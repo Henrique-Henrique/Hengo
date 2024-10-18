@@ -7,6 +7,9 @@
 > [!WARNING]
 > 🚧 (**Dev1**) Hengo is still under development! Expect bugs and incomplete features as we continue to improve it.
 
+> [!WARNING]
+> The codebase will soon be refactored to incorporate better types, enums, and references, as Godot 4.2 had numerous bugs related to cyclic types, which, according to my tests, have now been resolved
+
 ## Overview
 
 **[Hengo](https://hengoscript.com)** is a **Godot Visual Script** designed to simplify and enhance your workflow. It allows you to create logic visually while compiling directly into GDScript for seamless integration with Godot Engine.
