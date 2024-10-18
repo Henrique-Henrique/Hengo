@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bex2vj3nc86r2"
-path="res://.godot/imported/start_message.png-007461a827ce2cef87901d35f46edbf5.ctex"
+uid="uid://bqwblm7lxart1"
+path="res://.godot/imported/example.png-241479471b9be7915ba7c3533af0f6de.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/images/start_message.png"
-dest_files=["res://.godot/imported/start_message.png-007461a827ce2cef87901d35f46edbf5.ctex"]
+source_file="res://misc/example.png"
+dest_files=["res://.godot/imported/example.png-241479471b9be7915ba7c3533af0f6de.ctex"]
 
 [params]
 

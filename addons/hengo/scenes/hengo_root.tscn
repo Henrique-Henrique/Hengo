@@ -31,9 +31,9 @@ bg_color = Color(0.0936, 0.09756, 0.12, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(606, 660)
-shader_parameter/offset = Vector2(450.472, 439.218)
-shader_parameter/zoom_factor = 0.797791
+shader_parameter/screen_size = Vector2(220, 648)
+shader_parameter/offset = Vector2(100, 1.5165e-05)
+shader_parameter/zoom_factor = 0.5
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -50,9 +50,9 @@ content_margin_bottom = 8.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1004, 660)
-shader_parameter/offset = Vector2(-106.252, 127.231)
-shader_parameter/zoom_factor = 0.200074
+shader_parameter/screen_size = Vector2(608, 648)
+shader_parameter/offset = Vector2(100, 1.5165e-05)
+shader_parameter/zoom_factor = 0.5
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -398,7 +398,6 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
 [node name="StartMessage" parent="Split/HSplitContainer/CNodeUI/Cam" instance=ExtResource("15_nf048")]
-scale = Vector2(0.5, 0.5)
 
 [node name="Center2" type="Marker2D" parent="Split/HSplitContainer/CNodeUI"]
 visible = false
