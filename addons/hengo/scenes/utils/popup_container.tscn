@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://crsj5ij47bnr2"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/popup_container.gd" id="1_b3884"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xgpgf"]
+
+[node name="PopupContainer" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_b3884")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_xgpgf")

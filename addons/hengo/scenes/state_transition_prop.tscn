@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://dnlpt6pcv3llx"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/state_transition_prop.gd" id="1_pyyyx"]
+[ext_resource type="PackedScene" uid="uid://cmu4eb6jplyhf" path="res://addons/hengo/scenes/props/string.tscn" id="1_uq6bn"]
+[ext_resource type="Texture2D" uid="uid://d2w7gmwebkwol" path="res://addons/hengo/assets/icons/example.svg" id="2_stncq"]
+
+[node name="TransitionProp" type="HBoxContainer"]
+script = ExtResource("1_pyyyx")
+
+[node name="String" parent="." instance=ExtResource("1_uq6bn")]
+layout_mode = 2
+placeholder_text = "Transition Name"
+
+[node name="MenuButton" type="MenuButton" parent="."]
+layout_mode = 2
+icon = ExtResource("2_stncq")
+item_count = 3
+popup/item_0/text = "Move Up"
+popup/item_1/text = "Move Down"
+popup/item_1/id = 1
+popup/item_2/text = "Remove"
+popup/item_2/id = 2

@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
+
+[ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
+[ext_resource type="Script" path="res://hengo/test.gd" id="3_dq87n"]
+
+[node name="Node" type="Node"]
+
+[node name="Icon" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(261, 153)
+rotation = 0.261799
+texture = ExtResource("1_wvpun")
+
+[node name="Icon2" type="Sprite2D" parent="."]
+modulate = Color(0.898675, 0.199437, 7.70092e-07, 1)
+position = Vector2(550, 303)
+texture = ExtResource("1_wvpun")
+script = ExtResource("3_dq87n")
+
+[node name="Button" type="Button" parent="."]
+visible = false
+offset_left = 265.0
+offset_top = 417.0
+offset_right = 451.0
+offset_bottom = 575.0
+text = "CLICK TO TEST"
+
+[node name="Button2" type="Button" parent="."]
+visible = false
+offset_left = 576.0
+offset_top = 418.0
+offset_right = 762.0
+offset_bottom = 576.0
+text = "DECREMENT"

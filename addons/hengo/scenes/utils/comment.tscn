@@ -1,0 +1,194 @@
+[gd_scene load_steps=11 format=3 uid="uid://dqwgveflk7eyy"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/comment.gd" id="1_lt0vh"]
+[ext_resource type="Texture2D" uid="uid://be7jm0i23g62x" path="res://addons/hengo/assets/icons/comment.svg" id="2_oxp78"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_wevrp"]
+[ext_resource type="Texture2D" uid="uid://cjy20p4j477ul" path="res://addons/hengo/assets/icons/resize.svg" id="4_ipyu5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yltpd"]
+resource_local_to_scene = true
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.188998, 0.187807, 0.177515, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.278955, 0.278957, 0.263201, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 4.0
+expand_margin_top = 2.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6qudv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6xdtb"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_q87bi"]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0, 0, 0, 0.2)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m8esy"]
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 1, 1, 0)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mjsmx"]
+resource_local_to_scene = true
+bg_color = Color(0.164706, 0.156863, 0.156863, 0.545098)
+border_color = Color(0.356863, 0.388235, 0.372549, 0.615686)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Comment" type="VBoxContainer"]
+custom_minimum_size = Vector2(10, 10)
+offset_right = 297.0
+offset_bottom = 186.0
+pivot_offset = Vector2(521, 0)
+mouse_filter = 2
+theme_override_constants/separation = 0
+script = ExtResource("1_lt0vh")
+
+[node name="TitlePanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_yltpd")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TitlePanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="Icon" type="TextureButton" parent="TitlePanel/HBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(1, 1, 1, 0.470588)
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("2_oxp78")
+stretch_mode = 5
+
+[node name="Title" type="LineEdit" parent="TitlePanel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+mouse_force_pass_scroll_events = false
+theme_override_fonts/font = ExtResource("2_wevrp")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/focus = SubResource("StyleBoxEmpty_6qudv")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_6xdtb")
+theme_override_styles/normal = SubResource("StyleBoxFlat_q87bi")
+text = "COMMENT"
+editable = false
+selecting_enabled = false
+
+[node name="ColorButton" type="ColorPickerButton" parent="TitlePanel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/normal = SubResource("StyleBoxFlat_m8esy")
+text = "      "
+color = Color(0.188235, 0.188235, 0.176471, 1)
+edit_alpha = false
+
+[node name="CheckButton" type="CheckButton" parent="TitlePanel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Pin This Comment"
+button_pressed = true
+
+[node name="Background" type="Panel" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mjsmx")
+
+[node name="BottomRight" type="TextureRect" parent="Background"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.129412)
+z_index = 1
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_default_cursor_shape = 12
+texture = ExtResource("4_ipyu5")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="BottomLeft" type="TextureRect" parent="Background"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.129412)
+z_index = 1
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 40.0
+grow_vertical = 0
+mouse_default_cursor_shape = 11
+texture = ExtResource("4_ipyu5")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="TopLeft" type="TextureRect" parent="Background"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.129412)
+z_index = 1
+layout_mode = 1
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_default_cursor_shape = 12
+texture = ExtResource("4_ipyu5")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+flip_v = true
+
+[node name="TopRight" type="TextureRect" parent="Background"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.129412)
+z_index = 1
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_bottom = 40.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 11
+texture = ExtResource("4_ipyu5")
+expand_mode = 1
+stretch_mode = 5
+flip_v = true

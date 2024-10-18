@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://11dy5qcbcget"]
+
+[node name="Label" type="Label"]
+process_mode = 4
+modulate = Color(1, 1, 1, 0.294118)
+offset_right = 40.0
+offset_bottom = 23.0
+text = "null"

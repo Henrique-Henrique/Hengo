@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://dcpyg6oh21jjy"]
+
+[ext_resource type="Texture2D" uid="uid://do4pi6fkp2s01" path="res://addons/hengo/assets/icons/flow_arrow.svg" id="1_pujoi"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="2_6kffk"]
+
+[node name="CNodeFlow" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="FlowConnector" type="TextureRect" parent="."]
+unique_name_in_owner = true
+modulate = Color(0.319255, 0.319255, 0.319255, 1)
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -22.5
+offset_right = 22.5
+offset_bottom = 35.0
+grow_horizontal = 2
+mouse_default_cursor_shape = 2
+texture = ExtResource("1_pujoi")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+script = ExtResource("2_6kffk")

@@ -1,0 +1,54 @@
+[gd_scene load_steps=4 format=3 uid="uid://cw6folrynkpo3"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/cnode_in_out.gd" id="1_c51g4"]
+[ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="2_qlbmr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6s8ct"]
+resource_local_to_scene = true
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="PanelContainer" type="PanelContainer"]
+offset_right = 95.0
+offset_bottom = 36.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_6s8ct")
+script = ExtResource("1_c51g4")
+type = "out"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="CNameOutput" type="HBoxContainer" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+alignment = 2
+
+[node name="Name" type="Label" parent="MarginContainer/CNameOutput"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "output"
+
+[node name="Connector" type="TextureRect" parent="MarginContainer/CNameOutput"]
+unique_name_in_owner = true
+z_index = 2
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_qlbmr")
+expand_mode = 1
+stretch_mode = 5

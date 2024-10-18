@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3 uid="uid://bp41rm18x02uh"]
+
+[ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="1_6215o"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_718bw"]
+[ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="3_qrmjw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b7ipo"]
+resource_local_to_scene = true
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.133333, 0.156863, 0.188235, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wneg0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_f4qkv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_78hmt"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_htvb2"]
+
+[node name="PanelContainer" type="PanelContainer"]
+offset_right = 112.0
+offset_bottom = 23.0
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_b7ipo")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer"]
+process_mode = 4
+custom_minimum_size = Vector2(15, 0)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("1_6215o")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="RichTextLabel" parent="HBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_fonts/normal_font = ExtResource("2_718bw")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_wneg0")
+theme_override_styles/background = SubResource("StyleBoxEmpty_f4qkv")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_78hmt")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_htvb2")
+bbcode_enabled = true
+text = "Name"
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+
+[node name="Type" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_qrmjw")
+text = "Button"

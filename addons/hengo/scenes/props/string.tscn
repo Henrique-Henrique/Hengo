@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cmu4eb6jplyhf"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/props/prop_string.gd" id="1_c07fc"]
+
+[node name="String" type="LineEdit"]
+offset_right = 67.0625
+offset_bottom = 31.0
+size_flags_horizontal = 3
+expand_to_text_length = true
+script = ExtResource("1_c07fc")

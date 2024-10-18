@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://0desvnqpa0qx"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connection_line.gd" id="1_56q0h"]
+[ext_resource type="Texture2D" uid="uid://cjfr27210nif2" path="res://addons/hengo/assets/images/line_dashed.png" id="1_oqqwv"]
+[ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="2_vb5fy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gr23u"]
+resource_local_to_scene = true
+
+[node name="FlowConnectionLine" type="Line2D"]
+texture_repeat = 2
+material = SubResource("ShaderMaterial_gr23u")
+width = 7.0
+default_color = Color(0.317647, 0.317647, 0.317647, 1)
+texture = ExtResource("1_oqqwv")
+texture_mode = 1
+script = ExtResource("1_56q0h")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.54902, 0.423529, 0.0784314, 1)
+scale = Vector2(0.14, 0.14)
+texture = ExtResource("2_vb5fy")

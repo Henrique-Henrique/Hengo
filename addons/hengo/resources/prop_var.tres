@@ -1,0 +1,6 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://bc3tp5ypolxv7"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/res/prop_var.gd" id="1_4w75u"]
+
+[resource]
+script = ExtResource("1_4w75u")

@@ -1,0 +1,6 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://st4ctyxrvf3h"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/res/cnode_function_in_out.gd" id="1_08l4h"]
+
+[resource]
+script = ExtResource("1_08l4h")

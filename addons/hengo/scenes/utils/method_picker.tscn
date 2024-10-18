@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://ds1l212xog53y"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/method_picker.gd" id="1_8ff1r"]
+
+[node name="MethodPicker" type="VBoxContainer"]
+custom_minimum_size = Vector2(350, 0)
+offset_right = 350.0
+offset_bottom = 779.0
+size_flags_vertical = 3
+script = ExtResource("1_8ff1r")
+
+[node name="Search" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Type to search..."
+
+[node name="List" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3

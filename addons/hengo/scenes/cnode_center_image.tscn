@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://c0w8fb52tegdb"]
+
+[node name="CNodeCenterImage" type="CenterContainer"]
+mouse_filter = 2
+
+[node name="Img" type="TextureRect" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(35, 35)
+layout_mode = 2

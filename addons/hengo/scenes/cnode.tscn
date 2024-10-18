@@ -1,0 +1,191 @@
+[gd_scene load_steps=9 format=3 uid="uid://bxh18qk6jrul6"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
+[ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_ks1pc"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_yxi08"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_txmip"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.160784, 0.168627, 0.227451, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.302161, 0.314697, 0.407424, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0, 0, 0, 0.188235)
+shadow_size = 14
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjksb"]
+resource_local_to_scene = true
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.117647, 0.12549, 0.172549, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t3xrx"]
+resource_local_to_scene = true
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0.964706, 0.0392157, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vwobo"]
+resource_local_to_scene = true
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0.964706, 1, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pj3so"]
+bg_color = Color(0.843137, 0.129412, 0, 0.156863)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.870588, 0, 0, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
+
+[node name="Cnode" type="PanelContainer"]
+offset_right = 336.0
+offset_bottom = 44.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_txmip")
+script = ExtResource("1_onkoy")
+
+[node name="Container" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TitleContainer" type="PanelContainer" parent="Container"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 6
+theme_override_styles/panel = SubResource("StyleBoxFlat_bjksb")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Container/TitleContainer"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="TitleIcon" type="TextureRect" parent="Container/TitleContainer/HBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Container/TitleContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_yxi08")
+text = "Function name"
+
+[node name="ArrowUp" type="Control" parent="Container/TitleContainer"]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="Container/TitleContainer/ArrowUp"]
+modulate = Color(0.317647, 0.317647, 0.317647, 1)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -35.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_ks1pc")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+
+[node name="CenterContainer" type="HBoxContainer" parent="Container"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="InputContainer" type="VBoxContainer" parent="Container/CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="OutputContainer" type="VBoxContainer" parent="Container/CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="SelectBorder" type="Panel" parent="."]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_t3xrx")
+
+[node name="Border" type="Panel" parent="."]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_vwobo")
+
+[node name="ErrorBorder" type="Panel" parent="."]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pj3so")

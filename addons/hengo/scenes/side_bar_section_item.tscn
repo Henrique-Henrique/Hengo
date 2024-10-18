@@ -1,0 +1,41 @@
+[gd_scene load_steps=4 format=3 uid="uid://bhqa8mde65bux"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/side_bar_section_item.gd" id="1_18eg5"]
+[ext_resource type="Texture2D" uid="uid://d2w7gmwebkwol" path="res://addons/hengo/assets/icons/example.svg" id="1_xx3ap"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kcoex"]
+resource_local_to_scene = true
+content_margin_left = 28.0
+content_margin_right = 8.0
+bg_color = Color(0.117647, 0.12549, 0.176471, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="SideBarSectionItem" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_kcoex")
+script = ExtResource("1_18eg5")
+
+[node name="Container" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Container"]
+process_mode = 4
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 10
+
+[node name="TextureRect3" type="TextureRect" parent="Container/HBoxContainer"]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("1_xx3ap")
+stretch_mode = 3
+
+[node name="Name" type="Label" parent="Container/HBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+text = "Nome"

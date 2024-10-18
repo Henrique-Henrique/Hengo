@@ -1,0 +1,42 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Hengo"
+run/main_scene="res://demo.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+HengoDebugger="*res://addons/hengo/scripts/debug/hengo_debugger.gd"
+
+[debug]
+
+gdscript/warnings/exclude_addons=false
+
+[display]
+
+window/size/always_on_top=true
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/hengo/plugin.cfg")
+
+[file_customization]
+
+folder_colors={
+"res://addons/hengo/assets/": "green",
+"res://addons/hengo/references/": "purple",
+"res://addons/hengo/resources/": "orange",
+"res://addons/hengo/scenes/": "red",
+"res://addons/hengo/scripts/": "blue"
+}

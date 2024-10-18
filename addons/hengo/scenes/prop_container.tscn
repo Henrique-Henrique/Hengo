@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bngdq8uvalmrx"]
+
+[node name="PropContainer" type="HBoxContainer"]
+offset_right = 37.0
+offset_bottom = 23.0
+
+[node name="Name" type="Label" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Prop"

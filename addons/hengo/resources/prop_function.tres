@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://cuponxxp0evnv"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/res/prop_function.gd" id="1_1vy8r"]
+
+[resource]
+script = ExtResource("1_1vy8r")
+name = ""
+type = -1
+value = null
+sub_type = null

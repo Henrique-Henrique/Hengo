@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddjla4dq0g2k5"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/props/prop_float.gd" id="1_hf0bs"]
+
+[node name="SpinBox" type="SpinBox"]
+offset_right = 118.0
+offset_bottom = 45.0
+step = 1e-08
+allow_greater = true
+allow_lesser = true
+script = ExtResource("1_hf0bs")

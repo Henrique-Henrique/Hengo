@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=3 uid="uid://bndv7bbtjlyrk"]
+
+[ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="1_106ed"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/connection_line.gd" id="1_ck24c"]
+[ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="2_pv7lw"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pxqr5"]
+resource_local_to_scene = true
+
+[sub_resource type="Gradient" id="Gradient_saaee"]
+resource_local_to_scene = true
+colors = PackedColorArray(0.4, 0.2, 0.6, 1, 0.4, 0.2, 0.6, 1)
+
+[node name="ConnectionLine" type="Line2D"]
+z_index = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_pxqr5")
+width = 7.0
+default_color = Color(0.574328, 0.574328, 0.574328, 1)
+gradient = SubResource("Gradient_saaee")
+texture = ExtResource("1_106ed")
+texture_mode = 1
+script = ExtResource("1_ck24c")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.835294, 0, 0, 1)
+scale = Vector2(0.22, 0.22)
+texture = ExtResource("2_pv7lw")

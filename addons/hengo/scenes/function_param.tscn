@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://bmxrtibga4vum"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/props/function_param.gd" id="1_1spal"]
+[ext_resource type="PackedScene" uid="uid://cmu4eb6jplyhf" path="res://addons/hengo/scenes/props/string.tscn" id="1_jvpu6"]
+[ext_resource type="Texture2D" uid="uid://d2w7gmwebkwol" path="res://addons/hengo/assets/icons/example.svg" id="2_t474t"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="3_8ofcq"]
+
+[node name="FunctionParam" type="HBoxContainer"]
+size_flags_horizontal = 3
+script = ExtResource("1_1spal")
+
+[node name="Name" parent="." instance=ExtResource("1_jvpu6")]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Name"
+
+[node name="TypePick" parent="." instance=ExtResource("3_8ofcq")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="MenuButton" type="MenuButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("2_t474t")
+item_count = 3
+popup/item_0/text = "Remove"
+popup/item_1/text = "Move Up"
+popup/item_1/id = 1
+popup/item_2/text = "Move Down"
+popup/item_2/id = 2

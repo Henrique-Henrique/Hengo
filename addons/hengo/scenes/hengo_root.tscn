@@ -1,0 +1,532 @@
+[gd_scene load_steps=41 format=3 uid="uid://clbto1cshblaw"]
+
+[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
+[ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
+[ext_resource type="PackedScene" uid="uid://deljertujr1va" path="res://addons/hengo/scenes/side_bar.tscn" id="5_6h34f"]
+[ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="5_oiccs"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/drop_prop_menu.gd" id="5_vwcbq"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/state_action_bar.gd" id="5_xq2ue"]
+[ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/error_bt.gd" id="8_fl5nl"]
+[ext_resource type="PackedScene" uid="uid://bt8df11sb6xyh" path="res://addons/hengo/scenes/side_menu_pop_up.tscn" id="8_h6yjh"]
+[ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
+[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
+[ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
+[ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
+[ext_resource type="Texture2D" uid="uid://bngwf5vpsmtgo" path="res://addons/hengo/assets/images/grid_cnode_out.png" id="12_7rfh3"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
+[ext_resource type="Texture2D" uid="uid://bxajxich16tmm" path="res://addons/hengo/assets/images/grid_state.png" id="12_x1ww2"]
+[ext_resource type="Texture2D" uid="uid://bv047wy4rgrj7" path="res://addons/hengo/assets/icons/menu/file.svg" id="12_xsbp1"]
+[ext_resource type="Texture2D" uid="uid://vf74i7nxqsmu" path="res://addons/hengo/assets/icons/menu/file_add.svg" id="13_70p3m"]
+[ext_resource type="Texture2D" uid="uid://ctlaqfkdcnini" path="res://addons/hengo/assets/images/grid_cnode.png" id="13_w5ssd"]
+[ext_resource type="PackedScene" uid="uid://b80qpbvaqauud" path="res://addons/hengo/scenes/start_message.tscn" id="15_nf048"]
+[ext_resource type="FontFile" uid="uid://buicqe4n7bixe" path="res://addons/hengo/assets/fonts/Mono/SpaceMono-Regular.ttf" id="24_paf7x"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
+bg_color = Color(0.0936, 0.09756, 0.12, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
+shader = ExtResource("9_5sxro")
+shader_parameter/screen_size = Vector2(606, 660)
+shader_parameter/offset = Vector2(450.472, 439.218)
+shader_parameter/zoom_factor = 0.797791
+shader_parameter/alpha = 0.2
+shader_parameter/text_size = 100.0
+shader_parameter/text = ExtResource("4_ngl72")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k3ul"]
+bg_color = Color(0.0462, 0.58905, 0.77, 0.286275)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gn4j7"]
+bg_color = Color(0.136826, 0.136826, 0.136826, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
+shader = ExtResource("9_5sxro")
+shader_parameter/screen_size = Vector2(1004, 660)
+shader_parameter/offset = Vector2(-106.252, 127.231)
+shader_parameter/zoom_factor = 0.200074
+shader_parameter/alpha = 0.2
+shader_parameter/text_size = 200.0
+shader_parameter/text = ExtResource("12_7rfh3")
+
+[sub_resource type="Gradient" id="Gradient_rg8iy"]
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
+bg_color = Color(0, 0.65, 0.1625, 0.270588)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ny3pm"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.27451, 0.545098, 0.407843, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_budvq"]
+bg_color = Color(0.160784, 0.168627, 0.227451, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.220735, 0.230653, 0.304723, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iqtoh"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.0980392, 0.0980392, 0.133333, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.269759, 0.269854, 0.341946, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.345098)
+shadow_size = 15
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wifp2"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_85ut6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_457tp"]
+
+[sub_resource type="CodeHighlighter" id="CodeHighlighter_ghdov"]
+number_color = Color(1, 0.619608, 0.392157, 1)
+symbol_color = Color(0.478431, 0.635294, 0.968627, 1)
+function_color = Color(0.478431, 0.635294, 0.968627, 1)
+member_variable_color = Color(0.791999, 0.791999, 0.791999, 1)
+keyword_colors = {
+"and": Color(0.733333, 0.603922, 0.968627, 1),
+"as": Color(0.733333, 0.603922, 0.968627, 1),
+"assert": Color(0.733333, 0.603922, 0.968627, 1),
+"break": Color(0.733333, 0.603922, 0.968627, 1),
+"class": Color(0.733333, 0.603922, 0.968627, 1),
+"class_name": Color(0.733333, 0.603922, 0.968627, 1),
+"continue": Color(0.733333, 0.603922, 0.968627, 1),
+"elif": Color(0.733333, 0.603922, 0.968627, 1),
+"else": Color(0.733333, 0.603922, 0.968627, 1),
+"enum": Color(0.733333, 0.603922, 0.968627, 1),
+"export": Color(0.733333, 0.603922, 0.968627, 1),
+"extends": Color(0.733333, 0.603922, 0.968627, 1),
+"for": Color(0.733333, 0.603922, 0.968627, 1),
+"func": Color(0.733333, 0.603922, 0.968627, 1),
+"if": Color(0.733333, 0.603922, 0.968627, 1),
+"in": Color(0.733333, 0.603922, 0.968627, 1),
+"is": Color(0.733333, 0.603922, 0.968627, 1),
+"match": Color(0.733333, 0.603922, 0.968627, 1),
+"not": Color(0.733333, 0.603922, 0.968627, 1),
+"onready": Color(0.733333, 0.603922, 0.968627, 1),
+"or": Color(0.733333, 0.603922, 0.968627, 1),
+"pass": Color(0.733333, 0.603922, 0.968627, 1),
+"return": Color(0.733333, 0.603922, 0.968627, 1),
+"setget": Color(0.733333, 0.603922, 0.968627, 1),
+"signal": Color(0.733333, 0.603922, 0.968627, 1),
+"static": Color(0.733333, 0.603922, 0.968627, 1),
+"tool": Color(0.733333, 0.603922, 0.968627, 1),
+"var": Color(0.733333, 0.603922, 0.968627, 1),
+"while": Color(0.733333, 0.603922, 0.968627, 1),
+"yield": Color(0.733333, 0.603922, 0.968627, 1)
+}
+color_regions = {
+"\" \"": Color(0.619608, 0.807843, 0.415686, 1),
+"#": Color(0.337255, 0.372549, 0.537255, 1)
+}
+
+[node name="HengoRoot" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_2muha")
+script = ExtResource("2_velgh")
+
+[node name="Split" type="HSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+split_offset = -350
+
+[node name="StateUI" type="Panel" parent="Split"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
+
+[node name="Grid" type="TextureRect" parent="Split/StateUI"]
+process_mode = 4
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_dfn6x")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("12_x1ww2")
+
+[node name="Cam" type="Node2D" parent="Split/StateUI"]
+position = Vector2(100, 1.5165e-05)
+scale = Vector2(0.5, 0.5)
+script = ExtResource("3_84akk")
+
+[node name="CenterDebugReference" type="Sprite2D" parent="Split/StateUI/Cam"]
+visible = false
+modulate = Color(0.992157, 0.207843, 0, 1)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("5_oiccs")
+
+[node name="RefPoint" type="Marker2D" parent="Split/StateUI/Cam"]
+visible = false
+position = Vector2(289, 313)
+
+[node name="StateContainer" type="Control" parent="Split/StateUI/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_2muha")
+
+[node name="StateConnectionGuide" type="Line2D" parent="Split/StateUI/Cam"]
+unique_name_in_owner = true
+visible = false
+z_index = 2
+width = 6.0
+texture = ExtResource("7_6jref")
+texture_mode = 1
+script = ExtResource("7_gj1gq")
+
+[node name="Lines" type="Node2D" parent="Split/StateUI/Cam"]
+
+[node name="SelectionRect" type="ReferenceRect" parent="Split/StateUI/Cam"]
+process_mode = 4
+visible = false
+offset_left = 153.0
+offset_top = 148.0
+offset_right = 193.0
+offset_bottom = 188.0
+border_color = Color(0.044248, 0.585155, 0.767195, 1)
+border_width = 3.0
+
+[node name="Panel" type="Panel" parent="Split/StateUI/Cam/SelectionRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_0k3ul")
+
+[node name="StartMessage" type="TextureRect" parent="Split/StateUI/Cam"]
+
+[node name="Center" type="Marker2D" parent="Split/StateUI"]
+visible = false
+
+[node name="PanelContainer" type="PanelContainer" parent="Split/StateUI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gn4j7")
+
+[node name="StateActionBar" type="HBoxContainer" parent="Split/StateUI/PanelContainer"]
+layout_mode = 2
+script = ExtResource("5_xq2ue")
+
+[node name="Left" type="HBoxContainer" parent="Split/StateUI/PanelContainer/StateActionBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Compile" type="Button" parent="Split/StateUI/PanelContainer/StateActionBar/Left"]
+layout_mode = 2
+text = "Compile"
+icon = ExtResource("11_xut0q")
+
+[node name="Right" type="HBoxContainer" parent="Split/StateUI/PanelContainer/StateActionBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="Open" type="Button" parent="Split/StateUI/PanelContainer/StateActionBar/Right"]
+layout_mode = 2
+text = "Open
+"
+icon = ExtResource("12_xsbp1")
+
+[node name="Create" type="Button" parent="Split/StateUI/PanelContainer/StateActionBar/Right"]
+layout_mode = 2
+text = "Create
+"
+icon = ExtResource("13_70p3m")
+
+[node name="StateStatLabel" type="Label" parent="Split/StateUI"]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(1, 1, 1, 0.658824)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
+horizontal_alignment = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="Split"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CNodeUI" type="Panel" parent="Split/HSplitContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
+
+[node name="Grid" type="TextureRect" parent="Split/HSplitContainer/CNodeUI"]
+process_mode = 4
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_r8ipe")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("13_w5ssd")
+
+[node name="Cam" type="Node2D" parent="Split/HSplitContainer/CNodeUI"]
+position = Vector2(100, 1.5165e-05)
+scale = Vector2(0.5, 0.5)
+script = ExtResource("3_84akk")
+
+[node name="CenterDebugReference" type="Sprite2D" parent="Split/HSplitContainer/CNodeUI/Cam"]
+modulate = Color(0.478431, 1, 0, 1)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("5_oiccs")
+
+[node name="RefPoint" type="Marker2D" parent="Split/HSplitContainer/CNodeUI/Cam"]
+visible = false
+position = Vector2(289, 313)
+
+[node name="CommentContainer" type="Control" parent="Split/HSplitContainer/CNodeUI/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+theme = ExtResource("1_2muha")
+
+[node name="CnodeContainer" type="Control" parent="Split/HSplitContainer/CNodeUI/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+theme = ExtResource("1_2muha")
+
+[node name="ConnectionGuide" type="Line2D" parent="Split/HSplitContainer/CNodeUI/Cam"]
+unique_name_in_owner = true
+visible = false
+z_index = 2
+width = 6.0
+gradient = SubResource("Gradient_rg8iy")
+texture = ExtResource("7_6jref")
+texture_mode = 1
+script = ExtResource("7_gj1gq")
+
+[node name="Lines" type="Node2D" parent="Split/HSplitContainer/CNodeUI/Cam"]
+
+[node name="SelectionRect" type="ReferenceRect" parent="Split/HSplitContainer/CNodeUI/Cam"]
+process_mode = 4
+visible = false
+offset_left = 153.0
+offset_top = 148.0
+offset_right = 193.0
+offset_bottom = 188.0
+mouse_filter = 2
+border_color = Color(3.41728e-06, 0.648138, 0.159242, 1)
+border_width = 3.0
+
+[node name="Panel" type="Panel" parent="Split/HSplitContainer/CNodeUI/Cam/SelectionRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
+
+[node name="StartMessage" parent="Split/HSplitContainer/CNodeUI/Cam" instance=ExtResource("15_nf048")]
+scale = Vector2(0.5, 0.5)
+
+[node name="Center2" type="Marker2D" parent="Split/HSplitContainer/CNodeUI"]
+visible = false
+position = Vector2(-580, 0)
+
+[node name="PanelContainer" type="PanelContainer" parent="Split/HSplitContainer/CNodeUI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 28.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gn4j7")
+
+[node name="CNodeActionBar" type="HBoxContainer" parent="Split/HSplitContainer/CNodeUI/PanelContainer"]
+layout_mode = 2
+alignment = 2
+script = ExtResource("7_sagw0")
+
+[node name="ErrorBt" type="Button" parent="Split/HSplitContainer/CNodeUI/PanelContainer/CNodeActionBar"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("12_wtrk7")
+theme_override_styles/normal = SubResource("StyleBoxFlat_ny3pm")
+text = "0"
+script = ExtResource("8_fl5nl")
+
+[node name="CNodeStatLabel" type="Label" parent="Split/HSplitContainer/CNodeUI"]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(1, 1, 1, 0.658824)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
+horizontal_alignment = 2
+
+[node name="SideBar" parent="Split/HSplitContainer" instance=ExtResource("5_6h34f")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DropPropMenu" type="PopupMenu" parent="."]
+unique_name_in_owner = true
+size = Vector2i(28, 8)
+script = ExtResource("5_vwcbq")
+
+[node name="SideMenuPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
+visible = false
+
+[node name="SideMenuPopUp" parent="SideMenuPopUpContainer" instance=ExtResource("8_h6yjh")]
+unique_name_in_owner = true
+
+[node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
+visible = false
+
+[node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUp"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(230, 0)
+offset_right = 230.0
+offset_bottom = 39.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_budvq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GeneralPopUp/GeneralPopUp/VBoxContainer"]
+layout_mode = 2
+text = "Pop Up"
+horizontal_alignment = 1
+
+[node name="PopupContainer" parent="." instance=ExtResource("8_uxy8l")]
+unique_name_in_owner = true
+visible = false
+
+[node name="DropDownMenu" parent="PopupContainer" instance=ExtResource("9_xwbyp")]
+unique_name_in_owner = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="CodeToolTip" type="PanelContainer" parent="CanvasLayer"]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+offset_right = 184.0
+offset_bottom = 152.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_iqtoh")
+
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/CodeToolTip"]
+layout_mode = 2
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+theme_override_constants/outline_size = 0
+theme_override_constants/line_spacing = 0
+theme_override_constants/caret_width = 0
+theme_override_fonts/font = ExtResource("24_paf7x")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_wifp2")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_85ut6")
+theme_override_styles/read_only = SubResource("StyleBoxEmpty_457tp")
+text = "var test 3
+void()
+seila
+# vish
+# dsaokdaspo
+\"teste\" dsa # dsadsa"
+context_menu_enabled = false
+shortcut_keys_enabled = false
+selecting_enabled = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+virtual_keyboard_enabled = false
+middle_mouse_paste_enabled = false
+scroll_fit_content_height = true
+syntax_highlighter = SubResource("CodeHighlighter_ghdov")
+draw_tabs = true
+
+[node name="Label" type="Label" parent="CanvasLayer/CodeToolTip"]
+process_mode = 4
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_constants/line_spacing = 0
+theme_override_fonts/font = ExtResource("24_paf7x")

@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://egclfjnfoynq"]
+
+[ext_resource type="Texture2D" uid="uid://dnuexbtw2l01x" path="res://addons/hengo/assets/icons/move-down.svg" id="1_cb1bw"]
+
+[node name="EventStructure" type="VBoxContainer"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 0
+
+[node name="EventList" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TextureRect" type="TextureRect" parent="."]
+modulate = Color(0.264594, 0.275961, 0.360465, 1)
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("1_cb1bw")
+expand_mode = 1

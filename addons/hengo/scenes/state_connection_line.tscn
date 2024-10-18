@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://ccmrgg06av47q"]
+
+[ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="1_2wkr5"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/state_connection_line.gd" id="1_nu1hq"]
+
+[node name="StateConnectionLine" type="Line2D"]
+width = 6.0
+default_color = Color(0.435294, 0.435294, 0.435294, 1)
+texture = ExtResource("1_2wkr5")
+texture_mode = 1
+script = ExtResource("1_nu1hq")

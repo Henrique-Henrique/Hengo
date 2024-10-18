@@ -1,0 +1,155 @@
+[gd_scene load_steps=10 format=3 uid="uid://deljertujr1va"]
+
+[ext_resource type="PackedScene" uid="uid://dcrlv2iu1skwv" path="res://addons/hengo/scenes/side_bar_section.tscn" id="1_x8dke"]
+[ext_resource type="Texture2D" uid="uid://cekdb53pjncgc" path="res://addons/hengo/assets/icons/cnode/set_var.svg" id="2_idrcx"]
+[ext_resource type="Texture2D" uid="uid://druwq8ra8hfkx" path="res://addons/hengo/assets/icons/cnode/func.svg" id="3_5q2ny"]
+[ext_resource type="Texture2D" uid="uid://cq32uf5d70waf" path="res://addons/hengo/assets/icons/cnode/signal.svg" id="4_cw51w"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kgh42"]
+bg_color = Color(0.0941176, 0.0980392, 0.121569, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lajno"]
+resource_local_to_scene = true
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.147775, 0.23, 0.1403, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uedq2"]
+resource_local_to_scene = true
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.1464, 0.1542, 0.24, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7ar1"]
+resource_local_to_scene = true
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.24, 0.1512, 0.23852, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8jbsx"]
+resource_local_to_scene = true
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.1498, 0.24, 0.1416, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="SideBar" type="PanelContainer"]
+custom_minimum_size = Vector2(300, 0)
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 8.0
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_kgh42")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 2
+
+[node name="Sections" type="VBoxContainer" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Var" parent="ScrollContainer/Sections" instance=ExtResource("1_x8dke")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_lajno")
+type = 1
+base_name = "variable"
+
+[node name="TitleContainer" parent="ScrollContainer/Sections/Var/SideBarSection" index="0"]
+theme_override_constants/separation = 8
+
+[node name="Icon" parent="ScrollContainer/Sections/Var/SideBarSection/TitleContainer" index="1"]
+custom_minimum_size = Vector2(20, 0)
+texture = ExtResource("2_idrcx")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Function" parent="ScrollContainer/Sections" instance=ExtResource("1_x8dke")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_uedq2")
+type = 2
+base_name = "function"
+
+[node name="TitleContainer" parent="ScrollContainer/Sections/Function/SideBarSection" index="0"]
+theme_override_constants/separation = 8
+
+[node name="Icon" parent="ScrollContainer/Sections/Function/SideBarSection/TitleContainer" index="1"]
+custom_minimum_size = Vector2(20, 0)
+texture = ExtResource("3_5q2ny")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" parent="ScrollContainer/Sections/Function/SideBarSection/TitleContainer" index="2"]
+text = "Functions"
+
+[node name="StateSignal" parent="ScrollContainer/Sections" instance=ExtResource("1_x8dke")]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_a7ar1")
+type = 3
+base_name = "signal"
+
+[node name="TitleContainer" parent="ScrollContainer/Sections/StateSignal/SideBarSection" index="0"]
+theme_override_constants/separation = 8
+
+[node name="Icon" parent="ScrollContainer/Sections/StateSignal/SideBarSection/TitleContainer" index="1"]
+custom_minimum_size = Vector2(20, 0)
+texture = ExtResource("4_cw51w")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" parent="ScrollContainer/Sections/StateSignal/SideBarSection/TitleContainer" index="2"]
+text = "Signals"
+
+[node name="LocalVar" parent="ScrollContainer/Sections" instance=ExtResource("1_x8dke")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_8jbsx")
+type = 4
+base_name = "local_Var"
+
+[node name="TitleContainer" parent="ScrollContainer/Sections/LocalVar/SideBarSection" index="0"]
+theme_override_constants/separation = 8
+
+[node name="Icon" parent="ScrollContainer/Sections/LocalVar/SideBarSection/TitleContainer" index="1"]
+custom_minimum_size = Vector2(20, 0)
+texture = ExtResource("2_idrcx")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" parent="ScrollContainer/Sections/LocalVar/SideBarSection/TitleContainer" index="2"]
+text = "Local Variables"
+
+[editable path="ScrollContainer/Sections/Var"]
+[editable path="ScrollContainer/Sections/Function"]
+[editable path="ScrollContainer/Sections/StateSignal"]
+[editable path="ScrollContainer/Sections/LocalVar"]

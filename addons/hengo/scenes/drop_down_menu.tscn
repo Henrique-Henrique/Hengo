@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://bd8qatv1gtb"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/drop_down_menu.gd" id="1_uesla"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xyolx"]
+bg_color = Color(0.160784, 0.168627, 0.227451, 1)
+
+[node name="DropDownMenu" type="PanelContainer"]
+offset_right = 253.0
+offset_bottom = 318.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_xyolx")
+script = ExtResource("1_uesla")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SearchBar" type="LineEdit" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="List" type="ItemList" parent="VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+allow_search = false

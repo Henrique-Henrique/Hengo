@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3 uid="uid://cl5esqwecnako"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/res/prop_state_signal.gd" id="1_aky4n"]
+
+[resource]
+script = ExtResource("1_aky4n")
+name = ""
+type = -1
+value = null
+sub_type = ""

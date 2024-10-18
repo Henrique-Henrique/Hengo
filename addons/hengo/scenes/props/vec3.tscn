@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://c51y6x7dlt4ef"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/props/vec_3.gd" id="1_aowt1"]
+[ext_resource type="PackedScene" uid="uid://ddjla4dq0g2k5" path="res://addons/hengo/scenes/props/float.tscn" id="2_16xfq"]
+
+[node name="Vec2" type="HBoxContainer"]
+script = ExtResource("1_aowt1")
+
+[node name="x" parent="." instance=ExtResource("2_16xfq")]
+modulate = Color(0.603611, 1, 0.573066, 1)
+layout_mode = 2
+prefix = "x"
+
+[node name="y" parent="." instance=ExtResource("2_16xfq")]
+modulate = Color(0.999864, 0.357496, 0.290377, 1)
+layout_mode = 2
+prefix = "y"
+
+[node name="z" parent="." instance=ExtResource("2_16xfq")]
+modulate = Color(0.500311, 0.566757, 0.96885, 1)
+layout_mode = 2
+prefix = "z"

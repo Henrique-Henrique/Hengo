@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3 uid="uid://ck3bf3hyqo4j8"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/popup_signal.gd" id="1_pbp7j"]
+[ext_resource type="PackedScene" uid="uid://bngdq8uvalmrx" path="res://addons/hengo/scenes/prop_container.tscn" id="1_vl81b"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="2_jhj2a"]
+
+[node name="SignalSelect" type="VBoxContainer"]
+script = ExtResource("1_pbp7j")
+
+[node name="PropContainer" parent="." instance=ExtResource("1_vl81b")]
+layout_mode = 2
+
+[node name="Name" parent="PropContainer" index="0"]
+text = "Type"
+
+[node name="Obj" parent="PropContainer" instance=ExtResource("2_jhj2a")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select"
+
+[node name="PropContainer2" parent="." instance=ExtResource("1_vl81b")]
+layout_mode = 2
+
+[node name="Name" parent="PropContainer2" index="0"]
+text = "Signal"
+
+[node name="Signal" parent="PropContainer2" instance=ExtResource("2_jhj2a")]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Select"
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+
+[node name="Create" type="Button" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Create"
+
+[editable path="PropContainer"]
+[editable path="PropContainer2"]

@@ -1,0 +1,54 @@
+[gd_scene load_steps=4 format=3 uid="uid://bt8df11sb6xyh"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/side_menu_pop_up.gd" id="1_mlcin"]
+[ext_resource type="Texture2D" uid="uid://d2w7gmwebkwol" path="res://addons/hengo/assets/icons/example.svg" id="2_xcg4l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_budvq"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.160784, 0.168627, 0.227451, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.220735, 0.230653, 0.304723, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="SideMenuPopUp" type="PanelContainer"]
+custom_minimum_size = Vector2(350, 0)
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1152.0
+offset_right = -802.0
+offset_bottom = 43.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_budvq")
+script = ExtResource("1_mlcin")
+
+[node name="Container" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="TitleContainer" type="HBoxContainer" parent="Container"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Container/TitleContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Edit Variable"
+
+[node name="Delete" type="Button" parent="Container/TitleContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Delete Item"
+icon = ExtResource("2_xcg4l")
+
+[node name="Props" type="VBoxContainer" parent="Container"]
+layout_mode = 2
+size_flags_vertical = 3

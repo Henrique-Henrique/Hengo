@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgo5l4r43cdyy"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/props/dropdown.gd" id="1_oknia"]
+
+[node name="DropDown" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+size_flags_horizontal = 3
+text = "Variant"
+script = ExtResource("1_oknia")

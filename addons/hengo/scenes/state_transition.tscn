@@ -1,0 +1,57 @@
+[gd_scene load_steps=4 format=3 uid="uid://ghgm3it1dt4l"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/state_transition.gd" id="1_317fd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x0ytf"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.0901961)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_344vx"]
+bg_color = Color(0.6, 1, 0.556863, 0.258824)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.713726, 0.470588, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 4.0
+expand_margin_top = 8.0
+expand_margin_right = 4.0
+expand_margin_bottom = 8.0
+
+[node name="Transition" type="HBoxContainer"]
+offset_right = 123.0
+offset_bottom = 43.0
+theme_override_constants/separation = 0
+script = ExtResource("1_317fd")
+
+[node name="TransitionButton" type="PanelContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_x0ytf")
+
+[node name="Name" type="Label" parent="TransitionButton"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+text = "FINISHED"
+horizontal_alignment = 1
+
+[node name="Panel" type="Panel" parent="TransitionButton"]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+z_index = 10
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_344vx")

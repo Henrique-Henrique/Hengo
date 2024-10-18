@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3 uid="uid://dsbg6l0e3fd4a"]
+
+[ext_resource type="PackedScene" uid="uid://bx2a83vq644wl" path="res://addons/hengo/scenes/props/vec2.tscn" id="1_8uwfs"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/props/debug_value.gd" id="1_f802b"]
+[ext_resource type="PackedScene" uid="uid://c51y6x7dlt4ef" path="res://addons/hengo/scenes/props/vec3.tscn" id="2_wxv03"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8qki"]
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+bg_color = Color(0.108721, 0.108721, 0.108721, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="PanelContainer" type="PanelContainer"]
+custom_minimum_size = Vector2(120, 100)
+offset_right = 100.0
+offset_bottom = 100.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_k8qki")
+script = ExtResource("1_f802b")
+
+[node name="TextLabel" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Testing"
+horizontal_alignment = 1
+
+[node name="Vec2" parent="." instance=ExtResource("1_8uwfs")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Vec3" parent="." instance=ExtResource("2_wxv03")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Texture" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+expand_mode = 3

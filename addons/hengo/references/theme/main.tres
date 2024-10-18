@@ -1,0 +1,14 @@
+[gd_resource type="Theme" load_steps=4 format=3 uid="uid://xxj7abqbehjg"]
+
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
+
+[sub_resource type="ImageTexture" id="ImageTexture_6gb4l"]
+
+[resource]
+default_font = ExtResource("1_revyj")
+Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
+LineEdit/constants/minimum_character_width = 2
+LineEdit/fonts/font = ExtResource("1_revyj")
+SpinBox/icons/updown = SubResource("ImageTexture_6gb4l")
