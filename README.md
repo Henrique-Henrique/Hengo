@@ -52,5 +52,6 @@ Follow these steps to install **Hengo**:
 
 ## Documentation
 
-For now, I'm creating the documentation on Discord.  
-Join my [Discord](https://discord.gg/KapbHgb5FM) for more information, to help me out, or just to chat!
+The documentation can be found on the [Wiki](https://github.com/Henrique-Henrique/Hengo/wiki/Documentation).
+
+This documentation is not fully complete. If you have any further questions, please join my [Discord](https://discord.gg/KapbHgb5FM).
