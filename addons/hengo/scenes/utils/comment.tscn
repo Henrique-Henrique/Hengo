@@ -117,7 +117,6 @@ size_flags_horizontal = 3
 mouse_filter = 2
 mouse_force_pass_scroll_events = false
 theme_override_fonts/font = ExtResource("2_wevrp")
-theme_override_font_sizes/font_size = 14
 theme_override_styles/focus = SubResource("StyleBoxEmpty_6qudv")
 theme_override_styles/read_only = SubResource("StyleBoxEmpty_6xdtb")
 theme_override_styles/normal = SubResource("StyleBoxFlat_q87bi")

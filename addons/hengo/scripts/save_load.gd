@@ -777,6 +777,7 @@ static func load_and_edit(_path: StringName) -> void:
             comment._on_color(str_to_var(comment_config.color as String) as Color)
             comment.get_node('%ColorButton').color = str_to_var(comment_config.color as String) as Color
             comment.set_comment(comment_config.comment)
+            comment.pin_to_cnodes(true)
 
         # ---------------------------------------------------------------------------- #
         # creating connections

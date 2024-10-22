@@ -23,6 +23,8 @@ var connectors: Dictionary = {}
 var from_lines: Array = []
 var deleted: bool = false
 
+var comment_ref
+
 # behavior
 var moving: bool = false
 var selected: bool = false
@@ -172,12 +174,14 @@ func _on_gui(_event: InputEvent) -> void:
 			for i in get_tree().get_nodes_in_group(_Enums.CNODE_SELECTED_GROUP):
 				i.moving = false
 
+
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
-		if moving:
+		if moving and not comment_ref:
 			if _Global.CAM:
 				move(position + _event.relative / _Global.CAM.transform.x.x)
+
 
 # used when pick state on state signal
 func _on_dropdown_state_pick(_value: Dictionary) -> void:
@@ -205,6 +209,7 @@ func select() -> void:
 	add_to_group(_Enums.CNODE_SELECTED_GROUP)
 	get_node('%SelectBorder').visible = true
 	selected = true
+
 
 func unselect() -> void:
 	remove_from_group(_Enums.CNODE_SELECTED_GROUP)

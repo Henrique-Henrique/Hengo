@@ -106,6 +106,10 @@ func hide_border() -> void:
 func remove_from_scene() -> void:
 	if is_inside_tree():
 		_Router.comment_reference[_Router.current_route.id].erase(self)
+		
+		for cnode in cnode_inside:
+			cnode.comment_ref = null
+		
 		_Global.COMMENT_CONTAINER.remove_child(self)
 
 
@@ -114,6 +118,11 @@ func add_to_scene() -> void:
 
 	if not _Router.comment_reference[_Router.current_route.id].has(self):
 		_Router.comment_reference[_Router.current_route.id].append(self)
+	
+	for cnode in cnode_inside:
+		cnode.comment_ref = self
+	
+	pin_to_cnodes(true)
 
 
 func _on_pin() -> void:
@@ -122,20 +131,37 @@ func _on_pin() -> void:
 	if is_pinned:
 		pin_to_cnodes()
 	else:
+		for cnode in cnode_inside:
+			cnode.comment_ref = null
+
 		cnode_inside = []
 	
 
-func pin_to_cnodes() -> void:
+func pin_to_cnodes(_use_intern_list: bool = false) -> void:
 		var min_vec: Vector2 = Vector2.INF
 		var max_vec: Vector2 = -Vector2.INF
 
-		# defyning cnode area
-		for cnode in _Global.CNODE_CONTAINER.get_children():
-			if get_rect().has_point(cnode.position):
+		if _use_intern_list:
+			for cnode in cnode_inside:
 				min_vec = min_vec.min(cnode.position)
 				max_vec = max_vec.max(cnode.position + cnode.size)
-			
-				cnode_inside.append(cnode)
+
+				cnode.comment_ref = self
+		else:
+			# defyning cnode area
+			for cnode in _Global.CNODE_CONTAINER.get_children():
+				if get_rect().has_point(cnode.position):
+					min_vec = min_vec.min(cnode.position)
+					max_vec = max_vec.max(cnode.position + cnode.size)
+
+					# adding cnodes only when cnode dont pinned to other comment
+					# nested comment is not supported
+					if not cnode.comment_ref or cnode.comment_ref == self:
+						cnode_inside.append(cnode)
+						cnode.comment_ref = self
+				else:
+					if cnode.comment_ref == self:
+						cnode.comment_ref = null
 	
 		if min_vec >= Vector2.INF or max_vec <= -Vector2.INF:
 			return

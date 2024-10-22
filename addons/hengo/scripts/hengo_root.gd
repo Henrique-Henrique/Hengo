@@ -264,9 +264,10 @@ func _input(event: InputEvent) -> void:
 
 						print(all_states)
 			elif event.keycode == KEY_F9:
-				print(
-					_Global.history.get_current_action_name(), ' /// ', _Global.history.get_history_count()
-				)
+				# This is for Debug / Development key helper
+				
+				
+				print(_Global.COMMENT_CONTAINER.get_children())
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:
