@@ -1,9 +1,10 @@
 @tool
-extends VBoxContainer
+extends PanelContainer
 
 
 # imports
 const _Global = preload('res://addons/hengo/scripts/global.gd')
+const _Router = preload('res://addons/hengo/scripts/router.gd')
 
 var check_pin: CheckButton
 var title_panel: PanelContainer
@@ -12,6 +13,7 @@ var bottom_left: TextureRect
 var top_left: TextureRect
 var bottom_right: TextureRect
 var title: LineEdit
+var select_border: Panel
 
 var route_ref: Dictionary
 
@@ -37,8 +39,10 @@ func _ready() -> void:
 	top_right = get_node('%TopRight')
 	bottom_left = get_node('%BottomLeft')
 	bottom_right = get_node('%BottomRight')
+	select_border = get_node('%SelectBorder')
 
 	title_panel.gui_input.connect(_on_title_gui)
+	(get_node('%MenuButton') as MenuButton).get_popup().id_pressed.connect(_on_menu)
 
 	title = get_node('%Title')
 	title.text_submitted.connect(_on_submit)
@@ -91,6 +95,27 @@ func set_comment(_text: String) -> void:
 	title.text = _text
 
 
+func show_border() -> void:
+	select_border.visible = true
+
+
+func hide_border() -> void:
+	select_border.visible = false
+
+
+func remove_from_scene() -> void:
+	if is_inside_tree():
+		_Router.comment_reference[_Router.current_route.id].erase(self)
+		_Global.COMMENT_CONTAINER.remove_child(self)
+
+
+func add_to_scene() -> void:
+	_Global.COMMENT_CONTAINER.add_child(self)
+
+	if not _Router.comment_reference[_Router.current_route.id].has(self):
+		_Router.comment_reference[_Router.current_route.id].append(self)
+
+
 func _on_pin() -> void:
 	is_pinned = check_pin.button_pressed
 
@@ -130,6 +155,16 @@ func pin_to_cnodes() -> void:
 		tween.tween_property(self, 'size', target_size, .1)
 
 
+func _on_menu(_idx: int) -> void:
+	match _idx:
+		0:
+			# delete
+			_Global.history.create_action('Delete Comment')
+			_Global.history.add_do_method(remove_from_scene)
+			_Global.history.add_undo_reference(self)
+			_Global.history.add_undo_method(add_to_scene)
+			_Global.history.commit_action()
+
 func _on_color(_color: Color) -> void:
 	var style: StyleBoxFlat = title_panel.get('theme_override_styles/panel')
 	
@@ -161,8 +196,10 @@ func _on_title_gui(_event: InputEvent) -> void:
 		elif _event.pressed:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				is_moving = true
+				show_border()
 		else:
 			is_moving = false
+			hide_border()
 	elif _event is InputEventMouseMotion:
 		if is_moving:
 			position += _event.relative

@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://dqwgveflk7eyy"]
+[gd_scene load_steps=13 format=3 uid="uid://dqwgveflk7eyy"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/comment.gd" id="1_lt0vh"]
 [ext_resource type="Texture2D" uid="uid://be7jm0i23g62x" path="res://addons/hengo/assets/icons/comment.svg" id="2_oxp78"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_wevrp"]
 [ext_resource type="Texture2D" uid="uid://cjy20p4j477ul" path="res://addons/hengo/assets/icons/resize.svg" id="4_ipyu5"]
+[ext_resource type="Texture2D" uid="uid://c6p6p77i7bfc4" path="res://addons/hengo/assets/icons/settings.svg" id="4_l6dpx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yltpd"]
 resource_local_to_scene = true
@@ -60,27 +61,47 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="Comment" type="VBoxContainer"]
-custom_minimum_size = Vector2(10, 10)
-offset_right = 297.0
-offset_bottom = 186.0
-pivot_offset = Vector2(521, 0)
-mouse_filter = 2
-theme_override_constants/separation = 0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4rps2"]
+bg_color = Color(0.443137, 0.6, 0.878431, 0.0705882)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.68355, 0.695418, 0.713233, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[node name="CommentContainer" type="PanelContainer"]
+custom_minimum_size = Vector2(289, 130)
+offset_top = 186.0
+offset_right = 289.0
+offset_bottom = 316.0
 script = ExtResource("1_lt0vh")
 
-[node name="TitlePanel" type="PanelContainer" parent="."]
+[node name="Comment" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="TitlePanel" type="PanelContainer" parent="Comment"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_yltpd")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="TitlePanel"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Comment/TitlePanel"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 12
 
-[node name="Icon" type="TextureButton" parent="TitlePanel/HBoxContainer"]
+[node name="Icon" type="TextureButton" parent="Comment/TitlePanel/HBoxContainer"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(1, 1, 1, 0.470588)
@@ -89,7 +110,7 @@ size_flags_vertical = 4
 texture_normal = ExtResource("2_oxp78")
 stretch_mode = 5
 
-[node name="Title" type="LineEdit" parent="TitlePanel/HBoxContainer"]
+[node name="Title" type="LineEdit" parent="Comment/TitlePanel/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -104,7 +125,7 @@ text = "COMMENT"
 editable = false
 selecting_enabled = false
 
-[node name="ColorButton" type="ColorPickerButton" parent="TitlePanel/HBoxContainer"]
+[node name="ColorButton" type="ColorPickerButton" parent="Comment/TitlePanel/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
@@ -113,20 +134,27 @@ text = "      "
 color = Color(0.188235, 0.188235, 0.176471, 1)
 edit_alpha = false
 
-[node name="CheckButton" type="CheckButton" parent="TitlePanel/HBoxContainer"]
+[node name="CheckButton" type="CheckButton" parent="Comment/TitlePanel/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Pin This Comment"
 button_pressed = true
 
-[node name="Background" type="Panel" parent="."]
+[node name="MenuButton" type="MenuButton" parent="Comment/TitlePanel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("4_l6dpx")
+item_count = 1
+popup/item_0/text = "Delete"
+
+[node name="Background" type="Panel" parent="Comment"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_mjsmx")
 
-[node name="BottomRight" type="TextureRect" parent="Background"]
+[node name="BottomRight" type="TextureRect" parent="Comment/Background"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.129412)
 z_index = 1
@@ -145,7 +173,7 @@ texture = ExtResource("4_ipyu5")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="BottomLeft" type="TextureRect" parent="Background"]
+[node name="BottomLeft" type="TextureRect" parent="Comment/Background"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.129412)
 z_index = 1
@@ -162,7 +190,7 @@ expand_mode = 1
 stretch_mode = 5
 flip_h = true
 
-[node name="TopLeft" type="TextureRect" parent="Background"]
+[node name="TopLeft" type="TextureRect" parent="Comment/Background"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.129412)
 z_index = 1
@@ -176,7 +204,7 @@ stretch_mode = 5
 flip_h = true
 flip_v = true
 
-[node name="TopRight" type="TextureRect" parent="Background"]
+[node name="TopRight" type="TextureRect" parent="Comment/Background"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.129412)
 z_index = 1
@@ -192,3 +220,10 @@ texture = ExtResource("4_ipyu5")
 expand_mode = 1
 stretch_mode = 5
 flip_v = true
+
+[node name="SelectBorder" type="Panel" parent="."]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_4rps2")

@@ -209,7 +209,7 @@ func _process(_delta: float) -> void:
 			_Global.CAM.get_node('SelectionRect').visible = false
 
 
-func _input(event: InputEvent):
+func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		if event.pressed:
 			if event.shift_pressed and event.keycode == KEY_S:
@@ -265,7 +265,7 @@ func _input(event: InputEvent):
 						print(all_states)
 			elif event.keycode == KEY_F9:
 				print(
-					_Global.CNODE_CONTAINER.get_children()
+					_Global.history.get_current_action_name(), ' /// ', _Global.history.get_history_count()
 				)
 
 			if event.ctrl_pressed:
