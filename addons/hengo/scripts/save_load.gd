@@ -431,14 +431,18 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 
 static func load_and_edit(_path: StringName) -> void:
     # ---------------------------------------------------------------------------- #
-    var state_msg: TextureRect = _Global.STATE_CAM.get_node_or_null('StartMessage')
-    var cnode_msg: TextureRect = _Global.CNODE_CAM.get_node_or_null('StartMessage')
+    # remove start message
+    var state_msg: PanelContainer = _Global.STATE_CAM.get_parent().get_node('StartMessage')
+    var cnode_msg: PanelContainer = _Global.CNODE_CAM.get_parent().get_node('StartMessage')
 
     if state_msg:
-        _Global.STATE_CAM.remove_child(state_msg)
+        state_msg.get_parent().remove_child(state_msg)
     
     if cnode_msg:
-        _Global.CNODE_CAM.remove_child(cnode_msg)
+        cnode_msg.get_parent().remove_child(cnode_msg)
+
+    if not _Global.SIDE_BAR.visible:
+        _Global.SIDE_BAR.visible = true
 
     # reseting plugin
     _Global.ERROR_BT.reset()

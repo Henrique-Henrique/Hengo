@@ -19,9 +19,6 @@ var pos: Vector2 = Vector2.ZERO
 @onready var ref_point: Marker2D = get_node('RefPoint')
 var initial: Vector2 = Vector2.ZERO
 
-var start_zooming: bool = false
-var start_positioning: bool = true
-
 # private
 #
 func _ready() -> void:
@@ -31,16 +28,6 @@ func _ready() -> void:
 
 	((parent.get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
 	((parent.get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
-	
-	parent.visibility_changed.connect(func():
-		if not start_positioning or not parent.is_visible_in_tree():
-			return
-
-		transform.origin.y += 100
-
-		start_zooming = true
-		start_positioning = false
-	)
 
 	
 func _on_ui_size_changed() -> void:
@@ -57,9 +44,6 @@ func _input(event: InputEvent) -> void:
 				set_physics_process(false)
 		
 		elif event is InputEventMouseButton:
-			if start_zooming:
-				start_zooming = false
-			
 			if event.is_pressed():
 				if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_UP:
 					_zoom_in()
@@ -72,13 +56,9 @@ func _zoom_in() -> void:
 	_set_transform(get_global_mouse_position())
 
 
-func _zoom_out(_pos: Vector2 = Vector2.ZERO) -> void:
-	if start_positioning:
-		target_zoom = max(MIN_ZOOM * 1.5, MIN_ZOOM)
-		_set_transform(_pos)
-	else:
-		target_zoom = max(target_zoom - ZOOM_INCREMENT, MIN_ZOOM)
-		_set_transform(get_global_mouse_position())
+func _zoom_out() -> void:
+	target_zoom = max(target_zoom - ZOOM_INCREMENT, MIN_ZOOM)
+	_set_transform(get_global_mouse_position())
 
 
 func _set_transform(_pos: Vector2) -> void:
@@ -114,23 +94,6 @@ func _physics_process(_delta: float) -> void:
 		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
 		if is_equal_approx(transform.origin.x, pos.x):
-			set_physics_process(false)
-
-
-	elif start_zooming:
-		var factor: float = ZOOM_RATE * _delta
-		transform.x = lerp(transform.x, t_x, factor)
-		transform.y = lerp(transform.y, t_y, factor)
-
-		transform.origin = lerp(transform.origin, pos, factor)
-
-		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
-		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
-
-		if is_equal_approx(transform.origin.x, pos.x):
-			start_zooming = false
-			start_positioning = false
-			transform.origin.x += 100
 			set_physics_process(false)
 
 

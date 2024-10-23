@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=49 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -23,17 +23,20 @@
 [ext_resource type="Texture2D" uid="uid://bv047wy4rgrj7" path="res://addons/hengo/assets/icons/menu/file.svg" id="12_xsbp1"]
 [ext_resource type="Texture2D" uid="uid://vf74i7nxqsmu" path="res://addons/hengo/assets/icons/menu/file_add.svg" id="13_70p3m"]
 [ext_resource type="Texture2D" uid="uid://ctlaqfkdcnini" path="res://addons/hengo/assets/images/grid_cnode.png" id="13_w5ssd"]
-[ext_resource type="PackedScene" uid="uid://b80qpbvaqauud" path="res://addons/hengo/scenes/start_message.tscn" id="15_nf048"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
+[ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="22_tcuyg"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="FontFile" uid="uid://buicqe4n7bixe" path="res://addons/hengo/assets/fonts/Mono/SpaceMono-Regular.ttf" id="24_paf7x"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/cnode_start_msg.gd" id="24_pme8h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
 bg_color = Color(0.0936, 0.09756, 0.12, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(220, 648)
-shader_parameter/offset = Vector2(100, 1.5165e-05)
-shader_parameter/zoom_factor = 0.5
+shader_parameter/screen_size = Vector2(1559, 1975)
+shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -48,11 +51,30 @@ bg_color = Color(0.136826, 0.136826, 0.136826, 1)
 content_margin_right = 8.0
 content_margin_bottom = 8.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_53575"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.0941176, 0.0980392, 0.121569, 1)
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_sdfet"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gcx3q"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5i5ls"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qv5mu"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(608, 648)
-shader_parameter/offset = Vector2(100, 1.5165e-05)
-shader_parameter/zoom_factor = 0.5
+shader_parameter/screen_size = Vector2(923, 648)
+shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -193,8 +215,7 @@ mouse_filter = 2
 texture = ExtResource("12_x1ww2")
 
 [node name="Cam" type="Node2D" parent="Split/StateUI"]
-position = Vector2(100, 1.5165e-05)
-scale = Vector2(0.5, 0.5)
+position = Vector2(100, 8.42499e-06)
 script = ExtResource("3_84akk")
 
 [node name="CenterDebugReference" type="Sprite2D" parent="Split/StateUI/Cam"]
@@ -250,12 +271,11 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0k3ul")
 
-[node name="StartMessage" type="TextureRect" parent="Split/StateUI/Cam"]
-
 [node name="Center" type="Marker2D" parent="Split/StateUI"]
 visible = false
 
 [node name="PanelContainer" type="PanelContainer" parent="Split/StateUI"]
+z_index = 1
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -310,6 +330,39 @@ grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
 
+[node name="StartMessage" type="PanelContainer" parent="Split/StateUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_53575")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Split/StateUI/StartMessage"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_fonts/normal_font = ExtResource("20_y63ss")
+theme_override_fonts/mono_font = ExtResource("24_paf7x")
+theme_override_fonts/italics_font = ExtResource("22_tcuyg")
+theme_override_fonts/bold_font = ExtResource("23_tlngq")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_sdfet")
+theme_override_styles/background = SubResource("StyleBoxEmpty_gcx3q")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_5i5ls")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_qv5mu")
+bbcode_enabled = true
+text = "[center]
+[font_size=24][b]Here is the State container[/b][/font_size]
+
+Create your first script to get started
+
+
+[/center]"
+fit_content = true
+shortcut_keys_enabled = false
+script = ExtResource("24_pme8h")
+
 [node name="HSplitContainer" type="HSplitContainer" parent="Split"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -336,8 +389,7 @@ mouse_filter = 2
 texture = ExtResource("13_w5ssd")
 
 [node name="Cam" type="Node2D" parent="Split/HSplitContainer/CNodeUI"]
-position = Vector2(100, 1.5165e-05)
-scale = Vector2(0.5, 0.5)
+position = Vector2(100, 8.42499e-06)
 script = ExtResource("3_84akk")
 
 [node name="CenterDebugReference" type="Sprite2D" parent="Split/HSplitContainer/CNodeUI/Cam"]
@@ -397,8 +449,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
-[node name="StartMessage" parent="Split/HSplitContainer/CNodeUI/Cam" instance=ExtResource("15_nf048")]
-
 [node name="Center2" type="Marker2D" parent="Split/HSplitContainer/CNodeUI"]
 visible = false
 position = Vector2(-580, 0)
@@ -441,8 +491,58 @@ grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
 
+[node name="StartMessage" type="PanelContainer" parent="Split/HSplitContainer/CNodeUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_53575")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Split/HSplitContainer/CNodeUI/StartMessage"]
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("20_y63ss")
+theme_override_fonts/mono_font = ExtResource("24_paf7x")
+theme_override_fonts/italics_font = ExtResource("22_tcuyg")
+theme_override_fonts/bold_font = ExtResource("23_tlngq")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_sdfet")
+theme_override_styles/background = SubResource("StyleBoxEmpty_gcx3q")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_5i5ls")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_qv5mu")
+bbcode_enabled = true
+text = "[center]
+[font_size=36][center][b]Welcome to Hengo[/b][/center][/font_size]
+Work in Progress
+
+[center][color=coral]NOT READY FOR PRODUCTION[/color][/center]
+
+
+[font_size=24]
+[img=24]res://addons/hengo/assets/icons/message/feat.svg[/img] [b]What features should we test in this version?[/b]
+
+[img=800]res://addons/hengo/assets/images/features.png[/img]
+
+
+[img=24]res://addons/hengo/assets/icons/message/build.svg[/img] [b]What am I working on for the next version?[/b]
+
+[img=800]res://addons/hengo/assets/images/working.png[/img]
+
+
+[img=24]res://addons/hengo/assets/icons/message/discord.svg[/img]  [url=https://discord.gg/KapbHgb5FM]Join my Discord[/url]
+
+[img=24]res://addons/hengo/assets/icons/message/github.svg[/img]  [url=https://github.com/Henrique-Henrique/Hengo]View Source[/url]
+
+[img=24]res://addons/hengo/assets/icons/message/link.svg[/img]  [url=https://hengoscript.com]hengoscript.com[/url]
+
+[/font_size]
+[/center]"
+shortcut_keys_enabled = false
+script = ExtResource("24_pme8h")
+
 [node name="SideBar" parent="Split/HSplitContainer" instance=ExtResource("5_6h34f")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 
 [node name="DropPropMenu" type="PopupMenu" parent="."]
