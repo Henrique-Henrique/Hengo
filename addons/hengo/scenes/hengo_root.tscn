@@ -72,7 +72,7 @@ expand_margin_bottom = 4.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(923, 648)
+shader_parameter/screen_size = Vector2(2259, 1975)
 shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
 shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
@@ -502,6 +502,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_53575")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="Split/HSplitContainer/CNodeUI/StartMessage"]
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_fonts/normal_font = ExtResource("20_y63ss")
 theme_override_fonts/mono_font = ExtResource("24_paf7x")
 theme_override_fonts/italics_font = ExtResource("22_tcuyg")
@@ -537,6 +538,7 @@ Work in Progress
 
 [/font_size]
 [/center]"
+fit_content = true
 shortcut_keys_enabled = false
 script = ExtResource("24_pme8h")
 
