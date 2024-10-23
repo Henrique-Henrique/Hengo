@@ -15,6 +15,10 @@ run/main_scene="res://demo.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+HengoDebugger="*res://addons/hengo/scripts/debug/hengo_debugger.gd"
+
 [debug]
 
 gdscript/warnings/exclude_addons=false
@@ -22,6 +26,10 @@ gdscript/warnings/exclude_addons=false
 [display]
 
 window/size/always_on_top=true
+
+[dotnet]
+
+project/assembly_name="Hengo"
 
 [editor_plugins]
 

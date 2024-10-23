@@ -40,8 +40,12 @@ func _enter_tree():
 
 	# getting native api like String, float... methods.
 	var native_api_file: FileAccess = FileAccess.open(_Enums.NATIVE_API_PATH, FileAccess.READ)
-	_Enums.NATIVE_API_LIST = JSON.parse_string(native_api_file.get_as_text())
-	native_api_file.close()
+
+	if native_api_file:
+		_Enums.NATIVE_API_LIST = JSON.parse_string(native_api_file.get_as_text())
+		native_api_file.close()
+	else:
+		print('NATIVE LIST JSON -> ', FileAccess.get_open_error())
 
 	# creating hengo folder
 	if not DirAccess.dir_exists_absolute('res://hengo'):
