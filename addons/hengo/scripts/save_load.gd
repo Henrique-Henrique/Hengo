@@ -285,6 +285,17 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
     else:
         pass
 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 # ---------------------------------------------------------------------------- #
 static func get_cnode_list(_cnode_list: Array, _ignore_list: Array) -> Array:
     var arr: Array = []
@@ -432,8 +443,9 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 static func load_and_edit(_path: StringName) -> void:
     # ---------------------------------------------------------------------------- #
     # remove start message
-    var state_msg: PanelContainer = _Global.STATE_CAM.get_parent().get_node('StartMessage')
-    var cnode_msg: PanelContainer = _Global.CNODE_CAM.get_parent().get_node('StartMessage')
+    var state_msg: PanelContainer = _Global.STATE_CAM.get_parent().get_node_or_null('StartMessage')
+    var cnode_msg: PanelContainer = _Global.CNODE_CAM.get_parent().get_node_or_null('StartMessage')
+    var compile_bt: Button = _Global.STATE_CAM.get_parent().get_node('%Compile')
 
     if state_msg:
         state_msg.get_parent().remove_child(state_msg)
@@ -443,6 +455,8 @@ static func load_and_edit(_path: StringName) -> void:
 
     if not _Global.SIDE_BAR.visible:
         _Global.SIDE_BAR.visible = true
+
+    compile_bt.disabled = false
 
     # reseting plugin
     _Global.ERROR_BT.reset()

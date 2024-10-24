@@ -1,13 +1,11 @@
 @tool
 extends HBoxContainer
 
-const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
 const Global = preload('res://addons/hengo/scripts/global.gd')
 const SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
 const Enums = preload('res://addons/hengo/references/enums.gd')
 
 func _ready() -> void:
-    get_node('Left/Compile').pressed.connect(_on_compile_press)
     get_node('Right/Open').pressed.connect(_on_open_press)
     get_node('Right/Create').pressed.connect(_on_create_press)
 
@@ -24,10 +22,6 @@ func _on_create_press() -> void:
 
 func _on_script_created(_script: Script, _dialog: ScriptCreateDialog) -> void:
     _dialog.queue_free()
-
-
-func _on_compile_press() -> void:
-    _CodeGeneration.generate_and_save()
 
 
 func _on_open_press() -> void:

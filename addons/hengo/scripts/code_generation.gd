@@ -18,15 +18,17 @@ static var _name_ref: Dictionary = {}
 static var _debug_counter: float = 1.
 static var _debug_symbols: Dictionary = {}
 
-static func generate_and_save() -> void:
+
+static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 	var start: float = Time.get_ticks_usec()
 	_SaveLoad.save(generate(), _debug_symbols)
 	var end: float = Time.get_ticks_usec()
+	
 	print('GENERATED AND SAVED HENGO SCRIPT IN -> ', (end - start) / 1000, 'ms.')
-
 	print('debug  => ', _debug_symbols)
 
 	_Global.current_script_debug_symbols = _debug_symbols
+
 
 static func generate() -> String:
 	# reseting internal variables

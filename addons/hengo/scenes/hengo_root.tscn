@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=56 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
 [ext_resource type="Shader" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
 [ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
 [ext_resource type="Texture2D" uid="uid://bngwf5vpsmtgo" path="res://addons/hengo/assets/images/grid_cnode_out.png" id="12_7rfh3"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
@@ -34,9 +35,9 @@ bg_color = Color(0.0936, 0.09756, 0.12, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1559, 1975)
-shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1561, 1657)
+shader_parameter/offset = Vector2(3087.44, 500.126)
+shader_parameter/zoom_factor = 0.999987
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -45,7 +46,39 @@ shader_parameter/text = ExtResource("4_ngl72")
 bg_color = Color(0.0462, 0.58905, 0.77, 0.286275)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gn4j7"]
-bg_color = Color(0.136826, 0.136826, 0.136826, 1)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.0941176, 0.0980392, 0.121569, 1)
+border_width_bottom = 2
+border_color = Color(0.121658, 0.12694, 0.153395, 1)
+shadow_color = Color(0, 0, 0, 0.027451)
+shadow_size = 12
+shadow_offset = Vector2(0, 1.265)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rluxx"]
+content_margin_left = 8.0
+bg_color = Color(0.212471, 0.21937, 0.260652, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5te2"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eipqu"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tk0ia"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ny40n"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_10tvr"]
+bg_color = Color(0.211765, 0.219608, 0.258824, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
 content_margin_right = 8.0
@@ -72,9 +105,9 @@ expand_margin_bottom = 4.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(2259, 1975)
-shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1954, 1657)
+shader_parameter/offset = Vector2(-436.083, 395.817)
+shader_parameter/zoom_factor = 0.699998
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -177,6 +210,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 1381.0
+offset_bottom = 742.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -191,6 +226,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 0
 split_offset = -350
 
 [node name="StateUI" type="Panel" parent="Split"]
@@ -274,7 +310,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_0k3ul")
 [node name="Center" type="Marker2D" parent="Split/StateUI"]
 visible = false
 
-[node name="PanelContainer" type="PanelContainer" parent="Split/StateUI"]
+[node name="MenuBar" type="PanelContainer" parent="Split/StateUI"]
 z_index = 1
 layout_mode = 1
 anchors_preset = 10
@@ -283,32 +319,55 @@ offset_bottom = 28.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gn4j7")
 
-[node name="StateActionBar" type="HBoxContainer" parent="Split/StateUI/PanelContainer"]
+[node name="StateActionBar" type="HBoxContainer" parent="Split/StateUI/MenuBar"]
 layout_mode = 2
 script = ExtResource("5_xq2ue")
 
-[node name="Left" type="HBoxContainer" parent="Split/StateUI/PanelContainer/StateActionBar"]
+[node name="Left" type="HBoxContainer" parent="Split/StateUI/MenuBar/StateActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Compile" type="Button" parent="Split/StateUI/PanelContainer/StateActionBar/Left"]
+[node name="PanelContainer" type="PanelContainer" parent="Split/StateUI/MenuBar/StateActionBar/Left"]
 layout_mode = 2
-text = "Compile"
-icon = ExtResource("11_xut0q")
+theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
 
-[node name="Right" type="HBoxContainer" parent="Split/StateUI/PanelContainer/StateActionBar"]
+[node name="CompileContainer" type="HBoxContainer" parent="Split/StateUI/MenuBar/StateActionBar/Left/PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+script = ExtResource("11_35y2j")
+
+[node name="Compile" type="Button" parent="Split/StateUI/MenuBar/StateActionBar/Left/PanelContainer/CompileContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
+disabled = true
+text = "Compile"
+
+[node name="LoadIcon" type="TextureRect" parent="Split/StateUI/MenuBar/StateActionBar/Left/PanelContainer/CompileContainer"]
+layout_mode = 2
+texture = ExtResource("11_xut0q")
+expand_mode = 2
+stretch_mode = 3
+
+[node name="Right" type="HBoxContainer" parent="Split/StateUI/MenuBar/StateActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="Open" type="Button" parent="Split/StateUI/PanelContainer/StateActionBar/Right"]
+[node name="Open" type="Button" parent="Split/StateUI/MenuBar/StateActionBar/Right"]
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_10tvr")
 text = "Open
 "
 icon = ExtResource("12_xsbp1")
 
-[node name="Create" type="Button" parent="Split/StateUI/PanelContainer/StateActionBar/Right"]
+[node name="Create" type="Button" parent="Split/StateUI/MenuBar/StateActionBar/Right"]
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_10tvr")
 text = "Create
 "
 icon = ExtResource("13_70p3m")
