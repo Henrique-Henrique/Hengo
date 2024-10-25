@@ -43,6 +43,8 @@ _Hengo Demo_
 
 Follow these steps to install **Hengo**:
 
+**Minimum Version Required:** 4.3
+
 1. **Download the ZIP file** from the repository (Hengo is still under development!).
 2. **Extract the `addons` folder** from the ZIP file.
 3. **Move the `addons` folder** to your Godot project folder.
