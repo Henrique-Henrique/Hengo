@@ -40,9 +40,9 @@ bg_color = Color(0.0936, 0.09756, 0.12, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1531, 1975)
-shader_parameter/offset = Vector2(604.494, 825.761)
-shader_parameter/zoom_factor = 0.999981
+shader_parameter/screen_size = Vector2(915, 1390)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -117,9 +117,9 @@ expand_margin_bottom = 4.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1907, 1975)
-shader_parameter/offset = Vector2(779.962, 711.21)
-shader_parameter/zoom_factor = 0.999797
+shader_parameter/screen_size = Vector2(1615, 1390)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -329,6 +329,13 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0k3ul")
+
+[node name="GeneralContainer" type="Control" parent="Split/StateUI/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 
 [node name="Center" type="Marker2D" parent="Split/StateUI"]
 visible = false

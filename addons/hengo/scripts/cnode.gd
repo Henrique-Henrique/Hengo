@@ -644,8 +644,13 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 			match sub_type:
 				# adding virtual cnodes references
 				'virtual':
-					var ref = _config.route.state_ref
-					ref.virtual_cnode_list.append(instance)
+					match _config.route.type:
+						_Router.ROUTE_TYPE.STATE:
+							var ref = _config.route.state_ref
+							ref.virtual_cnode_list.append(instance)
+						_Router.ROUTE_TYPE.INPUT:
+							var ref = _config.route.general_ref
+							ref.virtual_cnode_list.append(instance)
 				# virtual node of signal and func
 				'signal_virtual', 'func_input':
 					var ref = _config.route.item_ref

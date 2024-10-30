@@ -16,6 +16,7 @@ static var CAM: _Cam
 static var STATE_CAM: _Cam
 static var CNODE_CAM: _Cam
 static var CNODE_CONTAINER: Control
+static var GENERAL_CONTAINER: Control
 static var COMMENT_CONTAINER: Control
 static var STATE_CONTAINER: Control
 static var SIDE_BAR: PanelContainer

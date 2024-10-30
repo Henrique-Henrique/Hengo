@@ -8,6 +8,8 @@ const _Router = preload('res://addons/hengo/scripts/router.gd')
 const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
 const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
 const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
+const _GeneralRoute = preload('res://addons/hengo/scripts/general_route.gd')
+const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
 
 # ---------------------------------------------------------------------------- #
 #                                    saving                                    #
@@ -463,6 +465,9 @@ static func load_and_edit(_path: StringName) -> void:
 
     for state in _Global.STATE_CONTAINER.get_children():
         state.queue_free()
+
+    for state in _Global.GENERAL_CONTAINER.get_children():
+        state.queue_free()
     
     for cnode in _Global.CNODE_CONTAINER.get_children():
         cnode.queue_free()
@@ -525,13 +530,60 @@ static func load_and_edit(_path: StringName) -> void:
         _Global.node_counter = 0
         _State._name_counter = 0
 
+        
+        # creating event
+        var general_route := _GeneralRoute.instantiate_general({
+            route = {
+                name = 'Inputs',
+                type = _Router.ROUTE_TYPE.INPUT,
+                id = _UtilsName.get_unique_name()
+            },
+            icon = 'res://addons/hengo/assets/icons/mouse.svg'
+        })
+
+        _CNode.instantiate_and_add({
+			name = '_input',
+			sub_type = 'virtual',
+            outputs = [ {
+				name = 'delta',
+				type = 'InputEvent'
+			}],
+			route = general_route.route,
+            position = Vector2.ZERO
+		})
+
+        _CNode.instantiate_and_add({
+			name = '_process',
+			sub_type = 'virtual',
+            outputs = [ {
+				name = 'delta',
+				type = 'InputEvent'
+			}],
+			route = general_route.route,
+            position = Vector2(400, 0)
+		})
+
+        _CNode.instantiate_and_add({
+			name = '_physics_process',
+			sub_type = 'virtual',
+            outputs = [ {
+				name = 'delta',
+				type = 'InputEvent'
+			}],
+			route = general_route.route,
+            position = Vector2(800, 0)
+		})
+
         # It's a new project
         var state := _State.instantiate_and_add_to_scene()
         state.add_event({
             name = 'Start',
             type = 'start'
         })
-    #
+
+        state.select()
+
+    #   
     #
     # loading hengo script data
     elif script.source_code.begins_with('#[hengo] '):
