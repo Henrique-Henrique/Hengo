@@ -24,6 +24,23 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
     }
 
     # ---------------------------------------------------------------------------- #
+    # Generals
+    var generals: Array[Dictionary] = []
+
+    for general in _Global.GENERAL_CONTAINER.get_children():
+        var data: Dictionary = general.custom_data
+
+        data.pos = var_to_str(general.position)
+
+        for cnode in general.virtual_cnode_list:
+            data.cnode_list = get_cnode_list(
+                _Router.route_reference[general.route.id], [])
+
+        generals.append(data)
+
+    script_data['generals'] = generals
+
+    # ---------------------------------------------------------------------------- #
     # STATES
     var states: Array[Dictionary] = []
 
@@ -530,49 +547,72 @@ static func load_and_edit(_path: StringName) -> void:
         _Global.node_counter = 0
         _State._name_counter = 0
 
-        
-        # creating event
-        var general_route := _GeneralRoute.instantiate_general({
-            route = {
-                name = 'Inputs',
-                type = _Router.ROUTE_TYPE.INPUT,
-                id = _UtilsName.get_unique_name()
+        # creating inputs
+        for general_data in [
+            {
+                name = 'Input',
+                cnode_name = '_input',
             },
-            icon = 'res://addons/hengo/assets/icons/mouse.svg'
-        })
+            {
+                name = 'Shortcut Input',
+                cnode_name = '_shortcut_input',
+                color = '#1e3033'
+            },
+            {
+                name = 'Unhandled Input',
+                cnode_name = '_unhandled_input',
+                color = '#352b19'
+            },
+            {
+                name = 'Unhandled Key Input',
+                cnode_name = '_unhandled_key_input',
+                color = '#44201e'
+            },
+            {
+                name = 'Process',
+                cnode_name = '_process',
+                color = '#401d3f',
+                param = {
+                    name = 'delta',
+                    type = 'float'
+                }
+            },
+            {
+                name = 'Physics Process',
+                cnode_name = '_physics_process',
+                color = '#1f2950',
+                param = {
+                    name = 'delta',
+                    type = 'float'
+                }
+            },
+        ]:
+            var data: Dictionary = {
+                route = {
+                    name = general_data.name,
+                    type = _Router.ROUTE_TYPE.INPUT,
+                    id = _UtilsName.get_unique_name()
+                },
+                custom_data = general_data,
+                type = 'input',
+                icon = 'res://addons/hengo/assets/icons/mouse.svg'
+            }
 
-        _CNode.instantiate_and_add({
-			name = '_input',
-			sub_type = 'virtual',
-            outputs = [ {
-				name = 'delta',
-				type = 'InputEvent'
-			}],
-			route = general_route.route,
-            position = Vector2.ZERO
-		})
+            if general_data.has('color'):
+                data.color = general_data.color
 
-        _CNode.instantiate_and_add({
-			name = '_process',
-			sub_type = 'virtual',
-            outputs = [ {
-				name = 'delta',
-				type = 'InputEvent'
-			}],
-			route = general_route.route,
-            position = Vector2(400, 0)
-		})
+            var general := _GeneralRoute.instantiate_general(data)
 
-        _CNode.instantiate_and_add({
-			name = '_physics_process',
-			sub_type = 'virtual',
-            outputs = [ {
-				name = 'delta',
-				type = 'InputEvent'
-			}],
-			route = general_route.route,
-            position = Vector2(800, 0)
-		})
+            _CNode.instantiate_and_add({
+                name = general_data.cnode_name,
+                sub_type = 'virtual',
+                outputs = [ {
+                    name = 'event',
+                    type = 'InputEvent'
+                } if not general_data.has('param') else general_data.param],
+                route = general.route,
+                position = Vector2.ZERO
+            })
 
         # It's a new project
         var state := _State.instantiate_and_add_to_scene()
@@ -598,6 +638,23 @@ static func load_and_edit(_path: StringName) -> void:
         _Global.node_counter = data.node_counter
         _Global.current_script_debug_symbols = data.debug_symbols
         _State._name_counter = data.state_name_counter
+
+        # generating generals (like inputs)
+        for general_config: Dictionary in data['generals']:
+            var general := _GeneralRoute.instantiate_general({
+                route = {
+                    name = general_config.name,
+                    type = _Router.ROUTE_TYPE.INPUT,
+                    id = _UtilsName.get_unique_name()
+                },
+                pos = general_config.pos,
+                custom_data = general_config,
+                type = 'input',
+                icon = 'res://addons/hengo/assets/icons/mouse.svg'
+            })
+
+            _load_cnode(general_config.cnode_list, general.route, inst_id_refs)
+
 
         for state: Dictionary in data['states']:
             var state_inst = _State.instantiate_and_add_to_scene({

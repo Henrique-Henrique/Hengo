@@ -3,7 +3,8 @@
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_e8s7e"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/general_route.gd" id="2_81cqh"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cuwfa"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xfiej"]
+resource_local_to_scene = true
 bg_color = Color(0.160784, 0.168627, 0.231373, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
@@ -18,6 +19,6 @@ offset_right = 18.0
 offset_bottom = 15.0
 mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("1_e8s7e")
-theme_override_styles/normal = SubResource("StyleBoxFlat_cuwfa")
+theme_override_styles/normal = SubResource("StyleBoxFlat_xfiej")
 text = "General"
 script = ExtResource("2_81cqh")

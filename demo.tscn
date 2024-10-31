@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=4 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
+[ext_resource type="Script" path="res://hengo/bt.gd" id="2_34af8"]
 [ext_resource type="Script" path="res://hengo/test.gd" id="3_dq87n"]
 
 [node name="Node" type="Node"]
@@ -10,6 +11,7 @@ visible = false
 position = Vector2(261, 153)
 rotation = 0.261799
 texture = ExtResource("1_wvpun")
+script = ExtResource("2_34af8")
 
 [node name="Icon2" type="Sprite2D" parent="."]
 modulate = Color(0.898675, 0.199437, 7.70092e-07, 1)

@@ -15,6 +15,8 @@ var route: Dictionary = {
 }
 var virtual_cnode_list: Array = []
 var moving: bool = false
+var type: StringName = ''
+var custom_data: Dictionary = {}
 
 func _ready() -> void:
 	gui_input.connect(_on_gui)
@@ -48,6 +50,10 @@ func change_name(_name: String) -> void:
 	text = _name
 
 
+func get_general_name() -> String:
+	return text
+
+
 # static
 static func instantiate_general(_config: Dictionary) -> _GeneralRoute:
 	var general_route_scene = load('res://addons/hengo/scenes/general_route.tscn')
@@ -63,6 +69,21 @@ static func instantiate_general(_config: Dictionary) -> _GeneralRoute:
 
 	if _config.has('icon'):
 		general_route.icon = load(_config.icon)
+
+	if _config.has('type'):
+		general_route.type = _config.type
+
+
+	if _config.has('pos'):
+		general_route.position = str_to_var(_config.pos)
+
+	print(_config.has('color'), ' => ', _config)
+	if _config.has('color'):
+		print('dddddddddddddddddddddddd')
+		general_route.get_theme_stylebox('normal').bg_color = Color(_config.color)
+
+	if _config.has('custom_data'):
+		general_route.custom_data = _config.custom_data
 
 	_Global.GENERAL_CONTAINER.add_child(general_route)
 

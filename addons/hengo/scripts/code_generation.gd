@@ -63,9 +63,26 @@ static func generate() -> String:
 			value = type_value,
 			export_var = '@export ' if var_export else ''
 		})
-	
+
 	code += var_code
 	# end variables
+
+	#region Parsing generals
+	var input_data: Dictionary = {}
+
+	for general in _Global.GENERAL_CONTAINER.get_children():
+		match general.type:
+			'input':
+				var tokens: Dictionary = parse_tokens(general.virtual_cnode_list)
+
+				if not tokens.is_empty():
+					input_data[general.get_general_name()] = tokens.values()[0]
+
+
+	print('in-> ', input_data)
+
+	var states_data: Dictionary = {}
+	#endregion
 
 	# base template
 	#TODO not all nodes has _process or _physics_process, make more dynamic
@@ -87,14 +104,30 @@ func _ready() -> void:
 		_STATE_CONTROLLER.change_state("{start_state_name}")
 
 
-func _process(_delta: float) -> void:
-	_STATE_CONTROLLER.static_process(_delta)
+func _process(delta: float) -> void:
+	_STATE_CONTROLLER.static_process(delta)
+{_process}
 
 
-func _physics_process(_delta: float) -> void:
-	_STATE_CONTROLLER.static_physics_process(_delta)\n\n""".format({
+func _physics_process(delta: float) -> void:
+	_STATE_CONTROLLER.static_physics_process(delta)
+{_physics_process}
+
+{_input}
+
+{_shortcut_input}
+
+{_unhandled_input}
+
+{_unhandled_key_input}""".format({
 		start_state_name = _Global.start_state.get_state_name().to_snake_case(),
-		start_state_debug = parse_token_by_type({type = 'start_debug_state', id = get_state_debug_counter(_Global.start_state)})
+		start_state_debug = parse_token_by_type({type = 'start_debug_state', id = get_state_debug_counter(_Global.start_state)}),
+		_input = 'func _input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Input') else '',
+		_shortcut_input = 'func _shortcut_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Shortcut Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Shortcut Input') else '',
+		_unhandled_input = 'func _unhandled_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Input') else '',
+		_unhandled_key_input = 'func _unhandled_key_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Key Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Key Input') else '',
+		_process = '\n'.join(input_data['Process'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Process') else '',
+		_physics_process = '\n'.join(input_data['PhysicsProcess'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('PhysicsProcess') else '',
 	})
 
 	# functions
@@ -215,11 +248,9 @@ func _physics_process(_delta: float) -> void:
 	base_template += signal_code
 	# end signal callables
 
-	var states_data: Dictionary = {}
-
 	# parsing all states
 	for state in _Global.STATE_CONTAINER.get_children():
-		var state_code_tokens = parse_state_tokens(state)
+		var state_code_tokens = parse_tokens(state.virtual_cnode_list)
 		var state_name = state.get_state_name().to_snake_case()
 		var transitions: Array = []
 
@@ -303,10 +334,10 @@ func _physics_process(_delta: float) -> void:
 
 	return code
 
-static func parse_state_tokens(_state: _State) -> Dictionary:
+static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 	var data: Dictionary = {}
 
-	for virtual_cnode in _state.virtual_cnode_list:
+	for virtual_cnode in _virtual_cnode_list:
 		var cnode_name: String = virtual_cnode.get_cnode_name()
 
 		if virtual_cnode.flow_to.has('cnode'):
