@@ -509,6 +509,11 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 			token.merge({
 				code = get_cnode_inputs(_node)[0],
 			})
+		'const':
+			token.merge({
+				name = _node.get_cnode_name(),
+				value = _node.get_node('%OutputContainer').get_child(0).get_node('%CNameOutput').get_child(0).get_value()
+			})
 
 	return token
 
@@ -728,6 +733,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + 'pass'
 		'raw_code':
 			return _token.code.value.trim_prefix('"').trim_suffix('"')
+		'const':
+			return indent + _token.name + '.' + _token.value
 		_:
 			return ''
 

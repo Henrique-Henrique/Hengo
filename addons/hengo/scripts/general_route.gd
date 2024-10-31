@@ -77,7 +77,7 @@ static func instantiate_general(_config: Dictionary) -> _GeneralRoute:
 	if _config.has('pos'):
 		general_route.position = str_to_var(_config.pos)
 
-	print(_config.has('color'), ' => ', _config)
+
 	if _config.has('color'):
 		print('dddddddddddddddddddddddd')
 		general_route.get_theme_stylebox('normal').bg_color = Color(_config.color)

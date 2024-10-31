@@ -24,6 +24,11 @@ func _on_pressed() -> void:
 			# all transitions
 			if _Router.current_route.type == _Router.ROUTE_TYPE.STATE:
 				options = _Router.current_route.state_ref.get_all_transition_data()
+		'const':
+			var const_name = get_parent().owner.root.get_cnode_name()
+
+			if _Enums.CONST_API_LIST.has(const_name):
+				options = _Enums.CONST_API_LIST[const_name]
 		'hengo_states':
 			options = _Global.SCRIPTS_STATES[custom_data] if _Global.SCRIPTS_STATES.has(custom_data) else []
 		'cast_type':
@@ -59,6 +64,9 @@ func _selected(_item: Dictionary) -> void:
 
 			output.hide_connection()
 			output.set_type((_item.name as String))
+		'const':
+			var output = get_parent().owner
+			output.change_type(_item.type)
 		
 	emit_signal('value_changed', text)
 
@@ -67,6 +75,7 @@ func _selected(_item: Dictionary) -> void:
 			if _Router.current_route.type == _Router.ROUTE_TYPE.STATE:
 				_CodeGeneration.check_state_errors(_Router.current_route.state_ref)
 
+	get_parent().owner.root.size = Vector2.ZERO
 
 # public
 #

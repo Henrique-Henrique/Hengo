@@ -481,12 +481,24 @@ func remove_out_prop() -> void:
 
 func get_in_prop_by_id_or_null() -> PanelContainer:
 	if type == 'in':
-		var prop_container = self.get_node('%CNameInput')
+		var prop_container = get_node('%CNameInput')
 
 		if prop_container.get_child_count() < 2:
 			return null
 
-		return get_node('%CNameInput').get_child(2)
+		return prop_container.get_child(2)
+	
+	return null
+
+
+func get_out_prop_by_id_or_null() -> PanelContainer:
+	if type == 'out':
+		var prop_container = get_node('%CNameOutput')
+
+		if prop_container.get_child_count() < 2:
+			return null
+
+		return prop_container.get_child(0)
 	
 	return null
 
@@ -526,13 +538,15 @@ func set_type(_type: String) -> void:
 	connection_type = _type
 
 func change_type(_type: String) -> void:
+	var remove_conn: bool = connection_type != _type
+
 	if type == 'in':
 		remove_in_prop()
-		set_type(_type)
 		set_in_prop()
-		hide_connection()
-	else:
-		set_type(_type)
+	
+	set_type(_type)
+	
+	if remove_conn:
 		hide_connection()
 
 

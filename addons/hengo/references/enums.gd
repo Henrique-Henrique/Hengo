@@ -57,6 +57,7 @@ const VARIANT_TYPES: PackedStringArray = [
 
 # dynamic native api
 static var NATIVE_API_LIST: Dictionary = {}
+static var CONST_API_LIST: Dictionary = {}
 
 # static
 #

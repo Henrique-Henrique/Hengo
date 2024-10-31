@@ -42,7 +42,11 @@ func _enter_tree():
 	var native_api_file: FileAccess = FileAccess.open(_Enums.NATIVE_API_PATH, FileAccess.READ)
 
 	if native_api_file:
-		_Enums.NATIVE_API_LIST = JSON.parse_string(native_api_file.get_as_text())
+		var api_json: Dictionary = JSON.parse_string(native_api_file.get_as_text())
+
+		_Enums.NATIVE_API_LIST = api_json.native_api
+		_Enums.CONST_API_LIST = api_json.const_api
+
 		native_api_file.close()
 	else:
 		print('NATIVE LIST JSON -> ', FileAccess.get_open_error())
@@ -141,10 +145,12 @@ func _enter_tree():
 	_Global.HENGO_EDITOR_PLUGIN = self
 
 func _generate_native_api() -> void:
-	var file: FileAccess = FileAccess.open('res://.api/extension_api.json', FileAccess.READ)
+	var file: FileAccess = FileAccess.open('res://extension_api.json', FileAccess.READ)
 	var data: Dictionary = JSON.parse_string(file.get_as_text())
 
 	var native_api: Dictionary = {}
+	var const_api: Dictionary = {}
+
 
 	for dict: Dictionary in (data['builtin_classes'] as Array):
 		if _Enums.VARIANT_TYPES.has(dict.name):
@@ -178,10 +184,39 @@ func _generate_native_api() -> void:
 				
 				native_api[dict.name] = arr
 
+			if dict.has('constants'):
+				var arr: Array = []
+
+				for constant: Dictionary in dict['constants']:
+					var dt: Dictionary = {
+						name = constant.name,
+						type = constant.type
+					}
+
+					arr.append(dt)
+				
+				const_api[dict.name] = _generate_consts(dict)
+
+
+	# parsing classes const, enums...
+	for dict: Dictionary in (data['classes'] as Array):
+		if dict.has('constants'):
+			const_api[dict.name] = _generate_consts(dict)
+		
+		if dict.has('enums'):
+			if const_api.has(dict.name):
+				const_api[dict.name] += _generate_enums(dict)
+			else:
+				const_api[dict.name] = _generate_enums(dict)
+
+
 	var file_json: FileAccess = FileAccess.open(_Enums.NATIVE_API_PATH, FileAccess.WRITE)
 
 	file_json.store_string(
-		JSON.stringify(native_api)
+		JSON.stringify({
+			native_api = native_api,
+			const_api = const_api
+		})
 	)
 
 	file_json.close()
@@ -190,6 +225,35 @@ func _generate_native_api() -> void:
 
 	# for d in native_api:
 	# 	print(native_api[d])
+
+func _generate_consts(_dict: Dictionary) -> Array:
+	var arr: Array = []
+
+	for constant: Dictionary in _dict['constants']:
+		var dt: Dictionary = {
+			name = constant.name,
+			type = constant.type if constant.has('type') else 'Variant'
+		}
+
+		arr.append(dt)
+
+	return arr
+
+func _generate_enums(_dict: Dictionary) -> Array:
+	var arr: Array = []
+
+	for enum_value in _dict.enums:
+		arr += enum_value.values.map(func(x: Dictionary) -> Dictionary: return {
+			name = x.name,
+			type = 'int'
+		})
+	
+	return arr
+	# if const_api.has(dict.name):
+	# 	const_api[dict.name] += arr
+	# else:
+	# 	const_api[dict.name] = arr
+
 
 func _on_file_tree_item_activated() -> void:
 	var item: TreeItem = file_system_tree.get_selected()

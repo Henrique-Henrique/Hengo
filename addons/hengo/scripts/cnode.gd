@@ -354,6 +354,9 @@ func add_output(_output: Dictionary) -> void:
 	if _output.has('sub_type'):
 		output.sub_type = _output.sub_type
 
+	if _output.has('data'):
+		output.custom_data = _output.get('data')
+
 	var type = values.get('type') if values.has('type') else 'Variant'
 	output.set_type(type)
 
