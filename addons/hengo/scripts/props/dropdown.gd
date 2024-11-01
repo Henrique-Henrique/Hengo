@@ -29,6 +29,16 @@ func _on_pressed() -> void:
 
 			if _Enums.CONST_API_LIST.has(const_name):
 				options = _Enums.CONST_API_LIST[const_name]
+		'action':
+			var arr: Array = []
+
+			for dict in ProjectSettings.get_property_list():
+				if dict.name.begins_with('input/'):
+					arr.append({
+						name = dict.name.substr(dict.name.find('/') + 1, dict.name.length())
+					})
+			
+			options = arr
 		'hengo_states':
 			options = _Global.SCRIPTS_STATES[custom_data] if _Global.SCRIPTS_STATES.has(custom_data) else []
 		'cast_type':

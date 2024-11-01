@@ -46,6 +46,7 @@ func _enter_tree():
 
 		_Enums.NATIVE_API_LIST = api_json.native_api
 		_Enums.CONST_API_LIST = api_json.const_api
+		_Enums.SINGLETON_API_LIST = api_json.singleton_api
 
 		native_api_file.close()
 	else:
@@ -150,7 +151,8 @@ func _generate_native_api() -> void:
 
 	var native_api: Dictionary = {}
 	var const_api: Dictionary = {}
-
+	var singleton_api: Array = []
+	var singleton_names: Array = []
 
 	for dict: Dictionary in (data['builtin_classes'] as Array):
 		if _Enums.VARIANT_TYPES.has(dict.name):
@@ -158,31 +160,54 @@ func _generate_native_api() -> void:
 				var arr: Array = []
 				
 				for method: Dictionary in dict['methods']:
-					var dt: Dictionary = {
-						name = method.name,
-						sub_type = 'func',
-						inputs = [ {
-							name = dict.name,
-							type = dict.name,
-							ref = true
-						}]
-					}
-
-					if method.has('arguments'):
-						dt.inputs += method.arguments
-					
-					if method.has('return_type'):
-						dt['outputs'] = [ {
+					# static
+					if method.is_static:
+						var dt: Dictionary = {
 							name = '',
-							type = method.return_type
-						}]
+							sub_type = 'singleton',
+						}
 
-					arr.append({
-						name = method.name,
-						data = dt
-					})
-				
-				native_api[dict.name] = arr
+						if method.has('arguments'):
+							dt.inputs = method.arguments
+						
+						if method.has('return_type'):
+							dt['outputs'] = [ {
+								name = '',
+								type = method.return_type
+							}]
+
+						singleton_api.append({
+							name = dict.name + '.' + method.name,
+							data = dt
+						})
+					else:
+						var dt: Dictionary = {
+							name = method.name,
+							sub_type = 'func',
+							inputs = [ {
+								name = dict.name,
+								type = dict.name,
+								ref = true
+							}]
+						}
+						
+						if method.has('arguments'):
+							dt.inputs += method.arguments
+						
+						if method.has('return_type'):
+							dt['outputs'] = [ {
+								name = '',
+								type = method.return_type
+							}]
+
+						arr.append({
+							name = method.name,
+							data = dt
+						})
+
+
+				if not arr.is_empty():
+					native_api[dict.name] = arr
 
 			if dict.has('constants'):
 				var arr: Array = []
@@ -198,8 +223,35 @@ func _generate_native_api() -> void:
 				const_api[dict.name] = _generate_consts(dict)
 
 
+	# parsing singleton names
+	for dict: Dictionary in (data['singletons'] as Array):
+		singleton_names.append(dict.name)
+
 	# parsing classes const, enums...
 	for dict: Dictionary in (data['classes'] as Array):
+		if dict.has('methods'):
+			for method: Dictionary in dict['methods']:
+				# static
+				if method.is_static or singleton_names.has(dict.name):
+					var dt: Dictionary = {
+						name = '',
+						sub_type = 'singleton',
+					}
+
+					if method.has('arguments'):
+						dt.inputs = method.arguments
+					
+					if method.has('return_value'):
+						dt['outputs'] = [ {
+							name = '',
+							type = method.return_value.type
+						}]
+
+					singleton_api.append({
+						name = dict.name + '.' + method.name,
+						data = dt
+					})
+
 		if dict.has('constants'):
 			const_api[dict.name] = _generate_consts(dict)
 		
@@ -209,13 +261,13 @@ func _generate_native_api() -> void:
 			else:
 				const_api[dict.name] = _generate_enums(dict)
 
-
 	var file_json: FileAccess = FileAccess.open(_Enums.NATIVE_API_PATH, FileAccess.WRITE)
 
 	file_json.store_string(
 		JSON.stringify({
 			native_api = native_api,
-			const_api = const_api
+			const_api = const_api,
+			singleton_api = singleton_api
 		})
 	)
 

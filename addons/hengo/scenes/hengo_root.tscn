@@ -40,9 +40,9 @@ bg_color = Color(0.0936, 0.09756, 0.12, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1561, 1395)
-shader_parameter/offset = Vector2(511.843, 446.54)
-shader_parameter/zoom_factor = 0.999991
+shader_parameter/screen_size = Vector2(1561, 1442)
+shader_parameter/offset = Vector2(521.636, 629.21)
+shader_parameter/zoom_factor = 0.995916
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -117,15 +117,15 @@ expand_margin_bottom = 4.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1957, 1395)
-shader_parameter/offset = Vector2(874.028, 299.959)
-shader_parameter/zoom_factor = 0.999997
+shader_parameter/screen_size = Vector2(1957, 1442)
+shader_parameter/offset = Vector2(552.529, 329.288)
+shader_parameter/zoom_factor = 0.999974
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.352941, 0.733333, 0.937255, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.988235, 0.498039, 0.498039, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)

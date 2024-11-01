@@ -127,7 +127,7 @@ func _physics_process(delta: float) -> void:
 		_unhandled_input = 'func _unhandled_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Input') else '',
 		_unhandled_key_input = 'func _unhandled_key_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Key Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Key Input') else '',
 		_process = '\n'.join(input_data['Process'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Process') else '',
-		_physics_process = '\n'.join(input_data['PhysicsProcess'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('PhysicsProcess') else '',
+		_physics_process = '\n'.join(input_data['Physics Process'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Physics Process') else '',
 	})
 
 	# functions
@@ -514,6 +514,12 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 				name = _node.get_cnode_name(),
 				value = _node.get_node('%OutputContainer').get_child(0).get_node('%CNameOutput').get_child(0).get_value()
 			})
+		'singleton':
+			token.merge({
+				name = _node.get_cnode_name(),
+				params = get_cnode_inputs(_node),
+				id = _id if _node.get_node('%OutputContainer').get_child_count() > 1 else -1,
+			})
 
 	return token
 
@@ -568,13 +574,14 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						return parse_token_by_type(x)
 			))
 			})
-		'func', 'user_func':
+		'func', 'user_func', 'singleton':
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
 			
 			prefix = values[1]
 
-			prints('>>> ', _token.name, prefix, params)
+			if _token.type == 'singleton':
+				prefix = ''
 
 			return indent + prefix + '{name}({params}){id}'.format({
 				name = _token.name,
@@ -735,6 +742,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return _token.code.value.trim_prefix('"').trim_suffix('"')
 		'const':
 			return indent + _token.name + '.' + _token.value
+		'singleton':
+			return indent + _token.name
 		_:
 			return ''
 

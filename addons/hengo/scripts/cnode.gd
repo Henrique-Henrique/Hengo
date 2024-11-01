@@ -660,6 +660,12 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 					ref.virtual_cnode_list.append(instance)
 				'var', 'local_var':
 					instance.get_node('%TitleContainer').visible = false
+				'const':
+					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/enum.svg')
+					title_container.get('theme_override_styles/panel').set('bg_color', Color('#2f6063'))
+				'singleton':
+					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/singleton.svg')
+					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
 
 		_Router.route_reference[_config.route.id].append(instance)
 	

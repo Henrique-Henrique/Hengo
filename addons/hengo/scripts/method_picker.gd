@@ -525,6 +525,16 @@ func _select() -> void:
 		var item = list_container.get_child(selected_id)
 		var data = item.get_meta('data')['data']
 
+
+		if data.name.contains('is_action'):
+			for input in data.inputs:
+				if input.name == 'action':
+					input.type = '@dropdown'
+					input.category = 'action'
+					input.in_prop = 'ui_select'
+		
+		print(data)
+
 		data['position'] = _Global.CNODE_CAM.get_relative_vec2(start_pos)
 
 		var cnode: _CNode = _CNode.instantiate_and_add(data)
@@ -737,7 +747,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								category = 'native',
 								outputs = [
 									{
-										name = 'to',
+										name = '',
 										sub_type = '@dropdown',
 										category = 'const',
 										out_prop = '...',
@@ -747,6 +757,12 @@ func start_api(_class_name: StringName = 'all') -> int:
 								route = _Router.current_route
 							}
 						})
+					
+					for singleton_config in _Enums.SINGLETON_API_LIST:
+						var dt: Dictionary = singleton_config
+						dt.data.route = _Router.current_route
+						dt.data.name = dt.name
+						api_list.append(dt)
 
 	return OK
 
