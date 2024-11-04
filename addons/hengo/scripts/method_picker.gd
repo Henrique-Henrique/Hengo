@@ -619,7 +619,7 @@ func _search(_text: String) -> void:
 	var arr: Array = []
 
 	for dict: Dictionary in api_list:
-		if (dict.name as String).to_snake_case().replacen('_', '').contains(_text.to_snake_case().replacen('_', '')):
+		if (dict.name as String).replacen(' -> ', '').to_snake_case().replacen('_', '').contains(_text.to_snake_case().replacen('_', '')):
 			arr.append(dict)
 
 	_show_list(arr)
@@ -735,7 +735,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 					for dict in ClassDB.class_get_method_list(_class_name):
 						api_list.append(_get_class_obj(dict, _class_name, _class_name))
 					
-
+					# const / enums
 					for key in _Enums.CONST_API_LIST:
 						var value: Array = _Enums.CONST_API_LIST[key]
 
@@ -758,10 +758,10 @@ func start_api(_class_name: StringName = 'all') -> int:
 							}
 						})
 					
+					# singleton
 					for singleton_config in _Enums.SINGLETON_API_LIST:
 						var dt: Dictionary = singleton_config
 						dt.data.route = _Router.current_route
-						dt.data.name = dt.name
 						api_list.append(dt)
 
 	return OK

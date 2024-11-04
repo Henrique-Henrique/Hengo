@@ -234,7 +234,8 @@ func _generate_native_api() -> void:
 				# static
 				if method.is_static or singleton_names.has(dict.name):
 					var dt: Dictionary = {
-						name = '',
+						name = dict.name + '.' + method.name,
+						fantasy_name = dict.name + ' -> ' + method.name,
 						sub_type = 'singleton',
 					}
 
@@ -248,7 +249,7 @@ func _generate_native_api() -> void:
 						}]
 
 					singleton_api.append({
-						name = dict.name + '.' + method.name,
+						name = dict.name + ' -> ' + method.name,
 						data = dt
 					})
 

@@ -648,17 +648,19 @@ static func load_and_edit(_path: StringName) -> void:
 
         # generating generals (like inputs)
         for general_config: Dictionary in data['generals']:
-            var general := _GeneralRoute.instantiate_general({
-                route = {
-                    name = general_config.name,
-                    type = _Router.ROUTE_TYPE.INPUT,
-                    id = _UtilsName.get_unique_name()
-                },
-                pos = general_config.pos,
-                custom_data = general_config,
-                type = 'input',
-                icon = 'res://addons/hengo/assets/icons/mouse.svg'
-            })
+            var dt: Dictionary = general_config.duplicate()
+
+            dt.route = {
+                name = general_config.name,
+                type = _Router.ROUTE_TYPE.INPUT,
+                id = _UtilsName.get_unique_name()
+            }
+
+            dt.type = 'input'
+            dt.icon = 'res://addons/hengo/assets/icons/mouse.svg'
+            dt.custom_data = general_config
+
+            var general := _GeneralRoute.instantiate_general(dt)
 
             _load_cnode(general_config.cnode_list, general.route, inst_id_refs)
 
