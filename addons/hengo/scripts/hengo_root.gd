@@ -90,6 +90,7 @@ func _ready() -> void:
 	_Global.ERROR_BT = get_node('%ErrorBt')
 	_Global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	_Global.STATE_CONNECTION_GUIDE = cnode_ui.get_node('%StateConnectionGuide')
+	_Global.GENERAL_CONTAINER = state_cam.get_node('%GeneralContainer')
 
 
 	# config code preview

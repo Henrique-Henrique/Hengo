@@ -8,6 +8,8 @@ const _Router = preload('res://addons/hengo/scripts/router.gd')
 const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
 const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
 const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
+const _GeneralRoute = preload('res://addons/hengo/scripts/general_route.gd')
+const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
 
 # ---------------------------------------------------------------------------- #
 #                                    saving                                    #
@@ -20,6 +22,23 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
         debug_symbols = _debug_symbols,
         state_name_counter = _State._name_counter
     }
+
+    # ---------------------------------------------------------------------------- #
+    # Generals
+    var generals: Array[Dictionary] = []
+
+    for general in _Global.GENERAL_CONTAINER.get_children():
+        var data: Dictionary = general.custom_data
+
+        data.pos = var_to_str(general.position)
+
+        for cnode in general.virtual_cnode_list:
+            data.cnode_list = get_cnode_list(
+                _Router.route_reference[general.route.id], [])
+
+        generals.append(data)
+
+    script_data['generals'] = generals
 
     # ---------------------------------------------------------------------------- #
     # STATES
@@ -463,6 +482,9 @@ static func load_and_edit(_path: StringName) -> void:
 
     for state in _Global.STATE_CONTAINER.get_children():
         state.queue_free()
+
+    for state in _Global.GENERAL_CONTAINER.get_children():
+        state.queue_free()
     
     for cnode in _Global.CNODE_CONTAINER.get_children():
         cnode.queue_free()
@@ -525,13 +547,90 @@ static func load_and_edit(_path: StringName) -> void:
         _Global.node_counter = 0
         _State._name_counter = 0
 
+        if ClassDB.is_parent_class(type, 'Node'):
+            var spacing: Vector2 = Vector2(-150, -200)
+
+            # creating inputs
+            for general_data in [
+                {
+                    name = 'Input',
+                    cnode_name = '_input',
+                },
+                # {
+                #     name = 'Shortcut Input',
+                #     cnode_name = '_shortcut_input',
+                #     color = '#1e3033'
+                # },
+                # {
+                #     name = 'Unhandled Input',
+                #     cnode_name = '_unhandled_input',
+                #     color = '#352b19'
+                # },
+                # {
+                #     name = 'Unhandled Key Input',
+                #     cnode_name = '_unhandled_key_input',
+                #     color = '#44201e'
+                # },
+                {
+                    name = 'Process',
+                    cnode_name = '_process',
+                    color = '#401d3f',
+                    param = {
+                        name = 'delta',
+                        type = 'float'
+                    }
+                },
+                {
+                    name = 'Physics Process',
+                    cnode_name = '_physics_process',
+                    color = '#1f2950',
+                    param = {
+                        name = 'delta',
+                        type = 'float'
+                    }
+                },
+            ]:
+                var data: Dictionary = {
+                    route = {
+                        name = general_data.name,
+                        type = _Router.ROUTE_TYPE.INPUT,
+                        id = _UtilsName.get_unique_name()
+                    },
+                    custom_data = general_data,
+                    type = 'input',
+                    icon = 'res://addons/hengo/assets/icons/mouse.svg'
+                }
+
+                if general_data.has('color'):
+                    data.color = general_data.color
+
+                var general := _GeneralRoute.instantiate_general(data)
+
+                general.position = spacing + Vector2(30, 0)
+
+                _CNode.instantiate_and_add({
+                    name = general_data.cnode_name,
+                    sub_type = 'virtual',
+                    outputs = [ {
+                        name = 'event',
+                        type = 'InputEvent'
+                    } if not general_data.has('param') else general_data.param],
+                    route = general.route,
+                    position = Vector2.ZERO
+                })
+
+                spacing = Vector2(general.position.x + general.size.x, general.position.y)
+
         # It's a new project
         var state := _State.instantiate_and_add_to_scene()
         state.add_event({
             name = 'Start',
             type = 'start'
         })
-    #
+
+        state.select()
+
+    #   
     #
     # loading hengo script data
     elif script.source_code.begins_with('#[hengo] '):
@@ -546,6 +645,25 @@ static func load_and_edit(_path: StringName) -> void:
         _Global.node_counter = data.node_counter
         _Global.current_script_debug_symbols = data.debug_symbols
         _State._name_counter = data.state_name_counter
+
+        # generating generals (like inputs)
+        for general_config: Dictionary in data['generals']:
+            var dt: Dictionary = general_config.duplicate()
+
+            dt.route = {
+                name = general_config.name,
+                type = _Router.ROUTE_TYPE.INPUT,
+                id = _UtilsName.get_unique_name()
+            }
+
+            dt.type = 'input'
+            dt.icon = 'res://addons/hengo/assets/icons/mouse.svg'
+            dt.custom_data = general_config
+
+            var general := _GeneralRoute.instantiate_general(dt)
+
+            _load_cnode(general_config.cnode_list, general.route, inst_id_refs)
+
 
         for state: Dictionary in data['states']:
             var state_inst = _State.instantiate_and_add_to_scene({

@@ -354,6 +354,9 @@ func add_output(_output: Dictionary) -> void:
 	if _output.has('sub_type'):
 		output.sub_type = _output.sub_type
 
+	if _output.has('data'):
+		output.custom_data = _output.get('data')
+
 	var type = values.get('type') if values.has('type') else 'Variant'
 	output.set_type(type)
 
@@ -644,14 +647,25 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 			match sub_type:
 				# adding virtual cnodes references
 				'virtual':
-					var ref = _config.route.state_ref
-					ref.virtual_cnode_list.append(instance)
+					match _config.route.type:
+						_Router.ROUTE_TYPE.STATE:
+							var ref = _config.route.state_ref
+							ref.virtual_cnode_list.append(instance)
+						_Router.ROUTE_TYPE.INPUT:
+							var ref = _config.route.general_ref
+							ref.virtual_cnode_list.append(instance)
 				# virtual node of signal and func
 				'signal_virtual', 'func_input':
 					var ref = _config.route.item_ref
 					ref.virtual_cnode_list.append(instance)
 				'var', 'local_var':
 					instance.get_node('%TitleContainer').visible = false
+				'const':
+					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/enum.svg')
+					title_container.get('theme_override_styles/panel').set('bg_color', Color('#2f6063'))
+				'singleton':
+					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/singleton.svg')
+					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
 
 		_Router.route_reference[_config.route.id].append(instance)
 	

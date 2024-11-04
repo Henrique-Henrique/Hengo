@@ -468,15 +468,17 @@ var native_list: Array = [
 ]
 var api_list = []
 
+
 func _ready() -> void:
 	list_container = get_node('%List')
 
 	var error: int = start_api(connection_type)
 
-	# disabling caming from inputs (for now)
+	# disabling coming from inputs (for now)
 	if error != OK or came_from == 'in':
 		await get_tree().process_frame
 		_Global.GENERAL_POPUP.get_parent().hide()
+
 
 	match _Router.current_route.type:
 		_Router.ROUTE_TYPE.SIGNAL, _Router.ROUTE_TYPE.FUNC:
@@ -506,6 +508,7 @@ func _ready() -> void:
 	search_bar.gui_input.connect(_on_search_gui_input)
 	search_bar.grab_focus()
 
+
 func _on_search_gui_input(_event: InputEvent) -> void:
 	if _event is InputEventKey:
 		if _event.pressed:
@@ -516,10 +519,21 @@ func _on_search_gui_input(_event: InputEvent) -> void:
 			elif _event.keycode == KEY_ENTER:
 				_select()
 
+
 func _select() -> void:
 	if list_container.get_child_count() > 0:
 		var item = list_container.get_child(selected_id)
 		var data = item.get_meta('data')['data']
+
+
+		if data.name.contains('is_action'):
+			for input in data.inputs:
+				if input.name == 'action':
+					input.type = '@dropdown'
+					input.category = 'action'
+					input.in_prop = 'ui_select'
+		
+		print(data)
 
 		data['position'] = _Global.CNODE_CAM.get_relative_vec2(start_pos)
 
@@ -548,6 +562,7 @@ func _select() -> void:
 
 		_Global.GENERAL_POPUP.get_parent().hide()
 
+
 func _show_list(_list: Array, _slice: bool = true) -> void:
 	# cleaning list first
 	for item in list_container.get_children():
@@ -570,35 +585,41 @@ func _show_list(_list: Array, _slice: bool = true) -> void:
 	if list_container.get_child_count() > 0:
 		_item_hover(list_container.get_child(0))
 
+
 func _on_item_gui_input(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				_select()
 
+
 func _on_item_hover(_item) -> void:
 	_item_hover(_item)
 	selected_id = _item.get_index()
+
 
 func _on_item_exit(_item) -> void:
 	_item_exit(_item)
 	selected_id = _item.get_index()
 
+
 func _item_hover(_item) -> void:
 	_item.get('theme_override_styles/panel').set('bg_color', Color.DARK_CYAN)
+
 
 func _item_exit(_item) -> void:
 	_item.get('theme_override_styles/panel').set('bg_color', Color('#222830'))
 
+
 func _search(_text: String) -> void:
 	if _text.is_empty():
-		_show_list(native_list)
+		_show_list(native_list, false)
 		return
 
 	var arr: Array = []
 
 	for dict: Dictionary in api_list:
-		if (dict.name as String).to_snake_case().replacen('_', '').contains(_text.to_snake_case().replacen('_', '')):
+		if (dict.name as String).replacen(' -> ', '').to_snake_case().replacen('_', '').contains(_text.to_snake_case().replacen('_', '')):
 			arr.append(dict)
 
 	_show_list(arr)
@@ -705,8 +726,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 					return dt
 					)
 
-				# for d in _Enums.NATIVE_API_LIST[_class_name]:
-				# 	print(d.has('route'))
+
 			else:
 				if came_from == 'in':
 					api_list = []
@@ -715,10 +735,37 @@ func start_api(_class_name: StringName = 'all') -> int:
 					for dict in ClassDB.class_get_method_list(_class_name):
 						api_list.append(_get_class_obj(dict, _class_name, _class_name))
 					
-				# for l: Dictionary in api_list:
-				# 	print(l)
+					# const / enums
+					for key in _Enums.CONST_API_LIST:
+						var value: Array = _Enums.CONST_API_LIST[key]
+
+						api_list.append({
+							name = 'Const -> ' + key,
+							data = {
+								name = key,
+								sub_type = 'const',
+								category = 'native',
+								outputs = [
+									{
+										name = '',
+										sub_type = '@dropdown',
+										category = 'const',
+										out_prop = '...',
+										data = value
+									}
+								],
+								route = _Router.current_route
+							}
+						})
+					
+					# singleton
+					for singleton_config in _Enums.SINGLETON_API_LIST:
+						var dt: Dictionary = singleton_config
+						dt.data.route = _Router.current_route
+						api_list.append(dt)
 
 	return OK
+
 
 func start(_type: StringName, _pos: Vector2, _show_native: bool = true, _came_from: String = 'out', _cnode_config: Dictionary = {}) -> void:
 	connection_type = _type

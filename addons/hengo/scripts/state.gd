@@ -251,7 +251,8 @@ static func instantiate_state(_config: Dictionary = {}) -> _State:
 		_CNode.instantiate_and_add({
 			name = 'enter',
 			sub_type = 'virtual',
-			route = state.route
+			route = state.route,
+			position = Vector2.ZERO
 		})
 		_CNode.instantiate_and_add({
 			name = 'update',
@@ -260,7 +261,8 @@ static func instantiate_state(_config: Dictionary = {}) -> _State:
 				name = 'delta',
 				type = 'float'
 			}],
-			route = state.route
+			route = state.route,
+			position = Vector2(400, 0)
 		})
 
 		# state.add_transition('FINISHED')

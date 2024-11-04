@@ -7,7 +7,8 @@ const _Global = preload('res://addons/hengo/scripts/global.gd')
 enum ROUTE_TYPE {
 	STATE,
 	FUNC,
-	SIGNAL
+	SIGNAL,
+	INPUT
 }
 
 static var current_route: Dictionary = {} # name: String, type: ROUTE_TYPE, id: String
@@ -18,8 +19,6 @@ static var comment_reference: Dictionary = {}
 static func change_route(_route: Dictionary) -> void:
 	if current_route == _route:
 		return
-
-	print('changed')
 
 	current_route = _route
 

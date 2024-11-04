@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3 uid="uid://cqtu0nvn7pf1g"]
+[gd_scene load_steps=14 format=3 uid="uid://cqtu0nvn7pf1g"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/state.gd" id="1_83mqb"]
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="2_gskjw"]
 [ext_resource type="Texture2D" uid="uid://dt6jgixjf857c" path="res://addons/hengo/assets/icons/arrow_horizontal.svg" id="2_w0w5j"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/state_arrow.gd" id="3_6rctr"]
+[ext_resource type="Texture2D" uid="uid://cuutceef7st2" path="res://addons/hengo/assets/icons/cnode/go_to.svg" id="3_mpv6s"]
 [ext_resource type="Shader" path="res://addons/hengo/assets/shaders/state_debug.gdshader" id="5_5ewri"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agnrl"]
@@ -11,7 +12,7 @@ content_margin_left = 4.0
 content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
-bg_color = Color(0.117647, 0.12549, 0.176471, 1)
+bg_color = Color(0.159704, 0.169409, 0.23237, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -27,7 +28,7 @@ content_margin_left = 12.0
 content_margin_top = 2.0
 content_margin_right = 12.0
 content_margin_bottom = 2.0
-bg_color = Color(0, 0, 0, 0.376471)
+bg_color = Color(0, 0, 0, 0.270588)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -107,6 +108,7 @@ theme_override_fonts/font = ExtResource("2_gskjw")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_pxaa8")
 theme_override_styles/normal = SubResource("StyleBoxFlat_o30u6")
 text = "State Name"
+icon = ExtResource("3_mpv6s")
 
 [node name="Control2" type="Control" parent="VBoxContainer/Title"]
 process_mode = 4
@@ -207,4 +209,5 @@ process_mode = 4
 visible = false
 material = SubResource("ShaderMaterial_5nend")
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_j42tk")
