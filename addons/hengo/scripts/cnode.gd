@@ -317,14 +317,9 @@ func add_input(_input: Dictionary) -> void:
 	var type = values.get('type') if values.has('type') else 'Variant'
 	input.set_type(type)
 
-	# adding input prop
-	var prop_container = input.get_node('%CNameInput')
-
 	input.get_node('%Name').text = values.name
 	input.root = self
-
-	print('vv xxxx -> ', _input)
-
+	
 	input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
 	in_container.add_child(input)
 

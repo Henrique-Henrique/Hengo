@@ -220,6 +220,9 @@ func _is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: S
 	or not _from_type == 'out' and _to_type == 'in':
 		return false
 
+	if _from_conn_type == _to_conn_type:
+		return true
+
 	if _from_conn_type == 'Variant' or _to_conn_type == 'Variant':
 		return true
 

@@ -168,12 +168,12 @@ func _generate_native_api() -> void:
 						}
 
 						if method.has('arguments'):
-							dt.inputs = method.arguments
+							dt.inputs = _parse_arguments(method)
 						
 						if method.has('return_type'):
 							dt['outputs'] = [ {
 								name = '',
-								type = method.return_type
+								type = _parse_enum_return(method.return_type)
 							}]
 
 						singleton_api.append({
@@ -192,12 +192,12 @@ func _generate_native_api() -> void:
 						}
 						
 						if method.has('arguments'):
-							dt.inputs += method.arguments
+							dt.inputs += _parse_arguments(method)
 						
 						if method.has('return_type'):
 							dt['outputs'] = [ {
 								name = '',
-								type = method.return_type
+								type = _parse_enum_return(method.return_type)
 							}]
 
 						arr.append({
@@ -240,12 +240,12 @@ func _generate_native_api() -> void:
 					}
 
 					if method.has('arguments'):
-						dt.inputs = method.arguments
+						dt.inputs = _parse_arguments(method)
 					
 					if method.has('return_value'):
 						dt['outputs'] = [ {
 							name = '',
-							type = method.return_value.type
+							type = _parse_enum_return(method.return_value.type)
 						}]
 
 					singleton_api.append({
@@ -279,6 +279,32 @@ func _generate_native_api() -> void:
 	# for d in native_api:
 	# 	print(native_api[d])
 
+func _parse_enum_return(_type: String) -> String:
+	return _type.split('.')[-1] if _type.begins_with('enum::') else _type
+
+func _parse_arguments(_dict: Dictionary) -> Array:
+	var arr: Array = []
+
+	for arg in _dict.arguments:
+		var arg_dt: Dictionary = {
+			name = arg.name
+		}
+
+		# parsing enums
+		if arg.type.begins_with('enum::'):
+			var enum_name: String = arg.type.split('.')[-1]
+
+			arg_dt.type = enum_name
+			arg_dt.sub_type = '@dropdown'
+			arg_dt.category = 'enum_list'
+			arg_dt.data = [_dict.name, enum_name]
+		else:
+			arg_dt.type = arg.type
+		
+		arr.append(arg_dt)
+
+	return arr
+
 func _generate_consts(_dict: Dictionary) -> Array:
 	var arr: Array = []
 
@@ -298,14 +324,10 @@ func _generate_enums(_dict: Dictionary) -> Array:
 	for enum_value in _dict.enums:
 		arr += enum_value.values.map(func(x: Dictionary) -> Dictionary: return {
 			name = x.name,
-			type = 'int'
+			type = enum_value.name
 		})
 	
 	return arr
-	# if const_api.has(dict.name):
-	# 	const_api[dict.name] += arr
-	# else:
-	# 	const_api[dict.name] = arr
 
 
 func _on_file_tree_item_activated() -> void:
