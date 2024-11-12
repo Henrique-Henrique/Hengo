@@ -99,12 +99,10 @@ func _on_press() -> void:
 					continue
 
 				if depth > old_depth:
-					print(h_depth, ' => ', cn.get_cnode_name(), ' : ', max_x_depth)
 					match flow:
 						'true_flow':
 							pos.x = max_x + max(200 * (abs(h_depth) - 1), 200)
 						_:
-							print('max => ', max_x, ' = ', cn.get_cnode_name())
 							pos.x = max_x + 200 * abs(abs(h_depth) - abs(max_x_depth))
 							# pos.x = (max_x + max(200 * (abs(h_depth) + abs(max_x_depth)), 200 * abs(max_x_depth))) if h_depth > 0 else max_x + 200
 
@@ -140,10 +138,6 @@ func _on_press() -> void:
 
 				max_x = max(max_x, pos.x + cn.size.x)
 				max_x_depth = max(max_x_depth, h_depth)
-
-
-			print(all_nodes.map(func(x): return [x[0].get_cnode_name(), x[1], x[2], x[3]]))
-			print(max_depth)
 
 
 func _format_cnode_flow(_cnode: _CNode, _key: String, _increment: Vector2 = Vector2.ZERO) -> void:

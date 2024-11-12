@@ -44,7 +44,6 @@ static func change_route(_route: Dictionary) -> void:
 		for cnode in cnode_list:
 			_Global.CNODE_CONTAINER.add_child(cnode)
 
-		print(line_route_reference)
 		# showing lines
 		for line in line_route_reference.get(_route.id):
 			line_container.add_child(line)

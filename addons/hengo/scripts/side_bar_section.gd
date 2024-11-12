@@ -95,8 +95,6 @@ func add_prop(_config: Dictionary = {}, start_item: bool = true) -> _SideBarSect
                 int(name_count) + 1
             )
 
-    print('prop name -> ', prop_name)
-
     match type:
         Types.PROP_VAR, Types.LOCAL_VAR:
             var res = load('res://addons/hengo/resources/prop_var.tres')

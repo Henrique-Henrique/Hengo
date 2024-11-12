@@ -79,8 +79,6 @@ static func generate() -> String:
 					input_data[general.get_general_name()] = tokens.values()[0]
 
 
-	print('in-> ', input_data)
-
 	var states_data: Dictionary = {}
 	#endregion
 
@@ -262,8 +260,6 @@ func _physics_process(delta: float) -> void:
 					to_state_name = trans.line.to_state.get_state_name().to_snake_case()
 				})
 
-		print('=>> ', state_code_tokens)
-
 		states_data[state_name] = {
 			virtual_tokens = state_code_tokens,
 			transitions = transitions
@@ -330,7 +326,6 @@ func _physics_process(delta: float) -> void:
 			base += func_base
 
 		code += base + '\n\n'
-		print(item.virtual_tokens)
 
 	return code
 
@@ -439,8 +434,6 @@ static func get_input_value(_input) -> Dictionary:
 # parsing cnode code base on type
 static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 	var use_self: bool = _node.route_ref.type != _Router.ROUTE_TYPE.STATE
-
-	prints('hello => ', use_self, _node.type, _node.get_cnode_name(), _node.route_ref.type)
 
 	var token: Dictionary = {
 		type = _node.type,
@@ -657,8 +650,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			})
 		'signal_disconnection':
 			var ref = (_token.params as Array).pop_front()
-			
-			print('hello => ', ref)
 
 			return indent + '{ref}.disconnect("{signal_name}", {call_ref}{callable})'.format({
 				ref = parse_token_by_type(ref),
@@ -768,10 +759,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				
 				idx += 1
 
-			print('ata-> ', _token.params)
-
 			return code
-			# return indent + parse_token_by_type(_token.params[1]) + '.' + 
 		_:
 			return ''
 

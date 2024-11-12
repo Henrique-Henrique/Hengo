@@ -532,8 +532,6 @@ func _select() -> void:
 					input.type = '@dropdown'
 					input.category = 'action'
 					input.in_prop = 'ui_select'
-		
-		print(data)
 
 		data['position'] = _Global.CNODE_CAM.get_relative_vec2(start_pos)
 
@@ -704,8 +702,6 @@ func start_api(_class_name: StringName = 'all') -> int:
 			x['data']['route'] = _Router.current_route
 			return x
 	)
-
-	print(came_from)
 
 	match _class_name:
 		'all':

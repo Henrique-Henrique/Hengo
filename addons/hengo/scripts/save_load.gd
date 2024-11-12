@@ -966,9 +966,6 @@ static func load_and_edit(_path: StringName) -> void:
     if _Global.HENGO_DEBUGGER_PLUGIN:
         _Global.HENGO_DEBUGGER_PLUGIN.reload_script()
 
-    # EditorInterface.set_main_screen_editor('Hengo')
-    print('Teste -> ', _path, _Global.current_script_path)
-
 
 static func get_inst_id_by_route(_route: Dictionary) -> int:
     if _route.has('state_ref'):
@@ -1003,7 +1000,6 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 
                 for state_dict: Dictionary in data['states'] as Array:
                     (_Global.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
-                    print(state_dict.name, ' : ', (data['states'] as Array).size(), ' : ', file_name)
                 
                 _Global.SCRIPTS_INFO.append({
                     name = 'Go to \'' + file_name.get_basename() + '\' state',
