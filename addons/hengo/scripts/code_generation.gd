@@ -383,22 +383,25 @@ static func get_cnode_outputs(_node: _CNode) -> Array:
 	return outputs
 
 # getting cnode inputs values
-static func get_cnode_inputs(_node: _CNode) -> Array:
+static func get_cnode_inputs(_node: _CNode, _get_name: bool = false) -> Array:
 	var input_container = _node.get_node('%InputContainer')
 	var inputs = []
 
 	for input in input_container.get_children():
-		inputs.append(get_input_value(input))
+		inputs.append(get_input_value(input, _get_name))
 	
 	return inputs
 
 
-static func get_input_value(_input) -> Dictionary:
+static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 	if _input.in_connected_from:
 		var data: Dictionary = parse_cnode_values(_input.in_connected_from, _input.out_from_in_out.get_index())
 
 		if _input.is_ref:
 			data['ref'] = true
+
+		if _get_name:
+			data['prop_name'] = _input.get_in_out_name()
 
 		return data
 	else:
@@ -520,7 +523,7 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 			})
 		'set_prop':
 			token.merge({
-				params = get_cnode_inputs(_node),
+				params = get_cnode_inputs(_node, true),
 				name = _node.get_node('%InputContainer').get_child(1).get_in_out_name()
 			})
 
@@ -752,10 +755,11 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			var idx: int = 0
 
 			for param in _token.params:
-				if idx == 1:
-					code += indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + ' = ' + parse_token_by_type(param)
-				elif idx > 1:
-					code += '\n' + indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + ' = ' + parse_token_by_type(param)
+				if param.type != 'in_prop':
+					if idx == 1:
+						code += indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + ' = ' + parse_token_by_type(param)
+					elif idx > 1:
+						code += '\n' + indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + '.' + param.prop_name + ' = ' + parse_token_by_type(param)
 				
 				idx += 1
 
