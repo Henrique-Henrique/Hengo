@@ -47,6 +47,7 @@ func _enter_tree():
 		_Enums.NATIVE_API_LIST = api_json.native_api
 		_Enums.CONST_API_LIST = api_json.const_api
 		_Enums.SINGLETON_API_LIST = api_json.singleton_api
+		_Enums.NATIVE_PROPS_LIST = api_json.native_props
 
 		native_api_file.close()
 	else:
@@ -153,9 +154,13 @@ func _generate_native_api() -> void:
 	var const_api: Dictionary = {}
 	var singleton_api: Array = []
 	var singleton_names: Array = []
+	var native_props: Dictionary = {}
 
 	for dict: Dictionary in (data['builtin_classes'] as Array):
 		if _Enums.VARIANT_TYPES.has(dict.name):
+			if dict.has('members'):
+				native_props[dict.name] = dict.members
+
 			if dict.has('methods'):
 				var arr: Array = []
 				
@@ -268,7 +273,8 @@ func _generate_native_api() -> void:
 		JSON.stringify({
 			native_api = native_api,
 			const_api = const_api,
-			singleton_api = singleton_api
+			singleton_api = singleton_api,
+			native_props = native_props
 		})
 	)
 

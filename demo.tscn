@@ -7,9 +7,7 @@
 [node name="Node" type="Node"]
 
 [node name="Icon" type="Sprite2D" parent="."]
-visible = false
 position = Vector2(261, 153)
-rotation = 0.261799
 texture = ExtResource("1_wvpun")
 script = ExtResource("2_34af8")
 

@@ -520,6 +520,16 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 				params = get_cnode_inputs(_node),
 				id = _id if _node.get_node('%OutputContainer').get_child_count() > 1 else -1,
 			})
+		'get_prop':
+			token.merge({
+				from = get_cnode_inputs(_node),
+				name = _node.get_node('%OutputContainer').get_child(0).get_in_out_name() if _id <= 0 else _node.get_node('%OutputContainer').get_child(0).get_in_out_name() + '.' + _node.get_node('%OutputContainer').get_child(_id).get_in_out_name(),
+			})
+		'set_prop':
+			token.merge({
+				params = get_cnode_inputs(_node),
+				name = _node.get_node('%InputContainer').get_child(1).get_in_out_name()
+			})
 
 	return token
 
@@ -744,6 +754,24 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + _token.name + '.' + _token.value
 		'singleton':
 			return indent + _token.name
+		'get_prop':
+			return indent + parse_token_by_type(_token.from[0]) + '.' + _token.name
+		'set_prop':
+			var code: String = ''
+			var idx: int = 0
+
+			for param in _token.params:
+				if idx == 1:
+					code += indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + ' = ' + parse_token_by_type(param)
+				elif idx > 1:
+					code += '\n' + indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + ' = ' + parse_token_by_type(param)
+				
+				idx += 1
+
+			print('ata-> ', _token.params)
+
+			return code
+			# return indent + parse_token_by_type(_token.params[1]) + '.' + 
 		_:
 			return ''
 

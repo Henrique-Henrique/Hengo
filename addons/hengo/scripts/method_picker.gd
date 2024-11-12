@@ -13,6 +13,7 @@ var connection_type: StringName = 'all'
 var show_native_first: bool = true
 var came_from: String = ''
 var cnode_config: Dictionary = {}
+var api_list = []
 
 var selected_id: int = 0:
 	set(new_value):
@@ -466,7 +467,6 @@ var native_list: Array = [
 		}
 	}
 ]
-var api_list = []
 
 
 func _ready() -> void:
@@ -705,6 +705,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 			return x
 	)
 
+	print(came_from)
 
 	match _class_name:
 		'all':
@@ -714,17 +715,63 @@ func start_api(_class_name: StringName = 'all') -> int:
 					api_list.append(_get_class_obj(dict, cl_name, _class_name))
 		_:
 			if _Enums.VARIANT_TYPES.has(_class_name):
-				if not _Enums.NATIVE_API_LIST.has(_class_name):
-					return FAILED
+				if _Enums.NATIVE_API_LIST.has(_class_name):
+					api_list = _Enums.NATIVE_API_LIST[_class_name].map(func(obj: Dictionary) -> Dictionary:
+						var dt: Dictionary = obj
 
-				api_list = _Enums.NATIVE_API_LIST[_class_name].map(func(obj: Dictionary) -> Dictionary:
-					var dt: Dictionary = obj
+						dt.data.route = _Router.current_route
+						dt.type = _class_name
 
-					dt.data.route = _Router.current_route
-					dt.type = _class_name
+						return dt
+						)
+				else:
+					api_list = []
+				
+				if _Enums.NATIVE_PROPS_LIST.has(_class_name):
+					for prop in _Enums.NATIVE_PROPS_LIST.get(_class_name):
+							api_list.append({
+								name = 'Get Prop -> ' + prop.name,
+								data = {
+									name = prop.name,
+									fantasy_name = 'Get Prop -> ' + prop.name,
+									sub_type = 'get_prop',
+									inputs = [
+										{
+											name = _class_name,
+											type = _class_name,
+											ref = true
+										}
+									],
+									outputs = [
+										{
+											name = prop.name,
+											type = prop.type,
+										}
+									],
+									route = _Router.current_route
+								}
+							})
 
-					return dt
-					)
+							api_list.append({
+								name = 'Set Prop -> ' + prop.name,
+								data = {
+									name = prop.name,
+									fantasy_name = 'Set Prop -> ' + prop.name,
+									sub_type = 'set_prop',
+									inputs = [
+										{
+											name = _class_name,
+											type = _class_name,
+											ref = true
+										},
+										{
+											name = prop.name,
+											type = prop.type,
+										}
+									],
+									route = _Router.current_route
+								}
+							})
 
 
 			else:
@@ -757,12 +804,67 @@ func start_api(_class_name: StringName = 'all') -> int:
 								route = _Router.current_route
 							}
 						})
-					
+
 					# singleton
 					for singleton_config in _Enums.SINGLETON_API_LIST:
 						var dt: Dictionary = singleton_config
 						dt.data.route = _Router.current_route
 						api_list.append(dt)
+					
+
+					for prop in ClassDB.class_get_property_list(_class_name):
+						var set_data: Dictionary = {
+							name = 'Set Prop -> ' + prop.name,
+							data = {
+								name = prop.name,
+								fantasy_name = 'Set Prop -> ' + prop.name,
+								sub_type = 'set_prop',
+								inputs = [
+									{
+										name = _class_name,
+										type = _class_name,
+										ref = true
+									},
+									{
+										name = prop.name,
+										type = type_string(prop.type),
+										ref = true
+									}
+								],
+								route = _Router.current_route
+							}
+						}
+
+						var get_data: Dictionary = {
+							name = 'Get Prop -> ' + prop.name,
+							data = {
+								name = prop.name,
+								fantasy_name = 'Get Prop -> ' + prop.name,
+								sub_type = 'get_prop',
+								inputs = [
+									{
+										name = _class_name,
+										type = _class_name,
+										ref = true
+									}
+								],
+								outputs = [
+									{
+										name = prop.name,
+										type = type_string(prop.type),
+									}
+								],
+								route = _Router.current_route
+							}
+						}
+
+						if _Enums.NATIVE_PROPS_LIST.has(type_string(prop.type)):
+							set_data.data.inputs += _Enums.NATIVE_PROPS_LIST.get(type_string(prop.type))
+							get_data.data.outputs += _Enums.NATIVE_PROPS_LIST.get(type_string(prop.type))
+
+						api_list.append(set_data)
+						api_list.append(get_data)
+
 
 	return OK
 

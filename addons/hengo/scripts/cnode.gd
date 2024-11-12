@@ -546,7 +546,7 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#764A75'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/signal.svg')
 						_config.type = 'default'
-					'set_var':
+					'set_var', 'set_prop', 'get_prop':
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#4A7346'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/set_var.svg')
