@@ -17,6 +17,7 @@ var virtual_cnode_list: Array = []
 var moving: bool = false
 var type: StringName = ''
 var custom_data: Dictionary = {}
+var id: int = -1
 
 func _ready() -> void:
 	gui_input.connect(_on_gui)
@@ -58,6 +59,8 @@ func get_general_name() -> String:
 static func instantiate_general(_config: Dictionary) -> _GeneralRoute:
 	var general_route_scene = load('res://addons/hengo/scenes/general_route.tscn')
 	var general_route = general_route_scene.instantiate()
+
+	general_route.id = _Global.get_new_node_counter() if not _config.has('id') else _config.id
 
 	general_route.route = _config.route
 	general_route.text = _config.route.name

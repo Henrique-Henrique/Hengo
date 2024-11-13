@@ -31,6 +31,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
         var data: Dictionary = general.custom_data
 
         data.pos = var_to_str(general.position)
+        data.id = general.id
 
         for cnode in general.virtual_cnode_list:
             data.cnode_list = get_cnode_list(
@@ -664,6 +665,8 @@ static func load_and_edit(_path: StringName) -> void:
 
             _load_cnode(general_config.cnode_list, general.route, inst_id_refs)
 
+            inst_id_refs[float(general.id)] = general
+
 
         for state: Dictionary in data['states']:
             var state_inst = _State.instantiate_and_add_to_scene({
@@ -751,7 +754,6 @@ static func load_and_edit(_path: StringName) -> void:
         # ---------------------------------------------------------------------------- #
         # creating vars
         for var_config: Dictionary in data['var_item_list']:
-            # print(var_config)
             var item = _Global.SIDE_BAR.get_node('%Var').add_prop(var_config)
 
             # instances
@@ -972,6 +974,8 @@ static func get_inst_id_by_route(_route: Dictionary) -> int:
         return _route.state_ref.hash
     elif _route.has('item_ref'):
         return _route.item_ref.get_instance_id()
+    elif _route.has('general_ref'):
+        return _route.general_ref.id
 
     return -1
 
