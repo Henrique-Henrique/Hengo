@@ -4,6 +4,7 @@ extends PanelContainer
 # imports
 const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
 const _Global = preload('res://addons/hengo/scripts/global.gd')
+const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 @onready var label: Label = get_node('%Label')
 @onready var code_edit: CodeEdit = get_node('%CodeEdit')
@@ -12,6 +13,7 @@ const _Global = preload('res://addons/hengo/scripts/global.gd')
 var ref: _CNode
 var bt_ref
 var word_list: Array
+var completion_list: Array
 
 var default_config: Dictionary
 
@@ -20,10 +22,22 @@ func _ready() -> void:
 	code_edit.text_changed.connect(_on_change)
 	save_bt.pressed.connect(_on_save)
 	
+	code_edit.code_completion_requested.connect(_completion_request)
+
 	# set default
 	if not default_config.is_empty():
 		code_edit.text = default_config.exp
 		_on_change()
+
+
+func _completion_request() -> void:
+	for key in completion_list:
+		code_edit.add_code_completion_option(CodeEdit.KIND_VARIABLE, key, key)
+
+	for native_name in _Enums.MATH_UTILITY_NAME_LIST:
+		code_edit.add_code_completion_option(CodeEdit.KIND_FUNCTION, native_name, native_name + '(')
+	
+	code_edit.update_code_completion_options(true)
 
 
 func _on_change() -> void:
@@ -31,7 +45,7 @@ func _on_change() -> void:
 	var keys: Array[String] = []
 
 	var reg: RegEx = RegEx.new()
-	reg.compile("[a-zA-Z][a-zA-Z0-9_]*")
+	reg.compile("\\b[a-zA-Z][a-zA-Z0-9_]*\\b(?!\\s*\\()")
 	var result = reg.search_all(code_edit.text)
 
 	if result:
@@ -46,7 +60,7 @@ func _on_change() -> void:
 		label.text = expre.get_error_text()
 		label.modulate = Color.ORANGE_RED
 	else:
-		var res = expre.execute(keys.map(func(_x): return 1), null, false)
+		expre.execute(keys.map(func(_x): return 1), null, false)
 
 		if not expre.has_execute_failed():
 			var k := keys.duplicate()
@@ -55,7 +69,7 @@ func _on_change() -> void:
 			label.text = 'Expression Valid'
 			label.modulate = Color.SEA_GREEN
 
-			var completion = unique_array(k)
+			completion_list = unique_array(k)
 			word_list = unique_array(keys)
 
 			save_bt.disabled = false
@@ -85,6 +99,7 @@ func _on_save() -> void:
 			})
 	
 	bt_ref.set_exp(code_edit.text)
+	ref.size = Vector2.ZERO
 	_Global.GENERAL_POPUP.get_parent().hide()
 
 

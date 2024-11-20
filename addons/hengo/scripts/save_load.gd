@@ -400,7 +400,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array) -> Array:
 
         match cnode.type:
             'expression':
-                cnode_data['exp'] = cnode.get_node('%Container').get_child(1).raw_text
+                cnode_data['exp'] = cnode.get_node('%Container').get_child(1).get_child(0).raw_text
 
         arr.append(cnode_data)
 

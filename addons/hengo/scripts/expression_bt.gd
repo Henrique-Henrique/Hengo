@@ -17,7 +17,7 @@ func _on_press() -> void:
 	expression_editor.default_config = {
 		exp = get_exp()
 	}
-	_Global.GENERAL_POPUP.get_parent().show_content(expression_editor, 'test')
+	_Global.GENERAL_POPUP.get_parent().show_content(expression_editor, 'Expression Editor')
 
 func set_exp(_exp: String) -> void:
 	raw_text = _exp

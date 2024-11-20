@@ -48,6 +48,7 @@ func _enter_tree():
 		_Enums.CONST_API_LIST = api_json.const_api
 		_Enums.SINGLETON_API_LIST = api_json.singleton_api
 		_Enums.NATIVE_PROPS_LIST = api_json.native_props
+		_Enums.MATH_UTILITY_NAME_LIST = api_json.math_utility_names
 
 		native_api_file.close()
 	else:
@@ -155,6 +156,12 @@ func _generate_native_api() -> void:
 	var singleton_api: Array = []
 	var singleton_names: Array = []
 	var native_props: Dictionary = {}
+	var math_utility_names: Array = []
+
+	for dict: Dictionary in (data['utility_functions'] as Array):
+		if dict.category == 'math':
+			math_utility_names.append(dict.name)
+
 
 	for dict: Dictionary in (data['builtin_classes'] as Array):
 		if _Enums.VARIANT_TYPES.has(dict.name):
@@ -274,7 +281,8 @@ func _generate_native_api() -> void:
 			native_api = native_api,
 			const_api = const_api,
 			singleton_api = singleton_api,
-			native_props = native_props
+			native_props = native_props,
+			math_utility_names = math_utility_names
 		})
 	)
 

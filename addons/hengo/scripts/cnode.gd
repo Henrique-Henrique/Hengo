@@ -635,12 +635,18 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 				instance.get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
 				title_container.visible = false
 			'expression':
+				title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/math.svg')
+				title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
+
 				var container = instance.get_node('%Container')
-				var bt = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+				var bt_container = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+				
+				var bt = bt_container.get_child(0)
 				bt.ref = instance
 				bt.set_exp(_config.exp)
-				container.add_child(bt)
-				container.move_child(bt, 1)
+				
+				container.add_child(bt_container)
+				container.move_child(bt_container, 1)
 
 		if _config.has('sub_type'):
 			var sub_type = _config.get('sub_type')

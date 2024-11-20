@@ -532,7 +532,7 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 		'expression':
 			token.merge({
 				params = get_cnode_inputs(_node, true),
-				exp = _node.get_node('%Container').get_child(1).raw_text
+				exp = _node.get_node('%Container').get_child(1).get_child(0).raw_text
 			})
 
 	return token
@@ -773,13 +773,12 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 			return code
 		'expression':
-			var new_exp: String = _token.exp
+			var new_exp: String = _token.exp.replacen('\n', '')
+			var reg: RegEx = RegEx.new()
 
 			for param in _token.params:
-				new_exp = new_exp.replacen(
-					param.prop_name,
-					parse_token_by_type(param)
-				)
+				reg.compile("\\b" + param.prop_name + "\\b")
+				new_exp = reg.sub(new_exp, parse_token_by_type(param), true)
 			
 			return new_exp
 		_:
