@@ -138,47 +138,47 @@ func _on_pin() -> void:
 	
 
 func pin_to_cnodes(_use_intern_list: bool = false) -> void:
-		var min_vec: Vector2 = Vector2.INF
-		var max_vec: Vector2 = -Vector2.INF
+	var min_vec: Vector2 = Vector2.INF
+	var max_vec: Vector2 = -Vector2.INF
 
-		if _use_intern_list:
-			for cnode in cnode_inside:
+	if _use_intern_list:
+		for cnode in cnode_inside:
+			min_vec = min_vec.min(cnode.position)
+			max_vec = max_vec.max(cnode.position + cnode.size)
+
+			cnode.comment_ref = self
+	else:
+		# defyning cnode area
+		for cnode in _Global.CNODE_CONTAINER.get_children():
+			if get_rect().has_point(cnode.position):
 				min_vec = min_vec.min(cnode.position)
 				max_vec = max_vec.max(cnode.position + cnode.size)
 
-				cnode.comment_ref = self
-		else:
-			# defyning cnode area
-			for cnode in _Global.CNODE_CONTAINER.get_children():
-				if get_rect().has_point(cnode.position):
-					min_vec = min_vec.min(cnode.position)
-					max_vec = max_vec.max(cnode.position + cnode.size)
+				# adding cnodes only when cnode dont pinned to other comment
+				# nested comment is not supported
+				if not cnode.comment_ref or cnode.comment_ref == self:
+					cnode_inside.append(cnode)
+					cnode.comment_ref = self
+			else:
+				if cnode.comment_ref == self:
+					cnode.comment_ref = null
 
-					# adding cnodes only when cnode dont pinned to other comment
-					# nested comment is not supported
-					if not cnode.comment_ref or cnode.comment_ref == self:
-						cnode_inside.append(cnode)
-						cnode.comment_ref = self
-				else:
-					if cnode.comment_ref == self:
-						cnode.comment_ref = null
+	if min_vec >= Vector2.INF or max_vec <= -Vector2.INF:
+		return
+
+	var target_position = min_vec
+	var target_size = (max_vec - min_vec)
+
+	target_position.x -= PADDING.x
+	target_position.y -= title.size.y + PADDING.y
+
+	target_size.x += PADDING.x * 2
+	target_size.y += (PADDING.y + title.size.y) + PADDING.y
+
+	var tween: Tween = get_tree().create_tween().set_trans(Tween.TRANS_BOUNCE).set_parallel()
 	
-		if min_vec >= Vector2.INF or max_vec <= -Vector2.INF:
-			return
-
-		var target_position = min_vec
-		var target_size = (max_vec - min_vec)
-
-		target_position.x -= PADDING.x
-		target_position.y -= title.size.y + PADDING.y
-
-		target_size.x += PADDING.x * 2
-		target_size.y += (PADDING.y + title.size.y) + PADDING.y
-
-		var tween: Tween = get_tree().create_tween().set_trans(Tween.TRANS_BOUNCE).set_parallel()
-		
-		tween.tween_property(self, 'position', target_position, .1)
-		tween.tween_property(self, 'size', target_size, .1)
+	tween.tween_property(self, 'position', target_position, .1)
+	tween.tween_property(self, 'size', target_size, .1)
 
 
 func _on_menu(_idx: int) -> void:

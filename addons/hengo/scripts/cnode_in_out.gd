@@ -529,7 +529,7 @@ func set_type(_type: String) -> void:
 			connector.set('modulate', Color('#FC7F7F'))
 		'Variant':
 			connector.texture = circle_icon
-			connector.set('modulate', Color('#57cc99'))
+			connector.set('modulate', Color('#72788a'))
 		_:
 			if FileAccess.file_exists(icon_path):
 				#TODO make icons a spritesheet
@@ -566,7 +566,7 @@ func get_type_color(_type: String) -> Color:
 		'Vector2':
 			return Color('#c368ed')
 		'Variant':
-			return Color('#57cc99')
+			return Color('#72788a')
 		_:
 			if ClassDB.is_parent_class(_type, 'Control'):
 				return Color('#8eef97')

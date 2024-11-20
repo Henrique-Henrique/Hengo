@@ -470,7 +470,7 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 				value = get_cnode_inputs(_node)[0],
 				id = get_debug_counter(_node)
 			})
-		'set_var':
+		'set_var', 'set_local_var':
 			token.merge({
 				name = _node.get_node('%InputContainer').get_child(0).get_in_out_name().to_snake_case(),
 				value = get_cnode_inputs(_node)[0],
@@ -559,6 +559,11 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + prefix + _token.name
 		'set_var':
 			return indent + prefix + '{name} = {value}'.format({
+				name = _token.name,
+				value = parse_token_by_type(_token.value)
+			})
+		'set_local_var':
+			return indent + '{name} = {value}'.format({
 				name = _token.name,
 				value = parse_token_by_type(_token.value)
 			})

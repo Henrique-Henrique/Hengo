@@ -120,7 +120,6 @@ func show_debug() -> void:
 	if not is_inside_tree():
 		return
 
-
 	if !debug_timer:
 		debug_timer = Timer.new()
 		debug_timer.wait_time = DEBUG_TIMER_TIME
@@ -130,7 +129,14 @@ func show_debug() -> void:
 		material.shader = flow_debug_shader
 		width = 13
 		texture = debug_texture
-		material.set('shader_parameter/color', default_color)
+
+		match input.owner.connection_type:
+			'Variant':
+				material.set('shader_parameter/color', Color('#72788a'))
+			_:
+				material.set('shader_parameter/color', default_color)
+
+		print('ta-> ', output.owner.connection_type)
 
 		# animations
 		var tween: Tween = get_tree().create_tween().parallel().set_trans(Tween.TRANS_LINEAR)

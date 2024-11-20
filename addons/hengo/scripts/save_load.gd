@@ -35,7 +35,9 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
         for cnode in general.virtual_cnode_list:
             data.cnode_list = get_cnode_list(
-                _Router.route_reference[general.route.id], [])
+                _Router.route_reference[general.route.id],
+                ['var', 'set_var', 'user_func', 'signal_connection', 'signal_emit', 'signal_disconnection']
+            )
 
         generals.append(data)
 
@@ -267,8 +269,12 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
     # ---------------------------------------------------------------------------- #
     # loading comments
     var comment_list: Array[Dictionary] = []
+    var comment_node_list: Array = []
 
-    for comment in _Global.COMMENT_CONTAINER.get_children():
+    for c_arr in _Router.comment_reference.values():
+        comment_node_list += c_arr
+
+    for comment in comment_node_list:
         comment_list.append({
             id = comment.get_instance_id(),
             is_pinned = comment.is_pinned,
@@ -459,7 +465,7 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
         if cnode.has('exp'):
             cnode_data['exp'] = cnode.get('exp')
 
-        var cnode_inst = _CNode.instantiate_and_add(cnode_data)
+        var cnode_inst = _CNode.instantiate_cnode(cnode_data)
 
         _inst_id_refs[cnode.hash] = cnode_inst
 
@@ -922,7 +928,6 @@ static func load_and_edit(_path: StringName) -> void:
             comment._on_color(str_to_var(comment_config.color as String) as Color)
             comment.get_node('%ColorButton').color = str_to_var(comment_config.color as String) as Color
             comment.set_comment(comment_config.comment)
-            comment.pin_to_cnodes(true)
 
         # ---------------------------------------------------------------------------- #
         # creating connections
@@ -962,6 +967,10 @@ static func load_and_edit(_path: StringName) -> void:
                     })
 
         _Router.change_route(_Global.start_state.route)
+
+        # folding comments after add to scene
+        for comment in _Global.COMMENT_CONTAINER.get_children():
+            comment.pin_to_cnodes(true)
 
     # confirming queue free before check errors
     await _Global.CNODE_CAM.get_tree().process_frame
