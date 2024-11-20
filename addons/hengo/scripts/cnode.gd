@@ -643,7 +643,9 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 				
 				var bt = bt_container.get_child(0)
 				bt.ref = instance
-				bt.set_exp(_config.exp)
+				
+				if _config.has('exp'):
+					bt.set_exp(_config.exp)
 				
 				container.add_child(bt_container)
 				container.move_child(bt_container, 1)
