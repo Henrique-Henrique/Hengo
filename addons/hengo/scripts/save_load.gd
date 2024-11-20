@@ -398,6 +398,10 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array) -> Array:
         if cnode.category:
             cnode_data['category'] = cnode.category
 
+        match cnode.type:
+            'expression':
+                cnode_data['exp'] = cnode.get_node('%Container').get_child(1).raw_text
+
         arr.append(cnode_data)
 
     return arr
@@ -451,6 +455,9 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 
         if cnode.has('category'):
             cnode_data['category'] = cnode.get('category')
+
+        if cnode.has('exp'):
+            cnode_data['exp'] = cnode.get('exp')
 
         var cnode_inst = _CNode.instantiate_and_add(cnode_data)
 

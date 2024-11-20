@@ -11,14 +11,7 @@ func _on_gui(_event: InputEvent) -> void:
                 hide()
 
 # public
-#
-# func show() -> void:
-#     visible = true
-
-# func hide() -> void:
-#     visible = false
-
-func show_content(_content: Node, _name: String, _pos: Vector2) -> void:
+func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) -> void:
     var gp = get_node('%GeneralPopUp')
     var container = gp.get_child(0)
 
@@ -30,6 +23,11 @@ func show_content(_content: Node, _name: String, _pos: Vector2) -> void:
     container.add_child(_content)
     container.get_child(0).text = _name
     
-    gp.position = _pos
+    if _pos == Vector2.INF:
+        # center
+        gp.position = (get_window().size / 2) - (Vector2i(_content.size) / 2)
+    else:
+        gp.position = _pos
+    
     gp.size = Vector2.ZERO
     show()

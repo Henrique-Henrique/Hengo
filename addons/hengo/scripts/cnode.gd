@@ -634,6 +634,13 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 
 				instance.get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
 				title_container.visible = false
+			'expression':
+				var container = instance.get_node('%Container')
+				var bt = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+				bt.ref = instance
+				bt.set_exp(_config.exp)
+				container.add_child(bt)
+				container.move_child(bt, 1)
 
 		if _config.has('sub_type'):
 			var sub_type = _config.get('sub_type')

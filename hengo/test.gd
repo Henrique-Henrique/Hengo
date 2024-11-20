@@ -1,1 +1,1 @@
-extends Sprite2D
+extends CharacterBody3D

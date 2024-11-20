@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 [ext_resource type="Script" path="res://hengo/bt.gd" id="2_34af8"]
-[ext_resource type="Script" path="res://hengo/test.gd" id="3_dq87n"]
 
 [node name="Node" type="Node"]
 
@@ -15,7 +14,6 @@ script = ExtResource("2_34af8")
 modulate = Color(0.898675, 0.199437, 7.70092e-07, 1)
 position = Vector2(550, 303)
 texture = ExtResource("1_wvpun")
-script = ExtResource("3_dq87n")
 
 [node name="Button" type="Button" parent="."]
 visible = false
@@ -31,4 +29,3 @@ offset_left = 576.0
 offset_top = 418.0
 offset_right = 762.0
 offset_bottom = 576.0
-text = "DECREMENT"

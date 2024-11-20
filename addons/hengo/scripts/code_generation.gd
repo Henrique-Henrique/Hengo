@@ -417,6 +417,9 @@ static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 			if _input.is_ref:
 				prop_data['ref'] = true
 
+			if _get_name:
+				prop_data['prop_name'] = _input.get_in_out_name()
+
 			if prop is Label:
 				if prop.text == 'self':
 					prop_data.value = '_ref'
@@ -525,6 +528,11 @@ static func parse_cnode_values(_node: _CNode, _id: int = 0) -> Dictionary:
 			token.merge({
 				params = get_cnode_inputs(_node, true),
 				name = _node.get_node('%InputContainer').get_child(1).get_in_out_name()
+			})
+		'expression':
+			token.merge({
+				params = get_cnode_inputs(_node, true),
+				exp = _node.get_node('%Container').get_child(1).raw_text
 			})
 
 	return token
@@ -764,6 +772,16 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				idx += 1
 
 			return code
+		'expression':
+			var new_exp: String = _token.exp
+
+			for param in _token.params:
+				new_exp = new_exp.replacen(
+					param.prop_name,
+					parse_token_by_type(param)
+				)
+			
+			return new_exp
 		_:
 			return ''
 

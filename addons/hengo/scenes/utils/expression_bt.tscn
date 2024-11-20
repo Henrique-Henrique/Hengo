@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bprgcwnlbytdn"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/expression_bt.gd" id="1_lybgk"]
+
+[node name="Button" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Expression"
+script = ExtResource("1_lybgk")

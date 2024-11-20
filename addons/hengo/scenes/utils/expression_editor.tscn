@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://dct6106nr8ey7"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/expression_editor.gd" id="1_xyhe4"]
+
+[node name="ExpressionEditor" type="PanelContainer"]
+offset_right = 8.0
+offset_bottom = 35.0
+script = ExtResource("1_xyhe4")
+
+[node name="List" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="CodeEdit" type="CodeEdit" parent="List"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 100)
+layout_mode = 2
+size_flags_vertical = 3
+placeholder_text = "Your Expression"
+
+[node name="Label" type="Label" parent="List"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+
+[node name="Save" type="Button" parent="List"]
+unique_name_in_owner = true
+layout_mode = 2
+disabled = true
+text = "Save"

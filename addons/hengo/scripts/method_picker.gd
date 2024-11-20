@@ -30,6 +30,21 @@ var selected_id: int = 0:
 
 var native_list: Array = [
 	{
+		name = 'Expression',
+		data = {
+			name = 'Expression',
+			sub_type = 'expression',
+			type = 'expression',
+			category = 'native',
+			inputs = [],
+			outputs = [ {
+				name = 'result',
+				type = 'Variant'
+			}],
+			route = _Router.current_route
+		}
+	},
+	{
 		name = 'Make Transition',
 		data = {
 			name = 'make_transition',
