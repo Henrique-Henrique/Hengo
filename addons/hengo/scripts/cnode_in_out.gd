@@ -257,6 +257,7 @@ func create_connection(_config: Dictionary) -> _ConnectionLine:
 	line.gradient.colors[0] = get_type_color(_conn_type)
 	line.gradient.colors[1] = get_type_color(_config.conn_type)
 
+	# debug color
 	match _conn_type:
 		'String':
 			line.default_color = Color('#8eef97')
@@ -266,14 +267,19 @@ func create_connection(_config: Dictionary) -> _ConnectionLine:
 			line.default_color = Color('#5ABBEF')
 		'bool':
 			line.default_color = Color('#FC7F7F')
-		'Vector2':
-			line.default_color = Color.REBECCA_PURPLE
+		'Vector2', 'Vector3':
+			line.default_color = Color('#c368ed')
 		'Variant':
-			var c = Color.WHITE
-			c.a = .3
-			line.default_color = c
+			line.default_color = Color('#72788a')
 		_:
-			pass
+			if ClassDB.is_parent_class(_conn_type, 'Control'):
+				line.default_color = Color('#8eef97')
+			elif ClassDB.is_parent_class(_conn_type, 'Node2D'):
+				line.default_color = Color('#5ABBEF')
+			elif ClassDB.is_parent_class(_conn_type, 'Node3D'):
+				line.default_color = Color('#FC7F7F')
+			elif ClassDB.is_parent_class(_conn_type, 'AnimationMixer'):
+				line.default_color = Color('#c368ed')
 
 	var from_conn = get_node('%Connector') if not is_reparenting else _config.reparent_data.from_conn
 	var to_conn = _config.from.get_node('%Connector')
@@ -563,7 +569,7 @@ func get_type_color(_type: String) -> Color:
 			return Color('#5ABBEF')
 		'bool':
 			return Color('#FC7F7F')
-		'Vector2':
+		'Vector2', 'Vector3':
 			return Color('#c368ed')
 		'Variant':
 			return Color('#72788a')
@@ -572,8 +578,6 @@ func get_type_color(_type: String) -> Color:
 				return Color('#8eef97')
 			elif ClassDB.is_parent_class(_type, 'Node2D'):
 				return Color('#5ABBEF')
-			elif ClassDB.is_parent_class(_type, 'Node3D'):
-				return Color('#FC7F7F')
 			elif ClassDB.is_parent_class(_type, 'Node3D'):
 				return Color('#FC7F7F')
 			elif ClassDB.is_parent_class(_type, 'AnimationMixer'):

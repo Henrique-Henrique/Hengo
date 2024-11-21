@@ -136,8 +136,6 @@ func show_debug() -> void:
 			_:
 				material.set('shader_parameter/color', default_color)
 
-		print('ta-> ', output.owner.connection_type)
-
 		# animations
 		var tween: Tween = get_tree().create_tween().parallel().set_trans(Tween.TRANS_LINEAR)
 		tween.tween_property(self, 'width', 17, DEBUG_TIMER_TIME)
