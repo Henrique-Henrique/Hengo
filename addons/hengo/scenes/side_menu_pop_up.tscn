@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bt8df11sb6xyh"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/side_menu_pop_up.gd" id="1_mlcin"]
-[ext_resource type="Texture2D" uid="uid://d2w7gmwebkwol" path="res://addons/hengo/assets/icons/example.svg" id="2_xcg4l"]
+[ext_resource type="Texture2D" uid="uid://cokwia3wb2nlx" path="res://addons/hengo/assets/icons/trash.svg" id="2_r305j"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_budvq"]
 content_margin_left = 8.0
@@ -47,7 +47,7 @@ text = "Edit Variable"
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Delete Item"
-icon = ExtResource("2_xcg4l")
+icon = ExtResource("2_r305j")
 
 [node name="Props" type="VBoxContainer" parent="Container"]
 layout_mode = 2
