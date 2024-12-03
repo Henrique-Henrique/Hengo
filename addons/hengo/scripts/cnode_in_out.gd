@@ -8,6 +8,7 @@ const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
 const _Enums = preload('res://addons/hengo/references/enums.gd')
 const _Router = preload('res://addons/hengo/scripts/router.gd')
 const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
+const _Dropdown = preload('res://addons/hengo/scripts/props/dropdown.gd')
 
 @export var root: PanelContainer
 @export_enum('in', 'out') var type: String
@@ -169,7 +170,7 @@ func _on_enter() -> void:
 			get('theme_override_styles/panel/').set('border_color', Color.LIGHT_CORAL)
 		return
 	
-	if not _is_type_relatable(_Global.connection_first_data.type, type, _Global.connection_first_data.conn_type, connection_type):
+	if not is_type_relatable(_Global.connection_first_data.type, type, _Global.connection_first_data.conn_type, connection_type):
 		# if true, can auto instantiate cast
 		if ClassDB.is_parent_class(connection_type, _Global.connection_first_data.conn_type):
 			get('theme_override_styles/panel/').set('border_color', Color.RED)
@@ -213,7 +214,7 @@ func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		pass
 
-func _is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: String, _to_conn_type: String) -> bool:
+func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: String, _to_conn_type: String) -> bool:
 	# if connection is in => out or out => in
 	# if not, can't connect
 	if not _from_type == 'in' and _to_type == 'out' \
@@ -249,7 +250,7 @@ func create_connection(_config: Dictionary) -> _ConnectionLine:
 	var _type = type if not is_reparenting else _config.reparent_data.from_type
 	var _conn_type = connection_type if not is_reparenting else _config.reparent_data.from_conn_type
 
-	if not _is_type_relatable(_type, _config.type, _conn_type, _config.conn_type):
+	if not is_type_relatable(_type, _config.type, _conn_type, _config.conn_type):
 		return
 
 	var line = _Assets.ConnectionLineScene.instantiate()
@@ -403,9 +404,13 @@ func set_in_prop(_default_value = null) -> void:
 		var prop_container = get_node('%CNameInput')
 		var prop
 
-		if prop_container.get_child_count() > 2:
+		print(prop_container.get_child_count() > 4)
+		if prop_container.get_child_count() > 4:
 			return
-
+		
+		
+		print(prop_container.get_child_count())
+		print(connection_type)
 		match connection_type:
 			'String', 'NodePath', 'StringName':
 				var str = load('res://addons/hengo/scenes/props/string.tscn').instantiate()
@@ -440,6 +445,10 @@ func set_in_prop(_default_value = null) -> void:
 				var prop_bool = load('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
 				prop_container.add_child(prop_bool)
 				prop = prop_bool
+			'Variant':
+				var l: Label = _Assets.CNodeInputLabel.instantiate()
+				l.text = 'null'
+				prop_container.add_child(l)
 			_:
 				var l: Label = _Assets.CNodeInputLabel.instantiate()
 
@@ -448,10 +457,7 @@ func set_in_prop(_default_value = null) -> void:
 						l.text = 'self'
 					else:
 						if _Enums.VARIANT_TYPES.has(connection_type):
-							if connection_type == 'Variant':
-								l.text = 'null'
-							else:
-								l.text = connection_type + '()'
+							l.text = connection_type + '()'
 						elif ClassDB.can_instantiate(connection_type):
 							l.text = connection_type + '.new()'
 					
@@ -463,14 +469,68 @@ func set_in_prop(_default_value = null) -> void:
 		if _default_value:
 			prop.set_default(str(_default_value))
 
+		# props ref
+		add_prop_ref()
 
-func remove_in_prop() -> void:
+
+func add_prop_ref(_default = null, _prop_idx: int = -1) -> _Dropdown:
+	# props ref
+	var input_container = get_node('%CNameInput')
+	var prop_ref_bt = load('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+	prop_ref_bt.text = ''
+	prop_ref_bt.icon = load('res://addons/hengo/assets/icons/circle-dot.svg')
+	prop_ref_bt.type = 'all_props'
+	prop_ref_bt.tooltip_text = 'Bind prop value'
+	
+	prop_ref_bt.add_theme_stylebox_override('normal', StyleBoxEmpty.new())
+
+	prop_ref_bt.custom_data = {
+		input_ref = self
+	}
+
+	if _default:
+		prop_ref_bt.set_default(_default)
+
+	if _prop_idx > -1:
+		for group in prop_ref_bt.get_groups():
+			prop_ref_bt.remove_from_group(group)
+		
+		prop_ref_bt.add_to_group('p' + str(_prop_idx))
+
+	input_container.add_child(prop_ref_bt)
+
+	return prop_ref_bt
+
+
+func reset_in_props(_jump_first: bool = false) -> void:
 	if type == 'in':
-		var prop_container = get_node('%CNameInput')
-
-		for in_prop in prop_container.get_children().slice(2):
+		for in_prop in get_node('%CNameInput').get_children().slice(3 if _jump_first else 2):
 			in_prop.free()
-			root.size = Vector2.ZERO
+		
+	root.size = Vector2.ZERO
+
+
+func remove_in_prop(_ignore_prop: bool = false) -> void:
+	if type == 'in':
+		for in_prop in get_node('%CNameInput').get_children().slice(2):
+			if _ignore_prop and in_prop is _Dropdown and in_prop.type == 'all_props':
+				continue
+
+			in_prop.free()
+	
+	root.size = Vector2.ZERO
+
+func reset_root_size() -> void:
+	root.size = Vector2.ZERO
+
+
+# only called by props signal
+func set_default(_name: String) -> void:
+	if _name.begins_with('t:'):
+		change_type(_name.split('t:')[1])
+		return
+	
+	change_name(_name)
 
 
 func remove_out_prop() -> void:
@@ -545,19 +605,22 @@ func set_type(_type: String) -> void:
 				connector.texture = circle_icon
 	
 	connection_type = _type
+	tooltip_text = _type
 
 func change_type(_type: String) -> void:
 	var remove_conn: bool = connection_type != _type
 
+	set_type(_type)
+
 	if type == 'in':
-		remove_in_prop()
+		reset_in_props()
 		set_in_prop()
 	
-	set_type(_type)
 	
 	if remove_conn:
 		hide_connection()
 
+	reset_root_size()
 
 func get_type_color(_type: String) -> Color:
 	match _type:

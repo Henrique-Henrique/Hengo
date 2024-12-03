@@ -1,10 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://cgo5l4r43cdyy"]
+[gd_scene load_steps=3 format=3 uid="uid://cgo5l4r43cdyy"]
 
+[ext_resource type="Texture2D" uid="uid://dvwar0heqfh58" path="res://addons/hengo/assets/icons/search.svg" id="1_kf6tg"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/props/dropdown.gd" id="1_oknia"]
 
 [node name="DropDown" type="Button"]
 offset_right = 8.0
 offset_bottom = 8.0
-size_flags_horizontal = 3
 text = "Variant"
+icon = ExtResource("1_kf6tg")
 script = ExtResource("1_oknia")

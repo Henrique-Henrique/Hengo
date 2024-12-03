@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://cxl5cac51kmgr"]
+
+[ext_resource type="Texture2D" uid="uid://4yg37pykw83w" path="res://addons/hengo/assets/icons/sigma.svg" id="1_hrrvp"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/prop_variable.gd" id="1_sghox"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="2_oark8"]
+
+[node name="PropVariable" type="HBoxContainer"]
+theme_override_constants/separation = 8
+script = ExtResource("1_sghox")
+
+[node name="Icon" type="TextureRect" parent="."]
+process_mode = 4
+modulate = Color(0, 0.635294, 1, 1)
+layout_mode = 2
+texture = ExtResource("1_hrrvp")
+
+[node name="Name" type="LineEdit" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Name"
+placeholder_text = "name"
+
+[node name="Types" parent="." instance=ExtResource("2_oark8")]
+layout_mode = 2
+tooltip_text = "Type"
+type = "cast_type"
+
+[node name="Export" type="CheckBox" parent="."]
+layout_mode = 2
+tooltip_text = "Export"

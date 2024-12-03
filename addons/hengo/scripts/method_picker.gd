@@ -620,6 +620,24 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 						api_list.append(set_data)
 						api_list.append(get_data)
+					
+					var idx: int = 0
+					for var_config in _Global.PROPS_CONTAINER.get_all_values().filter(func(x: Dictionary) -> bool:
+						return x.prop_type == StringName('VARIABLE')):
+						api_list.append({
+							name = 'Set Var -> ' + var_config.name,
+							data = {
+								name = 'Set Var -> ' + var_config.name,
+								sub_type = 'set_var',
+								inputs = [ {
+									name = var_config.name,
+									type = var_config.type,
+									group = 'p' + str(idx),
+								}],
+								route = _Router.current_route
+							}
+						})
+						idx += 1
 
 
 	return OK

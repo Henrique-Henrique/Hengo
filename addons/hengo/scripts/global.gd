@@ -7,6 +7,8 @@ const _State = preload('res://addons/hengo/scripts/state.gd')
 const _ConnectionGuide = preload('res://addons/hengo/scripts/connection_guide.gd')
 const _Hengo = preload('res://addons/hengo/hengo.gd')
 const _StateTransition = preload('res://addons/hengo/scripts/state_transition.gd')
+const _PropsContainer = preload('res://addons/hengo/scripts/props_container.gd')
+const _HengoRoot = preload('res://addons/hengo/scripts/hengo_root.gd')
 
 # plugin
 static var editor_interface: EditorInterface
@@ -31,6 +33,8 @@ static var CODE_TOOLTIP: PanelContainer
 static var ERROR_BT: Button
 static var CONNECTION_GUIDE: _ConnectionGuide
 static var STATE_CONNECTION_GUIDE: _ConnectionGuide
+static var PROPS_CONTAINER: _PropsContainer
+static var HENGO_ROOT: _HengoRoot
 
 # cnodes
 static var can_make_connection: bool = false

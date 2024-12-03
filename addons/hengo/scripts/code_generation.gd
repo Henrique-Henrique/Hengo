@@ -9,6 +9,7 @@ const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
 const _SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
 const _Router = preload('res://addons/hengo/scripts/router.gd')
 const _Enums = preload('res://addons/hengo/references/enums.gd')
+const _Dropdown = preload('res://addons/hengo/scripts/props/dropdown.gd')
 
 # references
 static var _name_list: Array = []
@@ -41,12 +42,14 @@ static func generate() -> String:
 	var code: String = 'extends {0}\n\n'.format([_Global.script_config.type])
 
 	# variables
-	var var_code: String = '#\n# Variables\n'
+	var var_code: String = '# Variables #\n'
 
-	for var_item in _Global.SIDE_BAR.get_node('%Var').get_node('%Container').get_children():
-		var var_name: String = var_item.res[0].value
-		var var_type: String = var_item.res[1].value
-		var var_export: bool = var_item.res[2].value
+	print('a-> ', _Global.PROPS_CONTAINER.get_values().variables)
+
+	for variable in _Global.PROPS_CONTAINER.get_values().variables:
+		var var_name: String = variable.name
+		var var_type: String = variable.type
+		var var_export: bool = variable. export
 
 		var type_value: String = 'null'
 
@@ -63,6 +66,27 @@ static func generate() -> String:
 			value = type_value,
 			export_var = '@export ' if var_export else ''
 		})
+
+	# for var_item in _Global.SIDE_BAR.get_node('%Var').get_node('%Container').get_children():
+	# 	var var_name: String = var_item.res[0].value
+	# 	var var_type: String = var_item.res[1].value
+	# 	var var_export: bool = var_item.res[2].value
+
+	# 	var type_value: String = 'null'
+
+	# 	if _Enums.VARIANT_TYPES.has(var_type):
+	# 		if var_type == 'Variant':
+	# 			type_value = 'null'
+	# 		else:
+	# 			type_value = var_type + '()'
+	# 	elif ClassDB.can_instantiate(var_type):
+	# 		type_value = var_type + '.new()'
+
+	# 	var_code += '{export_var}var {name} = {value}\n'.format({
+	# 		name = var_name.to_snake_case(),
+	# 		value = type_value,
+	# 		export_var = '@export ' if var_export else ''
+	# 	})
 
 	code += var_code
 	# end variables
@@ -427,10 +451,18 @@ static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 					prop_data.value = prop.text
 			else:
 				prop_data.value = str(prop.get_generated_code())
-				
-			if _input.root.route_ref.type != _Router.ROUTE_TYPE.STATE \
-			or not _input.is_ref:
-				prop_data.use_self = true
+
+			
+			if prop is _Dropdown:
+				match prop.type:
+					'all_props':
+						prop_data['is_prop'] = true
+						prop_data['use_self'] = false
+			else:
+				if _input.root.route_ref.type != _Router.ROUTE_TYPE.STATE \
+				or not _input.is_ref:
+					prop_data.use_self = true
+
 
 			return prop_data
 		else:
@@ -553,7 +585,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			'native':
 				prefix = ''
 
-
 	match _token.type:
 		'var':
 			return indent + prefix + _token.name
@@ -570,10 +601,14 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		'local_var':
 			return indent + _token.name
 		'in_prop':
+			if _token.has('is_prop') and _token.get('is_prop') == true:
+				return indent + prefix + _token.value
+			
 			if _token.has('use_self'):
 				if _token.has('ref'):
 					if _token.ref:
 						return indent + 'self'
+
 			return indent + _token.value
 		'void', 'go_to_void', 'self_go_to_void':
 			var values: Array = _provide_params_ref(_token.params, prefix)

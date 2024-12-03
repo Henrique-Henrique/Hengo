@@ -304,7 +304,7 @@ func add_input(_input: Dictionary) -> void:
 
 	if _input.has('category'):
 		input.category = _input.category
-
+ 
 		match _input.category:
 			# make connector invisible
 			# useful when input don't want a connection
@@ -314,13 +314,19 @@ func add_input(_input: Dictionary) -> void:
 	if _input.has('data'):
 		input.custom_data = _input.get('data')
 
-	var type = values.get('type') if values.has('type') else 'Variant'
-	input.set_type(type)
+	if _input.has('group'):
+		input.add_to_group(_input.get('group'))
+
+	input.set_type(values.get('type') if values.has('type') else 'Variant')
 
 	input.get_node('%Name').text = values.name
 	input.root = self
-	
-	input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
+
+	if _input.has('is_prop'):
+		input.add_prop_ref(_input.get('in_prop'), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
+	else:
+		input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
+
 	in_container.add_child(input)
 
 

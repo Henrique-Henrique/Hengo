@@ -7,7 +7,7 @@ const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
 const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 var options: Array = []
-var type: String = ''
+@export var type: String = ''
 var custom_data
 var custom_value: String = ''
 
@@ -52,6 +52,21 @@ func _on_pressed() -> void:
 				enum_reference[enum_name] = '.'.join(custom_data) + '.' + enum_name
 			
 			options = enum_reference.keys().map(func(x: String) -> Dictionary: return {name = x, code_name = enum_reference[x]}) if not enum_reference.is_empty() else []
+		'all_props':
+			var arr: Array = []
+
+			for prop in _Global.PROPS_CONTAINER.get_all_values(true):
+				if custom_data.input_ref.is_type_relatable(
+					'out',
+					'in',
+					prop.type,
+					custom_data.input_ref.connection_type,
+				):
+					arr.append(prop)
+		
+			options = arr
+
+			print(arr)
 
 	_Global.DROPDOWN_MENU.position = global_position
 	_Global.DROPDOWN_MENU.get_parent().show()
@@ -72,11 +87,22 @@ func _selected(_item: Dictionary) -> void:
 		'cast_type':
 			var output = get_parent().owner
 
-			output.hide_connection()
-			output.set_type((_item.name as String))
+			if output:
+				output.hide_connection()
+				output.set_type((_item.name as String))
 		'const':
 			var output = get_parent().owner
 			output.change_type(_item.type)
+		'all_props':
+			var input = custom_data.input_ref
+			input.remove_in_prop(true)
+			
+			for group in get_groups():
+				remove_from_group(group)
+
+			add_to_group('p' + str(_item.item.get_index()))
+
+			custom_value = str(_item.item.get_index())
 		
 	emit_signal('value_changed', text)
 
@@ -85,7 +111,8 @@ func _selected(_item: Dictionary) -> void:
 			if _Router.current_route.type == _Router.ROUTE_TYPE.STATE:
 				_CodeGeneration.check_state_errors(_Router.current_route.state_ref)
 
-	get_parent().owner.root.size = Vector2.ZERO
+	if get_parent().owner:
+		get_parent().owner.root.size = Vector2.ZERO
 
 # public
 #
@@ -97,8 +124,16 @@ func set_default(_text: String) -> void:
 		'cast_type':
 			text = _text
 
-			if get_parent():
+			if get_parent().owner:
 				get_parent().owner.set_type(_text)
+		'all_props':
+			if _text.begins_with('t:'):
+				queue_free()
+
+				custom_data.input_ref.reset_in_props(true)
+				custom_data.input_ref.set_in_prop()
+			
+			text = _text
 		_:
 			text = _text
 
@@ -115,5 +150,7 @@ func get_generated_code() -> String:
 	match type:
 		'enum_list':
 			return custom_value
+		'all_props':
+			return text.to_snake_case()
 		_:
 			return '\"' + text + '\"'
