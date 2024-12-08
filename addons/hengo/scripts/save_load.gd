@@ -58,7 +58,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			pos = var_to_str(state.position),
 			cnode_list = get_cnode_list(
 				_Router.route_reference[state.route.id],
-				['var', 'set_var', 'user_func', 'signal_connection', 'signal_emit', 'signal_disconnection']
+				['user_func', 'signal_connection', 'signal_emit', 'signal_disconnection']
 			),
 			events = [],
 			transitions = []
@@ -158,7 +158,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			instances = [],
 			cnode_list = get_cnode_list(
 				_Router.route_reference[item.route.id],
-				['var', 'set_var', 'local_var', 'set_local_var', 'user_func', 'func_input', 'func_output']
+				['local_var', 'set_local_var', 'user_func', 'func_input', 'func_output']
 			)
 		}
 		
@@ -219,7 +219,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			instances = [],
 			cnode_list = get_cnode_list(
 				_Router.route_reference[item.route.id],
-				['var', 'set_var', 'local_var', 'set_local_var', 'user_func', 'signal_virtual']
+				['local_var', 'set_local_var', 'user_func', 'signal_virtual']
 			)
 		}
 

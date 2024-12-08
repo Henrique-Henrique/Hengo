@@ -181,8 +181,12 @@ func _select_cnode() -> void:
 func _process(_delta: float) -> void:
 	if cnode_ui.get_global_rect().has_point(get_global_mouse_position()):
 		_Global.CAM = cnode_cam
+		cnode_cam.get_parent().get_node('FocusBorder').visible = true
+		state_cam.get_parent().get_node('FocusBorder').visible = false
 	elif state_ui.get_global_rect().has_point(get_global_mouse_position()):
 		_Global.CAM = state_cam
+		state_cam.get_parent().get_node('FocusBorder').visible = true
+		cnode_cam.get_parent().get_node('FocusBorder').visible = false
 	else:
 		_Global.CAM = null
 
