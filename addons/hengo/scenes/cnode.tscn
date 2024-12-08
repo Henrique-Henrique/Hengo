@@ -1,27 +1,9 @@
 [gd_scene load_steps=9 format=3 uid="uid://bxh18qk6jrul6"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
+[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_ykti4"]
 [ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_ks1pc"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_yxi08"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_txmip"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.160784, 0.168627, 0.227451, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.302161, 0.314697, 0.407424, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-shadow_color = Color(0, 0, 0, 0.188235)
-shadow_size = 14
-shadow_offset = Vector2(0, 6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjksb"]
 resource_local_to_scene = true
@@ -86,9 +68,9 @@ expand_margin_right = 8.0
 expand_margin_bottom = 8.0
 
 [node name="Cnode" type="PanelContainer"]
-offset_right = 216.0
-offset_bottom = 63.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_txmip")
+offset_right = 162.0
+offset_bottom = 48.0
+theme_override_styles/panel = ExtResource("1_ykti4")
 script = ExtResource("1_onkoy")
 
 [node name="Container" type="VBoxContainer" parent="."]

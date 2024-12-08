@@ -38,13 +38,13 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0936, 0.09756, 0.12, 1)
+bg_color = Color(0.0870588, 0.0870588, 0.0870588, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(605, 587)
-shader_parameter/offset = Vector2(222.454, 378.31)
-shader_parameter/zoom_factor = 0.999987
+shader_parameter/screen_size = Vector2(605, 895)
+shader_parameter/offset = Vector2(197.377, 332.952)
+shader_parameter/zoom_factor = 0.718163
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -76,9 +76,11 @@ expand_margin_bottom = 4.0
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qv5mu"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gn4j7"]
-bg_color = Color(0.0941176, 0.0980392, 0.121569, 1)
-border_width_bottom = 2
-border_color = Color(0.121658, 0.12694, 0.153395, 1)
+content_margin_left = 2.0
+content_margin_top = 1.0
+content_margin_right = 2.0
+content_margin_bottom = 1.0
+bg_color = Color(0.145098, 0.145098, 0.145098, 1)
 shadow_color = Color(0, 0, 0, 0.027451)
 shadow_size = 12
 shadow_offset = Vector2(0, 1.265)
@@ -135,9 +137,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1305, 587)
-shader_parameter/offset = Vector2(288.428, 144.685)
-shader_parameter/zoom_factor = 0.200015
+shader_parameter/screen_size = Vector2(1305, 895)
+shader_parameter/offset = Vector2(57.3315, 76.2711)
+shader_parameter/zoom_factor = 0.550099
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -363,18 +365,6 @@ grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
 
-[node name="FocusBorder" type="ReferenceRect" parent="Split/TabContainer/StateUI"]
-process_mode = 4
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-border_color = Color(0.396302, 0.549178, 0.706719, 0.431373)
-border_width = 4.0
-
 [node name="StartMessage" type="PanelContainer" parent="Split/TabContainer/StateUI"]
 visible = false
 layout_mode = 1
@@ -423,20 +413,21 @@ theme_override_constants/separation = 0
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="PanelContainer" type="PanelContainer" parent="Split/HSplitContainer/VBoxContainer"]
+[node name="MenuBar" type="PanelContainer" parent="Split/HSplitContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gn4j7")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/PanelContainer"]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/MenuBar"]
 layout_mode = 2
 alignment = 2
 script = ExtResource("7_sagw0")
 
-[node name="Left" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar"]
+[node name="Left" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Open" type="Button" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Left"]
+[node name="Open" type="Button" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Left"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_wtrk7")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_qdigx")
@@ -444,7 +435,7 @@ text = "Open
 "
 icon = ExtResource("18_1grhg")
 
-[node name="Create" type="Button" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Left"]
+[node name="Create" type="Button" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Left"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_wtrk7")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_a0x8d")
@@ -452,21 +443,21 @@ text = "Create
 "
 icon = ExtResource("19_o64k3")
 
-[node name="Right" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar"]
+[node name="Right" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right"]
+[node name="PanelContainer" type="PanelContainer" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
 
-[node name="CompileContainer" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right/PanelContainer"]
+[node name="CompileContainer" type="HBoxContainer" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right/PanelContainer"]
 layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right/PanelContainer/CompileContainer"]
+[node name="Compile" type="Button" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right/PanelContainer/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("23_tlngq")
@@ -477,13 +468,13 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
 disabled = true
 text = "Compile"
 
-[node name="LoadIcon" type="TextureRect" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right/PanelContainer/CompileContainer"]
+[node name="LoadIcon" type="TextureRect" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right/PanelContainer/CompileContainer"]
 layout_mode = 2
 texture = ExtResource("11_xut0q")
 expand_mode = 2
 stretch_mode = 3
 
-[node name="UIState" type="OptionButton" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right"]
+[node name="UIState" type="OptionButton" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right"]
 visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_wtrk7")
@@ -503,7 +494,7 @@ popup/item_3/icon = ExtResource("27_2381i")
 popup/item_3/id = 3
 script = ExtResource("23_yyxjy")
 
-[node name="ErrorBt" type="Button" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right"]
+[node name="ErrorBt" type="Button" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -512,7 +503,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_ny3pm")
 text = "0"
 script = ExtResource("8_fl5nl")
 
-[node name="ClassName" type="Label" parent="Split/HSplitContainer/VBoxContainer/PanelContainer/CNodeActionBar/Right"]
+[node name="ClassName" type="Label" parent="Split/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/Right"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -642,18 +633,6 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
-
-[node name="FocusBorder" type="ReferenceRect" parent="Split/HSplitContainer/VBoxContainer/CNodeUI"]
-process_mode = 4
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-border_color = Color(0.533333, 0.537255, 0.537255, 0.431373)
-border_width = 4.0
 
 [node name="StartMessage" type="PanelContainer" parent="Split/HSplitContainer/VBoxContainer/CNodeUI"]
 visible = false

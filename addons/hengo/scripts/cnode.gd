@@ -546,6 +546,7 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 						_config.type = 'default'
 					'void':
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/void.svg')
+						title_container.get('theme_override_styles/panel').set('bg_color', EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').darkened(.4))
 						_config.type = 'default'
 					'signal_connection', 'signal_disconnection', 'signal_emit':
 						# color

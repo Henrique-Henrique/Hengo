@@ -73,6 +73,19 @@ func _ready() -> void:
 	state_ui.gui_input.connect(_on_state_gui_input)
 	cnode_ui.gui_input.connect(_on_cnode_gui_input)
 
+	# colors
+	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
+	var color_factor: float = .4
+	var cnode_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/cnode.tres')
+	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
+
+	get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
+	cnode_style_box.bg_color = base_color
+	state_ui.get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
+	cnode_style_box.border_color = base_color.lightened(.2)
+	event_style_box.bg_color = base_color.lightened(.1)
+	event_style_box.border_color = base_color.lightened(.2)
+
 	# setting globals
 	_Global.CAM = state_cam
 	_Global.STATE_CAM = state_cam
@@ -181,12 +194,8 @@ func _select_cnode() -> void:
 func _process(_delta: float) -> void:
 	if cnode_ui.get_global_rect().has_point(get_global_mouse_position()):
 		_Global.CAM = cnode_cam
-		cnode_cam.get_parent().get_node('FocusBorder').visible = true
-		state_cam.get_parent().get_node('FocusBorder').visible = false
 	elif state_ui.get_global_rect().has_point(get_global_mouse_position()):
 		_Global.CAM = state_cam
-		state_cam.get_parent().get_node('FocusBorder').visible = true
-		cnode_cam.get_parent().get_node('FocusBorder').visible = false
 	else:
 		_Global.CAM = null
 
