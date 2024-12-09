@@ -101,7 +101,6 @@ func _selected(_item: Dictionary) -> void:
 				remove_from_group(group)
 
 			add_to_group('p' + str(_item.item.get_index()))
-
 			custom_value = str(_item.item.get_index())
 		
 	emit_signal('value_changed', text)
@@ -132,7 +131,7 @@ func set_default(_text: String) -> void:
 
 				custom_data.input_ref.reset_in_props(true)
 				custom_data.input_ref.set_in_prop()
-			
+
 			text = _text
 		_:
 			text = _text

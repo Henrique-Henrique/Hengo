@@ -620,7 +620,9 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 						api_list.append(set_data)
 						api_list.append(get_data)
+
 					
+					# set variable
 					var idx: int = 0
 					for var_config in _Global.PROPS_CONTAINER.get_all_values().filter(func(x: Dictionary) -> bool:
 						return x.prop_type == StringName('VARIABLE')):
@@ -633,6 +635,21 @@ func start_api(_class_name: StringName = 'all') -> int:
 									name = var_config.name,
 									type = var_config.type,
 									group = 'p' + str(idx),
+								}],
+								route = _Router.current_route
+							}
+						})
+
+						api_list.append({
+							name = 'Get Var -> ' + var_config.name,
+							data = {
+								name = '',
+								sub_type = 'var',
+								outputs = [ {
+									name = var_config.name,
+									type = var_config.type,
+									group = 'p' + str(idx),
+									group_idx = idx
 								}],
 								route = _Router.current_route
 							}

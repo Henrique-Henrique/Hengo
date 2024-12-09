@@ -358,8 +358,12 @@ func add_output(_output: Dictionary) -> void:
 	if _output.has('data'):
 		output.custom_data = _output.get('data')
 
-	var type = values.get('type') if values.has('type') else 'Variant'
-	output.set_type(type)
+	if _output.has('group_idx'):
+		var idx = _output.get('group_idx')
+		output.add_to_group('p' + str(idx))
+		output.custom_data = idx
+
+	output.set_type(values.get('type') if values.has('type') else 'Variant')
 
 	output.get_node('%Name').text = values.name
 	output.root = self

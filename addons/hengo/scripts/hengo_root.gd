@@ -82,7 +82,7 @@ func _ready() -> void:
 	get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
 	cnode_style_box.bg_color = base_color
 	state_ui.get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
-	cnode_style_box.border_color = base_color.lightened(.2)
+	cnode_style_box.border_color = base_color.lightened(.15)
 	event_style_box.bg_color = base_color.lightened(.1)
 	event_style_box.border_color = base_color.lightened(.2)
 

@@ -407,6 +407,10 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array) -> Array:
 				if out_prop is not Label:
 					output_data['out_prop'] = out_prop.get_value()
 
+			match cnode.type:
+				'var':
+					output_data['group_idx'] = int(output.custom_data)
+
 			cnode_data.outputs.append(output_data)
 
 		if cnode.category:

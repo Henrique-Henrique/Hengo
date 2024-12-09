@@ -496,6 +496,7 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> _Dropdown:
 			prop_ref_bt.remove_from_group(group)
 		
 		prop_ref_bt.add_to_group('p' + str(_prop_idx))
+		prop_ref_bt.custom_value = str(_prop_idx)
 
 	input_container.add_child(prop_ref_bt)
 
