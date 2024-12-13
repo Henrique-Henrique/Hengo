@@ -285,9 +285,6 @@ func remove_from_scene() -> void:
 func add_input(_input: Dictionary) -> void:
 	var in_container = get_node('%InputContainer')
 	var input := _Assets.CNodeInputScene.instantiate()
-	var values = {}
-
-	values = _input
 
 	if _input.has('ref'):
 		input.is_ref = true
@@ -307,9 +304,8 @@ func add_input(_input: Dictionary) -> void:
 	if _input.has('group'):
 		_Global.GROUP.add_to_group(_input.get('group'), input)
 
-	input.set_type(values.get('type') if values.has('type') else 'Variant')
-
-	input.get_node('%Name').text = values.name
+	input.set_type(_input.get('type') if _input.has('type') else 'Variant')
+	input.get_node('%Name').text = _input.name
 	input.root = self
 
 	if _input.has('is_prop'):
@@ -324,9 +320,6 @@ func add_output(_output: Dictionary) -> void:
 	var out_container = get_node('%OutputContainer')
 
 	var output := _Assets.CNodeOutputScene.instantiate()
-	var values = {}
-
-	values = _output
 
 	if _output.has('category'):
 		output.category = _output.category
@@ -342,9 +335,11 @@ func add_output(_output: Dictionary) -> void:
 		_Global.GROUP.add_to_group('p' + str(idx), output)
 		output.custom_data = idx
 
-	output.set_type(values.get('type') if values.has('type') else 'Variant')
+	if _output.has('group'):
+		_Global.GROUP.add_to_group(_output.get('group'), output)
 
-	output.get_node('%Name').text = values.name
+	output.set_type(_output.get('type') if _output.has('type') else 'Variant')
+	output.get_node('%Name').text = _output.name
 	output.root = self
 
 	output.set_out_prop(_output.sub_type if _output.has('sub_type') else '', _output.get('out_prop') if _output.has('out_prop') else null)

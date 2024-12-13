@@ -18,12 +18,12 @@ var props: Array[Dictionary] = [
 	{
 		name = 'inputs',
 		type = 'in_out',
-		value = [
-			{
-				name = 'minha var',
-				type = 'String',
-			}
-		]
+		value = []
+	},
+	{
+		name = 'outputs',
+		type = 'in_out',
+		value = []
 	}
 ]
 
