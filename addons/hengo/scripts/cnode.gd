@@ -287,17 +287,7 @@ func add_input(_input: Dictionary) -> void:
 	var input := _Assets.CNodeInputScene.instantiate()
 	var values = {}
 
-	# checking if has resource to define data (used to reflect side menu changes)
-	if _input.has('res'):
-		var res = _input.get('res')
-		values = {
-			name = res.name,
-			type = res.type
-		}
-		# adding intput reference to variable resource
-		res.in_out_ref.append(input)
-	else:
-		values = _input
+	values = _input
 
 	if _input.has('ref'):
 		input.is_ref = true
@@ -315,7 +305,7 @@ func add_input(_input: Dictionary) -> void:
 		input.custom_data = _input.get('data')
 
 	if _input.has('group'):
-		input.add_to_group(_input.get('group'))
+		_Global.GROUP.add_to_group(_input.get('group'), input)
 
 	input.set_type(values.get('type') if values.has('type') else 'Variant')
 
@@ -336,18 +326,7 @@ func add_output(_output: Dictionary) -> void:
 	var output := _Assets.CNodeOutputScene.instantiate()
 	var values = {}
 
-	# checking if has resource to define data (used to reflect side menu changes)
-	if _output.has('res'):
-		var res = _output.get('res')
-		values = {
-			name = res.name,
-			type = res.type
-		}
-
-		# adding output reference to variable resource
-		res.in_out_ref.append(output)
-	else:
-		values = _output
+	values = _output
 
 	if _output.has('category'):
 		output.category = _output.category
@@ -360,7 +339,7 @@ func add_output(_output: Dictionary) -> void:
 
 	if _output.has('group_idx'):
 		var idx = _output.get('group_idx')
-		output.add_to_group('p' + str(idx))
+		_Global.GROUP.add_to_group('p' + str(idx), output)
 		output.custom_data = idx
 
 	output.set_type(values.get('type') if values.has('type') else 'Variant')
@@ -604,6 +583,9 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 		# custom data
 		if _config.has('data'):
 			instance.data = _config.data
+
+		if _config.has('group'):
+			_Global.GROUP.add_to_group(_config.group, instance)
 
 		# instance flow connections
 		match (_config.type):

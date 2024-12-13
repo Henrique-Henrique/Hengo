@@ -17,6 +17,7 @@ func get_values() -> Dictionary:
 
 	return data
 
+
 func get_all_values(_get_item: bool = false) -> Array:
 	var arr: Array = []
 

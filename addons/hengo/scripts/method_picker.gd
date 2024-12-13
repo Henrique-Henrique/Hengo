@@ -655,6 +655,32 @@ func start_api(_class_name: StringName = 'all') -> int:
 							}
 						})
 						idx += 1
+					
+					# functions
+					print(
+						_Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool:
+						return x.type == 'func').map(func(y): return y.props)
+					)
+					for func_ref in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
+						var dt: Dictionary = {
+							name = 'Func -> ' + func_ref.props[0].value,
+							data = {
+								name = 'Func -> ' + func_ref.props[0].name,
+								sub_type = 'user_func',
+								route = _Router.current_route,
+								group = 'f_' + str(func_ref.hash)
+							}
+						}
+
+						dt.data.inputs = []
+						
+						var p_idx: int = 0
+						for prop_config in func_ref.props[1].value:
+							prop_config.group = 'f_' + str(func_ref.hash) + '_' + str(p_idx)
+							dt.data.inputs.append(prop_config)
+							p_idx += 1
+
+						api_list.append(dt)
 
 
 	return OK

@@ -9,6 +9,9 @@ const _Hengo = preload('res://addons/hengo/hengo.gd')
 const _StateTransition = preload('res://addons/hengo/scripts/state_transition.gd')
 const _PropsContainer = preload('res://addons/hengo/scripts/props_container.gd')
 const _HengoRoot = preload('res://addons/hengo/scripts/hengo_root.gd')
+const _GeneralMenu = preload('res://addons/hengo/scripts/general_menu.gd')
+const _RouteReferenceProps = preload('res://addons/hengo/scripts/route_reference_props.gd')
+const _Group = preload('res://addons/hengo/scripts/group.gd')
 
 # plugin
 static var editor_interface: EditorInterface
@@ -19,6 +22,7 @@ static var STATE_CAM: _Cam
 static var CNODE_CAM: _Cam
 static var CNODE_CONTAINER: Control
 static var GENERAL_CONTAINER: Control
+static var ROUTE_REFERENCE_CONTAINER: Control
 static var COMMENT_CONTAINER: Control
 static var STATE_CONTAINER: Control
 static var SIDE_BAR: PanelContainer
@@ -29,12 +33,15 @@ static var POPUP_CONTAINER: CanvasLayer
 static var LOCAL_VAR_SECTION
 static var SIGNAL_SECTION
 static var GENERAL_POPUP: PanelContainer
+static var ROUTE_REFERENCE_PROPS: _RouteReferenceProps
 static var CODE_TOOLTIP: PanelContainer
 static var ERROR_BT: Button
 static var CONNECTION_GUIDE: _ConnectionGuide
 static var STATE_CONNECTION_GUIDE: _ConnectionGuide
 static var PROPS_CONTAINER: _PropsContainer
 static var HENGO_ROOT: _HengoRoot
+static var GENERAL_MENU: _GeneralMenu
+static var GROUP: _Group
 
 # cnodes
 static var can_make_connection: bool = false

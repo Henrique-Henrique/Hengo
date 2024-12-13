@@ -1,0 +1,45 @@
+[gd_scene load_steps=4 format=3 uid="uid://cm6gt7yq5u8vy"]
+
+[ext_resource type="Texture2D" uid="uid://druwq8ra8hfkx" path="res://addons/hengo/assets/icons/cnode/func.svg" id="1_johya"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/route_reference.gd" id="1_qdfpd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e4ee6"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.0876837, 0.206262, 0.207311, 0.933333)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="RouteReference" type="PanelContainer"]
+offset_right = 10.0
+offset_bottom = 9.0
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_e4ee6")
+script = ExtResource("1_qdfpd")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer"]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("1_johya")
+
+[node name="Name" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+text = "Function"
+
+[node name="References" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+text = "0 references"

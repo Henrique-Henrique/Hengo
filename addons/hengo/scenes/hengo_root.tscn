@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=67 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -11,7 +11,6 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/error_bt.gd" id="8_fl5nl"]
-[ext_resource type="PackedScene" uid="uid://bt8df11sb6xyh" path="res://addons/hengo/scenes/side_menu_pop_up.tscn" id="8_h6yjh"]
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
 [ext_resource type="Shader" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
 [ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
@@ -34,6 +33,8 @@
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="25_mk8qi"]
 [ext_resource type="Texture2D" uid="uid://dxlxyjviyo0sq" path="res://addons/hengo/assets/icons/menu/panel-left.svg" id="26_c0oyf"]
 [ext_resource type="Texture2D" uid="uid://xfkxadepfmsd" path="res://addons/hengo/assets/icons/menu/panel-right.svg" id="27_2381i"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
@@ -42,9 +43,9 @@ bg_color = Color(0.0870588, 0.0870588, 0.0870588, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(605, 895)
-shader_parameter/offset = Vector2(197.377, 332.952)
-shader_parameter/zoom_factor = 0.718163
+shader_parameter/screen_size = Vector2(915, 1362)
+shader_parameter/offset = Vector2(-19.5672, 34.5203)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -137,9 +138,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1305, 895)
-shader_parameter/offset = Vector2(57.3315, 76.2711)
-shader_parameter/zoom_factor = 0.550099
+shader_parameter/screen_size = Vector2(1616, 1362)
+shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -149,6 +150,9 @@ colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2tipt"]
+bg_color = Color(0.366044, 0.12023, 0.0822263, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_budvq"]
 bg_color = Color(0.160784, 0.168627, 0.227451, 1)
@@ -301,8 +305,6 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 1.0
-offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_2muha")
@@ -311,8 +313,11 @@ theme = ExtResource("1_2muha")
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+
+[node name="RouteReferenceContainer" type="Control" parent="Split/TabContainer/StateUI/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
 
 [node name="StateConnectionGuide" type="Line2D" parent="Split/TabContainer/StateUI/Cam"]
 unique_name_in_owner = true
@@ -691,16 +696,27 @@ unique_name_in_owner = true
 visible = false
 layout_mode = 2
 
+[node name="GeneralMenu" type="PopupMenu" parent="."]
+unique_name_in_owner = true
+size = Vector2i(134, 60)
+script = ExtResource("31_keoa0")
+
 [node name="DropPropMenu" type="PopupMenu" parent="."]
 unique_name_in_owner = true
-size = Vector2i(28, 8)
+size = Vector2i(38, 12)
 script = ExtResource("5_vwcbq")
 
-[node name="SideMenuPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
+[node name="RouteReferenceProps" parent="." instance=ExtResource("8_uxy8l")]
+unique_name_in_owner = true
 visible = false
 
-[node name="SideMenuPopUp" parent="SideMenuPopUpContainer" instance=ExtResource("8_h6yjh")]
-unique_name_in_owner = true
+[node name="RRProps" type="PanelContainer" parent="RouteReferenceProps"]
+offset_right = 5.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_2tipt")
+script = ExtResource("34_wyhwi")
+
+[node name="List" type="VBoxContainer" parent="RouteReferenceProps/RRProps"]
+layout_mode = 2
 
 [node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
 visible = false

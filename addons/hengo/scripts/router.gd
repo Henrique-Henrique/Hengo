@@ -52,7 +52,6 @@ static func change_route(_route: Dictionary) -> void:
 		for comment in comment_reference.get(_route.id):
 			_Global.COMMENT_CONTAINER.add_child(comment)
 
-
 		match _route.type:
 			ROUTE_TYPE.FUNC:
 				_Global.LOCAL_VAR_SECTION.show_local_vars(_route)

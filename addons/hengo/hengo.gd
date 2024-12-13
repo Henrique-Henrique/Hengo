@@ -123,7 +123,6 @@ func _enter_tree():
 	main_scene = _Assets.HengoRootScene.instantiate()
 	side_bar = load('res://addons/hengo/scenes/side_bar.tscn').instantiate()
 
-	_Global.SIDE_MENU_POPUP = main_scene.get_node('%SideMenuPopUp')
 	_Global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)

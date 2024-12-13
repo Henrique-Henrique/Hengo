@@ -40,7 +40,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 		for cnode in general.virtual_cnode_list:
 			data.cnode_list = get_cnode_list(
 				_Router.route_reference[general.route.id],
-				['var', 'set_var', 'user_func', 'signal_connection', 'signal_emit', 'signal_disconnection']
+				['var', 'set_var', 'signal_connection', 'signal_emit', 'signal_disconnection']
 			)
 
 		generals.append(data)
@@ -58,7 +58,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			pos = var_to_str(state.position),
 			cnode_list = get_cnode_list(
 				_Router.route_reference[state.route.id],
-				['user_func', 'signal_connection', 'signal_emit', 'signal_disconnection']
+				['signal_connection', 'signal_emit', 'signal_disconnection']
 			),
 			events = [],
 			transitions = []
@@ -158,7 +158,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			instances = [],
 			cnode_list = get_cnode_list(
 				_Router.route_reference[item.route.id],
-				['local_var', 'set_local_var', 'user_func', 'func_input', 'func_output']
+				['local_var', 'set_local_var', 'func_input', 'func_output']
 			)
 		}
 		
@@ -219,7 +219,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			instances = [],
 			cnode_list = get_cnode_list(
 				_Router.route_reference[item.route.id],
-				['local_var', 'set_local_var', 'user_func', 'signal_virtual']
+				['local_var', 'set_local_var', 'signal_virtual']
 			)
 		}
 
@@ -512,6 +512,9 @@ static func load_and_edit(_path: StringName) -> void:
 
 	for state in _Global.GENERAL_CONTAINER.get_children():
 		state.queue_free()
+
+	for state in _Global.ROUTE_REFERENCE_CONTAINER.get_children():
+		state.queue_free()
 	
 	for cnode in _Global.CNODE_CONTAINER.get_children():
 		cnode.queue_free()
@@ -552,6 +555,8 @@ static func load_and_edit(_path: StringName) -> void:
 	for local_var_item in local_var_container.get_children():
 		local_var_item.queue_free()
 
+	_Global.GROUP.group.clear()
+
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config
 	var dir: DirAccess = DirAccess.open('res://hengo')
@@ -559,6 +564,9 @@ static func load_and_edit(_path: StringName) -> void:
 	parse_other_scripts_data(dir)
 
 	# ---------------------------------------------------------------------------- #
+
+	# confirming queue free before check errors
+	await _Global.CNODE_CAM.get_tree().process_frame
 
 	_Global.current_script_path = _path
 	_Router.current_route = {}
@@ -996,9 +1004,6 @@ static func load_and_edit(_path: StringName) -> void:
 		# folding comments after add to scene
 		for comment in _Global.COMMENT_CONTAINER.get_children():
 			comment.pin_to_cnodes(true)
-
-	# confirming queue free before check errors
-	await _Global.CNODE_CAM.get_tree().process_frame
 
 	# checking errors
 	for state: _State in _Global.STATE_CONTAINER.get_children():

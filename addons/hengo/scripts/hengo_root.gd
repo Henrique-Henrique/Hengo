@@ -8,6 +8,8 @@ const _Global = preload('res://addons/hengo/scripts/global.gd')
 const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
 const _State = preload('res://addons/hengo/scripts/state.gd')
 const _Enums = preload('res://addons/hengo/references/enums.gd')
+const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
+const _Group = preload('res://addons/hengo/scripts/group.gd')
 
 var target_zoom: float = .8
 var state_ui: Panel
@@ -92,6 +94,7 @@ func _ready() -> void:
 	_Global.CNODE_CAM = cnode_cam
 	_Global.SIDE_BAR = get_node('%SideBar')
 	_Global.DROP_PROP_MENU = get_node('%DropPropMenu')
+	_Global.GENERAL_MENU = get_node('%GeneralMenu')
 	_Global.CNODE_CONTAINER = get_node('%CnodeContainer')
 	_Global.COMMENT_CONTAINER = get_node('%CommentContainer')
 	_Global.STATE_CONTAINER = get_node('%StateContainer')
@@ -104,8 +107,11 @@ func _ready() -> void:
 	_Global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	_Global.STATE_CONNECTION_GUIDE = cnode_ui.get_node('%StateConnectionGuide')
 	_Global.GENERAL_CONTAINER = state_cam.get_node('%GeneralContainer')
+	_Global.ROUTE_REFERENCE_CONTAINER = state_cam.get_node('%RouteReferenceContainer')
+	_Global.ROUTE_REFERENCE_PROPS = get_node('%RouteReferenceProps').get_child(1)
 	_Global.PROPS_CONTAINER = get_node('%PropsUI')
 	_Global.HENGO_ROOT = self
+	_Global.GROUP = _Group.new()
 
 	# config code preview
 	var editor: TextEdit = _Global.CODE_TOOLTIP.get_child(0)
@@ -137,6 +143,24 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 
 					cnode_selecting_rect = true
 					start_select_pos = get_global_mouse_position()
+				MOUSE_BUTTON_RIGHT:
+					_Global.GENERAL_MENU.show_menu({
+						list = [
+						{
+							name = 'add function',
+							call = func():
+								_RouteReference.instantiate_and_add({
+									name = 'Function Name',
+									position = _Global.ROUTE_REFERENCE_CONTAINER.get_local_mouse_position(),
+									type = 'func'
+								})
+					},
+						# {
+						# 	name = 'add state',
+						# 	call = func(): pass
+						# }
+						]
+					})
 		else:
 			match _event.button_index:
 				MOUSE_BUTTON_LEFT:

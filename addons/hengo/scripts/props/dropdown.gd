@@ -127,6 +127,9 @@ func set_default(_text: String) -> void:
 				get_parent().owner.set_type(_text)
 		'all_props':
 			if _text.begins_with('t:'):
+				if custom_data.input_ref.is_type_relatable('out', 'in', _text.split('t:')[1], custom_data.input_ref.connection_type):
+					return
+				
 				queue_free()
 
 				custom_data.input_ref.reset_in_props(true)

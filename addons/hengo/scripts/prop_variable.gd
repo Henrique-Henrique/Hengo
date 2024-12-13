@@ -1,6 +1,10 @@
 @tool
 extends HBoxContainer
 
+# imports
+const _Global = preload('res://addons/hengo/scripts/global.gd')
+
+
 const type = StringName('VARIABLE')
 
 
@@ -10,11 +14,11 @@ func _ready() -> void:
 
 
 func _on_change_name(_new_text) -> void:
-	get_tree().call_group('p' + str(get_index()), 'set_default', _new_text)
+	_Global.GROUP.call_group(get_group_name(), 'set_default', [_new_text])
 
 
 func _on_type_changed(_type: String) -> void:
-	get_tree().call_group('p' + str(get_index()), 'set_default', 't:' + _type)
+	_Global.GROUP.call_group(get_group_name(), 'set_default', ['t:' + _type])
 
 
 func get_value() -> Dictionary:
@@ -30,3 +34,7 @@ func set_value(_dict: Dictionary) -> void:
 	$Name.text = _dict.name
 	get_node('Types').set_default(_dict.type)
 	(get_node('Export') as CheckBox).button_pressed = _dict. export
+
+
+func get_group_name() -> String:
+	return 'p' + str(get_index())
