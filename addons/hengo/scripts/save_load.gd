@@ -11,6 +11,8 @@ const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
 const _GeneralRoute = preload('res://addons/hengo/scripts/general_route.gd')
 const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
 const _Dropdown = preload('res://addons/hengo/scripts/props/dropdown.gd')
+const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
+
 # ---------------------------------------------------------------------------- #
 #                                    saving                                    #
 # ---------------------------------------------------------------------------- #
@@ -38,10 +40,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 		data.id = general.id
 
 		for cnode in general.virtual_cnode_list:
-			data.cnode_list = get_cnode_list(
-				_Router.route_reference[general.route.id],
-				['var', 'set_var', 'signal_connection', 'signal_emit', 'signal_disconnection']
-			)
+			data.cnode_list = get_cnode_list(_Router.route_reference[general.route.id])
 
 		generals.append(data)
 
@@ -56,10 +55,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			id = state.hash,
 			name = state.get_state_name(),
 			pos = var_to_str(state.position),
-			cnode_list = get_cnode_list(
-				_Router.route_reference[state.route.id],
-				['signal_connection', 'signal_emit', 'signal_disconnection']
-			),
+			cnode_list = get_cnode_list(_Router.route_reference[state.route.id]),
 			events = [],
 			transitions = []
 		}
@@ -144,6 +140,23 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	script_data['var_item_list'] = var_item_list
 
 	# ---------------------------------------------------------------------------- #
+	# ---------------------------------------------------------------------------- #
+	# ---------------------------------------------------------------------------- #
+	# ---------------------------------------------------------------------------- #
+	# Funcions
+	var func_list: Array[Dictionary] = []
+
+	for func_item in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x): return x.type == StringName('func')):
+		func_list.append({
+			hash = func_item.hash,
+			props = func_item.props,
+			cnode_list = get_cnode_list(_Router.route_reference[func_item.route.id]),
+			pos = var_to_str(func_item.position)
+		})
+
+	script_data['func_list'] = func_list
+
+	# ---------------------------------------------------------------------------- #
 	# Funcions
 	var func_section = _Global.SIDE_BAR.get_node('%Function').get_node('%Container')
 	var func_item_list: Array[Dictionary] = []
@@ -156,12 +169,9 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			inputs = [],
 			outputs = [],
 			instances = [],
-			cnode_list = get_cnode_list(
-				_Router.route_reference[item.route.id],
-				['local_var', 'set_local_var', 'func_input', 'func_output']
-			)
+			cnode_list = get_cnode_list(_Router.route_reference[item.route.id])
 		}
-		
+
 		# inputs
 		for input: Dictionary in item.res[1].inputs:
 			item_data.inputs.append({
@@ -217,10 +227,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			start_data = {},
 			params = [],
 			instances = [],
-			cnode_list = get_cnode_list(
-				_Router.route_reference[item.route.id],
-				['local_var', 'set_local_var', 'signal_virtual']
-			)
+			cnode_list = get_cnode_list(_Router.route_reference[item.route.id])
 		}
 
 		# params
@@ -327,7 +334,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 #
 #
 # ---------------------------------------------------------------------------- #
-static func get_cnode_list(_cnode_list: Array, _ignore_list: Array) -> Array:
+static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Array:
 	var arr: Array = []
 
 	for cnode in _cnode_list:
@@ -419,6 +426,11 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array) -> Array:
 		match cnode.type:
 			'expression':
 				cnode_data['exp'] = cnode.get_node('%Container').get_child(1).get_child(0).raw_text
+			'user_func', 'func_input', 'func_output':
+				for group_name: String in _Global.GROUP.get_group_list(cnode):
+					if group_name.begins_with('f_'):
+						cnode_data['group'] = group_name
+					
 
 		arr.append(cnode_data)
 
@@ -462,7 +474,7 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 			inputs = cnode.inputs,
 			outputs = cnode.outputs,
 			hash = cnode.hash,
-			route = _route
+			route = _route,
 		}
 
 		if cnode.has('fantasy_name'):
@@ -477,6 +489,8 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 		if cnode.has('exp'):
 			cnode_data['exp'] = cnode.get('exp')
 
+		if cnode.has('group'):
+			cnode_data['group'] = cnode.group
 		
 		var cnode_inst = _CNode.instantiate_cnode(cnode_data)
 
@@ -703,8 +717,29 @@ static func load_and_edit(_path: StringName) -> void:
 			_load_cnode(general_config.cnode_list, general.route, inst_id_refs)
 
 			inst_id_refs[float(general.id)] = general
+		
+		# functions
+		for func_config: Dictionary in data['func_list']:
+			var dt: Dictionary = {
+				hash = func_config.hash,
+				props = func_config.props,
+				name = 'Function Name',
+				pos = func_config.pos,
+				type = 'func',
+				route = {
+					name = '',
+					type = _Router.ROUTE_TYPE.FUNC,
+					id = _UtilsName.get_unique_name()
+				},
+			}
 
+			var func_ref = _RouteReference.instantiate_and_add(dt)
 
+			_load_cnode(func_config.cnode_list, func_ref.route, inst_id_refs)
+			
+			inst_id_refs[float(func_ref.hash)] = func_ref
+		
+		# states
 		for state: Dictionary in data['states']:
 			var state_inst = _State.instantiate_and_add_to_scene({
 				name = state.name,

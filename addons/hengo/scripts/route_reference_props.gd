@@ -5,9 +5,6 @@ extends PanelContainer
 const _Global = preload('res://addons/hengo/scripts/global.gd')
 const PropContainerScene = preload('res://addons/hengo/scenes/prop_container.tscn')
 
-func _ready() -> void:
-	print('dsa')
-
 
 func show_props(_config: Dictionary, _ref) -> void:
 	position = get_global_mouse_position()
@@ -28,6 +25,12 @@ func show_props(_config: Dictionary, _ref) -> void:
 				if prop.has('value'):
 					ref.set_default(prop.value)
 				
+				if prop.name == 'name':
+					ref.value_changed.connect(func(_name):
+						_ref.change_name(_name)
+						prop.value = _name
+						)
+
 				prop_ref.add_child(ref)
 			'in_out':
 				var ref = load('res://addons/hengo/scenes/props/function_input_output.tscn').instantiate()
@@ -42,7 +45,7 @@ func show_props(_config: Dictionary, _ref) -> void:
 				for prop_data in prop.value:
 					ref._add(prop_data)
 
-
+				# added input/output
 				ref.added_param.connect(func():
 					var new_prop: Dictionary = {
 						name = 'param 2',
@@ -74,7 +77,6 @@ func show_props(_config: Dictionary, _ref) -> void:
 									'signal_connection', 'signal_emit', 'func_output':
 										node_ref.add_input(new_prop)
 									_:
-										print(new_prop)
 										node_ref.add_output(new_prop)
 
 					)
@@ -96,6 +98,8 @@ func show_props(_config: Dictionary, _ref) -> void:
 					prop.value[_idx].name = _name
 
 					var group_name: StringName = StringName('fi_' + str(_ref.hash) + '_' + str(_idx)) if in_out_type == 'in' else StringName('fo_' + str(_ref.hash) + '_' + str(_idx))
+
+					print('c->> ', group_name)
 
 					for node_ref in _Global.GROUP.get_nodes_from_group(group_name):
 						node_ref.change_name(_name)

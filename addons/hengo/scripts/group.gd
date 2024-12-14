@@ -10,12 +10,10 @@ func add_to_group(_group: StringName, _ref) -> void:
     if not group.has(_group):
         group[_group] = []
     
-    print('t-> ----')
     group[_group].append(_ref)
 
 
 func remove_from_group(_group: StringName, _ref) -> void:
-    print('t-> ----')
     group[_group].erase(_ref)
 
 
@@ -29,3 +27,13 @@ func call_group(_group: StringName, _callback_name: StringName, _params: Array):
     
     for ref in group[_group]:
         ref.callv(_callback_name, _params)
+
+
+func get_group_list(_ref) -> Array:
+    var arr: Array = []
+
+    for key in group:
+        if group[key].has(_ref):
+            arr.append(key)
+
+    return arr

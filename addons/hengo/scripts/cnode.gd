@@ -562,26 +562,54 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 						_config.type = 'default'
 
 		instance.cnode_type = _config.type
+		
+		# hash of user function coming from group singleton
+		var func_id: String = ''
+
+		if _config.has('group'):
+			_Global.GROUP.add_to_group(_config.group, instance)
+			
+			if _config.group.begins_with('f_'):
+				func_id = _config.group.split('f_')[1]
 
 		# this tell hengo how to generate code
 		if _config.has('category'):
 			instance.category = _config.get('category')
 
 		if _config.has('inputs'):
-			for i in _config.get('inputs'):
-				instance.add_input(i)
+			var idx: int = 0
+
+			for input_config in _config.get('inputs'):
+				if not func_id.is_empty():
+					# adding user function inputs group
+					match _config.sub_type:
+						'func_output':
+							input_config.group = 'fo_' + func_id + '_' + str(idx)
+						_:
+							input_config.group = 'fi_' + func_id + '_' + str(idx)
+				
+				instance.add_input(input_config)
+				idx += 1
 
 		if _config.has('outputs'):
-			for i in _config.get('outputs'):
-				instance.add_output(i)
+			var idx: int = 0
+
+			for output_config in _config.get('outputs'):
+				if not func_id.is_empty():
+					# adding user function ouputs group
+					match _config.sub_type:
+						'func_input':
+							output_config.group = 'fi_' + func_id + '_' + str(idx)
+						_:
+							output_config.group = 'fo_' + func_id + '_' + str(idx)
+				
+				instance.add_output(output_config)
+				idx += 1
 
 		# custom data
 		if _config.has('data'):
 			instance.data = _config.data
-
-		if _config.has('group'):
-			_Global.GROUP.add_to_group(_config.group, instance)
-
+		
 		# instance flow connections
 		match (_config.type):
 			'default':
@@ -656,6 +684,8 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 				'signal_virtual', 'func_input':
 					var ref = _config.route.item_ref
 					ref.virtual_cnode_list.append(instance)
+				'func_output':
+					_config.route.item_ref.output_cnode = instance
 				'var', 'local_var':
 					instance.get_node('%TitleContainer').visible = false
 				'const':

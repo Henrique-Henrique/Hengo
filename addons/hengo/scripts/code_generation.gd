@@ -153,16 +153,16 @@ func _physics_process(delta: float) -> void:
 	})
 
 	# functions
-	var func_code: String = '#\n# Functions\n'
+	var func_code: String = '# Functions\n'
 
-	for func_item in _Global.SIDE_BAR.get_node('%Function').get_node('%Container').get_children():
-		var func_name: String = func_item.res[0].value
+	for func_item in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
+		var func_name: String = func_item.props[0].value
 
 		func_code += 'func {name}({params}):\n'.format({
 			name = func_name.to_snake_case(),
-			params = ', '.join(func_item.res[1].inputs.map(
+			params = ', '.join(func_item.props[1].value.map(
 				func(x: Dictionary) -> String:
-					return x.res.name
+					return x.name
 		))
 		})
 

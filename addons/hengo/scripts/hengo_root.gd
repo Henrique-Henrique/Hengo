@@ -10,6 +10,7 @@ const _State = preload('res://addons/hengo/scripts/state.gd')
 const _Enums = preload('res://addons/hengo/references/enums.gd')
 const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
 const _Group = preload('res://addons/hengo/scripts/group.gd')
+const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
 
 var target_zoom: float = .8
 var state_ui: Panel
@@ -150,9 +151,14 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 							name = 'add function',
 							call = func():
 								_RouteReference.instantiate_and_add({
-									name = 'Function Name',
+									name = 'func_name',
 									position = _Global.ROUTE_REFERENCE_CONTAINER.get_local_mouse_position(),
-									type = 'func'
+									type = 'func',
+									route = {
+										name = '',
+										type = _Router.ROUTE_TYPE.FUNC,
+										id = _UtilsName.get_unique_name()
+									}
 								})
 					},
 						# {

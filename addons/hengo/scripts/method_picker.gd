@@ -662,10 +662,13 @@ func start_api(_class_name: StringName = 'all') -> int:
 						return x.type == 'func').map(func(y): return y.props)
 					)
 					for func_ref in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
+						var dt_name: String = func_ref.props[0].value
+
 						var dt: Dictionary = {
-							name = 'Func -> ' + func_ref.props[0].value,
+							name = 'Func -> ' + dt_name,
 							data = {
-								name = 'Func -> ' + func_ref.props[0].name,
+								name = dt_name,
+								fantasy_name = 'Func -> ' + dt_name,
 								sub_type = 'user_func',
 								inputs = [],
 								outputs = [],
