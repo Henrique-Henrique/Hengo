@@ -317,7 +317,6 @@ func _select() -> void:
 				from_cnode = cnode,
 			})
 
-
 		_Global.GENERAL_POPUP.get_parent().hide()
 
 
@@ -657,10 +656,6 @@ func start_api(_class_name: StringName = 'all') -> int:
 						idx += 1
 					
 					# functions
-					print(
-						_Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool:
-						return x.type == 'func').map(func(y): return y.props)
-					)
 					for func_ref in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
 						var dt_name: String = func_ref.props[0].value
 

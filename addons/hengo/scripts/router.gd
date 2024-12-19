@@ -3,6 +3,7 @@ extends Node
 
 # imports
 const _Global = preload('res://addons/hengo/scripts/global.gd')
+const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 enum ROUTE_TYPE {
 	STATE,
@@ -61,6 +62,11 @@ static func change_route(_route: Dictionary) -> void:
 					if ['virtual', 'if'].has(cnode.type):
 						_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 				
+				for state in _Global.STATE_CAM.get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
+					state.unselect()
+				
+				_route.state_ref.select()
+
 				_Global.LOCAL_VAR_SECTION.hide()
 			_:
 				_Global.LOCAL_VAR_SECTION.hide()

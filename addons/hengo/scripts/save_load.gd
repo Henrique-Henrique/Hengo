@@ -150,6 +150,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 		func_list.append({
 			hash = func_item.hash,
 			props = func_item.props,
+			ref_count = func_item.ref_count,
 			cnode_list = get_cnode_list(_Router.route_reference[func_item.route.id]),
 			pos = var_to_str(func_item.position)
 		})
@@ -734,6 +735,8 @@ static func load_and_edit(_path: StringName) -> void:
 			}
 
 			var func_ref = _RouteReference.instantiate_and_add(dt)
+
+			func_ref.ref_count = func_config.ref_count
 
 			_load_cnode(func_config.cnode_list, func_ref.route, inst_id_refs)
 			

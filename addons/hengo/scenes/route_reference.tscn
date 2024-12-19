@@ -22,7 +22,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_e4ee6")
 script = ExtResource("1_qdfpd")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
-process_mode = 4
 layout_mode = 2
 mouse_filter = 2
 
@@ -38,8 +37,7 @@ process_mode = 4
 layout_mode = 2
 text = "Function"
 
-[node name="References" type="Label" parent="HBoxContainer"]
+[node name="References" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
-process_mode = 4
 layout_mode = 2
 text = "0 references"

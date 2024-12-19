@@ -6,10 +6,13 @@ const _Global = preload('res://addons/hengo/scripts/global.gd')
 const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
 const _Router = preload('res://addons/hengo/scripts/router.gd')
 const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
+const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 const ROUTE_SCENE = preload('res://addons/hengo/scenes/route_reference.tscn')
+const REF_TEXT = ' reference'
 
 var hash: int = -1
+var ref_count: int = 0
 var route: Dictionary = {
 	name = '',
 	type = _Router.ROUTE_TYPE.FUNC,
@@ -40,6 +43,29 @@ var props: Array = [
 
 func _ready() -> void:
 	gui_input.connect(_on_gui)
+	get_node('%References').pressed.connect(_on_reference_press)
+
+func _on_reference_press() -> void:
+	var container = VBoxContainer.new()
+
+	for cnode in _Global.GROUP.get_nodes_from_group('f_' + str(hash)):
+		match cnode.type:
+			'func_input', 'func_output':
+				continue
+
+		var bt = Button.new()
+		bt.pressed.connect(ref_pressed.bind(cnode))
+		bt.text = 'In -> ' + cnode.route_ref.name
+		container.add_child(bt)
+	
+	_Global.GENERAL_POPUP.get_parent().show_content(container, 'Pick a Method', get_global_mouse_position())
+
+
+func ref_pressed(_cnode) -> void:
+	_Router.change_route(_cnode.route_ref)
+	
+	_cnode.select()
+	_Global.GENERAL_POPUP.get_parent().hide()
 
 
 func _on_gui(_event: InputEvent) -> void:
@@ -71,6 +97,16 @@ func move(_pos: Vector2) -> void:
 
 func change_name(_name: String) -> void:
 	get_node('%Name').text = _name
+	route.name = _name
+
+
+func change_ref_count(_factor: int = 1) -> void:
+	set_ref_count(ref_count + (1 * _factor))
+
+
+func set_ref_count(_count: int) -> void:
+	ref_count = _count
+	get_node('%References').text = str(ref_count) + (REF_TEXT if ref_count < 2 else REF_TEXT + 's')
 
 
 static func instantiate(_config: Dictionary) -> _RouteReference:
@@ -89,7 +125,6 @@ static func instantiate(_config: Dictionary) -> _RouteReference:
 	route_reference.position = _config.position if _config.has('position') else Vector2.ZERO
 	route_reference.type = _config.type
 
-
 	if _config.has('pos'):
 		route_reference.position = str_to_var(_config.pos)
 
@@ -106,9 +141,6 @@ static func instantiate(_config: Dictionary) -> _RouteReference:
 					route = _config.route
 				}
 
-				# if _config.has('input'):
-				# 	in_data.hash = _config.get('input').get('id')
-
 				var out_data: Dictionary = {
 					name = 'output',
 					sub_type = 'func_output',
@@ -116,6 +148,7 @@ static func instantiate(_config: Dictionary) -> _RouteReference:
 					route = _config.route
 				}
 
+				# virtual function nodes
 				var input = _CNode.instantiate_cnode(in_data)
 				var output = _CNode.instantiate_cnode(out_data)
 
@@ -138,3 +171,10 @@ static func instantiate_and_add(_config: Dictionary) -> _RouteReference:
 	_Global.ROUTE_REFERENCE_CONTAINER.add_child(route_reference)
 
 	return route_reference
+
+
+static func get_route_ref_by_id_or_null(_id: int) -> _RouteReference:
+	var route_id_list = _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x): return x.hash == _id)
+
+	if not route_id_list.is_empty(): return route_id_list[0]
+	return null

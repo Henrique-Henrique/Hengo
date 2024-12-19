@@ -8,8 +8,8 @@ var target_zoom: float = 1.
 
 const MIN_ZOOM: float = .2
 const MAX_ZOOM: float = 1.
-const ZOOM_INCREMENT: float = .15
-const ZOOM_RATE: float = 12.
+const ZOOM_INCREMENT: float = .25
+const ZOOM_RATE: float = 14.
 
 var t_x: Vector2 = Vector2(1, 0)
 var t_y: Vector2 = Vector2(0, 1)

@@ -10,6 +10,7 @@ const _Router = preload('res://addons/hengo/scripts/router.gd')
 const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
 const _SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
 const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
+const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
 
 var flow_to: Dictionary = {}
 var type
@@ -255,6 +256,16 @@ func add_to_scene() -> void:
 	if not (_Router.route_reference[route_ref.id] as Array).has(self):
 		_Router.route_reference[route_ref.id].append(self)
 	
+
+	var groups: Array = _Global.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
+
+	if not groups.is_empty():
+		var group = groups[0]
+		var id = int((group as String).split('f_')[1])
+		var route_ref_node = _RouteReference.get_route_ref_by_id_or_null(id)
+	
+		route_ref_node.change_ref_count()
+
 	deleted = false
 
 
@@ -279,6 +290,16 @@ func remove_from_scene() -> void:
 		_Router.route_reference[route_ref.id].erase(self)
 		_Global.CNODE_CONTAINER.remove_child(self)
 	
+
+	var groups: Array = _Global.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
+
+	if not groups.is_empty():
+		var group = groups[0]
+		var id = int((group as String).split('f_')[1])
+		var route_ref_node = _RouteReference.get_route_ref_by_id_or_null(id)
+	
+		route_ref_node.change_ref_count(-1)
+
 	deleted = true
 
 
