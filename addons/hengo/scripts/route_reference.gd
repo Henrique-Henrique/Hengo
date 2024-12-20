@@ -58,14 +58,14 @@ func _on_reference_press() -> void:
 		bt.text = 'In -> ' + cnode.route_ref.name
 		container.add_child(bt)
 	
-	_Global.GENERAL_POPUP.get_parent().show_content(container, 'Pick a Method', get_global_mouse_position())
+	_Global.GENERAL_POPUP.get_parent().show_content(container, 'Go to Reference', get_global_mouse_position())
 
 
 func ref_pressed(_cnode) -> void:
 	_Router.change_route(_cnode.route_ref)
-	
 	_cnode.select()
 	_Global.GENERAL_POPUP.get_parent().hide()
+	_Global.CNODE_CAM.go_to_center(_cnode.position + _cnode.size / 2)
 
 
 func _on_gui(_event: InputEvent) -> void:
@@ -73,16 +73,19 @@ func _on_gui(_event: InputEvent) -> void:
 		if _event.pressed:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				moving = true
+				select()
 
-				# unselecting others states
-				for state in _Global.STATE_CONTAINER.get_children():
-					state.unselect()
+				if _event.double_click:
+					# unselecting others states
+					for state in _Global.STATE_CONTAINER.get_children():
+						state.unselect()
 
-				_Router.change_route(route)
+					_Router.change_route(route)
 			elif _event.button_index == MOUSE_BUTTON_RIGHT:
 				_Global.ROUTE_REFERENCE_PROPS.show_props({list = props}, self)
 		else:
 			moving = false
+			unselect()
 
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
@@ -164,6 +167,14 @@ static func instantiate(_config: Dictionary) -> _RouteReference:
 			)
 			
 	return route_reference
+
+
+func select() -> void:
+	get_node('%SelectBorder').visible = true
+
+
+func unselect() -> void:
+	get_node('%SelectBorder').visible = false
 
 
 static func instantiate_and_add(_config: Dictionary) -> _RouteReference:

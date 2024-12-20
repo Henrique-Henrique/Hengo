@@ -1,24 +1,30 @@
-[gd_scene load_steps=4 format=3 uid="uid://cm6gt7yq5u8vy"]
+[gd_scene load_steps=5 format=3 uid="uid://cm6gt7yq5u8vy"]
 
+[ext_resource type="StyleBox" uid="uid://b1ota3ch70ckt" path="res://addons/hengo/resources/style_box/route_reference.tres" id="1_dv5ha"]
 [ext_resource type="Texture2D" uid="uid://druwq8ra8hfkx" path="res://addons/hengo/assets/icons/cnode/func.svg" id="1_johya"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/route_reference.gd" id="1_qdfpd"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e4ee6"]
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-bg_color = Color(0.0876837, 0.206262, 0.207311, 0.933333)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dj30e"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.288, 0.9, 0.8898, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+expand_margin_left = 6.0
+expand_margin_top = 6.0
+expand_margin_right = 6.0
+expand_margin_bottom = 6.0
 
 [node name="RouteReference" type="PanelContainer"]
 offset_right = 10.0
 offset_bottom = 9.0
 mouse_default_cursor_shape = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_e4ee6")
+theme_override_styles/panel = ExtResource("1_dv5ha")
 script = ExtResource("1_qdfpd")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -30,6 +36,8 @@ process_mode = 4
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("1_johya")
+expand_mode = 3
+stretch_mode = 3
 
 [node name="Name" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
@@ -41,3 +49,11 @@ text = "Function"
 unique_name_in_owner = true
 layout_mode = 2
 text = "0 references"
+
+[node name="SelectBorder" type="Panel" parent="."]
+unique_name_in_owner = true
+process_mode = 4
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dj30e")

@@ -15,7 +15,8 @@ var t_x: Vector2 = Vector2(1, 0)
 var t_y: Vector2 = Vector2(0, 1)
 var pos: Vector2 = Vector2.ZERO
 
-# @onready var center_point: Panel = get_parent().get_node('%RefPoint')
+var ignore_process: bool = false
+
 @onready var ref_point: Marker2D = get_node('RefPoint')
 var initial: Vector2 = Vector2.ZERO
 
@@ -83,7 +84,7 @@ func _set_transform(_pos: Vector2) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if _Global.CAM == self:
+	if ignore_process or _Global.CAM == self:
 		var factor: float = ZOOM_RATE * _delta
 		transform.x = lerp(transform.x, t_x, factor)
 		transform.y = lerp(transform.y, t_y, factor)
@@ -95,9 +96,24 @@ func _physics_process(_delta: float) -> void:
 
 		if is_equal_approx(transform.origin.x, pos.x):
 			set_physics_process(false)
+			ignore_process = false
 
 
 # public
 #
 func get_relative_vec2(_pos: Vector2) -> Vector2:
 	return (_pos - global_position) / transform.x.x
+
+
+func go_to(_pos: Vector2) -> void:
+	pos = _pos * (-transform.x)
+	set_physics_process(true)
+
+
+func go_to_center(_pos: Vector2) -> void:
+	pos = (_pos * (-transform.x.x)) + (get_parent().size / 2)
+	t_x = Vector2.RIGHT
+	t_y = Vector2.DOWN
+	
+	ignore_process = true
+	set_physics_process(true)

@@ -76,19 +76,6 @@ func _ready() -> void:
 	state_ui.gui_input.connect(_on_state_gui_input)
 	cnode_ui.gui_input.connect(_on_cnode_gui_input)
 
-	# colors
-	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
-	var color_factor: float = .4
-	var cnode_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/cnode.tres')
-	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
-
-	get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
-	cnode_style_box.bg_color = base_color
-	state_ui.get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
-	cnode_style_box.border_color = base_color.lightened(.15)
-	event_style_box.bg_color = base_color.lightened(.1)
-	event_style_box.border_color = base_color.lightened(.2)
-
 	# setting globals
 	_Global.CAM = state_cam
 	_Global.STATE_CAM = state_cam
@@ -132,6 +119,25 @@ func _ready() -> void:
 
 	state_stat_label = get_node('%StateStatLabel')
 	cnode_stat_label = get_node('%CNodeStatLabel')
+
+	EditorInterface.get_editor_settings().settings_changed.connect(_on_settings_changed)
+	_on_settings_changed()
+
+func _on_settings_changed() -> void:
+	# colors
+	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
+	var color_factor: float = .4
+	var cnode_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/cnode.tres')
+	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
+	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
+
+	get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
+	cnode_style_box.bg_color = base_color
+	state_ui.get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
+	cnode_style_box.border_color = base_color.lightened(.15)
+	event_style_box.bg_color = base_color.lightened(.1)
+	event_style_box.border_color = base_color.lightened(.2)
+	route_ref.bg_color = base_color.lightened(.1)
 
 
 func _on_state_gui_input(_event: InputEvent) -> void:

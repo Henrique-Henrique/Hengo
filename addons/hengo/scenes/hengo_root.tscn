@@ -1,11 +1,10 @@
-[gd_scene load_steps=67 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=66 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
 [ext_resource type="PackedScene" uid="uid://deljertujr1va" path="res://addons/hengo/scenes/side_bar.tscn" id="5_6h34f"]
-[ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="5_oiccs"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/drop_prop_menu.gd" id="5_vwcbq"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
@@ -39,13 +38,13 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0995076, 0.150712, 0.194477, 1)
+bg_color = Color(0.106934, 0.112979, 0.152725, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(0, 0)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1561, 1615)
+shader_parameter/offset = Vector2(444.105, 591.017)
+shader_parameter/zoom_factor = 0.999992
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -81,7 +80,7 @@ content_margin_left = 2.0
 content_margin_top = 1.0
 content_margin_right = 2.0
 content_margin_bottom = 1.0
-bg_color = Color(0.165846, 0.251187, 0.324129, 1)
+bg_color = Color(0.178223, 0.188299, 0.254541, 1)
 shadow_color = Color(0, 0, 0, 0.027451)
 shadow_size = 12
 shadow_offset = Vector2(0, 1.265)
@@ -138,15 +137,15 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1305, 711)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/screen_size = Vector2(2260, 1613)
+shader_parameter/offset = Vector2(861.507, 368.502)
 shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
@@ -288,12 +287,6 @@ texture = ExtResource("12_x1ww2")
 [node name="Cam" type="Node2D" parent="Split/TabContainer/StateUI"]
 position = Vector2(100, 8.42499e-06)
 script = ExtResource("3_84akk")
-
-[node name="CenterDebugReference" type="Sprite2D" parent="Split/TabContainer/StateUI/Cam"]
-visible = false
-modulate = Color(0.992157, 0.207843, 0, 1)
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("5_oiccs")
 
 [node name="RefPoint" type="Marker2D" parent="Split/TabContainer/StateUI/Cam"]
 visible = false
@@ -539,11 +532,6 @@ texture = ExtResource("13_w5ssd")
 [node name="Cam" type="Node2D" parent="Split/HSplitContainer/VBoxContainer/CNodeUI"]
 position = Vector2(100, 8.42499e-06)
 script = ExtResource("3_84akk")
-
-[node name="CenterDebugReference" type="Sprite2D" parent="Split/HSplitContainer/VBoxContainer/CNodeUI/Cam"]
-modulate = Color(0.478431, 1, 0, 1)
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("5_oiccs")
 
 [node name="RefPoint" type="Marker2D" parent="Split/HSplitContainer/VBoxContainer/CNodeUI/Cam"]
 visible = false

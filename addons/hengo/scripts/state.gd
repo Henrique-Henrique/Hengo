@@ -75,7 +75,8 @@ func _on_gui(_event: InputEvent) -> void:
 					select()
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
-					_Router.change_route(route)
+					if _event.double_click:
+						_Router.change_route(route)
 
 					if selected:
 						for i in get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
@@ -86,6 +87,7 @@ func _on_gui(_event: InputEvent) -> void:
 						for i in get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
 							i.moving = false
 							i.unselect()
+
 						select()
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
 					var menu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
@@ -119,6 +121,7 @@ func get_state_name() -> String:
 
 func set_state_name(_name: String) -> void:
 	get_node('%Title').text = _name
+	route.name = _name
 
 func move(_pos: Vector2) -> void:
 	position = _pos
