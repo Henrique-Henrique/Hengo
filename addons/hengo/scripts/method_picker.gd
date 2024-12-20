@@ -365,7 +365,7 @@ func _item_hover(_item) -> void:
 
 
 func _item_exit(_item) -> void:
-	_item.get('theme_override_styles/panel').set('bg_color', Color('#222830'))
+	_item.get('theme_override_styles/panel').set('bg_color', Color(0, 0, 0, .5))
 
 
 func _search(_text: String) -> void:

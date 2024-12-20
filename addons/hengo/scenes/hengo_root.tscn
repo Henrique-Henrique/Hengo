@@ -33,18 +33,19 @@
 [ext_resource type="Texture2D" uid="uid://dxlxyjviyo0sq" path="res://addons/hengo/assets/icons/menu/panel-left.svg" id="26_c0oyf"]
 [ext_resource type="Texture2D" uid="uid://xfkxadepfmsd" path="res://addons/hengo/assets/icons/menu/panel-right.svg" id="27_2381i"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
+[ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="34_8uyjj"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.106934, 0.112979, 0.152725, 1)
+bg_color = Color(0.0306089, 0.103905, 0.111149, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1561, 1615)
-shader_parameter/offset = Vector2(444.105, 591.017)
-shader_parameter/zoom_factor = 0.999992
+shader_parameter/offset = Vector2(249, 330)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -80,7 +81,7 @@ content_margin_left = 2.0
 content_margin_top = 1.0
 content_margin_right = 2.0
 content_margin_bottom = 1.0
-bg_color = Color(0.178223, 0.188299, 0.254541, 1)
+bg_color = Color(0.0510148, 0.173175, 0.185248, 1)
 shadow_color = Color(0, 0, 0, 0.027451)
 shadow_size = 12
 shadow_offset = Vector2(0, 1.265)
@@ -138,8 +139,8 @@ corner_radius_bottom_left = 4
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(2260, 1613)
-shader_parameter/offset = Vector2(861.507, 368.502)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/offset = Vector2(414.987, 1598.59)
+shader_parameter/zoom_factor = 0.449998
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -152,18 +153,6 @@ bg_color = Color(0, 0.65, 0.1625, 0.270588)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2tipt"]
 bg_color = Color(0.366044, 0.12023, 0.0822263, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_budvq"]
-bg_color = Color(0.160784, 0.168627, 0.227451, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.220735, 0.230653, 0.304723, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iqtoh"]
 content_margin_left = 4.0
@@ -716,7 +705,7 @@ offset_right = 230.0
 offset_bottom = 39.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_budvq")
+theme_override_styles/panel = ExtResource("34_8uyjj")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
 layout_mode = 2

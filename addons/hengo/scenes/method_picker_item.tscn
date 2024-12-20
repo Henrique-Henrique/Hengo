@@ -1,16 +1,20 @@
 [gd_scene load_steps=9 format=3 uid="uid://bp41rm18x02uh"]
 
 [ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="1_6215o"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_718bw"]
-[ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="3_qrmjw"]
+[ext_resource type="FontFile" uid="uid://dwsm33u0lbnt1" path="res://addons/hengo/assets/fonts/Mono/SpaceMono-Bold.ttf" id="2_x1ted"]
+[ext_resource type="FontFile" uid="uid://ciyif02f4powl" path="res://addons/hengo/assets/fonts/Mono/SpaceMono-Italic.ttf" id="3_catkx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b7ipo"]
 resource_local_to_scene = true
-content_margin_left = 2.0
-content_margin_top = 2.0
-content_margin_right = 2.0
-content_margin_bottom = 2.0
-bg_color = Color(0.133333, 0.156863, 0.188235, 1)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0.439216)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wneg0"]
 
@@ -45,7 +49,7 @@ process_mode = 4
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
-theme_override_fonts/normal_font = ExtResource("2_718bw")
+theme_override_fonts/normal_font = ExtResource("2_x1ted")
 theme_override_styles/fill = SubResource("StyleBoxEmpty_wneg0")
 theme_override_styles/background = SubResource("StyleBoxEmpty_f4qkv")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_78hmt")
@@ -62,5 +66,5 @@ drag_and_drop_selection_enabled = false
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_qrmjw")
+theme_override_fonts/font = ExtResource("3_catkx")
 text = "Button"
