@@ -33,19 +33,20 @@
 [ext_resource type="Texture2D" uid="uid://dxlxyjviyo0sq" path="res://addons/hengo/assets/icons/menu/panel-left.svg" id="26_c0oyf"]
 [ext_resource type="Texture2D" uid="uid://xfkxadepfmsd" path="res://addons/hengo/assets/icons/menu/panel-right.svg" id="27_2381i"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
+[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="34_8uyjj"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0306089, 0.103905, 0.111149, 1)
+bg_color = Color(0.106514, 0.216086, 0.252589, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1561, 1615)
-shader_parameter/offset = Vector2(249, 330)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1028, 1540)
+shader_parameter/offset = Vector2(218.334, 741.158)
+shader_parameter/zoom_factor = 0.999996
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -81,7 +82,7 @@ content_margin_left = 2.0
 content_margin_top = 1.0
 content_margin_right = 2.0
 content_margin_bottom = 1.0
-bg_color = Color(0.0510148, 0.173175, 0.185248, 1)
+bg_color = Color(0.177523, 0.360144, 0.420982, 1)
 shadow_color = Color(0, 0, 0, 0.027451)
 shadow_size = 12
 shadow_offset = Vector2(0, 1.265)
@@ -138,9 +139,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(2260, 1613)
-shader_parameter/offset = Vector2(414.987, 1598.59)
-shader_parameter/zoom_factor = 0.449998
+shader_parameter/screen_size = Vector2(2793, 1538)
+shader_parameter/offset = Vector2(523.834, 61.3792)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -150,9 +151,6 @@ colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2tipt"]
-bg_color = Color(0.366044, 0.12023, 0.0822263, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iqtoh"]
 content_margin_left = 4.0
@@ -689,7 +687,7 @@ visible = false
 
 [node name="RRProps" type="PanelContainer" parent="RouteReferenceProps"]
 offset_right = 5.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_2tipt")
+theme_override_styles/panel = ExtResource("33_n637n")
 script = ExtResource("34_wyhwi")
 
 [node name="List" type="VBoxContainer" parent="RouteReferenceProps/RRProps"]

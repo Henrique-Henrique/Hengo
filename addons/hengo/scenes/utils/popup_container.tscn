@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/popup_container.gd" id="1_b3884"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xgpgf"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toxqe"]
+bg_color = Color(0, 0, 0, 0.298039)
 
 [node name="PopupContainer" type="CanvasLayer"]
 layer = 100
@@ -14,4 +15,4 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_xgpgf")
+theme_override_styles/panel = SubResource("StyleBoxFlat_toxqe")

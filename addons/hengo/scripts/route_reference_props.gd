@@ -7,7 +7,7 @@ const PropContainerScene = preload('res://addons/hengo/scenes/prop_container.tsc
 
 
 func show_props(_config: Dictionary, _ref) -> void:
-	position = get_global_mouse_position()
+	position = _ref.global_position + Vector2(_ref.size.x + 10, 0)
 
 	# clear
 	for chd in get_child(0).get_children():

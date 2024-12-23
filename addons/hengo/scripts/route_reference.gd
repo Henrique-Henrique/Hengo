@@ -23,27 +23,12 @@ var output_cnode = null
 var virtual_cnode_list: Array = []
 var moving: bool = false
 var type: StringName = ''
-var props: Array = [
-	{
-		name = 'name',
-		type = 'String',
-		value = 'func_name'
-	},
-	{
-		name = 'inputs',
-		type = 'in_out',
-		value = []
-	},
-	{
-		name = 'outputs',
-		type = 'in_out',
-		value = []
-	}
-]
+var props: Array
 
 func _ready() -> void:
 	gui_input.connect(_on_gui)
 	get_node('%References').pressed.connect(_on_reference_press)
+
 
 func _on_reference_press() -> void:
 	var container = VBoxContainer.new()
@@ -58,7 +43,7 @@ func _on_reference_press() -> void:
 		bt.text = 'In -> ' + cnode.route_ref.name
 		container.add_child(bt)
 	
-	_Global.GENERAL_POPUP.get_parent().show_content(container, 'Go to Reference', get_global_mouse_position())
+	_Global.GENERAL_POPUP.get_parent().show_content(container, 'Go to Reference', global_position)
 
 
 func ref_pressed(_cnode) -> void:
@@ -137,6 +122,24 @@ static func instantiate(_config: Dictionary) -> _RouteReference:
 		# initializing inputs and outputs
 		match _config.type:
 			'func':
+				route_reference.props = [
+					{
+						name = 'name',
+						type = 'String',
+						value = 'func_name'
+					},
+					{
+						name = 'inputs',
+						type = 'in_out',
+						value = []
+					},
+					{
+						name = 'outputs',
+						type = 'in_out',
+						value = []
+					}
+				]
+
 				var in_data: Dictionary = {
 					name = 'input',
 					sub_type = 'func_input',
@@ -159,6 +162,7 @@ static func instantiate(_config: Dictionary) -> _RouteReference:
 				_Global.GROUP.add_to_group('f_' + str(route_reference.hash), output)
 
 				route_reference.output_cnode = output
+		
 
 	match _config.type:
 		'func':

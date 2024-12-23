@@ -362,6 +362,7 @@ func _get_window_layout(configuration: ConfigFile) -> void:
 func _on_change_main_screen(_name: String) -> void:
 	if _name == PLUGIN_NAME:
 		hide_docks()
+		cahnge_colors()
 	else:
 		show_docks()
 
@@ -422,8 +423,6 @@ func set_docks() -> void:
 			dock = dock,
 			old_visibility = dock.visible
 		})
-	
-	print('set layout: ', docks_references)
 
 func hide_docks() -> void:
 	scene_tabs.visible = false
@@ -439,3 +438,20 @@ func show_docks() -> void:
 	# backuping docks visibility
 	for obj in docks_references:
 		obj.dock.visible = obj.old_visibility
+	
+
+func cahnge_colors() -> void:
+	# colors
+	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
+	var color_factor: float = .4
+	var cnode_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/cnode.tres')
+	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
+	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
+
+	_Global.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
+	cnode_style_box.bg_color = base_color
+	_Global.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
+	cnode_style_box.border_color = base_color.lightened(.15)
+	event_style_box.bg_color = base_color.lightened(.1)
+	event_style_box.border_color = base_color.lightened(.2)
+	route_ref.bg_color = base_color.lightened(.1)

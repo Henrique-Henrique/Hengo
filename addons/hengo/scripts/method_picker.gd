@@ -285,13 +285,28 @@ func _select() -> void:
 		var item = list_container.get_child(selected_id)
 		var data = item.get_meta('data')['data']
 
-
+		# intercepting method creation
+		# method picker middleware
+		# TODO: make this apresentable
 		if data.name.contains('is_action'):
 			for input in data.inputs:
 				if input.name == 'action':
 					input.type = '@dropdown'
 					input.category = 'action'
-					input.in_prop = 'ui_select'
+		elif data.name == 'connect':
+			print(data.inputs)
+			#
+			#
+			# WIP
+			#
+			#
+			#
+
+			for input in data.inputs:
+				if input.name == 'signal':
+					input.type = '@dropdown'
+					input.category = 'signal'
+
 
 		data['position'] = _Global.CNODE_CAM.get_relative_vec2(start_pos)
 
@@ -563,10 +578,11 @@ func start_api(_class_name: StringName = 'all') -> int:
 					# singleton
 					for singleton_config in _Enums.SINGLETON_API_LIST:
 						var dt: Dictionary = singleton_config
+						dt.data.name = dt.name
 						dt.data.route = _Router.current_route
 						api_list.append(dt)
 					
-
+					
 					for prop in ClassDB.class_get_property_list(_class_name):
 						var set_data: Dictionary = {
 							name = 'Set Prop -> ' + prop.name,
