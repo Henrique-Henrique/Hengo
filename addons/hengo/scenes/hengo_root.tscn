@@ -1,4 +1,4 @@
-[gd_scene load_steps=66 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=65 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -703,7 +703,7 @@ offset_right = 230.0
 offset_bottom = 39.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = ExtResource("34_8uyjj")
+theme_override_styles/panel = ExtResource("34_d82bi")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
 layout_mode = 2

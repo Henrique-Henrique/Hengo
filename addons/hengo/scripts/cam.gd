@@ -112,8 +112,5 @@ func go_to(_pos: Vector2) -> void:
 
 func go_to_center(_pos: Vector2) -> void:
 	pos = (_pos * (-transform.x.x)) + (get_parent().size / 2)
-	t_x = Vector2.RIGHT
-	t_y = Vector2.DOWN
-	
 	ignore_process = true
 	set_physics_process(true)

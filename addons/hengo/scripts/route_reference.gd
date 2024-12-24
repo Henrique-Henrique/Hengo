@@ -33,14 +33,21 @@ func _ready() -> void:
 func _on_reference_press() -> void:
 	var container = VBoxContainer.new()
 
+	var icon_text = load('res://addons/hengo/assets/icons/arrow-up-right.svg')
+
 	for cnode in _Global.GROUP.get_nodes_from_group('f_' + str(hash)):
+		if cnode.deleted:
+			continue
+
+		
 		match cnode.type:
 			'func_input', 'func_output':
 				continue
 
 		var bt = Button.new()
 		bt.pressed.connect(ref_pressed.bind(cnode))
-		bt.text = 'In -> ' + cnode.route_ref.name
+		bt.text = cnode.route_ref.name
+		bt.icon = icon_text
 		container.add_child(bt)
 	
 	_Global.GENERAL_POPUP.get_parent().show_content(container, 'Go to Reference', global_position)

@@ -29,6 +29,9 @@ func show_props(_config: Dictionary, _ref) -> void:
 					ref.value_changed.connect(func(_name):
 						_ref.change_name(_name)
 						prop.value = _name
+
+						for node_ref in _Global.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
+							node_ref.change_name('Func -> ' + _name)
 						)
 
 				prop_ref.add_child(ref)
@@ -98,8 +101,6 @@ func show_props(_config: Dictionary, _ref) -> void:
 					prop.value[_idx].name = _name
 
 					var group_name: StringName = StringName('fi_' + str(_ref.hash) + '_' + str(_idx)) if in_out_type == 'in' else StringName('fo_' + str(_ref.hash) + '_' + str(_idx))
-
-					print('c->> ', group_name)
 
 					for node_ref in _Global.GROUP.get_nodes_from_group(group_name):
 						node_ref.change_name(_name)

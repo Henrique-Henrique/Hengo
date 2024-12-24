@@ -8,7 +8,7 @@ var _STATE_CONTROLLER = HengoStateController.new()
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_name_1=StateName1.new(self)
+		state_name_1 = StateName1.new(self)
 	})
 
 
@@ -26,15 +26,8 @@ func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
 
 
-
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
-
-
-
-
-
-
 
 
 # Functions
@@ -54,6 +47,3 @@ class StateName1 extends HengoState:
 		#hen_dbg#__hen_id__ += 8
 		#hen_dbg#EngineDebugger.send_message('hengo:cnode', [__hen_id__])
 		#hen_dbg#EngineDebugger.send_message('hengo:debug_state', [16])
-
-
-

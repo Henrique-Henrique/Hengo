@@ -736,7 +736,7 @@ static func load_and_edit(_path: StringName) -> void:
 
 			var func_ref = _RouteReference.instantiate_and_add(dt)
 
-			func_ref.ref_count = func_config.ref_count
+			func_ref.set_ref_count(func_config.ref_count)
 
 			_load_cnode(func_config.cnode_list, func_ref.route, inst_id_refs)
 			

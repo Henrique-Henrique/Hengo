@@ -10,6 +10,9 @@ var to_state
 const POINT_WIDTH: int = 40
 const POINT_WIDTH_BEZIER: int = POINT_WIDTH / 2
 
+func _ready() -> void:
+	default_color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').lightened(.1)
+
 # public
 #
 func update_line() -> void:
