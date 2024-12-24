@@ -404,13 +404,9 @@ func set_in_prop(_default_value = null) -> void:
 		var prop_container = get_node('%CNameInput')
 		var prop
 
-		print(prop_container.get_child_count() > 4)
 		if prop_container.get_child_count() > 4:
 			return
 		
-		
-		print(prop_container.get_child_count())
-		print(connection_type)
 		match connection_type:
 			'String', 'NodePath', 'StringName':
 				var str = load('res://addons/hengo/scenes/props/string.tscn').instantiate()

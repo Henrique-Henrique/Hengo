@@ -291,7 +291,7 @@ func _select() -> void:
 
 		if data.has('inputs'):
 			for input in data.inputs:
-				if input.type == 'Callable':
+				if input.type == 'Callable' and not input.ref:
 					input.type = '@dropdown'
 					input.category = 'callable'
 
@@ -479,7 +479,6 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 	match _class_name:
 		'all':
-			print('API_SIZE: ', ClassDB.get_class_list().size())
 			for cl_name: StringName in ClassDB.get_class_list():
 				for dict in ClassDB.class_get_method_list(_class_name):
 					api_list.append(_get_class_obj(dict, cl_name, _class_name))

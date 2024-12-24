@@ -325,7 +325,17 @@ func add_input(_input: Dictionary) -> void:
 	if _input.has('group'):
 		_Global.GROUP.add_to_group(_input.get('group'), input)
 
-	input.set_type(_input.get('type') if _input.has('type') else 'Variant')
+	var _type = 'Variant'
+
+	if _input.has('type'):
+		match _input.type:
+			'@dropdown':
+				pass
+			_:
+				_type = _input.get('type')
+
+
+	input.set_type(_type)
 	input.get_node('%Name').text = _input.name
 	input.root = self
 
