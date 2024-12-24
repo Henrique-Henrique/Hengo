@@ -1,18 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://crsj5ij47bnr2"]
+[gd_scene load_steps=4 format=3 uid="uid://crsj5ij47bnr2"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/popup_container.gd" id="1_b3884"]
+[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/popup.gdshader" id="2_lrxjm"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toxqe"]
-bg_color = Color(0, 0, 0, 0.298039)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7pkyu"]
+shader = ExtResource("2_lrxjm")
+shader_parameter/lod = 1.2
 
 [node name="PopupContainer" type="CanvasLayer"]
 layer = 100
 script = ExtResource("1_b3884")
 
 [node name="Panel" type="Panel" parent="."]
+material = SubResource("ShaderMaterial_7pkyu")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_toxqe")
