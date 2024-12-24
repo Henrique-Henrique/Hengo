@@ -1,12 +1,12 @@
 {
-    "files.exclude": {
-        "**/.gitignore": false,
-        "**/*.tscn": true,
-        "**/*.svg": true,
-        "**/*.*.import": true,
-        "**/*.godot": true,
-        "**/*.png": true,
-        "**/*.cfg": true,
-    },
+    // "files.exclude": {
+    //     "**/.gitignore": false,
+    //     "**/*.tscn": true,
+    //     "**/*.svg": true,
+    //     "**/*.*.import": true,
+    //     "**/*.godot": true,
+    //     "**/*.png": true,
+    //     "**/*.cfg": true,
+    // },
     "godotTools.editorPath.godot4": "c:\\Users\\Henrique\\Desktop\\GD\\Stable\\Godot_v4.3-stable_win64.exe"
 }

@@ -65,8 +65,15 @@ func _on_pressed() -> void:
 					arr.append(prop)
 		
 			options = arr
+		'signal':
+			options = ClassDB.class_get_signal_list(custom_data).map(func(x): return {
+				name = x.name
+			})
+		'callable':
+			options = _Global.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
+				name = x.route.name
+			})
 
-			print(arr)
 
 	_Global.DROPDOWN_MENU.position = global_position
 	_Global.DROPDOWN_MENU.get_parent().show()

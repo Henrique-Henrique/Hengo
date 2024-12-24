@@ -93,6 +93,7 @@ func move(_pos: Vector2) -> void:
 func change_name(_name: String) -> void:
 	get_node('%Name').text = _name
 	route.name = _name
+	size = Vector2.ZERO
 
 
 func change_ref_count(_factor: int = 1) -> void:

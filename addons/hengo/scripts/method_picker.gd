@@ -288,24 +288,24 @@ func _select() -> void:
 		# intercepting method creation
 		# method picker middleware
 		# TODO: make this apresentable
+
+		if data.has('inputs'):
+			for input in data.inputs:
+				if input.type == 'Callable':
+					input.type = '@dropdown'
+					input.category = 'callable'
+
 		if data.name.contains('is_action'):
 			for input in data.inputs:
 				if input.name == 'action':
 					input.type = '@dropdown'
 					input.category = 'action'
-		elif data.name == 'connect':
-			print(data.inputs)
-			#
-			#
-			# WIP
-			#
-			#
-			#
-
+		elif data.name == 'connect' or data.name == 'disconnect':
 			for input in data.inputs:
 				if input.name == 'signal':
 					input.type = '@dropdown'
 					input.category = 'signal'
+					input.data = data.inputs[0].type
 
 
 		data['position'] = _Global.CNODE_CAM.get_relative_vec2(start_pos)

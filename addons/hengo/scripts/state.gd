@@ -93,7 +93,7 @@ func _on_gui(_event: InputEvent) -> void:
 					var menu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
 					var pos = global_position
 
-					pos.x += size.x + 4
+					pos.x += size.x * _Global.STATE_CAM.transform.x.x + 4
 					menu.start_prop(self)
 					_Global.GENERAL_POPUP.get_parent().show_content(menu, 'State Prop', pos)
 		else:
