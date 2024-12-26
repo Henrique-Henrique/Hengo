@@ -53,7 +53,7 @@ var native_list: Array = [
 			inputs = [
 				{
 					name = 'name',
-					type = '@dropdown',
+					sub_type = '@dropdown',
 					category = 'state_transition'
 				}
 			],
@@ -251,7 +251,7 @@ func _ready() -> void:
 						inputs = [
 							{
 								name = 'state',
-								type = '@dropdown',
+								sub_type = '@dropdown',
 								category = 'current_states'
 							}
 						],
@@ -291,19 +291,21 @@ func _select() -> void:
 
 		if data.has('inputs'):
 			for input in data.inputs:
-				if input.type == 'Callable' and not input.ref:
-					input.type = '@dropdown'
-					input.category = 'callable'
+				if input.has('type'):
+					if input.type == 'Callable':
+						input.sub_type = '@dropdown'
+						input.category = 'callable'
 
 		if data.name.contains('is_action'):
 			for input in data.inputs:
 				if input.name == 'action':
-					input.type = '@dropdown'
+					input.sub_type = '@dropdown'
 					input.category = 'action'
+
 		elif data.name == 'connect' or data.name == 'disconnect':
 			for input in data.inputs:
 				if input.name == 'signal':
-					input.type = '@dropdown'
+					input.sub_type = '@dropdown'
 					input.category = 'signal'
 					input.data = data.inputs[0].type
 
@@ -445,7 +447,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 						65542:
 							return {
 								name = arg.name,
-								type = '@dropdown',
+								sub_type = '@dropdown',
 								category = 'enum_list',
 								data = arg. class_name .split('.'),
 							}

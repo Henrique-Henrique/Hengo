@@ -39,12 +39,12 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.106514, 0.216086, 0.252589, 1)
+bg_color = Color(0.12, 0.138, 0.186, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(912, 1362)
-shader_parameter/offset = Vector2(272.495, 351.947)
+shader_parameter/screen_size = Vector2(1561, 1194)
+shader_parameter/offset = Vector2(647.195, 506.396)
 shader_parameter/zoom_factor = 0.200006
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
@@ -81,7 +81,7 @@ content_margin_left = 2.0
 content_margin_top = 1.0
 content_margin_right = 2.0
 content_margin_bottom = 1.0
-bg_color = Color(0.177523, 0.360144, 0.420982, 1)
+bg_color = Color(0.2, 0.23, 0.31, 1)
 shadow_color = Color(0, 0, 0, 0.027451)
 shadow_size = 12
 shadow_offset = Vector2(0, 1.265)
@@ -139,8 +139,8 @@ corner_radius_bottom_left = 4
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1613, 1368)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/offset = Vector2(330.965, 216.634)
+shader_parameter/zoom_factor = 0.996079
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")

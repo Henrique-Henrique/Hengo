@@ -452,12 +452,13 @@ static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 			else:
 				prop_data.value = str(prop.get_generated_code())
 
-			
 			if prop is _Dropdown:
 				match prop.type:
 					'all_props':
 						prop_data['is_prop'] = true
 						prop_data['use_self'] = false
+					'callable':
+						prop_data['use_prefix'] = true
 			else:
 				if _input.root.route_ref.type != _Router.ROUTE_TYPE.STATE \
 				or not _input.is_ref:
@@ -601,6 +602,9 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		'local_var':
 			return indent + _token.name
 		'in_prop':
+			if _token.has('use_prefix'):
+				return indent + prefix + _token.value
+
 			if _token.has('is_prop') and _token.get('is_prop') == true:
 				return indent + prefix + _token.value
 			

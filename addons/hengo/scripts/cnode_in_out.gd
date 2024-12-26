@@ -406,24 +406,8 @@ func set_in_prop(_default_value = null) -> void:
 
 		if prop_container.get_child_count() > 4:
 			return
-		
-		match connection_type:
-			'String', 'NodePath', 'StringName':
-				var str = load('res://addons/hengo/scenes/props/string.tscn').instantiate()
-				prop_container.add_child(str)
-				prop = str
-			'int':
-				var prop_int = load('res://addons/hengo/scenes/props/int.tscn').instantiate()
-				prop_container.add_child(prop_int)
-				prop = prop_int
-			'float':
-				var prop_float = load('res://addons/hengo/scenes/props/float.tscn').instantiate()
-				prop_container.add_child(prop_float)
-				prop = prop_float
-			'Vector2':
-				var prop_vec2 = load('res://addons/hengo/scenes/props/vec2.tscn').instantiate()
-				prop_container.add_child(prop_vec2)
-				prop = prop_vec2
+
+		match sub_type:
 			'@dropdown':
 				var dropdown = load('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 
@@ -437,30 +421,48 @@ func set_in_prop(_default_value = null) -> void:
 
 				prop_container.add_child(dropdown)
 				prop = dropdown
-			'bool':
-				var prop_bool = load('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
-				prop_container.add_child(prop_bool)
-				prop = prop_bool
-			'Variant':
-				var l: Label = _Assets.CNodeInputLabel.instantiate()
-				l.text = 'null'
-				prop_container.add_child(l)
 			_:
-				var l: Label = _Assets.CNodeInputLabel.instantiate()
+				match connection_type:
+					'String', 'NodePath', 'StringName':
+						var str = load('res://addons/hengo/scenes/props/string.tscn').instantiate()
+						prop_container.add_child(str)
+						prop = str
+					'int':
+						var prop_int = load('res://addons/hengo/scenes/props/int.tscn').instantiate()
+						prop_container.add_child(prop_int)
+						prop = prop_int
+					'float':
+						var prop_float = load('res://addons/hengo/scenes/props/float.tscn').instantiate()
+						prop_container.add_child(prop_float)
+						prop = prop_float
+					'Vector2':
+						var prop_vec2 = load('res://addons/hengo/scenes/props/vec2.tscn').instantiate()
+						prop_container.add_child(prop_vec2)
+						prop = prop_vec2
+					'bool':
+						var prop_bool = load('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
+						prop_container.add_child(prop_bool)
+						prop = prop_bool
+					'Variant':
+						var l: Label = _Assets.CNodeInputLabel.instantiate()
+						l.text = 'null'
+						prop_container.add_child(l)
+					_:
+						var l: Label = _Assets.CNodeInputLabel.instantiate()
 
-				if prop_container.get_child_count() < 3:
-					if _Global.script_config.type == connection_type:
-						l.text = 'self'
-					else:
-						if _Enums.VARIANT_TYPES.has(connection_type):
-							l.text = connection_type + '()'
-						elif ClassDB.can_instantiate(connection_type):
-							l.text = connection_type + '.new()'
-					
-					prop_container.add_child(l)
-				
-				if root.cnode_type == 'img':
-					l.visible = false
+						if prop_container.get_child_count() < 3:
+							if _Global.script_config.type == connection_type:
+								l.text = 'self'
+							else:
+								if _Enums.VARIANT_TYPES.has(connection_type):
+									l.text = connection_type + '()'
+								elif ClassDB.can_instantiate(connection_type):
+									l.text = connection_type + '.new()'
+							
+							prop_container.add_child(l)
+						
+						if root.cnode_type == 'img':
+							l.visible = false
 
 		if _default_value:
 			prop.set_default(str(_default_value))

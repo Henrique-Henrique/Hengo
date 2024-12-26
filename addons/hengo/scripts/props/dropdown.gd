@@ -159,7 +159,7 @@ func get_generated_code() -> String:
 	match type:
 		'enum_list':
 			return custom_value
-		'all_props':
+		'all_props', 'callable':
 			return text.to_snake_case()
 		_:
 			return '\"' + text + '\"'

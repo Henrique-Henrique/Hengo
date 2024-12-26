@@ -372,7 +372,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 
 			if input.category:
 				if ['state_transition'].has(input.category):
-					input_data['type'] = '@dropdown'
+					input_data['sub_type'] = '@dropdown'
 
 				input_data['category'] = input.category
 
@@ -385,9 +385,13 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 				var in_prop = cname_input.get_child(2)
 
 				if in_prop is not Label:
-					if in_prop is _Dropdown and in_prop.type == 'all_props':
-						input_data['is_prop'] = true
-						input_data['prop_idx'] = in_prop.custom_value
+					if in_prop is _Dropdown:
+						input_data.sub_type = '@dropdown'
+
+						match in_prop.type:
+							'all_props':
+								input_data['is_prop'] = true
+								input_data['prop_idx'] = in_prop.custom_value
 					
 					var value = in_prop.get_value()
 
@@ -1105,7 +1109,7 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 							},
 							{
 								name = 'state',
-								type = '@dropdown',
+								sub_type = '@dropdown',
 								category = 'hengo_states',
 								data = file_name.get_basename()
 							}

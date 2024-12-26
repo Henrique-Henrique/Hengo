@@ -319,23 +319,17 @@ func add_input(_input: Dictionary) -> void:
 			'state_transition', 'hengo_events', 'disabled':
 				input.get_node('%CNameInput').get_child(0).visible = false
 
+	if _input.has('sub_type'):
+		input.sub_type = _input.sub_type
+
 	if _input.has('data'):
 		input.custom_data = _input.get('data')
 
 	if _input.has('group'):
 		_Global.GROUP.add_to_group(_input.get('group'), input)
 
-	var _type = 'Variant'
 
-	if _input.has('type'):
-		match _input.type:
-			'@dropdown':
-				pass
-			_:
-				_type = _input.get('type')
-
-
-	input.set_type(_type)
+	input.set_type(_input.get('type') if _input.has('type') else 'Variant')
 	input.get_node('%Name').text = _input.name
 	input.root = self
 
