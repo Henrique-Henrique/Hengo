@@ -44,7 +44,6 @@ static func generate() -> String:
 	# variables
 	var var_code: String = '# Variables #\n'
 
-	print('a-> ', _Global.PROPS_CONTAINER.get_values().variables)
 
 	for variable in _Global.PROPS_CONTAINER.get_values().variables:
 		var var_name: String = variable.name
@@ -418,7 +417,7 @@ static func get_cnode_inputs(_node: _CNode, _get_name: bool = false) -> Array:
 
 
 static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
-	if _input.in_connected_from:
+	if _input.in_connected_from and not _input.from_connection_lines[0].deleted:
 		var data: Dictionary = parse_cnode_values(_input.in_connected_from, _input.out_from_in_out.get_index())
 
 		if _input.is_ref:

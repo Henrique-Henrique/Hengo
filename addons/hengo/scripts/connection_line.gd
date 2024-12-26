@@ -18,6 +18,8 @@ var input
 var output
 var conn_size: Vector2
 
+var deleted: bool = false
+
 const POINT_WIDTH: int = 50
 const POINT_WIDTH_BEZIER: int = POINT_WIDTH / 2
 
@@ -76,6 +78,8 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 	output.owner.remove_in_prop()
 	output.owner.root.check_error()
 
+	deleted = false
+
 	# reconnecting
 	if _add_to_list:
 		input.owner.to_connection_lines.append(self)
@@ -100,6 +104,8 @@ func remove_from_scene(_remove_from_list: bool = true) -> void:
 
 	output.owner.set_in_prop()
 	output.owner.root.check_error()
+
+	deleted = true
 
 	# # reseting connection
 	if _remove_from_list:
