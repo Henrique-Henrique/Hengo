@@ -210,9 +210,6 @@ func _on_exit() -> void:
 		_Global.CONNECTION_GUIDE.hover_pos = null
 		_Global.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
 
-func _input(_event: InputEvent):
-	if _event is InputEventMouseMotion:
-		pass
 
 func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: String, _to_conn_type: String) -> bool:
 	# if connection is in => out or out => in

@@ -90,7 +90,7 @@ func _ready() -> void:
 	_Global.POPUP_CONTAINER = get_node('%PopupContainer')
 	_Global.LOCAL_VAR_SECTION = _Global.SIDE_BAR.get_node('%LocalVar')
 	_Global.SIGNAL_SECTION = _Global.SIDE_BAR.get_node('%StateSignal')
-	_Global.CODE_TOOLTIP = get_node('%CodeToolTip')
+	_Global.DOCS_TOOLTIP = get_node('%DocsToolTip')
 	_Global.ERROR_BT = get_node('%ErrorBt')
 	_Global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	_Global.STATE_CONNECTION_GUIDE = cnode_ui.get_node('%StateConnectionGuide')
@@ -100,22 +100,6 @@ func _ready() -> void:
 	_Global.PROPS_CONTAINER = get_node('%PropsUI')
 	_Global.HENGO_ROOT = self
 	_Global.GROUP = _Group.new()
-
-	# config code preview
-	var editor: TextEdit = _Global.CODE_TOOLTIP.get_child(0)
-	var highlighter: CodeHighlighter = editor.syntax_highlighter
-
-	highlighter.clear_color_regions()
-	highlighter.add_color_region('\"', '\"', Color('#9ece6a'))
-	highlighter.add_color_region('#', '', Color('#565f89'), true)
-
-	for kw in [
-		"and", "as", "assert", "break", "class", "class_name", "continue", "extends",
-		"elif", "else", "enum", "export", "for", "func", "if", "in", "is", "match",
-		"not", "onready", "or", "pass", "return", "setget", "signal", "static", "tool",
-		"var", "while", "yield"
-	]:
-		highlighter.add_keyword_color(kw, Color('#bb9af7'))
 
 	state_stat_label = get_node('%StateStatLabel')
 	cnode_stat_label = get_node('%CNodeStatLabel')

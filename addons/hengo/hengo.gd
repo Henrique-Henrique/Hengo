@@ -60,43 +60,6 @@ func _enter_tree():
 
 		get_editor_interface().get_resource_filesystem().scan()
 
-	# ---------------------------------------------------------------------------- #
-
-	var file_system_dock: EditorFileSystem = EditorInterface.get_resource_filesystem()
-	file_system_tree = EditorInterface.get_file_system_dock() \
-		.find_child('*SplitContainer*', true, false) \
-		.get_child(0)
-
-	file_system_dock.filesystem_changed.connect(
-		func() -> void:
-			# start with 'res://' item in tree
-			var current: TreeItem = file_system_tree.get_root().get_child(1)
-
-			# searching hengo folder item in tree
-			for item: TreeItem in current.get_children():
-				if item.get_metadata(0) == 'res://hengo/':
-					current = item
-					break
-
-			# changing icons on hengo files
-			while current:
-				for item: TreeItem in current.get_children():
-					if item.get_metadata(0).ends_with('.gd'):
-						# TODO set icon based on script iherit
-						item.set_icon(0, load('res://icon.svg'))
-				
-				current = current.get_next_in_tree()
-	)
-
-	# ---------------------------------------------------------------------------- #
-
-	# removing native file system tree signal because I want my signal to trigger first
-	for signal_config: Dictionary in file_system_tree.get_signal_connection_list('item_activated'):
-		file_tree_signals.append(signal_config)
-		file_system_tree.disconnect('item_activated', signal_config.callable)
-
-	# rewriting file system tree item activated signal
-	file_system_tree.item_activated.connect(_on_file_tree_item_activated)
 
 	# ---------------------------------------------------------------------------- #
 
@@ -342,16 +305,6 @@ func _generate_enums(_dict: Dictionary) -> Array:
 	
 	return arr
 
-
-func _on_file_tree_item_activated() -> void:
-	var item: TreeItem = file_system_tree.get_selected()
-	var path: StringName = item.get_metadata(0)
-
-	if path.begins_with('res://hengo/') and path.ends_with('.gd'):
-		_SaveLoad.load_and_edit(path)
-	else:
-		for signal_config: Dictionary in file_tree_signals:
-			(signal_config.callable as Callable).call()
 
 func _get_window_layout(configuration: ConfigFile) -> void:
 	if main_scene.visible:

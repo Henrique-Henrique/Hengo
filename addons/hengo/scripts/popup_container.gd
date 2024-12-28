@@ -1,6 +1,8 @@
 @tool
 extends CanvasLayer
 
+const _Global = preload('res://addons/hengo/scripts/global.gd')
+
 func _ready() -> void:
     get_child(0).gui_input.connect(_on_gui)
 
@@ -8,6 +10,7 @@ func _on_gui(_event: InputEvent) -> void:
     if _event is InputEventMouseButton:
         if _event.pressed:
             if _event.button_index == MOUSE_BUTTON_LEFT or _event.button_index == MOUSE_BUTTON_RIGHT:
+                _Global.CAM.can_scroll = true
                 hide()
 
 # public
@@ -30,4 +33,10 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
         gp.position = _pos
     
     gp.size = Vector2.ZERO
+    show()
+    _Global.CAM.can_scroll = false
+
+
+func show_container() -> void:
+    _Global.CAM.can_scroll = false
     show()

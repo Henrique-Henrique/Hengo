@@ -1,14 +1,14 @@
-[gd_scene load_steps=65 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=64 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
+[ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
 [ext_resource type="PackedScene" uid="uid://deljertujr1va" path="res://addons/hengo/scenes/side_bar.tscn" id="5_6h34f"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/drop_prop_menu.gd" id="5_vwcbq"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
+[ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/error_bt.gd" id="8_fl5nl"]
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
 [ext_resource type="Shader" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
@@ -35,17 +35,19 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
+[ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.12, 0.138, 0.186, 1)
+bg_color = Color(0.0799998, 0.089412, 0.101176, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1561, 1194)
-shader_parameter/offset = Vector2(647.195, 506.396)
-shader_parameter/zoom_factor = 0.200006
+shader_parameter/screen_size = Vector2(912, 1362)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -81,7 +83,7 @@ content_margin_left = 2.0
 content_margin_top = 1.0
 content_margin_right = 2.0
 content_margin_bottom = 1.0
-bg_color = Color(0.2, 0.23, 0.31, 1)
+bg_color = Color(0.133333, 0.14902, 0.168627, 1)
 shadow_color = Color(0, 0, 0, 0.027451)
 shadow_size = 12
 shadow_offset = Vector2(0, 1.265)
@@ -139,83 +141,36 @@ corner_radius_bottom_left = 4
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1613, 1368)
-shader_parameter/offset = Vector2(330.965, 216.634)
-shader_parameter/zoom_factor = 0.996079
+shader_parameter/offset = Vector2(922.74, 264.881)
+shader_parameter/zoom_factor = 0.200003
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iqtoh"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
 content_margin_left = 4.0
 content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
-bg_color = Color(0.0980392, 0.0980392, 0.133333, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+bg_color = Color(0, 0, 0, 0.176471)
 border_width_bottom = 2
-border_color = Color(0.269759, 0.269854, 0.341946, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0, 0, 0, 0.345098)
-shadow_size = 15
+border_color = Color(1, 1, 1, 0.054902)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wifp2"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_85ut6"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_457tp"]
-
-[sub_resource type="CodeHighlighter" id="CodeHighlighter_ghdov"]
-number_color = Color(1, 0.619608, 0.392157, 1)
-symbol_color = Color(0.478431, 0.635294, 0.968627, 1)
-function_color = Color(0.478431, 0.635294, 0.968627, 1)
-member_variable_color = Color(0.791999, 0.791999, 0.791999, 1)
-keyword_colors = {
-"and": Color(0.733333, 0.603922, 0.968627, 1),
-"as": Color(0.733333, 0.603922, 0.968627, 1),
-"assert": Color(0.733333, 0.603922, 0.968627, 1),
-"break": Color(0.733333, 0.603922, 0.968627, 1),
-"class": Color(0.733333, 0.603922, 0.968627, 1),
-"class_name": Color(0.733333, 0.603922, 0.968627, 1),
-"continue": Color(0.733333, 0.603922, 0.968627, 1),
-"elif": Color(0.733333, 0.603922, 0.968627, 1),
-"else": Color(0.733333, 0.603922, 0.968627, 1),
-"enum": Color(0.733333, 0.603922, 0.968627, 1),
-"export": Color(0.733333, 0.603922, 0.968627, 1),
-"extends": Color(0.733333, 0.603922, 0.968627, 1),
-"for": Color(0.733333, 0.603922, 0.968627, 1),
-"func": Color(0.733333, 0.603922, 0.968627, 1),
-"if": Color(0.733333, 0.603922, 0.968627, 1),
-"in": Color(0.733333, 0.603922, 0.968627, 1),
-"is": Color(0.733333, 0.603922, 0.968627, 1),
-"match": Color(0.733333, 0.603922, 0.968627, 1),
-"not": Color(0.733333, 0.603922, 0.968627, 1),
-"onready": Color(0.733333, 0.603922, 0.968627, 1),
-"or": Color(0.733333, 0.603922, 0.968627, 1),
-"pass": Color(0.733333, 0.603922, 0.968627, 1),
-"return": Color(0.733333, 0.603922, 0.968627, 1),
-"setget": Color(0.733333, 0.603922, 0.968627, 1),
-"signal": Color(0.733333, 0.603922, 0.968627, 1),
-"static": Color(0.733333, 0.603922, 0.968627, 1),
-"tool": Color(0.733333, 0.603922, 0.968627, 1),
-"var": Color(0.733333, 0.603922, 0.968627, 1),
-"while": Color(0.733333, 0.603922, 0.968627, 1),
-"yield": Color(0.733333, 0.603922, 0.968627, 1)
-}
-color_regions = {
-"\" \"": Color(0.619608, 0.807843, 0.415686, 1),
-"#": Color(0.337255, 0.372549, 0.537255, 1)
-}
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fc62w"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
 
 [node name="HengoRoot" type="Control"]
 layout_mode = 3
@@ -228,6 +183,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 1
 theme = ExtResource("1_2muha")
 script = ExtResource("2_velgh")
 
@@ -722,46 +678,35 @@ unique_name_in_owner = true
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 100
 
-[node name="CodeToolTip" type="PanelContainer" parent="CanvasLayer"]
+[node name="DocsToolTip" type="PanelContainer" parent="CanvasLayer" node_paths=PackedStringArray("rich_text_label", "title_label")]
 unique_name_in_owner = true
-process_mode = 4
 visible = false
-offset_right = 184.0
-offset_bottom = 152.0
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_iqtoh")
+offset_right = 305.0
+offset_bottom = 133.0
+theme_override_styles/panel = ExtResource("36_dyro1")
+script = ExtResource("36_alymh")
+rich_text_label = NodePath("VBoxContainer/Text")
+title_label = NodePath("VBoxContainer/Title")
 
-[node name="TextEdit" type="TextEdit" parent="CanvasLayer/CodeToolTip"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/DocsToolTip"]
 layout_mode = 2
-mouse_filter = 2
-mouse_default_cursor_shape = 0
-theme_override_constants/outline_size = 0
-theme_override_constants/line_spacing = 0
-theme_override_constants/caret_width = 0
-theme_override_fonts/font = ExtResource("24_paf7x")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_wifp2")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_85ut6")
-theme_override_styles/read_only = SubResource("StyleBoxEmpty_457tp")
-text = "var test 3
-void()
-seila
-# vish
-# dsaokdaspo
-\"teste\" dsa # dsadsa"
-context_menu_enabled = false
-shortcut_keys_enabled = false
-selecting_enabled = false
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
-virtual_keyboard_enabled = false
-middle_mouse_paste_enabled = false
-scroll_fit_content_height = true
-syntax_highlighter = SubResource("CodeHighlighter_ghdov")
-draw_tabs = true
 
-[node name="Label" type="Label" parent="CanvasLayer/CodeToolTip"]
-process_mode = 4
-modulate = Color(1, 1, 1, 0)
+[node name="Title" type="Label" parent="CanvasLayer/DocsToolTip/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/line_spacing = 0
-theme_override_fonts/font = ExtResource("24_paf7x")
+theme_override_fonts/font = ExtResource("12_wtrk7")
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_mlcja")
+text = "Title"
+
+[node name="Text" type="RichTextLabel" parent="CanvasLayer/DocsToolTip/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+theme_override_fonts/normal_font = ExtResource("20_y63ss")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_fc62w")
+text = "A control for displaying text that can contain custom fonts, images, and basic formatting. RichTextLabel manages these as an internal tag stack. It also adapts itself to given width/heights.
+
+Note: Assignments to text clear the tag stack and reconstruct it from the property's contents. Any edits made to text will erase previous edits made from other manual sources such as append_text and the push_* / pop methods.
+
+Note: RichTextLabel doesn't support entangled BBCode tags. For example, instead of using [b]bold[i]bold italic[/b]italic[/i], use [b]bold[i]bold italic[/i][/b][i]italic[/i]."
+selection_enabled = true

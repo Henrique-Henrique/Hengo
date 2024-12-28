@@ -17,6 +17,8 @@ var pos: Vector2 = Vector2.ZERO
 
 var ignore_process: bool = false
 
+var can_scroll: bool = true
+
 @onready var ref_point: Marker2D = get_node('RefPoint')
 var initial: Vector2 = Vector2.ZERO
 
@@ -46,10 +48,11 @@ func _input(event: InputEvent) -> void:
 		
 		elif event is InputEventMouseButton:
 			if event.is_pressed():
-				if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_UP:
-					_zoom_in()
-				if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_DOWN:
-					_zoom_out()
+				if can_scroll:
+					if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_UP:
+						_zoom_in()
+					if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_DOWN:
+						_zoom_out()
 
 
 func _zoom_in() -> void:

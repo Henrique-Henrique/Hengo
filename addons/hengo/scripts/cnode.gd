@@ -87,7 +87,7 @@ func _on_exit() -> void:
 	_Global.flow_connection_to_data = {}
 
 	if not _Global.CONNECTION_GUIDE.is_in_out:
-		_Global.CODE_TOOLTIP.visible = false
+		_Global.DOCS_TOOLTIP.visible = false
 		_Global.CONNECTION_GUIDE.hover_pos = null
 		_Global.CONNECTION_GUIDE.gradient.colors = [Color.GRAY, Color.GRAY]
 
@@ -102,54 +102,65 @@ func _on_exit() -> void:
 		modulate = Color.WHITE
 		get_node('%Border').visible = false
 
-	var tween = create_tween().set_trans(Tween.TRANS_EXPO)
-	tween.tween_property(_Global.CODE_TOOLTIP, 'modulate', Color.TRANSPARENT, .3)
-
 	_is_mouse_enter = false
-
+	
 	_preview_timer.timeout.disconnect(_on_tooltip)
 
-	await tween.finished
+	get_tree().create_timer(.2).timeout.connect(func():
+		if _Global.DOCS_TOOLTIP.first_show:
+			_Global.DOCS_TOOLTIP.first_show = false
+		else:
+			_Global.DOCS_TOOLTIP.hide_docs()
+		)
 
 
 func _on_tooltip() -> void:
 	if _is_mouse_enter:
-		print('ss')
-		var code: String = _CodeGeneration.parse_token_and_value(self).strip_edges().replace('\t', '    ')
-		var text_edit: TextEdit = _Global.CODE_TOOLTIP.get_child(0)
-		var label: Label = _Global.CODE_TOOLTIP.get_child(1)
+		if _Global.DOCS_TOOLTIP.visible:
+			_Global.DOCS_TOOLTIP.position.x = self.global_position.x
+			_Global.DOCS_TOOLTIP.pivot_offset = Vector2(
+				0,
+				_Global.DOCS_TOOLTIP.size.y
+			)
+			_Global.DOCS_TOOLTIP.position.y = self.global_position.y - _Global.DOCS_TOOLTIP.size.y
+		else:
+			print('qqq')
+			var first_input = get_node('%InputContainer').get_child(0)
+			var current_class: String = first_input.connection_type
 
-		label.text = ''
-		label.size = Vector2.ZERO
-		text_edit.text = ''
-		text_edit.size = Vector2.ZERO
-		_Global.CODE_TOOLTIP.size = Vector2.ZERO
-		label.text = code
+			if not _Enums.VARIANT_TYPES.has(current_class):
+				# getting where member is located in class reference
+				while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
+					current_class = ClassDB.get_parent_class(current_class)
 
-		text_edit.text = code
+					# last class do verify
+					if current_class == 'Object':
+						break
+			
+			_Global.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
 
-		await get_tree().process_frame
-		_Global.CODE_TOOLTIP.position.x = self.global_position.x
-		_Global.CODE_TOOLTIP.pivot_offset = Vector2(
-			0,
-			_Global.CODE_TOOLTIP.size.y
-		)
+			await get_tree().process_frame
+			_Global.DOCS_TOOLTIP.position.x = self.global_position.x
+			_Global.DOCS_TOOLTIP.pivot_offset = Vector2(
+				0,
+				_Global.DOCS_TOOLTIP.size.y
+			)
 
-		_Global.CODE_TOOLTIP.position.y = self.global_position.y - _Global.CODE_TOOLTIP.size.y
-		_Global.CODE_TOOLTIP.scale = Vector2.ZERO
-		_Global.CODE_TOOLTIP.modulate = Color.TRANSPARENT
-		_Global.CODE_TOOLTIP.visible = true
+			_Global.DOCS_TOOLTIP.position.y = self.global_position.y - _Global.DOCS_TOOLTIP.size.y
+			_Global.DOCS_TOOLTIP.scale = Vector2.ZERO
+			_Global.DOCS_TOOLTIP.modulate = Color.TRANSPARENT
+			_Global.DOCS_TOOLTIP.visible = true
 
-		var tween = create_tween().set_trans(Tween.TRANS_CUBIC)
-		tween.set_parallel(true)
-		tween.tween_property(_Global.CODE_TOOLTIP, 'scale', Vector2.ONE, .1)
-		tween.tween_property(_Global.CODE_TOOLTIP, 'modulate', Color.WHITE, .3)
+			var tween = create_tween().set_trans(Tween.TRANS_CUBIC)
+			tween.set_parallel(true)
+			tween.tween_property(_Global.DOCS_TOOLTIP, 'scale', Vector2.ONE, .1)
+			tween.tween_property(_Global.DOCS_TOOLTIP, 'modulate', Color.WHITE, .3)
 
 
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
 		if _event.pressed:
-			_Global.CODE_TOOLTIP.visible = false
+			_Global.DOCS_TOOLTIP.visible = false
 			# this is for tooltip
 			_is_mouse_enter = false
 			if _event.ctrl_pressed:

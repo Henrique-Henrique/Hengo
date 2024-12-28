@@ -12,6 +12,7 @@ const _HengoRoot = preload('res://addons/hengo/scripts/hengo_root.gd')
 const _GeneralMenu = preload('res://addons/hengo/scripts/general_menu.gd')
 const _RouteReferenceProps = preload('res://addons/hengo/scripts/route_reference_props.gd')
 const _Group = preload('res://addons/hengo/scripts/group.gd')
+const _DocsToolTip = preload('res://addons/hengo/scripts/docs_tool_tip.gd')
 
 # plugin
 static var editor_interface: EditorInterface
@@ -34,7 +35,7 @@ static var LOCAL_VAR_SECTION
 static var SIGNAL_SECTION
 static var GENERAL_POPUP: PanelContainer
 static var ROUTE_REFERENCE_PROPS: _RouteReferenceProps
-static var CODE_TOOLTIP: PanelContainer
+static var DOCS_TOOLTIP: _DocsToolTip
 static var ERROR_BT: Button
 static var CONNECTION_GUIDE: _ConnectionGuide
 static var STATE_CONNECTION_GUIDE: _ConnectionGuide

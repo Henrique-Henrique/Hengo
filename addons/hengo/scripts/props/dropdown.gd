@@ -76,7 +76,7 @@ func _on_pressed() -> void:
 
 
 	_Global.DROPDOWN_MENU.position = global_position
-	_Global.DROPDOWN_MENU.get_parent().show()
+	_Global.DROPDOWN_MENU.get_parent().show_container()
 	_Global.DROPDOWN_MENU.mount(options, _selected, type)
 
 
