@@ -43,6 +43,7 @@ static var PROPS_CONTAINER: _PropsContainer
 static var HENGO_ROOT: _HengoRoot
 static var GENERAL_MENU: _GeneralMenu
 static var GROUP: _Group
+static var GD_PREVIEWER: CodeEdit
 
 # cnodes
 static var can_make_connection: bool = false

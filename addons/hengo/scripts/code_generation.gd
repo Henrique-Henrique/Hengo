@@ -844,21 +844,25 @@ static func _get_signal_call_name(_name: String) -> String:
 	return '_on_' + _name.to_snake_case() + '_signal_'
 
 static func parse_token_and_value(_node: _CNode, _id: int = 0) -> String:
+	var code: String
+
 	match _node.type:
 		'if':
-			return parse_token_by_type(
+			code = parse_token_by_type(
 				get_if_token(_node)
 			)
 		'for', 'for_arr':
-			return parse_token_by_type(
+			code = parse_token_by_type(
 				get_for_token(_node)
 			)
 		'virtual':
-			return '# virtual cnode'
+			code = '# virtual cnode'
+		_:
+			code = parse_token_by_type(
+				parse_cnode_values(_node, _id)
+			)
 
-	return parse_token_by_type(
-		parse_cnode_values(_node, _id)
-	)
+	return '\n'.join((code.split('\n') as Array).filter(func(x): return not x.contains(_Global.DEBUG_TOKEN))) # removes debug lines
 
 static func get_if_token(_node: _CNode) -> Dictionary:
 	var true_flow: Array = []

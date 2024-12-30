@@ -107,6 +107,8 @@ func _on_exit() -> void:
 	_preview_timer.timeout.disconnect(_on_tooltip)
 
 	get_tree().create_timer(.2).timeout.connect(func():
+		print(_Global.DOCS_TOOLTIP.first_show, ' = ', _Global.DOCS_TOOLTIP.is_hovering)
+
 		if _Global.DOCS_TOOLTIP.first_show:
 			_Global.DOCS_TOOLTIP.first_show = false
 		else:
@@ -114,7 +116,7 @@ func _on_exit() -> void:
 		)
 
 
-func _on_tooltip() -> void:
+func _on_tooltip() -> Variant:
 	if _is_mouse_enter:
 		if _Global.DOCS_TOOLTIP.visible:
 			_Global.DOCS_TOOLTIP.position.x = self.global_position.x
@@ -124,20 +126,31 @@ func _on_tooltip() -> void:
 			)
 			_Global.DOCS_TOOLTIP.position.y = self.global_position.y - _Global.DOCS_TOOLTIP.size.y
 		else:
-			print('qqq')
-			var first_input = get_node('%InputContainer').get_child(0)
-			var current_class: String = first_input.connection_type
+			print(type)
+			if category == 'native':
+				match raw_name:
+					'print':
+						return null
+					'make_transition':
+						_Global.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the system's current state. Use this functionality to shift from one active state to another", 'Make a Transition')
+			else:
+				match type:
+					'func', 'void':
+						var first_input = get_node('%InputContainer').get_child(0)
+						var current_class: String = first_input.connection_type
 
-			if not _Enums.VARIANT_TYPES.has(current_class):
-				# getting where member is located in class reference
-				while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
-					current_class = ClassDB.get_parent_class(current_class)
+						if not _Enums.VARIANT_TYPES.has(current_class):
+							# getting where member is located in class reference
+							while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
+								current_class = ClassDB.get_parent_class(current_class)
 
-					# last class do verify
-					if current_class == 'Object':
-						break
-			
-			_Global.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
+								# last class do verify
+								if current_class == 'Object':
+									break
+						
+						_Global.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
+					'if':
+						_Global.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
 
 			await get_tree().process_frame
 			_Global.DOCS_TOOLTIP.position.x = self.global_position.x
@@ -155,6 +168,8 @@ func _on_tooltip() -> void:
 			tween.set_parallel(true)
 			tween.tween_property(_Global.DOCS_TOOLTIP, 'scale', Vector2.ONE, .1)
 			tween.tween_property(_Global.DOCS_TOOLTIP, 'modulate', Color.WHITE, .3)
+	
+	return null
 
 
 func _on_gui(_event: InputEvent) -> void:
@@ -179,7 +194,12 @@ func _on_gui(_event: InputEvent) -> void:
 						for i in get_tree().get_nodes_in_group(_Enums.CNODE_SELECTED_GROUP):
 							i.moving = false
 							i.unselect()
+						
 						select()
+
+						# generate gd_preview
+						var code: String = _CodeGeneration.parse_token_and_value(self)
+						_Global.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
 		else:
 			moving = false
 			# group moving false

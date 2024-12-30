@@ -11,6 +11,7 @@ const PLUGIN_NAME = 'Hengo'
 const MENU_NATIVE_API_NAME = "Hengo Generate Native Api"
 
 var main_scene
+var gd_previewer: CodeEdit
 var side_bar
 var tabs_hide_helper
 var tabs_container
@@ -108,6 +109,26 @@ func _enter_tree():
 
 	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
 	_Global.HENGO_EDITOR_PLUGIN = self
+
+	# adding gdscript editor
+	gd_previewer = (load('res://addons/hengo/scenes/gd_editor.tscn') as PackedScene).instantiate()
+	gd_previewer.code_completion_enabled = false
+	gd_previewer.editable = false
+
+	var highlighter: CodeHighlighter = gd_previewer.syntax_highlighter
+	highlighter.clear_color_regions()
+	highlighter.add_color_region('\"', '\"', Color('#9ece6a'))
+	highlighter.add_color_region('#', '', Color('#565f89'), true)
+	for kw in [
+		"and", "as", "assert", "break", "class", "class_name", "continue", "extends",
+		"elif", "else", "enum", "export", "for", "func", "if", "in", "is", "match",
+		"not", "onready", "or", "pass", "return", "setget", "signal", "static", "tool",
+		"var", "while", "yield"
+	]:
+		highlighter.add_keyword_color(kw, Color('#bb9af7'))
+
+	add_control_to_bottom_panel(gd_previewer, 'Hengo Code')
+	_Global.GD_PREVIEWER = gd_previewer
 
 func _generate_native_api() -> void:
 	var file: FileAccess = FileAccess.open('res://extension_api.json', FileAccess.READ)
@@ -322,6 +343,7 @@ func _on_change_main_screen(_name: String) -> void:
 func _exit_tree():
 	remove_debugger_plugin(debug_plugin)
 	remove_tool_menu_item(MENU_NATIVE_API_NAME)
+	remove_control_from_bottom_panel(gd_previewer)
 
 	# reseting file system tree signals
 	for signal_config: Dictionary in file_tree_signals:
@@ -405,6 +427,6 @@ func cahnge_colors() -> void:
 	cnode_style_box.bg_color = base_color
 	_Global.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
 	cnode_style_box.border_color = base_color.lightened(.15)
-	event_style_box.bg_color = base_color.lightened(.1)
+	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)
 	route_ref.bg_color = base_color.lightened(.1)

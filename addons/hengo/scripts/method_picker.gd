@@ -281,6 +281,7 @@ func _on_search_gui_input(_event: InputEvent) -> void:
 
 
 func _select() -> void:
+	_Global.CNODE_CAM.can_scroll = true
 	if list_container.get_child_count() > 0:
 		var item = list_container.get_child(selected_id)
 		var data = item.get_meta('data')['data']

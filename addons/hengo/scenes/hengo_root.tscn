@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
-[ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
 [ext_resource type="PackedScene" uid="uid://deljertujr1va" path="res://addons/hengo/scenes/side_bar.tscn" id="5_6h34f"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/drop_prop_menu.gd" id="5_vwcbq"]
@@ -45,8 +45,8 @@ bg_color = Color(0.0799998, 0.089412, 0.101176, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(912, 1362)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/screen_size = Vector2(605, 656)
+shader_parameter/offset = Vector2(9.14116e-06, 7.70142e-13)
 shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
@@ -140,9 +140,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1613, 1368)
-shader_parameter/offset = Vector2(922.74, 264.881)
-shader_parameter/zoom_factor = 0.200003
+shader_parameter/screen_size = Vector2(1305, 656)
+shader_parameter/offset = Vector2(372.716, 52.4583)
+shader_parameter/zoom_factor = 0.501605
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")

@@ -34,14 +34,27 @@ func hide_docs() -> void:
 		tween.finished.connect(hide)
 
 
+func set_custom_doc(_content: String, _title: String) -> void:
+	visible = false
+	first_show = false
+	is_hovering = false
+	title_label.text = _title
+	rich_text_label.text = _content
+
+	await RenderingServer.frame_post_draw
+	rich_text_label.size = Vector2(rich_text_label.get_content_width(), rich_text_label.get_content_height())
+	size = Vector2(500, rich_text_label.size.y + title_label.size.y + 20)
+
+
 func start_docs(_class_name: StringName, _member: String = '') -> void:
+	rich_text_label.fit_content = false
 	visible = false
 	first_show = true
+	is_hovering = false
 
 	var script_editor: ScriptEditor = EditorInterface.get_script_editor()
 	script_editor.goto_help(_class_name)
 	var doc_rich_text_label: RichTextLabel = script_editor.find_child(_class_name, true, false).get_child(0)
-
 
 	# script editor file popup menu
 	var popup: PopupMenu = script_editor.find_child('*PopupMenu*', true, false)
@@ -88,6 +101,6 @@ func start_docs(_class_name: StringName, _member: String = '') -> void:
 	else:
 		rich_text_label.size = Vector2(500, label_height)
 	
-	size = Vector2(500, rich_text_label.size.y + title_label.size.y + 10)
+	size = Vector2(500, rich_text_label.size.y + title_label.size.y + 20)
 
 	rich_text_label.scroll_to_line(0)

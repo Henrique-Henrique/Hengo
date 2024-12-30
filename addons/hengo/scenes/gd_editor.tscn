@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8u6g6i185o8y"]
+
+[ext_resource type="FontFile" uid="uid://buicqe4n7bixe" path="res://addons/hengo/assets/fonts/Mono/SpaceMono-Regular.ttf" id="1_y0nil"]
+
+[sub_resource type="CodeHighlighter" id="CodeHighlighter_vplok"]
+number_color = Color(0.478431, 0.635294, 0.968627, 1)
+symbol_color = Color(0.733333, 0.603922, 0.968627, 1)
+function_color = Color(0.619608, 0.807843, 0.415686, 1)
+member_variable_color = Color(0.164706, 0.764706, 0.870588, 1)
+
+[node name="CodeEdit" type="CodeEdit"]
+custom_minimum_size = Vector2(400, 100)
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_y0nil")
+theme_override_font_sizes/font_size = 16
+placeholder_text = "Your Expression"
+syntax_highlighter = SubResource("CodeHighlighter_vplok")
+highlight_all_occurrences = true
+draw_tabs = true
+code_completion_enabled = true
+indent_automatic = true
+auto_brace_completion_enabled = true
+auto_brace_completion_highlight_matching = true
