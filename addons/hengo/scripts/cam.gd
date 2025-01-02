@@ -8,8 +8,8 @@ var target_zoom: float = 1.
 
 const MIN_ZOOM: float = .2
 const MAX_ZOOM: float = 1.
-const ZOOM_INCREMENT: float = .25
-const ZOOM_RATE: float = 14.
+const ZOOM_INCREMENT: float = .15
+const ZOOM_RATE: float = 12.
 
 var t_x: Vector2 = Vector2(1, 0)
 var t_y: Vector2 = Vector2(0, 1)
@@ -25,6 +25,7 @@ var initial: Vector2 = Vector2.ZERO
 # private
 #
 func _ready() -> void:
+	can_scroll = false
 	var parent: Panel = get_parent()
 
 	parent.item_rect_changed.connect(_on_ui_size_changed)

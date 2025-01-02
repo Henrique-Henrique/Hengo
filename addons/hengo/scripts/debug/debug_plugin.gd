@@ -130,15 +130,14 @@ func load_references() -> void:
 
 
 	# getting funcs
-	for func_item in _Global.SIDE_BAR.get_node('%Function').get_node('%Container').get_children():
-		var cnode = func_item.virtual_cnode_list[0]
-		_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
-
-
-	# getting signals
-	for signal_item in _Global.SIDE_BAR.get_node('%StateSignal').get_node('%Container').get_children():
-		var cnode = signal_item.virtual_cnode_list[0]
-		_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
+	#
+	#
+	#
+	#
+	#
+	# for func_item in _Global.SIDE_BAR.get_node('%Function').get_node('%Container').get_children():
+	# 	var cnode = func_item.virtual_cnode_list[0]
+	# 	_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 
 
 func _on_started() -> void:

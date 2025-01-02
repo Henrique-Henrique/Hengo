@@ -80,7 +80,6 @@ func _ready() -> void:
 	_Global.CAM = state_cam
 	_Global.STATE_CAM = state_cam
 	_Global.CNODE_CAM = cnode_cam
-	_Global.SIDE_BAR = get_node('%SideBar')
 	_Global.DROP_PROP_MENU = get_node('%DropPropMenu')
 	_Global.GENERAL_MENU = get_node('%GeneralMenu')
 	_Global.CNODE_CONTAINER = get_node('%CnodeContainer')
@@ -88,10 +87,8 @@ func _ready() -> void:
 	_Global.STATE_CONTAINER = get_node('%StateContainer')
 	_Global.DROPDOWN_MENU = get_node('%DropDownMenu')
 	_Global.POPUP_CONTAINER = get_node('%PopupContainer')
-	_Global.LOCAL_VAR_SECTION = _Global.SIDE_BAR.get_node('%LocalVar')
-	_Global.SIGNAL_SECTION = _Global.SIDE_BAR.get_node('%StateSignal')
 	_Global.DOCS_TOOLTIP = get_node('%DocsToolTip')
-	_Global.ERROR_BT = get_node('%ErrorBt')
+	# _Global.ERROR_BT = get_node('%ErrorBt')
 	_Global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	_Global.STATE_CONNECTION_GUIDE = cnode_ui.get_node('%StateConnectionGuide')
 	_Global.GENERAL_CONTAINER = state_cam.get_node('%GeneralContainer')
@@ -100,6 +97,7 @@ func _ready() -> void:
 	_Global.PROPS_CONTAINER = get_node('%PropsUI')
 	_Global.HENGO_ROOT = self
 	_Global.GROUP = _Group.new()
+	_Global.DASHBOARD = get_node('%DashBoard')
 
 	state_stat_label = get_node('%StateStatLabel')
 	cnode_stat_label = get_node('%CNodeStatLabel')

@@ -12,7 +12,6 @@ const MENU_NATIVE_API_NAME = "Hengo Generate Native Api"
 
 var main_scene
 var gd_previewer: CodeEdit
-var side_bar
 var tabs_hide_helper
 var tabs_container
 
@@ -85,7 +84,6 @@ func _enter_tree():
 	print('setted')
 
 	main_scene = _Assets.HengoRootScene.instantiate()
-	side_bar = load('res://addons/hengo/scenes/side_bar.tscn').instantiate()
 
 	_Global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
 
@@ -243,6 +241,12 @@ func _generate_native_api() -> void:
 							type = _parse_enum_return(method.return_value.type)
 						}]
 
+					# if dict.name.contains('is_action_pressed'):
+					print({
+						name = dict.name + ' -> ' + method.name,
+						data = dt
+					})
+
 					singleton_api.append({
 						name = dict.name + ' -> ' + method.name,
 						data = dt
@@ -336,7 +340,7 @@ func _get_window_layout(configuration: ConfigFile) -> void:
 func _on_change_main_screen(_name: String) -> void:
 	if _name == PLUGIN_NAME:
 		hide_docks()
-		cahnge_colors()
+		change_colors()
 	else:
 		show_docks()
 
@@ -415,7 +419,7 @@ func show_docks() -> void:
 		obj.dock.visible = obj.old_visibility
 	
 
-func cahnge_colors() -> void:
+func change_colors() -> void:
 	# colors
 	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
 	var color_factor: float = .4
@@ -424,9 +428,9 @@ func cahnge_colors() -> void:
 	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
 
 	_Global.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
-	cnode_style_box.bg_color = base_color
+	cnode_style_box.bg_color = base_color.lightened(.015)
 	_Global.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
-	cnode_style_box.border_color = base_color.lightened(.15)
+	cnode_style_box.border_color = base_color.lightened(.2)
 	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)
 	route_ref.bg_color = base_color.lightened(.1)

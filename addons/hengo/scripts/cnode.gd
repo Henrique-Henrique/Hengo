@@ -106,9 +106,8 @@ func _on_exit() -> void:
 	
 	_preview_timer.timeout.disconnect(_on_tooltip)
 
+	#TODO: reset this timer if hover again on other cnode
 	get_tree().create_timer(.2).timeout.connect(func():
-		print(_Global.DOCS_TOOLTIP.first_show, ' = ', _Global.DOCS_TOOLTIP.is_hovering)
-
 		if _Global.DOCS_TOOLTIP.first_show:
 			_Global.DOCS_TOOLTIP.first_show = false
 		else:
@@ -126,13 +125,12 @@ func _on_tooltip() -> Variant:
 			)
 			_Global.DOCS_TOOLTIP.position.y = self.global_position.y - _Global.DOCS_TOOLTIP.size.y
 		else:
-			print(type)
 			if category == 'native':
 				match raw_name:
 					'print':
 						return null
 					'make_transition':
-						_Global.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the system's current state. Use this functionality to shift from one active state to another", 'Make a Transition')
+						_Global.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the node current state. Use this functionality to shift from one active state to another", 'Make a Transition')
 			else:
 				match type:
 					'func', 'void':

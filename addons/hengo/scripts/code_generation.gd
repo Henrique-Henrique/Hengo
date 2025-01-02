@@ -66,27 +66,6 @@ static func generate() -> String:
 			export_var = '@export ' if var_export else ''
 		})
 
-	# for var_item in _Global.SIDE_BAR.get_node('%Var').get_node('%Container').get_children():
-	# 	var var_name: String = var_item.res[0].value
-	# 	var var_type: String = var_item.res[1].value
-	# 	var var_export: bool = var_item.res[2].value
-
-	# 	var type_value: String = 'null'
-
-	# 	if _Enums.VARIANT_TYPES.has(var_type):
-	# 		if var_type == 'Variant':
-	# 			type_value = 'null'
-	# 		else:
-	# 			type_value = var_type + '()'
-	# 	elif ClassDB.can_instantiate(var_type):
-	# 		type_value = var_type + '.new()'
-
-	# 	var_code += '{export_var}var {name} = {value}\n'.format({
-	# 		name = var_name.to_snake_case(),
-	# 		value = type_value,
-	# 		export_var = '@export ' if var_export else ''
-	# 	})
-
 	code += var_code
 	# end variables
 
@@ -171,14 +150,6 @@ func _physics_process(delta: float) -> void:
 		# local variable
 		var local_var_list: Array = []
 
-		if _Global.LOCAL_VAR_SECTION.local_vars.has(func_item.route.id):
-			for local_var in _Global.LOCAL_VAR_SECTION.local_vars[func_item.route.id]:
-				local_var_list.append(
-					'\tvar {name}'.format({
-						name = local_var.get_node('%Name').text
-					})
-				)
-
 		if not local_var_list.is_empty():
 			func_code += '\n'.join(local_var_list) + '\n\n'
 		
@@ -224,50 +195,6 @@ func _physics_process(delta: float) -> void:
 	base_template += func_code
 	# end functions
 
-	# signal callables
-	var signal_code: String = '#\n\n# Signals Callables\n'
-
-	for signal_item in _Global.SIDE_BAR.get_node('%StateSignal').get_node('%Container').get_children():
-		var signal_name = '_on_' + signal_item.res[0].value.to_snake_case() + '_signal_'
-		var raw_signal_data: Dictionary = ClassDB.class_get_signal(signal_item.data.signal_data.object_name, signal_item.data.signal_data.signal_name)
-
-		signal_code += 'func {name}({params}):\n'.format({
-			name = signal_name,
-			params = ', '.join(raw_signal_data.args.map( # parsing raw inputs from signal
-			func(x: Dictionary) -> String:
-				return x.name
-		# parsing custom inputs
-		) + signal_item.res[1].outputs.map(
-				func(x: Dictionary) -> String:
-					return x.res.name
-		))
-		})
-
-		# debug
-		signal_code += '\t' + get_debug_var_start()
-
-		var signal_flow_to: Dictionary = signal_item.virtual_cnode_list[0].flow_to
-
-		if signal_flow_to.has('cnode'):
-			var signal_tokens: Array = flow_tree_explorer(signal_item.virtual_cnode_list[0].flow_to.cnode)
-			var signal_block: Array = []
-
-			for token in signal_tokens:
-				signal_block.append(parse_token_by_type(token, 1))
-
-			# debug
-			signal_block.append(parse_token_by_type(
-				get_debug_token(signal_item.virtual_cnode_list[0]),
-				1
-			))
-
-			signal_code += '\n'.join(signal_block) + '\n\n'
-			signal_code += '\t' + get_debug_push_str() + '\n\n\n'
-		else:
-			signal_code += '\tpass\n\n'
-	
-	base_template += signal_code
-	# end signal callables
 
 	# parsing all states
 	for state in _Global.STATE_CONTAINER.get_children():

@@ -580,7 +580,6 @@ func start_api(_class_name: StringName = 'all') -> int:
 					# singleton
 					for singleton_config in _Enums.SINGLETON_API_LIST:
 						var dt: Dictionary = singleton_config
-						dt.data.name = dt.name
 						dt.data.route = _Router.current_route
 						api_list.append(dt)
 					

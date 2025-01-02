@@ -13,6 +13,7 @@ const _GeneralMenu = preload('res://addons/hengo/scripts/general_menu.gd')
 const _RouteReferenceProps = preload('res://addons/hengo/scripts/route_reference_props.gd')
 const _Group = preload('res://addons/hengo/scripts/group.gd')
 const _DocsToolTip = preload('res://addons/hengo/scripts/docs_tool_tip.gd')
+const _Dashboard = preload('res://addons/hengo/scripts/dashboard.gd')
 
 # plugin
 static var editor_interface: EditorInterface
@@ -26,13 +27,10 @@ static var GENERAL_CONTAINER: Control
 static var ROUTE_REFERENCE_CONTAINER: Control
 static var COMMENT_CONTAINER: Control
 static var STATE_CONTAINER: Control
-static var SIDE_BAR: PanelContainer
 static var DROP_PROP_MENU: PopupMenu
 static var SIDE_MENU_POPUP: PanelContainer
 static var DROPDOWN_MENU: PanelContainer
 static var POPUP_CONTAINER: CanvasLayer
-static var LOCAL_VAR_SECTION
-static var SIGNAL_SECTION
 static var GENERAL_POPUP: PanelContainer
 static var ROUTE_REFERENCE_PROPS: _RouteReferenceProps
 static var DOCS_TOOLTIP: _DocsToolTip
@@ -44,6 +42,7 @@ static var HENGO_ROOT: _HengoRoot
 static var GENERAL_MENU: _GeneralMenu
 static var GROUP: _Group
 static var GD_PREVIEWER: CodeEdit
+static var DASHBOARD: _Dashboard
 
 # cnodes
 static var can_make_connection: bool = false

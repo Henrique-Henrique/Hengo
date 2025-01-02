@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bt4sh4ymnseob"
-path="res://.godot/imported/none.svg-dd327345593fac447bd82d060260aba5.ctex"
+uid="uid://rc6wtot6iqux"
+path="res://.godot/imported/func_menu.svg-8d826bc417702c0d4a803bd3680ac4ba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/icons/menu/none.svg"
-dest_files=["res://.godot/imported/none.svg-dd327345593fac447bd82d060260aba5.ctex"]
+source_file="res://addons/hengo/assets/icons/menu/func_menu.svg"
+dest_files=["res://.godot/imported/func_menu.svg-8d826bc417702c0d4a803bd3680ac4ba.ctex"]
 
 [params]
 

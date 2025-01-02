@@ -1,0 +1,78 @@
+[gd_scene load_steps=8 format=3 uid="uid://dcyvdoty8t12u"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/dashboard.gd" id="1_6bswm"]
+[ext_resource type="Texture2D" uid="uid://d2isosfg5l71r" path="res://addons/hengo/assets/icons/add.svg" id="1_e6sgy"]
+[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/popup.gdshader" id="1_wb7a1"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_4j4ao"]
+[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="3_dqmrb"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1t8w7"]
+shader = ExtResource("1_wb7a1")
+shader_parameter/lod = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ae88q"]
+bg_color = Color(0.0952987, 0.172172, 0.168407, 1)
+
+[node name="DashBoard" type="PanelContainer"]
+z_index = 200
+material = SubResource("ShaderMaterial_1t8w7")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_ae88q")
+script = ExtResource("1_6bswm")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(600, 400)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = ExtResource("3_dqmrb")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Search" type="LineEdit" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Search scripts"
+
+[node name="Create" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Create"
+icon = ExtResource("1_e6sgy")
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_4j4ao")
+theme_override_font_sizes/font_size = 18
+text = "Your scripts"
+
+[node name="ListContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/ListContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4

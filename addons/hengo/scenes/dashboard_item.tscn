@@ -1,0 +1,93 @@
+[gd_scene load_steps=7 format=3 uid="uid://dlbtw3e4yecw2"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/dashboard_item.gd" id="1_5gobi"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="1_vcmxp"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_eprif"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="3_sr023"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4s6ao"]
+resource_local_to_scene = true
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_784bs"]
+bg_color = Color(0.0790579, 0.107502, 0.133507, 0.513726)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.27451, 0.611765, 0.847059, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="PanelContainer" type="PanelContainer"]
+offset_right = 332.0
+offset_bottom = 65.0
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_4s6ao")
+script = ExtResource("1_5gobi")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 15
+
+[node name="Panel" type="Panel" parent="HBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_784bs")
+
+[node name="ImgText" type="Label" parent="HBoxContainer/Panel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.27308, 0.613593, 0.847099, 1)
+theme_override_fonts/font = ExtResource("1_vcmxp")
+text = "Nt"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Name" type="Label" parent="HBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_eprif")
+theme_override_font_sizes/font_size = 16
+text = "Name"
+
+[node name="Type" type="Label" parent="HBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.418328, 0.683894, 0.828511, 1)
+theme_override_fonts/font = ExtResource("3_sr023")
+theme_override_font_sizes/font_size = 12
+text = "Sprite2D"
+
+[node name="Description" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.603922)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_eprif")
+text = "This is the script description"

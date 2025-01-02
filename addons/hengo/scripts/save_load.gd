@@ -113,31 +113,6 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	script_data['connections'] = connections
 	script_data['flow_connections'] = flow_connections
 
-	# ---------------------------------------------------------------------------- #
-	# Variables
-	var var_section = _Global.SIDE_BAR.get_node('%Var').get_node('%Container')
-	var var_item_list: Array[Dictionary] = []
-
-	for item in var_section.get_children():
-		var item_data: Dictionary = {
-			id = item.get_instance_id(),
-			name = item.res[0].value,
-			type = item.res[1].value,
-			export_var = item.res[2].value,
-			instances = []
-		}
-
-		# instances
-		for cnode in item.instance_reference:
-			# if node is deleted, dont add on data
-			if not is_instance_valid(cnode) or cnode.deleted:
-				continue
-
-			item_data['instances'].append(_get_cnode_route_instance(cnode))
-
-		var_item_list.append(item_data)
-
-	script_data['var_item_list'] = var_item_list
 
 	# ---------------------------------------------------------------------------- #
 	# ---------------------------------------------------------------------------- #
@@ -157,127 +132,6 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 	script_data['func_list'] = func_list
 
-	# ---------------------------------------------------------------------------- #
-	# Funcions
-	var func_section = _Global.SIDE_BAR.get_node('%Function').get_node('%Container')
-	var func_item_list: Array[Dictionary] = []
-
-	for item in func_section.get_children():
-		var item_data: Dictionary = {
-			id = item.get_instance_id(),
-			name = item.res[0].value,
-			start_data = {},
-			inputs = [],
-			outputs = [],
-			instances = [],
-			cnode_list = get_cnode_list(_Router.route_reference[item.route.id])
-		}
-
-		# inputs
-		for input: Dictionary in item.res[1].inputs:
-			item_data.inputs.append({
-				name = input.res.name,
-				type = input.res.type
-			})
-		
-		# outputs
-		for output: Dictionary in item.res[2].outputs:
-			item_data.outputs.append({
-				name = output.res.name,
-				type = output.res.type
-			})
-
-		# instances
-		for cnode in item.instance_reference:
-			# if node is deleted, dont add on data
-			if not is_instance_valid(cnode) or cnode.deleted:
-				continue
-
-			if cnode.type == 'func_input':
-				item_data['start_data'].input = {
-					pos = var_to_str(cnode.position),
-					id = cnode.hash
-				}
-				continue
-			elif cnode.type == 'func_output':
-				item_data['start_data'].output = {
-					pos = var_to_str(cnode.position),
-					id = cnode.hash
-				}
-				continue
-
-			item_data['instances'].append(_get_cnode_route_instance(cnode))
-
-		func_item_list.append(item_data)
-
-	script_data['func_item_list'] = func_item_list
-
-	# ---------------------------------------------------------------------------- #
-	# SIGNALS
-	var signal_section = _Global.SIDE_BAR.get_node('%StateSignal').get_node('%Container')
-	var signal_item_list: Array[Dictionary] = []
-
-	for item in signal_section.get_children():
-		var item_data: Dictionary = {
-			id = item.get_instance_id(),
-			name = item.res[0].value,
-			signal_data = {
-				object_name = item.data.signal_data.object_name,
-				signal_name = item.data.signal_data.signal_name
-			},
-			start_data = {},
-			params = [],
-			instances = [],
-			cnode_list = get_cnode_list(_Router.route_reference[item.route.id])
-		}
-
-		# params
-		for input: Dictionary in item.res[1].outputs:
-			item_data.params.append({
-				name = input.res.name,
-				type = input.res.type
-			})
-
-		# instances
-		for cnode in item.instance_reference:
-			# if node is deleted, dont add on data
-			if not is_instance_valid(cnode) or cnode.deleted:
-				continue
-
-			if cnode.type == 'signal_virtual':
-				item_data['start_data']. signal = {
-					pos = var_to_str(cnode.position),
-					id = cnode.hash
-				}
-				continue
-
-			item_data['instances'].append(_get_cnode_route_instance(cnode))
-		
-		signal_item_list.append(item_data)
-
-	script_data['signal_item_list'] = signal_item_list
-
-	# ---------------------------------------------------------------------------- #
-	# Local Variables
-	var local_var_section = _Global.SIDE_BAR.get_node('%LocalVar')
-	var local_var_item_list: Array[Dictionary] = []
-
-	for item in local_var_section.get_node('%Container').get_children():
-		var item_data: Dictionary = {
-			id = item.get_instance_id(),
-			name = item.res[0].value,
-			type = item.res[1].value,
-			route_ref = get_inst_id_by_route(item.route_ref),
-			instances = []
-		}
-
-		# instances
-		for cnode in item.instance_reference:
-			item_data['instances'].append(_get_cnode_route_instance(cnode))
-
-		local_var_item_list.append(item_data)
-
-	script_data['local_var_items'] = local_var_item_list
 	# ---------------------------------------------------------------------------- #
 	# loading comments
 	var comment_list: Array[Dictionary] = []
@@ -518,13 +372,10 @@ static func load_and_edit(_path: StringName) -> void:
 	if cnode_msg:
 		cnode_msg.get_parent().remove_child(cnode_msg)
 
-	# if not _Global.SIDE_BAR.visible:
-	#     _Global.SIDE_BAR.visible = true
-
 	compile_bt.disabled = false
 
 	# reseting plugin
-	_Global.ERROR_BT.reset()
+	# _Global.ERROR_BT.reset()
 
 	for state in _Global.STATE_CONTAINER.get_children():
 		state.queue_free()
@@ -549,30 +400,6 @@ static func load_and_edit(_path: StringName) -> void:
 
 	for prop in _Global.PROPS_CONTAINER.get_node('%List').get_children():
 		prop.queue_free()
-
-	# cleaning vars
-	var var_container = _Global.SIDE_BAR.get_node('%Var').get_node('%Container')
-	for var_item in var_container.get_children():
-		var_item.queue_free()
-	
-	# cleaning funcions
-	var func_container = _Global.SIDE_BAR.get_node('%Function').get_node('%Container')
-	for func_item in func_container.get_children():
-		func_item.queue_free()
-
-	# cleaning signals
-	var signal_container = _Global.SIDE_BAR.get_node('%StateSignal').get_node('%Container')
-	for signal_item in signal_container.get_children():
-		signal_item.queue_free()
-	
-	# cleaning local vars
-	var local_var_section = _Global.SIDE_BAR.get_node('%LocalVar')
-	var local_var_container = local_var_section.get_node('%Container')
-
-	local_var_section.local_vars = {}
-
-	for local_var_item in local_var_container.get_children():
-		local_var_item.queue_free()
 
 	_Global.GROUP.group.clear()
 
@@ -694,7 +521,6 @@ static func load_and_edit(_path: StringName) -> void:
 		var data: Dictionary = parse_hengo_json(script.source_code)
 
 		var inst_id_refs: Dictionary = {}
-		var cnode_to_route_list: Array[Dictionary] = []
 		var state_trans_connections: Array = []
 	
 		# setting script configs
@@ -786,200 +612,6 @@ static func load_and_edit(_path: StringName) -> void:
 					var prop_scene = load('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
 					_Global.PROPS_CONTAINER.get_node('%List').add_child(prop_scene)
 					prop_scene.set_value(prop)
-
-		# ---------------------------------------------------------------------------- #
-		# creating func
-
-		for func_config: Dictionary in data['func_item_list']:
-			var item = _Global.SIDE_BAR.get_node('%Function').add_prop(func_config, false)
-			var inputs: Array[Dictionary] = []
-			var outputs: Array[Dictionary] = []
-
-			# inputs
-			for input: Dictionary in func_config['inputs']:
-				var res: Resource = load('res://addons/hengo/resources/cnode_function_in_out.tres').duplicate()
-				res.name = input.name
-				res.type = input.type
-				inputs.append({res = res})
-			
-			item.res[1].inputs = inputs
-
-			# outputs
-			for output: Dictionary in func_config['outputs']:
-				var res: Resource = load('res://addons/hengo/resources/cnode_function_in_out.tres').duplicate()
-				res.name = output.name
-				res.type = output.type
-				outputs.append({res = res})
-			
-			item.res[2].outputs = outputs
-
-			func_config['start_data']['cnode_refs'] = inst_id_refs
-			item.start_item(func_config['start_data'])
-
-			# cnodes
-			_load_cnode(func_config['cnode_list'], item.route, inst_id_refs)
-
-			# func instances
-			for cnode_config: Dictionary in func_config['instances']:
-				var cnode_data: Dictionary = {
-					type = 'func',
-					item = item,
-					cnode_id = cnode_config.hash,
-					route_inst_id = cnode_config.route_inst_id,
-					data = {
-						pos = cnode_config.pos,
-						route = item.route
-					}
-				}
-
-				if cnode_config.has('in_prop_data'):
-					cnode_data['in_prop_data'] = cnode_config.get('in_prop_data')
-				
-				cnode_to_route_list.append(cnode_data)
-			
-			inst_id_refs[func_config.id] = item
-
-		# ---------------------------------------------------------------------------- #
-		# creating vars
-		for var_config: Dictionary in data['var_item_list']:
-			var item = _Global.SIDE_BAR.get_node('%Var').add_prop(var_config)
-
-			# instances
-			for cnode_config: Dictionary in var_config['instances']:
-				var id = -1
-				match cnode_config['sub_type']:
-					'var':
-						id = 0
-					'set_var':
-						id = 1
-				
-				var cnode_data: Dictionary = {
-					type = 'var',
-					item = item,
-					id = id,
-					cnode_id = cnode_config.hash,
-					route_inst_id = cnode_config.route_inst_id,
-					data = {
-						pos = cnode_config.pos,
-					}
-				}
-
-				if cnode_config.has('in_prop_data'):
-					cnode_data['in_prop_data'] = cnode_config.get('in_prop_data')
-				
-				cnode_to_route_list.append(cnode_data)
-			
-			inst_id_refs[var_config.id] = item
-		
-		# ---------------------------------------------------------------------------- #
-		# creating signals
-		for signal_config: Dictionary in data['signal_item_list']:
-			var item = _Global.SIDE_BAR.get_node('%StateSignal').add_prop(signal_config, false)
-			var params: Array[Dictionary] = []
-
-			# params
-			for input: Dictionary in signal_config['params']:
-				var res: Resource = load('res://addons/hengo/resources/cnode_function_in_out.tres').duplicate()
-				res.name = input.name
-				res.type = input.type
-				params.append({res = res})
-			
-			item.res[1].outputs = params
-
-			signal_config['start_data']['cnode_refs'] = inst_id_refs
-			item.start_item(signal_config['start_data'])
-
-			# cnodes
-			_load_cnode(signal_config['cnode_list'], item.route, inst_id_refs)
-
-			# signal instances
-			for cnode_config: Dictionary in signal_config['instances']:
-				var id = -1
-				match cnode_config['sub_type']:
-					'signal_connection':
-						id = 0
-					'signal_disconnection':
-						id = 1
-					'signal_emit':
-						id = 2
-				
-				var cnode_data: Dictionary = {
-					type = 'signal',
-					item = item,
-					id = id,
-					cnode_id = cnode_config.hash,
-					route_inst_id = cnode_config.route_inst_id,
-					data = {
-						pos = cnode_config.pos,
-					}
-				}
-
-				if cnode_config.has('in_prop_data'):
-					cnode_data['in_prop_data'] = cnode_config.get('in_prop_data')
-
-				cnode_to_route_list.append(cnode_data)
-
-			inst_id_refs[signal_config.id] = item
-
-				# ---------------------------------------------------------------------------- #
-		# creating local_vars
-		for local_var_config: Dictionary in data['local_var_items']:
-			# local var route ref
-			local_var_config['route_ref'] = inst_id_refs[
-				local_var_config['route_ref']
-			].route
-
-			var item = local_var_section.add_prop(local_var_config)
-
-			# instances
-			for cnode_config: Dictionary in local_var_config['instances']:
-				var id = -1
-				match cnode_config['sub_type']:
-					'local_var':
-						id = 0
-					'set_local_var':
-						id = 1
-				
-				var cnode_data: Dictionary = {
-					type = 'local_var',
-					item = item,
-					id = id,
-					cnode_id = cnode_config.hash,
-					route_inst_id = cnode_config.route_inst_id,
-					data = {
-						pos = cnode_config.pos,
-					}
-				}
-
-				if cnode_config.has('in_prop_data'):
-					cnode_data['in_prop_data'] = cnode_config.get('in_prop_data')
-				
-				cnode_to_route_list.append(cnode_data)
-			
-			inst_id_refs[local_var_config.id] = item
-
-		# ---------------------------------------------------------------------------- #
-		# instancing side bar items references
-		for cnode_config: Dictionary in cnode_to_route_list:
-			var id = -1
-
-			if cnode_config.has('id'):
-				id = cnode_config.id
-
-			_Global.DROP_PROP_MENU.mount(cnode_config.item.type, cnode_config.item, cnode_config.item.data, false)
-			
-			var cnode_data: Dictionary = {
-				pos = cnode_config.data.pos,
-				route = inst_id_refs[cnode_config.route_inst_id].route,
-				hash = cnode_config.cnode_id
-			}
-
-			if cnode_config.has('in_prop_data'):
-				cnode_data['in_prop_data'] = cnode_config.get('in_prop_data')
-
-			var cnode = _Global.DROP_PROP_MENU.add_instance(id, cnode_data)
-
-			inst_id_refs[cnode_config.cnode_id] = cnode
 
 		# ---------------------------------------------------------------------------- #
 		# creating comments

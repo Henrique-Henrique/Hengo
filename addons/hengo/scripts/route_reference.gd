@@ -9,7 +9,7 @@ const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
 const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 const ROUTE_SCENE = preload('res://addons/hengo/scenes/route_reference.tscn')
-const REF_TEXT = ' reference'
+const REF_TEXT = ''
 
 var hash: int = -1
 var ref_count: int = 0
@@ -56,7 +56,7 @@ func _on_reference_press() -> void:
 func ref_pressed(_cnode) -> void:
 	_Router.change_route(_cnode.route_ref)
 	_cnode.select()
-	_Global.GENERAL_POPUP.get_parent().hide()
+	_Global.GENERAL_POPUP.get_parent().hide_popup()
 	_Global.CNODE_CAM.go_to_center(_cnode.position + _cnode.size / 2)
 
 
@@ -102,7 +102,7 @@ func change_ref_count(_factor: int = 1) -> void:
 
 func set_ref_count(_count: int) -> void:
 	ref_count = _count
-	get_node('%References').text = str(ref_count) + (REF_TEXT if ref_count < 2 else REF_TEXT + 's')
+	get_node('%References').text = str(ref_count) + REF_TEXT
 
 
 static func instantiate(_config: Dictionary) -> _RouteReference:

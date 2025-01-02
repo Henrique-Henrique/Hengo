@@ -40,3 +40,8 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
 func show_container() -> void:
     _Global.CAM.can_scroll = false
     show()
+
+
+func hide_popup() -> void:
+    _Global.CAM.can_scroll = true
+    hide()

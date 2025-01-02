@@ -54,8 +54,6 @@ static func change_route(_route: Dictionary) -> void:
 			_Global.COMMENT_CONTAINER.add_child(comment)
 
 		match _route.type:
-			ROUTE_TYPE.FUNC:
-				_Global.LOCAL_VAR_SECTION.show_local_vars(_route)
 			ROUTE_TYPE.STATE:
 				# debug
 				for cnode in cnode_list:
@@ -66,10 +64,6 @@ static func change_route(_route: Dictionary) -> void:
 					state.unselect()
 				
 				_route.state_ref.select()
-
-				_Global.LOCAL_VAR_SECTION.hide()
-			_:
-				_Global.LOCAL_VAR_SECTION.hide()
 
 	else:
 		# TODO error msg
