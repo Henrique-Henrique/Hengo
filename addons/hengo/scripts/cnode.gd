@@ -1,10 +1,20 @@
 @tool
 class_name HenCnode extends PanelContainer
 
+enum TYPE {
+    DEFAULT,
+    IF,
+    IMG,
+    EXPRESSION,
+}
+
+enum SUB_TYPE {
+
+}
 
 var flow_to: Dictionary = {}
-var type
-var cnode_type
+var type: TYPE
+var sub_type: String
 var route_ref: Dictionary
 var data: Dictionary = {}
 var category: String
@@ -137,7 +147,7 @@ func _on_tooltip() -> Variant:
 									break
 						
 						HenGlobal.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
-					'if':
+					TYPE.IF:
 						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
 
 			await get_tree().process_frame
@@ -324,7 +334,7 @@ func remove_from_scene() -> void:
 
 func add_input(_input: Dictionary) -> void:
 	var in_container = get_node('%InputContainer')
-	var input := HenAssets.CNodeInputScene.instantiate()
+	var input: HenCnodeInOut = HenAssets.CNodeInputScene.instantiate()
 
 	if _input.has('ref'):
 		input.is_ref = true
@@ -452,7 +462,7 @@ func disable_error() -> void:
 
 func get_connection_lines_in_flow() -> Dictionary:
 	match type:
-		'if':
+		TYPE.IF:
 			var flow_dict: Dictionary = {
 				base_conn = get_input_connection_lines()
 			}
@@ -494,7 +504,7 @@ func get_connector_lines(_connector) -> Array:
 
 func get_input_connection_lines() -> Array:
 	match type:
-		'if':
+		TYPE.IF:
 			var input = get_node('%TitleContainer').get_child(0).get_child(0)
 
 			if input.from_connection_lines.size() > 0:
@@ -554,7 +564,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/debug.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#8a7346'))
 
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'func', 'user_func':
 						# color
 						
@@ -565,26 +575,26 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 								title_container.get('theme_override_styles/panel').set('bg_color', Color('#464A73'))
 						
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/func.svg')
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'void':
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/void.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').darkened(.4))
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'signal_connection', 'signal_disconnection', 'signal_emit':
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#764A75'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/signal.svg')
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'set_var', 'set_prop', 'get_prop':
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#4A7346'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/set_var.svg')
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'virtual', 'func_input', 'signal_virtual':
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#734646'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/virtual.svg')
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'cast', 'raw_code':
 						match _config.sub_type:
 							'raw_code':
@@ -593,19 +603,19 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 								title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/cast.svg')
 
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'self_go_to_void':
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/go_to.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					'for', 'for_arr':
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/for.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#8c5c37'))
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 					_:
-						_config.type = 'default'
+						_config.type = TYPE.DEFAULT
 
-		instance.cnode_type = _config.type
+		instance.type = _config.type
 		
 		# hash of user function coming from group singleton
 		var func_id: String = ''
@@ -656,13 +666,13 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 		
 		# instance flow connections
 		match (_config.type):
-			'default':
+			TYPE.DEFAULT:
 				var default_flow := HenAssets.CNodeFlowScene.instantiate()
 				var connector = default_flow.get_child(0)
 				connector.root = instance
 				instance.get_node('%Container').add_child(default_flow)
 				instance.connectors.cnode = connector
-			'if':
+			TYPE.IF:
 				var if_flow := HenAssets.CNodeIfFlowScene.instantiate()
 				for i in if_flow.get_node('%FlowContainer').get_children():
 					i.root = instance
@@ -681,7 +691,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 				title_container.get('theme_override_styles/panel').set('bg_color', Color('#674883'))
 				title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/if.svg')
 
-			'img':
+			TYPE.IMG:
 				var center_img = HenAssets.CNodeCenterImage.instantiate()
 				var img = center_img.get_node('%Img')
 				var center_container = instance.get_node('%CenterContainer')
@@ -694,7 +704,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 
 				instance.get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
 				title_container.visible = false
-			'expression':
+			TYPE.EXPRESSION:
 				title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/math.svg')
 				title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 
@@ -711,10 +721,10 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 				container.move_child(bt_container, 1)
 
 		if _config.has('sub_type'):
-			var sub_type = _config.get('sub_type')
-			instance.type = sub_type
+			var _sub_type = _config.get('sub_type')
+			instance.sub_type = _sub_type
 
-			match sub_type:
+			match _sub_type:
 				# adding virtual cnodes references
 				'virtual':
 					match _config.route.type:

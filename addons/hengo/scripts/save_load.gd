@@ -109,7 +109,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# Funcions
 	var func_list: Array[Dictionary] = []
 
-	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x): return x.type == StringName('func')):
+	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference): return x.type == StringName('func')):
 		func_list.append({
 			hash = func_item.hash,
 			props = func_item.props,
@@ -180,16 +180,16 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Array:
 	var arr: Array = []
 
-	for cnode in _cnode_list:
+	for cnode: HenCnode in _cnode_list:
 		# ignore cnode types
-		if _ignore_list.has(cnode.type):
+		if _ignore_list.has(cnode.sub_type):
 			continue
 
 		var cnode_data: Dictionary = {
 			# id = cnode.get_instance_id(),
 			pos = var_to_str(cnode.position),
 			name = cnode.get_cnode_name(),
-			sub_type = cnode.type,
+			sub_type = cnode.sub_type,
 			hash = cnode.hash,
 			inputs = [],
 			outputs = []
@@ -200,8 +200,8 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 		if cnode_data.name != fantasy_name:
 			cnode_data['fantasy_name'] = fantasy_name
 
-		if cnode.cnode_type != 'default':
-			cnode_data['type'] = cnode.cnode_type
+		if cnode.type != HenCnode.TYPE.DEFAULT:
+			cnode_data.type = cnode.type
 
 		for input in cnode.get_node('%InputContainer').get_children():
 			var input_data: Dictionary = {
@@ -261,7 +261,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 				if out_prop is not Label:
 					output_data['out_prop'] = out_prop.get_value()
 
-			match cnode.type:
+			match cnode.sub_type:
 				'var':
 					output_data['group_idx'] = int(output.custom_data)
 
@@ -270,7 +270,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 		if cnode.category:
 			cnode_data['category'] = cnode.category
 
-		match cnode.type:
+		match cnode.sub_type:
 			'expression':
 				cnode_data['exp'] = cnode.get_node('%Container').get_child(1).get_child(0).raw_text
 			'user_func', 'func_input', 'func_output':
@@ -290,7 +290,7 @@ static func _get_cnode_route_instance(_cnode: HenCnode) -> Dictionary:
 		id = _cnode.get_instance_id(),
 		pos = var_to_str(_cnode.position),
 		route_inst_id = get_inst_id_by_route(_cnode.route_ref),
-		sub_type = _cnode.type,
+		sub_type = _cnode.sub_type,
 		hash = _cnode.hash
 	}
 
@@ -632,7 +632,7 @@ static func load_and_edit(_path: StringName) -> void:
 			var to_in_out
 
 			match to_cnode.type:
-				'if':
+				HenCnode.TYPE.IF:
 					to_in_out = to_cnode.get_node('%TitleContainer').get_child(0).get_child(connection.output)
 				_:
 					to_in_out = to_cnode.get_node('%InputContainer').get_child(connection.output)
@@ -645,16 +645,16 @@ static func load_and_edit(_path: StringName) -> void:
 		
 		# flow connections
 		for flow_connection: Dictionary in data['flow_connections']:
-			var cnode = inst_id_refs[flow_connection.from_cnode] as HenCnode
+			var cnode := inst_id_refs[flow_connection.from_cnode] as HenCnode
 
-			match cnode.cnode_type:
-				'default':
+			match cnode.type:
+				HenCnode.TYPE.DEFAULT:
 					var connector = cnode.get_node('%Container').get_children()[-1].get_child(0)
 
 					connector.create_connection_line_and_instance({
 						from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
 					})
-				'if':
+				HenCnode.TYPE.IF:
 					var connector = cnode.get_node('%Container').get_child(2).get_node('%FlowContainer').get_child(flow_connection.from_connector)
 					
 					connector.create_connection_line_and_instance({

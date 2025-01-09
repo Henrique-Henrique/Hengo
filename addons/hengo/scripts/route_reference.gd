@@ -29,12 +29,12 @@ func _on_reference_press() -> void:
 
 	var icon_text = load('res://addons/hengo/assets/icons/arrow-up-right.svg')
 
-	for cnode in HenGlobal.GROUP.get_nodes_from_group('f_' + str(hash)):
+	for cnode: HenCnode in HenGlobal.GROUP.get_nodes_from_group('f_' + str(hash)):
 		if cnode.deleted:
 			continue
 
 		
-		match cnode.type:
+		match cnode.sub_type:
 			'func_input', 'func_output':
 				continue
 
@@ -122,7 +122,7 @@ static func instantiate(_config: Dictionary) -> HenRouteReference:
 		route_reference.props = _config.props
 	else:
 		# initializing inputs and outputs
-		match _config.type:
+		match _config.sub_type:
 			'func':
 				route_reference.props = [
 					{

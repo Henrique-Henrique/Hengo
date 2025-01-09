@@ -231,7 +231,7 @@ func _input(event: InputEvent) -> void:
 						HenGlobal.history.create_action('Delete Node')
 
 						for cnode: HenCnode in all_nodes:
-							if cnode.type == 'virtual':
+							if cnode.sub_type == 'virtual':
 								continue
 							
 							HenGlobal.history.add_do_method(cnode.remove_from_scene)

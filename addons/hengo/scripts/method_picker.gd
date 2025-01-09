@@ -127,8 +127,8 @@ var native_list: Array = [
 		name = 'IF Condition',
 		data = {
 			name = 'IF',
-			type = 'if',
-			sub_type = 'if',
+			type = HenCnode.TYPE.IF,
+			sub_type = HenCnode.TYPE.IF,
 			route = HenRouter.current_route
 		}
 	},
@@ -667,7 +667,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 						idx += 1
 					
 					# functions
-					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
+					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == 'func'):
 						var dt_name: String = func_ref.props[0].value
 
 						var dt: Dictionary = {

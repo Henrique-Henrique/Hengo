@@ -4,7 +4,7 @@ class_name HenRouteReferenceProps extends PanelContainer
 const PropContainerScene = preload('res://addons/hengo/scenes/prop_container.tscn')
 
 
-func show_props(_config: Dictionary, _ref) -> void:
+func show_props(_config: Dictionary, _ref: HenRouteReference) -> void:
 	position = _ref.global_position + Vector2(_ref.size.x * HenGlobal.STATE_CAM.transform.x.x + 10, 0)
 
 	# clear
@@ -12,8 +12,8 @@ func show_props(_config: Dictionary, _ref) -> void:
 		chd.free()
 
 
-	for prop in _config.list:
-		var prop_ref = PropContainerScene.instantiate()
+	for prop: Dictionary in _config.list:
+		var prop_ref: HenPropsContainer = PropContainerScene.instantiate()
 		prop_ref.get_child(0).text = prop.name
 
 		match prop.type:
@@ -61,10 +61,10 @@ func show_props(_config: Dictionary, _ref) -> void:
 						prop.value.erase(new_prop)
 						)
 
-					for node_ref in HenGlobal.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
+					for node_ref: HenCnode in HenGlobal.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
 						match in_out_type:
 							'in':
-								match node_ref.type:
+								match node_ref.sub_type:
 									'func_output':
 										pass
 									'func_input':
@@ -72,7 +72,7 @@ func show_props(_config: Dictionary, _ref) -> void:
 									_:
 										node_ref.add_input(new_prop)
 							'out':
-								match node_ref.type:
+								match node_ref.sub_type:
 									'func_input', 'signal_disconnection':
 										pass
 									'signal_connection', 'signal_emit', 'func_output':

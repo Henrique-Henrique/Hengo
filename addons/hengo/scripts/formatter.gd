@@ -17,8 +17,8 @@ func parse_virtual(_cnode: HenCnode, _flow: String, _id: int = 0, _h_id: int = 0
 	max_depth = max(max_depth, _id)
 
 	match _cnode.type:
-		'if':
-			all_nodes.append([_cnode, 'if', _id, _h_id])
+		HenCnode.TYPE.IF:
+			all_nodes.append([_cnode, HenCnode.TYPE.IF, _id, _h_id])
 
 			if _cnode.flow_to.has('false_flow'):
 				parse_virtual(_cnode.flow_to['false_flow'], 'false_flow', _id + 1, _h_id + 1)
@@ -104,7 +104,7 @@ func _on_press() -> void:
 
 				elif depth < old_depth:
 					match flow:
-						'if':
+						HenCnode.TYPE.IF:
 
 							if cn.flow_to.has('then_flow'):
 								pos.x = cn.flow_to.then_flow.position.x
@@ -116,7 +116,7 @@ func _on_press() -> void:
 							pos.x = old_cn.position.x
 				else:
 					match flow:
-						'if':
+						HenCnode.TYPE.IF:
 							pos.x = max_x + max(200 * (abs(h_depth) - 1), 200)
 						'true_flow':
 							pos.x -= 200 * abs(h_depth)

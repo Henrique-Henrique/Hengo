@@ -1,7 +1,7 @@
 @tool
-class_name HenFlowConnection extends TextureRect
+class_name HenFlowConnector extends TextureRect
 
-@export var root: PanelContainer
+@export var root: HenCnode
 @export var type: String = 'cnode'
 
 var connections_lines: Array = []
@@ -75,13 +75,13 @@ func _on_gui(_event: InputEvent) -> void:
 
 
 func create_connection_line(_config: Dictionary) -> HenFlowConnectionLine:
-    var line := HenAssets.FlowConnectionLineScene.instantiate()
+    var line: HenFlowConnectionLine = HenAssets.FlowConnectionLineScene.instantiate()
 
     line.from_connector = self
     line.to_cnode = _config.from_cnode
 
     match self.root.type:
-        'if':
+        HenCnode.TYPE.IF:
             self.root.flow_to[type] = _config.from_cnode
             line.flow_type = type
         _:

@@ -13,14 +13,14 @@ static var GENERAL_CONTAINER: Control
 static var ROUTE_REFERENCE_CONTAINER: Control
 static var COMMENT_CONTAINER: Control
 static var STATE_CONTAINER: Control
-static var DROP_PROP_MENU: PopupMenu
+static var DROP_PROP_MENU: HenDropPropMenu
 static var SIDE_MENU_POPUP: PanelContainer
-static var DROPDOWN_MENU: PanelContainer
+static var DROPDOWN_MENU: HenDropDownMenu
 static var POPUP_CONTAINER: CanvasLayer
 static var GENERAL_POPUP: PanelContainer
 static var ROUTE_REFERENCE_PROPS: HenRouteReferenceProps
 static var DOCS_TOOLTIP: HenDocsToolTip
-static var ERROR_BT: Button
+static var ERROR_BT: HenErrorBt
 static var CONNECTION_GUIDE: HenConnectionGuide
 static var STATE_CONNECTION_GUIDE: HenConnectionGuide
 static var PROPS_CONTAINER: HenPropsContainer

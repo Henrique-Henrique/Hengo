@@ -22,7 +22,7 @@ static func change_route(_route: Dictionary) -> void:
 
 	if route_reference.has(_route.id):
 		# cleaning cnode tree
-		for cnode in HenGlobal.CNODE_CONTAINER.get_children():
+		for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
 			HenGlobal.CNODE_CONTAINER.remove_child(cnode)
 
 		# clearing lines
@@ -39,7 +39,7 @@ static func change_route(_route: Dictionary) -> void:
 		# showing cnodes
 		var cnode_list = route_reference.get(_route.id)
 
-		for cnode in cnode_list:
+		for cnode: HenCnode in cnode_list:
 			HenGlobal.CNODE_CONTAINER.add_child(cnode)
 
 		# showing lines
@@ -53,8 +53,8 @@ static func change_route(_route: Dictionary) -> void:
 		match _route.type:
 			ROUTE_TYPE.STATE:
 				# debug
-				for cnode in cnode_list:
-					if ['virtual', 'if'].has(cnode.type):
+				for cnode: HenCnode in cnode_list:
+					if ['virtual', HenCnode.TYPE.IF].has(cnode.sub_type):
 						HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 				
 				for state in HenGlobal.STATE_CAM.get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):

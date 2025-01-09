@@ -6,8 +6,8 @@ const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.
 const normal_texture = preload('res://addons/hengo/assets/images/line_dashed.png')
 const debug_texture = preload('res://addons/hengo/assets/images/flow_line_debug.svg')
 
-var from_connector
-var to_cnode
+var from_connector: HenFlowConnector
+var to_cnode: HenCnode
 var flow_type: StringName = ''
 
 # debug
@@ -131,8 +131,8 @@ func show_debug() -> void:
 		var border_style: StyleBoxFlat = cnode_border.get('theme_override_styles/panel')
 		var from_border_style: StyleBoxFlat = from_cnode_border.get('theme_override_styles/panel')
 
-		var to_color: Color = Color('#FABC3F') if to_cnode.type == 'debug_value' else Color('#52b788')
-		var from_color: Color = Color('#FABC3F') if from_connector.root.type == 'debug_value' else Color('#52b788')
+		var to_color: Color = Color('#FABC3F') if to_cnode.sub_type == 'debug_value' else Color('#52b788')
+		var from_color: Color = Color('#FABC3F') if from_connector.root.sub_type == 'debug_value' else Color('#52b788')
 
 		# arrows colors
 		from_connector.modulate = to_color

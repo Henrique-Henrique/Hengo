@@ -2,7 +2,7 @@
 class_name HenCnodeInOut extends PanelContainer
 
 
-@export var root: PanelContainer
+@export var root: HenCnode
 @export_enum('in', 'out') var type: String
 
 var connection_type: String = 'Variant'
@@ -450,7 +450,7 @@ func set_in_prop(_default_value = null) -> void:
 							
 							prop_container.add_child(l)
 						
-						if root.cnode_type == 'img':
+						if root.type == HenCnode.TYPE.IMG:
 							l.visible = false
 
 		if _default_value:

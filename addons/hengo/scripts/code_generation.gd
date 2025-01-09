@@ -123,7 +123,7 @@ func _physics_process(delta: float) -> void:
 	# functions
 	var func_code: String = '# Functions\n'
 
-	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
+	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.sub_type == 'func'):
 		var func_name: String = func_item.props[0].value
 
 		func_code += 'func {name}({params}):\n'.format({
@@ -298,7 +298,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 
 static func flow_tree_explorer(_node: HenCnode, _token_list: Array = []) -> Array:
 	match _node.type:
-		'if':
+		HenCnode.TYPE.IF:
 			_token_list.append(get_if_token(_node))
 		'for', 'for_arr':
 			_token_list.append(get_for_token(_node))
@@ -384,21 +384,21 @@ static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 			return prop_data
 		else:
 			# if input don't have a connection
-			return {type = 'not_connected', cnode_type = _input.connection_type}
+			return {sub_type = 'not_connected', type = _input.connection_type}
 
 # parsing cnode code base on type
 static func parse_cnode_values(_node: HenCnode, _id: int = 0) -> Dictionary:
 	var use_self: bool = _node.route_ref.type != HenRouter.ROUTE_TYPE.STATE
 
 	var token: Dictionary = {
-		type = _node.type,
+		type = _node.sub_type,
 		use_self = use_self,
 	}
 
 	if _node.category:
 		token.category = _node.category
 
-	match _node.type:
+	match _node.sub_type:
 		'void', 'go_to_void', 'self_go_to_void':
 			token.merge({
 				name = _node.get_cnode_name().to_snake_case(),
@@ -444,7 +444,7 @@ static func parse_cnode_values(_node: HenCnode, _id: int = 0) -> Dictionary:
 			}
 		'cast':
 			return {
-				type = _node.type,
+				type = _node.sub_type,
 				to = _node.get_node('%OutputContainer').get_child(0).connection_type,
 				from = get_input_value(_node.get_node('%InputContainer').get_child(0))
 			}
@@ -763,7 +763,7 @@ static func _get_signal_call_name(_name: String) -> String:
 static func parse_token_and_value(_node: HenCnode, _id: int = 0) -> String:
 	var code: String
 
-	match _node.type:
+	match _node.sub_type:
 		'if':
 			code = parse_token_by_type(
 				get_if_token(_node)
@@ -811,7 +811,7 @@ static func get_if_token(_node: HenCnode) -> Dictionary:
 
 static func get_for_token(_node: HenCnode) -> Dictionary:
 	return {
-		type = _node.type,
+		type = _node.sub_type,
 		hash = _node.get_instance_id(),
 		params = get_cnode_inputs(_node),
 		flow = flow_tree_explorer(_node.flow_to.cnode) if _node.flow_to.has('cnode') else []
@@ -835,7 +835,7 @@ static func check_state_errors(_state: HenState) -> void:
 
 
 static func check_errors_in_flow(_node: HenCnode) -> void:
-	match _node.type:
+	match _node.sub_type:
 		'signal_connection', 'go_to_void':
 			_node.check_error()
 			if not _node.flow_to.is_empty():
