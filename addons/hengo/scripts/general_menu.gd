@@ -1,5 +1,5 @@
 @tool
-extends PopupMenu
+class_name HenGeneralMenu extends PopupMenu
 
 var data: Dictionary = {}
 

@@ -2,8 +2,8 @@
 extends EditorDebuggerPlugin
 
 # imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
+const HenGlobal = preload('res://addons/hengo/scripts/global.gd')
+const HenRouter = preload('res://addons/hengo/scripts/router.gd')
 
 const PREFIX = 'hengo'
 
@@ -16,15 +16,15 @@ func _capture(message, data, session_id) -> bool:
 			for num: int in get_debug_ids(data[0]):
 				var id_str: String = str(num)
 
-				if _Global.current_script_debug_symbols.has(id_str):
-					var symbol_data: Array = _Global.current_script_debug_symbols[id_str]
+				if HenGlobal.current_script_debug_symbols.has(id_str):
+					var symbol_data: Array = HenGlobal.current_script_debug_symbols[id_str]
 					var hash_number: int = symbol_data[0]
 					var flow: String = symbol_data[1]
 
-					if not _Global.node_references.has(hash_number):
+					if not HenGlobal.node_references.has(hash_number):
 						continue
 
-					var node_data: Dictionary = _Global.node_references[hash_number]
+					var node_data: Dictionary = HenGlobal.node_references[hash_number]
 					var flow_name: String = flow if flow else 'cnode'
 
 					if node_data.has('base_conn'):
@@ -44,19 +44,19 @@ func _capture(message, data, session_id) -> bool:
 
 			return true
 		'hengo:debugger_loaded':
-			get_session(session_id).send_message('hengo:start_script', [_Global.current_script_path, _Global.DEBUG_TOKEN])
+			get_session(session_id).send_message('hengo:start_script', [HenGlobal.current_script_path, HenGlobal.DEBUG_TOKEN])
 			return true
 		'hengo:debug_value':
 			var id_str: String = str(data[0])
 
-			if _Global.current_script_debug_symbols.has(id_str):
-				var symbol_data: Array = _Global.current_script_debug_symbols[id_str]
+			if HenGlobal.current_script_debug_symbols.has(id_str):
+				var symbol_data: Array = HenGlobal.current_script_debug_symbols[id_str]
 				var hash_number: int = symbol_data[0]
 
-				if not _Global.node_references.has(hash_number):
+				if not HenGlobal.node_references.has(hash_number):
 					return true
 				
-				var node_data: Dictionary = _Global.node_references[hash_number]
+				var node_data: Dictionary = HenGlobal.node_references[hash_number]
 				var cnode = node_data['cnode'][2]
 				
 				cnode.show_debug_value(str_to_var(data[1]))
@@ -65,14 +65,14 @@ func _capture(message, data, session_id) -> bool:
 		'hengo:debug_state':
 			var id_str: String = str(data[0])
 
-			if _Global.current_script_debug_symbols.has(id_str):
-				var symbol_data: Array = _Global.current_script_debug_symbols[id_str]
+			if HenGlobal.current_script_debug_symbols.has(id_str):
+				var symbol_data: Array = HenGlobal.current_script_debug_symbols[id_str]
 				var hash_number: int = symbol_data[0]
 
-				if not _Global.state_references.has(hash_number):
+				if not HenGlobal.state_references.has(hash_number):
 					return true
 
-				_Global.state_references[hash_number].show_debug()
+				HenGlobal.state_references[hash_number].show_debug()
 			
 			return true
 
@@ -83,7 +83,7 @@ func reload_script() -> void:
 	load_references()
 
 	for session in get_sessions():
-		session.send_message('hengo:reload_script', [_Global.current_script_path, _Global.DEBUG_TOKEN])
+		session.send_message('hengo:reload_script', [HenGlobal.current_script_path, HenGlobal.DEBUG_TOKEN])
 
 
 func get_debug_ids(_num: int) -> Array:
@@ -111,22 +111,22 @@ func _setup_session(session_id):
 
 
 func load_references() -> void:
-	_Global.node_references = {}
-	_Global.state_references = {}
+	HenGlobal.node_references = {}
+	HenGlobal.state_references = {}
 
 	# getting states
-	for state in _Global.STATE_CONTAINER.get_children():
-		_Global.state_references[state.hash] = state
+	for state in HenGlobal.STATE_CONTAINER.get_children():
+		HenGlobal.state_references[state.hash] = state
 
 	# getting cnodes
-	for cnode in _Router.route_reference[_Router.current_route.id]:
+	for cnode in HenRouter.route_reference[HenRouter.current_route.id]:
 		if ['virtual', 'if'].has(cnode.type):
-			_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
+			HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 		elif cnode.type == 'debug_value':
 			var line_config: Dictionary = cnode.get_connection_lines_in_flow()
 			line_config['cnode'].append(cnode)
 
-			_Global.node_references[cnode.hash] = line_config
+			HenGlobal.node_references[cnode.hash] = line_config
 
 
 	# getting funcs
@@ -135,26 +135,26 @@ func load_references() -> void:
 	#
 	#
 	#
-	# for func_item in _Global.SIDE_BAR.get_node('%Function').get_node('%Container').get_children():
+	# for func_item in HenGlobal.SIDE_BAR.get_node('%Function').get_node('%Container').get_children():
 	# 	var cnode = func_item.virtual_cnode_list[0]
-	# 	_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
+	# 	HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 
 
 func _on_started() -> void:
 	load_references()
-	_Global.HENGO_DEBUGGER_PLUGIN = self
+	HenGlobal.HENGO_DEBUGGER_PLUGIN = self
 
 	print('Hengo Debugger Started!')
 
 
 func _on_stopped() -> void:
-	_Global.node_references = {}
-	_Global.HENGO_DEBUGGER_PLUGIN = null
+	HenGlobal.node_references = {}
+	HenGlobal.HENGO_DEBUGGER_PLUGIN = null
 
-	if _Global.old_state_debug:
-		if not _Global.old_state_debug.is_queued_for_deletion():
-			_Global.old_state_debug.hide_debug()
+	if HenGlobal.old_state_debug:
+		if not HenGlobal.old_state_debug.is_queued_for_deletion():
+			HenGlobal.old_state_debug.hide_debug()
 		
-		_Global.old_state_debug = null
+		HenGlobal.old_state_debug = null
 
 	print('Hengo Debugger Stopped!')

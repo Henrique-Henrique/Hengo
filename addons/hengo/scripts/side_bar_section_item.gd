@@ -1,12 +1,5 @@
 @tool
-extends PanelContainer
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
+class_name HenSideBarSectionItem extends PanelContainer
 
 var type: String
 var mouse_inside: bool = false
@@ -32,7 +25,7 @@ func _ready() -> void:
 	mouse_exited.connect(_on_exit)
 
 func _change_func_scene() -> void:
-	_Router.change_route(route)
+	HenRouter.change_route(route)
 
 func _on_enter() -> void:
 	get('theme_override_styles/panel').set('bg_color', Color.RED)
@@ -47,26 +40,26 @@ func _on_gui(_event: InputEvent) -> void:
 		if not _event.pressed:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				# dropping prop in canvas
-				if _Global.mouse_on_cnode_ui:
+				if HenGlobal.mouse_on_cnode_ui:
 					if type == 'function':
-						_Global.DROP_PROP_MENU.mount(type, self, data)
+						HenGlobal.DROP_PROP_MENU.mount(type, self, data)
 						return
 					
-					_Global.DROP_PROP_MENU.mount(type, self, data)
+					HenGlobal.DROP_PROP_MENU.mount(type, self, data)
 
-					_Global.DROP_PROP_MENU.popup()
-					_Global.DROP_PROP_MENU.position = get_viewport().get_window().position + Vector2i(get_global_mouse_position())
+					HenGlobal.DROP_PROP_MENU.popup()
+					HenGlobal.DROP_PROP_MENU.position = get_viewport().get_window().position + Vector2i(get_global_mouse_position())
 					return
 				
 				# opening popup to edit
 				if mouse_inside:
-					_Global.SIDE_MENU_POPUP.mount(res, {
+					HenGlobal.SIDE_MENU_POPUP.mount(res, {
 						ref = self
 					})
 					await RenderingServer.frame_post_draw
-					_Global.SIDE_MENU_POPUP.position = global_position
-					_Global.SIDE_MENU_POPUP.position.x -= _Global.SIDE_MENU_POPUP.size.x
-					_Global.SIDE_MENU_POPUP.get_parent().show()
+					HenGlobal.SIDE_MENU_POPUP.position = global_position
+					HenGlobal.SIDE_MENU_POPUP.position.x -= HenGlobal.SIDE_MENU_POPUP.size.x
+					HenGlobal.SIDE_MENU_POPUP.get_parent().show()
 
 # public
 #
@@ -79,14 +72,14 @@ func start_item(_config: Dictionary = {}) -> void:
 			get_node('Container').add_child(bt)
 
 			var _route = {
-				id = _UtilsName.get_unique_name(),
-				type = _Router.ROUTE_TYPE.FUNC,
+				id = HenUtilsName.get_unique_name(),
+				type = HenRouter.ROUTE_TYPE.FUNC,
 				item_ref = self
 			}
 
-			_Router.route_reference[_route.id] = []
-			_Router.line_route_reference[_route.id] = []
-			_Router.comment_reference[_route.id] = []
+			HenRouter.route_reference[_route.id] = []
+			HenRouter.line_route_reference[_route.id] = []
+			HenRouter.comment_reference[_route.id] = []
 			route = _route
 
 			var in_data: Dictionary = {
@@ -100,7 +93,7 @@ func start_item(_config: Dictionary = {}) -> void:
 			if _config.has('input'):
 				in_data.hash = _config.get('input').get('id')
 
-			var input = _CNode.instantiate_cnode(in_data)
+			var input = HenCnode.instantiate_cnode(in_data)
 
 			var out_data: Dictionary = {
 				name = 'output',
@@ -113,7 +106,7 @@ func start_item(_config: Dictionary = {}) -> void:
 			if _config.has('output'):
 				out_data.hash = _config.get('output').get('id')
 
-			var output = _CNode.instantiate_cnode(out_data)
+			var output = HenCnode.instantiate_cnode(out_data)
 
 			if _config.has('cnode_refs'):
 				_config.cnode_refs[_config.get('input').get('id')] = input
@@ -129,14 +122,14 @@ func start_item(_config: Dictionary = {}) -> void:
 			get_node('Container').add_child(bt)
 
 			var _route = {
-				id = _UtilsName.get_unique_name(),
-				type = _Router.ROUTE_TYPE.SIGNAL,
+				id = HenUtilsName.get_unique_name(),
+				type = HenRouter.ROUTE_TYPE.SIGNAL,
 				item_ref = self
 			}
 
-			_Router.route_reference[_route.id] = []
-			_Router.line_route_reference[_route.id] = []
-			_Router.comment_reference[_route.id] = []
+			HenRouter.route_reference[_route.id] = []
+			HenRouter.line_route_reference[_route.id] = []
+			HenRouter.comment_reference[_route.id] = []
 			route = _route
 
 			var dt = data.signal_data
@@ -159,7 +152,7 @@ func start_item(_config: Dictionary = {}) -> void:
 			if _config.has('signal'):
 				signal_data.hash = _config.get('signal').get('id')
 
-			var input = _CNode.instantiate_cnode(signal_data)
+			var input = HenCnode.instantiate_cnode(signal_data)
 
 			if _config.has('cnode_refs'):
 				_config.cnode_refs[_config.get('signal').get('id')] = input

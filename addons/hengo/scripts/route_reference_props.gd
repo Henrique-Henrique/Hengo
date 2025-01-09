@@ -1,13 +1,11 @@
 @tool
-extends PanelContainer
+class_name HenRouteReferenceProps extends PanelContainer
 
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
 const PropContainerScene = preload('res://addons/hengo/scenes/prop_container.tscn')
 
 
 func show_props(_config: Dictionary, _ref) -> void:
-	position = _ref.global_position + Vector2(_ref.size.x * _Global.STATE_CAM.transform.x.x + 10, 0)
+	position = _ref.global_position + Vector2(_ref.size.x * HenGlobal.STATE_CAM.transform.x.x + 10, 0)
 
 	# clear
 	for chd in get_child(0).get_children():
@@ -30,7 +28,7 @@ func show_props(_config: Dictionary, _ref) -> void:
 						_ref.change_name(_name)
 						prop.value = _name
 
-						for node_ref in _Global.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
+						for node_ref in HenGlobal.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
 							node_ref.change_name('Func -> ' + _name)
 						)
 
@@ -63,7 +61,7 @@ func show_props(_config: Dictionary, _ref) -> void:
 						prop.value.erase(new_prop)
 						)
 
-					for node_ref in _Global.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
+					for node_ref in HenGlobal.GROUP.get_nodes_from_group('f_' + str(_ref.hash)):
 						match in_out_type:
 							'in':
 								match node_ref.type:
@@ -92,7 +90,7 @@ func show_props(_config: Dictionary, _ref) -> void:
 					prop.value[_idx].type = _type
 					
 					var group_name: StringName = StringName('fi_' + str(_ref.hash) + '_' + str(_idx)) if in_out_type == 'in' else StringName('fo_' + str(_ref.hash) + '_' + str(_idx))
-					for node_ref in _Global.GROUP.get_nodes_from_group(group_name):
+					for node_ref in HenGlobal.GROUP.get_nodes_from_group(group_name):
 						node_ref.change_type(_type)
 
 					)
@@ -102,7 +100,7 @@ func show_props(_config: Dictionary, _ref) -> void:
 
 					var group_name: StringName = StringName('fi_' + str(_ref.hash) + '_' + str(_idx)) if in_out_type == 'in' else StringName('fo_' + str(_ref.hash) + '_' + str(_idx))
 
-					for node_ref in _Global.GROUP.get_nodes_from_group(group_name):
+					for node_ref in HenGlobal.GROUP.get_nodes_from_group(group_name):
 						node_ref.change_name(_name)
 
 					)

@@ -1,5 +1,5 @@
 @tool
-extends Resource
+class_name HenAssets extends Resource
 
 static var ConnectionLineScene: PackedScene
 static var StateConnectionLineScene: PackedScene

@@ -1,8 +1,5 @@
 @tool
-extends Line2D
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
+class_name HenStateConnectionLine extends Line2D
 
 var from_transition
 var to_state
@@ -18,20 +15,20 @@ func _ready() -> void:
 func update_line() -> void:
 	if to_state.position > from_transition.root.position + from_transition.root.size / 2:
 		_draw_line(
-			_Global.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x , from_transition.size.y / 2),
-			_Global.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
+			HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x , from_transition.size.y / 2),
+			HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
 		)
 		to_state.get_node('%LeftArrow').show_arrow(self)
 		to_state.get_node('%RightArrow').hide_arrow(self)
 	elif to_state.position < from_transition.root.position + from_transition.root.size / 2 \
 	and to_state.position > from_transition.root.position:
-		var end: Vector2 = _Global.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
+		var end: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
 
 		end.x += to_state.size.x + 10
 		end.y += to_state.get_node('%Title').size.y / 2
 
 		_draw_line(
-			_Global.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2),
+			HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2),
 			end,
 			1,
 			-1
@@ -39,13 +36,13 @@ func update_line() -> void:
 		to_state.get_node('%RightArrow').show_arrow(self)
 		to_state.get_node('%LeftArrow').hide_arrow(self)
 	elif to_state.position + to_state.size <  from_transition.root.position:
-		var end: Vector2 =_Global.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
+		var end: Vector2 =HenGlobal.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
 
 		end.x += to_state.size.x + 10
 		end.y += to_state.get_node('%Title').size.y / 2
 
 		_draw_line(
-			_Global.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2),
+			HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2),
 			end,
 			-1,
 			-1
@@ -54,8 +51,8 @@ func update_line() -> void:
 		to_state.get_node('%LeftArrow').hide_arrow(self)
 	elif to_state.position < from_transition.root.position:
 		_draw_line(
-			_Global.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2),
-			_Global.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2),
+			HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2),
+			HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2),
 			-1,
 			1
 		)
@@ -100,8 +97,8 @@ func _draw_line(_start_point: Vector2, _end_point: Vector2, _invert_start: int =
 
 
 func add_to_scene(_add_to_list: bool = true) -> void:
-	_Global.STATE_CAM.get_node('Lines').add_child(self)
-	global_position = _Global.STATE_CAM.global_position
+	HenGlobal.STATE_CAM.get_node('Lines').add_child(self)
+	global_position = HenGlobal.STATE_CAM.global_position
 
 	update_line()
 
@@ -120,7 +117,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 
 func remove_from_scene(_remove_from_list: bool = true) -> void:
 	if is_inside_tree():
-		_Global.STATE_CAM.get_node('Lines').remove_child(self)
+		HenGlobal.STATE_CAM.get_node('Lines').remove_child(self)
 		
 		if from_transition.root.is_connected('on_move', update_line):
 			from_transition.root.disconnect('on_move', update_line)

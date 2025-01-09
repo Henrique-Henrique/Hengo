@@ -1,7 +1,5 @@
 @tool
-extends VBoxContainer
-
-const _PropVariable = preload('res://addons/hengo/scripts/prop_variable.gd')
+class_name HenPropsContainer extends VBoxContainer
 
 func get_values() -> Dictionary:
 	var data: Dictionary = {

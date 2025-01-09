@@ -1,8 +1,5 @@
 @tool
-extends Node2D
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
+class_name HenCam extends Node2D
 
 var target_zoom: float = 1.
 
@@ -39,7 +36,7 @@ func _on_ui_size_changed() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if _Global.CAM == self:
+	if HenGlobal.CAM == self:
 		if event is InputEventMouseMotion:
 			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 				transform.origin += (event as InputEventMouseMotion).relative
@@ -88,7 +85,7 @@ func _set_transform(_pos: Vector2) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if ignore_process or _Global.CAM == self:
+	if ignore_process or HenGlobal.CAM == self:
 		var factor: float = ZOOM_RATE * _delta
 		transform.x = lerp(transform.x, t_x, factor)
 		transform.y = lerp(transform.y, t_y, factor)

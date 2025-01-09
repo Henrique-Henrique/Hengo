@@ -1,5 +1,5 @@
 @tool
-extends RichTextLabel
+class_name HenCnodeStateMsg extends RichTextLabel
 
 func _ready() -> void:
 	meta_clicked.connect(_on_meta)

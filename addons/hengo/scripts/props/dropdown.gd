@@ -1,10 +1,5 @@
 @tool
-extends Button
-
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
+class_name HenDropdown extends Button
 
 var options: Array = []
 @export var type: String = ''
@@ -22,13 +17,13 @@ func _on_pressed() -> void:
 	match type:
 		'state_transition':
 			# all transitions
-			if _Router.current_route.type == _Router.ROUTE_TYPE.STATE:
-				options = _Router.current_route.state_ref.get_all_transition_data()
+			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
+				options = HenRouter.current_route.state_ref.get_all_transition_data()
 		'const':
 			var const_name = get_parent().owner.root.get_cnode_name()
 
-			if _Enums.CONST_API_LIST.has(const_name):
-				options = _Enums.CONST_API_LIST[const_name]
+			if HenEnums.CONST_API_LIST.has(const_name):
+				options = HenEnums.CONST_API_LIST[const_name]
 		'action':
 			var arr: Array = []
 
@@ -40,11 +35,11 @@ func _on_pressed() -> void:
 			
 			options = arr
 		'hengo_states':
-			options = _Global.SCRIPTS_STATES[custom_data] if _Global.SCRIPTS_STATES.has(custom_data) else []
+			options = HenGlobal.SCRIPTS_STATES[custom_data] if HenGlobal.SCRIPTS_STATES.has(custom_data) else []
 		'cast_type':
-			options = _Enums.DROPDOWN_ALL_CLASSES
+			options = HenEnums.DROPDOWN_ALL_CLASSES
 		'current_states':
-			options = _Global.STATE_CONTAINER.get_children().map(func(state): return {name = state.get_state_name()})
+			options = HenGlobal.STATE_CONTAINER.get_children().map(func(state): return {name = state.get_state_name()})
 		'enum_list':
 			var enum_reference: Dictionary = {}
 
@@ -55,7 +50,7 @@ func _on_pressed() -> void:
 		'all_props':
 			var arr: Array = []
 
-			for prop in _Global.PROPS_CONTAINER.get_all_values(true):
+			for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
 				if custom_data.input_ref.is_type_relatable(
 					'out',
 					'in',
@@ -70,14 +65,14 @@ func _on_pressed() -> void:
 				name = x.name
 			})
 		'callable':
-			options = _Global.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
+			options = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
 				name = x.route.name
 			})
 
 
-	_Global.DROPDOWN_MENU.position = global_position
-	_Global.DROPDOWN_MENU.get_parent().show_container()
-	_Global.DROPDOWN_MENU.mount(options, _selected, type)
+	HenGlobal.DROPDOWN_MENU.position = global_position
+	HenGlobal.DROPDOWN_MENU.get_parent().show_container()
+	HenGlobal.DROPDOWN_MENU.mount(options, _selected, type)
 
 
 func _selected(_item: Dictionary) -> void:
@@ -114,8 +109,8 @@ func _selected(_item: Dictionary) -> void:
 
 	match type:
 		'hengo_states':
-			if _Router.current_route.type == _Router.ROUTE_TYPE.STATE:
-				_CodeGeneration.check_state_errors(_Router.current_route.state_ref)
+			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
+				HenCodeGeneration.check_state_errors(HenRouter.current_route.state_ref)
 
 	if get_parent().owner:
 		get_parent().owner.root.size = Vector2.ZERO

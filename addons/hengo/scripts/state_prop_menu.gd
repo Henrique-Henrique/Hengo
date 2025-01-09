@@ -1,10 +1,7 @@
 @tool
-extends PanelContainer
+class_name HenStatePropMenu extends PanelContainer
 
-# imports
-const _State = preload('res://addons/hengo/scripts/state.gd')
-
-var state: _State
+var state: HenState
 
 # private
 #
@@ -43,7 +40,7 @@ func _name_change(_name: String) -> void:
 
 # public
 #
-func start_prop(_state: _State) -> void:
+func start_prop(_state: HenState) -> void:
 	state = _state
 
 	get_node('%StateName').text = state.get_state_name()

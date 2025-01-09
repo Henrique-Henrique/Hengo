@@ -1,27 +1,13 @@
 @tool
-extends Node
-
-# imports
-const _Cam = preload('res://addons/hengo/scripts/cam.gd')
-const _State = preload('res://addons/hengo/scripts/state.gd')
-const _ConnectionGuide = preload('res://addons/hengo/scripts/connection_guide.gd')
-const _Hengo = preload('res://addons/hengo/hengo.gd')
-const _StateTransition = preload('res://addons/hengo/scripts/state_transition.gd')
-const _PropsContainer = preload('res://addons/hengo/scripts/props_container.gd')
-const _HengoRoot = preload('res://addons/hengo/scripts/hengo_root.gd')
-const _GeneralMenu = preload('res://addons/hengo/scripts/general_menu.gd')
-const _RouteReferenceProps = preload('res://addons/hengo/scripts/route_reference_props.gd')
-const _Group = preload('res://addons/hengo/scripts/group.gd')
-const _DocsToolTip = preload('res://addons/hengo/scripts/docs_tool_tip.gd')
-const _Dashboard = preload('res://addons/hengo/scripts/dashboard.gd')
+class_name HenGlobal extends Node
 
 # plugin
 static var editor_interface: EditorInterface
 
 # nodes referencs
-static var CAM: _Cam
-static var STATE_CAM: _Cam
-static var CNODE_CAM: _Cam
+static var CAM: HenCam
+static var STATE_CAM: HenCam
+static var CNODE_CAM: HenCam
 static var CNODE_CONTAINER: Control
 static var GENERAL_CONTAINER: Control
 static var ROUTE_REFERENCE_CONTAINER: Control
@@ -32,17 +18,17 @@ static var SIDE_MENU_POPUP: PanelContainer
 static var DROPDOWN_MENU: PanelContainer
 static var POPUP_CONTAINER: CanvasLayer
 static var GENERAL_POPUP: PanelContainer
-static var ROUTE_REFERENCE_PROPS: _RouteReferenceProps
-static var DOCS_TOOLTIP: _DocsToolTip
+static var ROUTE_REFERENCE_PROPS: HenRouteReferenceProps
+static var DOCS_TOOLTIP: HenDocsToolTip
 static var ERROR_BT: Button
-static var CONNECTION_GUIDE: _ConnectionGuide
-static var STATE_CONNECTION_GUIDE: _ConnectionGuide
-static var PROPS_CONTAINER: _PropsContainer
-static var HENGO_ROOT: _HengoRoot
-static var GENERAL_MENU: _GeneralMenu
-static var GROUP: _Group
+static var CONNECTION_GUIDE: HenConnectionGuide
+static var STATE_CONNECTION_GUIDE: HenConnectionGuide
+static var PROPS_CONTAINER: HenPropsContainer
+static var HENGO_ROOT: HenHengoRoot
+static var GENERAL_MENU: HenGeneralMenu
+static var GROUP: HenGroup
 static var GD_PREVIEWER: CodeEdit
-static var DASHBOARD: _Dashboard
+static var DASHBOARD: HenDashboard
 
 # cnodes
 static var can_make_connection: bool = false
@@ -58,7 +44,7 @@ static var mouse_on_cnode_ui: bool = false
 # states
 static var can_make_state_connection: bool = false
 static var state_connection_to_date: Dictionary = {}
-static var current_state_transition: _StateTransition
+static var current_state_transition: HenStateTransition
 
 # history
 static var history: UndoRedo
@@ -76,7 +62,7 @@ static var ui_mode: UI_STATE = UI_STATE.BOTH
 static var unique_id: int = 0
 
 # code flow
-static var start_state: _State
+static var start_state: HenState
 
 # save load
 static var current_script_path: StringName = ''
@@ -90,7 +76,7 @@ static var SCRIPTS_STATES: Dictionary = {}
 # debug
 static var node_references: Dictionary = {}
 static var state_references: Dictionary = {}
-static var old_state_debug: _State = null
+static var old_state_debug: HenState = null
 
 # counter
 static var node_counter: int = 0
@@ -102,7 +88,7 @@ static func get_new_node_counter() -> int:
 
 
 # debug
-static var HENGO_EDITOR_PLUGIN: _Hengo
+static var HENGO_EDITOR_PLUGIN: HenHengo
 static var HENGO_DEBUGGER_PLUGIN
 const DEBUG_TOKEN: String = '#hen_dbg#'
 const DEBUG_VAR_NAME: String = '__hen_id__'

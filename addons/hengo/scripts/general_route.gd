@@ -1,15 +1,9 @@
 @tool
-extends Button
-
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _GeneralRoute = preload('res://addons/hengo/scripts/general_route.gd')
+class_name HenGeneralRoute extends Button
 
 var route: Dictionary = {
 	name = '',
-	type = _Router.ROUTE_TYPE.INPUT,
+	type = HenRouter.ROUTE_TYPE.INPUT,
 	id = '',
 	state_ref = null
 }
@@ -29,10 +23,10 @@ func _on_gui(_event: InputEvent) -> void:
 			moving = true
 
 			# unselecting others states
-			for state in _Global.STATE_CONTAINER.get_children():
+			for state in HenGlobal.STATE_CONTAINER.get_children():
 				state.unselect()
 
-			_Router.change_route(route)
+			HenRouter.change_route(route)
 		else:
 			moving = false
 
@@ -40,7 +34,7 @@ func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
 		if moving:
-			move(position + _event.relative / _Global.CAM.transform.x.x)
+			move(position + _event.relative / HenGlobal.CAM.transform.x.x)
 		
 
 func move(_pos: Vector2) -> void:
@@ -56,19 +50,19 @@ func get_general_name() -> String:
 
 
 # static
-static func instantiate_general(_config: Dictionary) -> _GeneralRoute:
+static func instantiate_general(_config: Dictionary) -> HenGeneralRoute:
 	var general_route_scene = load('res://addons/hengo/scenes/general_route.tscn')
 	var general_route = general_route_scene.instantiate()
 
-	general_route.id = _Global.get_new_node_counter() if not _config.has('id') else _config.id
+	general_route.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 
 	general_route.route = _config.route
 	general_route.text = _config.route.name
 	general_route.route.general_ref = general_route
 
-	_Router.route_reference[_config.route.id] = []
-	_Router.line_route_reference[_config.route.id] = []
-	_Router.comment_reference[_config.route.id] = []
+	HenRouter.route_reference[_config.route.id] = []
+	HenRouter.line_route_reference[_config.route.id] = []
+	HenRouter.comment_reference[_config.route.id] = []
 
 	if _config.has('icon'):
 		general_route.icon = load(_config.icon)
@@ -87,6 +81,6 @@ static func instantiate_general(_config: Dictionary) -> _GeneralRoute:
 	if _config.has('custom_data'):
 		general_route.custom_data = _config.custom_data
 
-	_Global.GENERAL_CONTAINER.add_child(general_route)
+	HenGlobal.GENERAL_CONTAINER.add_child(general_route)
 
 	return general_route

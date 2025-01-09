@@ -1,16 +1,12 @@
 @tool
-extends PanelContainer
+class_name HenExpressionEditor extends PanelContainer
 
-# imports
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 @onready var label: Label = get_node('%Label')
 @onready var code_edit: CodeEdit = get_node('%CodeEdit')
 @onready var save_bt: Button = get_node('%Save')
 
-var ref: _CNode
+var ref: HenCnode
 var bt_ref
 var word_list: Array
 var completion_list: Array
@@ -34,7 +30,7 @@ func _completion_request() -> void:
 	for key in completion_list:
 		code_edit.add_code_completion_option(CodeEdit.KIND_VARIABLE, key, key)
 
-	for native_name in _Enums.MATH_UTILITY_NAME_LIST:
+	for native_name in HenEnums.MATH_UTILITY_NAME_LIST:
 		code_edit.add_code_completion_option(CodeEdit.KIND_FUNCTION, native_name, native_name + '(')
 	
 	code_edit.update_code_completion_options(true)
@@ -100,7 +96,7 @@ func _on_save() -> void:
 	
 	bt_ref.set_exp(code_edit.text)
 	ref.size = Vector2.ZERO
-	_Global.GENERAL_POPUP.get_parent().hide()
+	HenGlobal.GENERAL_POPUP.get_parent().hide()
 
 
 func unique_array(arr: Array) -> Array:

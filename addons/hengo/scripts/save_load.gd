@@ -1,17 +1,5 @@
 @tool
-extends Node
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _State = preload('res://addons/hengo/scripts/state.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
-const _GeneralRoute = preload('res://addons/hengo/scripts/general_route.gd')
-const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
-const _Dropdown = preload('res://addons/hengo/scripts/props/dropdown.gd')
-const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
+class_name HenSaveLoad extends Node
 
 # ---------------------------------------------------------------------------- #
 #                                    saving                                    #
@@ -19,28 +7,28 @@ const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
 
 static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	var script_data: Dictionary = {
-		type = _Global.script_config.type,
-		node_counter = _Global.node_counter,
+		type = HenGlobal.script_config.type,
+		node_counter = HenGlobal.node_counter,
 		debug_symbols = _debug_symbols,
-		state_name_counter = _State._name_counter
+		state_name_counter = HenState._name_counter
 	}
 
 	# ---------------------------------------------------------------------------- #
 	# Props
-	script_data['props'] = _Global.PROPS_CONTAINER.get_all_values()
+	script_data['props'] = HenGlobal.PROPS_CONTAINER.get_all_values()
 
 	# ---------------------------------------------------------------------------- #
 	# Generals
 	var generals: Array[Dictionary] = []
 
-	for general in _Global.GENERAL_CONTAINER.get_children():
+	for general in HenGlobal.GENERAL_CONTAINER.get_children():
 		var data: Dictionary = general.custom_data
 
 		data.pos = var_to_str(general.position)
 		data.id = general.id
 
 		for cnode in general.virtual_cnode_list:
-			data.cnode_list = get_cnode_list(_Router.route_reference[general.route.id])
+			data.cnode_list = get_cnode_list(HenRouter.route_reference[general.route.id])
 
 		generals.append(data)
 
@@ -50,12 +38,12 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# STATES
 	var states: Array[Dictionary] = []
 
-	for state in _Global.STATE_CONTAINER.get_children():
+	for state in HenGlobal.STATE_CONTAINER.get_children():
 		var data: Dictionary = {
 			id = state.hash,
 			name = state.get_state_name(),
 			pos = var_to_str(state.position),
-			cnode_list = get_cnode_list(_Router.route_reference[state.route.id]),
+			cnode_list = get_cnode_list(HenRouter.route_reference[state.route.id]),
 			events = [],
 			transitions = []
 		}
@@ -94,8 +82,8 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	var connections: Array[Dictionary] = []
 	var flow_connections: Array[Dictionary] = []
 
-	for line in _Router.line_route_reference.values().reduce(func(acc, c): return acc + c):
-		if line is _ConnectionLine:
+	for line in HenRouter.line_route_reference.values().reduce(func(acc, c): return acc + c):
+		if line is HenConnectionLine:
 			connections.append({
 				from_cnode = line.from_cnode.hash,
 				to_cnode = line.to_cnode.hash,
@@ -121,12 +109,12 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# Funcions
 	var func_list: Array[Dictionary] = []
 
-	for func_item in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x): return x.type == StringName('func')):
+	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x): return x.type == StringName('func')):
 		func_list.append({
 			hash = func_item.hash,
 			props = func_item.props,
 			ref_count = func_item.ref_count,
-			cnode_list = get_cnode_list(_Router.route_reference[func_item.route.id]),
+			cnode_list = get_cnode_list(HenRouter.route_reference[func_item.route.id]),
 			pos = var_to_str(func_item.position)
 		})
 
@@ -137,7 +125,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	var comment_list: Array[Dictionary] = []
 	var comment_node_list: Array = []
 
-	for c_arr in _Router.comment_reference.values():
+	for c_arr in HenRouter.comment_reference.values():
 		comment_node_list += c_arr
 
 	for comment in comment_node_list:
@@ -146,12 +134,12 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			is_pinned = comment.is_pinned,
 			comment = comment.get_comment(),
 			# getting the first cnode of router that comment are in (this is needed to get router ref later)
-			router_ref_id = _Router.route_reference[comment.route_ref.id][0].hash,
+			router_ref_id = HenRouter.route_reference[comment.route_ref.id][0].hash,
 			color = var_to_str(comment.get_color()),
 			pos = var_to_str(comment.position),
 			size = var_to_str(comment.size),
 			cnode_inside_ids = comment.cnode_inside.map(
-				func(x: _CNode) -> int:
+				func(x: HenCnode) -> int:
 					return x.hash
 		)
 		})
@@ -170,7 +158,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	var reload_err: int = script.reload()
 
 	if reload_err == OK:
-		var err: int = ResourceSaver.save(script, _Global.current_script_path)
+		var err: int = ResourceSaver.save(script, HenGlobal.current_script_path)
 
 		if err == OK:
 			print('SAVED HENGO SCRIPT')
@@ -239,7 +227,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 				var in_prop = cname_input.get_child(2)
 
 				if in_prop is not Label:
-					if in_prop is _Dropdown:
+					if in_prop is HenDropdown:
 						input_data.sub_type = '@dropdown'
 
 						match in_prop.type:
@@ -286,7 +274,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 			'expression':
 				cnode_data['exp'] = cnode.get_node('%Container').get_child(1).get_child(0).raw_text
 			'user_func', 'func_input', 'func_output':
-				for group_name: String in _Global.GROUP.get_group_list(cnode):
+				for group_name: String in HenGlobal.GROUP.get_group_list(cnode):
 					if group_name.begins_with('f_'):
 						cnode_data['group'] = group_name
 					
@@ -297,7 +285,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 
 # ---------------------------------------------------------------------------- #
 
-static func _get_cnode_route_instance(_cnode: _CNode) -> Dictionary:
+static func _get_cnode_route_instance(_cnode: HenCnode) -> Dictionary:
 	var cnode_data: Dictionary = {
 		id = _cnode.get_instance_id(),
 		pos = var_to_str(_cnode.position),
@@ -351,7 +339,7 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 		if cnode.has('group'):
 			cnode_data['group'] = cnode.group
 		
-		var cnode_inst = _CNode.instantiate_cnode(cnode_data)
+		var cnode_inst = HenCnode.instantiate_cnode(cnode_data)
 
 		_inst_id_refs[cnode.hash] = cnode_inst
 
@@ -362,9 +350,9 @@ static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 static func load_and_edit(_path: StringName) -> void:
 	# ---------------------------------------------------------------------------- #
 	# remove start message
-	var state_msg: PanelContainer = _Global.STATE_CAM.get_parent().get_node_or_null('StartMessage')
-	var cnode_msg: PanelContainer = _Global.CNODE_CAM.get_parent().get_node_or_null('StartMessage')
-	var compile_bt: Button = _Global.STATE_CAM.get_parent().get_node('%Compile')
+	var state_msg: PanelContainer = HenGlobal.STATE_CAM.get_parent().get_node_or_null('StartMessage')
+	var cnode_msg: PanelContainer = HenGlobal.CNODE_CAM.get_parent().get_node_or_null('StartMessage')
+	var compile_bt: Button = HenGlobal.STATE_CAM.get_parent().get_node('%Compile')
 
 	if state_msg:
 		state_msg.get_parent().remove_child(state_msg)
@@ -375,51 +363,51 @@ static func load_and_edit(_path: StringName) -> void:
 	compile_bt.disabled = false
 
 	# reseting plugin
-	# _Global.ERROR_BT.reset()
+	# HenGlobal.ERROR_BT.reset()
 
-	for state in _Global.STATE_CONTAINER.get_children():
+	for state in HenGlobal.STATE_CONTAINER.get_children():
 		state.queue_free()
 
-	for state in _Global.GENERAL_CONTAINER.get_children():
+	for state in HenGlobal.GENERAL_CONTAINER.get_children():
 		state.queue_free()
 
-	for state in _Global.ROUTE_REFERENCE_CONTAINER.get_children():
+	for state in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children():
 		state.queue_free()
 	
-	for cnode in _Global.CNODE_CONTAINER.get_children():
+	for cnode in HenGlobal.CNODE_CONTAINER.get_children():
 		cnode.queue_free()
 
-	for cnode in _Global.COMMENT_CONTAINER.get_children():
+	for cnode in HenGlobal.COMMENT_CONTAINER.get_children():
 		cnode.queue_free()
 	
-	for cnode_line in _Global.CNODE_CAM.get_node('Lines').get_children():
+	for cnode_line in HenGlobal.CNODE_CAM.get_node('Lines').get_children():
 		cnode_line.queue_free()
 	
-	for state_line in _Global.STATE_CAM.get_node('Lines').get_children():
+	for state_line in HenGlobal.STATE_CAM.get_node('Lines').get_children():
 		state_line.queue_free()
 
-	for prop in _Global.PROPS_CONTAINER.get_node('%List').get_children():
+	for prop in HenGlobal.PROPS_CONTAINER.get_node('%List').get_children():
 		prop.queue_free()
 
-	_Global.GROUP.group.clear()
+	HenGlobal.GROUP.group.clear()
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config
 	var dir: DirAccess = DirAccess.open('res://hengo')
-	_Global.SCRIPTS_INFO = []
+	HenGlobal.SCRIPTS_INFO = []
 	parse_other_scripts_data(dir)
 
 	# ---------------------------------------------------------------------------- #
 
 	# confirming queue free before check errors
-	await _Global.CNODE_CAM.get_tree().process_frame
+	await HenGlobal.CNODE_CAM.get_tree().process_frame
 
-	_Global.current_script_path = _path
-	_Router.current_route = {}
-	_Router.route_reference = {}
-	_Router.line_route_reference = {}
-	_Router.comment_reference = {}
-	_Global.history = UndoRedo.new()
+	HenGlobal.current_script_path = _path
+	HenRouter.current_route = {}
+	HenRouter.route_reference = {}
+	HenRouter.line_route_reference = {}
+	HenRouter.comment_reference = {}
+	HenGlobal.history = UndoRedo.new()
 
 	var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
 
@@ -427,9 +415,9 @@ static func load_and_edit(_path: StringName) -> void:
 		# setting script type
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
 	
-		_Global.script_config['type'] = type
-		_Global.node_counter = 0
-		_State._name_counter = 0
+		HenGlobal.script_config['type'] = type
+		HenGlobal.node_counter = 0
+		HenState._name_counter = 0
 
 		if ClassDB.is_parent_class(type, 'Node'):
 			var spacing: Vector2 = Vector2(-150, -200)
@@ -477,8 +465,8 @@ static func load_and_edit(_path: StringName) -> void:
 				var data: Dictionary = {
 					route = {
 						name = general_data.name,
-						type = _Router.ROUTE_TYPE.INPUT,
-						id = _UtilsName.get_unique_name()
+						type = HenRouter.ROUTE_TYPE.INPUT,
+						id = HenUtilsName.get_unique_name()
 					},
 					custom_data = general_data,
 					type = 'input',
@@ -488,11 +476,11 @@ static func load_and_edit(_path: StringName) -> void:
 				if general_data.has('color'):
 					data.color = general_data.color
 
-				var general := _GeneralRoute.instantiate_general(data)
+				var general := HenGeneralRoute.instantiate_general(data)
 
 				general.position = spacing + Vector2(30, 0)
 
-				_CNode.instantiate_and_add({
+				HenCnode.instantiate_and_add({
 					name = general_data.cnode_name,
 					sub_type = 'virtual',
 					outputs = [ {
@@ -506,7 +494,7 @@ static func load_and_edit(_path: StringName) -> void:
 				spacing = Vector2(general.position.x + general.size.x, general.position.y)
 
 		# It's a new project
-		var state := _State.instantiate_and_add_to_scene()
+		var state := HenState.instantiate_and_add_to_scene()
 		state.add_event({
 			name = 'Start',
 			type = 'start'
@@ -524,10 +512,10 @@ static func load_and_edit(_path: StringName) -> void:
 		var state_trans_connections: Array = []
 	
 		# setting script configs
-		_Global.script_config['type'] = data.type
-		_Global.node_counter = data.node_counter
-		_Global.current_script_debug_symbols = data.debug_symbols
-		_State._name_counter = data.state_name_counter
+		HenGlobal.script_config['type'] = data.type
+		HenGlobal.node_counter = data.node_counter
+		HenGlobal.current_script_debug_symbols = data.debug_symbols
+		HenState._name_counter = data.state_name_counter
 
 		# generating generals (like inputs)
 		for general_config: Dictionary in data['generals']:
@@ -535,15 +523,15 @@ static func load_and_edit(_path: StringName) -> void:
 
 			dt.route = {
 				name = general_config.name,
-				type = _Router.ROUTE_TYPE.INPUT,
-				id = _UtilsName.get_unique_name()
+				type = HenRouter.ROUTE_TYPE.INPUT,
+				id = HenUtilsName.get_unique_name()
 			}
 
 			dt.type = 'input'
 			dt.icon = 'res://addons/hengo/assets/icons/mouse.svg'
 			dt.custom_data = general_config
 
-			var general := _GeneralRoute.instantiate_general(dt)
+			var general := HenGeneralRoute.instantiate_general(dt)
 
 			_load_cnode(general_config.cnode_list, general.route, inst_id_refs)
 
@@ -559,12 +547,12 @@ static func load_and_edit(_path: StringName) -> void:
 				type = 'func',
 				route = {
 					name = '',
-					type = _Router.ROUTE_TYPE.FUNC,
-					id = _UtilsName.get_unique_name()
+					type = HenRouter.ROUTE_TYPE.FUNC,
+					id = HenUtilsName.get_unique_name()
 				},
 			}
 
-			var func_ref = _RouteReference.instantiate_and_add(dt)
+			var func_ref = HenRouteReference.instantiate_and_add(dt)
 
 			func_ref.set_ref_count(func_config.ref_count)
 
@@ -574,7 +562,7 @@ static func load_and_edit(_path: StringName) -> void:
 		
 		# states
 		for state: Dictionary in data['states']:
-			var state_inst = _State.instantiate_and_add_to_scene({
+			var state_inst = HenState.instantiate_and_add_to_scene({
 				name = state.name,
 				pos = state.pos,
 				hash = state.id
@@ -610,7 +598,7 @@ static func load_and_edit(_path: StringName) -> void:
 			match prop.prop_type:
 				StringName('VARIABLE'):
 					var prop_scene = load('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
-					_Global.PROPS_CONTAINER.get_node('%List').add_child(prop_scene)
+					HenGlobal.PROPS_CONTAINER.get_node('%List').add_child(prop_scene)
 					prop_scene.set_value(prop)
 
 		# ---------------------------------------------------------------------------- #
@@ -621,7 +609,7 @@ static func load_and_edit(_path: StringName) -> void:
 			var router = inst_id_refs[comment_config.router_ref_id].route_ref
 
 			comment.route_ref = router
-			_Router.comment_reference[router.id].append(comment)
+			HenRouter.comment_reference[router.id].append(comment)
 
 			comment.is_pinned = comment_config.is_pinned
 			comment.position = str_to_var(comment_config.pos)
@@ -630,7 +618,7 @@ static func load_and_edit(_path: StringName) -> void:
 				func(x: int) -> Variant:
 					return inst_id_refs[float(x)]
 			)
-			_Global.COMMENT_CONTAINER.add_child(comment)
+			HenGlobal.COMMENT_CONTAINER.add_child(comment)
 			comment.check_pin.button_pressed = comment_config.is_pinned
 			comment._on_color(str_to_var(comment_config.color as String) as Color)
 			comment.get_node('%ColorButton').color = str_to_var(comment_config.color as String) as Color
@@ -639,8 +627,8 @@ static func load_and_edit(_path: StringName) -> void:
 		# ---------------------------------------------------------------------------- #
 		# creating connections
 		for connection: Dictionary in data['connections']:
-			var from_in_out = (inst_id_refs[connection.from_cnode] as _CNode).get_node('%OutputContainer').get_child(connection.input)
-			var to_cnode = (inst_id_refs[connection.to_cnode] as _CNode)
+			var from_in_out = (inst_id_refs[connection.from_cnode] as HenCnode).get_node('%OutputContainer').get_child(connection.input)
+			var to_cnode = (inst_id_refs[connection.to_cnode] as HenCnode)
 			var to_in_out
 
 			match to_cnode.type:
@@ -657,36 +645,36 @@ static func load_and_edit(_path: StringName) -> void:
 		
 		# flow connections
 		for flow_connection: Dictionary in data['flow_connections']:
-			var cnode = inst_id_refs[flow_connection.from_cnode] as _CNode
+			var cnode = inst_id_refs[flow_connection.from_cnode] as HenCnode
 
 			match cnode.cnode_type:
 				'default':
 					var connector = cnode.get_node('%Container').get_children()[-1].get_child(0)
 
 					connector.create_connection_line_and_instance({
-						from_cnode = (inst_id_refs[flow_connection.to_cnode] as _CNode)
+						from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
 					})
 				'if':
 					var connector = cnode.get_node('%Container').get_child(2).get_node('%FlowContainer').get_child(flow_connection.from_connector)
 					
 					connector.create_connection_line_and_instance({
-						from_cnode = (inst_id_refs[flow_connection.to_cnode] as _CNode)
+						from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
 					})
 
-		_Router.change_route(_Global.start_state.route)
+		HenRouter.change_route(HenGlobal.start_state.route)
 
 		# folding comments after add to scene
-		for comment in _Global.COMMENT_CONTAINER.get_children():
+		for comment in HenGlobal.COMMENT_CONTAINER.get_children():
 			comment.pin_to_cnodes(true)
 
 	# checking errors
-	for state: _State in _Global.STATE_CONTAINER.get_children():
-		_CodeGeneration.check_state_errors(state)
+	for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
+		HenCodeGeneration.check_state_errors(state)
 
 	# checking if debugging
 	# change debugger script path
-	if _Global.HENGO_DEBUGGER_PLUGIN:
-		_Global.HENGO_DEBUGGER_PLUGIN.reload_script()
+	if HenGlobal.HENGO_DEBUGGER_PLUGIN:
+		HenGlobal.HENGO_DEBUGGER_PLUGIN.reload_script()
 	
 	# showing current type
 	show_class_name()
@@ -723,12 +711,12 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 			if script.source_code.begins_with('#[hengo] '):
 				var data: Dictionary = parse_hengo_json(script.source_code)
 
-				_Global.SCRIPTS_STATES[file_name.get_basename()] = []
+				HenGlobal.SCRIPTS_STATES[file_name.get_basename()] = []
 
 				for state_dict: Dictionary in data['states'] as Array:
-					(_Global.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
+					(HenGlobal.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
 				
-				_Global.SCRIPTS_INFO.append({
+				HenGlobal.SCRIPTS_INFO.append({
 					name = 'Go to \'' + file_name.get_basename() + '\' state',
 					data = {
 						name = 'go_to_event',
@@ -768,8 +756,8 @@ static func script_has_state(_script_name: String, _state_name: String) -> bool:
 
 
 static func show_class_name() -> void:
-	var cl_label: Label = _Global.HENGO_ROOT.get_node('%ClassName')
-	var type = _Global.script_config['type']
+	var cl_label: Label = HenGlobal.HENGO_ROOT.get_node('%ClassName')
+	var type = HenGlobal.script_config['type']
 	var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
 
 	cl_label.visible = true

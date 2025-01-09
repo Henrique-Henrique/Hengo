@@ -1,14 +1,6 @@
 @tool
-extends PanelContainer
+class_name HenCnodeInOut extends PanelContainer
 
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Assets = preload('res://addons/hengo/scripts/assets.gd')
-const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _Dropdown = preload('res://addons/hengo/scripts/props/dropdown.gd')
 
 @export var root: PanelContainer
 @export_enum('in', 'out') var type: String
@@ -27,7 +19,7 @@ var category: StringName
 
 #reparent / remove
 var is_reparenting: bool = false
-var line_ref: _ConnectionLine
+var line_ref: HenConnectionLine
 var reparent_data: Dictionary = {}
 var old_conn_ref
 
@@ -68,44 +60,44 @@ func _on_gui(_event: InputEvent) -> void:
 
 					hide_connection()
 
-					_Global.can_make_connection = true
-					_Global.connection_first_data = {
+					HenGlobal.can_make_connection = true
+					HenGlobal.connection_first_data = {
 						type = line.input.owner.type,
 						conn_type = line.input.owner.connection_type
 					}
-					_Global.reparent_data = {
+					HenGlobal.reparent_data = {
 						from_type = line.input.owner.type,
 						from_conn_type = line.input.owner.connection_type,
 						from_conn = line.input
 					}
 					_on_enter()
 				else:
-					_Global.can_make_connection = true
-					_Global.connection_first_data = {
+					HenGlobal.can_make_connection = true
+					HenGlobal.connection_first_data = {
 						type = type,
 						conn_type = connection_type
 					}
 
 					var connector: TextureRect = get_node('%Connector')
-					var pos = _Global.CAM.get_relative_vec2(get_node('%Connector').global_position)
+					var pos = HenGlobal.CAM.get_relative_vec2(get_node('%Connector').global_position)
 
-					_Global.CONNECTION_GUIDE.is_in_out = true
-					_Global.CONNECTION_GUIDE.start(pos + connector.size / 2, self)
+					HenGlobal.CONNECTION_GUIDE.is_in_out = true
+					HenGlobal.CONNECTION_GUIDE.start(pos + connector.size / 2, self)
 		else:
-			if _Global.can_make_connection and _Global.connection_to_data.is_empty():
+			if HenGlobal.can_make_connection and HenGlobal.connection_to_data.is_empty():
 				# call mehotd list on in_out type
 				print('type:: ', connection_type)
 				var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
 					from_in_out = self
 				})
-				_Global.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
+				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 
-			elif _Global.can_make_connection and _Global.connection_to_data.has('auto_cast'):
-				var to_cnode: _CNode = _Global.connection_to_data.from.root
+			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data.has('auto_cast'):
+				var to_cnode: HenCnode = HenGlobal.connection_to_data.from.root
 
 				# making auto cast
-				var cast_cnode: _CNode = _CNode.instantiate_and_add(
+				var cast_cnode: HenCnode = HenCnode.instantiate_and_add(
 					{
 						name = 'Casting -> BBT',
 						sub_type = 'cast',
@@ -121,11 +113,11 @@ func _on_gui(_event: InputEvent) -> void:
 								name = 'to',
 								sub_type = '@dropdown',
 								category = 'cast_type',
-								out_prop = _Global.connection_to_data.conn_type
+								out_prop = HenGlobal.connection_to_data.conn_type
 							}
 						],
 						position = lerp(to_cnode.position, root.position, .5),
-						route = _Router.current_route
+						route = HenRouter.current_route
 					}
 				)
 
@@ -138,77 +130,77 @@ func _on_gui(_event: InputEvent) -> void:
 					conn_type = connection_type
 				})
 
-				var second_line = cast_output.create_connection_and_instance(_Global.connection_to_data)
+				var second_line = cast_output.create_connection_and_instance(HenGlobal.connection_to_data)
 
 				cast_cnode.position.x -= cast_cnode.size.x / 4
 
 				print(cast_cnode)
 
-			elif _Global.can_make_connection and not _Global.connection_to_data.is_empty():
+			elif HenGlobal.can_make_connection and not HenGlobal.connection_to_data.is_empty():
 				# try connection
-				var line := create_connection(_Global.connection_to_data)
+				var line := create_connection(HenGlobal.connection_to_data)
 
 				if line:
-					_Global.history.create_action('Add Connection')
-					_Global.history.add_do_method(line.add_to_scene)
-					_Global.history.add_do_reference(line)
-					_Global.history.add_undo_method(line.remove_from_scene)
-					_Global.history.commit_action()
+					HenGlobal.history.create_action('Add Connection')
+					HenGlobal.history.add_do_method(line.add_to_scene)
+					HenGlobal.history.add_do_reference(line)
+					HenGlobal.history.add_undo_method(line.remove_from_scene)
+					HenGlobal.history.commit_action()
 			
-			_Global.CONNECTION_GUIDE.end()
+			HenGlobal.CONNECTION_GUIDE.end()
 
-			_Global.connection_to_data = {}
-			_Global.connection_first_data = {}
-			_Global.reparent_data = {}
-			_Global.can_make_connection = false
+			HenGlobal.connection_to_data = {}
+			HenGlobal.connection_first_data = {}
+			HenGlobal.reparent_data = {}
+			HenGlobal.can_make_connection = false
 			is_reparenting = false
 			line_ref = null
 
 func _on_enter() -> void:
-	if not _Global.can_make_connection:
+	if not HenGlobal.can_make_connection:
 		if type == 'out':
 			get('theme_override_styles/panel/').set('border_color', Color.LIGHT_CORAL)
 		return
 	
-	if not is_type_relatable(_Global.connection_first_data.type, type, _Global.connection_first_data.conn_type, connection_type):
+	if not is_type_relatable(HenGlobal.connection_first_data.type, type, HenGlobal.connection_first_data.conn_type, connection_type):
 		# if true, can auto instantiate cast
-		if ClassDB.is_parent_class(connection_type, _Global.connection_first_data.conn_type):
+		if ClassDB.is_parent_class(connection_type, HenGlobal.connection_first_data.conn_type):
 			get('theme_override_styles/panel/').set('border_color', Color.RED)
 
-			_Global.connection_to_data = {
+			HenGlobal.connection_to_data = {
 				from = self,
 				type = type,
 				conn_type = connection_type,
-				reparent_data = _Global.reparent_data,
+				reparent_data = HenGlobal.reparent_data,
 				auto_cast = true
 			}
 		return
 
 	get('theme_override_styles/panel/').set('border_color', Color.RED)
 
-	_Global.connection_to_data = {
+	HenGlobal.connection_to_data = {
 		from = self,
 		type = type,
 		conn_type = connection_type,
-		reparent_data = _Global.reparent_data
+		reparent_data = HenGlobal.reparent_data
 	}
 
 
-	if _Global.CONNECTION_GUIDE.is_in_out:
+	if HenGlobal.CONNECTION_GUIDE.is_in_out:
 		var connector: TextureRect = get_node('%Connector')
-		var pos = _Global.CAM.get_relative_vec2(get_node('%Connector').global_position)
+		var pos = HenGlobal.CAM.get_relative_vec2(get_node('%Connector').global_position)
 
-		_Global.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
-		_Global.CONNECTION_GUIDE.gradient.colors[1] = get_type_color(connection_type)
+		HenGlobal.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
+		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = get_type_color(connection_type)
 
 func _on_exit() -> void:
 	get('theme_override_styles/panel/').set('border_color', Color.TRANSPARENT)
 	
-	_Global.connection_to_data = {}
+	HenGlobal.connection_to_data = {}
 
-	if _Global.CONNECTION_GUIDE.is_in_out:
-		_Global.CONNECTION_GUIDE.hover_pos = null
-		_Global.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
+	if HenGlobal.CONNECTION_GUIDE.is_in_out:
+		HenGlobal.CONNECTION_GUIDE.hover_pos = null
+		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
 
 
 func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: String, _to_conn_type: String) -> bool:
@@ -225,7 +217,7 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 		return true
 
 	# checking if is native types
-	if _Enums.VARIANT_TYPES.has(_from_conn_type):
+	if HenEnums.VARIANT_TYPES.has(_from_conn_type):
 		if not _from_conn_type == _to_conn_type:
 			return false
 	# if it's not native, it's a class
@@ -243,14 +235,14 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 
 # public
 #
-func create_connection(_config: Dictionary) -> _ConnectionLine:
+func create_connection(_config: Dictionary) -> HenConnectionLine:
 	var _type = type if not is_reparenting else _config.reparent_data.from_type
 	var _conn_type = connection_type if not is_reparenting else _config.reparent_data.from_conn_type
 
 	if not is_type_relatable(_type, _config.type, _conn_type, _config.conn_type):
 		return
 
-	var line = _Assets.ConnectionLineScene.instantiate()
+	var line = HenAssets.ConnectionLineScene.instantiate()
 
 	line.gradient.colors[0] = get_type_color(_conn_type)
 	line.gradient.colors[1] = get_type_color(_config.conn_type)
@@ -316,8 +308,8 @@ func create_connection(_config: Dictionary) -> _ConnectionLine:
 
 	return line
 
-func create_connection_and_instance(_config: Dictionary) -> _ConnectionLine:
-	var line: _ConnectionLine = create_connection(_config)
+func create_connection_and_instance(_config: Dictionary) -> HenConnectionLine:
+	var line: HenConnectionLine = create_connection(_config)
 	line.add_to_scene()
 	return line
 
@@ -441,17 +433,17 @@ func set_in_prop(_default_value = null) -> void:
 						prop_container.add_child(prop_bool)
 						prop = prop_bool
 					'Variant':
-						var l: Label = _Assets.CNodeInputLabel.instantiate()
+						var l: Label = HenAssets.CNodeInputLabel.instantiate()
 						l.text = 'null'
 						prop_container.add_child(l)
 					_:
-						var l: Label = _Assets.CNodeInputLabel.instantiate()
+						var l: Label = HenAssets.CNodeInputLabel.instantiate()
 
 						if prop_container.get_child_count() < 3:
-							if _Global.script_config.type == connection_type:
+							if HenGlobal.script_config.type == connection_type:
 								l.text = 'self'
 							else:
-								if _Enums.VARIANT_TYPES.has(connection_type):
+								if HenEnums.VARIANT_TYPES.has(connection_type):
 									l.text = connection_type + '()'
 								elif ClassDB.can_instantiate(connection_type):
 									l.text = connection_type + '.new()'
@@ -468,7 +460,7 @@ func set_in_prop(_default_value = null) -> void:
 		add_prop_ref()
 
 
-func add_prop_ref(_default = null, _prop_idx: int = -1) -> _Dropdown:
+func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	# props ref
 	var input_container = get_node('%CNameInput')
 	var prop_ref_bt = load('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
@@ -488,9 +480,9 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> _Dropdown:
 
 	if _prop_idx > -1:
 		for group in prop_ref_bt.get_groups():
-			_Global.GROUP.remove_from_group(group, prop_ref_bt)
+			HenGlobal.GROUP.remove_from_group(group, prop_ref_bt)
 		
-		_Global.GROUP.add_to_group('p' + str(_prop_idx), prop_ref_bt)
+		HenGlobal.GROUP.add_to_group('p' + str(_prop_idx), prop_ref_bt)
 		prop_ref_bt.custom_value = str(_prop_idx)
 
 	input_container.add_child(prop_ref_bt)
@@ -509,7 +501,7 @@ func reset_in_props(_jump_first: bool = false) -> void:
 func remove_in_prop(_ignore_prop: bool = false) -> void:
 	if type == 'in':
 		for in_prop in get_node('%CNameInput').get_children().slice(2):
-			if _ignore_prop and in_prop is _Dropdown and in_prop.type == 'all_props':
+			if _ignore_prop and in_prop is HenDropdown and in_prop.type == 'all_props':
 				continue
 
 			in_prop.free()

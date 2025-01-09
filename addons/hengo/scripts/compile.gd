@@ -1,8 +1,6 @@
 @tool
-extends HBoxContainer
+class_name HenCompile extends HBoxContainer
 
-# imports
-const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
 
 var icon: TextureRect
 
@@ -17,11 +15,11 @@ func _on_compile_press() -> void:
 	# icon.texture = load('res://addons/hengo/assets/icons/menu/loading.svg')
 	# set_process(true)
 
-	_CodeGeneration.generate_and_save(self)
+	HenCodeGeneration.generate_and_save(self)
 
 
 # func generate() -> void:
-# 	_CodeGeneration.generate_and_save(self)
+# 	HenCodeGeneration.generate_and_save(self)
 
 
 # func success() -> void:

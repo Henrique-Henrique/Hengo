@@ -1,8 +1,6 @@
 @tool
-extends PanelContainer
+class_name HenDashboardItem extends PanelContainer
 
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
 
 var item_name: String = ''
 var script_path: String = ''
@@ -21,9 +19,9 @@ func _on_gui(_event: InputEvent) -> void:
 		
 
 func _open_script() -> void:
-	_SaveLoad.load_and_edit(script_path)
-	_Global.DASHBOARD.hide_dashboard()
-	print('aqq -> ', _Global.DASHBOARD.visible)
+	HenSaveLoad.load_and_edit(script_path)
+	HenGlobal.DASHBOARD.hide_dashboard()
+	print('aqq -> ', HenGlobal.DASHBOARD.visible)
 
 
 func _on_hover() -> void:

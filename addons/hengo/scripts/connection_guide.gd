@@ -1,8 +1,6 @@
 @tool
-extends Line2D
+class_name HenConnectionGuide extends Line2D
 
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
 
 var start_pos: Vector2
 var in_out

@@ -1,10 +1,6 @@
 @tool
-extends PanelContainer
+class_name HenComment extends PanelContainer
 
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
 
 var check_pin: CheckButton
 var title_panel: PanelContainer
@@ -105,19 +101,19 @@ func hide_border() -> void:
 
 func remove_from_scene() -> void:
 	if is_inside_tree():
-		_Router.comment_reference[_Router.current_route.id].erase(self)
+		HenRouter.comment_reference[HenRouter.current_route.id].erase(self)
 		
 		for cnode in cnode_inside:
 			cnode.comment_ref = null
 		
-		_Global.COMMENT_CONTAINER.remove_child(self)
+		HenGlobal.COMMENT_CONTAINER.remove_child(self)
 
 
 func add_to_scene() -> void:
-	_Global.COMMENT_CONTAINER.add_child(self)
+	HenGlobal.COMMENT_CONTAINER.add_child(self)
 
-	if not _Router.comment_reference[_Router.current_route.id].has(self):
-		_Router.comment_reference[_Router.current_route.id].append(self)
+	if not HenRouter.comment_reference[HenRouter.current_route.id].has(self):
+		HenRouter.comment_reference[HenRouter.current_route.id].append(self)
 	
 	for cnode in cnode_inside:
 		cnode.comment_ref = self
@@ -149,7 +145,7 @@ func pin_to_cnodes(_use_intern_list: bool = false) -> void:
 			cnode.comment_ref = self
 	else:
 		# defyning cnode area
-		for cnode in _Global.CNODE_CONTAINER.get_children():
+		for cnode in HenGlobal.CNODE_CONTAINER.get_children():
 			if get_rect().has_point(cnode.position):
 				min_vec = min_vec.min(cnode.position)
 				max_vec = max_vec.max(cnode.position + cnode.size)
@@ -185,11 +181,11 @@ func _on_menu(_idx: int) -> void:
 	match _idx:
 		0:
 			# delete
-			_Global.history.create_action('Delete Comment')
-			_Global.history.add_do_method(remove_from_scene)
-			_Global.history.add_undo_reference(self)
-			_Global.history.add_undo_method(add_to_scene)
-			_Global.history.commit_action()
+			HenGlobal.history.create_action('Delete Comment')
+			HenGlobal.history.add_do_method(remove_from_scene)
+			HenGlobal.history.add_undo_reference(self)
+			HenGlobal.history.add_undo_method(add_to_scene)
+			HenGlobal.history.commit_action()
 
 func _on_color(_color: Color) -> void:
 	var style: StyleBoxFlat = title_panel.get('theme_override_styles/panel')

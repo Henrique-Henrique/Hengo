@@ -1,9 +1,5 @@
 @tool
-extends Button
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
+class_name HenFormatter extends Button
 
 const VIRTUAL_DISTANCE = 500
 const CNODE_FLOW_DISTANCE = 100
@@ -17,7 +13,7 @@ func _ready() -> void:
 	pressed.connect(_on_press)
 
 
-func parse_virtual(_cnode: _CNode, _flow: String, _id: int = 0, _h_id: int = 0) -> void:
+func parse_virtual(_cnode: HenCnode, _flow: String, _id: int = 0, _h_id: int = 0) -> void:
 	max_depth = max(max_depth, _id)
 
 	match _cnode.type:
@@ -41,18 +37,18 @@ func parse_virtual(_cnode: _CNode, _flow: String, _id: int = 0, _h_id: int = 0) 
 
 
 func _on_press() -> void:
-	# var last_virtual: _CNode = null
-	# var cnodes: Array = _Global.CNODE_CONTAINER.get_children()
+	# var last_virtual: HenCnode = null
+	# var cnodes: Array = HenGlobal.CNODE_CONTAINER.get_children()
 
 	# test
-	for node in _Global.CNODE_CAM.get_children():
+	for node in HenGlobal.CNODE_CAM.get_children():
 		if node is ReferenceRect:
 			node.queue_free()
 
 	
 	# var start: int = Time.get_ticks_usec()
 
-	for state in _Global.STATE_CONTAINER.get_children():
+	for state in HenGlobal.STATE_CONTAINER.get_children():
 		for cnode in [state.virtual_cnode_list[1]]:
 			all_nodes = []
 			parse_virtual(cnode, 'cnode')
@@ -66,7 +62,7 @@ func _on_press() -> void:
 
 			var x_depth: int = 0
 			
-			var old_cn: _CNode = all_nodes[0][0]
+			var old_cn: HenCnode = all_nodes[0][0]
 			var old_flow: String = all_nodes[0][1]
 			var old_depth: int = all_nodes[0][2]
 				
@@ -78,7 +74,7 @@ func _on_press() -> void:
 			old_cn.position = Vector2.ZERO
 
 			for arr in all_nodes:
-				var cn: _CNode = arr[0]
+				var cn: HenCnode = arr[0]
 				var flow: String = arr[1]
 				var depth: int = arr[2]
 				var h_depth: int = arr[3]
@@ -140,8 +136,8 @@ func _on_press() -> void:
 				max_x_depth = max(max_x_depth, h_depth)
 
 
-func _format_cnode_flow(_cnode: _CNode, _key: String, _increment: Vector2 = Vector2.ZERO) -> void:
-	var cn: _CNode = _cnode.flow_to[_key]
+func _format_cnode_flow(_cnode: HenCnode, _key: String, _increment: Vector2 = Vector2.ZERO) -> void:
+	var cn: HenCnode = _cnode.flow_to[_key]
 	var pos: Vector2 = _cnode.position
 
 	pos += _increment
@@ -159,4 +155,4 @@ func debug_rect(_pos: Vector2, _size: Vector2, _color: Color = Color.RED) -> voi
 	ref.border_color = _color
 	ref.border_width = 3
 	ref.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_Global.CNODE_CAM.add_child(ref)
+	HenGlobal.CNODE_CAM.add_child(ref)

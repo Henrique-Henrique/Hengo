@@ -1,16 +1,6 @@
 @tool
-extends PanelContainer
+class_name HenCnode extends PanelContainer
 
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
-const _Assets = preload('res://addons/hengo/scripts/assets.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _CodeGeneration = preload('res://addons/hengo/scripts/code_generation.gd')
-const _SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
-const _ConnectionLine = preload('res://addons/hengo/scripts/connection_line.gd')
-const _RouteReference = preload('res://addons/hengo/scripts/route_reference.gd')
 
 var flow_to: Dictionary = {}
 var type
@@ -58,25 +48,25 @@ func _on_enter() -> void:
 	_preview_timer = get_tree().create_timer(.5)
 	_preview_timer.timeout.connect(_on_tooltip)
 
-	if _Global.can_make_flow_connection:
-		_Global.flow_connection_to_data = {
+	if HenGlobal.can_make_flow_connection:
+		HenGlobal.flow_connection_to_data = {
 			from_cnode = self
 		}
 
-		if not _Global.CONNECTION_GUIDE.is_in_out:
-			var pos: Vector2 = _Global.CAM.get_relative_vec2(global_position)
+		if not HenGlobal.CONNECTION_GUIDE.is_in_out:
+			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(global_position)
 			pos.x += size.x / 2
 
-			_Global.CONNECTION_GUIDE.hover_pos = pos
-			_Global.CONNECTION_GUIDE.gradient.colors = [Color('#00f6ff'), Color('#00f6ff')]
+			HenGlobal.CONNECTION_GUIDE.hover_pos = pos
+			HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color('#00f6ff'), Color('#00f6ff')]
 
 			pivot_offset = size / 2
 			var tween = create_tween().set_trans(Tween.TRANS_SPRING)
 			tween.tween_property(self, 'scale', Vector2(1.05, 1.05), .03)
-			tween.tween_property(_Global.flow_cnode_from, 'scale', Vector2(1.05, 1.05), .03)
+			tween.tween_property(HenGlobal.flow_cnode_from, 'scale', Vector2(1.05, 1.05), .03)
 			
-			_Global.flow_cnode_from.modulate = Color('#00f6ff')
-			_Global.flow_cnode_from.get_node('%Border').visible = true
+			HenGlobal.flow_cnode_from.modulate = Color('#00f6ff')
+			HenGlobal.flow_cnode_from.get_node('%Border').visible = true
 			
 			modulate = Color('#00f6ff')
 			get_node('%Border').visible = true
@@ -84,20 +74,20 @@ func _on_enter() -> void:
 
 
 func _on_exit() -> void:
-	_Global.flow_connection_to_data = {}
+	HenGlobal.flow_connection_to_data = {}
 
-	if not _Global.CONNECTION_GUIDE.is_in_out:
-		_Global.DOCS_TOOLTIP.visible = false
-		_Global.CONNECTION_GUIDE.hover_pos = null
-		_Global.CONNECTION_GUIDE.gradient.colors = [Color.GRAY, Color.GRAY]
+	if not HenGlobal.CONNECTION_GUIDE.is_in_out:
+		HenGlobal.DOCS_TOOLTIP.visible = false
+		HenGlobal.CONNECTION_GUIDE.hover_pos = null
+		HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color.GRAY, Color.GRAY]
 
 		var tween2 = create_tween().set_trans(Tween.TRANS_SPRING)
 		tween2.tween_property(self, 'scale', Vector2(1, 1), .05)
 		
-		if _Global.flow_cnode_from:
-			tween2.tween_property(_Global.flow_cnode_from, 'scale', Vector2(1, 1), .05)
-			_Global.flow_cnode_from.modulate = Color.WHITE
-			_Global.flow_cnode_from.get_node('%Border').visible = false
+		if HenGlobal.flow_cnode_from:
+			tween2.tween_property(HenGlobal.flow_cnode_from, 'scale', Vector2(1, 1), .05)
+			HenGlobal.flow_cnode_from.modulate = Color.WHITE
+			HenGlobal.flow_cnode_from.get_node('%Border').visible = false
 
 		modulate = Color.WHITE
 		get_node('%Border').visible = false
@@ -108,36 +98,36 @@ func _on_exit() -> void:
 
 	#TODO: reset this timer if hover again on other cnode
 	get_tree().create_timer(.2).timeout.connect(func():
-		if _Global.DOCS_TOOLTIP.first_show:
-			_Global.DOCS_TOOLTIP.first_show = false
+		if HenGlobal.DOCS_TOOLTIP.first_show:
+			HenGlobal.DOCS_TOOLTIP.first_show = false
 		else:
-			_Global.DOCS_TOOLTIP.hide_docs()
+			HenGlobal.DOCS_TOOLTIP.hide_docs()
 		)
 
 
 func _on_tooltip() -> Variant:
 	if _is_mouse_enter:
-		if _Global.DOCS_TOOLTIP.visible:
-			_Global.DOCS_TOOLTIP.position.x = self.global_position.x
-			_Global.DOCS_TOOLTIP.pivot_offset = Vector2(
+		if HenGlobal.DOCS_TOOLTIP.visible:
+			HenGlobal.DOCS_TOOLTIP.position.x = self.global_position.x
+			HenGlobal.DOCS_TOOLTIP.pivot_offset = Vector2(
 				0,
-				_Global.DOCS_TOOLTIP.size.y
+				HenGlobal.DOCS_TOOLTIP.size.y
 			)
-			_Global.DOCS_TOOLTIP.position.y = self.global_position.y - _Global.DOCS_TOOLTIP.size.y
+			HenGlobal.DOCS_TOOLTIP.position.y = self.global_position.y - HenGlobal.DOCS_TOOLTIP.size.y
 		else:
 			if category == 'native':
 				match raw_name:
 					'print':
 						return null
 					'make_transition':
-						_Global.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the node current state. Use this functionality to shift from one active state to another", 'Make a Transition')
+						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the node current state. Use this functionality to shift from one active state to another", 'Make a Transition')
 			else:
 				match type:
 					'func', 'void':
 						var first_input = get_node('%InputContainer').get_child(0)
 						var current_class: String = first_input.connection_type
 
-						if not _Enums.VARIANT_TYPES.has(current_class):
+						if not HenEnums.VARIANT_TYPES.has(current_class):
 							# getting where member is located in class reference
 							while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
 								current_class = ClassDB.get_parent_class(current_class)
@@ -146,26 +136,26 @@ func _on_tooltip() -> Variant:
 								if current_class == 'Object':
 									break
 						
-						_Global.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
+						HenGlobal.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
 					'if':
-						_Global.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
+						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
 
 			await get_tree().process_frame
-			_Global.DOCS_TOOLTIP.position.x = self.global_position.x
-			_Global.DOCS_TOOLTIP.pivot_offset = Vector2(
+			HenGlobal.DOCS_TOOLTIP.position.x = self.global_position.x
+			HenGlobal.DOCS_TOOLTIP.pivot_offset = Vector2(
 				0,
-				_Global.DOCS_TOOLTIP.size.y
+				HenGlobal.DOCS_TOOLTIP.size.y
 			)
 
-			_Global.DOCS_TOOLTIP.position.y = self.global_position.y - _Global.DOCS_TOOLTIP.size.y
-			_Global.DOCS_TOOLTIP.scale = Vector2.ZERO
-			_Global.DOCS_TOOLTIP.modulate = Color.TRANSPARENT
-			_Global.DOCS_TOOLTIP.visible = true
+			HenGlobal.DOCS_TOOLTIP.position.y = self.global_position.y - HenGlobal.DOCS_TOOLTIP.size.y
+			HenGlobal.DOCS_TOOLTIP.scale = Vector2.ZERO
+			HenGlobal.DOCS_TOOLTIP.modulate = Color.TRANSPARENT
+			HenGlobal.DOCS_TOOLTIP.visible = true
 
 			var tween = create_tween().set_trans(Tween.TRANS_CUBIC)
 			tween.set_parallel(true)
-			tween.tween_property(_Global.DOCS_TOOLTIP, 'scale', Vector2.ONE, .1)
-			tween.tween_property(_Global.DOCS_TOOLTIP, 'modulate', Color.WHITE, .3)
+			tween.tween_property(HenGlobal.DOCS_TOOLTIP, 'scale', Vector2.ONE, .1)
+			tween.tween_property(HenGlobal.DOCS_TOOLTIP, 'modulate', Color.WHITE, .3)
 	
 	return null
 
@@ -173,7 +163,7 @@ func _on_tooltip() -> Variant:
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
 		if _event.pressed:
-			_Global.DOCS_TOOLTIP.visible = false
+			HenGlobal.DOCS_TOOLTIP.visible = false
 			# this is for tooltip
 			_is_mouse_enter = false
 			if _event.ctrl_pressed:
@@ -184,24 +174,24 @@ func _on_gui(_event: InputEvent) -> void:
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
-						for i in get_tree().get_nodes_in_group(_Enums.CNODE_SELECTED_GROUP):
+						for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 							i.moving = true
 					else:
 						moving = true
 						# cleaning other selects
-						for i in get_tree().get_nodes_in_group(_Enums.CNODE_SELECTED_GROUP):
+						for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 							i.moving = false
 							i.unselect()
 						
 						select()
 
 						# generate gd_preview
-						var code: String = _CodeGeneration.parse_token_and_value(self)
-						_Global.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
+						var code: String = HenCodeGeneration.parse_token_and_value(self)
+						HenGlobal.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
 		else:
 			moving = false
 			# group moving false
-			for i in get_tree().get_nodes_in_group(_Enums.CNODE_SELECTED_GROUP):
+			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 				i.moving = false
 
 
@@ -209,8 +199,8 @@ func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
 		if moving and not comment_ref:
-			if _Global.CAM:
-				move(position + _event.relative / _Global.CAM.transform.x.x)
+			if HenGlobal.CAM:
+				move(position + _event.relative / HenGlobal.CAM.transform.x.x)
 
 
 # used when pick state on state signal
@@ -236,13 +226,13 @@ func move(_pos: Vector2) -> void:
 	# print(position, ' : ', global_position)
 
 func select() -> void:
-	add_to_group(_Enums.CNODE_SELECTED_GROUP)
+	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 	get_node('%SelectBorder').visible = true
 	selected = true
 
 
 func unselect() -> void:
-	remove_from_group(_Enums.CNODE_SELECTED_GROUP)
+	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
 	get_node('%SelectBorder').visible = false
 	selected = false
 
@@ -266,7 +256,7 @@ func add_to_scene() -> void:
 	var in_container = get_node('%InputContainer')
 	var out_container = get_node('%OutputContainer')
 
-	_Global.CNODE_CONTAINER.add_child(self)
+	HenGlobal.CNODE_CONTAINER.add_child(self)
 
 	for input in in_container.get_children():
 		input.show_connection(false)
@@ -282,16 +272,16 @@ func add_to_scene() -> void:
 			line.add_to_scene(false)
 
 
-	if not (_Router.route_reference[route_ref.id] as Array).has(self):
-		_Router.route_reference[route_ref.id].append(self)
+	if not (HenRouter.route_reference[route_ref.id] as Array).has(self):
+		HenRouter.route_reference[route_ref.id].append(self)
 	
 
-	var groups: Array = _Global.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
+	var groups: Array = HenGlobal.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
 
 	if not groups.is_empty():
 		var group = groups[0]
 		var id = int((group as String).split('f_')[1])
-		var route_ref_node = _RouteReference.get_route_ref_by_id_or_null(id)
+		var route_ref_node = HenRouteReference.get_route_ref_by_id_or_null(id)
 	
 		route_ref_node.change_ref_count()
 
@@ -316,16 +306,16 @@ func remove_from_scene() -> void:
 			for line in get_connector(conn_key).connections_lines:
 				line.remove_from_scene(false)
 
-		_Router.route_reference[route_ref.id].erase(self)
-		_Global.CNODE_CONTAINER.remove_child(self)
+		HenRouter.route_reference[route_ref.id].erase(self)
+		HenGlobal.CNODE_CONTAINER.remove_child(self)
 	
 
-	var groups: Array = _Global.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
+	var groups: Array = HenGlobal.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
 
 	if not groups.is_empty():
 		var group = groups[0]
 		var id = int((group as String).split('f_')[1])
-		var route_ref_node = _RouteReference.get_route_ref_by_id_or_null(id)
+		var route_ref_node = HenRouteReference.get_route_ref_by_id_or_null(id)
 	
 		route_ref_node.change_ref_count(-1)
 
@@ -334,7 +324,7 @@ func remove_from_scene() -> void:
 
 func add_input(_input: Dictionary) -> void:
 	var in_container = get_node('%InputContainer')
-	var input := _Assets.CNodeInputScene.instantiate()
+	var input := HenAssets.CNodeInputScene.instantiate()
 
 	if _input.has('ref'):
 		input.is_ref = true
@@ -355,7 +345,7 @@ func add_input(_input: Dictionary) -> void:
 		input.custom_data = _input.get('data')
 
 	if _input.has('group'):
-		_Global.GROUP.add_to_group(_input.get('group'), input)
+		HenGlobal.GROUP.add_to_group(_input.get('group'), input)
 
 
 	input.set_type(_input.get('type') if _input.has('type') else 'Variant')
@@ -373,7 +363,7 @@ func add_input(_input: Dictionary) -> void:
 func add_output(_output: Dictionary) -> void:
 	var out_container = get_node('%OutputContainer')
 
-	var output := _Assets.CNodeOutputScene.instantiate()
+	var output := HenAssets.CNodeOutputScene.instantiate()
 
 	if _output.has('category'):
 		output.category = _output.category
@@ -386,11 +376,11 @@ func add_output(_output: Dictionary) -> void:
 
 	if _output.has('group_idx'):
 		var idx = _output.get('group_idx')
-		_Global.GROUP.add_to_group('p' + str(idx), output)
+		HenGlobal.GROUP.add_to_group('p' + str(idx), output)
 		output.custom_data = idx
 
 	if _output.has('group'):
-		_Global.GROUP.add_to_group(_output.get('group'), output)
+		HenGlobal.GROUP.add_to_group(_output.get('group'), output)
 
 	output.set_type(_output.get('type') if _output.has('type') else 'Variant')
 	output.get_node('%Name').text = _output.name
@@ -409,7 +399,7 @@ func check_error() -> void:
 			var input = in_container.get_child(1)
 
 			# checking if other script has changed state name
-			if not _SaveLoad.script_has_state(input.custom_data, input.get_in_prop_by_id_or_null().get_value()):
+			if not HenSaveLoad.script_has_state(input.custom_data, input.get_in_prop_by_id_or_null().get_value()):
 				errors.append({
 					input_instance_id = input.get_instance_id(),
 					msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
@@ -451,7 +441,7 @@ func check_error() -> void:
 
 	if errors.size() > 0:
 		get_node('%ErrorBorder').visible = true
-		_Global.ERROR_BT.set_error_on_id(get_instance_id(), errors)
+		HenGlobal.ERROR_BT.set_error_on_id(get_instance_id(), errors)
 	else:
 		disable_error()
 
@@ -539,11 +529,11 @@ func show_debug_value(_value) -> void:
 
 # static
 #
-static func instantiate_cnode(_config: Dictionary) -> _CNode:
-	var instance: _CNode = _Assets.CNodeScene.instantiate()
+static func instantiate_cnode(_config: Dictionary) -> HenCnode:
+	var instance: HenCnode = HenAssets.CNodeScene.instantiate()
 
 	if not _config.is_empty():
-		instance.hash = _Global.get_new_node_counter() if not _config.has('hash') else _config.hash
+		instance.hash = HenGlobal.get_new_node_counter() if not _config.has('hash') else _config.hash
 		instance.raw_name = _config.name
 		instance.change_name(_config.get('fantasy_name') if _config.has('fantasy_name') else _config.name)
 
@@ -621,7 +611,7 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 		var func_id: String = ''
 
 		if _config.has('group'):
-			_Global.GROUP.add_to_group(_config.group, instance)
+			HenGlobal.GROUP.add_to_group(_config.group, instance)
 			
 			if _config.group.begins_with('f_'):
 				func_id = _config.group.split('f_')[1]
@@ -667,18 +657,18 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 		# instance flow connections
 		match (_config.type):
 			'default':
-				var default_flow := _Assets.CNodeFlowScene.instantiate()
+				var default_flow := HenAssets.CNodeFlowScene.instantiate()
 				var connector = default_flow.get_child(0)
 				connector.root = instance
 				instance.get_node('%Container').add_child(default_flow)
 				instance.connectors.cnode = connector
 			'if':
-				var if_flow := _Assets.CNodeIfFlowScene.instantiate()
+				var if_flow := HenAssets.CNodeIfFlowScene.instantiate()
 				for i in if_flow.get_node('%FlowContainer').get_children():
 					i.root = instance
 					instance.connectors[i.type] = i
 				
-				var input = _Assets.CNodeInputScene.instantiate()
+				var input = HenAssets.CNodeInputScene.instantiate()
 				var container = title_container.get_child(0)
 				container.add_child(input)
 				container.move_child(input, 0)
@@ -692,7 +682,7 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 				title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/if.svg')
 
 			'img':
-				var center_img = _Assets.CNodeCenterImage.instantiate()
+				var center_img = HenAssets.CNodeCenterImage.instantiate()
 				var img = center_img.get_node('%Img')
 				var center_container = instance.get_node('%CenterContainer')
 
@@ -728,10 +718,10 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 				# adding virtual cnodes references
 				'virtual':
 					match _config.route.type:
-						_Router.ROUTE_TYPE.STATE:
+						HenRouter.ROUTE_TYPE.STATE:
 							var ref = _config.route.state_ref
 							ref.virtual_cnode_list.append(instance)
-						_Router.ROUTE_TYPE.INPUT:
+						HenRouter.ROUTE_TYPE.INPUT:
 							var ref = _config.route.general_ref
 							ref.virtual_cnode_list.append(instance)
 				# virtual node of signal and func
@@ -749,7 +739,7 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/singleton.svg')
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
 
-		_Router.route_reference[_config.route.id].append(instance)
+		HenRouter.route_reference[_config.route.id].append(instance)
 	
 	instance.route_ref = _config.route
 
@@ -765,7 +755,7 @@ static func instantiate_cnode(_config: Dictionary) -> _CNode:
 	return instance
 
 
-static func instantiate_and_add(_config: Dictionary) -> _CNode:
+static func instantiate_and_add(_config: Dictionary) -> HenCnode:
 	var cnode := instantiate_cnode(_config)
 	cnode.add_to_scene()
 

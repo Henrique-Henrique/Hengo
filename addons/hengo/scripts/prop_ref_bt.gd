@@ -1,8 +1,5 @@
 @tool
-extends TextureButton
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
+class_name HenPropRef extends TextureButton
 
 var input_ref
 
@@ -12,5 +9,5 @@ func _ready() -> void:
 
 func _on_press() -> void:
 	print(
-		_Global.PROPS_CONTAINER.get_all_values()
+		HenGlobal.PROPS_CONTAINER.get_all_values()
 	)

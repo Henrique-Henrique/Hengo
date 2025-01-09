@@ -1,5 +1,5 @@
 @tool
-extends Button
+class_name HenPropBt extends Button
 
 enum Types {
 	VARIABLE,

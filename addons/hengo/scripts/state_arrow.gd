@@ -1,5 +1,5 @@
 @tool
-extends TextureRect
+class_name HenStateArrow extends TextureRect
 
 var connections: Array = []
 

@@ -1,11 +1,5 @@
 @tool
-extends Line2D
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Assets = preload('res://addons/hengo/scripts/assets.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
+class_name HenConnectionLine extends Line2D
 
 # debug imports
 const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.gdshader')
@@ -31,8 +25,8 @@ var debug_timer: Timer
 
 
 func update_line() -> void:
-	var start_pos: Vector2 = _Global.CNODE_CAM.get_relative_vec2(input.global_position) + conn_size
-	var end_pos: Vector2 = _Global.CNODE_CAM.get_relative_vec2(output.global_position) + conn_size
+	var start_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(input.global_position) + conn_size
+	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(output.global_position) + conn_size
 
 	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
 	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)
@@ -64,8 +58,8 @@ func update_line() -> void:
 
 
 func add_to_scene(_add_to_list: bool = true) -> void:
-	_Global.CNODE_CAM.get_node('Lines').add_child(self)
-	global_position = _Global.CNODE_CAM.global_position
+	HenGlobal.CNODE_CAM.get_node('Lines').add_child(self)
+	global_position = HenGlobal.CNODE_CAM.global_position
 
 	update_line()
 
@@ -86,13 +80,13 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 		output.owner.from_connection_lines.append(self)
 		output.owner.in_connected_from = input.owner.root
 
-	if not (_Router.line_route_reference[to_cnode.route_ref.id] as Array).has(self):
-		_Router.line_route_reference[to_cnode.route_ref.id].append(self)
+	if not (HenRouter.line_route_reference[to_cnode.route_ref.id] as Array).has(self):
+		HenRouter.line_route_reference[to_cnode.route_ref.id].append(self)
 
 
 func remove_from_scene(_remove_from_list: bool = true) -> void:
 	if is_inside_tree():
-		_Global.CNODE_CAM.get_node('Lines').remove_child(self)
+		HenGlobal.CNODE_CAM.get_node('Lines').remove_child(self)
 
 		if from_cnode.is_connected('on_move', update_line):
 			from_cnode.disconnect('on_move', update_line)
@@ -100,7 +94,7 @@ func remove_from_scene(_remove_from_list: bool = true) -> void:
 		if to_cnode.is_connected('on_move', update_line):
 			to_cnode.disconnect('on_move', update_line)
 		
-		_Router.line_route_reference[to_cnode.route_ref.id].erase(self)
+		HenRouter.line_route_reference[to_cnode.route_ref.id].erase(self)
 
 	output.owner.set_in_prop()
 	output.owner.root.check_error()

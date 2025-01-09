@@ -1,11 +1,6 @@
 @tool
-extends PopupMenu
+class_name HenDropPropMenu extends PopupMenu
 
-# imports
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 var type: String = ""
 var reference: Node
@@ -33,10 +28,10 @@ func _map_inputs(_in_prop_data: Dictionary, _inputs: Array) -> void:
 
 # public
 #
-func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
+func add_instance(_id: int, _config: Dictionary = {}) -> HenCnode:
 	var ref = null
-	var pos: Vector2 = _Global.CNODE_CONTAINER.get_local_mouse_position() if not _config.has('pos') else str_to_var(_config.get('pos'))
-	var route = _Router.current_route if not _config.has('route') else _config.get('route')
+	var pos: Vector2 = HenGlobal.CNODE_CONTAINER.get_local_mouse_position() if not _config.has('pos') else str_to_var(_config.get('pos'))
+	var route = HenRouter.current_route if not _config.has('route') else _config.get('route')
 	var in_prop_data: Dictionary = _config.get('in_prop_data') if _config.has('in_prop_data') else {}
 
 	match type:
@@ -44,7 +39,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
 			match _id:
 				0:
 					var res = custom_data.get('var_res')
-					var cnode = _CNode.instantiate_and_add({
+					var cnode = HenCnode.instantiate_and_add({
 						name = '',
 						sub_type = 'var' if type == 'var' else 'local_var',
 						position = pos,
@@ -64,7 +59,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
 					if not in_prop_data.is_empty():
 						input_data['in_prop'] = in_prop_data['0']
 
-					var cnode = _CNode.instantiate_and_add({
+					var cnode = HenCnode.instantiate_and_add({
 						name = 'Set Var',
 						sub_type = 'set_var' if type == 'var' else 'set_local_var',
 						inputs = [input_data],
@@ -88,7 +83,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
 
 			match _id:
 				0:
-					var cnode = _CNode.instantiate_and_add({
+					var cnode = HenCnode.instantiate_and_add({
 						name = 'Connect -> ' + reference.res[0].value,
 						data = data,
 						sub_type = 'signal_connection',
@@ -99,7 +94,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
 					reference.instance_reference.append(cnode)
 					ref = cnode
 				1:
-					var cnode = _CNode.instantiate_and_add({
+					var cnode = HenCnode.instantiate_and_add({
 						name = 'Disconnect -> ' + reference.res[0].value,
 						data = data,
 						sub_type = 'signal_disconnection',
@@ -110,7 +105,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
 					reference.instance_reference.append(cnode)
 					ref = cnode
 				2:
-					var cnode = _CNode.instantiate_and_add({
+					var cnode = HenCnode.instantiate_and_add({
 						name = 'Emit Signal -> ' + reference.res[0].value,
 						data = data,
 						sub_type = 'signal_emit',
@@ -128,7 +123,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> _CNode:
 
 			_map_inputs(in_prop_data, inputs)
 
-			var cnode = _CNode.instantiate_and_add({
+			var cnode = HenCnode.instantiate_and_add({
 				name = func_res.value,
 				sub_type = 'user_func',
 				inputs = inputs_res.get('inputs'),

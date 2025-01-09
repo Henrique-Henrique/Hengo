@@ -1,21 +1,11 @@
 @tool
-extends PanelContainer
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
-const _Assets = preload('res://addons/hengo/scripts/assets.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _State = preload('res://addons/hengo/scripts/state.gd')
-const _UtilsName = preload('res://addons/hengo/scripts/utils_name.gd')
-const _StateTransition = preload('res://addons/hengo/scripts/state_transition.gd')
+class_name HenState extends PanelContainer
 
 static var _name_counter: int = 1
 
 var route: Dictionary = {
 	name = '',
-	type = _Router.ROUTE_TYPE.STATE,
+	type = HenRouter.ROUTE_TYPE.STATE,
 	id = '',
 	state_ref = null
 }
@@ -42,27 +32,27 @@ func _ready() -> void:
 
 
 func _on_enter():
-	if _Global.can_make_state_connection:
-		_Global.state_connection_to_date = {
+	if HenGlobal.can_make_state_connection:
+		HenGlobal.state_connection_to_date = {
 			state_from = self,
 		}
 
 		get_node('%HoverBorder').visible = true
-		_Global.STATE_CONNECTION_GUIDE.hover_pos = _Global.CAM.get_relative_vec2(global_position)
-		_Global.STATE_CONNECTION_GUIDE.default_color = Color('#00b678')
+		HenGlobal.STATE_CONNECTION_GUIDE.hover_pos = HenGlobal.CAM.get_relative_vec2(global_position)
+		HenGlobal.STATE_CONNECTION_GUIDE.default_color = Color('#00b678')
 		
-		if _Global.current_state_transition:
-			_Global.current_state_transition.hover(true)
+		if HenGlobal.current_state_transition:
+			HenGlobal.current_state_transition.hover(true)
 
 
 func _on_exit():
-	_Global.state_connection_to_date = {}
+	HenGlobal.state_connection_to_date = {}
 	get_node('%HoverBorder').visible = false
-	_Global.STATE_CONNECTION_GUIDE.hover_pos = null
-	_Global.STATE_CONNECTION_GUIDE.default_color = Color.WHITE
+	HenGlobal.STATE_CONNECTION_GUIDE.hover_pos = null
+	HenGlobal.STATE_CONNECTION_GUIDE.default_color = Color.WHITE
 
-	if _Global.current_state_transition:
-		_Global.current_state_transition.hover(false)
+	if HenGlobal.current_state_transition:
+		HenGlobal.current_state_transition.hover(false)
 
 
 func _on_gui(_event: InputEvent) -> void:
@@ -76,15 +66,15 @@ func _on_gui(_event: InputEvent) -> void:
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if _event.double_click:
-						_Router.change_route(route)
+						HenRouter.change_route(route)
 
 					if selected:
-						for i in get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
+						for i in get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
 							i.moving = true
 					else:
 						moving = true
 						# cleaning other selects
-						for i in get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
+						for i in get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
 							i.moving = false
 							i.unselect()
 
@@ -93,20 +83,20 @@ func _on_gui(_event: InputEvent) -> void:
 					var menu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
 					var pos = global_position
 
-					pos.x += size.x * _Global.STATE_CAM.transform.x.x + 4
+					pos.x += size.x * HenGlobal.STATE_CAM.transform.x.x + 4
 					menu.start_prop(self)
-					_Global.GENERAL_POPUP.get_parent().show_content(menu, 'State Prop', pos)
+					HenGlobal.GENERAL_POPUP.get_parent().show_content(menu, 'State Prop', pos)
 		else:
 			moving = false
 			# group moving false
-			for i in get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
+			for i in get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
 				i.moving = false
 
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
 		if moving:
-			move(position + _event.relative / _Global.CAM.transform.x.x)
+			move(position + _event.relative / HenGlobal.CAM.transform.x.x)
 
 func _notification(what):
 	match what:
@@ -128,19 +118,19 @@ func move(_pos: Vector2) -> void:
 	emit_signal('on_move')
 
 func select() -> void:
-	add_to_group(_Enums.STATE_SELECTED_GROUP)
+	add_to_group(HenEnums.STATE_SELECTED_GROUP)
 	get_node('%SelectBorder').visible = true
 	selected = true
 
 func unselect() -> void:
-	remove_from_group(_Enums.STATE_SELECTED_GROUP)
+	remove_from_group(HenEnums.STATE_SELECTED_GROUP)
 	get_node('%SelectBorder').visible = false
 	selected = false
 
 
 # using on undo / redo
 func add_to_scene() -> void:
-	_Global.STATE_CONTAINER.add_child(self)
+	HenGlobal.STATE_CONTAINER.add_child(self)
 
 	for line in from_lines:
 		line.add_to_scene(false)
@@ -157,23 +147,23 @@ func remove_from_scene() -> void:
 		for line in to_lines:
 			line.remove_from_scene(false)
 
-		_Global.STATE_CONTAINER.remove_child(self)
+		HenGlobal.STATE_CONTAINER.remove_child(self)
 
 
 func add_event(_config: Dictionary) -> PanelContainer:
 	var event_container := get_node('%EventContainer')
-	var event := _Assets.EventScene.instantiate()
+	var event := HenAssets.EventScene.instantiate()
 
 	event.get_child(0).text = _config.name
 
 	match _config.type:
 		'start':
-			_Global.start_state = self
+			HenGlobal.start_state = self
 
 	event.set_meta('config', _config)
 
 	if event_container.get_child_count() <= 0:
-		var event_struct := _Assets.EventStructScene.instantiate()
+		var event_struct := HenAssets.EventStructScene.instantiate()
 		event_container.add_child(event_struct)
 	
 	var event_list := event_container.get_child(0).get_node('%EventList')
@@ -191,7 +181,7 @@ func remove_event(_event: PanelContainer) -> void:
 	if parent.get_child_count() <= 0:
 		parent.get_parent().queue_free()
 
-func add_transition(_name: String) -> _StateTransition:
+func add_transition(_name: String) -> HenStateTransition:
 	var transition = load('res://addons/hengo/scenes/state_transition.tscn').instantiate()
 	transition.set_transition_name(_name)
 	transition.root = self
@@ -207,12 +197,12 @@ func get_all_transition_data() -> Array:
 
 
 func show_debug() -> void:
-	if is_instance_valid(_Global.old_state_debug):
-		_Global.old_state_debug.hide_debug()
+	if is_instance_valid(HenGlobal.old_state_debug):
+		HenGlobal.old_state_debug.hide_debug()
 	
 	get_node('%DebugBorder').visible = true
 	
-	_Global.old_state_debug = self
+	HenGlobal.old_state_debug = self
 
 
 func hide_debug() -> void:
@@ -221,11 +211,11 @@ func hide_debug() -> void:
 
 # static
 #
-static func instantiate_state(_config: Dictionary = {}) -> _State:
+static func instantiate_state(_config: Dictionary = {}) -> HenState:
 	var state_scene = load('res://addons/hengo/scenes/state.tscn')
 	var state = state_scene.instantiate()
 
-	state.hash = _Global.get_new_node_counter() if not _config.has('hash') else _config.hash
+	state.hash = HenGlobal.get_new_node_counter() if not _config.has('hash') else _config.hash
 
 	var type: StringName = 'new'
 
@@ -241,23 +231,23 @@ static func instantiate_state(_config: Dictionary = {}) -> _State:
 	if _config.has('pos'):
 		state.position = str_to_var(_config.pos)
 
-	state.route.id = _UtilsName.get_unique_name()
+	state.route.id = HenUtilsName.get_unique_name()
 	state.route.state_ref = state
 	state.route.name = state.get_node('%Title').text
 
-	_Router.route_reference[state.route.id] = []
-	_Router.line_route_reference[state.route.id] = []
-	_Router.comment_reference[state.route.id] = []
+	HenRouter.route_reference[state.route.id] = []
+	HenRouter.line_route_reference[state.route.id] = []
+	HenRouter.comment_reference[state.route.id] = []
 
 	if type == 'new':
 		# adding initial cnodes (update and ready)
-		_CNode.instantiate_and_add({
+		HenCnode.instantiate_and_add({
 			name = 'enter',
 			sub_type = 'virtual',
 			route = state.route,
 			position = Vector2.ZERO
 		})
-		_CNode.instantiate_and_add({
+		HenCnode.instantiate_and_add({
 			name = 'update',
 			sub_type = 'virtual',
 			outputs = [ {
@@ -272,22 +262,22 @@ static func instantiate_state(_config: Dictionary = {}) -> _State:
 
 		print(state.route)
 
-		_Router.change_route(state.route)
+		HenRouter.change_route(state.route)
 
 		state.position = Vector2.ZERO
 	
 	state.size = Vector2.ZERO
 
-	_Enums.DROPDOWN_STATES.append(state.route)
+	HenEnums.DROPDOWN_STATES.append(state.route)
 
 
-	print('INSTANCD ', _Global.STATE_CONTAINER.get_child_count())
+	print('INSTANCD ', HenGlobal.STATE_CONTAINER.get_child_count())
 
 	return state
 
 
-static func instantiate_and_add_to_scene(_config: Dictionary = {}) -> _State:
-	var state = _State.instantiate_state(_config)
+static func instantiate_and_add_to_scene(_config: Dictionary = {}) -> HenState:
+	var state = HenState.instantiate_state(_config)
 
 	state.add_to_scene()
 

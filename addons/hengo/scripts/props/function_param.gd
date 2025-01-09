@@ -2,7 +2,7 @@
 extends HBoxContainer
 
 # imports
-const _Enums = preload ('res://addons/hengo/references/enums.gd')
+const HenEnums = preload('res://addons/hengo/references/enums.gd')
 
 enum {
     DELETE,
@@ -20,7 +20,7 @@ signal type_changed
 func _ready() -> void:
     get_node('%MenuButton').get_popup().id_pressed.connect(_on_id_pressed)
     var type_picker = get_node('%TypePick')
-    type_picker.options = _Enums.DROPDOWN_ALL_CLASSES
+    type_picker.options = HenEnums.DROPDOWN_ALL_CLASSES
     type_picker.connect('value_changed', _on_type_change)
 
 func _on_type_change(_value: String):

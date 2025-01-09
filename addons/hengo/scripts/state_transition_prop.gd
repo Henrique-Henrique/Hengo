@@ -1,5 +1,5 @@
 @tool
-extends HBoxContainer
+class_name HenStateTransitionProp extends HBoxContainer
 
 enum {
     MOVE_UP,

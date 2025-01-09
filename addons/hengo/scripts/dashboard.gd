@@ -1,10 +1,6 @@
 @tool
-extends PanelContainer
+class_name HenDashboard extends PanelContainer
 
-
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 const DashBoardItemScene = preload('res://addons/hengo/scenes/dashboard_item.tscn')
 
@@ -87,7 +83,7 @@ func get_script_list(_dir: DirAccess, _list: Array[Array] = []) -> Array[Array]:
 			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
 
 			if script.source_code.begins_with('#[hengo] '):
-				var data: Dictionary = _SaveLoad.parse_hengo_json(script.source_code)
+				var data: Dictionary = HenSaveLoad.parse_hengo_json(script.source_code)
 
 				_list.append([file_name.get_basename(), _dir.get_current_dir() + '/' + file_name, data.type])
 			else:
@@ -103,5 +99,5 @@ func get_script_list(_dir: DirAccess, _list: Array[Array] = []) -> Array[Array]:
 func hide_dashboard() -> void:
 	visible = false
 
-	_Global.CNODE_CAM.can_scroll = true
-	_Global.STATE_CAM.can_scroll = true
+	HenGlobal.CNODE_CAM.can_scroll = true
+	HenGlobal.STATE_CAM.can_scroll = true

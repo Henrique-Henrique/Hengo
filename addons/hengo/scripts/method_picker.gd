@@ -1,11 +1,5 @@
 @tool
-extends VBoxContainer
-
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Router = preload('res://addons/hengo/scripts/router.gd')
-const _CNode = preload('res://addons/hengo/scripts/cnode.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
+class_name HenMethodPicker extends VBoxContainer
 
 var list_container: VBoxContainer
 var start_pos: Vector2 = Vector2.ZERO
@@ -41,7 +35,7 @@ var native_list: Array = [
 				name = 'result',
 				type = 'Variant'
 			}],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -57,7 +51,7 @@ var native_list: Array = [
 					category = 'state_transition'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -80,7 +74,7 @@ var native_list: Array = [
 					category = 'cast_type'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -96,7 +90,7 @@ var native_list: Array = [
 					type = 'Variant'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -111,7 +105,7 @@ var native_list: Array = [
 					type = 'Variant'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -126,7 +120,7 @@ var native_list: Array = [
 					type = 'String'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -135,7 +129,7 @@ var native_list: Array = [
 			name = 'IF',
 			type = 'if',
 			sub_type = 'if',
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -163,7 +157,7 @@ var native_list: Array = [
 					type = 'int'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -183,7 +177,7 @@ var native_list: Array = [
 					type = 'Variant'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -192,7 +186,7 @@ var native_list: Array = [
 			name = 'break',
 			sub_type = 'break',
 			category = 'native',
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -201,7 +195,7 @@ var native_list: Array = [
 			name = 'continue',
 			sub_type = 'continue',
 			category = 'native',
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	},
 	{
@@ -223,7 +217,7 @@ var native_list: Array = [
 					type = 'Variant'
 				}
 			],
-			route = _Router.current_route
+			route = HenRouter.current_route
 		}
 	}
 ]
@@ -237,11 +231,11 @@ func _ready() -> void:
 	# disabling coming from inputs (for now)
 	if error != OK or came_from == 'in':
 		await get_tree().process_frame
-		_Global.GENERAL_POPUP.get_parent().hide()
+		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
 
-	match _Router.current_route.type:
-		_Router.ROUTE_TYPE.SIGNAL, _Router.ROUTE_TYPE.FUNC:
+	match HenRouter.current_route.type:
+		HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.FUNC:
 			native_list.append(
 				{
 					name = 'Go to Event',
@@ -255,7 +249,7 @@ func _ready() -> void:
 								category = 'current_states'
 							}
 						],
-						route = _Router.current_route
+						route = HenRouter.current_route
 					}
 				},
 			)
@@ -281,7 +275,7 @@ func _on_search_gui_input(_event: InputEvent) -> void:
 
 
 func _select() -> void:
-	_Global.CNODE_CAM.can_scroll = true
+	HenGlobal.CNODE_CAM.can_scroll = true
 	if list_container.get_child_count() > 0:
 		var item = list_container.get_child(selected_id)
 		var data = item.get_meta('data')['data']
@@ -311,9 +305,9 @@ func _select() -> void:
 					input.data = data.inputs[0].type
 
 
-		data['position'] = _Global.CNODE_CAM.get_relative_vec2(start_pos)
+		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 
-		var cnode: _CNode = _CNode.instantiate_and_add(data)
+		var cnode: HenCnode = HenCnode.instantiate_and_add(data)
 
 		# make connection
 		if cnode_config.has('from_in_out'):
@@ -324,7 +318,7 @@ func _select() -> void:
 				from = output,
 				type = came_from,
 				conn_type = connection_type,
-				reparent_data = _Global.reparent_data
+				reparent_data = HenGlobal.reparent_data
 			})
 		
 		
@@ -335,7 +329,7 @@ func _select() -> void:
 				from_cnode = cnode,
 			})
 
-		_Global.GENERAL_POPUP.get_parent().hide()
+		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
 
 func _show_list(_list: Array, _slice: bool = true) -> void:
@@ -355,7 +349,7 @@ func _show_list(_list: Array, _slice: bool = true) -> void:
 		list_container.add_child(item)
 	
 	await RenderingServer.frame_post_draw
-	_Global.GENERAL_POPUP.size = Vector2.ZERO
+	HenGlobal.GENERAL_POPUP.size = Vector2.ZERO
 
 	if list_container.get_child_count() > 0:
 		_item_hover(list_container.get_child(0))
@@ -458,7 +452,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 							type = _get_typeny_arg(arg)
 						}
 					),
-			route = _Router.current_route
+			route = HenRouter.current_route
 		},
 	}
 
@@ -474,9 +468,9 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 
 
 func start_api(_class_name: StringName = 'all') -> int:
-	api_list = _Global.SCRIPTS_INFO.map(
+	api_list = HenGlobal.SCRIPTS_INFO.map(
 		func(x: Dictionary) -> Dictionary:
-			x['data']['route'] = _Router.current_route
+			x['data']['route'] = HenRouter.current_route
 			return x
 	)
 
@@ -486,12 +480,12 @@ func start_api(_class_name: StringName = 'all') -> int:
 				for dict in ClassDB.class_get_method_list(_class_name):
 					api_list.append(_get_class_obj(dict, cl_name, _class_name))
 		_:
-			if _Enums.VARIANT_TYPES.has(_class_name):
-				if _Enums.NATIVE_API_LIST.has(_class_name):
-					api_list = _Enums.NATIVE_API_LIST[_class_name].map(func(obj: Dictionary) -> Dictionary:
+			if HenEnums.VARIANT_TYPES.has(_class_name):
+				if HenEnums.NATIVE_API_LIST.has(_class_name):
+					api_list = HenEnums.NATIVE_API_LIST[_class_name].map(func(obj: Dictionary) -> Dictionary:
 						var dt: Dictionary = obj
 
-						dt.data.route = _Router.current_route
+						dt.data.route = HenRouter.current_route
 						dt.type = _class_name
 
 						return dt
@@ -499,8 +493,8 @@ func start_api(_class_name: StringName = 'all') -> int:
 				else:
 					api_list = []
 				
-				if _Enums.NATIVE_PROPS_LIST.has(_class_name):
-					for prop in _Enums.NATIVE_PROPS_LIST.get(_class_name):
+				if HenEnums.NATIVE_PROPS_LIST.has(_class_name):
+					for prop in HenEnums.NATIVE_PROPS_LIST.get(_class_name):
 							api_list.append({
 								name = 'Get Prop -> ' + prop.name,
 								data = {
@@ -520,7 +514,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 											type = prop.type,
 										}
 									],
-									route = _Router.current_route
+									route = HenRouter.current_route
 								}
 							})
 
@@ -541,7 +535,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 											type = prop.type,
 										}
 									],
-									route = _Router.current_route
+									route = HenRouter.current_route
 								}
 							})
 
@@ -555,8 +549,8 @@ func start_api(_class_name: StringName = 'all') -> int:
 						api_list.append(_get_class_obj(dict, _class_name, _class_name))
 					
 					# const / enums
-					for key in _Enums.CONST_API_LIST:
-						var value: Array = _Enums.CONST_API_LIST[key]
+					for key in HenEnums.CONST_API_LIST:
+						var value: Array = HenEnums.CONST_API_LIST[key]
 
 						api_list.append({
 							name = 'Const -> ' + key,
@@ -573,14 +567,14 @@ func start_api(_class_name: StringName = 'all') -> int:
 										data = value
 									}
 								],
-								route = _Router.current_route
+								route = HenRouter.current_route
 							}
 						})
 
 					# singleton
-					for singleton_config in _Enums.SINGLETON_API_LIST:
+					for singleton_config in HenEnums.SINGLETON_API_LIST:
 						var dt: Dictionary = singleton_config
-						dt.data.route = _Router.current_route
+						dt.data.route = HenRouter.current_route
 						api_list.append(dt)
 					
 					
@@ -603,7 +597,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 										ref = true
 									}
 								],
-								route = _Router.current_route
+								route = HenRouter.current_route
 							}
 						}
 
@@ -626,13 +620,13 @@ func start_api(_class_name: StringName = 'all') -> int:
 										type = type_string(prop.type),
 									}
 								],
-								route = _Router.current_route
+								route = HenRouter.current_route
 							}
 						}
 
-						if _Enums.NATIVE_PROPS_LIST.has(type_string(prop.type)):
-							set_data.data.inputs += _Enums.NATIVE_PROPS_LIST.get(type_string(prop.type))
-							get_data.data.outputs += _Enums.NATIVE_PROPS_LIST.get(type_string(prop.type))
+						if HenEnums.NATIVE_PROPS_LIST.has(type_string(prop.type)):
+							set_data.data.inputs += HenEnums.NATIVE_PROPS_LIST.get(type_string(prop.type))
+							get_data.data.outputs += HenEnums.NATIVE_PROPS_LIST.get(type_string(prop.type))
 
 						api_list.append(set_data)
 						api_list.append(get_data)
@@ -640,7 +634,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 					
 					# set variable
 					var idx: int = 0
-					for var_config in _Global.PROPS_CONTAINER.get_all_values().filter(func(x: Dictionary) -> bool:
+					for var_config in HenGlobal.PROPS_CONTAINER.get_all_values().filter(func(x: Dictionary) -> bool:
 						return x.prop_type == StringName('VARIABLE')):
 						api_list.append({
 							name = 'Set Var -> ' + var_config.name,
@@ -652,7 +646,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 									type = var_config.type,
 									group = 'p' + str(idx),
 								}],
-								route = _Router.current_route
+								route = HenRouter.current_route
 							}
 						})
 
@@ -667,13 +661,13 @@ func start_api(_class_name: StringName = 'all') -> int:
 									group = 'p' + str(idx),
 									group_idx = idx
 								}],
-								route = _Router.current_route
+								route = HenRouter.current_route
 							}
 						})
 						idx += 1
 					
 					# functions
-					for func_ref in _Global.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
+					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == 'func'):
 						var dt_name: String = func_ref.props[0].value
 
 						var dt: Dictionary = {
@@ -684,7 +678,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								sub_type = 'user_func',
 								inputs = [],
 								outputs = [],
-								route = _Router.current_route,
+								route = HenRouter.current_route,
 								group = 'f_' + str(func_ref.hash)
 							}
 						}

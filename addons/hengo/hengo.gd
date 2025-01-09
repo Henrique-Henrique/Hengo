@@ -1,11 +1,5 @@
 @tool
-extends EditorPlugin
-
-# imports
-const _Assets = preload('res://addons/hengo/scripts/assets.gd')
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _SaveLoad = preload('res://addons/hengo/scripts/save_load.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
+class_name HenHengo extends EditorPlugin
 
 const PLUGIN_NAME = 'Hengo'
 const MENU_NATIVE_API_NAME = "Hengo Generate Native Api"
@@ -39,16 +33,16 @@ func _enter_tree():
 	add_debugger_plugin(debug_plugin)
 
 	# getting native api like String, float... methods.
-	var native_api_file: FileAccess = FileAccess.open(_Enums.NATIVE_API_PATH, FileAccess.READ)
+	var native_api_file: FileAccess = FileAccess.open(HenEnums.NATIVE_API_PATH, FileAccess.READ)
 
 	if native_api_file:
 		var api_json: Dictionary = JSON.parse_string(native_api_file.get_as_text())
 
-		_Enums.NATIVE_API_LIST = api_json.native_api
-		_Enums.CONST_API_LIST = api_json.const_api
-		_Enums.SINGLETON_API_LIST = api_json.singleton_api
-		_Enums.NATIVE_PROPS_LIST = api_json.native_props
-		_Enums.MATH_UTILITY_NAME_LIST = api_json.math_utility_names
+		HenEnums.NATIVE_API_LIST = api_json.native_api
+		HenEnums.CONST_API_LIST = api_json.const_api
+		HenEnums.SINGLETON_API_LIST = api_json.singleton_api
+		HenEnums.NATIVE_PROPS_LIST = api_json.native_props
+		HenEnums.MATH_UTILITY_NAME_LIST = api_json.math_utility_names
 
 		native_api_file.close()
 	else:
@@ -64,28 +58,28 @@ func _enter_tree():
 	# ---------------------------------------------------------------------------- #
 
 	# setting scene reference here to prevent crash on development when reload scripts on editor :)
-	_Assets.ConnectionLineScene = load('res://addons/hengo/scenes/connection_line.tscn')
-	_Assets.StateConnectionLineScene = load('res://addons/hengo/scenes/state_connection_line.tscn')
-	_Assets.FlowConnectionLineScene = load('res://addons/hengo/scenes/flow_connection_line.tscn')
-	_Assets.HengoRootScene = load('res://addons/hengo/scenes/hengo_root.tscn')
-	_Assets.CNodeInputScene = load('res://addons/hengo/scenes/cnode_input.tscn')
-	_Assets.CNodeOutputScene = load('res://addons/hengo/scenes/cnode_output.tscn')
-	_Assets.CNodeScene = load('res://addons/hengo/scenes/cnode.tscn')
-	_Assets.CNodeFlowScene = load('res://addons/hengo/scenes/cnode_flow.tscn')
-	_Assets.CNodeIfFlowScene = load('res://addons/hengo/scenes/cnode_if_flow.tscn')
-	_Assets.EventScene = load('res://addons/hengo/scenes/event.tscn')
-	_Assets.EventStructScene = load('res://addons/hengo/scenes/event_structure.tscn')
-	_Assets.SideBarSectionItemScene = load('res://addons/hengo/scenes/side_bar_section_item.tscn')
-	_Assets.PropContainerScene = load('res://addons/hengo/scenes/prop_container.tscn')
-	_Assets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
-	_Assets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')
+	HenAssets.ConnectionLineScene = load('res://addons/hengo/scenes/connection_line.tscn')
+	HenAssets.StateConnectionLineScene = load('res://addons/hengo/scenes/state_connection_line.tscn')
+	HenAssets.FlowConnectionLineScene = load('res://addons/hengo/scenes/flow_connection_line.tscn')
+	HenAssets.HengoRootScene = load('res://addons/hengo/scenes/hengo_root.tscn')
+	HenAssets.CNodeInputScene = load('res://addons/hengo/scenes/cnode_input.tscn')
+	HenAssets.CNodeOutputScene = load('res://addons/hengo/scenes/cnode_output.tscn')
+	HenAssets.CNodeScene = load('res://addons/hengo/scenes/cnode.tscn')
+	HenAssets.CNodeFlowScene = load('res://addons/hengo/scenes/cnode_flow.tscn')
+	HenAssets.CNodeIfFlowScene = load('res://addons/hengo/scenes/cnode_if_flow.tscn')
+	HenAssets.EventScene = load('res://addons/hengo/scenes/event.tscn')
+	HenAssets.EventStructScene = load('res://addons/hengo/scenes/event_structure.tscn')
+	HenAssets.SideBarSectionItemScene = load('res://addons/hengo/scenes/side_bar_section_item.tscn')
+	HenAssets.PropContainerScene = load('res://addons/hengo/scenes/prop_container.tscn')
+	HenAssets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
+	HenAssets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')
 
-	_Global.editor_interface = get_editor_interface()
+	HenGlobal.editor_interface = get_editor_interface()
 	print('setted')
 
-	main_scene = _Assets.HengoRootScene.instantiate()
+	main_scene = HenAssets.HengoRootScene.instantiate()
 
-	_Global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
+	HenGlobal.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)
@@ -106,7 +100,7 @@ func _enter_tree():
 	set_docks()
 
 	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
-	_Global.HENGO_EDITOR_PLUGIN = self
+	HenGlobal.HENGO_EDITOR_PLUGIN = self
 
 	# adding gdscript editor
 	gd_previewer = (load('res://addons/hengo/scenes/gd_editor.tscn') as PackedScene).instantiate()
@@ -126,7 +120,7 @@ func _enter_tree():
 		highlighter.add_keyword_color(kw, Color('#bb9af7'))
 
 	add_control_to_bottom_panel(gd_previewer, 'Hengo Code')
-	_Global.GD_PREVIEWER = gd_previewer
+	HenGlobal.GD_PREVIEWER = gd_previewer
 
 func _generate_native_api() -> void:
 	var file: FileAccess = FileAccess.open('res://extension_api.json', FileAccess.READ)
@@ -145,7 +139,7 @@ func _generate_native_api() -> void:
 
 
 	for dict: Dictionary in (data['builtin_classes'] as Array):
-		if _Enums.VARIANT_TYPES.has(dict.name):
+		if HenEnums.VARIANT_TYPES.has(dict.name):
 			if dict.has('members'):
 				native_props[dict.name] = dict.members
 
@@ -261,7 +255,7 @@ func _generate_native_api() -> void:
 			else:
 				const_api[dict.name] = _generate_enums(dict)
 
-	var file_json: FileAccess = FileAccess.open(_Enums.NATIVE_API_PATH, FileAccess.WRITE)
+	var file_json: FileAccess = FileAccess.open(HenEnums.NATIVE_API_PATH, FileAccess.WRITE)
 
 	file_json.store_string(
 		JSON.stringify({
@@ -357,7 +351,7 @@ func _exit_tree():
 		main_scene.queue_free()
 	
 	remove_autoload_singleton('HengoDebugger')
-	_Global.HENGO_EDITOR_PLUGIN = null
+	HenGlobal.HENGO_EDITOR_PLUGIN = null
 
 func _make_visible(_visible: bool):
 	if main_scene:
@@ -427,9 +421,9 @@ func change_colors() -> void:
 	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
 	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
 
-	_Global.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
+	HenGlobal.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
 	cnode_style_box.bg_color = base_color.lightened(.015)
-	_Global.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
+	HenGlobal.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
 	cnode_style_box.border_color = base_color.lightened(.2)
 	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)

@@ -1,9 +1,6 @@
 @tool
-extends Node
+class_name HenRouter extends Node
 
-# imports
-const _Global = preload('res://addons/hengo/scripts/global.gd')
-const _Enums = preload('res://addons/hengo/references/enums.gd')
 
 enum ROUTE_TYPE {
 	STATE,
@@ -25,25 +22,25 @@ static func change_route(_route: Dictionary) -> void:
 
 	if route_reference.has(_route.id):
 		# cleaning cnode tree
-		for cnode in _Global.CNODE_CONTAINER.get_children():
-			_Global.CNODE_CONTAINER.remove_child(cnode)
+		for cnode in HenGlobal.CNODE_CONTAINER.get_children():
+			HenGlobal.CNODE_CONTAINER.remove_child(cnode)
 
 		# clearing lines
-		var line_container = _Global.CNODE_CAM.get_node('Lines')
+		var line_container = HenGlobal.CNODE_CAM.get_node('Lines')
 
 		for line in line_container.get_children():
 			line_container.remove_child(line)
 		
 		# clearing comments
-		for comment in _Global.COMMENT_CONTAINER.get_children():
-			_Global.COMMENT_CONTAINER.remove_child(comment)
+		for comment in HenGlobal.COMMENT_CONTAINER.get_children():
+			HenGlobal.COMMENT_CONTAINER.remove_child(comment)
 
 
 		# showing cnodes
 		var cnode_list = route_reference.get(_route.id)
 
 		for cnode in cnode_list:
-			_Global.CNODE_CONTAINER.add_child(cnode)
+			HenGlobal.CNODE_CONTAINER.add_child(cnode)
 
 		# showing lines
 		for line in line_route_reference.get(_route.id):
@@ -51,16 +48,16 @@ static func change_route(_route: Dictionary) -> void:
 
 		# showing comments
 		for comment in comment_reference.get(_route.id):
-			_Global.COMMENT_CONTAINER.add_child(comment)
+			HenGlobal.COMMENT_CONTAINER.add_child(comment)
 
 		match _route.type:
 			ROUTE_TYPE.STATE:
 				# debug
 				for cnode in cnode_list:
 					if ['virtual', 'if'].has(cnode.type):
-						_Global.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
+						HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 				
-				for state in _Global.STATE_CAM.get_tree().get_nodes_in_group(_Enums.STATE_SELECTED_GROUP):
+				for state in HenGlobal.STATE_CAM.get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
 					state.unselect()
 				
 				_route.state_ref.select()

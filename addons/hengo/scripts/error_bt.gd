@@ -1,5 +1,5 @@
 @tool
-extends Button
+class_name HenErrorBt extends Button
 
 # errors
 var cnode_errors: Dictionary = {}

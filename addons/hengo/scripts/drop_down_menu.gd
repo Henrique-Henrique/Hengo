@@ -1,5 +1,5 @@
 @tool
-extends PanelContainer
+class_name HenDropDownMenu extends PanelContainer
 
 var list_container: ItemList
 var search_bar: LineEdit

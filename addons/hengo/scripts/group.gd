@@ -1,5 +1,5 @@
 @tool
-extends RefCounted
+class_name HenGroup extends RefCounted
 
 var group: Dictionary = {}
 

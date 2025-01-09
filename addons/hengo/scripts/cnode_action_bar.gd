@@ -1,7 +1,5 @@
 @tool
-extends HBoxContainer
-
-const _Global = preload('res://addons/hengo/scripts/global.gd')
+class_name HenCNodeActionBar extends HBoxContainer
 
 
 func _ready() -> void:
@@ -9,7 +7,7 @@ func _ready() -> void:
 
 
 func _on_dashboard() -> void:
-    _Global.CNODE_CAM.can_scroll = false
-    _Global.STATE_CAM.can_scroll = false
+    HenGlobal.CNODE_CAM.can_scroll = false
+    HenGlobal.STATE_CAM.can_scroll = false
 
-    _Global.DASHBOARD.show_dashboard(true)
+    HenGlobal.DASHBOARD.show_dashboard(true)
