@@ -19,7 +19,7 @@ func _on_pressed() -> void:
 			# all transitions
 			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
 				options = HenRouter.current_route.state_ref.get_all_transition_data()
-		'const':
+		HenCnode.SUB_TYPE.CONST:
 			var const_name = get_parent().owner.root.get_cnode_name()
 
 			if HenEnums.CONST_API_LIST.has(const_name):
@@ -92,7 +92,7 @@ func _selected(_item: Dictionary) -> void:
 			if output:
 				output.hide_connection()
 				output.set_type((_item.name as String))
-		'const':
+		HenCnode.SUB_TYPE.CONST:
 			var output = get_parent().owner
 			output.change_type(_item.type)
 		'all_props':

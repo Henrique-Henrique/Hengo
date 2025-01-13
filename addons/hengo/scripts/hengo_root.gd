@@ -111,7 +111,7 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 								HenRouteReference.instantiate_and_add({
 									name = 'func_name',
 									position = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_local_mouse_position(),
-									type = 'func',
+									type = HenRouteReference.TYPE.FUNC,
 									route = {
 										name = '',
 										type = HenRouter.ROUTE_TYPE.FUNC,
@@ -231,7 +231,7 @@ func _input(event: InputEvent) -> void:
 						HenGlobal.history.create_action('Delete Node')
 
 						for cnode: HenCnode in all_nodes:
-							if cnode.sub_type == 'virtual':
+							if cnode.sub_type == HenCnode.SUB_TYPE.VIRTUAL:
 								continue
 							
 							HenGlobal.history.add_do_method(cnode.remove_from_scene)

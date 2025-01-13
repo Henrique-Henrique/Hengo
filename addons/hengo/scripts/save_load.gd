@@ -109,7 +109,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# Funcions
 	var func_list: Array[Dictionary] = []
 
-	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference): return x.type == StringName('func')):
+	for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference): return x.type == HenRouteReference.TYPE.FUNC):
 		func_list.append({
 			hash = func_item.hash,
 			props = func_item.props,
@@ -237,7 +237,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 					
 					var value = in_prop.get_value()
 
-					input_data['in_prop'] = value if [TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL].has(typeof(value)) else var_to_str(value)
+					input_data[HenCnode.SUB_TYPE.IN_PROP] = value if [TYPE_STRING, TYPE_INT, TYPE_FLOAT, TYPE_BOOL].has(typeof(value)) else var_to_str(value)
 
 			cnode_data.inputs.append(input_data)
 
@@ -262,7 +262,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 					output_data['out_prop'] = out_prop.get_value()
 
 			match cnode.sub_type:
-				'var':
+				HenCnode.SUB_TYPE.VAR:
 					output_data['group_idx'] = int(output.custom_data)
 
 			cnode_data.outputs.append(output_data)
@@ -271,9 +271,9 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 			cnode_data['category'] = cnode.category
 
 		match cnode.sub_type:
-			'expression':
+			HenCnode.SUB_TYPE.EXPRESSION:
 				cnode_data['exp'] = cnode.get_node('%Container').get_child(1).get_child(0).raw_text
-			'user_func', 'func_input', 'func_output':
+			HenCnode.SUB_TYPE.USER_FUNC, HenCnode.SUB_TYPE.FUNC_INPUT, HenCnode.SUB_TYPE.FUNC_OUTPUT:
 				for group_name: String in HenGlobal.GROUP.get_group_list(cnode):
 					if group_name.begins_with('f_'):
 						cnode_data['group'] = group_name
@@ -482,7 +482,7 @@ static func load_and_edit(_path: StringName) -> void:
 
 				HenCnode.instantiate_and_add({
 					name = general_data.cnode_name,
-					sub_type = 'virtual',
+					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
 					outputs = [ {
 						name = 'event',
 						type = 'InputEvent'
@@ -544,7 +544,7 @@ static func load_and_edit(_path: StringName) -> void:
 				props = func_config.props,
 				name = 'Function Name',
 				pos = func_config.pos,
-				type = 'func',
+				type = HenCnode.SUB_TYPE.FUNC,
 				route = {
 					name = '',
 					type = HenRouter.ROUTE_TYPE.FUNC,
@@ -721,7 +721,7 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 					data = {
 						name = 'go_to_event',
 						fantasy_name = 'Go to \'' + file_name.get_basename() + '\' state',
-						sub_type = 'go_to_void',
+						sub_type = HenCnode.SUB_TYPE.GO_TO_VOID,
 						inputs = [
 							{
 								name = 'hengo',

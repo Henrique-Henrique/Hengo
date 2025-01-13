@@ -100,7 +100,7 @@ func _on_gui(_event: InputEvent) -> void:
 				var cast_cnode: HenCnode = HenCnode.instantiate_and_add(
 					{
 						name = 'Casting -> BBT',
-						sub_type = 'cast',
+						sub_type = HenCnode.SUB_TYPE.CAST,
 						category = 'native',
 						inputs = [
 							{

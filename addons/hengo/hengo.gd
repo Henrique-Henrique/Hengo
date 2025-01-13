@@ -65,7 +65,6 @@ func _enter_tree():
 	HenAssets.CNodeIfFlowScene = load('res://addons/hengo/scenes/cnode_if_flow.tscn')
 	HenAssets.EventScene = load('res://addons/hengo/scenes/event.tscn')
 	HenAssets.EventStructScene = load('res://addons/hengo/scenes/event_structure.tscn')
-	HenAssets.SideBarSectionItemScene = load('res://addons/hengo/scenes/side_bar_section_item.tscn')
 	HenAssets.PropContainerScene = load('res://addons/hengo/scenes/prop_container.tscn')
 	HenAssets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
 	HenAssets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')

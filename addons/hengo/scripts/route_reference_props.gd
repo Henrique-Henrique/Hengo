@@ -65,17 +65,17 @@ func show_props(_config: Dictionary, _ref: HenRouteReference) -> void:
 						match in_out_type:
 							'in':
 								match node_ref.sub_type:
-									'func_output':
+									HenCnode.SUB_TYPE.FUNC_OUTPUT:
 										pass
-									'func_input':
+									HenCnode.SUB_TYPE.FUNC_INPUT:
 										node_ref.add_output(new_prop)
 									_:
 										node_ref.add_input(new_prop)
 							'out':
 								match node_ref.sub_type:
-									'func_input', 'signal_disconnection':
+									HenCnode.SUB_TYPE.FUNC_INPUT, 'signal_disconnection':
 										pass
-									'signal_connection', 'signal_emit', 'func_output':
+									'signal_connection', 'signal_emit', HenCnode.SUB_TYPE.FUNC_OUTPUT:
 										node_ref.add_input(new_prop)
 									_:
 										node_ref.add_output(new_prop)

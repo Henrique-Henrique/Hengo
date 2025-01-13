@@ -9,12 +9,44 @@ enum TYPE {
 }
 
 enum SUB_TYPE {
-
+	FUNC,
+	VOID,
+	VAR,
+	LOCAL_VAR,
+	DEBUG_VALUE,
+	USER_FUNC,
+	SET_VAR,
+	SET_PROP,
+	GET_PROP,
+	VIRTUAL,
+	FUNC_INPUT,
+	CAST,
+	RAW_CODE,
+	SELF_GO_TO_VOID,
+	FOR,
+	FOR_ARR,
+	FUNC_OUTPUT,
+	CONST,
+	SINGLETON,
+	GO_TO_VOID,
+	IMG,
+	EXPRESSION,
+	SET_LOCAL_VAR,
+	IN_PROP,
+	NOT_CONNECTED,
+	DEBUG,
+	DEBUG_PUSH,
+	DEBUG_FLOW_START,
+	START_DEBUG_STATE,
+	DEBUG_STATE,
+	BREAK,
+	CONTINUE,
+	PASS
 }
 
 var flow_to: Dictionary = {}
 var type: TYPE
-var sub_type: String
+var sub_type: SUB_TYPE
 var route_ref: Dictionary
 var data: Dictionary = {}
 var category: String
@@ -132,8 +164,8 @@ func _on_tooltip() -> Variant:
 					'make_transition':
 						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the node current state. Use this functionality to shift from one active state to another", 'Make a Transition')
 			else:
-				match type:
-					'func', 'void':
+				match sub_type:
+					SUB_TYPE.FUNC, HenCnode.SUB_TYPE.VOID:
 						var first_input = get_node('%InputContainer').get_child(0)
 						var current_class: String = first_input.connection_type
 
@@ -363,9 +395,9 @@ func add_input(_input: Dictionary) -> void:
 	input.root = self
 
 	if _input.has('is_prop'):
-		input.add_prop_ref(_input.get('in_prop'), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
+		input.add_prop_ref(_input.get(HenCnode.SUB_TYPE.IN_PROP), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
 	else:
-		input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
+		input.set_in_prop(_input.get(HenCnode.SUB_TYPE.IN_PROP) if _input.has(HenCnode.SUB_TYPE.IN_PROP) else null)
 
 	in_container.add_child(input)
 
@@ -404,8 +436,8 @@ func check_error() -> void:
 	var out_container = get_node('%OutputContainer')
 	var errors: Array[Dictionary] = []
 
-	match type:
-		'go_to_void':
+	match sub_type:
+		HenCnode.SUB_TYPE.GO_TO_VOID:
 			var input = in_container.get_child(1)
 
 			# checking if other script has changed state name
@@ -428,7 +460,7 @@ func check_error() -> void:
 				input_instance_id = input.get_instance_id(),
 				msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
 			})
-		'cast':
+		HenCnode.SUB_TYPE.CAST:
 			var output = out_container.get_child(0)
 			
 			# if not connected pass
@@ -551,10 +583,10 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 
 		if not _config.has('type'):
 			if _config.has('sub_type'):
-				match _config.sub_type:
-					'var', 'local_var':
+				match _config.sub_type as SUB_TYPE:
+					SUB_TYPE.VAR, SUB_TYPE.LOCAL_VAR:
 						_config.type = ''
-					'debug_value':
+					SUB_TYPE.DEBUG_VALUE:
 						var debug_value_scene = load('res://addons/hengo/scenes/props/debug_value.tscn').instantiate()
 						var container: VBoxContainer = instance.get_node('%Container')
 						
@@ -565,9 +597,8 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#8a7346'))
 
 						_config.type = TYPE.DEFAULT
-					'func', 'user_func':
+					SUB_TYPE.FUNC, SUB_TYPE.USER_FUNC:
 						# color
-						
 						match _config.name:
 							'make_transition':
 								title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
@@ -576,7 +607,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 						
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/func.svg')
 						_config.type = TYPE.DEFAULT
-					'void':
+					SUB_TYPE.VOID:
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/void.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').darkened(.4))
 						_config.type = TYPE.DEFAULT
@@ -585,30 +616,30 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#764A75'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/signal.svg')
 						_config.type = TYPE.DEFAULT
-					'set_var', 'set_prop', 'get_prop':
+					SUB_TYPE.SET_VAR, SUB_TYPE.SET_PROP, SUB_TYPE.GET_PROP:
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#4A7346'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/set_var.svg')
 						_config.type = TYPE.DEFAULT
-					'virtual', 'func_input', 'signal_virtual':
+					SUB_TYPE.VIRTUAL, SUB_TYPE.FUNC_INPUT, 'signal_virtual':
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#734646'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/virtual.svg')
 						_config.type = TYPE.DEFAULT
-					'cast', 'raw_code':
-						match _config.sub_type:
-							'raw_code':
+					SUB_TYPE.CAST, SUB_TYPE.RAW_CODE:
+						match _config.sub_type as SUB_TYPE:
+							SUB_TYPE.RAW_CODE:
 								title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/raw.svg')
-							'cast':
+							SUB_TYPE.CAST:
 								title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/cast.svg')
 
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 						_config.type = TYPE.DEFAULT
-					'self_go_to_void':
+					SUB_TYPE.SELF_GO_TO_VOID:
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/go_to.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 						_config.type = TYPE.DEFAULT
-					'for', 'for_arr':
+					SUB_TYPE.FOR, SUB_TYPE.FOR_ARR:
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/for.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#8c5c37'))
 						_config.type = TYPE.DEFAULT
@@ -636,8 +667,8 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 			for input_config in _config.get('inputs'):
 				if not func_id.is_empty():
 					# adding user function inputs group
-					match _config.sub_type:
-						'func_output':
+					match _config.sub_type as SUB_TYPE:
+						HenCnode.SUB_TYPE.FUNC_OUTPUT:
 							input_config.group = 'fo_' + func_id + '_' + str(idx)
 						_:
 							input_config.group = 'fi_' + func_id + '_' + str(idx)
@@ -651,8 +682,8 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 			for output_config in _config.get('outputs'):
 				if not func_id.is_empty():
 					# adding user function ouputs group
-					match _config.sub_type:
-						'func_input':
+					match _config.sub_type as SUB_TYPE:
+						HenCnode.SUB_TYPE.FUNC_INPUT:
 							output_config.group = 'fi_' + func_id + '_' + str(idx)
 						_:
 							output_config.group = 'fo_' + func_id + '_' + str(idx)
@@ -665,7 +696,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 			instance.data = _config.data
 		
 		# instance flow connections
-		match (_config.type):
+		match _config.type as TYPE:
 			TYPE.DEFAULT:
 				var default_flow := HenAssets.CNodeFlowScene.instantiate()
 				var connector = default_flow.get_child(0)
@@ -724,10 +755,10 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 			var _sub_type = _config.get('sub_type')
 			instance.sub_type = _sub_type
 
-			match _sub_type:
+			match _sub_type as SUB_TYPE:
 				# adding virtual cnodes references
-				'virtual':
-					match _config.route.type:
+				HenCnode.SUB_TYPE.VIRTUAL:
+					match _config.route.type as HenRouter.ROUTE_TYPE:
 						HenRouter.ROUTE_TYPE.STATE:
 							var ref = _config.route.state_ref
 							ref.virtual_cnode_list.append(instance)
@@ -735,17 +766,17 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 							var ref = _config.route.general_ref
 							ref.virtual_cnode_list.append(instance)
 				# virtual node of signal and func
-				'signal_virtual', 'func_input':
+				'signal_virtual', HenCnode.SUB_TYPE.FUNC_INPUT:
 					var ref = _config.route.item_ref
 					ref.virtual_cnode_list.append(instance)
-				'func_output':
+				HenCnode.SUB_TYPE.FUNC_OUTPUT:
 					_config.route.item_ref.output_cnode = instance
-				'var', 'local_var':
+				HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
 					instance.get_node('%TitleContainer').visible = false
-				'const':
+				HenCnode.SUB_TYPE.CONST:
 					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/enum.svg')
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#2f6063'))
-				'singleton':
+				HenCnode.SUB_TYPE.SINGLETON:
 					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/singleton.svg')
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
 

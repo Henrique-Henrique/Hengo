@@ -120,9 +120,9 @@ func load_references() -> void:
 
 	# getting cnodes
 	for cnode in HenRouter.route_reference[HenRouter.current_route.id]:
-		if ['virtual', HenCnode.TYPE.IF].has(cnode.sub_type):
+		if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
 			HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
-		elif cnode.sub_type == 'debug_value':
+		elif cnode.sub_type == HenCnode.SUB_TYPE.DEBUG_VALUE:
 			var line_config: Dictionary = cnode.get_connection_lines_in_flow()
 			line_config['cnode'].append(cnode)
 

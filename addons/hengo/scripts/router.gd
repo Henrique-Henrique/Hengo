@@ -54,7 +54,7 @@ static func change_route(_route: Dictionary) -> void:
 			ROUTE_TYPE.STATE:
 				# debug
 				for cnode: HenCnode in cnode_list:
-					if ['virtual', HenCnode.TYPE.IF].has(cnode.sub_type):
+					if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
 						HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 				
 				for state in HenGlobal.STATE_CAM.get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):

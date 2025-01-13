@@ -1,8 +1,11 @@
 @tool
 class_name HenDropPropMenu extends PopupMenu
 
+enum Type {
+	VAR
+}
 
-var type: String = ""
+var type: Type
 var reference: Node
 var custom_data: Dictionary = {}
 
@@ -22,7 +25,7 @@ func _map_inputs(_in_prop_data: Dictionary, _inputs: Array) -> void:
 			var id = str(count)
 
 			if _in_prop_data.has(id):
-				input_config['in_prop'] = _in_prop_data[str(count)]
+				input_config[HenCnode.SUB_TYPE.IN_PROP] = _in_prop_data[str(count)]
 			
 			count += 1
 
@@ -35,13 +38,13 @@ func add_instance(_id: int, _config: Dictionary = {}) -> HenCnode:
 	var in_prop_data: Dictionary = _config.get('in_prop_data') if _config.has('in_prop_data') else {}
 
 	match type:
-		'var', 'local_var':
+		HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
 			match _id:
 				0:
 					var res = custom_data.get('var_res')
 					var cnode = HenCnode.instantiate_and_add({
 						name = '',
-						sub_type = 'var' if type == 'var' else 'local_var',
+						sub_type = HenCnode.SUB_TYPE.VAR if type == Type.VAR else HenCnode.SUB_TYPE.LOCAL_VAR,
 						position = pos,
 						outputs = [ {
 							res = res
@@ -57,11 +60,11 @@ func add_instance(_id: int, _config: Dictionary = {}) -> HenCnode:
 					}
 
 					if not in_prop_data.is_empty():
-						input_data['in_prop'] = in_prop_data['0']
+						input_data[HenCnode.SUB_TYPE.IN_PROP] = in_prop_data['0']
 
 					var cnode = HenCnode.instantiate_and_add({
 						name = 'Set Var',
-						sub_type = 'set_var' if type == 'var' else 'set_local_var',
+						sub_type = HenCnode.SUB_TYPE.SET_VAR if type == Type.VAR else HenCnode.SUB_TYPE.SET_LOCAL_VAR,
 						inputs = [input_data],
 						position = pos,
 						route = route
@@ -125,7 +128,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> HenCnode:
 
 			var cnode = HenCnode.instantiate_and_add({
 				name = func_res.value,
-				sub_type = 'user_func',
+				sub_type = HenCnode.SUB_TYPE.USER_FUNC,
 				inputs = inputs_res.get('inputs'),
 				outputs = outputs_res.get('outputs'),
 				position = pos,
@@ -136,7 +139,7 @@ func add_instance(_id: int, _config: Dictionary = {}) -> HenCnode:
 
 	return ref
 
-func mount(_type: String, _ref: Node = null, _custom_data: Dictionary = {}, _create_menu: bool = true) -> void:
+func mount(_type: Type, _ref: Node = null, _custom_data: Dictionary = {}, _create_menu: bool = true) -> void:
 	clear()
 	type = _type
 	reference = _ref
@@ -144,7 +147,7 @@ func mount(_type: String, _ref: Node = null, _custom_data: Dictionary = {}, _cre
 	
 	if _create_menu:
 		match _type:
-			'var', 'local_var':
+			HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
 				add_item('Get')
 				add_item('Set')
 			'state_signal':

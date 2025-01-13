@@ -5,6 +5,10 @@ class_name HenRouteReference extends PanelContainer
 const ROUTE_SCENE = preload('res://addons/hengo/scenes/route_reference.tscn')
 const REF_TEXT = ''
 
+enum TYPE {
+	FUNC
+}
+
 var hash: int = -1
 var ref_count: int = 0
 var route: Dictionary = {
@@ -16,7 +20,7 @@ var route: Dictionary = {
 var output_cnode = null
 var virtual_cnode_list: Array = []
 var moving: bool = false
-var type: StringName = ''
+var type: TYPE
 var props: Array
 
 func _ready() -> void:
@@ -35,7 +39,7 @@ func _on_reference_press() -> void:
 
 		
 		match cnode.sub_type:
-			'func_input', 'func_output':
+			HenCnode.SUB_TYPE.FUNC_INPUT, HenCnode.SUB_TYPE.FUNC_OUTPUT:
 				continue
 
 		var bt = Button.new()
@@ -122,8 +126,8 @@ static func instantiate(_config: Dictionary) -> HenRouteReference:
 		route_reference.props = _config.props
 	else:
 		# initializing inputs and outputs
-		match _config.sub_type:
-			'func':
+		match _config.type:
+			TYPE.FUNC:
 				route_reference.props = [
 					{
 						name = 'name',
@@ -144,14 +148,14 @@ static func instantiate(_config: Dictionary) -> HenRouteReference:
 
 				var in_data: Dictionary = {
 					name = 'input',
-					sub_type = 'func_input',
+					sub_type = HenCnode.SUB_TYPE.FUNC_INPUT,
 					position = str_to_var(_config.get('input').get('pos')) if _config.has('input') else Vector2(0, 0),
 					route = _config.route
 				}
 
 				var out_data: Dictionary = {
 					name = 'output',
-					sub_type = 'func_output',
+					sub_type = HenCnode.SUB_TYPE.FUNC_OUTPUT,
 					position = str_to_var(_config.get('output').get('pos')) if _config.has('output') else Vector2(0, 500),
 					route = _config.route
 				}
@@ -167,7 +171,7 @@ static func instantiate(_config: Dictionary) -> HenRouteReference:
 		
 
 	match _config.type:
-		'func':
+		TYPE.FUNC:
 			route_reference.change_name(
 				route_reference.props[0].value
 			)

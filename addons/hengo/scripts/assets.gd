@@ -12,7 +12,6 @@ static var CNodeFlowScene: PackedScene
 static var CNodeIfFlowScene: PackedScene
 static var EventScene: PackedScene
 static var EventStructScene: PackedScene
-static var SideBarSectionItemScene: PackedScene
 static var PropContainerScene: PackedScene
 static var CNodeInputLabel: PackedScene
 static var CNodeCenterImage: PackedScene

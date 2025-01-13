@@ -27,8 +27,8 @@ var native_list: Array = [
 		name = 'Expression',
 		data = {
 			name = 'Expression',
-			sub_type = 'expression',
-			type = 'expression',
+			sub_type = HenCnode.SUB_TYPE.EXPRESSION,
+			type = HenCnode.SUB_TYPE.EXPRESSION,
 			category = 'native',
 			inputs = [],
 			outputs = [ {
@@ -42,7 +42,7 @@ var native_list: Array = [
 		name = 'Make Transition',
 		data = {
 			name = 'make_transition',
-			sub_type = 'func',
+			sub_type = HenCnode.SUB_TYPE.FUNC,
 			category = 'native',
 			inputs = [
 				{
@@ -58,7 +58,7 @@ var native_list: Array = [
 		name = 'Cast To ->',
 		data = {
 			name = 'Cast To',
-			sub_type = 'cast',
+			sub_type = HenCnode.SUB_TYPE.CAST,
 			category = 'native',
 			inputs = [
 				{
@@ -82,7 +82,7 @@ var native_list: Array = [
 		data = {
 			name = '',
 			fantasy_name = 'Debug Value',
-			sub_type = 'debug_value',
+			sub_type = HenCnode.SUB_TYPE.DEBUG_VALUE,
 			category = 'native',
 			inputs = [
 				{
@@ -97,7 +97,7 @@ var native_list: Array = [
 		name = 'print',
 		data = {
 			name = 'print',
-			sub_type = 'void',
+			sub_type = HenCnode.SUB_TYPE.VOID,
 			category = 'native',
 			inputs = [
 				{
@@ -112,7 +112,7 @@ var native_list: Array = [
 		name = 'Print Text',
 		data = {
 			name = 'print',
-			sub_type = 'void',
+			sub_type = HenCnode.SUB_TYPE.VOID,
 			category = 'native',
 			inputs = [
 				{
@@ -136,7 +136,7 @@ var native_list: Array = [
 		name = 'For -> Range',
 		data = {
 			name = 'For -> Range',
-			sub_type = 'for',
+			sub_type = HenCnode.SUB_TYPE.FOR,
 			inputs = [
 				{
 					name = 'start',
@@ -164,7 +164,7 @@ var native_list: Array = [
 		name = 'For -> Item',
 		data = {
 			name = 'For -> Item',
-			sub_type = 'for_arr',
+			sub_type = HenCnode.SUB_TYPE.FOR_ARR,
 			inputs = [
 				{
 					name = 'array',
@@ -184,7 +184,7 @@ var native_list: Array = [
 		name = 'break',
 		data = {
 			name = 'break',
-			sub_type = 'break',
+			sub_type = HenCnode.SUB_TYPE.BREAK,
 			category = 'native',
 			route = HenRouter.current_route
 		}
@@ -193,7 +193,7 @@ var native_list: Array = [
 		name = 'continue',
 		data = {
 			name = 'continue',
-			sub_type = 'continue',
+			sub_type = HenCnode.SUB_TYPE.CONTINUE,
 			category = 'native',
 			route = HenRouter.current_route
 		}
@@ -202,7 +202,7 @@ var native_list: Array = [
 		name = 'Raw Code',
 		data = {
 			name = 'Raw Code',
-			sub_type = 'raw_code',
+			sub_type = HenCnode.SUB_TYPE.RAW_CODE,
 			category = 'native',
 			inputs = [
 				{
@@ -241,7 +241,7 @@ func _ready() -> void:
 					name = 'Go to Event',
 					data = {
 						name = 'go_to_event',
-						sub_type = 'self_go_to_void',
+						sub_type = HenCnode.SUB_TYPE.SELF_GO_TO_VOID,
 						inputs = [
 							{
 								name = 'state',
@@ -401,15 +401,15 @@ func _search(_text: String) -> void:
 # ---------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------
 # GENERATING API
-func _get_sub_type(_type: Variant.Type, _usage: int) -> StringName:
+func _get_sub_type(_type: Variant.Type, _usage: int) -> HenCnode.SUB_TYPE:
 	match _type:
 		TYPE_NIL:
 			if _usage == 131078: # is the code for nil returning variant, so... a func
-				return 'func'
+				return HenCnode.SUB_TYPE.FUNC
 			else:
-				return 'void'
+				return HenCnode.SUB_TYPE.VOID
 		_:
-			return 'func'
+			return HenCnode.SUB_TYPE.FUNC
 
 
 func _get_typeny_arg(_arg: Dictionary) -> StringName:
@@ -500,7 +500,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								data = {
 									name = prop.name,
 									fantasy_name = 'Get Prop -> ' + prop.name,
-									sub_type = 'get_prop',
+									sub_type = HenCnode.SUB_TYPE.GET_PROP,
 									inputs = [
 										{
 											name = _class_name,
@@ -523,7 +523,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								data = {
 									name = prop.name,
 									fantasy_name = 'Set Prop -> ' + prop.name,
-									sub_type = 'set_prop',
+									sub_type = HenCnode.SUB_TYPE.SET_PROP,
 									inputs = [
 										{
 											name = _class_name,
@@ -556,13 +556,13 @@ func start_api(_class_name: StringName = 'all') -> int:
 							name = 'Const -> ' + key,
 							data = {
 								name = key,
-								sub_type = 'const',
+								sub_type = HenCnode.SUB_TYPE.CONST,
 								category = 'native',
 								outputs = [
 									{
 										name = '',
 										sub_type = '@dropdown',
-										category = 'const',
+										category = HenCnode.SUB_TYPE.CONST,
 										out_prop = '...',
 										data = value
 									}
@@ -584,7 +584,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							data = {
 								name = prop.name,
 								fantasy_name = 'Set Prop -> ' + prop.name,
-								sub_type = 'set_prop',
+								sub_type = HenCnode.SUB_TYPE.SET_PROP,
 								inputs = [
 									{
 										name = _class_name,
@@ -606,7 +606,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							data = {
 								name = prop.name,
 								fantasy_name = 'Get Prop -> ' + prop.name,
-								sub_type = 'get_prop',
+								sub_type = HenCnode.SUB_TYPE.GET_PROP,
 								inputs = [
 									{
 										name = _class_name,
@@ -640,7 +640,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							name = 'Set Var -> ' + var_config.name,
 							data = {
 								name = 'Set Var -> ' + var_config.name,
-								sub_type = 'set_var',
+								sub_type = HenCnode.SUB_TYPE.SET_VAR,
 								inputs = [ {
 									name = var_config.name,
 									type = var_config.type,
@@ -654,7 +654,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							name = 'Get Var -> ' + var_config.name,
 							data = {
 								name = '',
-								sub_type = 'var',
+								sub_type = HenCnode.SUB_TYPE.VAR,
 								outputs = [ {
 									name = var_config.name,
 									type = var_config.type,
@@ -667,7 +667,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 						idx += 1
 					
 					# functions
-					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == 'func'):
+					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
 						var dt_name: String = func_ref.props[0].value
 
 						var dt: Dictionary = {
@@ -675,7 +675,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							data = {
 								name = dt_name,
 								fantasy_name = 'Func -> ' + dt_name,
-								sub_type = 'user_func',
+								sub_type = HenCnode.SUB_TYPE.USER_FUNC,
 								inputs = [],
 								outputs = [],
 								route = HenRouter.current_route,

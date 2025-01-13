@@ -243,13 +243,13 @@ static func instantiate_state(_config: Dictionary = {}) -> HenState:
 		# adding initial cnodes (update and ready)
 		HenCnode.instantiate_and_add({
 			name = 'enter',
-			sub_type = 'virtual',
+			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
 			route = state.route,
 			position = Vector2.ZERO
 		})
 		HenCnode.instantiate_and_add({
 			name = 'update',
-			sub_type = 'virtual',
+			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
 			outputs = [ {
 				name = 'delta',
 				type = 'float'
