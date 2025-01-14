@@ -13,7 +13,7 @@ func show_props(_config: Dictionary, _ref: HenRouteReference) -> void:
 
 
 	for prop: Dictionary in _config.list:
-		var prop_ref: HenPropsContainer = PropContainerScene.instantiate()
+		var prop_ref = PropContainerScene.instantiate()
 		prop_ref.get_child(0).text = prop.name
 
 		match prop.type:

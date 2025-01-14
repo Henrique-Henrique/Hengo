@@ -593,7 +593,6 @@ static func load_and_edit(_path: StringName) -> void:
 			})
 
 		# creating props
-		print(data['props'])
 		for prop: Dictionary in data['props']:
 			match prop.prop_type:
 				StringName('VARIABLE'):

@@ -187,13 +187,13 @@ func _physics_process(delta: float) -> void:
 
 
 	# parsing all states
-	for state in HenGlobal.STATE_CONTAINER.get_children():
+	for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
 		var state_code_tokens = parse_tokens(state.virtual_cnode_list)
 		var state_name = state.get_state_name().to_snake_case()
 		var transitions: Array = []
 
 		# transitions
-		for trans in state.get_node('%TransitionContainer').get_children():
+		for trans: HenStateTransition in state.get_node('%TransitionContainer').get_children():
 			if trans.line:
 				transitions.append({
 					name = trans.get_transition_name(),
@@ -269,10 +269,11 @@ func _physics_process(delta: float) -> void:
 
 	return code
 
+
 static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 	var data: Dictionary = {}
 
-	for virtual_cnode in _virtual_cnode_list:
+	for virtual_cnode: HenCnode in _virtual_cnode_list:
 		var cnode_name: String = virtual_cnode.get_cnode_name()
 
 		if virtual_cnode.flow_to.has('cnode'):
@@ -296,6 +297,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 
 	return data
 
+
 static func flow_tree_explorer(_node: HenCnode, _token_list: Array = []) -> Array:
 	match _node.type:
 		HenCnode.TYPE.IF:
@@ -310,17 +312,19 @@ static func flow_tree_explorer(_node: HenCnode, _token_list: Array = []) -> Arra
 
 	return _token_list
 
+
 # getting cnode outputs
 static func get_cnode_outputs(_node: HenCnode) -> Array:
 	var outputs = []
 
-	for output in _node.get_node('%OutputContainer').get_children():
+	for output: HenCnodeInOut in _node.get_node('%OutputContainer').get_children():
 		outputs.append({
 			name = output.get_node('%Name').text,
 			type = output.connection_type
 		})
 	
 	return outputs
+
 
 # getting cnode inputs values
 static func get_cnode_inputs(_node: HenCnode, _get_name: bool = false) -> Array:
@@ -384,7 +388,7 @@ static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 			return prop_data
 		else:
 			# if input don't have a connection
-			return {sub_type = HenCnode.SUB_TYPE.NOT_CONNECTED, type = _input.connection_type}
+			return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = _input.connection_type}
 
 # parsing cnode code base on type
 static func parse_cnode_values(_node: HenCnode, _id: int = 0) -> Dictionary:
@@ -501,6 +505,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		match _token.get('category'):
 			'native':
 				prefix = ''
+
 
 	match _token.type:
 		HenCnode.SUB_TYPE.VAR:
@@ -781,6 +786,7 @@ static func parse_token_and_value(_node: HenCnode, _id: int = 0) -> String:
 
 	return '\n'.join((code.split('\n') as Array).filter(func(x): return not x.contains(HenGlobal.DEBUG_TOKEN))) # removes debug lines
 
+
 static func get_if_token(_node: HenCnode) -> Dictionary:
 	var true_flow: Array = []
 	var then_flow: Array = []
@@ -808,6 +814,7 @@ static func get_if_token(_node: HenCnode) -> Dictionary:
 		false_flow = false_flow,
 		condition = get_input_value(container.get_child(0))
 	}
+
 
 static func get_for_token(_node: HenCnode) -> Dictionary:
 	return {
