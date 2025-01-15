@@ -2,10 +2,10 @@
 class_name HenCnode extends PanelContainer
 
 enum TYPE {
-    DEFAULT,
-    IF,
-    IMG,
-    EXPRESSION,
+	DEFAULT,
+	IF,
+	IMG,
+	EXPRESSION,
 }
 
 enum SUB_TYPE {
@@ -794,7 +794,7 @@ func get_input_token_list(_get_name: bool = false) -> Array:
 	var inputs = []
 
 	for input in input_container.get_children():
-		inputs.append(get_input_token(input, _get_name))
+		inputs.append(input.get_token(_get_name))
 	
 	return inputs
 
@@ -810,60 +810,6 @@ func get_output_token_list() -> Array:
 		})
 	
 	return outputs
-
-
-func get_input_token(_input: HenCnodeInOut, _get_name: bool = false) -> Dictionary:
-	if _input.in_connected_from and not _input.from_connection_lines[0].deleted:
-		var data: Dictionary = _input.in_connected_from.get_token_list(_input.out_from_in_out.get_index())
-
-		if _input.is_ref:
-			data['ref'] = true
-
-		if _get_name:
-			data['prop_name'] = _input.get_in_out_name()
-
-		return data
-	else:
-		# if not has connection, check if has prop input (like string, int, etc)
-		var cname_input = _input.get_node('%CNameInput')
-		if cname_input.get_child_count() > 2:
-			var prop = cname_input.get_child(2)
-			var prop_data: Dictionary = {
-				type = HenCnode.SUB_TYPE.IN_PROP,
-				value = ''
-			}
-
-			if _input.is_ref:
-				prop_data['ref'] = true
-
-			if _get_name:
-				prop_data['prop_name'] = _input.get_in_out_name()
-
-			if prop is Label:
-				if prop.text == 'self':
-					prop_data.value = '_ref'
-				else:
-					prop_data.value = prop.text
-			else:
-				prop_data.value = str(prop.get_generated_code())
-
-			if prop is HenDropdown:
-				match prop.type:
-					'all_props':
-						prop_data['is_prop'] = true
-						prop_data['use_self'] = false
-					'callable':
-						prop_data['use_prefix'] = true
-			else:
-				if _input.root.route_ref.type != HenRouter.ROUTE_TYPE.STATE \
-				or not _input.is_ref:
-					prop_data.use_self = true
-
-
-			return prop_data
-		else:
-			# if input don't have a connection
-			return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = _input.connection_type}
 
 
 func get_token_list(_id: int = 0) -> Dictionary:
@@ -917,7 +863,7 @@ func get_token_list(_id: int = 0) -> Dictionary:
 			return {
 				type = sub_type,
 				to = get_node('%OutputContainer').get_child(0).connection_type,
-				from = get_input_token(get_node('%InputContainer').get_child(0))
+				from = (get_node('%InputContainer').get_child(0) as HenCnodeInOut).get_token()
 			}
 		HenCnode.SUB_TYPE.IMG:
 			token.merge({
@@ -998,7 +944,7 @@ func get_if_token() -> Dictionary:
 		true_flow = true_flow,
 		then_flow = then_flow,
 		false_flow = false_flow,
-		condition = get_input_token(container.get_child(0))
+		condition = (container.get_child(0) as HenCnodeInOut).get_token()
 	}
 
 
@@ -1015,7 +961,7 @@ func parse_token_and_value(_id: int = 0) -> String:
 	var code: String
 
 	match sub_type:
-		'if':
+		HenCnode.SUB_TYPE.IF:
 			code = HenCodeGeneration.parse_token_by_type(
 				get_if_token()
 			)
