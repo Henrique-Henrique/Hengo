@@ -21,10 +21,12 @@ enum SUB_TYPE {
 	VIRTUAL,
 	FUNC_INPUT,
 	CAST,
+	IF,
 	RAW_CODE,
 	SELF_GO_TO_VOID,
 	FOR,
 	FOR_ARR,
+	FOR_ITEM,
 	FUNC_OUTPUT,
 	CONST,
 	SINGLETON,
@@ -228,7 +230,7 @@ func _on_gui(_event: InputEvent) -> void:
 						select()
 
 						# generate gd_preview
-						var code: String = HenCodeGeneration.parse_token_and_value(self)
+						var code: String = parse_token_and_value()
 						HenGlobal.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
 		else:
 			moving = false
@@ -446,20 +448,6 @@ func check_error() -> void:
 					input_instance_id = input.get_instance_id(),
 					msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
 				})
-
-		'signal_connection':
-			var input = in_container.get_child(0)
-
-			# checking if it's connected
-			# signal connection need a ref
-			if input.in_connected_from:
-				disable_error()
-				return
-
-			errors.append({
-				input_instance_id = input.get_instance_id(),
-				msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
-			})
 		HenCnode.SUB_TYPE.CAST:
 			var output = out_container.get_child(0)
 			
@@ -610,11 +598,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 					SUB_TYPE.VOID:
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/void.svg')
 						title_container.get('theme_override_styles/panel').set('bg_color', EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').darkened(.4))
-						_config.type = TYPE.DEFAULT
-					'signal_connection', 'signal_disconnection', 'signal_emit':
-						# color
-						title_container.get('theme_override_styles/panel').set('bg_color', Color('#764A75'))
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/signal.svg')
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.SET_VAR, SUB_TYPE.SET_PROP, SUB_TYPE.GET_PROP:
 						# color
@@ -804,3 +787,247 @@ static func instantiate_and_add(_config: Dictionary) -> HenCnode:
 		cnode.position = _config.get('position')
 
 	return cnode
+
+
+func get_input_token_list(_get_name: bool = false) -> Array:
+	var input_container = get_node('%InputContainer')
+	var inputs = []
+
+	for input in input_container.get_children():
+		inputs.append(get_input_token(input, _get_name))
+	
+	return inputs
+
+
+# getting cnode outputs
+func get_output_token_list() -> Array:
+	var outputs = []
+
+	for output: HenCnodeInOut in get_node('%OutputContainer').get_children():
+		outputs.append({
+			name = output.get_node('%Name').text,
+			type = output.connection_type
+		})
+	
+	return outputs
+
+
+func get_input_token(_input: HenCnodeInOut, _get_name: bool = false) -> Dictionary:
+	if _input.in_connected_from and not _input.from_connection_lines[0].deleted:
+		var data: Dictionary = _input.in_connected_from.get_token_list(_input.out_from_in_out.get_index())
+
+		if _input.is_ref:
+			data['ref'] = true
+
+		if _get_name:
+			data['prop_name'] = _input.get_in_out_name()
+
+		return data
+	else:
+		# if not has connection, check if has prop input (like string, int, etc)
+		var cname_input = _input.get_node('%CNameInput')
+		if cname_input.get_child_count() > 2:
+			var prop = cname_input.get_child(2)
+			var prop_data: Dictionary = {
+				type = HenCnode.SUB_TYPE.IN_PROP,
+				value = ''
+			}
+
+			if _input.is_ref:
+				prop_data['ref'] = true
+
+			if _get_name:
+				prop_data['prop_name'] = _input.get_in_out_name()
+
+			if prop is Label:
+				if prop.text == 'self':
+					prop_data.value = '_ref'
+				else:
+					prop_data.value = prop.text
+			else:
+				prop_data.value = str(prop.get_generated_code())
+
+			if prop is HenDropdown:
+				match prop.type:
+					'all_props':
+						prop_data['is_prop'] = true
+						prop_data['use_self'] = false
+					'callable':
+						prop_data['use_prefix'] = true
+			else:
+				if _input.root.route_ref.type != HenRouter.ROUTE_TYPE.STATE \
+				or not _input.is_ref:
+					prop_data.use_self = true
+
+
+			return prop_data
+		else:
+			# if input don't have a connection
+			return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = _input.connection_type}
+
+
+func get_token_list(_id: int = 0) -> Dictionary:
+	var use_self: bool = route_ref.type != HenRouter.ROUTE_TYPE.STATE
+
+	var token: Dictionary = {
+		type = sub_type,
+		use_self = use_self,
+	}
+
+	if category:
+		token.category = category
+
+	match sub_type:
+		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
+			token.merge({
+				name = get_cnode_name().to_snake_case(),
+				params = get_input_token_list()
+			})
+		HenCnode.SUB_TYPE.FUNC, HenCnode.SUB_TYPE.USER_FUNC:
+			token.merge({
+				name = get_cnode_name().to_snake_case(),
+				params = get_input_token_list(),
+				id = _id if get_node('%OutputContainer').get_child_count() > 1 else -1,
+			})
+		HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
+			token.merge({
+				name = get_node('%OutputContainer').get_child(0).get_in_out_name().to_snake_case(),
+			})
+		HenCnode.SUB_TYPE.DEBUG_VALUE:
+			token.merge({
+				value = get_input_token_list()[0],
+				# id = HenCodeGeneration.get_debug_counter(_node)
+			})
+		HenCnode.SUB_TYPE.SET_VAR, HenCnode.SUB_TYPE.SET_LOCAL_VAR:
+			token.merge({
+				name = get_node('%InputContainer').get_child(0).get_in_out_name().to_snake_case(),
+				value = get_input_token_list()[0],
+			})
+		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT, 'signal_virtual':
+			token.merge({
+				param = get_node('%OutputContainer').get_child(_id).get_node('%Name').text,
+				id = _id
+			})
+		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+			return {
+				type = HenCnode.SUB_TYPE.FOR_ITEM,
+				hash = get_instance_id()
+			}
+		HenCnode.SUB_TYPE.CAST:
+			return {
+				type = sub_type,
+				to = get_node('%OutputContainer').get_child(0).connection_type,
+				from = get_input_token(get_node('%InputContainer').get_child(0))
+			}
+		HenCnode.SUB_TYPE.IMG:
+			token.merge({
+				name = (get_node('%Title').text as String).to_snake_case(),
+				params = get_input_token_list()
+			})
+		HenCnode.SUB_TYPE.RAW_CODE:
+			token.merge({
+				code = get_input_token_list()[0],
+			})
+		HenCnode.SUB_TYPE.CONST:
+			token.merge({
+				name = get_cnode_name(),
+				value = get_node('%OutputContainer').get_child(0).get_node('%CNameOutput').get_child(0).get_value()
+			})
+		HenCnode.SUB_TYPE.SINGLETON:
+			token.merge({
+				name = get_cnode_name(),
+				params = get_input_token_list(),
+				id = _id if get_node('%OutputContainer').get_child_count() > 1 else -1,
+			})
+		HenCnode.SUB_TYPE.GET_PROP:
+			token.merge({
+				from = get_input_token_list(),
+				name = get_node('%OutputContainer').get_child(0).get_in_out_name() if _id <= 0 else get_node('%OutputContainer').get_child(0).get_in_out_name() + '.' + get_node('%OutputContainer').get_child(_id).get_in_out_name(),
+			})
+		HenCnode.SUB_TYPE.SET_PROP:
+			token.merge({
+				params = get_input_token_list(true),
+				name = get_node('%InputContainer').get_child(1).get_in_out_name()
+			})
+		HenCnode.SUB_TYPE.EXPRESSION:
+			token.merge({
+				params = get_input_token_list(true),
+				exp = get_node('%Container').get_child(1).get_child(0).raw_text
+			})
+
+	return token
+
+
+func get_flow_token_list(_token_list: Array = []) -> Array:
+	match type:
+		HenCnode.TYPE.IF:
+			_token_list.append(get_if_token())
+		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+			_token_list.append(get_for_token())
+		_:
+			_token_list.append(get_token_list())
+
+			if not flow_to.is_empty():
+				flow_to.cnode.get_flow_token_list(_token_list)
+
+	return _token_list
+
+
+func get_if_token() -> Dictionary:
+	var true_flow: Array = []
+	var then_flow: Array = []
+	var false_flow: Array = []
+
+	if flow_to.has('true_flow'):
+		true_flow = flow_to.true_flow.get_flow_token_list()
+		# debug
+		true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
+
+	if flow_to.has('then_flow'):
+		then_flow = flow_to.then_flow.get_flow_token_list()
+		then_flow.append(HenCodeGeneration.get_debug_token(self, 'then_flow'))
+		
+	if flow_to.has('false_flow'):
+		false_flow = flow_to.false_flow.get_flow_token_list()
+		false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
+	
+	var container = get_node('%TitleContainer').get_child(0)
+
+	return {
+		type = HenCnode.SUB_TYPE.IF,
+		true_flow = true_flow,
+		then_flow = then_flow,
+		false_flow = false_flow,
+		condition = get_input_token(container.get_child(0))
+	}
+
+
+func get_for_token() -> Dictionary:
+	return {
+		type = sub_type,
+		hash = get_instance_id(),
+		params = get_input_token_list(),
+		flow = flow_to.cnode.get_flow_token_list() if flow_to.has('cnode') else []
+	}
+
+
+func parse_token_and_value(_id: int = 0) -> String:
+	var code: String
+
+	match sub_type:
+		'if':
+			code = HenCodeGeneration.parse_token_by_type(
+				get_if_token()
+			)
+		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+			code = HenCodeGeneration.parse_token_by_type(
+				get_for_token()
+			)
+		HenCnode.SUB_TYPE.VIRTUAL:
+			code = '# virtual cnode'
+		_:
+			code = HenCodeGeneration.parse_token_by_type(
+				get_token_list(_id)
+			)
+
+	return '\n'.join((code.split('\n') as Array).filter(func(x): return not x.contains(HenGlobal.DEBUG_TOKEN))) # removes debug lines

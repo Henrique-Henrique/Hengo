@@ -1,10 +1,9 @@
-[gd_scene load_steps=45 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=44 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/drop_prop_menu.gd" id="5_vwcbq"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
@@ -35,9 +34,9 @@ bg_color = Color(0.08, 0.0894118, 0.101176, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(915, 1358)
-shader_parameter/offset = Vector2(97.2191, 280.344)
-shader_parameter/zoom_factor = 0.999998
+shader_parameter/screen_size = Vector2(912, 1362)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -87,9 +86,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1616, 1358)
-shader_parameter/offset = Vector2(556.97, 321.507)
-shader_parameter/zoom_factor = 0.200013
+shader_parameter/screen_size = Vector2(1613, 1363)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -426,11 +425,6 @@ unique_name_in_owner = true
 size = Vector2i(134, 60)
 script = ExtResource("31_keoa0")
 
-[node name="DropPropMenu" type="PopupMenu" parent="."]
-unique_name_in_owner = true
-size = Vector2i(38, 12)
-script = ExtResource("5_vwcbq")
-
 [node name="RouteReferenceProps" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true
 visible = false
@@ -508,5 +502,4 @@ selection_enabled = true
 
 [node name="DashBoard" parent="." instance=ExtResource("28_nqqx4")]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1

@@ -17,7 +17,7 @@ var route: Dictionary = {
 	id = ''
 }
 # only funcions
-var output_cnode = null
+var output_cnode: HenCnode
 var virtual_cnode_list: Array = []
 var moving: bool = false
 var type: TYPE

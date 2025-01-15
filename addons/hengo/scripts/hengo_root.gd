@@ -69,7 +69,6 @@ func _ready() -> void:
 	HenGlobal.CAM = state_cam
 	HenGlobal.STATE_CAM = state_cam
 	HenGlobal.CNODE_CAM = cnode_cam
-	HenGlobal.DROP_PROP_MENU = get_node('%DropPropMenu')
 	HenGlobal.GENERAL_MENU = get_node('%GeneralMenu')
 	HenGlobal.CNODE_CONTAINER = get_node('%CnodeContainer')
 	HenGlobal.COMMENT_CONTAINER = get_node('%CommentContainer')

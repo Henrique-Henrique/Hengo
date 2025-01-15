@@ -13,7 +13,6 @@ static var GENERAL_CONTAINER: Control
 static var ROUTE_REFERENCE_CONTAINER: Control
 static var COMMENT_CONTAINER: Control
 static var STATE_CONTAINER: Control
-static var DROP_PROP_MENU: HenDropPropMenu
 static var SIDE_MENU_POPUP: PanelContainer
 static var DROPDOWN_MENU: HenDropDownMenu
 static var POPUP_CONTAINER: CanvasLayer
