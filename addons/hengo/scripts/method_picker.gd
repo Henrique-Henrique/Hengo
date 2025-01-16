@@ -1,6 +1,10 @@
 @tool
 class_name HenMethodPicker extends VBoxContainer
 
+enum Type {
+	COMMENT
+}
+
 var list_container: VBoxContainer
 var start_pos: Vector2 = Vector2.ZERO
 var connection_type: StringName = 'all'
@@ -76,6 +80,10 @@ var native_list: Array = [
 			],
 			route = HenRouter.current_route
 		}
+	},
+	{
+		name = 'Comment',
+		data_type = Type.COMMENT,
 	},
 	{
 		name = 'debug value',
@@ -278,7 +286,20 @@ func _select() -> void:
 	HenGlobal.CNODE_CAM.can_scroll = true
 	if list_container.get_child_count() > 0:
 		var item = list_container.get_child(selected_id)
-		var data = item.get_meta('data')['data']
+		var item_data = item.get_meta('data')
+
+		if item_data.has('data_type'):
+			match item_data.data_type as Type:
+				Type.COMMENT:
+					var comment = load('res://addons/hengo/scenes/utils/comment.tscn').instantiate()
+					comment.route_ref = HenRouter.current_route
+					comment.position = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
+					HenRouter.comment_reference[HenRouter.current_route.id].append(comment)
+					HenGlobal.COMMENT_CONTAINER.add_child(comment)
+					HenGlobal.GENERAL_POPUP.get_parent().hide()
+					return
+				
+		var data = item_data['data']
 
 		# intercepting method creation
 		# method picker middleware

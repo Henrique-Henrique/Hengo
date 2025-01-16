@@ -226,10 +226,12 @@ static func instantiate_state(_config: Dictionary = {}) -> HenState:
 		state.get_node('%Title').text = _config.name
 	else:
 		_name_counter += 1
-		state.get_node('%Title').text = 'State Name ' + str(_name_counter)
+		state.get_node('%Title').text = 'State ' + str(_name_counter)
 
 	if _config.has('pos'):
 		state.position = str_to_var(_config.pos)
+	elif _config.has('position'):
+		state.position = _config.position
 
 	state.route.id = HenUtilsName.get_unique_name()
 	state.route.state_ref = state
@@ -269,9 +271,6 @@ static func instantiate_state(_config: Dictionary = {}) -> HenState:
 	state.size = Vector2.ZERO
 
 	HenEnums.DROPDOWN_STATES.append(state.route)
-
-
-	print('INSTANCD ', HenGlobal.STATE_CONTAINER.get_child_count())
 
 	return state
 

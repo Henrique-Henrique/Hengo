@@ -109,7 +109,7 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 							call = func():
 								HenRouteReference.instantiate_and_add({
 									name = 'func_name',
-									position = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_local_mouse_position(),
+									position = HenGlobal.STATE_CONTAINER.get_local_mouse_position(),
 									type = HenRouteReference.TYPE.FUNC,
 									route = {
 										name = '',
@@ -117,7 +117,21 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 										id = HenUtilsName.get_unique_name()
 									}
 						})
-					}]})
+					},
+					{
+						name = 'add state',
+						call = func():
+							var state_ref = HenState.instantiate_state({
+								position = HenGlobal.STATE_CONTAINER.get_local_mouse_position()
+							})
+
+							HenGlobal.history.create_action('Add State')
+							HenGlobal.history.add_do_method(state_ref.add_to_scene)
+							HenGlobal.history.add_do_reference(state_ref)
+							HenGlobal.history.add_undo_method(state_ref.remove_from_scene)
+							HenGlobal.history.commit_action()
+					}
+					]})
 		else:
 			match _event.button_index:
 				MOUSE_BUTTON_LEFT:
@@ -208,21 +222,7 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		if event.pressed:
-			if event.shift_pressed and event.keycode == KEY_S:
-				var state_ref = HenState.instantiate_state()
-
-				HenGlobal.history.create_action('Add State')
-				HenGlobal.history.add_do_method(state_ref.add_to_scene)
-				HenGlobal.history.add_do_reference(state_ref)
-				HenGlobal.history.add_undo_method(state_ref.remove_from_scene)
-				HenGlobal.history.commit_action()
-			elif event.shift_pressed and event.keycode == KEY_C:
-				# add comment
-				var comment = load('res://addons/hengo/scenes/utils/comment.tscn').instantiate()
-				comment.route_ref = HenRouter.current_route
-				HenRouter.comment_reference[HenRouter.current_route.id].append(comment)
-				HenGlobal.COMMENT_CONTAINER.add_child(comment)
-			elif event.shift_pressed and event.keycode == KEY_F:
+			if event.shift_pressed and event.keycode == KEY_F:
 				# delete cnode or state
 				match HenGlobal.CAM:
 					HenGlobal.CNODE_CAM:
