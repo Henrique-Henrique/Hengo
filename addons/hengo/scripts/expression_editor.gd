@@ -14,6 +14,9 @@ var completion_list: Array
 var default_config: Dictionary
 
 
+const NATIVE_KEYWORDS: Array[StringName] = ['and', 'or', 'not', 'in', 'is']
+
+
 func _ready() -> void:
 	code_edit.text_changed.connect(_on_change)
 	save_bt.pressed.connect(_on_save)
@@ -46,7 +49,10 @@ func _on_change() -> void:
 
 	if result:
 		for r: RegExMatch in result:
-			keys.append(r.get_string())
+			var key: String = r.get_string()
+
+			if not NATIVE_KEYWORDS.has(key):
+				keys.append(r.get_string())
 
 	var error = expre.parse(code_edit.text, keys)
 

@@ -454,7 +454,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						return parse_token_by_type(x)
 			))
 			})
-		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT, 'signal_virtual':
+		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT:
 			return _token.param
 		HenCnode.SUB_TYPE.IF:
 			var base: String = 'if {condition}:\n'.format({

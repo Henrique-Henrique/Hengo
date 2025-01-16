@@ -604,7 +604,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#4A7346'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/set_var.svg')
 						_config.type = TYPE.DEFAULT
-					SUB_TYPE.VIRTUAL, SUB_TYPE.FUNC_INPUT, 'signal_virtual':
+					SUB_TYPE.VIRTUAL, SUB_TYPE.FUNC_INPUT:
 						# color
 						title_container.get('theme_override_styles/panel').set('bg_color', Color('#734646'))
 						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/virtual.svg')
@@ -678,6 +678,8 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 		if _config.has('data'):
 			instance.data = _config.data
 		
+		print(_config.type)
+
 		# instance flow connections
 		match _config.type as TYPE:
 			TYPE.DEFAULT:
@@ -749,7 +751,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 							var ref = _config.route.general_ref
 							ref.virtual_cnode_list.append(instance)
 				# virtual node of signal and func
-				'signal_virtual', HenCnode.SUB_TYPE.FUNC_INPUT:
+				HenCnode.SUB_TYPE.FUNC_INPUT:
 					var ref = _config.route.item_ref
 					ref.virtual_cnode_list.append(instance)
 				HenCnode.SUB_TYPE.FUNC_OUTPUT:
@@ -849,7 +851,7 @@ func get_token_list(_id: int = 0) -> Dictionary:
 				name = get_node('%InputContainer').get_child(0).get_in_out_name().to_snake_case(),
 				value = get_input_token_list()[0],
 			})
-		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT, 'signal_virtual':
+		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT:
 			token.merge({
 				param = get_node('%OutputContainer').get_child(_id).get_node('%Name').text,
 				id = _id
@@ -896,6 +898,7 @@ func get_token_list(_id: int = 0) -> Dictionary:
 				name = get_node('%InputContainer').get_child(1).get_in_out_name()
 			})
 		HenCnode.SUB_TYPE.EXPRESSION:
+			print(get_node('%Container').get_child(1).get_child(0))
 			token.merge({
 				params = get_input_token_list(true),
 				exp = get_node('%Container').get_child(1).get_child(0).raw_text
