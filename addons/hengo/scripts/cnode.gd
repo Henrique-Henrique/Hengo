@@ -908,8 +908,8 @@ func get_token_list(_id: int = 0) -> Dictionary:
 
 
 func get_flow_token_list(_token_list: Array = []) -> Array:
-	match type:
-		HenCnode.TYPE.IF:
+	match sub_type:
+		HenCnode.SUB_TYPE.IF:
 			_token_list.append(get_if_token())
 		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
 			_token_list.append(get_for_token())

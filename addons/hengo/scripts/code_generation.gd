@@ -390,8 +390,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			'native':
 				prefix = ''
 
-
-	match _token.type:
+	match _token.type as HenCnode.SUB_TYPE:
 		HenCnode.SUB_TYPE.VAR:
 			return indent + prefix + _token.name
 		HenCnode.SUB_TYPE.SET_VAR:
