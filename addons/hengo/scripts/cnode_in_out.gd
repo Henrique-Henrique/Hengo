@@ -7,7 +7,7 @@ class_name HenCnodeInOut extends PanelContainer
 
 var connection_type: String = 'Variant'
 # cnode reference from connection
-var in_connected_from
+var in_connected_from: HenCnode
 # id from output connection
 var out_from_in_out
 # connections lines
@@ -639,7 +639,7 @@ func get_type_color(_type: String) -> Color:
 
 func get_token(_get_name: bool = false) -> Dictionary:
 	if in_connected_from and not from_connection_lines[0].deleted:
-		var data: Dictionary = in_connected_from.get_token_list(out_from_in_out.get_index())
+		var data: Dictionary = in_connected_from.get_token(out_from_in_out.get_index())
 
 		if is_ref:
 			data['ref'] = true

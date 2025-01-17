@@ -83,7 +83,7 @@ func get_script_list(_dir: DirAccess, _list: Array[Array] = []) -> Array[Array]:
 			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
 
 			if script.source_code.begins_with('#[hengo] '):
-				var data: Dictionary = HenSaveLoad.parse_hengo_json(script.source_code)
+				var data: Dictionary = HenLoader.parse_hengo_json(script.source_code)
 
 				_list.append([file_name.get_basename(), _dir.get_current_dir() + '/' + file_name, data.type])
 			else:

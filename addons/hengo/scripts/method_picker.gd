@@ -136,7 +136,7 @@ var native_list: Array = [
 		data = {
 			name = 'IF',
 			type = HenCnode.TYPE.IF,
-			sub_type = HenCnode.TYPE.IF,
+			sub_type = HenCnode.SUB_TYPE.IF,
 			route = HenRouter.current_route
 		}
 	},

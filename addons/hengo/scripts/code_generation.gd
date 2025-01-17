@@ -31,7 +31,7 @@ static func _get_signal_call_name(_name: String) -> String:
 #
 static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 	var start: float = Time.get_ticks_usec()
-	HenSaveLoad.save(generate(), _debug_symbols)
+	HenSaver.save(generate(), _debug_symbols)
 	var end: float = Time.get_ticks_usec()
 	
 	print('GENERATED AND SAVED HENGO SCRIPT IN -> ', (end - start) / 1000, 'ms.')
@@ -323,7 +323,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 
 static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
 	if _input.in_connected_from and not _input.from_connection_lines[0].deleted:
-		var data: Dictionary = _input.in_connected_from.get_token_list(_input.out_from_in_out.get_index())
+		var data: Dictionary = _input.in_connected_from.get_token(_input.out_from_in_out.get_index())
 
 		if _input.is_ref:
 			data['ref'] = true

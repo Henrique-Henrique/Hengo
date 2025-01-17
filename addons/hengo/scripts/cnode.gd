@@ -397,9 +397,9 @@ func add_input(_input: Dictionary) -> void:
 	input.root = self
 
 	if _input.has('is_prop'):
-		input.add_prop_ref(_input.get(HenCnode.SUB_TYPE.IN_PROP), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
+		input.add_prop_ref(_input.get('in_prop'), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
 	else:
-		input.set_in_prop(_input.get(HenCnode.SUB_TYPE.IN_PROP) if _input.has(HenCnode.SUB_TYPE.IN_PROP) else null)
+		input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
 
 	in_container.add_child(input)
 
@@ -443,7 +443,7 @@ func check_error() -> void:
 			var input = in_container.get_child(1)
 
 			# checking if other script has changed state name
-			if not HenSaveLoad.script_has_state(input.custom_data, input.get_in_prop_by_id_or_null().get_value()):
+			if not HenLoader.script_has_state(input.custom_data, input.get_in_prop_by_id_or_null().get_value()):
 				errors.append({
 					input_instance_id = input.get_instance_id(),
 					msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
@@ -814,7 +814,7 @@ func get_output_token_list() -> Array:
 	return outputs
 
 
-func get_token_list(_id: int = 0) -> Dictionary:
+func get_token(_id: int = 0) -> Dictionary:
 	var use_self: bool = route_ref.type != HenRouter.ROUTE_TYPE.STATE
 
 	var token: Dictionary = {
@@ -914,7 +914,7 @@ func get_flow_token_list(_token_list: Array = []) -> Array:
 		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
 			_token_list.append(get_for_token())
 		_:
-			_token_list.append(get_token_list())
+			_token_list.append(get_token())
 
 			if not flow_to.is_empty():
 				flow_to.cnode.get_flow_token_list(_token_list)
@@ -976,7 +976,7 @@ func parse_token_and_value(_id: int = 0) -> String:
 			code = '# virtual cnode'
 		_:
 			code = HenCodeGeneration.parse_token_by_type(
-				get_token_list(_id)
+				get_token(_id)
 			)
 
 	return '\n'.join((code.split('\n') as Array).filter(func(x): return not x.contains(HenGlobal.DEBUG_TOKEN))) # removes debug lines
