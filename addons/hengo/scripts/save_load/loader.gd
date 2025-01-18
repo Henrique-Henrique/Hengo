@@ -160,7 +160,7 @@ static func load_and_edit(_path: StringName) -> void:
 	#
 	# loading hengo script data
 	elif script.source_code.begins_with('#[hengo] '):
-		var data: Dictionary = parse_hengo_json(script.source_code)
+		var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
 
 		var inst_id_refs: Dictionary = {}
 		var state_trans_connections: Array = []
@@ -172,7 +172,7 @@ static func load_and_edit(_path: StringName) -> void:
 		HenState._name_counter = data.state_name_counter
 
 		# generating generals (like inputs)
-		for general_config: Dictionary in data['generals']:
+		for general_config: Dictionary in data.generals:
 			var dt: Dictionary = general_config.duplicate()
 
 			dt.route = {
@@ -192,7 +192,7 @@ static func load_and_edit(_path: StringName) -> void:
 			inst_id_refs[float(general.id)] = general
 		
 		# functions
-		for func_config: Dictionary in data['func_list']:
+		for func_config: Dictionary in data.func_list:
 			var dt: Dictionary = {
 				hash = func_config.hash,
 				props = func_config.props,
@@ -215,7 +215,7 @@ static func load_and_edit(_path: StringName) -> void:
 			inst_id_refs[float(func_ref.hash)] = func_ref
 		
 		# states
-		for state: Dictionary in data['states']:
+		for state: Dictionary in data.states:
 			var state_inst = HenState.instantiate_and_add_to_scene({
 				name = state.name,
 				pos = state.pos,
@@ -247,7 +247,7 @@ static func load_and_edit(_path: StringName) -> void:
 			})
 
 		# creating props
-		for prop: Dictionary in data['props']:
+		for prop: Dictionary in data.props:
 			match prop.prop_type:
 				StringName('VARIABLE'):
 					var prop_scene = load('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
@@ -257,7 +257,7 @@ static func load_and_edit(_path: StringName) -> void:
 		# ---------------------------------------------------------------------------- #
 		# creating comments
 		var comment_scene = load('res://addons/hengo/scenes/utils/comment.tscn')
-		for comment_config: Dictionary in data['comments']:
+		for comment_config: Dictionary in data.comments:
 			var comment = comment_scene.instantiate()
 			var router = inst_id_refs[comment_config.router_ref_id].route_ref
 
@@ -279,7 +279,7 @@ static func load_and_edit(_path: StringName) -> void:
 
 		# ---------------------------------------------------------------------------- #
 		# creating connections
-		for connection: Dictionary in data['connections']:
+		for connection: Dictionary in data.connections:
 			var from_in_out = (inst_id_refs[connection.from_cnode] as HenCnode).get_node('%OutputContainer').get_child(connection.input)
 			var to_cnode = (inst_id_refs[connection.to_cnode] as HenCnode)
 			var to_in_out
@@ -297,7 +297,7 @@ static func load_and_edit(_path: StringName) -> void:
 			})
 		
 		# flow connections
-		for flow_connection: Dictionary in data['flow_connections']:
+		for flow_connection: Dictionary in data.flow_connections:
 			var cnode := inst_id_refs[flow_connection.from_cnode] as HenCnode
 
 			match cnode.type:
@@ -385,9 +385,23 @@ static func show_class_name() -> void:
 		sb.bg_color = Color('#0000004a')
 
 
-static func parse_hengo_json(_source: String) -> Dictionary:
-	var hengo_json: String = _source.split('\n').slice(0, 1)[0].split('#[hengo] ')[1]
-	return JSON.parse_string(hengo_json)
+static func parse_hengo_json(_source: String) -> HenSaver.ScriptData:
+	var hengo_json: Dictionary = JSON.parse_string(_source.split('\n').slice(0, 1)[0].split('#[hengo] ')[1])
+	var script_data := HenSaver.ScriptData.new()
+
+	script_data.type = hengo_json.type
+	script_data.node_counter = hengo_json.node_counter
+	script_data.debug_symbols = hengo_json.debug_symbols
+	script_data.state_name_counter = hengo_json.state_name_counter
+	script_data.props = hengo_json.props
+	script_data.generals = hengo_json.generals
+	script_data.states = hengo_json.states
+	script_data.connections = hengo_json.connections
+	script_data.flow_connections = hengo_json.flow_connections
+	script_data.func_list = hengo_json.func_list
+	script_data.comments = hengo_json.comments
+
+	return script_data
 
 
 static func parse_other_scripts_data(_dir: DirAccess) -> void:
@@ -403,11 +417,11 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
 
 			if script.source_code.begins_with('#[hengo] '):
-				var data: Dictionary = parse_hengo_json(script.source_code)
+				var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
 
 				HenGlobal.SCRIPTS_STATES[file_name.get_basename()] = []
 
-				for state_dict: Dictionary in data['states'] as Array:
+				for state_dict: Dictionary in data.states as Array:
 					(HenGlobal.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
 				
 				HenGlobal.SCRIPTS_INFO.append({
@@ -438,12 +452,11 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 
 static func script_has_state(_script_name: String, _state_name: String) -> bool:
 	var has_state: bool = false
-
 	var script: GDScript = ResourceLoader.load('res://hengo/' + _script_name + '.gd', '', ResourceLoader.CACHE_MODE_IGNORE)
 
 	if script.source_code.begins_with('#[hengo] '):
-		var data: Dictionary = parse_hengo_json(script.source_code)
+		var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
 	
-		return data['states'].map(func(x: Dictionary) -> String: return x.name.to_lower()).has(_state_name)
+		return data.states.map(func(x: Dictionary) -> String: return x.name.to_lower()).has(_state_name)
 	
 	return has_state

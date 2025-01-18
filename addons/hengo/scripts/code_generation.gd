@@ -300,6 +300,10 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 		var cnode_name: String = virtual_cnode.get_cnode_name()
 
 		if virtual_cnode.flow_to.has('cnode'):
+			# ignore deleted cnodes
+			if virtual_cnode.flow_to.cnode.deleted:
+				continue
+			
 			var token_list = [get_debug_flow_start_token(virtual_cnode)] + virtual_cnode.flow_to.cnode.get_flow_token_list()
 			token_list.append(get_debug_token(virtual_cnode))
 			token_list.append(get_push_debug_token(virtual_cnode))

@@ -1,23 +1,53 @@
 @tool
 class_name HenSaver extends Node
 
+
+class ScriptData:
+	var type: String
+	var node_counter: int
+	var debug_symbols: Dictionary
+	var state_name_counter: int
+	var props: Array
+	var generals: Array
+	var states: Array
+	var connections: Array
+	var flow_connections: Array
+	var func_list: Array
+	var comments: Array
+
+	func get_save() -> Dictionary:
+		return {
+			type = type,
+			node_counter = node_counter,
+			debug_symbols = debug_symbols,
+			state_name_counter = state_name_counter,
+			props = props,
+			generals = generals,
+			states = states,
+			connections = connections,
+			flow_connections = flow_connections,
+			func_list = func_list,
+			comments = comments
+		}
+
+
 static func save(_code: String, _debug_symbols: Dictionary) -> void:
-	var script_data: Dictionary = {
-		type = HenGlobal.script_config.type,
-		node_counter = HenGlobal.node_counter,
-		debug_symbols = _debug_symbols,
-		state_name_counter = HenState._name_counter
-	}
+	var script_data: ScriptData = ScriptData.new()
+
+	script_data.type = HenGlobal.script_config.type
+	script_data.node_counter = HenGlobal.node_counter
+	script_data.debug_symbols = _debug_symbols
+	script_data.state_name_counter = HenState._name_counter
 
 	# ---------------------------------------------------------------------------- #
 	# Props
-	script_data['props'] = HenGlobal.PROPS_CONTAINER.get_all_values()
+	script_data.props = HenGlobal.PROPS_CONTAINER.get_all_values()
 
 	# ---------------------------------------------------------------------------- #
 	# Generals
 	var generals: Array[Dictionary] = []
 
-	for general in HenGlobal.GENERAL_CONTAINER.get_children():
+	for general: HenGeneralRoute in HenGlobal.GENERAL_CONTAINER.get_children():
 		var data: Dictionary = general.custom_data
 
 		data.pos = var_to_str(general.position)
@@ -28,13 +58,13 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 		generals.append(data)
 
-	script_data['generals'] = generals
+	script_data.generals = generals
 
 	# ---------------------------------------------------------------------------- #
 	# STATES
 	var states: Array[Dictionary] = []
 
-	for state in HenGlobal.STATE_CONTAINER.get_children():
+	for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
 		var data: Dictionary = {
 			id = state.hash,
 			name = state.get_state_name(),
@@ -51,7 +81,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 		# ---------------------------------------------------------------------------- #
 		# transitions
-		for trans in state.get_node('%TransitionContainer').get_children():
+		for trans: HenStateTransition in state.get_node('%TransitionContainer').get_children():
 			var trans_data = {
 				name = trans.get_transition_name()
 			}
@@ -71,7 +101,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 		states.append(data)
 
-	script_data['states'] = states
+	script_data.states = states
 
 	# ---------------------------------------------------------------------------- #
 	# CONNECTIONS
@@ -94,8 +124,8 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 				to_cnode = line.to_cnode.hash
 			})
 
-	script_data['connections'] = connections
-	script_data['flow_connections'] = flow_connections
+	script_data.connections = connections
+	script_data.flow_connections = flow_connections
 
 
 	# ---------------------------------------------------------------------------- #
@@ -114,7 +144,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			pos = var_to_str(func_item.position)
 		})
 
-	script_data['func_list'] = func_list
+	script_data.func_list = func_list
 
 	# ---------------------------------------------------------------------------- #
 	# loading comments
@@ -140,11 +170,10 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 		)
 		})
 
-	script_data['comments'] = comment_list
-
+	script_data.comments = comment_list
 
 	# ---------------------------------------------------------------------------- #
-	var code = '#[hengo] ' + JSON.stringify(script_data) + '\n\n' + _code
+	var code = '#[hengo] ' + JSON.stringify(script_data.get_save()) + '\n\n' + _code
 	var script: GDScript = GDScript.new()
 
 	print(code)
@@ -166,12 +195,12 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 	var arr: Array = []
 
 	for cnode: HenCnode in _cnode_list:
+
 		# ignore cnode types
 		if _ignore_list.has(cnode.sub_type):
 			continue
 
 		var cnode_data: Dictionary = {
-			# id = cnode.get_instance_id(),
 			pos = var_to_str(cnode.position),
 			name = cnode.get_cnode_name(),
 			sub_type = cnode.sub_type,
@@ -188,7 +217,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 		if cnode.type != HenCnode.TYPE.DEFAULT:
 			cnode_data.type = cnode.type
 
-		for input in cnode.get_node('%InputContainer').get_children():
+		for input: HenCnodeInOut in cnode.get_node('%InputContainer').get_children():
 			var input_data: Dictionary = {
 				name = input.get_in_out_name(),
 				type = input.connection_type,
@@ -226,7 +255,7 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 
 			cnode_data.inputs.append(input_data)
 
-		for output in cnode.get_node('%OutputContainer').get_children():
+		for output: HenCnodeInOut in cnode.get_node('%OutputContainer').get_children():
 			var output_data: Dictionary = {
 				name = output.get_in_out_name(),
 				type = output.connection_type
