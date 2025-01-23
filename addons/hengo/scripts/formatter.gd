@@ -1,158 +1,90 @@
 @tool
-class_name HenFormatter extends Button
+class_name HenFormatter extends Node
 
-const VIRTUAL_DISTANCE = 500
-const CNODE_FLOW_DISTANCE = 100
-const IF_FLOW_DISTANCE = 200
+static var start_position: Vector2
+static var arr: Array = []
+static var min_x: float
+static var max_x: float
 
+static func format(_virtual_cnode: HenCnode, _old_cnode: HenCnode) -> void:
+	# reseting positions
+	# _virtual_cnode.position.x = start_position.x - _virtual_cnode.size.x / 2
+	_virtual_cnode.position.y = _old_cnode.position.y + _old_cnode.size.y + 200
+	_virtual_cnode.can_move_to_format = true
+	arr.append(_virtual_cnode)
 
-var all_nodes: Array[Array] = []
-var max_depth: int = 0
-
-func _ready() -> void:
-	pressed.connect(_on_press)
-
-
-func parse_virtual(_cnode: HenCnode, _flow: String, _id: int = 0, _h_id: int = 0) -> void:
-	max_depth = max(max_depth, _id)
-
-	match _cnode.type:
+	match _virtual_cnode.type:
 		HenCnode.TYPE.IF:
-			all_nodes.append([_cnode, HenCnode.TYPE.IF, _id, _h_id])
+			if _virtual_cnode.flow_to.has('true_flow'):
+				format(_virtual_cnode.flow_to.true_flow, _virtual_cnode)
 
-			if _cnode.flow_to.has('false_flow'):
-				parse_virtual(_cnode.flow_to['false_flow'], 'false_flow', _id + 1, _h_id + 1)
+			# if _virtual_cnode.flow_to.has('then_flow'):
+			# 	format(_virtual_cnode.flow_to.then_flow)
 
-			if _cnode.flow_to.has('then_flow'):
-				parse_virtual(_cnode.flow_to['then_flow'], 'then_flow', _id + 1, _h_id)
-			
-			if _cnode.flow_to.has('true_flow'):
-				parse_virtual(_cnode.flow_to['true_flow'], 'true_flow', _id + 1, _h_id - 1)
-		
+			if _virtual_cnode.flow_to.has('false_flow'):
+				format(_virtual_cnode.flow_to.false_flow, _virtual_cnode)
+			else:
+				arr.append([_virtual_cnode])
 		_:
-			all_nodes.append([_cnode, _flow, _id, _h_id])
-
-			if _cnode.flow_to.has('cnode'):
-				parse_virtual(_cnode.flow_to['cnode'], _flow, _id + 1, _h_id)
+			if _virtual_cnode.flow_to.has('cnode'):
+				format(_virtual_cnode.flow_to.cnode, _virtual_cnode)
 
 
-func _on_press() -> void:
-	# var last_virtual: HenCnode = null
-	# var cnodes: Array = HenGlobal.CNODE_CONTAINER.get_children()
+static func format_y() -> void:
+	arr.reverse()
 
-	# test
-	for node in HenGlobal.CNODE_CAM.get_children():
-		if node is ReferenceRect:
-			node.queue_free()
+	if arr[0] is Array:
+		arr.remove_at(0)
 
+	print(arr.duplicate().map(func(x): return x.hash if x is HenCnode else x[0].hash))
+
+	var first_cnode: HenCnode = arr[0] as HenCnode
 	
-	# var start: int = Time.get_ticks_usec()
+	first_cnode.can_move_to_format = false
+	min_x = first_cnode.position.x
+	max_x = first_cnode.position.x + first_cnode.size.x
 
-	for state in HenGlobal.STATE_CONTAINER.get_children():
-		for cnode in [state.virtual_cnode_list[1]]:
-			all_nodes = []
-			parse_virtual(cnode, 'cnode')
 
-			all_nodes.reverse()
+	for cnode in arr:
+		if cnode is HenCnode:
+			var flow_line: HenFlowConnectionLine = cnode.from_lines[0]
+			var from_cnode: HenCnode = flow_line.from_connector.root
 
-			# var true_min_x: float = INF
-			# var false_max_x: float = -INF
+			print(cnode.hash, ' | ', flow_line.flow_type, ' > ', from_cnode.can_move_to_format)
 
-			# var ata: Array = []
+			match flow_line.flow_type:
+				'false_flow':
+					if cnode.can_move_to_format:
+						cnode.position.x = min_x - cnode.size.x
+						min_x = min(min_x, cnode.position.x)
 
-			var x_depth: int = 0
+					if from_cnode.can_move_to_format:
+						from_cnode.position.x = min_x - from_cnode.size.x
+						from_cnode.can_move_to_format = false
+						min_x = min(min_x, from_cnode.position.x)
+				'true_flow':
+					if cnode.can_move_to_format:
+						cnode.position.x = min_x - cnode.size.x
+						min_x = min(min_x, cnode.position.x)
+
+					if from_cnode.can_move_to_format:
+						from_cnode.position.x = max_x
+						from_cnode.can_move_to_format = false
+						max_x = max(max_x, from_cnode.position.x + from_cnode.size.x)
+				'cnode':
+					if cnode.can_move_to_format:
+						cnode.position.x = min_x - cnode.size.x
+						min_x = min(min_x, cnode.position.x)
+
+					if from_cnode.can_move_to_format:
+						from_cnode.position.x = cnode.position.x
+						from_cnode.can_move_to_format = false
+						min_x = min(min_x, from_cnode.position.x)
 			
-			var old_cn: HenCnode = all_nodes[0][0]
-			var old_flow: String = all_nodes[0][1]
-			var old_depth: int = all_nodes[0][2]
-				
-			var max_x: float = -INF
-			var max_x_depth: int = all_nodes[0][3]
-			var old_x_depth: int = max_x_depth
+			flow_line.update_line()
+		elif cnode is Array:
+			var cnode_ref: HenCnode = cnode[0]
 
-
-			old_cn.position = Vector2.ZERO
-
-			for arr in all_nodes:
-				var cn: HenCnode = arr[0]
-				var flow: String = arr[1]
-				var depth: int = arr[2]
-				var h_depth: int = arr[3]
-					
-
-				var pos: Vector2 = Vector2(0, 205 * depth)
-
-				if cn == old_cn:
-					cn.move(pos)
-				
-					old_cn = cn
-					old_flow = flow
-					old_depth = depth
-					old_x_depth = h_depth
-
-					max_x = max(max_x, pos.x + cn.size.x)
-					max_x_depth = max(max_x_depth, h_depth)
-					continue
-
-				if depth > old_depth:
-					match flow:
-						'true_flow':
-							pos.x = max_x + max(200 * (abs(h_depth) - 1), 200)
-						_:
-							pos.x = max_x + 200 * abs(abs(h_depth) - abs(max_x_depth))
-							# pos.x = (max_x + max(200 * (abs(h_depth) + abs(max_x_depth)), 200 * abs(max_x_depth))) if h_depth > 0 else max_x + 200
-
-				elif depth < old_depth:
-					match flow:
-						HenCnode.TYPE.IF:
-
-							if cn.flow_to.has('then_flow'):
-								pos.x = cn.flow_to.then_flow.position.x
-							elif cn.flow_to.has('false_flow'):
-								pos.x = cn.flow_to.false_flow.position.x - 200
-							elif cn.flow_to.has('true_flow'):
-								pos.x = cn.flow_to.true_flow.position.x + 200
-						_:
-							pos.x = old_cn.position.x
-				else:
-					match flow:
-						HenCnode.TYPE.IF:
-							pos.x = max_x + max(200 * (abs(h_depth) - 1), 200)
-						'true_flow':
-							pos.x -= 200 * abs(h_depth)
-						'then_flow':
-							pos.x = old_cn.position.x + 200 * 2
-						'false_flow':
-							pos.x = old_cn.position.x + 200 * 2
-
-				cn.move(pos)
-				
-				old_cn = cn
-				old_flow = flow
-				old_depth = depth
-				old_x_depth = h_depth
-
-				max_x = max(max_x, pos.x + cn.size.x)
-				max_x_depth = max(max_x_depth, h_depth)
-
-
-func _format_cnode_flow(_cnode: HenCnode, _key: String, _increment: Vector2 = Vector2.ZERO) -> void:
-	var cn: HenCnode = _cnode.flow_to[_key]
-	var pos: Vector2 = _cnode.position
-
-	pos += _increment
-
-	pos.x += (_cnode.size.x - cn.size.x) / 2
-	pos.y += _cnode.size.y + CNODE_FLOW_DISTANCE
-
-	cn.move(pos)
-
-
-func debug_rect(_pos: Vector2, _size: Vector2, _color: Color = Color.RED) -> void:
-	var ref = ReferenceRect.new()
-	ref.position = _pos
-	ref.size = _size
-	ref.border_color = _color
-	ref.border_width = 3
-	ref.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	HenGlobal.CNODE_CAM.add_child(ref)
+			cnode_ref.position.x = min_x - cnode_ref.size.x
+			cnode_ref.can_move_to_format = false
+			min_x = min(min_x, cnode_ref.position.x)

@@ -1,4 +1,4 @@
-#[hengo] {"comments":[],"connections":[{"from_cnode":35,"input":0,"output":1,"to_cnode":34},{"from_cnode":36,"input":0,"output":0,"to_cnode":34},{"from_cnode":30,"input":0,"output":0,"to_cnode":36}],"debug_symbols":{"16":[8,"cnode"],"2":[7],"32":[7],"4":[15,"true_flow"],"8":[15,"false_flow"]},"flow_connections":[{"from_cnode":15,"from_connector":0,"to_cnode":16},{"from_cnode":15,"from_connector":2,"to_cnode":17},{"from_cnode":8,"from_connector":0,"to_cnode":34},{"from_cnode":34,"from_connector":0,"to_cnode":15}],"func_list":[{"cnode_list":[{"group":"f_31","hash":32,"inputs":[],"name":"input","outputs":[{"name":"x","type":"Variant"},{"name":"vvv","type":"Variant"}],"pos":"Vector2(0, 0)","sub_type":10},{"group":"f_31","hash":33,"inputs":[],"name":"output","outputs":[{"name":"cc","type":"Variant"}],"pos":"Vector2(0, 500)","sub_type":18}],"hash":31,"pos":"Vector2(172.208, -69.4548)","props":[{"name":"name","type":"String","value":"func_name"},{"name":"inputs","type":"in_out","value":[{"group":"fi_31_0","name":"x"},{"group":"fi_31_1","name":"vvv"}]},{"name":"outputs","type":"in_out","value":[{"group":"fo_31_0","name":"cc"}]}],"ref_count":3}],"generals":[{"cnode_list":[{"hash":2,"inputs":[],"name":"_input","outputs":[{"name":"event","type":"InputEvent"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_input","id":1,"name":"Input","pos":"Vector2(-120, -200)"},{"cnode_list":[{"hash":4,"inputs":[],"name":"_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_process","color":"#401d3f","id":3,"name":"Process","param":{"name":"delta","type":"float"},"pos":"Vector2(-11, -200)"},{"cnode_list":[{"hash":6,"inputs":[],"name":"_physics_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_physics_process","color":"#1f2950","id":5,"name":"Physics Process","param":{"name":"delta","type":"float"},"pos":"Vector2(117, -200)"}],"node_counter":36,"props":[{"export":false,"name":"ata","prop_type":"VARIABLE","type":"Variant"}],"state_name_counter":1,"states":[{"cnode_list":[{"hash":8,"inputs":[],"name":"enter","outputs":[],"pos":"Vector2(-31.0037, 1.00012)","sub_type":9},{"hash":9,"inputs":[],"name":"update","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(400, 0)","sub_type":9},{"hash":15,"inputs":[],"name":"IF","outputs":[],"pos":"Vector2(-87.05, 279.008)","sub_type":12,"type":1},{"category":"native","hash":16,"inputs":[{"name":"content","type":"Variant"}],"name":"print","outputs":[],"pos":"Vector2(-305.772, 467.039)","sub_type":1},{"category":"native","hash":17,"inputs":[{"in_prop":"","name":"content","type":"String"}],"name":"print","outputs":[],"pos":"Vector2(182.452, 463.042)","sub_type":1},{"hash":30,"inputs":[{"name":"Sprite2D","ref":true,"type":"Sprite2D"}],"name":"get_hframes","outputs":[{"name":"","type":"int"}],"pos":"Vector2(-647.284, 64.306)","sub_type":0},{"fantasy_name":"Func -> func_name","group":"f_31","hash":34,"inputs":[{"name":"x","type":"Variant"},{"name":"vvv","type":"Variant"}],"name":"func_name","outputs":[{"name":"cc","type":"Variant"}],"pos":"Vector2(-78.216, 114.258)","sub_type":5},{"fantasy_name":"Func -> func_name","group":"f_31","hash":35,"inputs":[{"name":"x","type":"Variant"},{"name":"vvv","type":"Variant"}],"name":"func_name","outputs":[{"name":"cc","type":"Variant"}],"pos":"Vector2(-323.751, 244.206)","sub_type":5},{"fantasy_name":"Func -> func_name","group":"f_31","hash":36,"inputs":[{"name":"x","type":"Variant"},{"name":"vvv","type":"Variant"}],"name":"func_name","outputs":[{"name":"cc","type":"Variant"}],"pos":"Vector2(-318.749, 113.202)","sub_type":5}],"events":[{"name":"Start","type":"start"}],"id":7,"name":"State 1","pos":"Vector2(-15.7895, 87.3688)","route":{"id":"17372302605542","name":"State 1","type":0},"transitions":[]}],"type":"Sprite2D"}
+#[hengo] {"comments":[],"connections":[],"debug_symbols":{"2":[7],"4":[8,"cnode"],"8":[7]},"flow_connections":[{"from_cnode":8,"from_connector":0,"to_cnode":10}],"func_list":[],"generals":[{"cnode_list":[{"hash":2,"inputs":[],"name":"_input","outputs":[{"name":"event","type":"InputEvent"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_input","id":1,"name":"Input","pos":"Vector2(-120, -200)"},{"cnode_list":[{"hash":4,"inputs":[],"name":"_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_process","color":"#401d3f","id":3,"name":"Process","param":{"name":"delta","type":"float"},"pos":"Vector2(-11, -200)"},{"cnode_list":[{"hash":6,"inputs":[],"name":"_physics_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_physics_process","color":"#1f2950","id":5,"name":"Physics Process","param":{"name":"delta","type":"float"},"pos":"Vector2(117, -200)"}],"node_counter":10,"props":[],"state_name_counter":1,"states":[{"cnode_list":[{"hash":8,"inputs":[],"name":"enter","outputs":[],"pos":"Vector2(0, 0)","sub_type":9},{"hash":9,"inputs":[],"name":"update","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(400, 0)","sub_type":9},{"category":"native","hash":10,"inputs":[{"name":"content","type":"Variant"}],"name":"print","outputs":[],"pos":"Vector2(-46.101, 262.662)","sub_type":1}],"events":[{"name":"Start","type":"start"}],"id":7,"name":"State 1","pos":"Vector2(0, 0)","route":{"id":"17375518762089","name":"State 1","type":0},"transitions":[]}],"type":"Sprite2D"}
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -10,7 +10,6 @@
 extends Sprite2D
 
  # Variables #
-var ata = null
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -46,27 +45,14 @@ func _physics_process(delta: float) -> void:
 
 
 # Functions
-func func_name(x, vvv):
-	#hen_dbg#var __hen_id__: float = 0.
-	pass
-
 class State1 extends HengoState:
 	func enter() -> void:
 		#hen_dbg#var __hen_id__: float = 0.
 
-		_ref.func_name(_ref.func_name(_ref.get_hframes(), null), _ref.func_name(null, null))
-		if null:
-			print(null)
-			#hen_dbg#__hen_id__ += 4
-		else:
-			print("")
-			#hen_dbg#__hen_id__ += 8
-
-
-
-		#hen_dbg#__hen_id__ += 16
+		print(null)
+		#hen_dbg#__hen_id__ += 4
 		#hen_dbg#EngineDebugger.send_message('hengo:cnode', [__hen_id__])
-		#hen_dbg#EngineDebugger.send_message('hengo:debug_state', [32])
+		#hen_dbg#EngineDebugger.send_message('hengo:debug_state', [8])
 
 
 

@@ -262,8 +262,14 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode == KEY_F9:
 				# This is for Debug / Development key helper
 				
-				
-				print(HenGlobal.COMMENT_CONTAINER.get_children())
+				HenFormatter.arr = []
+				HenFormatter.start_position = HenGlobal.CNODE_CONTAINER.get_child(0).position + HenGlobal.CNODE_CONTAINER.get_child(0).size / 2
+
+				HenFormatter.format(
+					HenGlobal.CNODE_CONTAINER.get_child(0).flow_to.cnode,
+					HenGlobal.CNODE_CONTAINER.get_child(0)
+				)
+				HenFormatter.format_y()
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:

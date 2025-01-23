@@ -46,6 +46,7 @@ enum SUB_TYPE {
 	PASS
 }
 
+
 var flow_to: Dictionary = {}
 var type: TYPE
 var sub_type: SUB_TYPE
@@ -71,6 +72,10 @@ var old_state_event_connected: PanelContainer
 var _is_mouse_enter: bool = false
 var _preview_timer: SceneTreeTimer
 
+# formatter
+var can_move_to_format: bool = true
+
+
 signal on_move
 
 
@@ -91,6 +96,8 @@ func _on_enter() -> void:
 
 	_preview_timer = get_tree().create_timer(.5)
 	_preview_timer.timeout.connect(_on_tooltip)
+
+	print(hash)
 
 	if HenGlobal.can_make_flow_connection:
 		HenGlobal.flow_connection_to_data = {
