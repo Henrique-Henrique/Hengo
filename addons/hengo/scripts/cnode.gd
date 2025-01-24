@@ -75,7 +75,6 @@ var _preview_timer: SceneTreeTimer
 # formatter
 var can_move_to_format: bool = true
 
-
 signal on_move
 
 
@@ -931,17 +930,12 @@ func get_flow_token_list(_token_list: Array = []) -> Array:
 
 func get_if_token() -> Dictionary:
 	var true_flow: Array = []
-	var then_flow: Array = []
 	var false_flow: Array = []
 
 	if flow_to.has('true_flow'):
 		true_flow = flow_to.true_flow.get_flow_token_list()
 		# debug
 		true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
-
-	if flow_to.has('then_flow'):
-		then_flow = flow_to.then_flow.get_flow_token_list()
-		then_flow.append(HenCodeGeneration.get_debug_token(self, 'then_flow'))
 		
 	if flow_to.has('false_flow'):
 		false_flow = flow_to.false_flow.get_flow_token_list()
@@ -952,7 +946,6 @@ func get_if_token() -> Dictionary:
 	return {
 		type = HenCnode.SUB_TYPE.IF,
 		true_flow = true_flow,
-		then_flow = then_flow,
 		false_flow = false_flow,
 		condition = (container.get_child(0) as HenCnodeInOut).get_token()
 	}

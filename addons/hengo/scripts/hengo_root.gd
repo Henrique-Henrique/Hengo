@@ -262,14 +262,34 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode == KEY_F9:
 				# This is for Debug / Development key helper
 				
-				HenFormatter.arr = []
-				HenFormatter.start_position = HenGlobal.CNODE_CONTAINER.get_child(0).position + HenGlobal.CNODE_CONTAINER.get_child(0).size / 2
+				var start: float = Time.get_ticks_usec()
+				var virtual: HenCnode = HenGlobal.CNODE_CONTAINER.get_child(0)
 
+				virtual.position = Vector2.ZERO
+
+				HenFormatter.arr = []
+				HenFormatter.start_position = virtual.position + virtual.size / 2
 				HenFormatter.format(
-					HenGlobal.CNODE_CONTAINER.get_child(0).flow_to.cnode,
-					HenGlobal.CNODE_CONTAINER.get_child(0)
+					virtual.flow_to.cnode,
+					virtual
 				)
 				HenFormatter.format_y()
+
+				virtual.move(
+					Vector2(
+						virtual.flow_to.cnode.position.x - (
+							virtual.size.x - virtual.flow_to.cnode.size.x
+						) / 2,
+						virtual.position.y
+					)
+				)
+
+				HenFormatter.format_comments()
+
+				var end: float = Time.get_ticks_usec()
+
+				print('Formatted in: ', (end - start) / 1000., 'ms')
+
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:

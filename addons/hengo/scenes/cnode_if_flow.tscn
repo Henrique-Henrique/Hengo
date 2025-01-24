@@ -18,10 +18,6 @@ theme_override_constants/separation = 45
 layout_mode = 2
 text = "true"
 
-[node name="Label2" type="Label" parent="MarginContainer/HBoxContainer"]
-layout_mode = 2
-text = "then"
-
 [node name="Label3" type="Label" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 text = "false"
@@ -50,18 +46,6 @@ stretch_mode = 3
 flip_v = true
 script = ExtResource("2_2nb45")
 type = "true_flow"
-
-[node name="then" type="TextureRect" parent="Control2/FlowContainer"]
-modulate = Color(0.317647, 0.317647, 0.317647, 1)
-custom_minimum_size = Vector2(20, 20)
-layout_mode = 2
-size_flags_horizontal = 7
-texture = ExtResource("1_ldy7x")
-expand_mode = 1
-stretch_mode = 3
-flip_v = true
-script = ExtResource("2_2nb45")
-type = "then_flow"
 
 [node name="false" type="TextureRect" parent="Control2/FlowContainer"]
 modulate = Color(0.317647, 0.317647, 0.317647, 1)

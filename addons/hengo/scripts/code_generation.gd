@@ -473,13 +473,10 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						parse_token_by_type(token, _level + 1)
 					)
 
-			if not _token.false_flow.is_empty():
-				var else_code: String = indent + 'else:\n'
-				for token in _token.false_flow:
-					else_code += parse_token_by_type(token, _level + 1) + '\n'
-				code_list.append(else_code)
 			
-			for token in _token.then_flow:
+			code_list.append('')
+
+			for token in _token.false_flow:
 				code_list.append(
 					parse_token_by_type(token, _level)
 				)
@@ -490,7 +487,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			else:
 				base += '\n'.join(code_list) + '\n\n'
 		
-			return indent + base
+			return '\n' + indent + base
 		HenCnode.SUB_TYPE.NOT_CONNECTED:
 			return 'null'
 		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:

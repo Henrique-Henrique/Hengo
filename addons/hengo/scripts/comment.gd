@@ -133,7 +133,7 @@ func _on_pin() -> void:
 		cnode_inside = []
 	
 
-func pin_to_cnodes(_use_intern_list: bool = false) -> void:
+func pin_to_cnodes(_use_intern_list: bool = false, _use_animation: bool = true) -> void:
 	var min_vec: Vector2 = Vector2.INF
 	var max_vec: Vector2 = -Vector2.INF
 
@@ -171,10 +171,14 @@ func pin_to_cnodes(_use_intern_list: bool = false) -> void:
 	target_size.x += PADDING.x * 2
 	target_size.y += (PADDING.y + title.size.y) + PADDING.y
 
-	var tween: Tween = get_tree().create_tween().set_trans(Tween.TRANS_BOUNCE).set_parallel()
-	
-	tween.tween_property(self, 'position', target_position, .1)
-	tween.tween_property(self, 'size', target_size, .1)
+	if _use_animation:
+		var tween: Tween = get_tree().create_tween().set_trans(Tween.TRANS_BOUNCE).set_parallel()
+		
+		tween.tween_property(self, 'position', target_position, .1)
+		tween.tween_property(self, 'size', target_size, .1)
+	else:
+		position = target_position
+		size = target_size
 
 
 func _on_menu(_idx: int) -> void:
