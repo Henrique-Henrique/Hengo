@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dklyi8ycj0mw2"]
+[gd_scene load_steps=4 format=3 uid="uid://dklyi8ycj0mw2"]
 
-[ext_resource type="Texture2D" uid="uid://do4pi6fkp2s01" path="res://addons/hengo/assets/icons/flow_arrow.svg" id="1_ldy7x"]
+[ext_resource type="FontFile" uid="uid://csaaxix73myb" path="res://addons/hengo/assets/fonts/Fredoka/Fredoka-SemiBold.ttf" id="1_2vim6"]
+[ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="1_rsbep"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="2_2nb45"]
 
 [node name="CNodeIFFlow" type="VBoxContainer"]
@@ -8,7 +9,9 @@
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
 theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
 layout_mode = 2
@@ -16,10 +19,14 @@ theme_override_constants/separation = 45
 
 [node name="Label" type="Label" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("1_2vim6")
+theme_override_font_sizes/font_size = 18
 text = "true"
 
 [node name="Label3" type="Label" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("1_2vim6")
+theme_override_font_sizes/font_size = 18
 text = "false"
 
 [node name="Control2" type="Control" parent="."]
@@ -36,11 +43,11 @@ theme_override_constants/separation = 35
 alignment = 1
 
 [node name="true" type="TextureRect" parent="Control2/FlowContainer"]
-modulate = Color(0.317647, 0.317647, 0.317647, 1)
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 size_flags_horizontal = 7
-texture = ExtResource("1_ldy7x")
+texture = ExtResource("1_rsbep")
 expand_mode = 1
 stretch_mode = 3
 flip_v = true
@@ -48,11 +55,11 @@ script = ExtResource("2_2nb45")
 type = "true_flow"
 
 [node name="false" type="TextureRect" parent="Control2/FlowContainer"]
-modulate = Color(0.317647, 0.317647, 0.317647, 1)
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 size_flags_horizontal = 7
-texture = ExtResource("1_ldy7x")
+texture = ExtResource("1_rsbep")
 expand_mode = 1
 stretch_mode = 3
 flip_v = true

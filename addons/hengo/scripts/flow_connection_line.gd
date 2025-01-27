@@ -16,12 +16,12 @@ const DEBUG_TRANS_TIME = .7
 
 var debug_timer: Timer
 
-const POINT_WIDTH: float = 50.
-const POINT_WIDTH_BEZIER: float = POINT_WIDTH / 1.1
+const POINT_WIDTH: float = 63.
+const POINT_WIDTH_BEZIER: float = POINT_WIDTH
 
 func update_line() -> void:
 	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2
-	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, 0)
+	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, -10)
 
 	var first_point: Vector2 = from_pos + Vector2(0, POINT_WIDTH)
 	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)
@@ -72,7 +72,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 		to_cnode.connect('on_move', update_line)
 
 	from_connector.is_connected = true
-	from_connector.texture = load('res://addons/hengo/assets/icons/flow_arrow_hover.svg')
+	from_connector.texture = load('res://addons/hengo/assets/images/flow_out.svg')
 	to_cnode.get_node('%ArrowUp').visible = true
 
 
@@ -100,7 +100,7 @@ func remove_from_scene(_remove_from_list: bool = true) -> void:
 		HenRouter.line_route_reference[to_cnode.route_ref.id].erase(self)
 	
 	from_connector.is_connected = false
-	from_connector.texture = load('res://addons/hengo/assets/icons/flow_arrow.svg')
+	from_connector.texture = load('res://addons/hengo/assets/images/flow_out.svg')
 	to_cnode.get_node('%ArrowUp').visible = false
 
 	if _remove_from_list:

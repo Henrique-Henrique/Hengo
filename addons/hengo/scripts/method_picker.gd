@@ -239,6 +239,7 @@ func _ready() -> void:
 	# disabling coming from inputs (for now)
 	if error != OK or came_from == 'in':
 		await get_tree().process_frame
+		HenGlobal.CNODE_CAM.can_scroll = true
 		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
 

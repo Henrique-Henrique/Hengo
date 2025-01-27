@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_ykti4"]
 [ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_ks1pc"]
-[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_yxi08"]
+[ext_resource type="FontFile" uid="uid://csaaxix73myb" path="res://addons/hengo/assets/fonts/Fredoka/Fredoka-SemiBold.ttf" id="3_2e6bb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjksb"]
 resource_local_to_scene = true
@@ -12,10 +12,8 @@ content_margin_top = 8.0
 content_margin_right = 8.0
 content_margin_bottom = 8.0
 bg_color = Color(0.117647, 0.12549, 0.172549, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+corner_radius_top_left = 10
+corner_radius_top_right = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t3xrx"]
 resource_local_to_scene = true
@@ -101,7 +99,8 @@ stretch_mode = 5
 [node name="Title" type="Label" parent="Container/TitleContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_yxi08")
+theme_override_fonts/font = ExtResource("3_2e6bb")
+theme_override_font_sizes/font_size = 18
 text = "Function name"
 
 [node name="ArrowUp" type="Control" parent="Container/TitleContainer"]
@@ -113,14 +112,15 @@ size_flags_vertical = 0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="Container/TitleContainer/ArrowUp"]
-modulate = Color(0.317647, 0.317647, 0.317647, 1)
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_top = -35.0
+offset_top = -41.35
+offset_bottom = -6.35
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 4

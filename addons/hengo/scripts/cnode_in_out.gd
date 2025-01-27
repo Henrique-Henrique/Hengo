@@ -91,6 +91,7 @@ func _on_gui(_event: InputEvent) -> void:
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
 					from_in_out = self
 				})
+				print('ss')
 				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 
 			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data.has('auto_cast'):
@@ -564,7 +565,7 @@ func get_out_prop_by_id_or_null() -> PanelContainer:
 func set_type(_type: String) -> void:
 	var icon_path = 'res://addons/hengo/assets/.editor_icons/' + _type + '.svg'
 	var connector = get_node('%Connector')
-	var circle_icon = load('res://addons/hengo/assets/icons/circle.svg')
+	var circle_icon = load('res://addons/hengo/assets/icons/rectangle.svg')
 
 	connector.set('modulate', Color('#fff'))
 

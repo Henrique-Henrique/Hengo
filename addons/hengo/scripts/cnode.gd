@@ -711,7 +711,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 
 				# color
 				title_container.get('theme_override_styles/panel').set('bg_color', Color('#674883'))
-				title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/if.svg')
 
 			TYPE.IMG:
 				var center_img = HenAssets.CNodeCenterImage.instantiate()

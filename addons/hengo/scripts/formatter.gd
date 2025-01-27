@@ -8,7 +8,7 @@ static var max_x: float
 
 # cnodes
 const CNODE_X_SPACING = 150
-const CNODE_Y_SPACING = 120
+const CNODE_Y_SPACING = 150
 # inputs
 const INPUT_Y_SPACING = 80
 const INPUT_X_SPACING = 60

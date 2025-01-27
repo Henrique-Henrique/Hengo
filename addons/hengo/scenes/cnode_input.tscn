@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://c5m5u8fxln8se"]
+[gd_scene load_steps=5 format=3 uid="uid://c5m5u8fxln8se"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode_in_out.gd" id="1_mmpja"]
-[ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="2_8pebk"]
+[ext_resource type="Texture2D" uid="uid://cewv6h1ngav2v" path="res://addons/hengo/assets/icons/rectangle.svg" id="2_vuayd"]
+[ext_resource type="FontFile" uid="uid://cwkkqmicotg5n" path="res://addons/hengo/assets/fonts/Fredoka/Fredoka-Medium.ttf" id="3_fvkpj"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w25o5"]
 resource_local_to_scene = true
@@ -17,8 +18,8 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [node name="Panel" type="PanelContainer"]
-offset_right = 80.0
-offset_bottom = 38.0
+offset_right = 33.0
+offset_bottom = 28.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_w25o5")
 script = ExtResource("1_mmpja")
 type = "in"
@@ -27,28 +28,30 @@ type = "in"
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
 
 [node name="CNameInput" type="HBoxContainer" parent="Margin"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 5
+theme_override_constants/separation = 4
 
 [node name="Connector" type="TextureRect" parent="Margin/CNameInput"]
 unique_name_in_owner = true
 z_index = 2
-custom_minimum_size = Vector2(20, 0)
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("2_8pebk")
-expand_mode = 1
+texture = ExtResource("2_vuayd")
+expand_mode = 4
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Margin/CNameInput"]
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_fvkpj")
+theme_override_font_sizes/font_size = 16

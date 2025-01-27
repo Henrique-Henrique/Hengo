@@ -217,9 +217,9 @@ func change_colors() -> void:
 	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
 
 	HenGlobal.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
-	cnode_style_box.bg_color = base_color.lightened(.015)
+	cnode_style_box.bg_color = base_color.lightened(.07)
+	cnode_style_box.border_color = cnode_style_box.bg_color.darkened(.3)
 	HenGlobal.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
-	cnode_style_box.border_color = base_color.lightened(.2)
 	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)
 	route_ref.bg_color = base_color.lightened(.1)
