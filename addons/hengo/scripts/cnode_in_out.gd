@@ -565,7 +565,7 @@ func get_out_prop_by_id_or_null() -> PanelContainer:
 func set_type(_type: String) -> void:
 	var icon_path = 'res://addons/hengo/assets/.editor_icons/' + _type + '.svg'
 	var connector = get_node('%Connector')
-	var circle_icon = load('res://addons/hengo/assets/icons/rectangle.svg')
+	var circle_icon = load('res://addons/hengo/assets/icons/circle.svg')
 
 	connector.set('modulate', Color('#fff'))
 

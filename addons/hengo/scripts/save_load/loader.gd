@@ -282,13 +282,7 @@ static func load_and_edit(_path: StringName) -> void:
 		for connection: Dictionary in data.connections:
 			var from_in_out = (inst_id_refs[connection.from_cnode] as HenCnode).get_node('%OutputContainer').get_child(connection.input)
 			var to_cnode = (inst_id_refs[connection.to_cnode] as HenCnode)
-			var to_in_out
-
-			match to_cnode.type:
-				HenCnode.TYPE.IF:
-					to_in_out = to_cnode.get_node('%TitleContainer').get_child(0).get_child(connection.output)
-				_:
-					to_in_out = to_cnode.get_node('%InputContainer').get_child(connection.output)
+			var to_in_out = to_cnode.get_node('%InputContainer').get_child(connection.output)
 
 			from_in_out.create_connection_and_instance({
 				from = to_in_out,

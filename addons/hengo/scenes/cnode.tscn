@@ -3,17 +3,19 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_ykti4"]
 [ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_ks1pc"]
-[ext_resource type="FontFile" uid="uid://csaaxix73myb" path="res://addons/hengo/assets/fonts/Fredoka/Fredoka-SemiBold.ttf" id="3_2e6bb"]
+[ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="3_8vu1l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjksb"]
 resource_local_to_scene = true
-content_margin_left = 8.0
-content_margin_top = 8.0
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.117647, 0.12549, 0.172549, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.0784314)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t3xrx"]
 resource_local_to_scene = true
@@ -66,8 +68,8 @@ expand_margin_right = 8.0
 expand_margin_bottom = 8.0
 
 [node name="Cnode" type="PanelContainer"]
-offset_right = 162.0
-offset_bottom = 48.0
+offset_right = 170.0
+offset_bottom = 41.0
 theme_override_styles/panel = ExtResource("1_ykti4")
 script = ExtResource("1_onkoy")
 
@@ -99,9 +101,10 @@ stretch_mode = 5
 [node name="Title" type="Label" parent="Container/TitleContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_2e6bb")
-theme_override_font_sizes/font_size = 18
-text = "Function name"
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_8vu1l")
+theme_override_font_sizes/font_size = 20
+text = "Title"
 
 [node name="ArrowUp" type="Control" parent="Container/TitleContainer"]
 unique_name_in_owner = true
@@ -140,13 +143,13 @@ alignment = 1
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 3
+theme_override_constants/separation = 0
 
 [node name="OutputContainer" type="VBoxContainer" parent="Container/CenterContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 3
+theme_override_constants/separation = 0
 
 [node name="SelectBorder" type="Panel" parent="."]
 unique_name_in_owner = true

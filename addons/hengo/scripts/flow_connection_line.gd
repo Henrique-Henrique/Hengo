@@ -16,7 +16,7 @@ const DEBUG_TRANS_TIME = .7
 
 var debug_timer: Timer
 
-const POINT_WIDTH: float = 63.
+const POINT_WIDTH: float = 60.
 const POINT_WIDTH_BEZIER: float = POINT_WIDTH
 
 func update_line() -> void:

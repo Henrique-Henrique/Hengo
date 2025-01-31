@@ -1,11 +1,15 @@
 [gd_scene load_steps=5 format=3 uid="uid://c5m5u8fxln8se"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode_in_out.gd" id="1_mmpja"]
-[ext_resource type="Texture2D" uid="uid://cewv6h1ngav2v" path="res://addons/hengo/assets/icons/rectangle.svg" id="2_vuayd"]
-[ext_resource type="FontFile" uid="uid://cwkkqmicotg5n" path="res://addons/hengo/assets/fonts/Fredoka/Fredoka-Medium.ttf" id="3_fvkpj"]
+[ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="2_k1cv3"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="3_ldyji"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w25o5"]
 resource_local_to_scene = true
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
 border_width_left = 2
 border_width_top = 2
@@ -37,7 +41,7 @@ theme_override_constants/margin_bottom = 2
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 8
 
 [node name="Connector" type="TextureRect" parent="Margin/CNameInput"]
 unique_name_in_owner = true
@@ -45,13 +49,14 @@ z_index = 2
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("2_vuayd")
+texture = ExtResource("2_k1cv3")
 expand_mode = 4
 stretch_mode = 5
 
 [node name="Name" type="Label" parent="Margin/CNameInput"]
 unique_name_in_owner = true
 process_mode = 4
+modulate = Color(1, 1, 1, 0.54902)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_fvkpj")
-theme_override_font_sizes/font_size = 16
+theme_override_fonts/font = ExtResource("3_ldyji")
+theme_override_font_sizes/font_size = 18

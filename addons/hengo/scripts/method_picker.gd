@@ -137,7 +137,13 @@ var native_list: Array = [
 			name = 'IF',
 			type = HenCnode.TYPE.IF,
 			sub_type = HenCnode.SUB_TYPE.IF,
-			route = HenRouter.current_route
+			route = HenRouter.current_route,
+			inputs = [
+				{
+					name = 'condition',
+					type = 'bool'
+				},
+			]
 		}
 	},
 	{

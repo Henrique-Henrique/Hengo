@@ -9,8 +9,8 @@ resource_local_to_scene = true
 [node name="FlowConnectionLine" type="Line2D"]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_gr23u")
-width = 7.0
-default_color = Color(0.227451, 0.25098, 0.278431, 1)
+width = 12.0
+default_color = Color(0.73, 0.73, 0.73, 0.184314)
 texture = ExtResource("1_oqqwv")
 texture_mode = 1
 script = ExtResource("1_56q0h")

@@ -112,16 +112,9 @@ static func format_y() -> void:
 
 static func format_inputs_y(_cnode: HenCnode, _max_y: float) -> float:
 	var is_first: bool = true
-	var input_arr: Array
-
-	match _cnode.type:
-		HenCnode.TYPE.IF:
-			input_arr = [_cnode.get_node('%TitleContainer').get_child(0).get_child(0)]
-		_:
-			input_arr = _cnode.get_node('%InputContainer').get_children()
 
 
-	for input: HenCnodeInOut in input_arr:
+	for input: HenCnodeInOut in _cnode.get_node('%InputContainer').get_children():
 		if input.in_connected_from:
 			if is_first:
 				input.in_connected_from.position.y = _cnode.position.y
@@ -136,16 +129,7 @@ static func format_inputs_y(_cnode: HenCnode, _max_y: float) -> float:
 
 
 static func format_inputs_min(_cnode: HenCnode, _min_x: float) -> float:
-	var input_arr: Array
-
-	match _cnode.type:
-		HenCnode.TYPE.IF:
-			input_arr = [_cnode.get_node('%TitleContainer').get_child(0).get_child(0)]
-		_:
-			input_arr = _cnode.get_node('%InputContainer').get_children()
-
-
-	for input: HenCnodeInOut in input_arr:
+	for input: HenCnodeInOut in _cnode.get_node('%InputContainer').get_children():
 		if input.in_connected_from:
 			input.in_connected_from.position.x = _cnode.position.x - input.in_connected_from.size.x - INPUT_X_SPACING
 
