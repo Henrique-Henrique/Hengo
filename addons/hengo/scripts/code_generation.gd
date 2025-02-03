@@ -177,7 +177,7 @@ func _physics_process(delta: float) -> void:
 		var func_flow_to: Dictionary = func_item.virtual_cnode_list[0].flow_to
 
 		if func_flow_to.has('cnode'):
-			var func_tokens: Array = func_item.virtual_cnode_list[0].get_flow_token_list().flow_to.cnode
+			var func_tokens: Array = func_item.virtual_cnode_list[0].flow_to.cnode.get_flow_token_list()
 			var func_block: Array = []
 
 			for token in func_tokens:

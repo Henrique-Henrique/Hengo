@@ -4,14 +4,12 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x0ytf"]
 content_margin_left = 8.0
-content_margin_top = 4.0
+content_margin_top = 8.0
 content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(1, 1, 1, 0.0901961)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+content_margin_bottom = 8.0
+bg_color = Color(1, 1, 1, 0)
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.0784314)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_344vx"]
 bg_color = Color(0.6, 1, 0.556863, 0.258824)
@@ -30,8 +28,8 @@ expand_margin_right = 4.0
 expand_margin_bottom = 8.0
 
 [node name="Transition" type="HBoxContainer"]
-offset_right = 123.0
-offset_bottom = 43.0
+offset_right = 60.0
+offset_bottom = 31.0
 theme_override_constants/separation = 0
 script = ExtResource("1_317fd")
 
@@ -44,7 +42,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_x0ytf")
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
-text = "FINISHED"
+text = "name"
 horizontal_alignment = 1
 
 [node name="Panel" type="Panel" parent="TransitionButton"]

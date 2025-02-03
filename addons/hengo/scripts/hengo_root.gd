@@ -122,6 +122,7 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 						name = 'add state',
 						call = func():
 							var state_ref = HenState.instantiate_state({
+								type = 'new',
 								position = HenGlobal.STATE_CONTAINER.get_local_mouse_position()
 							})
 
@@ -220,6 +221,9 @@ func _process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if not HenGlobal.HENGO_ROOT.visible:
+		return
+	
 	if event is InputEventKey:
 		if event.pressed:
 			if event.shift_pressed and event.keycode == KEY_F:
@@ -293,8 +297,8 @@ func _input(event: InputEvent) -> void:
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:
-					HenGlobal.history.undo()
 					get_tree().root.set_input_as_handled()
+					HenGlobal.history.undo()
 				elif event.keycode == KEY_Y:
 					HenGlobal.history.redo()
 				elif event.keycode == KEY_C:

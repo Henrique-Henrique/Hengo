@@ -214,13 +214,15 @@ func hide_debug() -> void:
 static func instantiate_state(_config: Dictionary = {}) -> HenState:
 	var state_scene = load('res://addons/hengo/scenes/state.tscn')
 	var state = state_scene.instantiate()
-
-	state.hash = HenGlobal.get_new_node_counter() if not _config.has('hash') else _config.hash
-
 	var type: StringName = 'new'
 
 	if not _config.is_empty():
-		type = 'load'
+		if _config.has('type'):
+			type = _config.type
+		else:
+			type = 'load'
+
+	state.hash = HenGlobal.get_new_node_counter() if not _config.has('hash') else _config.hash
 
 	if _config.has('name'):
 		state.get_node('%Title').text = _config.name
@@ -232,6 +234,8 @@ static func instantiate_state(_config: Dictionary = {}) -> HenState:
 		state.position = str_to_var(_config.pos)
 	elif _config.has('position'):
 		state.position = _config.position
+	else:
+		state.position = Vector2.ZERO
 
 	state.route.id = HenUtilsName.get_unique_name()
 	state.route.state_ref = state
@@ -260,13 +264,7 @@ static func instantiate_state(_config: Dictionary = {}) -> HenState:
 			position = Vector2(400, 0)
 		})
 
-		# state.add_transition('FINISHED')
-
-		print(state.route)
-
 		HenRouter.change_route(state.route)
-
-		state.position = Vector2.ZERO
 	
 	state.size = Vector2.ZERO
 
