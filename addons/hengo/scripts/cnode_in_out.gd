@@ -58,7 +58,7 @@ func _on_gui(_event: InputEvent) -> void:
 					line_ref = line
 					old_conn_ref = self.get_node('%Connector')
 
-					hide_connection()
+					# hide_connection()
 
 					HenGlobal.can_make_connection = true
 					HenGlobal.connection_first_data = {
@@ -91,7 +91,15 @@ func _on_gui(_event: InputEvent) -> void:
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
 					from_in_out = self
 				})
-				print('ss')
+
+				if is_reparenting:
+					# remove connection
+					HenGlobal.history.create_action('Remove connection line')
+					HenGlobal.history.add_do_method(line_ref.remove_from_scene)
+					HenGlobal.history.add_undo_reference(line_ref)
+					HenGlobal.history.add_undo_method(line_ref.add_to_scene)
+					HenGlobal.history.commit_action()
+
 				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 
 			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data.has('auto_cast'):

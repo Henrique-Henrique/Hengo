@@ -294,6 +294,7 @@ func _input(event: InputEvent) -> void:
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:
 					HenGlobal.history.undo()
+					get_tree().root.set_input_as_handled()
 				elif event.keycode == KEY_Y:
 					HenGlobal.history.redo()
 				elif event.keycode == KEY_C:

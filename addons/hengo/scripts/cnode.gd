@@ -908,6 +908,10 @@ func get_token(_id: int = 0) -> Dictionary:
 
 
 func get_flow_token_list(_token_list: Array = []) -> Array:
+	# if cnode is deleted
+	if deleted:
+		return _token_list
+
 	match sub_type:
 		HenCnode.SUB_TYPE.IF:
 			_token_list.append(get_if_token())
