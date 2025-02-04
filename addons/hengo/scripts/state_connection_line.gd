@@ -97,6 +97,7 @@ func _draw_line(_start_point: Vector2, _end_point: Vector2, _invert_start: int =
 
 
 func add_to_scene(_add_to_list: bool = true) -> void:
+	await HenGlobal.STATE_CAM.get_tree().process_frame
 	HenGlobal.STATE_CAM.get_node('Lines').add_child(self)
 	global_position = HenGlobal.STATE_CAM.global_position
 
@@ -108,9 +109,9 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 	if not to_state.is_connected('on_move', update_line):
 		to_state.connect('on_move', update_line)
 
-	from_transition.line = self
 
 	if _add_to_list:
+		from_transition.line = self
 		from_transition.root.to_lines.append(self)
 		to_state.from_lines.append(self)
 
@@ -125,8 +126,8 @@ func remove_from_scene(_remove_from_list: bool = true) -> void:
 		if to_state.is_connected('on_move', update_line):
 			to_state.disconnect('on_move', update_line)
 	
-	from_transition.line = null
 	
 	if _remove_from_list:
+		from_transition.line = null
 		from_transition.root.to_lines.erase(self)
 		to_state.from_lines.erase(self)

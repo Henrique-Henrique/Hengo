@@ -96,8 +96,6 @@ func _on_enter() -> void:
 	_preview_timer = get_tree().create_timer(.5)
 	_preview_timer.timeout.connect(_on_tooltip)
 
-	print(hash, ' | ', from_lines)
-
 	if HenGlobal.can_make_flow_connection:
 		HenGlobal.flow_connection_to_data = {
 			from_cnode = self

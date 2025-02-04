@@ -3,7 +3,10 @@ class_name HenStateTransition extends HBoxContainer
 
 @export var root: PanelContainer
 
-var line
+var line: HenStateConnectionLine
+
+# deleted
+var state_ref_deleted: HenState
 
 # private
 #
@@ -12,11 +15,13 @@ func _ready() -> void:
 	bt.gui_input.connect(_on_input)
 	item_rect_changed.connect(_on_rect_change)
 
+
 func _on_rect_change() -> void:
 	if line:
 		await get_tree().process_frame
 
 		line.update_line()
+
 
 func _on_input(_event: InputEvent):
 	if _event is InputEventMouseButton:
@@ -35,12 +40,12 @@ func _on_input(_event: InputEvent):
 					HenGlobal.history.add_undo_method(line.add_to_scene)
 					HenGlobal.history.commit_action()
 			elif HenGlobal.can_make_state_connection and not HenGlobal.state_connection_to_date.is_empty():
-				var line := create_connection_line(HenGlobal.state_connection_to_date)
+				var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
 
 				HenGlobal.history.create_action('Add State Connection')
-				HenGlobal.history.add_do_method(line.add_to_scene)
-				HenGlobal.history.add_do_reference(line)
-				HenGlobal.history.add_undo_method(line.remove_from_scene)
+				HenGlobal.history.add_do_method(_line.add_to_scene)
+				HenGlobal.history.add_do_reference(_line)
+				HenGlobal.history.add_undo_method(_line.remove_from_scene)
 				HenGlobal.history.commit_action()
 
 			HenGlobal.connection_to_data = {}
@@ -51,6 +56,20 @@ func _on_input(_event: InputEvent):
 
 # public
 #
+func add_to_scene() -> void:
+	if line:
+		line.add_to_scene(false)
+	
+	state_ref_deleted.get_node('%TransitionContainer').add_child(self)
+
+func remove_from_scene() -> void:
+	if line:
+		line.remove_from_scene(false)
+	
+	state_ref_deleted = get_parent().owner
+	get_parent().remove_child(self)
+	state_ref_deleted.size = Vector2.ZERO
+
 func hover(_hover: bool) -> void:
 	get_node('%Panel').visible = _hover
 
@@ -64,20 +83,21 @@ func get_transition_name() -> String:
 
 
 func create_connection_line(_config: Dictionary) -> HenStateConnectionLine:
-	var line = HenAssets.StateConnectionLineScene.instantiate()
+	var _line: HenStateConnectionLine = HenAssets.StateConnectionLineScene.instantiate()
 
-	line.from_transition = self
-	line.to_state = _config.state_from
+	_line.from_transition = self
+	_line.to_state = _config.state_from
 
 	# signal to update connection line
-	root.connect('on_move', line.update_line)
-	_config.state_from.connect('on_move', line.update_line)
+	root.connect('on_move', _line.update_line)
+	_config.state_from.connect('on_move', _line.update_line)
 
-	return line
+	return _line
+
 
 func add_connection(_config: Dictionary) -> HenStateConnectionLine:
-	var line := create_connection_line(_config)
+	var _line: HenStateConnectionLine = create_connection_line(_config)
 
-	line.add_to_scene()
+	_line.add_to_scene()
 
-	return line
+	return _line
