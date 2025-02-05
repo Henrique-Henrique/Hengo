@@ -87,7 +87,8 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			}
 
 			if trans.line:
-				trans_data['to_state_id'] = trans.line.to_state.hash
+				if not trans.line.deleted:
+					trans_data['to_state_id'] = trans.line.to_state.hash
 
 			data['transitions'].append(trans_data)
 

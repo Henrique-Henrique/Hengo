@@ -211,7 +211,7 @@ func show_docks() -> void:
 func change_colors() -> void:
 	# colors
 	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
-	var color_factor: float = .4
+	var color_factor: float = .55
 	var cnode_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/cnode.tres')
 	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
 	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
@@ -219,7 +219,8 @@ func change_colors() -> void:
 	HenGlobal.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
 	cnode_style_box.bg_color = base_color.lightened(.07)
 	cnode_style_box.border_color = cnode_style_box.bg_color.darkened(.3)
-	HenGlobal.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)
 	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)
 	route_ref.bg_color = base_color.lightened(.1)
+	
+	HenGlobal.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)

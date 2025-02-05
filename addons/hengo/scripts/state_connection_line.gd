@@ -1,8 +1,10 @@
 @tool
 class_name HenStateConnectionLine extends Line2D
 
+
 var from_transition
 var to_state
+var deleted: bool = false
 
 const POINT_WIDTH: int = 40
 const POINT_WIDTH_BEZIER: int = POINT_WIDTH / 2
@@ -109,6 +111,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 	if not to_state.is_connected('on_move', update_line):
 		to_state.connect('on_move', update_line)
 
+	deleted = false
 
 	if _add_to_list:
 		from_transition.line = self
@@ -126,7 +129,8 @@ func remove_from_scene(_remove_from_list: bool = true) -> void:
 		if to_state.is_connected('on_move', update_line):
 			to_state.disconnect('on_move', update_line)
 	
-	
+	deleted = true
+
 	if _remove_from_list:
 		from_transition.line = null
 		from_transition.root.to_lines.erase(self)

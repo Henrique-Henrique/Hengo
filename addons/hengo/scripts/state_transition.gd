@@ -40,13 +40,14 @@ func _on_input(_event: InputEvent):
 					HenGlobal.history.add_undo_method(line.add_to_scene)
 					HenGlobal.history.commit_action()
 			elif HenGlobal.can_make_state_connection and not HenGlobal.state_connection_to_date.is_empty():
-				var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
+				if not line:
+					var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
 
-				HenGlobal.history.create_action('Add State Connection')
-				HenGlobal.history.add_do_method(_line.add_to_scene)
-				HenGlobal.history.add_do_reference(_line)
-				HenGlobal.history.add_undo_method(_line.remove_from_scene)
-				HenGlobal.history.commit_action()
+					HenGlobal.history.create_action('Add State Connection')
+					HenGlobal.history.add_do_method(_line.add_to_scene)
+					HenGlobal.history.add_do_reference(_line)
+					HenGlobal.history.add_undo_method(_line.remove_from_scene)
+					HenGlobal.history.commit_action()
 
 			HenGlobal.connection_to_data = {}
 			HenGlobal.can_make_state_connection = false

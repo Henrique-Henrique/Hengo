@@ -151,8 +151,8 @@ func remove_from_scene() -> void:
 
 
 func add_event(_config: Dictionary) -> PanelContainer:
-	var event_container := get_node('%EventContainer')
-	var event := HenAssets.EventScene.instantiate()
+	var event_container = get_node('%EventContainer')
+	var event = HenAssets.EventScene.instantiate()
 
 	event.get_child(0).text = _config.name
 
@@ -163,10 +163,10 @@ func add_event(_config: Dictionary) -> PanelContainer:
 	event.set_meta('config', _config)
 
 	if event_container.get_child_count() <= 0:
-		var event_struct := HenAssets.EventStructScene.instantiate()
+		var event_struct = HenAssets.EventStructScene.instantiate()
 		event_container.add_child(event_struct)
 	
-	var event_list := event_container.get_child(0).get_node('%EventList')
+	var event_list = event_container.get_child(0).get_node('%EventList')
 	event_list.add_child(event)
 
 	return event
