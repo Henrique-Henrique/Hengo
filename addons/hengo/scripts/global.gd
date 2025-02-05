@@ -79,12 +79,15 @@ static var old_state_debug: HenState = null
 
 # counter
 static var node_counter: int = 0
+static var prop_counter: int = 0
 
 static func get_new_node_counter() -> int:
     node_counter += 1
-
     return node_counter
 
+static func get_new_prop_counter() -> int:
+    prop_counter += 1
+    return prop_counter
 
 # debug
 static var HENGO_EDITOR_PLUGIN: HenHengo

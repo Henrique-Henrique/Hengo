@@ -1,7 +1,6 @@
 @tool
 class_name HenPropVariable extends HBoxContainer
 
-
 const type = StringName('VARIABLE')
 
 
@@ -35,3 +34,7 @@ func set_value(_dict: Dictionary) -> void:
 
 func get_group_name() -> String:
 	return 'p' + str(get_index())
+
+
+func start_prop() -> void:
+	($Name as LineEdit).text = 'variable ' + str(HenGlobal.get_new_prop_counter())

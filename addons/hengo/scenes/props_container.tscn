@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://b3fjufjpvcq01"]
+[gd_scene load_steps=3 format=3 uid="uid://b3fjufjpvcq01"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/props_container.gd" id="1_gpwl4"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/prop_bt.gd" id="1_rtn48"]
-[ext_resource type="Texture2D" uid="uid://cpihofvote86s" path="res://addons/hengo/assets/icons/mouse.svg" id="3_5pstr"]
 
 [node name="Props" type="VBoxContainer"]
 script = ExtResource("1_gpwl4")
@@ -16,26 +15,6 @@ layout_mode = 2
 text = "variable"
 script = ExtResource("1_rtn48")
 list_container = NodePath("../../List")
-
-[node name="PropConst" type="HBoxContainer" parent="HBoxContainer"]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="TextureRect2" type="TextureRect" parent="HBoxContainer/PropConst"]
-modulate = Color(1, 0.34902, 0.231373, 1)
-layout_mode = 2
-texture = ExtResource("3_5pstr")
-
-[node name="LineEdit" type="LineEdit" parent="HBoxContainer/PropConst"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "name"
-
-[node name="LineEdit2" type="LineEdit" parent="HBoxContainer/PropConst"]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "content"
 
 [node name="List" type="VBoxContainer" parent="."]
 unique_name_in_owner = true

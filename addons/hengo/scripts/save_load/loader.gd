@@ -168,6 +168,7 @@ static func load_and_edit(_path: StringName) -> void:
 		# setting script configs
 		HenGlobal.script_config['type'] = data.type
 		HenGlobal.node_counter = data.node_counter
+		HenGlobal.prop_counter = data.prop_counter
 		HenGlobal.current_script_debug_symbols = data.debug_symbols
 		HenState._name_counter = data.state_name_counter
 
@@ -385,6 +386,7 @@ static func parse_hengo_json(_source: String) -> HenSaver.ScriptData:
 
 	script_data.type = hengo_json.type
 	script_data.node_counter = hengo_json.node_counter
+	script_data.prop_counter = hengo_json.prop_counter
 	script_data.debug_symbols = hengo_json.debug_symbols
 	script_data.state_name_counter = hengo_json.state_name_counter
 	script_data.props = hengo_json.props

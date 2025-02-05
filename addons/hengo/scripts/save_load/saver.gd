@@ -5,6 +5,7 @@ class_name HenSaver extends Node
 class ScriptData:
 	var type: String
 	var node_counter: int
+	var prop_counter: int
 	var debug_symbols: Dictionary
 	var state_name_counter: int
 	var props: Array
@@ -18,6 +19,7 @@ class ScriptData:
 	func get_save() -> Dictionary:
 		return {
 			type = type,
+			prop_counter = prop_counter,
 			node_counter = node_counter,
 			debug_symbols = debug_symbols,
 			state_name_counter = state_name_counter,
@@ -36,6 +38,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 	script_data.type = HenGlobal.script_config.type
 	script_data.node_counter = HenGlobal.node_counter
+	script_data.prop_counter = HenGlobal.prop_counter
 	script_data.debug_symbols = _debug_symbols
 	script_data.state_name_counter = HenState._name_counter
 

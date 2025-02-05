@@ -17,4 +17,5 @@ func _on_press() -> void:
 	match type:
 		Types.VARIABLE:
 			var prop = load('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
+			prop.start_prop()
 			list_container.add_child(prop)

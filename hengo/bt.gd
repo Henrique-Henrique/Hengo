@@ -1,4 +1,4 @@
-#[hengo] {"comments":[],"connections":[],"debug_symbols":{"2":[7],"4":[7],"8":[10]},"flow_connections":[],"func_list":[],"generals":[{"cnode_list":[{"hash":2,"inputs":[],"name":"_input","outputs":[{"name":"event","type":"InputEvent"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_input","id":1,"name":"Input","pos":"Vector2(-120, -200)"},{"cnode_list":[{"hash":4,"inputs":[],"name":"_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_process","color":"#401d3f","id":3,"name":"Process","param":{"name":"delta","type":"float"},"pos":"Vector2(-11, -200)"},{"cnode_list":[{"hash":6,"inputs":[],"name":"_physics_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_physics_process","color":"#1f2950","id":5,"name":"Physics Process","param":{"name":"delta","type":"float"},"pos":"Vector2(117, -200)"}],"node_counter":12,"props":[],"state_name_counter":2,"states":[{"cnode_list":[{"hash":8,"inputs":[],"name":"enter","outputs":[],"pos":"Vector2(0, 0)","sub_type":9},{"hash":9,"inputs":[],"name":"update","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(400, 0)","sub_type":9}],"events":[{"name":"Start","type":"start"}],"id":7,"name":"State 1","pos":"Vector2(-121.002, -10.0002)","route":{"id":"17387566757864","name":"State 1","type":0},"transitions":[{"name":"Transition 0","to_state_id":10}]},{"cnode_list":[{"hash":11,"inputs":[],"name":"enter","outputs":[],"pos":"Vector2(0, 0)","sub_type":9},{"hash":12,"inputs":[],"name":"update","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(400, 0)","sub_type":9}],"events":[],"id":10,"name":"State 2","pos":"Vector2(246.22, -19.1243)","route":{"id":"17387566815055","name":"State 2","type":0},"transitions":[]}],"type":"Sprite2D"}
+#[hengo] {"comments":[],"connections":[],"debug_symbols":{"2":[7],"4":[7],"8":[13]},"flow_connections":[],"func_list":[],"generals":[{"cnode_list":[{"hash":2,"inputs":[],"name":"_input","outputs":[{"name":"event","type":"InputEvent"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_input","id":1,"name":"Input","pos":"Vector2(-120, -200)"},{"cnode_list":[{"hash":4,"inputs":[],"name":"_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_process","color":"#401d3f","id":3,"name":"Process","param":{"name":"delta","type":"float"},"pos":"Vector2(-11, -200)"},{"cnode_list":[{"hash":6,"inputs":[],"name":"_physics_process","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(0, 0)","sub_type":9}],"cnode_name":"_physics_process","color":"#1f2950","id":5,"name":"Physics Process","param":{"name":"delta","type":"float"},"pos":"Vector2(117, -200)"}],"node_counter":15,"prop_counter":5,"props":[{"export":false,"name":"variable 1","prop_type":"VARIABLE","type":"Variant"},{"export":false,"name":"variable 2","prop_type":"VARIABLE","type":"Variant"},{"export":false,"name":"variable 3","prop_type":"VARIABLE","type":"Variant"},{"export":false,"name":"variable 4","prop_type":"VARIABLE","type":"Variant"},{"export":false,"name":"variable 5","prop_type":"VARIABLE","type":"Variant"}],"state_name_counter":3,"states":[{"cnode_list":[{"hash":8,"inputs":[],"name":"enter","outputs":[],"pos":"Vector2(0, 0)","sub_type":9},{"hash":9,"inputs":[],"name":"update","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(400, 0)","sub_type":9}],"events":[{"name":"Start","type":"start"}],"id":7,"name":"State 1","pos":"Vector2(0, 0)","route":{"id":"17387582406024","name":"State 1","type":0},"transitions":[{"name":"Transition 0"},{"name":"Transition 3","to_state_id":13}]},{"cnode_list":[{"hash":14,"inputs":[],"name":"enter","outputs":[],"pos":"Vector2(0, 0)","sub_type":9},{"hash":15,"inputs":[],"name":"update","outputs":[{"name":"delta","type":"float"}],"pos":"Vector2(400, 0)","sub_type":9}],"events":[],"id":13,"name":"State 3","pos":"Vector2(407.101, -18.0241)","route":{"id":"17387582406155","name":"State 3","type":0},"transitions":[]}],"type":"Sprite2D"}
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -10,15 +10,20 @@
 extends Sprite2D
 
  # Variables #
+var variable_1 = null
+var variable_2 = null
+var variable_3 = null
+var variable_4 = null
+var variable_5 = null
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
 		state_1=State1.new(self, {
-			transition_0="state_2"
+			transition_3="state_3"
 		}),
-		state_2=State2.new(self)
+		state_3=State3.new(self)
 	})
 
 
@@ -55,7 +60,7 @@ class State1 extends HengoState:
 
 
 
-class State2 extends HengoState:
+class State3 extends HengoState:
 	func enter() -> void:
 		#hen_dbg#EngineDebugger.send_message('hengo:debug_state', [8])
 		pass
