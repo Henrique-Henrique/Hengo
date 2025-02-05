@@ -37,3 +37,10 @@ func get_group_list(_ref) -> Array:
             arr.append(key)
 
     return arr
+
+
+func reset_and_add_group(_ref, _group) -> void:
+    for g in get_group_list(_ref):
+        remove_from_group(g, _ref)
+
+    add_to_group(_group, _ref)

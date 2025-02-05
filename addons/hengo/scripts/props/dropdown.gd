@@ -97,12 +97,11 @@ func _selected(_item: Dictionary) -> void:
 			output.change_type(_item.type)
 		'all_props':
 			var input = custom_data.input_ref
-			input.remove_in_prop(true)
-			
-			for group in get_groups():
-				remove_from_group(group)
+			var group: String = 'p' + str(_item.item.get_index())
 
-			add_to_group('p' + str(_item.item.get_index()))
+			input.remove_in_prop(true)
+
+			HenGlobal.GROUP.reset_and_add_group(self, group)
 			custom_value = str(_item.item.get_index())
 		
 	emit_signal('value_changed', text)

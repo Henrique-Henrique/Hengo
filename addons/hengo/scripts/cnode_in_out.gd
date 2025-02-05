@@ -488,10 +488,7 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 		prop_ref_bt.set_default(_default)
 
 	if _prop_idx > -1:
-		for group in prop_ref_bt.get_groups():
-			HenGlobal.GROUP.remove_from_group(group, prop_ref_bt)
-		
-		HenGlobal.GROUP.add_to_group('p' + str(_prop_idx), prop_ref_bt)
+		HenGlobal.GROUP.reset_and_add_group(prop_ref_bt, 'p' + str(_prop_idx))
 		prop_ref_bt.custom_value = str(_prop_idx)
 
 	input_container.add_child(prop_ref_bt)

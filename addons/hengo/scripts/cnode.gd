@@ -567,7 +567,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 
 		if not _config.has('type'):
 			if _config.has('sub_type'):
-				print(_config.sub_type)
 				match _config.sub_type as SUB_TYPE:
 					SUB_TYPE.VAR, SUB_TYPE.LOCAL_VAR:
 						_config.type = ''
@@ -675,7 +674,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 		if _config.has('data'):
 			instance.data = _config.data
 		
-		print(_config.type)
 
 		# instance flow connections
 		match _config.type as TYPE:
