@@ -293,7 +293,27 @@ func _input(event: InputEvent) -> void:
 				var end: float = Time.get_ticks_usec()
 
 				print('Formatted in: ', (end - start) / 1000., 'ms')
-
+			elif event.keycode == KEY_F10:
+				for i in range(10):
+					var cnode = HenCnode.instantiate_and_add({
+						name = 'print',
+						sub_type = HenCnode.SUB_TYPE.VOID,
+						category = 'native',
+						inputs = [
+							{
+								name = 'content',
+								type = 'Variant'
+							}
+						],
+						position = Vector2(0, 300 * i),
+						route = HenRouter.current_route
+					})
+				
+			elif event.keycode == KEY_F8:
+				print(
+					HenGlobal.CNODE_CONTAINER.get_child_count()
+				)
+					
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:

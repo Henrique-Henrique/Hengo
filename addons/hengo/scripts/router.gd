@@ -18,12 +18,21 @@ static func change_route(_route: Dictionary) -> void:
 	if current_route == _route:
 		return
 
+	# hide all virtuals
+	if not current_route.is_empty():
+		for vc: HenVirtualCNode in HenGlobal.vc_list[current_route.id]:
+			vc.reset()
+
 	current_route = _route
 
 	if route_reference.has(_route.id):
 		# cleaning cnode tree
 		for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
-			HenGlobal.CNODE_CONTAINER.remove_child(cnode)
+			if cnode.is_pool:
+				cnode.visible = false
+
+		HenGlobal.CNODE_CAM._check_virtual_cnodes()
+
 
 		# clearing lines
 		var line_container = HenGlobal.CNODE_CAM.get_node('Lines')
@@ -34,7 +43,6 @@ static func change_route(_route: Dictionary) -> void:
 		# clearing comments
 		for comment in HenGlobal.COMMENT_CONTAINER.get_children():
 			HenGlobal.COMMENT_CONTAINER.remove_child(comment)
-
 
 		# showing cnodes
 		var cnode_list = route_reference.get(_route.id)

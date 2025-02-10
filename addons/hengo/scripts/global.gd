@@ -95,3 +95,8 @@ static var HENGO_DEBUGGER_PLUGIN
 const DEBUG_TOKEN: String = '#hen_dbg#'
 const DEBUG_VAR_NAME: String = '__hen_id__'
 static var current_script_debug_symbols: Dictionary = {}
+
+
+# performance test
+static var cnode_pool: Array = []
+static var vc_list: Dictionary = {}

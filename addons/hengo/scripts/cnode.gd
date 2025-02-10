@@ -75,6 +75,9 @@ var _preview_timer: SceneTreeTimer
 # formatter
 var can_move_to_format: bool = true
 
+# pool
+var is_pool: bool = false
+
 signal on_move
 
 
@@ -762,6 +765,7 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
 
 		HenRouter.route_reference[_config.route.id].append(instance)
+
 	
 	instance.route_ref = _config.route
 
@@ -774,6 +778,20 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 
 	instance.size = Vector2.ZERO
 
+	
+	# # adding virtual cnode to list
+	# var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
+
+	# v_cnode.name = instance.get_cnode_name()
+	# v_cnode.id = instance.hash
+	# v_cnode.position = instance.position
+
+	# if not HenGlobal.vc_list.has(_config.route.id):
+	# 	HenGlobal.vc_list[_config.route.id] = []
+	
+	# HenGlobal.vc_list[_config.route.id].append(v_cnode)
+	# # ---- end virtual ---
+
 	return instance
 
 
@@ -785,6 +803,16 @@ static func instantiate_and_add(_config: Dictionary) -> HenCnode:
 		cnode.position = _config.get('position')
 
 	return cnode
+
+
+static func instantiate_and_add_pool() -> void:
+	for i in range(10): # pool size
+		var instance: HenCnode = HenAssets.CNodeScene.instantiate()
+		instance.position = Vector2(50000, 50000)
+		instance.is_pool = true
+		instance.visible = false
+		HenGlobal.cnode_pool.append(instance)
+		HenGlobal.CNODE_CONTAINER.add_child(instance)
 
 
 func get_input_token_list(_get_name: bool = false) -> Array:

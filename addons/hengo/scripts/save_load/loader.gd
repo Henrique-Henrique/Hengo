@@ -28,7 +28,10 @@ static func load_and_edit(_path: StringName) -> void:
 	for state in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children():
 		state.queue_free()
 	
-	for cnode in HenGlobal.CNODE_CONTAINER.get_children():
+	for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
+		if cnode.is_pool:
+			continue
+		
 		cnode.queue_free()
 
 	for cnode in HenGlobal.COMMENT_CONTAINER.get_children():
@@ -43,7 +46,9 @@ static func load_and_edit(_path: StringName) -> void:
 	for prop in HenGlobal.PROPS_CONTAINER.get_node('%List').get_children():
 		prop.queue_free()
 
+
 	HenGlobal.GROUP.group.clear()
+	HenGlobal.vc_list.clear()
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config
@@ -234,8 +239,9 @@ static func load_and_edit(_path: StringName) -> void:
 					})
 
 			# cnodes
-			_load_cnode(state.cnode_list, state_inst.route, inst_id_refs)
-			
+			# _load_cnode(state.cnode_list, state_inst.route, inst_id_refs)
+			_load_vc(state.cnode_list, state_inst.route)
+
 			for event_config: Dictionary in state['events']:
 				state_inst.add_event(event_config)
 			
@@ -278,36 +284,36 @@ static func load_and_edit(_path: StringName) -> void:
 			comment.get_node('%ColorButton').color = str_to_var(comment_config.color as String) as Color
 			comment.set_comment(comment_config.comment)
 
-		# ---------------------------------------------------------------------------- #
-		# creating connections
-		for connection: Dictionary in data.connections:
-			var from_in_out = (inst_id_refs[connection.from_cnode] as HenCnode).get_node('%OutputContainer').get_child(connection.input)
-			var to_cnode = (inst_id_refs[connection.to_cnode] as HenCnode)
-			var to_in_out = to_cnode.get_node('%InputContainer').get_child(connection.output)
+		# # ---------------------------------------------------------------------------- #
+		# # creating connections
+		# for connection: Dictionary in data.connections:
+		# 	var from_in_out = (inst_id_refs[connection.from_cnode] as HenCnode).get_node('%OutputContainer').get_child(connection.input)
+		# 	var to_cnode = (inst_id_refs[connection.to_cnode] as HenCnode)
+		# 	var to_in_out = to_cnode.get_node('%InputContainer').get_child(connection.output)
 
-			from_in_out.create_connection_and_instance({
-				from = to_in_out,
-				type = to_in_out.type,
-				conn_type = to_in_out.connection_type,
-			})
+		# 	from_in_out.create_connection_and_instance({
+		# 		from = to_in_out,
+		# 		type = to_in_out.type,
+		# 		conn_type = to_in_out.connection_type,
+		# 	})
 		
-		# flow connections
-		for flow_connection: Dictionary in data.flow_connections:
-			var cnode := inst_id_refs[flow_connection.from_cnode] as HenCnode
+		# # flow connections
+		# for flow_connection: Dictionary in data.flow_connections:
+		# 	var cnode := inst_id_refs[flow_connection.from_cnode] as HenCnode
 
-			match cnode.type:
-				HenCnode.TYPE.DEFAULT:
-					var connector = cnode.get_node('%Container').get_children()[-1].get_child(0)
+		# 	match cnode.type:
+		# 		HenCnode.TYPE.DEFAULT:
+		# 			var connector = cnode.get_node('%Container').get_children()[-1].get_child(0)
 
-					connector.create_connection_line_and_instance({
-						from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
-					})
-				HenCnode.TYPE.IF:
-					var connector = cnode.get_node('%Container').get_child(2).get_node('%FlowContainer').get_child(flow_connection.from_connector)
+		# 			connector.create_connection_line_and_instance({
+		# 				from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
+		# 			})
+		# 		HenCnode.TYPE.IF:
+		# 			var connector = cnode.get_node('%Container').get_child(2).get_node('%FlowContainer').get_child(flow_connection.from_connector)
 					
-					connector.create_connection_line_and_instance({
-						from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
-					})
+		# 			connector.create_connection_line_and_instance({
+		# 				from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
+		# 			})
 
 		HenRouter.change_route(HenGlobal.start_state.route)
 
@@ -456,3 +462,18 @@ static func script_has_state(_script_name: String, _state_name: String) -> bool:
 		return data.states.map(func(x: Dictionary) -> String: return x.name.to_lower()).has(_state_name)
 	
 	return has_state
+
+
+static func _load_vc(_cnode_list: Array, _route: Dictionary) -> void:
+	for _config: Dictionary in _cnode_list:
+		# adding virtual cnode to list
+		var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
+
+		v_cnode.name = _config.name
+		v_cnode.id = _config.hash
+		v_cnode.position = str_to_var(_config.pos)
+
+		if not HenGlobal.vc_list.has(_route.id):
+			HenGlobal.vc_list[_route.id] = []
+		
+		HenGlobal.vc_list[_route.id].append(v_cnode)

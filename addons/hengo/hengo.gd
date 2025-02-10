@@ -26,6 +26,7 @@ var docks_references: Array = []
 var file_system_tree: Tree
 var file_tree_signals: Array = []
 
+# debug
 var debug_plugin: EditorDebuggerPlugin
 
 func _enter_tree():
@@ -96,6 +97,11 @@ func _enter_tree():
 
 	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
 	HenGlobal.HENGO_EDITOR_PLUGIN = self
+
+	HenGlobal.cnode_pool.clear()
+
+	# creating cnode pool
+	HenCnode.instantiate_and_add_pool()
 
 	# adding gdscript editor
 	gd_previewer = (load('res://addons/hengo/scenes/gd_editor.tscn') as PackedScene).instantiate()
