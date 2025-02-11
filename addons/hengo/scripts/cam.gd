@@ -106,6 +106,9 @@ func _physics_process(_delta: float) -> void:
 
 # checking virtual cnodes positions
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
+	if self != HenGlobal.CNODE_CAM:
+		return
+	
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom, # position
 		(HenGlobal.CNODE_CAM.get_parent() as Panel).size / _zoom
@@ -115,11 +118,11 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 		for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenRouter.current_route.id]:
 			v_cnode.check_visibility(rect)
 	
-	print(
-		HenGlobal.vc_list[HenRouter.current_route.id].map(func(x): return x.is_showing),
-		' = ',
-		HenGlobal.cnode_pool.map(func(x): return x.visible)
-	)
+	# print(
+	# 	HenGlobal.vc_list[HenRouter.current_route.id].map(func(x): return x.is_showing),
+	# 	' = ',
+	# 	HenGlobal.cnode_pool.map(func(x): return x.visible)
+	# )
 
 
 # public

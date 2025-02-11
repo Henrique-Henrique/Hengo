@@ -147,14 +147,15 @@ func _on_gui(_event: InputEvent) -> void:
 
 			elif HenGlobal.can_make_connection and not HenGlobal.connection_to_data.is_empty():
 				# try connection
-				var line := create_connection(HenGlobal.connection_to_data)
+				create_virtual_connection(HenGlobal.connection_to_data)
+				# var line := create_connection(HenGlobal.connection_to_data)
 
-				if line:
-					HenGlobal.history.create_action('Add Connection')
-					HenGlobal.history.add_do_method(line.add_to_scene)
-					HenGlobal.history.add_do_reference(line)
-					HenGlobal.history.add_undo_method(line.remove_from_scene)
-					HenGlobal.history.commit_action()
+				# if line:
+				# 	HenGlobal.history.create_action('Add Connection')
+				# 	HenGlobal.history.add_do_method(line.add_to_scene)
+				# 	HenGlobal.history.add_do_reference(line)
+				# 	HenGlobal.history.add_undo_method(line.remove_from_scene)
+				# 	HenGlobal.history.commit_action()
 			
 			HenGlobal.CONNECTION_GUIDE.end()
 
@@ -242,8 +243,78 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 
 	return true
 
+
 # public
 #
+func create_virtual_connection(_config: Dictionary) -> void:
+	var _type = type if not is_reparenting else _config.reparent_data.from_type
+	var _conn_type = connection_type if not is_reparenting else _config.reparent_data.from_conn_type
+
+	if not is_type_relatable(_type, _config.type, _conn_type, _config.conn_type):
+		return
+	
+	var from_conn = get_node('%Connector') if not is_reparenting else _config.reparent_data.from_conn
+	var to_conn = _config.from.get_node('%Connector')
+	var _root: HenCnode = root if not is_reparenting else _config.reparent_data.from_conn.owner.root
+	var _self: HenCnodeInOut = self if not is_reparenting else _config.reparent_data.from_conn.owner
+
+	if not root.virtual_ref and not _config.from.root.virtual_ref:
+		return
+
+
+	if _self.type == 'in':
+		print(_root.virtual_ref)
+	elif _config.from.type == 'in':
+		# clear connection
+		for output_data: Dictionary in _root.virtual_ref.output_connections:
+			if output_data.idx == get_index() and output_data.to_idx == _config.from.get_index():
+				if output_data.has('line_ref'):
+					output_data.line_ref.visible = false
+				
+				_root.virtual_ref.output_connections.erase(output_data)
+
+		for input_data: Dictionary in _config.from.root.virtual_ref.input_connections:
+			if input_data.idx == get_index() and input_data.from_idx == _config.from.get_index():
+				if input_data.has('line_ref'):
+					input_data.line_ref.visible = false
+				
+				_config.from.root.virtual_ref.input_connections.erase(input_data)
+
+		# _root.virtual_ref.output_connections = [] # to test
+		# _config.from.root.virtual_ref.input_connections = [] # to test
+		
+		var _line_ref: HenConnectionLine
+
+		for line: HenConnectionLine in HenGlobal.connection_line_pool:
+			if not line.visible:
+				line.from_cnode = _root
+				line.to_cnode = _config.from.root
+				line.input = from_conn
+				line.output = to_conn
+				
+				line.position = Vector2.ZERO
+				line.visible = true
+				_line_ref = line
+				line.update_line()
+				break
+
+		_root.virtual_ref.output_connections.append({
+			idx = get_index(),
+			to = _config.from.root.virtual_ref,
+			to_idx = _config.from.get_index(),
+			line_ref = _line_ref
+		})
+		_config.from.root.virtual_ref.input_connections.append({
+			idx = get_index(),
+			from = _root.virtual_ref,
+			from_idx = _config.from.get_index(),
+			line_ref = _line_ref
+		})
+
+	print(_config)
+	print(_root.virtual_ref.output_connections, ' | ', _config.from.root.virtual_ref.input_connections)
+
+
 func create_connection(_config: Dictionary) -> HenConnectionLine:
 	var _type = type if not is_reparenting else _config.reparent_data.from_type
 	var _conn_type = connection_type if not is_reparenting else _config.reparent_data.from_conn_type
@@ -294,7 +365,6 @@ func create_connection(_config: Dictionary) -> HenConnectionLine:
 		line.output = from_conn
 		for c_line in _self.from_connection_lines:
 			c_line.remove_from_scene()
-			#TODO undo/redo
 
 		_self.in_connected_from = _config.from.root
 		_self.out_from_in_out = _config.from
@@ -306,14 +376,13 @@ func create_connection(_config: Dictionary) -> HenConnectionLine:
 		# clear other connections
 		for c_line in _config.from.from_connection_lines:
 			c_line.remove_from_scene()
-			#TODO undo/redo
 
 		_config.from.in_connected_from = _root
 		_config.from.out_from_in_out = _self
 
-	# signal to update connection line
-	_root.connect('on_move', line.update_line)
-	_config.from.root.connect('on_move', line.update_line)
+	# # signal to update connection line
+	# _root.connect('on_move', line.update_line)
+	# _config.from.root.connect('on_move', line.update_line)
 
 	return line
 

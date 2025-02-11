@@ -335,27 +335,31 @@ func _select() -> void:
 
 		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 
-		var cnode: HenCnode = HenCnode.instantiate_and_add(data)
+		print(data)
 
-		# make connection
-		if cnode_config.has('from_in_out'):
-			var output = cnode_config.get('from_in_out')
-			var input = cnode.get_node('%InputContainer').get_child(0)
+		HenVirtualCNode.instantiate_virtual_cnode_and_add(data)
 
-			input.create_connection_and_instance({
-				from = output,
-				type = came_from,
-				conn_type = connection_type,
-				reparent_data = HenGlobal.reparent_data
-			})
+		# var cnode: HenCnode = HenCnode.instantiate_and_add(data)
+
+		# # make connection
+		# if cnode_config.has('from_in_out'):
+		# 	var output = cnode_config.get('from_in_out')
+		# 	var input = cnode.get_node('%InputContainer').get_child(0)
+
+		# 	input.create_connection_and_instance({
+		# 		from = output,
+		# 		type = came_from,
+		# 		conn_type = connection_type,
+		# 		reparent_data = HenGlobal.reparent_data
+		# 	})
 		
 		
-		if cnode_config.has('from_flow_connector'):
-			var from_flow_connector = cnode_config.get('from_flow_connector')
+		# if cnode_config.has('from_flow_connector'):
+		# 	var from_flow_connector = cnode_config.get('from_flow_connector')
 
-			from_flow_connector.create_connection_line_and_instance({
-				from_cnode = cnode,
-			})
+		# 	from_flow_connector.create_connection_line_and_instance({
+		# 		from_cnode = cnode,
+		# 	})
 
 		HenGlobal.GENERAL_POPUP.get_parent().hide()
 

@@ -28,17 +28,17 @@ static func load_and_edit(_path: StringName) -> void:
 	for state in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children():
 		state.queue_free()
 	
-	for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
-		if cnode.is_pool:
-			continue
+	# for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
+	# 	if cnode.is_pool:
+	# 		continue
 		
-		cnode.queue_free()
+	# 	cnode.queue_free()
 
 	for cnode in HenGlobal.COMMENT_CONTAINER.get_children():
 		cnode.queue_free()
 	
-	for cnode_line in HenGlobal.CNODE_CAM.get_node('Lines').get_children():
-		cnode_line.queue_free()
+	# for cnode_line in HenGlobal.CNODE_CAM.get_node('Lines').get_children():
+	# 	cnode_line.queue_free()
 	
 	for state_line in HenGlobal.STATE_CAM.get_node('Lines').get_children():
 		state_line.queue_free()
@@ -466,14 +466,5 @@ static func script_has_state(_script_name: String, _state_name: String) -> bool:
 
 static func _load_vc(_cnode_list: Array, _route: Dictionary) -> void:
 	for _config: Dictionary in _cnode_list:
-		# adding virtual cnode to list
-		var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
-
-		v_cnode.name = _config.name
-		v_cnode.id = _config.hash
-		v_cnode.position = str_to_var(_config.pos)
-
-		if not HenGlobal.vc_list.has(_route.id):
-			HenGlobal.vc_list[_route.id] = []
-		
-		HenGlobal.vc_list[_route.id].append(v_cnode)
+		_config.route = _route
+		HenVirtualCNode.instantiate_virtual_cnode(_config)

@@ -80,6 +80,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 		output.owner.from_connection_lines.append(self)
 		output.owner.in_connected_from = input.owner.root
 
+	print(to_cnode.route_ref)
 	if not (HenRouter.line_route_reference[to_cnode.route_ref.id] as Array).has(self):
 		HenRouter.line_route_reference[to_cnode.route_ref.id].append(self)
 

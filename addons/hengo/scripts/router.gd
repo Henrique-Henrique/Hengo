@@ -35,10 +35,10 @@ static func change_route(_route: Dictionary) -> void:
 
 
 		# clearing lines
-		var line_container = HenGlobal.CNODE_CAM.get_node('Lines')
+		# var line_container = HenGlobal.CNODE_CAM.get_node('Lines')
 
-		for line in line_container.get_children():
-			line_container.remove_child(line)
+		# for line in line_container.get_children():
+		# 	line_container.remove_child(line)
 		
 		# clearing comments
 		for comment in HenGlobal.COMMENT_CONTAINER.get_children():
@@ -51,8 +51,8 @@ static func change_route(_route: Dictionary) -> void:
 			HenGlobal.CNODE_CONTAINER.add_child(cnode)
 
 		# showing lines
-		for line in line_route_reference.get(_route.id):
-			line_container.add_child(line)
+		# for line in line_route_reference.get(_route.id):
+		# 	line_container.add_child(line)
 
 		# showing comments
 		for comment in comment_reference.get(_route.id):

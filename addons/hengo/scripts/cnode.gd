@@ -77,6 +77,8 @@ var can_move_to_format: bool = true
 
 # pool
 var is_pool: bool = false
+var virtual_ref: HenVirtualCNode
+
 
 signal on_move
 
@@ -273,8 +275,11 @@ func _on_dropdown_state_pick(_value: Dictionary) -> void:
 #
 func move(_pos: Vector2) -> void:
 	position = _pos
+
+	if virtual_ref:
+		virtual_ref.position = position
+
 	emit_signal('on_move')
-	# print(position, ' : ', global_position)
 
 func select() -> void:
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
@@ -373,7 +378,7 @@ func remove_from_scene() -> void:
 	deleted = true
 
 
-func add_input(_input: Dictionary) -> void:
+func add_input(_input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
 	var in_container = get_node('%InputContainer')
 	var input: HenCnodeInOut = HenAssets.CNodeInputScene.instantiate()
 
@@ -403,12 +408,15 @@ func add_input(_input: Dictionary) -> void:
 	input.get_node('%Name').text = _input.name
 	input.root = self
 
-	if _input.has('is_prop'):
-		input.add_prop_ref(_input.get('in_prop'), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
-	else:
-		input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
+	if _instantiate_prop:
+		if _input.has('is_prop'):
+			input.add_prop_ref(_input.get('in_prop'), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
+		else:
+			input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
 
 	in_container.add_child(input)
+
+	return input
 
 
 func add_output(_output: Dictionary) -> void:
@@ -778,20 +786,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 
 	instance.size = Vector2.ZERO
 
-	
-	# # adding virtual cnode to list
-	# var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
-
-	# v_cnode.name = instance.get_cnode_name()
-	# v_cnode.id = instance.hash
-	# v_cnode.position = instance.position
-
-	# if not HenGlobal.vc_list.has(_config.route.id):
-	# 	HenGlobal.vc_list[_config.route.id] = []
-	
-	# HenGlobal.vc_list[_config.route.id].append(v_cnode)
-	# # ---- end virtual ---
-
 	return instance
 
 
@@ -806,13 +800,32 @@ static func instantiate_and_add(_config: Dictionary) -> HenCnode:
 
 
 static func instantiate_and_add_pool() -> void:
-	for i in range(10): # pool size
+	for vc_idx in range(10): # pool size
 		var instance: HenCnode = HenAssets.CNodeScene.instantiate()
+
+		for input_idx in range(10): # input pool size
+			instance.add_input({name = "", type = "Variant"}, false)
+
+		for output_idx in range(10): # output pool size
+			instance.add_output({name = "", type = "Variant"})
+		
 		instance.position = Vector2(50000, 50000)
 		instance.is_pool = true
 		instance.visible = false
+		instance.set_flow_connection(TYPE.DEFAULT)
+
 		HenGlobal.cnode_pool.append(instance)
 		HenGlobal.CNODE_CONTAINER.add_child(instance)
+
+		await RenderingServer.frame_post_draw
+
+
+	for connection_line_idx in range(10 * 20): # connection line pool size
+		var line: HenConnectionLine = HenAssets.ConnectionLineScene.instantiate()
+		line.visible = false
+		line.position = Vector2(50000, 50000)
+		HenGlobal.connection_line_pool.append(line)
+		HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
 
 
 func get_input_token_list(_get_name: bool = false) -> Array:
@@ -823,6 +836,66 @@ func get_input_token_list(_get_name: bool = false) -> Array:
 		inputs.append(input.get_token(_get_name))
 	
 	return inputs
+
+
+func set_flow_connection(_type: TYPE) -> void:
+	var title_container = get_node('%TitleContainer')
+
+	match _type:
+		TYPE.DEFAULT:
+			var default_flow := HenAssets.CNodeFlowScene.instantiate()
+			var connector = default_flow.get_child(0)
+			connector.root = self
+			get_node('%Container').add_child(default_flow)
+			connectors.cnode = connector
+		TYPE.IF:
+			var if_flow := HenAssets.CNodeIfFlowScene.instantiate()
+			for i in if_flow.get_node('%FlowContainer').get_children():
+				i.root = self
+				connectors[i.type] = i
+			
+			# var input = HenAssets.CNodeInputScene.instantiate()
+			# var container = title_container.get_child(0)
+			# container.add_child(input)
+			# container.move_child(input, 0)
+			# container.process_mode = Node.PROCESS_MODE_INHERIT
+			# input.root = self
+			# input.set_type('bool')
+			get_node('%Container').add_child(if_flow)
+
+			# color
+			title_container.get('theme_override_styles/panel').set('bg_color', Color('#674883'))
+			title_container.get_node('%TitleIcon').visible = false
+			(title_container.get_node('%Title') as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+		TYPE.IMG:
+			var center_img = HenAssets.CNodeCenterImage.instantiate()
+			var img = center_img.get_node('%Img')
+			var center_container = get_node('%CenterContainer')
+
+			# img.texture = load('res://addons/hengo/assets/icons/' + _config.category + '.svg')
+
+			center_container.set('theme_override_constants/separation', 5)
+			center_container.add_child(center_img)
+			center_container.move_child(center_img, 1)
+
+			get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
+			title_container.visible = false
+		TYPE.EXPRESSION:
+			title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/math.svg')
+			title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
+
+			var container = get_node('%Container')
+			var bt_container = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+			
+			var bt = bt_container.get_child(0)
+			bt.ref = self
+			
+			# if _config.has('exp'):
+			# 	bt.set_exp(_config.exp)
+			
+			container.add_child(bt_container)
+			container.move_child(bt_container, 1)
 
 
 # getting cnode outputs

@@ -99,4 +99,5 @@ static var current_script_debug_symbols: Dictionary = {}
 
 # performance test
 static var cnode_pool: Array = []
+static var connection_line_pool: Array = []
 static var vc_list: Dictionary = {}
