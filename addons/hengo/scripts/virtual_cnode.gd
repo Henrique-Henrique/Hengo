@@ -92,6 +92,8 @@ func show() -> void:
 			
 			cnode_ref = cnode
 
+			var start: float = Time.get_ticks_usec()
+
 			for line_data: InputConnectionData in input_connections:
 				if line_data.from_ref.line_ref is HenConnectionLine:
 					line_data.line_ref = line_data.from_ref.line_ref
@@ -162,6 +164,10 @@ func show() -> void:
 				if not cnode_ref.is_connected('on_move', line_data.line_ref.update_line):
 					cnode_ref.connect('on_move', line_data.line_ref.update_line)
 
+			
+			var end: float = Time.get_ticks_usec()
+
+			print('gen => ', (end - start) / 1000., 'ms')
 			
 			cnode.reset_size()
 

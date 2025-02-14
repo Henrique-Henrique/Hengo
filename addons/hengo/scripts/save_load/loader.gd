@@ -257,13 +257,13 @@ static func load_and_edit(_path: StringName) -> void:
 		for prop: Dictionary in data.props:
 			match prop.prop_type:
 				StringName('VARIABLE'):
-					var prop_scene = load('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
+					var prop_scene = preload('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
 					HenGlobal.PROPS_CONTAINER.get_node('%List').add_child(prop_scene)
 					prop_scene.set_value(prop)
 
 		# ---------------------------------------------------------------------------- #
 		# creating comments
-		var comment_scene = load('res://addons/hengo/scenes/utils/comment.tscn')
+		var comment_scene = preload('res://addons/hengo/scenes/utils/comment.tscn')
 		for comment_config: Dictionary in data.comments:
 			var comment = comment_scene.instantiate()
 			var router = inst_id_refs[comment_config.router_ref_id].route_ref

@@ -80,7 +80,7 @@ func _on_gui(_event: InputEvent) -> void:
 
 						select()
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
-					var menu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
+					var menu = preload('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
 					var pos = global_position
 
 					pos.x += size.x * HenGlobal.STATE_CAM.transform.x.x + 4
@@ -182,7 +182,7 @@ func remove_event(_event: PanelContainer) -> void:
 		parent.get_parent().queue_free()
 
 func add_transition(_name: String) -> HenStateTransition:
-	var transition = load('res://addons/hengo/scenes/state_transition.tscn').instantiate()
+	var transition = preload('res://addons/hengo/scenes/state_transition.tscn').instantiate()
 	transition.set_transition_name(_name)
 	transition.root = self
 	get_node('%TransitionContainer').add_child(transition)
@@ -212,7 +212,7 @@ func hide_debug() -> void:
 # static
 #
 static func instantiate_state(_config: Dictionary = {}) -> HenState:
-	var state_scene = load('res://addons/hengo/scenes/state.tscn')
+	var state_scene = preload('res://addons/hengo/scenes/state.tscn')
 	var state = state_scene.instantiate()
 	var type: StringName = 'new'
 

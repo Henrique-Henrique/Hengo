@@ -109,6 +109,7 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 	if self != HenGlobal.CNODE_CAM:
 		return
 	
+	var start: float = Time.get_ticks_usec()
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom, # position
 		(HenGlobal.CNODE_CAM.get_parent() as Panel).size / _zoom
@@ -119,6 +120,12 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 			for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenRouter.current_route.id]:
 				v_cnode.check_visibility(rect)
 	
+	var end: float = Time.get_ticks_usec()
+
+	var s = (end - start) / 1000.
+	if s > 10.:
+		print('showed: ', s, 'ms')
+
 	# print(
 	# 	HenGlobal.vc_list[HenRouter.current_route.id].map(func(x): return x.is_showing),
 	# 	' = ',

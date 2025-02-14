@@ -30,7 +30,7 @@ var file_tree_signals: Array = []
 var debug_plugin: EditorDebuggerPlugin
 
 func _enter_tree():
-	debug_plugin = load('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
+	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
 	add_debugger_plugin(debug_plugin)
 
 	# getting native api like String, float... methods.
@@ -55,20 +55,20 @@ func _enter_tree():
 		EditorInterface.get_resource_filesystem().scan()
 
 	# setting scene reference here to prevent crash on development when reload scripts on editor :)
-	HenAssets.ConnectionLineScene = load('res://addons/hengo/scenes/connection_line.tscn')
-	HenAssets.StateConnectionLineScene = load('res://addons/hengo/scenes/state_connection_line.tscn')
-	HenAssets.FlowConnectionLineScene = load('res://addons/hengo/scenes/flow_connection_line.tscn')
-	HenAssets.HengoRootScene = load('res://addons/hengo/scenes/hengo_root.tscn')
-	HenAssets.CNodeInputScene = load('res://addons/hengo/scenes/cnode_input.tscn')
-	HenAssets.CNodeOutputScene = load('res://addons/hengo/scenes/cnode_output.tscn')
-	HenAssets.CNodeScene = load('res://addons/hengo/scenes/cnode.tscn')
-	HenAssets.CNodeFlowScene = load('res://addons/hengo/scenes/cnode_flow.tscn')
-	HenAssets.CNodeIfFlowScene = load('res://addons/hengo/scenes/cnode_if_flow.tscn')
-	HenAssets.EventScene = load('res://addons/hengo/scenes/event.tscn')
-	HenAssets.EventStructScene = load('res://addons/hengo/scenes/event_structure.tscn')
-	HenAssets.PropContainerScene = load('res://addons/hengo/scenes/prop_container.tscn')
-	HenAssets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
-	HenAssets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')
+	HenAssets.ConnectionLineScene = preload('res://addons/hengo/scenes/connection_line.tscn')
+	HenAssets.StateConnectionLineScene = preload('res://addons/hengo/scenes/state_connection_line.tscn')
+	HenAssets.FlowConnectionLineScene = preload('res://addons/hengo/scenes/flow_connection_line.tscn')
+	HenAssets.HengoRootScene = preload('res://addons/hengo/scenes/hengo_root.tscn')
+	HenAssets.CNodeInputScene = preload('res://addons/hengo/scenes/cnode_input.tscn')
+	HenAssets.CNodeOutputScene = preload('res://addons/hengo/scenes/cnode_output.tscn')
+	HenAssets.CNodeScene = preload('res://addons/hengo/scenes/cnode.tscn')
+	HenAssets.CNodeFlowScene = preload('res://addons/hengo/scenes/cnode_flow.tscn')
+	HenAssets.CNodeIfFlowScene = preload('res://addons/hengo/scenes/cnode_if_flow.tscn')
+	HenAssets.EventScene = preload('res://addons/hengo/scenes/event.tscn')
+	HenAssets.EventStructScene = preload('res://addons/hengo/scenes/event_structure.tscn')
+	HenAssets.PropContainerScene = preload('res://addons/hengo/scenes/prop_container.tscn')
+	HenAssets.CNodeInputLabel = preload('res://addons/hengo/scenes/cnode_input_label.tscn')
+	HenAssets.CNodeCenterImage = preload('res://addons/hengo/scenes/cnode_center_image.tscn')
 
 	HenGlobal.editor_interface = get_editor_interface()
 	print('setted')
@@ -105,7 +105,7 @@ func _enter_tree():
 	HenCnode.instantiate_and_add_pool()
 
 	# adding gdscript editor
-	gd_previewer = (load('res://addons/hengo/scenes/gd_editor.tscn') as PackedScene).instantiate()
+	gd_previewer = (preload('res://addons/hengo/scenes/gd_editor.tscn') as PackedScene).instantiate()
 	gd_previewer.code_completion_enabled = false
 	gd_previewer.editable = false
 
@@ -222,9 +222,9 @@ func change_colors() -> void:
 	# colors
 	var base_color: Color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color')
 	var color_factor: float = .55
-	var cnode_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/cnode.tres')
-	var event_style_box: StyleBoxFlat = load('res://addons/hengo/resources/style_box/event.tres')
-	var route_ref: StyleBoxFlat = load('res://addons/hengo/resources/style_box/route_reference.tres')
+	var cnode_style_box: StyleBoxFlat = preload('res://addons/hengo/resources/style_box/cnode.tres')
+	var event_style_box: StyleBoxFlat = preload('res://addons/hengo/resources/style_box/event.tres')
+	var route_ref: StyleBoxFlat = preload('res://addons/hengo/resources/style_box/route_reference.tres')
 
 	HenGlobal.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
 	cnode_style_box.bg_color = base_color.lightened(.07)

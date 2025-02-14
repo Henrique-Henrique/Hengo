@@ -31,7 +31,7 @@ func _ready() -> void:
 func _on_reference_press() -> void:
 	var container = VBoxContainer.new()
 
-	var icon_text = load('res://addons/hengo/assets/icons/arrow-up-right.svg')
+	var icon_text = preload('res://addons/hengo/assets/icons/arrow-up-right.svg')
 
 	for cnode: HenCnode in HenGlobal.GROUP.get_nodes_from_group('f_' + str(hash)):
 		if cnode.deleted:

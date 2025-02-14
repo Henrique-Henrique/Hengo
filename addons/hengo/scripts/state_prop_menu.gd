@@ -21,7 +21,7 @@ func _on_add() -> void:
 
 
 func _add_transition(_name: String = '', _ref = null) -> void:
-	var transition = load('res://addons/hengo/scenes/state_transition_prop.tscn').instantiate()
+	var transition = preload('res://addons/hengo/scenes/state_transition_prop.tscn').instantiate()
 	transition.set_prop_name(_name)
 
 	if _ref == null:

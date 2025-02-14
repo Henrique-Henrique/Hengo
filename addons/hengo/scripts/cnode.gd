@@ -99,7 +99,7 @@ func _on_enter() -> void:
 	if virtual_ref:
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
-		print(virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
+		print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
 		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
 		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)
 
@@ -589,13 +589,13 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 					SUB_TYPE.VAR, SUB_TYPE.LOCAL_VAR:
 						_config.type = ''
 					SUB_TYPE.DEBUG_VALUE:
-						var debug_value_scene = load('res://addons/hengo/scenes/props/debug_value.tscn').instantiate()
+						var debug_value_scene = preload('res://addons/hengo/scenes/props/debug_value.tscn').instantiate()
 						var container: VBoxContainer = instance.get_node('%Container')
 						
 						container.add_child(debug_value_scene)
 						container.move_child(debug_value_scene, 1)
 
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/debug.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/debug.svg')
 						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#8a7346'))
 
 						_config.type = TYPE.DEFAULT
@@ -607,37 +607,37 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 							# _:
 								# title_container.get('theme_override_styles/panel').set('bg_color', Color('#464A73'))
 						
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/func.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/func.svg')
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.VOID:
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/void.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/void.svg')
 						# title_container.get('theme_override_styles/panel').set('bg_color', EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').darkened(.4))
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.SET_VAR, SUB_TYPE.SET_PROP, SUB_TYPE.GET_PROP:
 						# color
 						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#4A7346'))
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/set_var.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/set_var.svg')
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.VIRTUAL, SUB_TYPE.FUNC_INPUT:
 						# color
 						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#734646'))
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/virtual.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/virtual.svg')
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.CAST, SUB_TYPE.RAW_CODE:
 						match _config.sub_type as SUB_TYPE:
 							SUB_TYPE.RAW_CODE:
-								title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/raw.svg')
+								title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/raw.svg')
 							SUB_TYPE.CAST:
-								title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/cast.svg')
+								title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/cast.svg')
 
 						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.SELF_GO_TO_VOID:
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/go_to.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/go_to.svg')
 						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.FOR, SUB_TYPE.FOR_ARR:
-						title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/for.svg')
+						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/for.svg')
 						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#8c5c37'))
 						_config.type = TYPE.DEFAULT
 					_:
@@ -735,11 +735,11 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 				instance.get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
 				title_container.visible = false
 			TYPE.EXPRESSION:
-				title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/math.svg')
+				title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/math.svg')
 				title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 
 				var container = instance.get_node('%Container')
-				var bt_container = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+				var bt_container = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
 				
 				var bt = bt_container.get_child(0)
 				bt.ref = instance
@@ -773,10 +773,10 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 				HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
 					instance.get_node('%TitleContainer').visible = false
 				HenCnode.SUB_TYPE.CONST:
-					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/enum.svg')
+					title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/enum.svg')
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#2f6063'))
 				HenCnode.SUB_TYPE.SINGLETON:
-					title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/singleton.svg')
+					title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/singleton.svg')
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
 
 		HenRouter.route_reference[_config.route.id].append(instance)
@@ -809,7 +809,7 @@ static func instantiate_and_add(_config: Dictionary) -> HenCnode:
 static func instantiate_and_add_pool() -> void:
 	HenGlobal.can_instantiate_pool = true
 
-	for loop_idx in range(10):
+	for loop_idx in range(3):
 		if not HenGlobal.can_instantiate_pool:
 			return
 		
@@ -896,8 +896,6 @@ func set_flow_connection(_type: TYPE) -> void:
 			var img = center_img.get_node('%Img')
 			var center_container = get_node('%CenterContainer')
 
-			# img.texture = load('res://addons/hengo/assets/icons/' + _config.category + '.svg')
-
 			center_container.set('theme_override_constants/separation', 5)
 			center_container.add_child(center_img)
 			center_container.move_child(center_img, 1)
@@ -905,11 +903,11 @@ func set_flow_connection(_type: TYPE) -> void:
 			get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
 			title_container.visible = false
 		TYPE.EXPRESSION:
-			title_container.get_node('%TitleIcon').texture = load('res://addons/hengo/assets/icons/cnode/math.svg')
+			title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/math.svg')
 			title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 
 			var container = get_node('%Container')
-			var bt_container = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+			var bt_container = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
 			
 			var bt = bt_container.get_child(0)
 			bt.ref = self

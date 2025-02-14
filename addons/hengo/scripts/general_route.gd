@@ -51,7 +51,7 @@ func get_general_name() -> String:
 
 # static
 static func instantiate_general(_config: Dictionary) -> HenGeneralRoute:
-	var general_route_scene = load('res://addons/hengo/scenes/general_route.tscn')
+	var general_route_scene = preload('res://addons/hengo/scenes/general_route.tscn')
 	var general_route = general_route_scene.instantiate()
 
 	general_route.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id

@@ -157,7 +157,7 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 		if _event.pressed:
 			match _event.button_index:
 				MOUSE_BUTTON_RIGHT:
-					var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
+					var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 					method_list.start(HenGlobal.script_config.type if HenGlobal.script_config.has('type') else 'all', get_global_mouse_position())
 					HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 				MOUSE_BUTTON_LEFT:

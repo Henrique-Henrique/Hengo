@@ -18,7 +18,7 @@ func show_props(_config: Dictionary, _ref: HenRouteReference) -> void:
 
 		match prop.type:
 			'String':
-				var ref = load('res://addons/hengo/scenes/props/string.tscn').instantiate()
+				var ref = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
 
 				if prop.has('value'):
 					ref.set_default(prop.value)
@@ -34,7 +34,7 @@ func show_props(_config: Dictionary, _ref: HenRouteReference) -> void:
 
 				prop_ref.add_child(ref)
 			'in_out':
-				var ref = load('res://addons/hengo/scenes/props/function_input_output.tscn').instantiate()
+				var ref = preload('res://addons/hengo/scenes/props/function_input_output.tscn').instantiate()
 				var in_out_type: StringName = ''
 
 				match prop.name:

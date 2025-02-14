@@ -298,7 +298,7 @@ func _select() -> void:
 		if item_data.has('data_type'):
 			match item_data.data_type as Type:
 				Type.COMMENT:
-					var comment = load('res://addons/hengo/scenes/utils/comment.tscn').instantiate()
+					var comment = preload('res://addons/hengo/scenes/utils/comment.tscn').instantiate()
 					comment.route_ref = HenRouter.current_route
 					comment.position = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 					HenRouter.comment_reference[HenRouter.current_route.id].append(comment)
@@ -342,7 +342,14 @@ func _select() -> void:
 
 		# # make connection
 		if cnode_config.has('from_in_out'):
-			var out_virtual_ref: HenVirtualCNode = cnode_config.get('from_in_out')
+			var input = v_cnode.cnode_ref.get_node('%InputContainer').get_child(0)
+
+			input.create_virtual_connection({
+				from = cnode_config.from_in_out,
+				type = came_from,
+				conn_type = connection_type,
+				reparent_data = HenGlobal.reparent_data
+			})
 
 			# v_cnode.input_connections.append({
 			# 	idx = 0,
@@ -351,12 +358,12 @@ func _select() -> void:
 			# 	line_ref = line
 			# })
 
-		# 	input.create_connection_and_instance({
-		# 		from = output,
-		# 		type = came_from,
-		# 		conn_type = connection_type,
-		# 		reparent_data = HenGlobal.reparent_data
-		# 	})
+			# 	input.create_connection_and_instance({
+			# 		from = output,
+			# 		type = came_from,
+			# 		conn_type = connection_type,
+			# 		reparent_data = HenGlobal.reparent_data
+			# 	})
 		
 		
 		# if cnode_config.has('from_flow_connector'):
@@ -375,7 +382,7 @@ func _show_list(_list: Array, _slice: bool = true) -> void:
 		item.queue_free()
 
 	for dict: Dictionary in _list.slice(0, 20) if _slice else _list:
-		var item = load('res://addons/hengo/scenes/method_picker_item.tscn').instantiate()
+		var item = preload('res://addons/hengo/scenes/method_picker_item.tscn').instantiate()
 		item.set_meta('data', dict)
 		item.mouse_entered.connect(_on_item_hover.bind(item))
 		item.mouse_exited.connect(_on_item_exit.bind(item))

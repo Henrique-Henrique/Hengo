@@ -89,9 +89,9 @@ func _on_gui(_event: InputEvent) -> void:
 			if HenGlobal.can_make_connection and HenGlobal.connection_to_data.is_empty():
 				# call mehotd list on in_out type
 				print('type:: ', connection_type)
-				var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
+				var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
-					from_in_out = root.virtual_ref,
+					from_in_out = self,
 					in_out_idx = get_index()
 				})
 
@@ -262,66 +262,89 @@ func create_virtual_connection(_config: Dictionary) -> void:
 	var _root: HenCnode = root if not is_reparenting else _config.reparent_data.from_conn.owner.root
 	var _self: HenCnodeInOut = self if not is_reparenting else _config.reparent_data.from_conn.owner
 
+
 	if not root.virtual_ref and not _config.from.root.virtual_ref:
 		return
+	
 
+	var _from: HenCnodeInOut
+	var _to: HenCnodeInOut
+	var _from_connector
+	var _to_connector
 
+	# defining connection direction 
 	if _self.type == 'in':
-		print(_root.virtual_ref)
+		_from = _config.from
+		_to = _self
+		_root = _config.from.root
+		_from_connector = to_conn
+		_to_connector = from_conn
+		_conn_type = _from.connection_type
 	elif _config.from.type == 'in':
-		# clear connection
-		_config.from.remove_virtual_connections()
+		_from = _self
+		_to = _config.from
+		_from_connector = from_conn
+		_to_connector = to_conn
 
-		var line: HenConnectionLine = HenPool.get_line_from_pool(
-			_root,
-			_config.from.root,
-			from_conn,
-			to_conn
-		)
-		
-		line.update_colors(_conn_type, _config.from.connection_type)
 
-		line.from_pool_visible = true
-		line.to_pool_visible = true
-		line.conn_size = (get_node('%Connector') as TextureRect).size / 2
+	# clear connection
+	_to.remove_virtual_connections()
 
-		# signal to update connection line
-		if not _root.is_connected('on_move', line.update_line):
-			_root.connect('on_move', line.update_line)
-		
-		if not _config.from.root.is_connected('on_move', line.update_line):
-			_config.from.root.connect('on_move', line.update_line)
+	var line: HenConnectionLine = HenPool.get_line_from_pool(
+		_root,
+		_to.root,
+		_from_connector,
+		_to_connector
+	)
+	
+	line.update_colors(_conn_type, _to.connection_type)
 
-		
-		var input_connection: HenVirtualCNode.InputConnectionData = HenVirtualCNode.InputConnectionData.new()
-		var output_connection: HenVirtualCNode.OutputConnectionData = HenVirtualCNode.OutputConnectionData.new()
-		
-		output_connection.idx = get_index()
-		output_connection.to = _config.from.root.virtual_ref
-		output_connection.to_idx = _config.from.get_index()
-		output_connection.line_ref = line
-		output_connection.to_ref = input_connection
-		output_connection.type = _conn_type
-		output_connection.to_type = _config.from.connection_type
+	line.from_pool_visible = true
+	line.to_pool_visible = true
+	line.conn_size = (get_node('%Connector') as TextureRect).size / 2
 
-		input_connection.idx = _config.from.get_index()
-		input_connection.from = _root.virtual_ref
-		input_connection.from_idx = get_index()
-		input_connection.line_ref = line
-		input_connection.from_ref = output_connection
-		input_connection.type = _config.from.connection_type
-		input_connection.from_type = _conn_type
-		
-		_root.virtual_ref.output_connections.append(output_connection)
-		_config.from.root.virtual_ref.input_connections.append(input_connection)
+	# signal to update connection line
+	if not _root.is_connected('on_move', line.update_line):
+		_root.connect('on_move', line.update_line)
+	
+	if not _to.root.is_connected('on_move', line.update_line):
+		_to.root.connect('on_move', line.update_line)
 
-		_config.from.remove_in_prop()
-		line.update_line()
+	
+	var input_connection: HenVirtualCNode.InputConnectionData = HenVirtualCNode.InputConnectionData.new()
+	var output_connection: HenVirtualCNode.OutputConnectionData = HenVirtualCNode.OutputConnectionData.new()
+	
+	# output
+	output_connection.idx = get_index()
+	output_connection.line_ref = line
+	output_connection.type = _conn_type
+	
+	output_connection.to_idx = _to.get_index()
+	output_connection.to = _to.root.virtual_ref
+	output_connection.to_ref = input_connection
+	output_connection.to_type = _to.connection_type
+
+	# inputs
+	input_connection.idx = _to.get_index()
+	input_connection.line_ref = line
+	input_connection.type = _to.connection_type
+	
+	input_connection.from = _root.virtual_ref
+	input_connection.from_idx = get_index()
+	input_connection.from_ref = output_connection
+	input_connection.from_type = _conn_type
+	
+
+	_root.virtual_ref.output_connections.append(output_connection)
+	_to.root.virtual_ref.input_connections.append(input_connection)
+
+	_to.remove_in_prop()
+	line.update_line()
 
 	has_connection = true
-	_config.from.has_connection = true
+	_to.has_connection = true
 
-	print(_root.virtual_ref.output_connections, ' | ', _config.from.root.virtual_ref.input_connections)
+	print(_root.virtual_ref.output_connections, ' | ', _to.root.virtual_ref.input_connections)
 
 
 func remove_virtual_connections() -> void:
@@ -470,7 +493,7 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 
 		match _sub_type:
 			'@dropdown':
-				var dropdown = load('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 
 				dropdown.type = category
 				dropdown.custom_data = custom_data
@@ -498,7 +521,7 @@ func set_in_prop(_default_value = null) -> void:
 
 		match sub_type:
 			'@dropdown':
-				var dropdown = load('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 
 				dropdown.type = category
 				dropdown.custom_data = custom_data
@@ -513,23 +536,23 @@ func set_in_prop(_default_value = null) -> void:
 			_:
 				match connection_type:
 					'String', 'NodePath', 'StringName':
-						var str = load('res://addons/hengo/scenes/props/string.tscn').instantiate()
+						var str = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
 						prop_container.add_child(str)
 						prop = str
 					'int':
-						var prop_int = load('res://addons/hengo/scenes/props/int.tscn').instantiate()
+						var prop_int = preload('res://addons/hengo/scenes/props/int.tscn').instantiate()
 						prop_container.add_child(prop_int)
 						prop = prop_int
 					'float':
-						var prop_float = load('res://addons/hengo/scenes/props/float.tscn').instantiate()
+						var prop_float = preload('res://addons/hengo/scenes/props/float.tscn').instantiate()
 						prop_container.add_child(prop_float)
 						prop = prop_float
 					'Vector2':
-						var prop_vec2 = load('res://addons/hengo/scenes/props/vec2.tscn').instantiate()
+						var prop_vec2 = preload('res://addons/hengo/scenes/props/vec2.tscn').instantiate()
 						prop_container.add_child(prop_vec2)
 						prop = prop_vec2
 					'bool':
-						var prop_bool = load('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
+						var prop_bool = preload('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
 						prop_container.add_child(prop_bool)
 						prop = prop_bool
 					'Variant':
@@ -563,9 +586,9 @@ func set_in_prop(_default_value = null) -> void:
 func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	# props ref
 	var input_container = get_node('%CNameInput')
-	var prop_ref_bt = load('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+	var prop_ref_bt = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 	prop_ref_bt.text = ''
-	prop_ref_bt.icon = load('res://addons/hengo/assets/icons/circle-dot.svg')
+	prop_ref_bt.icon = preload('res://addons/hengo/assets/icons/circle-dot.svg')
 	prop_ref_bt.type = 'all_props'
 	prop_ref_bt.tooltip_text = 'Bind prop value'
 	
@@ -659,41 +682,34 @@ func get_out_prop_by_id_or_null() -> PanelContainer:
 
 # type behavior
 func set_type(_type: String) -> void:
-	var icon_path = 'res://addons/hengo/assets/.editor_icons/' + _type + '.svg'
 	var connector = get_node('%Connector')
-	var circle_icon = load('res://addons/hengo/assets/icons/circle.svg')
 
 	connector.set('modulate', Color('#fff'))
 
 	match _type:
 		'String':
-			connector.texture = circle_icon
+			connector.texture = HenAssets.get_icon_texture('circle')
 			connector.set('modulate', Color('#8eef97'))
 		'float':
-			connector.texture = circle_icon
+			connector.texture = HenAssets.get_icon_texture('circle')
 			connector.set('modulate', Color('#FFDD65'))
 		'int':
-			connector.texture = circle_icon
+			connector.texture = HenAssets.get_icon_texture('circle')
 			connector.set('modulate', Color('#5ABBEF'))
 		'bool':
-			connector.texture = circle_icon
+			connector.texture = HenAssets.get_icon_texture('circle')
 			connector.set('modulate', Color('#FC7F7F'))
 		'Variant':
-			connector.texture = circle_icon
+			connector.texture = HenAssets.get_icon_texture('circle')
 			connector.set('modulate', Color('#72788a'))
 		_:
-			if FileAccess.file_exists(icon_path):
-				#TODO make icons a spritesheet
-				var icon: Image = Image.load_from_file(icon_path)
-				connector.texture = ImageTexture.create_from_image(icon)
-			else:
-				connector.texture = circle_icon
+			connector.texture = HenAssets.get_icon_texture(_type)
 	
 	connection_type = _type
 	tooltip_text = _type
 
 func change_type(_type: String) -> void:
-	var remove_conn: bool = connection_type != _type
+	# var remove_conn: bool = connection_type != _type
 
 	set_type(_type)
 
@@ -702,8 +718,8 @@ func change_type(_type: String) -> void:
 		set_in_prop()
 	
 	
-	if remove_conn:
-		hide_connection()
+	# if remove_conn:
+	# 	hide_connection()
 
 	reset_root_size()
 

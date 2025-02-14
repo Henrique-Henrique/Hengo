@@ -16,12 +16,12 @@ func _ready():
 
 func _on_hover() -> void:
 	if not is_connected:
-		texture = load('res://addons/hengo/assets/icons/flow_arrow_hover.svg')
+		texture = preload('res://addons/hengo/assets/icons/flow_arrow_hover.svg')
 
 
 func _on_exit() -> void:
 	if not is_connected:
-		texture = load('res://addons/hengo/assets/images/flow_out.svg')
+		texture = preload('res://addons/hengo/assets/images/flow_out.svg')
 
 
 # updating line
@@ -43,7 +43,7 @@ func _on_gui(_event: InputEvent) -> void:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				remove_connection()
 				if HenGlobal.can_make_flow_connection and HenGlobal.flow_connection_to_data.is_empty():
-					var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
+					var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 					method_list.start(HenGlobal.script_config.type, get_global_mouse_position(), true, 'out', {
 						from_flow_connector = self
 					})

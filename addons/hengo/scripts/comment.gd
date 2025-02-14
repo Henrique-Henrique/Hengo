@@ -78,7 +78,7 @@ func _handle_exit(_anchor) -> void:
 
 func random_icon() -> Texture2D:
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	var arr: Array = [load('res://addons/hengo/assets/icons/comment.svg'), load('res://addons/hengo/assets/icons/comment2.svg'), load('res://addons/hengo/assets/icons/comment3.svg')]
+	var arr: Array = [preload('res://addons/hengo/assets/icons/comment.svg'), preload('res://addons/hengo/assets/icons/comment2.svg'), preload('res://addons/hengo/assets/icons/comment3.svg')]
 
 	return arr[rng.randi_range(0, arr.size() - 1)]
 

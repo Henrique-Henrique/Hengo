@@ -72,7 +72,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 		to_cnode.connect('on_move', update_line)
 
 	from_connector.is_connected = true
-	from_connector.texture = load('res://addons/hengo/assets/images/flow_out.svg')
+	from_connector.texture = preload('res://addons/hengo/assets/images/flow_out.svg')
 	to_cnode.get_node('%ArrowUp').visible = true
 
 
@@ -100,7 +100,7 @@ func remove_from_scene(_remove_from_list: bool = true) -> void:
 		HenRouter.line_route_reference[to_cnode.route_ref.id].erase(self)
 	
 	from_connector.is_connected = false
-	from_connector.texture = load('res://addons/hengo/assets/images/flow_out.svg')
+	from_connector.texture = preload('res://addons/hengo/assets/images/flow_out.svg')
 	to_cnode.get_node('%ArrowUp').visible = false
 
 	if _remove_from_list:
