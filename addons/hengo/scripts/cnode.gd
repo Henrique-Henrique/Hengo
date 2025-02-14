@@ -99,7 +99,8 @@ func _on_enter() -> void:
 	if virtual_ref:
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
-		print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
+		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
+		print('flow -> ', virtual_ref.flow_connection)
 		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
 		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)
 
@@ -848,6 +849,15 @@ static func instantiate_and_add_pool() -> void:
 			HenGlobal.connection_line_pool.append(line)
 			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
 		
+
+		for flow_connection_line_idx in range(30):
+			var line: HenFlowConnectionLine = HenAssets.FlowConnectionLineScene.instantiate()
+			line.visible = false
+			line.position = Vector2(50000, 50000)
+			HenGlobal.flow_connection_line_pool.append(line)
+			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
+
+
 		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
 
 

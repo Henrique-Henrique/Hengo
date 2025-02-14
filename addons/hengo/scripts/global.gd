@@ -100,5 +100,6 @@ static var current_script_debug_symbols: Dictionary = {}
 # pool
 static var cnode_pool: Array = []
 static var connection_line_pool: Array = []
+static var flow_connection_line_pool: Array = []
 static var vc_list: Dictionary = {}
 static var can_instantiate_pool: bool = true

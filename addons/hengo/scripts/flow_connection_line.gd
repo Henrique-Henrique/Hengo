@@ -19,9 +19,16 @@ var debug_timer: Timer
 const POINT_WIDTH: float = 60.
 const POINT_WIDTH_BEZIER: float = POINT_WIDTH
 
+# pool
+var from_pool_visible: bool = true
+var to_pool_visible: bool = true
+var from_virtual_pos: Vector2
+var to_virtual_pos: Vector2
+
+
 func update_line() -> void:
-	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2
-	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, -10)
+	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
+	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, -10) if to_pool_visible and to_cnode else to_virtual_pos
 
 	var first_point: Vector2 = from_pos + Vector2(0, POINT_WIDTH)
 	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)

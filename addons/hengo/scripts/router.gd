@@ -24,7 +24,7 @@ static func change_route(_route: Dictionary) -> void:
 			vc.reset()
 
 
-	for line: HenConnectionLine in HenGlobal.CNODE_CAM.get_node('Lines').get_children():
+	for line: HenConnectionLine in HenGlobal.connection_line_pool:
 		line.visible = false
 		line.from_cnode = null
 		line.to_cnode = null
