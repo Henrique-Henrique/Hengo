@@ -96,6 +96,13 @@ func _ready():
 
 
 func _on_enter() -> void:
+	if virtual_ref:
+		# for dict: Dictionary in virtual_ref.output_connections:
+		# 	print(dict.to.input_connections)
+		print(virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
+		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
+		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)
+
 	_is_mouse_enter = true
 
 	_preview_timer = get_tree().create_timer(.5)
@@ -800,32 +807,48 @@ static func instantiate_and_add(_config: Dictionary) -> HenCnode:
 
 
 static func instantiate_and_add_pool() -> void:
-	for vc_idx in range(10): # pool size
-		var instance: HenCnode = HenAssets.CNodeScene.instantiate()
+	HenGlobal.can_instantiate_pool = true
 
-		for input_idx in range(10): # input pool size
-			instance.add_input({name = "", type = "Variant"}, false)
-
-		for output_idx in range(10): # output pool size
-			instance.add_output({name = "", type = "Variant"})
+	for loop_idx in range(10):
+		if not HenGlobal.can_instantiate_pool:
+			return
 		
-		instance.position = Vector2(50000, 50000)
-		instance.is_pool = true
-		instance.visible = false
-		instance.set_flow_connection(TYPE.DEFAULT)
+		var start: float = Time.get_ticks_usec()
 
-		HenGlobal.cnode_pool.append(instance)
-		HenGlobal.CNODE_CONTAINER.add_child(instance)
+		for vc_idx in range(30): # pool size
+			var instance: HenCnode = HenAssets.CNodeScene.instantiate()
 
-		await RenderingServer.frame_post_draw
+			for input_idx in range(5): # input pool size
+				instance.add_input({name = "", type = "Variant"}, false)
 
+			for output_idx in range(5): # output pool size
+				instance.add_output({name = "", type = "Variant"})
+			
+			instance.position = Vector2(50000, 50000)
+			instance.is_pool = true
+			instance.visible = false
+			instance.set_flow_connection(TYPE.DEFAULT)
 
-	for connection_line_idx in range(10 * 20): # connection line pool size
-		var line: HenConnectionLine = HenAssets.ConnectionLineScene.instantiate()
-		line.visible = false
-		line.position = Vector2(50000, 50000)
-		HenGlobal.connection_line_pool.append(line)
-		HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
+			if not HenGlobal.can_instantiate_pool:
+				return
+			
+			HenGlobal.cnode_pool.append(instance)
+			HenGlobal.CNODE_CONTAINER.add_child(instance)
+
+			await RenderingServer.frame_post_draw
+			
+		var end: float = Time.get_ticks_usec()
+
+		print('time => ', (end - start) / 1000., 'ms')
+
+		for connection_line_idx in range(30): # connection line pool size
+			var line: HenConnectionLine = HenAssets.ConnectionLineScene.instantiate()
+			line.visible = false
+			line.position = Vector2(50000, 50000)
+			HenGlobal.connection_line_pool.append(line)
+			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
+		
+		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
 
 
 func get_input_token_list(_get_name: bool = false) -> Array:

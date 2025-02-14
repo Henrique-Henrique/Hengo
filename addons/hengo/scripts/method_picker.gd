@@ -337,14 +337,19 @@ func _select() -> void:
 
 		print(data)
 
-		HenVirtualCNode.instantiate_virtual_cnode_and_add(data)
-
+		var v_cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add(data)
 		# var cnode: HenCnode = HenCnode.instantiate_and_add(data)
 
 		# # make connection
-		# if cnode_config.has('from_in_out'):
-		# 	var output = cnode_config.get('from_in_out')
-		# 	var input = cnode.get_node('%InputContainer').get_child(0)
+		if cnode_config.has('from_in_out'):
+			var out_virtual_ref: HenVirtualCNode = cnode_config.get('from_in_out')
+
+			# v_cnode.input_connections.append({
+			# 	idx = 0,
+			# 	to = out_virtual_ref,
+			# 	to_idx = cnode_config.in_out_idx,
+			# 	line_ref = line
+			# })
 
 		# 	input.create_connection_and_instance({
 		# 		from = output,

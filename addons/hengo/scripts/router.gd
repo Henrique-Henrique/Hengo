@@ -23,6 +23,15 @@ static func change_route(_route: Dictionary) -> void:
 		for vc: HenVirtualCNode in HenGlobal.vc_list[current_route.id]:
 			vc.reset()
 
+
+	for line: HenConnectionLine in HenGlobal.CNODE_CAM.get_node('Lines').get_children():
+		line.visible = false
+		line.from_cnode = null
+		line.to_cnode = null
+		line.input = null
+		line.output = null
+
+
 	current_route = _route
 
 	if route_reference.has(_route.id):
@@ -31,15 +40,10 @@ static func change_route(_route: Dictionary) -> void:
 			if cnode.is_pool:
 				cnode.visible = false
 
+		# show/hide cnodes
 		HenGlobal.CNODE_CAM._check_virtual_cnodes()
 
 
-		# clearing lines
-		# var line_container = HenGlobal.CNODE_CAM.get_node('Lines')
-
-		# for line in line_container.get_children():
-		# 	line_container.remove_child(line)
-		
 		# clearing comments
 		for comment in HenGlobal.COMMENT_CONTAINER.get_children():
 			HenGlobal.COMMENT_CONTAINER.remove_child(comment)

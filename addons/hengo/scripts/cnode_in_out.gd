@@ -27,6 +27,8 @@ var old_conn_ref
 var custom_data
 var sub_type
 
+var has_connection: bool = false
+
 # private
 #
 func _ready():
@@ -89,16 +91,18 @@ func _on_gui(_event: InputEvent) -> void:
 				print('type:: ', connection_type)
 				var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
-					from_in_out = self
+					from_in_out = root.virtual_ref,
+					in_out_idx = get_index()
 				})
 
-				if is_reparenting:
-					# remove connection
-					HenGlobal.history.create_action('Remove connection line')
-					HenGlobal.history.add_do_method(line_ref.remove_from_scene)
-					HenGlobal.history.add_undo_reference(line_ref)
-					HenGlobal.history.add_undo_method(line_ref.add_to_scene)
-					HenGlobal.history.commit_action()
+				remove_virtual_connections()
+				# if is_reparenting:
+				# 	# remove connection
+				# 	HenGlobal.history.create_action('Remove connection line')
+				# 	HenGlobal.history.add_do_method(line_ref.remove_from_scene)
+				# 	HenGlobal.history.add_undo_reference(line_ref)
+				# 	HenGlobal.history.add_undo_method(line_ref.add_to_scene)
+				# 	HenGlobal.history.commit_action()
 
 				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 
@@ -266,53 +270,70 @@ func create_virtual_connection(_config: Dictionary) -> void:
 		print(_root.virtual_ref)
 	elif _config.from.type == 'in':
 		# clear connection
-		for output_data: Dictionary in _root.virtual_ref.output_connections:
-			if output_data.idx == get_index() and output_data.to_idx == _config.from.get_index():
-				if output_data.has('line_ref'):
-					output_data.line_ref.visible = false
-				
-				_root.virtual_ref.output_connections.erase(output_data)
+		_config.from.remove_virtual_connections()
 
-		for input_data: Dictionary in _config.from.root.virtual_ref.input_connections:
-			if input_data.idx == get_index() and input_data.from_idx == _config.from.get_index():
-				if input_data.has('line_ref'):
-					input_data.line_ref.visible = false
-				
-				_config.from.root.virtual_ref.input_connections.erase(input_data)
-
-		# _root.virtual_ref.output_connections = [] # to test
-		# _config.from.root.virtual_ref.input_connections = [] # to test
+		var line: HenConnectionLine = HenPool.get_line_from_pool(
+			_root,
+			_config.from.root,
+			from_conn,
+			to_conn
+		)
 		
-		var _line_ref: HenConnectionLine
+		line.update_colors(_conn_type, _config.from.connection_type)
 
-		for line: HenConnectionLine in HenGlobal.connection_line_pool:
-			if not line.visible:
-				line.from_cnode = _root
-				line.to_cnode = _config.from.root
-				line.input = from_conn
-				line.output = to_conn
-				
-				line.position = Vector2.ZERO
-				line.visible = true
-				_line_ref = line
-				line.update_line()
-				break
+		line.from_pool_visible = true
+		line.to_pool_visible = true
+		line.conn_size = (get_node('%Connector') as TextureRect).size / 2
 
-		_root.virtual_ref.output_connections.append({
-			idx = get_index(),
-			to = _config.from.root.virtual_ref,
-			to_idx = _config.from.get_index(),
-			line_ref = _line_ref
-		})
-		_config.from.root.virtual_ref.input_connections.append({
-			idx = get_index(),
-			from = _root.virtual_ref,
-			from_idx = _config.from.get_index(),
-			line_ref = _line_ref
-		})
+		# signal to update connection line
+		if not _root.is_connected('on_move', line.update_line):
+			_root.connect('on_move', line.update_line)
+		
+		if not _config.from.root.is_connected('on_move', line.update_line):
+			_config.from.root.connect('on_move', line.update_line)
 
-	print(_config)
+		
+		var input_connection: HenVirtualCNode.InputConnectionData = HenVirtualCNode.InputConnectionData.new()
+		var output_connection: HenVirtualCNode.OutputConnectionData = HenVirtualCNode.OutputConnectionData.new()
+		
+		output_connection.idx = get_index()
+		output_connection.to = _config.from.root.virtual_ref
+		output_connection.to_idx = _config.from.get_index()
+		output_connection.line_ref = line
+		output_connection.to_ref = input_connection
+		output_connection.type = _conn_type
+		output_connection.to_type = _config.from.connection_type
+
+		input_connection.idx = _config.from.get_index()
+		input_connection.from = _root.virtual_ref
+		input_connection.from_idx = get_index()
+		input_connection.line_ref = line
+		input_connection.from_ref = output_connection
+		input_connection.type = _config.from.connection_type
+		input_connection.from_type = _conn_type
+		
+		_root.virtual_ref.output_connections.append(output_connection)
+		_config.from.root.virtual_ref.input_connections.append(input_connection)
+
+		_config.from.remove_in_prop()
+		line.update_line()
+
+	has_connection = true
+	_config.from.has_connection = true
+
 	print(_root.virtual_ref.output_connections, ' | ', _config.from.root.virtual_ref.input_connections)
+
+
+func remove_virtual_connections() -> void:
+	if type == 'in':
+		# removing input connections
+		for input_data: HenVirtualCNode.InputConnectionData in root.virtual_ref.input_connections:
+			# remove input connection reference on other cnode
+			input_data.from.output_connections.erase(input_data.from_ref)
+			input_data.line_ref.visible = false
+			root.virtual_ref.input_connections.erase(input_data)
+		
+		set_in_prop()
 
 
 func create_connection(_config: Dictionary) -> HenConnectionLine:
@@ -368,6 +389,7 @@ func create_connection(_config: Dictionary) -> HenConnectionLine:
 
 		_self.in_connected_from = _config.from.root
 		_self.out_from_in_out = _config.from
+
 	elif _config.from.type == 'in':
 		line.from_cnode = _root
 		line.to_cnode = _config.from.root
@@ -380,9 +402,9 @@ func create_connection(_config: Dictionary) -> HenConnectionLine:
 		_config.from.in_connected_from = _root
 		_config.from.out_from_in_out = _self
 
-	# # signal to update connection line
-	# _root.connect('on_move', line.update_line)
-	# _config.from.root.connect('on_move', line.update_line)
+	# signal to update connection line
+	_root.connect('on_move', line.update_line)
+	_config.from.root.connect('on_move', line.update_line)
 
 	return line
 
@@ -581,7 +603,7 @@ func remove_in_prop(_ignore_prop: bool = false) -> void:
 
 			in_prop.free()
 	
-	root.size = Vector2.ZERO
+	root.reset_size()
 
 func reset_root_size() -> void:
 	root.size = Vector2.ZERO

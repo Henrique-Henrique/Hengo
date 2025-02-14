@@ -44,7 +44,7 @@ func _input(event: InputEvent) -> void:
 				((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
 
-				_check_virtual_cnodes(transform.origin, transform.x.x)
+				_check_virtual_cnodes()
 		
 		elif event is InputEventMouseButton:
 			if event.is_pressed():
@@ -83,8 +83,6 @@ func _set_transform(_pos: Vector2) -> void:
 	t_x = Vector2(target_zoom, 0)
 	t_y = Vector2(0, target_zoom)
 
-	_check_virtual_cnodes(pos, target_zoom)
-
 	set_physics_process(true)
 
 
@@ -98,6 +96,8 @@ func _physics_process(_delta: float) -> void:
 
 		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
 		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
+
+		_check_virtual_cnodes()
 
 		if is_equal_approx(transform.origin.x, pos.x):
 			set_physics_process(false)
@@ -114,9 +114,10 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 		(HenGlobal.CNODE_CAM.get_parent() as Panel).size / _zoom
 	)
 
-	if HenGlobal.vc_list.has(HenRouter.current_route.id):
-		for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenRouter.current_route.id]:
-			v_cnode.check_visibility(rect)
+	if HenRouter.current_route:
+		if HenGlobal.vc_list.has(HenRouter.current_route.id):
+			for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenRouter.current_route.id]:
+				v_cnode.check_visibility(rect)
 	
 	# print(
 	# 	HenGlobal.vc_list[HenRouter.current_route.id].map(func(x): return x.is_showing),

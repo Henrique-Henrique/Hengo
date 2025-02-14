@@ -97,7 +97,8 @@ const DEBUG_VAR_NAME: String = '__hen_id__'
 static var current_script_debug_symbols: Dictionary = {}
 
 
-# performance test
+# pool
 static var cnode_pool: Array = []
 static var connection_line_pool: Array = []
 static var vc_list: Dictionary = {}
+static var can_instantiate_pool: bool = true

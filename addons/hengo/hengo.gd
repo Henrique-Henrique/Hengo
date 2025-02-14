@@ -141,6 +141,8 @@ func _on_change_main_screen(_name: String) -> void:
 
 
 func _exit_tree():
+	HenGlobal.can_instantiate_pool = false
+	
 	remove_debugger_plugin(debug_plugin)
 	remove_tool_menu_item(MENU_NATIVE_API_NAME)
 	remove_control_from_bottom_panel(gd_previewer)
@@ -154,6 +156,7 @@ func _exit_tree():
 	
 	remove_autoload_singleton('HengoDebugger')
 	HenGlobal.HENGO_EDITOR_PLUGIN = null
+	print('Done')
 
 func _make_visible(_visible: bool):
 	if main_scene:
