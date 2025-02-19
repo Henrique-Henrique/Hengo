@@ -99,6 +99,7 @@ func _enter_tree():
 	HenGlobal.HENGO_EDITOR_PLUGIN = self
 
 	HenGlobal.cnode_pool.clear()
+	HenGlobal.state_pool.clear()
 	HenGlobal.connection_line_pool.clear()
 	HenGlobal.flow_connection_line_pool.clear()
 

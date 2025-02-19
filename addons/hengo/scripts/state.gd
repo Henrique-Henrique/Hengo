@@ -19,6 +19,8 @@ var moving: bool = false
 var selected: bool = false
 var hash: int
 
+var virtual_ref: HenVirtualState
+
 signal on_move
 
 # private
@@ -66,6 +68,7 @@ func _on_gui(_event: InputEvent) -> void:
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if _event.double_click:
+						print(route)
 						HenRouter.change_route(route)
 
 					if selected:

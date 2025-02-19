@@ -19,7 +19,7 @@ static func change_route(_route: Dictionary) -> void:
 		return
 
 	# hide all virtuals
-	if not current_route.is_empty():
+	if not current_route.is_empty() and HenGlobal.vc_list.has(current_route.id):
 		for vc: HenVirtualCNode in HenGlobal.vc_list[current_route.id]:
 			vc.reset()
 
@@ -34,11 +34,11 @@ static func change_route(_route: Dictionary) -> void:
 
 	current_route = _route
 
+
 	if route_reference.has(_route.id):
 		# cleaning cnode tree
-		for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
-			if cnode.is_pool:
-				cnode.visible = false
+		for cnode: HenCnode in HenGlobal.cnode_pool:
+			cnode.visible = false
 
 		# show/hide cnodes
 		HenGlobal.CNODE_CAM._check_virtual_cnodes()
@@ -62,17 +62,17 @@ static func change_route(_route: Dictionary) -> void:
 		for comment in comment_reference.get(_route.id):
 			HenGlobal.COMMENT_CONTAINER.add_child(comment)
 
-		match _route.type:
-			ROUTE_TYPE.STATE:
-				# debug
-				for cnode: HenCnode in cnode_list:
-					if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
-						HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
+		# match _route.type:
+		# 	ROUTE_TYPE.STATE:
+		# 		# debug
+		# 		for cnode: HenCnode in cnode_list:
+		# 			if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
+		# 				HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
 				
-				for state in HenGlobal.STATE_CAM.get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
-					state.unselect()
+		# 		for state in HenGlobal.STATE_CAM.get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
+		# 			state.unselect()
 				
-				_route.state_ref.select()
+		# 		_route.state_ref.select()
 
 	else:
 		# TODO error msg

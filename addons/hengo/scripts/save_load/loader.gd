@@ -19,8 +19,8 @@ static func load_and_edit(_path: StringName) -> void:
 	# reseting plugin
 	# HenGlobal.ERROR_BT.reset()
 
-	for state in HenGlobal.STATE_CONTAINER.get_children():
-		state.queue_free()
+	# for state in HenGlobal.STATE_CONTAINER.get_children():
+	# 	state.queue_free()
 
 	for state in HenGlobal.GENERAL_CONTAINER.get_children():
 		state.queue_free()
@@ -43,12 +43,18 @@ static func load_and_edit(_path: StringName) -> void:
 	for state_line in HenGlobal.STATE_CAM.get_node('Lines').get_children():
 		state_line.queue_free()
 
+
 	for prop in HenGlobal.PROPS_CONTAINER.get_node('%List').get_children():
 		prop.queue_free()
 
 
 	HenGlobal.GROUP.group.clear()
 	HenGlobal.vc_list.clear()
+	HenGlobal.vs_list.clear()
+
+	# reset state pool
+	for state in HenGlobal.state_pool:
+		state.visible = false
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config
@@ -219,39 +225,44 @@ static func load_and_edit(_path: StringName) -> void:
 			_load_cnode(func_config.cnode_list, func_ref.route, inst_id_refs)
 			
 			inst_id_refs[float(func_ref.hash)] = func_ref
-		
+
+
 		# states
 		for state: Dictionary in data.states:
-			var state_inst = HenState.instantiate_and_add_to_scene({
-				name = state.name,
-				pos = state.pos,
-				hash = state.id
-			})
+			# var state_inst = HenState.instantiate_and_add_to_scene({
+			# 	name = state.name,
+			# 	pos = state.pos,
+			# 	hash = state.id
+			# })
+			var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state(state)
 
 			# transition
-			for trans: Dictionary in state['transitions']:
-				var trans_inst = state_inst.add_transition(trans.name)
+			for trans: Dictionary in state.transitions:
+				v_state.add_transition(trans)
 
-				if trans.has('to_state_id'):
-					state_trans_connections.append({
-						to_state_id = trans.get('to_state_id'),
-						ref = trans_inst
-					})
+				# var trans_inst = state_inst.add_transition(trans.name)
+
+			# 	if trans.has('to_state_id'):
+			# 		state_trans_connections.append({
+			# 			to_state_id = trans.get('to_state_id'),
+			# 			ref = trans_inst
+			# 		})
 
 			# cnodes
 			# _load_cnode(state.cnode_list, state_inst.route, inst_id_refs)
-			_load_vc(state.cnode_list, state_inst.route)
+			_load_vc(state.cnode_list, v_state.route)
 
-			for event_config: Dictionary in state['events']:
-				state_inst.add_event(event_config)
+			# for event_config: Dictionary in state['events']:
+			# 	state_inst.add_event(event_config)
 			
-			inst_id_refs[state.id] = state_inst
+			# inst_id_refs[state.id] = state_inst
 
+		
 		# creating state transitions connection
-		for trans_config: Dictionary in state_trans_connections:
-			trans_config.ref.add_connection({
-				state_from = inst_id_refs[trans_config.to_state_id]
-			})
+		# for trans_config: Dictionary in state_trans_connections:
+		# 	trans_config.ref.add_connection({
+		# 		state_from = inst_id_refs[trans_config.to_state_id]
+		# 	})
 
 		# creating props
 		for prop: Dictionary in data.props:
@@ -315,7 +326,7 @@ static func load_and_edit(_path: StringName) -> void:
 		# 				from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
 		# 			})
 
-		HenRouter.change_route(HenGlobal.start_state.route)
+		# HenRouter.change_route(HenGlobal.start_state.route)
 
 		# folding comments after add to scene
 		for comment in HenGlobal.COMMENT_CONTAINER.get_children():

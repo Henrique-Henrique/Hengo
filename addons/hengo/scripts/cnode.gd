@@ -838,9 +838,6 @@ static func instantiate_and_add_pool() -> void:
 
 			await RenderingServer.frame_post_draw
 			
-		var end: float = Time.get_ticks_usec()
-
-		print('time => ', (end - start) / 1000., 'ms')
 
 		for connection_line_idx in range(30): # connection line pool size
 			var line: HenConnectionLine = HenAssets.ConnectionLineScene.instantiate()
@@ -857,6 +854,21 @@ static func instantiate_and_add_pool() -> void:
 			HenGlobal.flow_connection_line_pool.append(line)
 			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
 
+
+		for state_idx in range(4): # state pool size
+			var state: HenState = preload('res://addons/hengo/scenes/state.tscn').instantiate()
+
+			for transition_idx in range(5): # trnasition size pool
+				state.add_transition('content')
+
+			state.visible = false
+			state.position = Vector2(50000, 50000)
+			HenGlobal.state_pool.append(state)
+			HenGlobal.STATE_CONTAINER.add_child(state)
+		
+
+		var end: float = Time.get_ticks_usec()
+		print('time => ', (end - start) / 1000., 'ms')
 
 		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
 

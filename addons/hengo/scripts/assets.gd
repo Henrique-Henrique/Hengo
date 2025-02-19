@@ -15,6 +15,7 @@ static var EventStructScene: PackedScene
 static var PropContainerScene: PackedScene
 static var CNodeInputLabel: PackedScene
 static var CNodeCenterImage: PackedScene
+
 static var cache_icon_images: Dictionary = {}
 
 
