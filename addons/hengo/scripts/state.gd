@@ -34,10 +34,14 @@ func _ready() -> void:
 
 
 func _on_enter():
+	if virtual_ref:
+		print(virtual_ref.from_transitions, '  |  ', virtual_ref.transitions)
+
 	if HenGlobal.can_make_state_connection:
 		HenGlobal.state_connection_to_date = {
 			state_from = self,
 		}
+
 
 		get_node('%HoverBorder').visible = true
 		HenGlobal.STATE_CONNECTION_GUIDE.hover_pos = HenGlobal.CAM.get_relative_vec2(global_position)
@@ -178,6 +182,7 @@ func add_event(_config: Dictionary) -> PanelContainer:
 
 	return event
 
+
 func remove_event(_event: PanelContainer) -> void:
 	var event_container := get_node('%EventContainer')
 	var parent = _event.get_parent()
@@ -188,6 +193,7 @@ func remove_event(_event: PanelContainer) -> void:
 	if parent.get_child_count() <= 0:
 		parent.get_parent().queue_free()
 
+
 func add_transition(_name: String) -> HenStateTransition:
 	var transition = preload('res://addons/hengo/scenes/state_transition.tscn').instantiate()
 	transition.set_transition_name(_name)
@@ -196,6 +202,7 @@ func add_transition(_name: String) -> HenStateTransition:
 	size = Vector2.ZERO
 
 	return transition
+
 
 func get_all_transition_data() -> Array:
 	return get_node('%TransitionContainer').get_children().map(func(x): return {

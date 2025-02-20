@@ -36,10 +36,6 @@ static func change_route(_route: Dictionary) -> void:
 
 
 	if route_reference.has(_route.id):
-		# cleaning cnode tree
-		for cnode: HenCnode in HenGlobal.cnode_pool:
-			cnode.visible = false
-
 		# show/hide cnodes
 		HenGlobal.CNODE_CAM._check_virtual_cnodes()
 

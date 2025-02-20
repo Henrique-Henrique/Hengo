@@ -7,6 +7,7 @@ var route: Dictionary
 var position: Vector2
 var size: Vector2
 var transitions: Array = []
+var from_transitions: Array = []
 
 var is_showing: bool = false
 var state_ref: HenState
@@ -14,7 +15,11 @@ var state_ref: HenState
 
 class TransitionData:
 	var name: String
+	var from: HenVirtualState
 	var to: HenVirtualState
+	var line_ref: HenStateConnectionLine
+	var from_pos: Vector2
+	var to_pos: Vector2
 
 
 func check_visibility(_rect: Rect2) -> void:
@@ -53,9 +58,39 @@ func show() -> void:
 					transition.set_transition_name(transition_data.name)
 
 					if transition_data.to:
-						pass
+						if not transition_data.line_ref:
+							transition_data.line_ref = HenPool.get_state_line_from_pool()
+						
+						transition_data.line_ref.from_pool_visible = true
+						transition_data.line_ref.from_transition = transition
+						
+						transition_data.line_ref.to_virtual_pos = transition_data.to_pos
+
+						transition_data.line_ref.update_line()
+
+						# signal to update connection line
+						if not state_ref.is_connected('on_move', transition_data.line_ref.update_line):
+							state_ref.connect('on_move', transition_data.line_ref.update_line)
 
 				idx += 1
+
+
+			for transition: TransitionData in from_transitions:
+				if transition.from:
+					if not transition.line_ref:
+						transition.line_ref = HenPool.get_state_line_from_pool()
+
+					transition.line_ref.to_pool_visible = true
+					transition.line_ref.to_state = state_ref
+
+					transition.line_ref.from_virtual_pos = transition.from_pos
+
+					transition.line_ref.update_line()
+
+					
+					# signal to update connection line
+					if not state_ref.is_connected('on_move', transition.line_ref.update_line):
+						state_ref.connect('on_move', transition.line_ref.update_line)
 
 
 			state.route = route
@@ -67,11 +102,36 @@ func show() -> void:
 
 func hide() -> void:
 	if state_ref:
+		for signal_data: Dictionary in state_ref.get_signal_connection_list('on_move'):
+			state_ref.disconnect('on_move', signal_data.callable)
+		
+
 		for transition: TransitionData in transitions:
 			if transition.to:
-				if transition.to.is_showing:
-					pass
-				print(transition.to.is_showing)
+				if transition.line_ref:
+					transition.line_ref.from_pool_visible = false
+
+					if transition.to.is_showing:
+						var from_transition: HenStateTransition = transition.line_ref.from_transition
+						var pos: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
+						transition.from_pos = pos
+						transition.line_ref.from_virtual_pos = pos
+					else:
+						transition.line_ref.visible = false
+						transition.line_ref = null
+
+
+		for transition: TransitionData in from_transitions:
+			transition.line_ref.to_pool_visible = false
+
+			if transition.from.is_showing:
+				var pos: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(transition.to.state_ref.global_position)
+				transition.to_pos = pos
+				transition.line_ref.to_virtual_pos = pos
+			else:
+				transition.line_ref.visible = false
+				transition.line_ref = null
+
 
 		state_ref.visible = false
 		state_ref.virtual_ref = null
@@ -83,6 +143,15 @@ func add_transition(_config: Dictionary) -> void:
 
 	transition.name = _config.name
 	transitions.append(transition)
+
+
+func reset() -> void:
+	is_showing = false
+
+	if state_ref:
+		state_ref.virtual_ref = null
+		state_ref.visible = false
+		state_ref = null
 
 
 static func instantiate_virtual_state(_config: Dictionary) -> HenVirtualState:

@@ -1,7 +1,7 @@
 @tool
 class_name HenStateTransition extends HBoxContainer
 
-@export var root: PanelContainer
+@export var root: HenState
 
 var line: HenStateConnectionLine
 
@@ -41,15 +41,15 @@ func _on_input(_event: InputEvent):
 					HenGlobal.history.add_undo_method(line.add_to_scene)
 					HenGlobal.history.commit_action()
 			elif HenGlobal.can_make_state_connection and not HenGlobal.state_connection_to_date.is_empty():
-				if not line:
-					create_virtual_connection(HenGlobal.state_connection_to_date)
-					# var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
+				create_virtual_connection(HenGlobal.state_connection_to_date)
+			
+				# var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
 
-					# HenGlobal.history.create_action('Add State Connection')
-					# HenGlobal.history.add_do_method(_line.add_to_scene)
-					# HenGlobal.history.add_do_reference(_line)
-					# HenGlobal.history.add_undo_method(_line.remove_from_scene)
-					# HenGlobal.history.commit_action()
+				# HenGlobal.history.create_action('Add State Connection')
+				# HenGlobal.history.add_do_method(_line.add_to_scene)
+				# HenGlobal.history.add_do_reference(_line)
+				# HenGlobal.history.add_undo_method(_line.remove_from_scene)
+				# HenGlobal.history.commit_action()
 
 			HenGlobal.connection_to_data = {}
 			HenGlobal.can_make_state_connection = false
@@ -86,16 +86,22 @@ func get_transition_name() -> String:
 
 
 func create_virtual_connection(_config: Dictionary) -> HenStateConnectionLine:
+	if transition_ref and transition_ref.to:
+		transition_ref.to.from_transitions.clear()
+
 	var _line: HenStateConnectionLine = HenPool.get_state_line_from_pool()
 
 	# set virtual transition connection
+	transition_ref.from = root.virtual_ref
 	transition_ref.to = (_config.state_from as HenState).virtual_ref
+	(_config.state_from as HenState).virtual_ref.from_transitions.append(transition_ref)
 
 	_line.from_transition = self
 	_line.to_state = _config.state_from
 
 	_line.update_line()
 
+	transition_ref.line_ref = _line
 	line = _line
 
 	# signal to update connection line

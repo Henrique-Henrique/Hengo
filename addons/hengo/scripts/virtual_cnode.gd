@@ -306,6 +306,7 @@ func reset() -> void:
 			line_data.to_ref.from_old_pos = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.input.global_position) + line_data.line_ref.conn_size
 
 		cnode_ref.virtual_ref = null
+		cnode_ref.visible = false
 		cnode_ref = null
 
 
