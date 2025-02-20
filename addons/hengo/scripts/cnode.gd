@@ -847,7 +847,7 @@ static func instantiate_and_add_pool() -> void:
 			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
 		
 
-		for flow_connection_line_idx in range(30):
+		for flow_connection_line_idx in range(30): # flow connection line pool size
 			var line: HenFlowConnectionLine = HenAssets.FlowConnectionLineScene.instantiate()
 			line.visible = false
 			line.position = Vector2(50000, 50000)
@@ -866,6 +866,14 @@ static func instantiate_and_add_pool() -> void:
 			HenGlobal.state_pool.append(state)
 			HenGlobal.STATE_CONTAINER.add_child(state)
 		
+
+		for state_transition_line_idx in range(5):
+			var line: HenStateConnectionLine = HenAssets.StateConnectionLineScene.instantiate()
+			line.visible = false
+			line.position = Vector2(50000, 50000)
+			HenGlobal.state_connection_line_pool.append(line)
+			HenGlobal.STATE_CAM.get_node('Lines').add_child(line)
+
 
 		var end: float = Time.get_ticks_usec()
 		print('time => ', (end - start) / 1000., 'ms')

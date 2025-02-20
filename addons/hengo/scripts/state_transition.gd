@@ -7,6 +7,7 @@ var line: HenStateConnectionLine
 
 # deleted
 var state_ref_deleted: HenState
+var transition_ref: HenVirtualState.TransitionData
 
 # private
 #
@@ -41,13 +42,14 @@ func _on_input(_event: InputEvent):
 					HenGlobal.history.commit_action()
 			elif HenGlobal.can_make_state_connection and not HenGlobal.state_connection_to_date.is_empty():
 				if not line:
-					var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
+					create_virtual_connection(HenGlobal.state_connection_to_date)
+					# var _line: HenStateConnectionLine = create_connection_line(HenGlobal.state_connection_to_date)
 
-					HenGlobal.history.create_action('Add State Connection')
-					HenGlobal.history.add_do_method(_line.add_to_scene)
-					HenGlobal.history.add_do_reference(_line)
-					HenGlobal.history.add_undo_method(_line.remove_from_scene)
-					HenGlobal.history.commit_action()
+					# HenGlobal.history.create_action('Add State Connection')
+					# HenGlobal.history.add_do_method(_line.add_to_scene)
+					# HenGlobal.history.add_do_reference(_line)
+					# HenGlobal.history.add_undo_method(_line.remove_from_scene)
+					# HenGlobal.history.commit_action()
 
 			HenGlobal.connection_to_data = {}
 			HenGlobal.can_make_state_connection = false
@@ -81,6 +83,29 @@ func set_transition_name(_name: String) -> void:
 
 func get_transition_name() -> String:
 	return get_node('%Name').text
+
+
+func create_virtual_connection(_config: Dictionary) -> HenStateConnectionLine:
+	var _line: HenStateConnectionLine = HenPool.get_state_line_from_pool()
+
+	# set virtual transition connection
+	transition_ref.to = (_config.state_from as HenState).virtual_ref
+
+	_line.from_transition = self
+	_line.to_state = _config.state_from
+
+	_line.update_line()
+
+	line = _line
+
+	# signal to update connection line
+	if not root.is_connected('on_move', _line.update_line):
+		root.connect('on_move', _line.update_line)
+	
+	if not _config.state_from.is_connected('on_move', line.update_line):
+		_config.state_from.connect('on_move', line.update_line)
+
+	return _line
 
 
 func create_connection_line(_config: Dictionary) -> HenStateConnectionLine:

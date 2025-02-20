@@ -40,8 +40,8 @@ static func load_and_edit(_path: StringName) -> void:
 	# for cnode_line in HenGlobal.CNODE_CAM.get_node('Lines').get_children():
 	# 	cnode_line.queue_free()
 	
-	for state_line in HenGlobal.STATE_CAM.get_node('Lines').get_children():
-		state_line.queue_free()
+	# for state_line in HenGlobal.STATE_CAM.get_node('Lines').get_children():
+	# 	state_line.queue_free()
 
 
 	for prop in HenGlobal.PROPS_CONTAINER.get_node('%List').get_children():
@@ -54,6 +54,10 @@ static func load_and_edit(_path: StringName) -> void:
 
 	# reset state pool
 	for state in HenGlobal.state_pool:
+		state.visible = false
+	
+	# reset state connection pool
+	for state in HenGlobal.state_connection_line_pool:
 		state.visible = false
 
 	# ---------------------------------------------------------------------------- #
@@ -239,6 +243,13 @@ static func load_and_edit(_path: StringName) -> void:
 			# transition
 			for trans: Dictionary in state.transitions:
 				v_state.add_transition(trans)
+
+				if trans.has('to_state_id'):
+					state_trans_connections.append({
+						to_state_id = trans.get('to_state_id'),
+						v_state = v_state
+					})
+
 
 				# var trans_inst = state_inst.add_transition(trans.name)
 

@@ -2,12 +2,19 @@
 class_name HenStateConnectionLine extends Line2D
 
 
+const POINT_WIDTH: int = 40
+const POINT_WIDTH_BEZIER = POINT_WIDTH / 2.
+
 var from_transition
 var to_state
 var deleted: bool = false
 
-const POINT_WIDTH: int = 40
-const POINT_WIDTH_BEZIER: int = POINT_WIDTH / 2
+# pool
+var from_pool_visible: bool = true
+var to_pool_visible: bool = true
+var from_virtual_pos: Vector2
+var to_virtual_pos: Vector2
+
 
 func _ready() -> void:
 	default_color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').lightened(.1)
@@ -15,15 +22,15 @@ func _ready() -> void:
 # public
 #
 func update_line() -> void:
-	if to_state.position > from_transition.root.position + from_transition.root.size / 2:
+	if to_state.global_position > from_transition.root.global_position + from_transition.root.size / 2:
 		_draw_line(
 			HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x , from_transition.size.y / 2),
 			HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
 		)
 		to_state.get_node('%LeftArrow').show_arrow(self)
 		to_state.get_node('%RightArrow').hide_arrow(self)
-	elif to_state.position < from_transition.root.position + from_transition.root.size / 2 \
-	and to_state.position > from_transition.root.position:
+	elif to_state.global_position < from_transition.root.global_position + from_transition.root.size / 2 \
+	and to_state.global_position > from_transition.root.global_position:
 		var end: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
 
 		end.x += to_state.size.x + 10
@@ -37,7 +44,7 @@ func update_line() -> void:
 		)
 		to_state.get_node('%RightArrow').show_arrow(self)
 		to_state.get_node('%LeftArrow').hide_arrow(self)
-	elif to_state.position + to_state.size <  from_transition.root.position:
+	elif to_state.global_position + to_state.size <  from_transition.root.global_position:
 		var end: Vector2 =HenGlobal.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
 
 		end.x += to_state.size.x + 10
@@ -51,7 +58,7 @@ func update_line() -> void:
 		)
 		to_state.get_node('%RightArrow').show_arrow(self)
 		to_state.get_node('%LeftArrow').hide_arrow(self)
-	elif to_state.position < from_transition.root.position:
+	elif to_state.global_position < from_transition.root.global_position:
 		_draw_line(
 			HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2),
 			HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2),

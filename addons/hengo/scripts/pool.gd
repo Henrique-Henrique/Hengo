@@ -35,3 +35,19 @@ static func get_flow_line_from_pool() -> HenFlowConnectionLine:
             break
     
     return _line
+
+
+static func get_state_line_from_pool() -> HenStateConnectionLine:
+    var _line: HenStateConnectionLine
+
+    for line: HenStateConnectionLine in HenGlobal.state_connection_line_pool:
+        if not line.visible:
+            line.points = []
+            
+            line.position = Vector2.ZERO
+            line.visible = true
+
+            _line = line
+            break
+    
+    return _line

@@ -118,6 +118,10 @@ func set_state_name(_name: String) -> void:
 
 func move(_pos: Vector2) -> void:
 	position = _pos
+
+	if virtual_ref:
+		virtual_ref.position = _pos
+
 	emit_signal('on_move')
 
 func select() -> void:

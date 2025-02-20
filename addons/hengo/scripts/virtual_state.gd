@@ -49,7 +49,11 @@ func show() -> void:
 					var transition_data: TransitionData = transitions[idx]
 
 					transition.visible = true
+					transition.transition_ref = transition_data
 					transition.set_transition_name(transition_data.name)
+
+					if transition_data.to:
+						pass
 
 				idx += 1
 
@@ -63,6 +67,12 @@ func show() -> void:
 
 func hide() -> void:
 	if state_ref:
+		for transition: TransitionData in transitions:
+			if transition.to:
+				if transition.to.is_showing:
+					pass
+				print(transition.to.is_showing)
+
 		state_ref.visible = false
 		state_ref.virtual_ref = null
 		state_ref = null

@@ -102,6 +102,7 @@ func _enter_tree():
 	HenGlobal.state_pool.clear()
 	HenGlobal.connection_line_pool.clear()
 	HenGlobal.flow_connection_line_pool.clear()
+	HenGlobal.state_connection_line_pool.clear()
 
 	# creating cnode pool
 	HenCnode.instantiate_and_add_pool()
