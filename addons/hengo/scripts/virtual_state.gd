@@ -111,24 +111,24 @@ func hide() -> void:
 				if transition.line_ref:
 					transition.line_ref.from_pool_visible = false
 
+					transition.from_pos = transition.line_ref.points[0]
+					transition.line_ref.from_virtual_pos = transition.from_pos
+					
 					if not transition.to.is_showing:
 						transition.line_ref.visible = false
 						transition.line_ref = null
-					else:
-						transition.from_pos = transition.line_ref.points[0]
-						transition.line_ref.from_virtual_pos = transition.line_ref.points[0]
-
+					
 
 		for transition: TransitionData in from_transitions:
 			transition.line_ref.to_pool_visible = false
+			
+			transition.to_pos = transition.line_ref.points[-1]
+			transition.line_ref.to_virtual_pos = transition.to_pos
 
 			if not transition.from.is_showing:
 				transition.line_ref.visible = false
 				transition.line_ref = null
-			else:
-				transition.to_pos = transition.line_ref.points[-1]
-				transition.line_ref.to_virtual_pos = transition.line_ref.points[-1]
-
+			
 
 		state_ref.visible = false
 		state_ref.virtual_ref = null

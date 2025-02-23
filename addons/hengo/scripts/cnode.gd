@@ -607,7 +607,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 								# title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
 							# _:
 								# title_container.get('theme_override_styles/panel').set('bg_color', Color('#464A73'))
-						
 						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/func.svg')
 						_config.type = TYPE.DEFAULT
 					SUB_TYPE.VOID:

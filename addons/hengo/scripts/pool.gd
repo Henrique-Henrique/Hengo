@@ -43,7 +43,6 @@ static func get_state_line_from_pool() -> HenStateConnectionLine:
     for line: HenStateConnectionLine in HenGlobal.state_connection_line_pool:
         if not line.visible:
             line.points = []
-            
             line.position = Vector2.ZERO
             line.visible = true
 
