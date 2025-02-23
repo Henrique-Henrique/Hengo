@@ -14,7 +14,8 @@ var from_pool_visible: bool = true
 var to_pool_visible: bool = true
 var from_virtual_pos: Vector2
 var to_virtual_pos: Vector2
-
+var virtual_invert_start: int = 1
+var virtual_invert_end: int = 1
 
 func _ready() -> void:
 	default_color = EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').lightened(.1)
@@ -24,49 +25,65 @@ func _ready() -> void:
 func update_line() -> void:
 	var _start_point: Vector2
 	var _end_point: Vector2
-	var _invert_start: int = 1
-	var _invert_end: int = 1
 
-	_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
-	_end_point = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
+	var to_pos: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) if to_pool_visible else to_virtual_pos
+	var to_pos_2: Vector2 = (to_pos + to_state.size) if to_pool_visible else to_virtual_pos
+	var from_pos: Vector2 = (HenGlobal.STATE_CAM.get_relative_vec2(from_transition.root.global_position) + from_transition.root.size / 2) if from_pool_visible else from_virtual_pos
+	var from_pos_2: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.root.global_position) if from_pool_visible else from_virtual_pos
 
-	# if to_state.global_position > from_transition.root.global_position + from_transition.root.size / 2:
-	# 	_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
-	# 	_end_point = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
-	# elif to_state.global_position < from_transition.root.global_position + from_transition.root.size / 2 \
-	# and to_state.global_position > from_transition.root.global_position:
-	# 	var end: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
+	if to_pos > from_pos:
+		_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
+		_end_point = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
 
-	# 	end.x += to_state.size.x + 10
-	# 	end.y += to_state.get_node('%Title').size.y / 2
-
-	# 	_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
-	# 	_end_point = end
-	# 	_invert_start = 1
-	# 	_invert_end = -1
-	# elif to_state.global_position + to_state.size < from_transition.root.global_position:
-	# 	var end: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(Vector2(to_state.global_position.x, to_state.global_position.y))
-
-	# 	end.x += to_state.size.x + 10
-	# 	end.y += to_state.get_node('%Title').size.y / 2
-
-	# 	_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2)
-	# 	_end_point = end
-	# 	_invert_start = -1
-	# 	_invert_end = -1
-	# elif to_state.global_position < from_transition.root.global_position:
-	# 	_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2)
-	# 	_end_point = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
+		if from_pool_visible:
+			virtual_invert_start = 1
 		
-	# 	_invert_start = -1
-	# 	_invert_end = 1
+		if to_pool_visible:
+			virtual_invert_end = 1
+	elif to_pos < from_pos and to_pos > from_pos_2:
+		var end: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position)
+
+		end.x += to_state.size.x + 10
+		end.y += to_state.get_node('%Title').size.y / 2
+
+		_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
+		_end_point = end
+
+		if from_pool_visible:
+			virtual_invert_start = 1
+		
+		if to_pool_visible:
+			virtual_invert_end = -1
+	elif to_pos_2 < from_pos_2:
+		var end: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position)
+
+		end.x += to_state.size.x + 10
+		end.y += to_state.get_node('%Title').size.y / 2
+
+		_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2)
+		_end_point = end
+
+		if from_pool_visible:
+			virtual_invert_start = -1
+		
+		if to_pool_visible:
+			virtual_invert_end = -1
+	elif to_pos < from_pos_2:
+		_start_point = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(0, from_transition.size.y / 2)
+		_end_point = HenGlobal.STATE_CAM.get_relative_vec2(to_state.global_position) + Vector2(-10, to_state.get_node('%Title').size.y / 2)
+		
+		if from_pool_visible:
+			virtual_invert_start = -1
+		
+		if to_pool_visible:
+			virtual_invert_end = 1
 	
 
-	_draw_line(_start_point, _end_point, _invert_start, _invert_end)
-
+	_draw_line(_start_point, _end_point, virtual_invert_start, virtual_invert_end)
+		
 
 func _draw_line(_start_point: Vector2, _end_point: Vector2, _invert_start: int = 1, _invert_end: int = 1) -> void:
-	var start_pos: Vector2 = _start_point if from_pool_visible and from_transition else from_virtual_pos
+	var start_pos: Vector2 = _start_point if from_pool_visible else from_virtual_pos
 	var end_pos: Vector2 = _end_point if to_pool_visible else to_virtual_pos
 
 	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH * _invert_start, 0)

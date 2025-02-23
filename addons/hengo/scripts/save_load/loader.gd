@@ -53,12 +53,17 @@ static func load_and_edit(_path: StringName) -> void:
 	HenGlobal.vs_list.clear()
 
 	# reset state pool
-	for state in HenGlobal.state_pool:
+	for state: HenState in HenGlobal.state_pool:
+		for signal_data: Dictionary in state.get_signal_connection_list('on_move'):
+			state.disconnect('on_move', signal_data.callable)
+		
 		state.visible = false
 	
 	# reset state connection pool
-	for state in HenGlobal.state_connection_line_pool:
-		state.visible = false
+	for state_line: HenStateConnectionLine in HenGlobal.state_connection_line_pool:
+		state_line.to_state = null
+		state_line.from_transition = null
+		state_line.visible = false
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config

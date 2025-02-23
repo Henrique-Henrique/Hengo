@@ -305,6 +305,10 @@ func reset() -> void:
 		for line_data: OutputConnectionData in output_connections:
 			line_data.to_ref.from_old_pos = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.input.global_position) + line_data.line_ref.conn_size
 
+		
+		for signal_data: Dictionary in cnode_ref.get_signal_connection_list('on_move'):
+			cnode_ref.disconnect('on_move', signal_data.callable)
+
 		cnode_ref.virtual_ref = null
 		cnode_ref.visible = false
 		cnode_ref = null

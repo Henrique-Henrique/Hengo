@@ -34,12 +34,13 @@ func _on_input(_event: InputEvent):
 				HenGlobal.STATE_CONNECTION_GUIDE.start(HenGlobal.CAM.get_relative_vec2(global_position))
 		else:
 			if HenGlobal.can_make_state_connection and HenGlobal.state_connection_to_date.is_empty():
-				if line:
-					HenGlobal.history.create_action('Remove State Connection')
-					HenGlobal.history.add_do_method(line.remove_from_scene)
-					HenGlobal.history.add_undo_reference(line)
-					HenGlobal.history.add_undo_method(line.add_to_scene)
-					HenGlobal.history.commit_action()
+				pass
+				# if line:
+				# 	HenGlobal.history.create_action('Remove State Connection')
+				# 	HenGlobal.history.add_do_method(line.remove_from_scene)
+				# 	HenGlobal.history.add_undo_reference(line)
+				# 	HenGlobal.history.add_undo_method(line.add_to_scene)
+				# 	HenGlobal.history.commit_action()
 			elif HenGlobal.can_make_state_connection and not HenGlobal.state_connection_to_date.is_empty():
 				create_virtual_connection(HenGlobal.state_connection_to_date)
 			
@@ -98,7 +99,7 @@ func create_virtual_connection(_config: Dictionary) -> HenStateConnectionLine:
 
 	_line.from_transition = self
 	_line.to_state = _config.state_from
-
+	
 	_line.update_line()
 
 	transition_ref.line_ref = _line

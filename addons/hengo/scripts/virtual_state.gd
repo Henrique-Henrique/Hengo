@@ -63,7 +63,7 @@ func show() -> void:
 						
 						transition_data.line_ref.from_pool_visible = true
 						transition_data.line_ref.from_transition = transition
-						
+
 						transition_data.line_ref.to_virtual_pos = transition_data.to_pos
 
 						transition_data.line_ref.update_line()
@@ -80,13 +80,12 @@ func show() -> void:
 					if not transition.line_ref:
 						transition.line_ref = HenPool.get_state_line_from_pool()
 
+
 					transition.line_ref.to_pool_visible = true
 					transition.line_ref.to_state = state_ref
 
 					transition.line_ref.from_virtual_pos = transition.from_pos
-
 					transition.line_ref.update_line()
-
 					
 					# signal to update connection line
 					if not state_ref.is_connected('on_move', transition.line_ref.update_line):
@@ -97,6 +96,7 @@ func show() -> void:
 			state.set_state_name(name)
 			
 			state.reset_size()
+			size = state.size
 			break
 
 
@@ -111,26 +111,23 @@ func hide() -> void:
 				if transition.line_ref:
 					transition.line_ref.from_pool_visible = false
 
-					if transition.to.is_showing:
-						var from_transition: HenStateTransition = transition.line_ref.from_transition
-						var pos: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(from_transition.global_position) + Vector2(from_transition.size.x, from_transition.size.y / 2)
-						transition.from_pos = pos
-						transition.line_ref.from_virtual_pos = pos
-					else:
+					if not transition.to.is_showing:
 						transition.line_ref.visible = false
 						transition.line_ref = null
+					else:
+						transition.from_pos = transition.line_ref.points[0]
+						transition.line_ref.from_virtual_pos = transition.line_ref.points[0]
 
 
 		for transition: TransitionData in from_transitions:
 			transition.line_ref.to_pool_visible = false
 
-			if transition.from.is_showing:
-				var pos: Vector2 = HenGlobal.STATE_CAM.get_relative_vec2(transition.to.state_ref.global_position)
-				transition.to_pos = pos
-				transition.line_ref.to_virtual_pos = pos
-			else:
+			if not transition.from.is_showing:
 				transition.line_ref.visible = false
 				transition.line_ref = null
+			else:
+				transition.to_pos = transition.line_ref.points[-1]
+				transition.line_ref.to_virtual_pos = transition.line_ref.points[-1]
 
 
 		state_ref.visible = false
