@@ -31,7 +31,8 @@ static func _get_signal_call_name(_name: String) -> String:
 #
 static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 	var start: float = Time.get_ticks_usec()
-	HenSaver.save(generate(), _debug_symbols)
+	# HenSaver.save(generate(), _debug_symbols)
+	HenSaver.save('', _debug_symbols)
 	var end: float = Time.get_ticks_usec()
 	
 	print('GENERATED AND SAVED HENGO SCRIPT IN -> ', (end - start) / 1000, 'ms.')

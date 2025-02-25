@@ -35,7 +35,8 @@ func _ready() -> void:
 
 func _on_enter():
 	if virtual_ref:
-		print(virtual_ref.from_transitions, '  |  ', virtual_ref.transitions)
+		print(virtual_ref.events)
+		# print(virtual_ref.from_transitions, '  |  ', virtual_ref.transitions)
 
 	if HenGlobal.can_make_state_connection:
 		HenGlobal.state_connection_to_date = {

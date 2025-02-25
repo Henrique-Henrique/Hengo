@@ -25,6 +25,15 @@ class FlowConnectionData:
 	var true_flow: HenVirtualCNode
 	var then_flow: HenVirtualCNode
 
+	func get_save() -> Dictionary:
+		var data: Dictionary = {}
+
+		if cnode: data.cnode = cnode.id
+		if true_flow: data.true_flow = true_flow.id
+		if then_flow: data.then_flow = then_flow.id
+
+		return data
+
 
 class ConnectionData:
 	var idx: int
@@ -39,6 +48,13 @@ class InputConnectionData extends ConnectionData:
 	var from_old_pos: Vector2
 	var from_type: StringName
 
+	func get_save() -> Dictionary:
+		return {
+			idx = idx,
+			from_vc_id = from.id,
+			from_idx = from_idx,
+		}
+
 
 class OutputConnectionData extends ConnectionData:
 	var to: HenVirtualCNode
@@ -46,6 +62,13 @@ class OutputConnectionData extends ConnectionData:
 	var to_ref: InputConnectionData
 	var to_old_pos: Vector2
 	var to_type: StringName
+
+	func get_save() -> Dictionary:
+		return {
+			idx = idx,
+			to_vc_id = to.id,
+			to_idx = to_idx
+		}
 
 
 func check_visibility(_rect: Rect2) -> void:
@@ -70,6 +93,7 @@ func show() -> void:
 			cnode.route_ref = HenRouter.current_route
 			cnode.change_name(name)
 			cnode.virtual_ref = self
+
 
 			var idx: int = 0
 
@@ -305,13 +329,40 @@ func reset() -> void:
 		for line_data: OutputConnectionData in output_connections:
 			line_data.to_ref.from_old_pos = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.input.global_position) + line_data.line_ref.conn_size
 
-		
+
 		for signal_data: Dictionary in cnode_ref.get_signal_connection_list('on_move'):
 			cnode_ref.disconnect('on_move', signal_data.callable)
 
 		cnode_ref.virtual_ref = null
 		cnode_ref.visible = false
 		cnode_ref = null
+
+
+func get_save() -> Dictionary:
+	var data: Dictionary = {
+		id = id,
+		name = name,
+		position = var_to_str(position),
+		inputs = inputs,
+		outputs = outputs,
+		size = var_to_str(size),
+		input_connections = [],
+		output_connections = [],
+	}
+
+	if flow_connection:
+		data.flow_connection = flow_connection.get_save()
+
+	if from_vcnode:
+		data.from_vc_id = from_vcnode.id
+
+	for input: InputConnectionData in input_connections:
+		data.input_connections.append(input.get_save())
+	
+	for output: OutputConnectionData in output_connections:
+		data.output_connections.append(output.get_save())
+
+	return data
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:

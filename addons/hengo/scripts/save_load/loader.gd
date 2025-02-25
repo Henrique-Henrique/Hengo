@@ -52,6 +52,13 @@ static func load_and_edit(_path: StringName) -> void:
 	HenGlobal.vc_list.clear()
 	HenGlobal.vs_list.clear()
 
+	# hide all virtuals
+	for cnode: HenCnode in HenGlobal.cnode_pool:
+		for signal_data: Dictionary in cnode.get_signal_connection_list('on_move'):
+			cnode.disconnect('on_move', signal_data.callable)
+
+		cnode.visible = false
+
 	# reset state pool
 	for state: HenState in HenGlobal.state_pool:
 		for signal_data: Dictionary in state.get_signal_connection_list('on_move'):
@@ -85,6 +92,7 @@ static func load_and_edit(_path: StringName) -> void:
 
 	var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
 
+	# create new graph
 	if script.source_code.begins_with('extends '):
 		# setting script type
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
@@ -154,7 +162,7 @@ static func load_and_edit(_path: StringName) -> void:
 
 				general.position = spacing + Vector2(30, 0)
 
-				HenCnode.instantiate_and_add({
+				HenVirtualCNode.instantiate_virtual_cnode({
 					name = general_data.cnode_name,
 					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
 					outputs = [ {
@@ -165,17 +173,39 @@ static func load_and_edit(_path: StringName) -> void:
 					position = Vector2.ZERO
 				})
 
+
 				spacing = Vector2(general.position.x + general.size.x, general.position.y)
 
-		# It's a new project
-		var state := HenState.instantiate_and_add_to_scene()
-		state.add_event({
+		var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state({
+			name = 'My state'
+		})
+		
+		v_state.add_event({
 			name = 'Start',
 			type = 'start'
 		})
 
-		state.select()
+		# adding initial cnodes (update and ready)
+		HenVirtualCNode.instantiate_virtual_cnode({
+			name = 'enter',
+			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+			route = v_state.route,
+			position = Vector2.ZERO
+		})
 
+		HenVirtualCNode.instantiate_virtual_cnode({
+			name = 'update',
+			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+			outputs = [ {
+				name = 'delta',
+				type = 'float'
+			}],
+			route = v_state.route,
+			position = Vector2(400, 0)
+		})
+
+		HenRouter.current_route = v_state.route
+		HenGlobal.STATE_CAM._check_virtual_state()
 	#   
 	#
 	# loading hengo script data

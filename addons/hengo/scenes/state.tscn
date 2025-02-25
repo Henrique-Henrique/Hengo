@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cqtu0nvn7pf1g"]
+[gd_scene load_steps=15 format=3 uid="uid://cqtu0nvn7pf1g"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/state.gd" id="1_83mqb"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_ckcrp"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/state_arrow.gd" id="3_6rctr"]
 [ext_resource type="Texture2D" uid="uid://cuutceef7st2" path="res://addons/hengo/assets/icons/cnode/go_to.svg" id="3_mpv6s"]
 [ext_resource type="Shader" path="res://addons/hengo/assets/shaders/state_debug.gdshader" id="5_5ewri"]
+[ext_resource type="PackedScene" uid="uid://egclfjnfoynq" path="res://addons/hengo/scenes/event_structure.tscn" id="7_qwmax"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5fi16"]
 
@@ -131,12 +132,17 @@ script = ExtResource("3_6rctr")
 
 [node name="EventContainer" type="Control" parent="VBoxContainer/Title"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = -5.0
 offset_bottom = -5.0
 grow_horizontal = 2
+
+[node name="EventStructure" parent="VBoxContainer/Title/EventContainer" instance=ExtResource("7_qwmax")]
+layout_mode = 1
+offset_top = -32.0
 
 [node name="Control" type="Control" parent="VBoxContainer/Title"]
 process_mode = 4

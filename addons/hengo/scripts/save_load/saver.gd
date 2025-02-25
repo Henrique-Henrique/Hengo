@@ -67,43 +67,64 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# STATES
 	var states: Array[Dictionary] = []
 
-	for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
+	for v_state: HenVirtualState in HenGlobal.vs_list:
 		var data: Dictionary = {
-			id = state.hash,
-			name = state.get_state_name(),
-			pos = var_to_str(state.position),
-			cnode_list = get_cnode_list(HenRouter.route_reference[state.route.id]),
+			id = v_state.id,
+			name = v_state.name,
+			position = var_to_str(v_state.position),
+			cnode_list = [],
 			events = [],
-			transitions = []
+			transitions = [],
 		}
 
-		var state_route = state.route.duplicate()
-		state_route.erase('state_ref')
-
-		data['route'] = state_route
-
-		# ---------------------------------------------------------------------------- #
 		# transitions
-		for trans: HenStateTransition in state.get_node('%TransitionContainer').get_children():
-			var trans_data = {
-				name = trans.get_transition_name()
-			}
+		for transition: HenVirtualState.TransitionData in v_state.transitions:
+			data.transitions.append(transition.get_save())
 
-			if trans.line:
-				if not trans.line.deleted:
-					trans_data['to_state_id'] = trans.line.to_state.hash
-
-			data['transitions'].append(trans_data)
-
-		var event_container = state.get_node('%EventContainer')
-
-		if event_container.get_child_count() > 0:
-			var event_list := event_container.get_child(0).get_node('%EventList')
-
-			for event in event_list.get_children():
-				data['events'].append(event.get_meta('config'))
+		# cnodes
+		if HenGlobal.vc_list.has(v_state.route.id):
+			for v_cnode: HenVirtualCNode in HenGlobal.vc_list.get(v_state.route.id):
+				data.cnode_list.append(v_cnode.get_save())
 
 		states.append(data)
+
+	# for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
+	# 	var data: Dictionary = {
+	# 		id = state.hash,
+	# 		name = state.get_state_name(),
+	# 		pos = var_to_str(state.position),
+	# 		cnode_list = get_cnode_list(HenRouter.route_reference[state.route.id]),
+	# 		events = [],
+	# 		transitions = []
+	# 	}
+
+	# 	var state_route = state.route.duplicate()
+	# 	state_route.erase('state_ref')
+
+	# 	data['route'] = state_route
+
+	# 	# ---------------------------------------------------------------------------- #
+	# 	# transitions
+	# 	for trans: HenStateTransition in state.get_node('%TransitionContainer').get_children():
+	# 		var trans_data = {
+	# 			name = trans.get_transition_name()
+	# 		}
+
+	# 		if trans.line:
+	# 			if not trans.line.deleted:
+	# 				trans_data['to_state_id'] = trans.line.to_state.hash
+
+	# 		data['transitions'].append(trans_data)
+
+	# 	var event_container = state.get_node('%EventContainer')
+
+	# 	if event_container.get_child_count() > 0:
+	# 		var event_list := event_container.get_child(0).get_node('%EventList')
+
+	# 		for event in event_list.get_children():
+	# 			data['events'].append(event.get_meta('config'))
+
+	# 	states.append(data)
 
 	script_data.states = states
 
@@ -176,23 +197,26 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 	script_data.comments = comment_list
 
+	print(JSON.stringify(script_data.get_save()))
+
 	# ---------------------------------------------------------------------------- #
 	var code = '#[hengo] ' + JSON.stringify(script_data.get_save()) + '\n\n' + _code
 	var script: GDScript = GDScript.new()
 
-	print(code)
 
-	script.source_code = code
+	# print(code)
 
-	var reload_err: int = script.reload()
+	# script.source_code = code
 
-	if reload_err == OK:
-		var err: int = ResourceSaver.save(script, HenGlobal.current_script_path)
+	# var reload_err: int = script.reload()
 
-		if err == OK:
-			print('SAVED HENGO SCRIPT')
-	else:
-		pass
+	# if reload_err == OK:
+	# 	var err: int = ResourceSaver.save(script, HenGlobal.current_script_path)
+
+	# 	if err == OK:
+	# 		print('SAVED HENGO SCRIPT')
+	# else:
+	# 	pass
 
 
 static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Array:
