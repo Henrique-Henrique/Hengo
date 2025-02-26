@@ -205,10 +205,8 @@ static func instantiate_virtual_state(_config: Dictionary) -> HenVirtualState:
 	HenRouter.line_route_reference[v_state.route.id] = []
 	HenRouter.comment_reference[v_state.route.id] = []
 
-	if _config.has('pos'):
-		v_state.position = str_to_var(_config.pos)
-	elif _config.has('position'):
-		v_state.position = _config.position
+	if _config.has('position'):
+		v_state.position = str_to_var(_config.position)
 
 	HenGlobal.vs_list.append(v_state)
 

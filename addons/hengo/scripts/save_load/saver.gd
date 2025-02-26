@@ -130,27 +130,27 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 	# ---------------------------------------------------------------------------- #
 	# CONNECTIONS
-	var connections: Array[Dictionary] = []
-	var flow_connections: Array[Dictionary] = []
+	# var connections: Array[Dictionary] = []
+	# var flow_connections: Array[Dictionary] = []
 
-	for line in HenRouter.line_route_reference.values().reduce(func(acc, c): return acc + c):
-		if line is HenConnectionLine:
-			connections.append({
-				from_cnode = line.from_cnode.hash,
-				to_cnode = line.to_cnode.hash,
-				input = line.input.owner.get_index(),
-				output = line.output.owner.get_index()
-			})
-		# its flow connection
-		else:
-			flow_connections.append({
-				from_cnode = line.from_connector.root.hash,
-				from_connector = line.from_connector.get_index(),
-				to_cnode = line.to_cnode.hash
-			})
+	# for line in HenRouter.line_route_reference.values().reduce(func(acc, c): return acc + c):
+	# 	if line is HenConnectionLine:
+	# 		connections.append({
+	# 			from_cnode = line.from_cnode.hash,
+	# 			to_cnode = line.to_cnode.hash,
+	# 			input = line.input.owner.get_index(),
+	# 			output = line.output.owner.get_index()
+	# 		})
+	# 	# its flow connection
+	# 	else:
+	# 		flow_connections.append({
+	# 			from_cnode = line.from_connector.root.hash,
+	# 			from_connector = line.from_connector.get_index(),
+	# 			to_cnode = line.to_cnode.hash
+	# 		})
 
-	script_data.connections = connections
-	script_data.flow_connections = flow_connections
+	# script_data.connections = connections
+	# script_data.flow_connections = flow_connections
 
 
 	# ---------------------------------------------------------------------------- #
@@ -206,17 +206,18 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 
 	# print(code)
 
-	# script.source_code = code
+	script.source_code = code
 
-	# var reload_err: int = script.reload()
+	var reload_err: int = script.reload()
 
-	# if reload_err == OK:
-	# 	var err: int = ResourceSaver.save(script, HenGlobal.current_script_path)
+	if reload_err == OK:
+		var err: int = ResourceSaver.save(script, 'res://hengo/testing.gd')
+		# var err: int = ResourceSaver.save(script, HenGlobal.current_script_path)
 
-	# 	if err == OK:
-	# 		print('SAVED HENGO SCRIPT')
-	# else:
-	# 	pass
+		if err == OK:
+			print('SAVED HENGO SCRIPT')
+	else:
+		pass
 
 
 static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Array:

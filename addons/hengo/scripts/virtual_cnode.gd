@@ -365,17 +365,44 @@ func get_save() -> Dictionary:
 	return data
 
 
+func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode) -> void:
+	var input_connection: InputConnectionData = InputConnectionData.new()
+	var output_connection: OutputConnectionData = OutputConnectionData.new()
+
+	# output
+	# output_connection.idx = _from_out_idx
+	# output_connection.line_ref = line
+	# output_connection.type = _to.outputs[_from_out_idx].type
+	
+	# output_connection.to_idx = _to.get_index()
+	# output_connection.to = _to.root.virtual_ref
+	# output_connection.to_ref = input_connection
+	# output_connection.to_type = _to.connection_type
+
+	# # inputs
+	# input_connection.idx = _to.get_index()
+	# input_connection.line_ref = line
+	# input_connection.type = _to.connection_type
+	
+	# input_connection.from = _root.virtual_ref
+	# input_connection.from_idx = get_index()
+	# input_connection.from_ref = output_connection
+	# input_connection.from_type = _conn_type
+	
+
+	# _to.output_connections.append(output_connection)
+	# input_connections.append(input_connection)
+
+
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 
 	v_cnode.name = _config.name
-	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('hash') else _config.hash
+	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 
-	if _config.has('pos'):
-		v_cnode.position = str_to_var(_config.pos)
-	elif _config.has('position'):
-		v_cnode.position = _config.position
+	if _config.has('position'):
+		v_cnode.position = _config.position if _config.position is Vector2 else str_to_var(_config.position)
 
 	v_cnode.inputs = _config.inputs if _config.has('inputs') else []
 	v_cnode.outputs = _config.outputs if _config.has('outputs') else []

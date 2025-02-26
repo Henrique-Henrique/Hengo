@@ -310,9 +310,8 @@ func _input(event: InputEvent) -> void:
 					})
 				
 			elif event.keycode == KEY_F8:
-				print(
-					HenGlobal.CNODE_CONTAINER.get_child_count()
-				)
+				# just for test
+				HenLoader.load('res://hengo/testing.gd')
 					
 
 			if event.ctrl_pressed:
