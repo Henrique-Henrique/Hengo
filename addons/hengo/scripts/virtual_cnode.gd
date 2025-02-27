@@ -63,14 +63,6 @@ class OutputConnectionData extends ConnectionData:
 	var to_old_pos: Vector2
 	var to_type: StringName
 
-	func get_save() -> Dictionary:
-		return {
-			idx = idx,
-			to_vc_id = to.id,
-			to_idx = to_idx
-		}
-
-
 func check_visibility(_rect: Rect2) -> void:
 	is_showing = _rect.intersects(
 		Rect2(
@@ -358,40 +350,45 @@ func get_save() -> Dictionary:
 
 	for input: InputConnectionData in input_connections:
 		data.input_connections.append(input.get_save())
-	
-	for output: OutputConnectionData in output_connections:
-		data.output_connections.append(output.get_save())
 
 	return data
 
 
-func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode) -> void:
+func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: HenConnectionLine = null) -> void:
 	var input_connection: InputConnectionData = InputConnectionData.new()
 	var output_connection: OutputConnectionData = OutputConnectionData.new()
 
 	# output
-	# output_connection.idx = _from_out_idx
-	# output_connection.line_ref = line
-	# output_connection.type = _to.outputs[_from_out_idx].type
+	output_connection.idx = _from_idx
+	output_connection.line_ref = _line
+	output_connection.type = _from.outputs[_from_idx].type
 	
-	# output_connection.to_idx = _to.get_index()
-	# output_connection.to = _to.root.virtual_ref
-	# output_connection.to_ref = input_connection
-	# output_connection.to_type = _to.connection_type
+	output_connection.to_idx = _idx
+	output_connection.to = self
+	output_connection.to_ref = input_connection
+	output_connection.to_type = inputs[_idx].type
 
 	# # inputs
-	# input_connection.idx = _to.get_index()
-	# input_connection.line_ref = line
-	# input_connection.type = _to.connection_type
+	input_connection.idx = _idx
+	input_connection.line_ref = _line
+	input_connection.type = inputs[_idx].type
 	
-	# input_connection.from = _root.virtual_ref
-	# input_connection.from_idx = get_index()
-	# input_connection.from_ref = output_connection
-	# input_connection.from_type = _conn_type
-	
+	input_connection.from = _from
+	input_connection.from_idx = _from_idx
+	input_connection.from_ref = output_connection
+	input_connection.from_type = _from.outputs[_from_idx].type
 
-	# _to.output_connections.append(output_connection)
-	# input_connections.append(input_connection)
+	_from.output_connections.append(output_connection)
+	input_connections.append(input_connection)
+
+
+func add_flow_connection(_to: HenVirtualCNode) -> void:
+	var flow_data: HenVirtualCNode.FlowConnectionData = HenVirtualCNode.FlowConnectionData.new()
+
+	flow_data.cnode = _to
+
+	flow_connection = flow_data
+	_to.from_vcnode = self
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:

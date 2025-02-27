@@ -4,7 +4,8 @@ class_name HenLoader extends Node
 
 static var loaded_virtual_cnode_list: Dictionary = {}
 static var connection_list: Array = []
-
+static var flow_connection_list: Array = []
+static var from_flow_list: Array = []
 
 static func load_and_edit(_path: StringName) -> void:
 	# ---------------------------------------------------------------------------- #
@@ -384,8 +385,8 @@ static func load_and_edit(_path: StringName) -> void:
 			comment.pin_to_cnodes(true)
 
 	# checking errors
-	for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
-		HenCodeGeneration.check_state_errors(state)
+	# for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
+	# 	HenCodeGeneration.check_state_errors(state)
 
 	# checking if debugging
 	# change debugger script path
@@ -399,9 +400,10 @@ static func load_and_edit(_path: StringName) -> void:
 static func load(_path: StringName) -> void:
 	# ---------------------------------------------------------------------------- #
 	# remove start message
-
 	loaded_virtual_cnode_list.clear()
 	connection_list.clear()
+	flow_connection_list.clear()
+	from_flow_list.clear()
 
 	var state_msg: PanelContainer = HenGlobal.STATE_CAM.get_parent().get_node_or_null('StartMessage')
 	var cnode_msg: PanelContainer = HenGlobal.CNODE_CAM.get_parent().get_node_or_null('StartMessage')
@@ -447,6 +449,13 @@ static func load(_path: StringName) -> void:
 		state_line.to_state = null
 		state_line.from_transition = null
 		state_line.visible = false
+
+	for connection: HenConnectionLine in HenGlobal.connection_line_pool:
+		connection.visible = false
+
+	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+		flow_connection.visible = false
+
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config
@@ -657,6 +666,23 @@ static func load(_path: StringName) -> void:
 					})
 
 			_load_vc(state.cnode_list, v_state.route)
+
+
+		# adding in/out connections
+		for input_data: Dictionary in connection_list:
+			(input_data.from as HenVirtualCNode).add_connection(
+				input_data.idx,
+				input_data.from_idx,
+				(loaded_virtual_cnode_list[int(input_data.from_vc_id)] as HenVirtualCNode)
+			)
+
+		# adding flow connection
+		for flow_data: Dictionary in flow_connection_list:
+			(flow_data.from as HenVirtualCNode).add_flow_connection(loaded_virtual_cnode_list[int(flow_data.cnode)])
+
+		for from_flow_data: Dictionary in from_flow_list:
+			(from_flow_data.from as HenVirtualCNode).from_vcnode = \
+			(loaded_virtual_cnode_list[from_flow_data.to_idx] as HenVirtualCNode)
 
 
 		# creating props
@@ -875,7 +901,19 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> void:
 		_config.route = _route
 		var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(_config)
 		loaded_virtual_cnode_list[vc.id] = vc
-	
+
+		if _config.has('from_vc_id'):
+			from_flow_list.append({
+				from = vc,
+				to_idx = int(_config.from_vc_id)
+			})
+
 		if _config.has('input_connections'):
 			for input: Dictionary in _config.input_connections:
-				connection_list.append(vc.add_connection.bind(input.from_idx, input.idx))
+				input.from = vc
+				connection_list.append(input)
+		
+		if _config.has('flow_connection'):
+			flow_connection_list.append({
+				from = vc
+			}.merged(_config.flow_connection))

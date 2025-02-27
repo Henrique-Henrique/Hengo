@@ -32,6 +32,13 @@ static func change_route(_route: Dictionary) -> void:
 		line.output = null
 
 
+	for connection: HenConnectionLine in HenGlobal.connection_line_pool:
+		connection.visible = false
+
+	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+		flow_connection.visible = false
+
+
 	current_route = _route
 
 

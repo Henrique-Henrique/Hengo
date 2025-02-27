@@ -238,7 +238,6 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 	else:
 		# checking if types is relatable
 		if _from_type == 'out':
-
 			if not ClassDB.is_parent_class(_from_conn_type, _to_conn_type):
 				return false
 		else:
@@ -310,33 +309,13 @@ func create_virtual_connection(_config: Dictionary) -> void:
 	if not _to.root.is_connected('on_move', line.update_line):
 		_to.root.connect('on_move', line.update_line)
 
-	
-	var input_connection: HenVirtualCNode.InputConnectionData = HenVirtualCNode.InputConnectionData.new()
-	var output_connection: HenVirtualCNode.OutputConnectionData = HenVirtualCNode.OutputConnectionData.new()
-	
-	# output
-	output_connection.idx = get_index()
-	output_connection.line_ref = line
-	output_connection.type = _conn_type
-	
-	output_connection.to_idx = _to.get_index()
-	output_connection.to = _to.root.virtual_ref
-	output_connection.to_ref = input_connection
-	output_connection.to_type = _to.connection_type
 
-	# inputs
-	input_connection.idx = _to.get_index()
-	input_connection.line_ref = line
-	input_connection.type = _to.connection_type
-	
-	input_connection.from = _root.virtual_ref
-	input_connection.from_idx = get_index()
-	input_connection.from_ref = output_connection
-	input_connection.from_type = _conn_type
-	
-
-	_root.virtual_ref.output_connections.append(output_connection)
-	_to.root.virtual_ref.input_connections.append(input_connection)
+	_to.root.virtual_ref.add_connection(
+		_to.get_index(),
+		get_index(),
+		_root.virtual_ref,
+		line
+	)
 
 	_to.remove_in_prop()
 	line.update_line()
@@ -710,7 +689,6 @@ func set_type(_type: String) -> void:
 
 func change_type(_type: String) -> void:
 	# var remove_conn: bool = connection_type != _type
-
 	set_type(_type)
 
 	if type == 'in':
