@@ -108,30 +108,31 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Container"]
+[node name="FromFlowContainer" type="HBoxContainer" parent="Container"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="PanelContainer" type="PanelContainer" parent="Container/HBoxContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Container/FromFlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_448gq")
 
-[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/FromFlowContainer/PanelContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer/FlowSlot"]
+[node name="ArrowUp" type="Control" parent="Container/FromFlowContainer/PanelContainer/FlowSlot"]
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer/FlowSlot/ArrowUp"]
+[node name="TextureRect" type="TextureRect" parent="Container/FromFlowContainer/PanelContainer/FlowSlot/ArrowUp"]
 visible = false
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
@@ -150,7 +151,7 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 
-[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer/FlowSlot"]
+[node name="Label" type="Label" parent="Container/FromFlowContainer/PanelContainer/FlowSlot"]
 visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
@@ -158,25 +159,25 @@ theme_override_font_sizes/font_size = 16
 text = "teste"
 horizontal_alignment = 1
 
-[node name="PanelContainer2" type="PanelContainer" parent="Container/HBoxContainer"]
+[node name="PanelContainer2" type="PanelContainer" parent="Container/FromFlowContainer"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
 
-[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer2"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/FromFlowContainer/PanelContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer2/FlowSlot"]
+[node name="ArrowUp" type="Control" parent="Container/FromFlowContainer/PanelContainer2/FlowSlot"]
 process_mode = 4
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer2/FlowSlot/ArrowUp"]
+[node name="TextureRect" type="TextureRect" parent="Container/FromFlowContainer/PanelContainer2/FlowSlot/ArrowUp"]
 visible = false
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
@@ -195,32 +196,32 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 
-[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer2/FlowSlot"]
+[node name="Label" type="Label" parent="Container/FromFlowContainer/PanelContainer2/FlowSlot"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
 theme_override_font_sizes/font_size = 16
 text = "teste"
 horizontal_alignment = 1
 
-[node name="PanelContainer3" type="PanelContainer" parent="Container/HBoxContainer"]
+[node name="PanelContainer3" type="PanelContainer" parent="Container/FromFlowContainer"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
 
-[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer3"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/FromFlowContainer/PanelContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer3/FlowSlot"]
+[node name="ArrowUp" type="Control" parent="Container/FromFlowContainer/PanelContainer3/FlowSlot"]
 process_mode = 4
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer3/FlowSlot/ArrowUp"]
+[node name="TextureRect" type="TextureRect" parent="Container/FromFlowContainer/PanelContainer3/FlowSlot/ArrowUp"]
 visible = false
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
@@ -239,32 +240,32 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 
-[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer3/FlowSlot"]
+[node name="Label" type="Label" parent="Container/FromFlowContainer/PanelContainer3/FlowSlot"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
 theme_override_font_sizes/font_size = 16
 text = "teste"
 horizontal_alignment = 1
 
-[node name="PanelContainer4" type="PanelContainer" parent="Container/HBoxContainer"]
+[node name="PanelContainer4" type="PanelContainer" parent="Container/FromFlowContainer"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
 
-[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer4"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/FromFlowContainer/PanelContainer4"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer4/FlowSlot"]
+[node name="ArrowUp" type="Control" parent="Container/FromFlowContainer/PanelContainer4/FlowSlot"]
 process_mode = 4
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer4/FlowSlot/ArrowUp"]
+[node name="TextureRect" type="TextureRect" parent="Container/FromFlowContainer/PanelContainer4/FlowSlot/ArrowUp"]
 visible = false
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
@@ -283,32 +284,32 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 
-[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer4/FlowSlot"]
+[node name="Label" type="Label" parent="Container/FromFlowContainer/PanelContainer4/FlowSlot"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
 theme_override_font_sizes/font_size = 16
 text = "teste"
 horizontal_alignment = 1
 
-[node name="PanelContainer5" type="PanelContainer" parent="Container/HBoxContainer"]
+[node name="PanelContainer5" type="PanelContainer" parent="Container/FromFlowContainer"]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
 
-[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer5"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/FromFlowContainer/PanelContainer5"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 alignment = 1
 
-[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer5/FlowSlot"]
+[node name="ArrowUp" type="Control" parent="Container/FromFlowContainer/PanelContainer5/FlowSlot"]
 process_mode = 4
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer5/FlowSlot/ArrowUp"]
+[node name="TextureRect" type="TextureRect" parent="Container/FromFlowContainer/PanelContainer5/FlowSlot/ArrowUp"]
 visible = false
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
@@ -327,7 +328,7 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 
-[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer5/FlowSlot"]
+[node name="Label" type="Label" parent="Container/FromFlowContainer/PanelContainer5/FlowSlot"]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
 theme_override_font_sizes/font_size = 16
@@ -413,7 +414,7 @@ horizontal_alignment = 1
 [node name="Control" type="Control" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot"]
 layout_mode = 2
 
-[node name="true" type="TextureRect" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot/Control"]
+[node name="true" type="TextureRect" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot/Control" node_paths=PackedStringArray("root")]
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 custom_minimum_size = Vector2(20, 50)
 layout_mode = 1
@@ -430,6 +431,7 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 script = ExtResource("6_gsclm")
+root = NodePath("../../../../../../..")
 type = "true_flow"
 
 [node name="FlowSlot2" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]

@@ -97,10 +97,11 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
+		print(virtual_ref.flow_connections, ' | ', virtual_ref.from_flow_connections)
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
 		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
-		print('flow -> ', virtual_ref.flow_connection)
+		# print('flow -> ', virtual_ref.flow_connection)
 		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
 		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)
 
@@ -109,29 +110,30 @@ func _on_enter() -> void:
 	_preview_timer = get_tree().create_timer(.5)
 	_preview_timer.timeout.connect(_on_tooltip)
 
+
 	if HenGlobal.can_make_flow_connection:
 		HenGlobal.flow_connection_to_data = {
 			from_cnode = self
 		}
 
-		if not HenGlobal.CONNECTION_GUIDE.is_in_out:
-			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(global_position)
-			pos.x += size.x / 2
+		# if not HenGlobal.CONNECTION_GUIDE.is_in_out:
+		# 	var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(global_position)
+		# 	pos.x += size.x / 2
 
-			HenGlobal.CONNECTION_GUIDE.hover_pos = pos
-			HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color('#00f6ff'), Color('#00f6ff')]
+		# 	HenGlobal.CONNECTION_GUIDE.hover_pos = pos
+		# 	HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color('#00f6ff'), Color('#00f6ff')]
 
-			pivot_offset = size / 2
-			var tween = create_tween().set_trans(Tween.TRANS_SPRING)
-			tween.tween_property(self, 'scale', Vector2(1.05, 1.05), .03)
-			tween.tween_property(HenGlobal.flow_cnode_from, 'scale', Vector2(1.05, 1.05), .03)
+		# 	pivot_offset = size / 2
+		# 	var tween = create_tween().set_trans(Tween.TRANS_SPRING)
+		# 	tween.tween_property(self, 'scale', Vector2(1.05, 1.05), .03)
+		# 	tween.tween_property(HenGlobal.flow_cnode_from, 'scale', Vector2(1.05, 1.05), .03)
 			
-			HenGlobal.flow_cnode_from.modulate = Color('#00f6ff')
-			HenGlobal.flow_cnode_from.get_node('%Border').visible = true
+		# 	HenGlobal.flow_cnode_from.modulate = Color('#00f6ff')
+		# 	HenGlobal.flow_cnode_from.get_node('%Border').visible = true
 			
-			modulate = Color('#00f6ff')
-			get_node('%Border').visible = true
-			get_node('%Border').get('theme_override_styles/panel').set('border_color', Color('#00f6ff'))
+		# 	modulate = Color('#00f6ff')
+		# 	get_node('%Border').visible = true
+		# 	get_node('%Border').get('theme_override_styles/panel').set('border_color', Color('#00f6ff'))
 
 
 func _on_exit() -> void:

@@ -59,26 +59,31 @@ var sub_type: SubType
 
 var input_connections: Array = []
 var output_connections: Array = []
-var flow_connection: FlowConnectionData
-var from_vcnode: HenVirtualCNode
+# var flow_connection: FlowConnectionData
+# var from_vcnode: HenVirtualCNode
+var flow_connections: Array = []
+var from_flow_connections: Array = []
 
 
 class FlowConnectionData:
 	var line_ref: HenFlowConnectionLine
 	var from_pos: Vector2
 	var to_pos: Vector2
-	var cnode: HenVirtualCNode
-	var true_flow: HenVirtualCNode
-	var then_flow: HenVirtualCNode
+	var to: HenVirtualCNode
+
+	
+	func add_connection(_to: HenVirtualCNode) -> void:
+		to = _to
+
 
 	func get_save() -> Dictionary:
 		var data: Dictionary = {}
-
-		if cnode: data.cnode = cnode.id
-		if true_flow: data.true_flow = true_flow.id
-		if then_flow: data.then_flow = then_flow.id
-
 		return data
+
+
+class FromFlowConnection:
+	var from: HenVirtualCNode
+	var from_connection: FlowConnectionData
 
 
 class ConnectionData:
@@ -240,14 +245,14 @@ func show() -> void:
 			size = cnode.size
 
 
-			if from_vcnode:
+			for from_flow_connection: FromFlowConnection in from_flow_connections:
 				var line: HenFlowConnectionLine
 
-				if from_vcnode.flow_connection.line_ref:
-					line = from_vcnode.flow_connection.line_ref
+				if from_flow_connection.from_connection.line_ref:
+					line = from_flow_connection.from_connection.line_ref
 				else:
 					line = HenPool.get_flow_line_from_pool()
-					from_vcnode.flow_connection.line_ref = line
+					from_flow_connection.from_connection.line_ref = line
 
 				# signal to update flow connection line
 				if not cnode_ref.is_connected('on_move', line.update_line):
@@ -255,13 +260,14 @@ func show() -> void:
 
 				line.to_cnode = cnode_ref
 				line.to_pool_visible = true
-				line.from_virtual_pos = from_vcnode.flow_connection.from_pos
+				line.from_virtual_pos = from_flow_connection.from_connection.from_pos
 
 				await RenderingServer.frame_pre_draw
 				line.update_line()
 
 
-			if flow_connection:
+			for flow_connection: FlowConnectionData in flow_connections:
+				print(flow_connection)
 				var line: HenFlowConnectionLine
 
 				if flow_connection.line_ref:
@@ -325,31 +331,35 @@ func hide() -> void:
 			
 			line_data.line_ref = null
 
+		
+		for flow_connection: FlowConnectionData in flow_connections:
+			if flow_connection.to:
+				if flow_connection.line_ref:
+					flow_connection.line_ref.from_pool_visible = false
 
-		if flow_connection is FlowConnectionData:
-			if flow_connection.line_ref:
-				flow_connection.line_ref.from_pool_visible = false
-
-				if flow_connection.cnode.is_showing:
-					var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(cnode_ref.get_connector().global_position) + cnode_ref.get_connector().size / 2
-					flow_connection.from_pos = pos
-					flow_connection.line_ref.from_virtual_pos = pos
-				else:
-					flow_connection.line_ref.visible = false
-					flow_connection.line_ref = null
+					if flow_connection.to.is_showing:
+						var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(cnode_ref.global_position) + cnode_ref.size / 2
+						# var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(cnode_ref.get_connector().global_position) + cnode_ref.get_connector().size / 2
+						flow_connection.from_pos = pos
+						flow_connection.line_ref.from_virtual_pos = pos
+					else:
+						flow_connection.line_ref.visible = false
+						flow_connection.line_ref = null
 
 
-		if from_vcnode is HenVirtualCNode:
-			if from_vcnode.flow_connection.line_ref:
-				from_vcnode.flow_connection.line_ref.to_pool_visible = false
+		for from_flow_connection: FromFlowConnection in from_flow_connections:
+			var line: HenFlowConnectionLine = from_flow_connection.from_connection.line_ref
 
-				if from_vcnode.is_showing:
+			if line:
+				line.to_pool_visible = false
+
+				if from_flow_connection.from.is_showing:
 					var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(cnode_ref.global_position) + Vector2(cnode_ref.size.x / 2, -10)
-					from_vcnode.flow_connection.to_pos = pos
-					from_vcnode.flow_connection.line_ref.to_virtual_pos = pos
+					from_flow_connection.from_connection.to_pos = pos
+					line.to_virtual_pos = pos
 				else:
-					from_vcnode.flow_connection.line_ref.visible = false
-					from_vcnode.flow_connection.line_ref = null
+					line.visible = false
+					line = null
 
 
 		cnode_ref.visible = false
@@ -379,6 +389,8 @@ func reset() -> void:
 func get_save() -> Dictionary:
 	var data: Dictionary = {
 		id = id,
+		type = type,
+		sub_type = sub_type,
 		name = name,
 		position = var_to_str(position),
 		inputs = inputs,
@@ -388,11 +400,11 @@ func get_save() -> Dictionary:
 		output_connections = [],
 	}
 
-	if flow_connection:
-		data.flow_connection = flow_connection.get_save()
+	# if flow_connection:
+	# 	data.flow_connection = flow_connection.get_save()
 
-	if from_vcnode:
-		data.from_vc_id = from_vcnode.id
+	# if from_vcnode:
+	# 	data.from_vc_id = from_vcnode.id
 
 	for input: InputConnectionData in input_connections:
 		data.input_connections.append(input.get_save())
@@ -428,26 +440,23 @@ func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: He
 	input_connections.append(input_connection)
 
 
-func add_flow_connection(_to: HenVirtualCNode) -> void:
-	var flow_data: HenVirtualCNode.FlowConnectionData = HenVirtualCNode.FlowConnectionData.new()
-
-	flow_data.cnode = _to
-
-	flow_connection = flow_data
-	_to.from_vcnode = self
-
-
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 
-	v_cnode.type = _config.type if _config.has('type') else Type.DEFAULT
+	v_cnode.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.sub_type = _config.sub_type
 	v_cnode.name = _config.name
 	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 
 	if _config.has('position'):
 		v_cnode.position = _config.position if _config.position is Vector2 else str_to_var(_config.position)
+
+
+	match v_cnode.type:
+		Type.DEFAULT:
+			v_cnode.flow_connections.append(FlowConnectionData.new())
+
 
 	v_cnode.inputs = _config.inputs if _config.has('inputs') else []
 	v_cnode.outputs = _config.outputs if _config.has('outputs') else []

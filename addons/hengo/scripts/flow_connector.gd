@@ -49,9 +49,7 @@ func _on_gui(_event: InputEvent) -> void:
 					})
 					HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 				elif HenGlobal.can_make_flow_connection and not HenGlobal.flow_connection_to_data.is_empty():
-					create_virtual_connection({
-
-					})
+					create_virtual_connection(HenGlobal.flow_connection_to_data)
 					# var line := create_connection_line(HenGlobal.flow_connection_to_data)
 
 					# HenGlobal.history.create_action('Add Flow Connection')
@@ -66,9 +64,10 @@ func _on_gui(_event: InputEvent) -> void:
 					HenGlobal.flow_connection_to_data.from_cnode.modulate = Color.WHITE
 					HenGlobal.flow_connection_to_data.from_cnode.get_node('%Border').visible = false
 
-				root.scale = Vector2.ONE
-				root.modulate = Color.WHITE
-				root.get_node('%Border').visible = false
+
+				# root.scale = Vector2.ONE
+				# root.modulate = Color.WHITE
+				# root.get_node('%Border').visible = false
 				# endregion
 
 				HenGlobal.flow_connection_to_data = {}
@@ -78,11 +77,10 @@ func _on_gui(_event: InputEvent) -> void:
 
 
 func create_virtual_connection(_config: Dictionary) -> void:
-	print(HenGlobal.flow_connection_to_data.from_cnode.virtual_ref.name)
 	var line: HenFlowConnectionLine = HenPool.get_flow_line_from_pool()
 	
 	line.from_connector = self
-	line.to_cnode = HenGlobal.flow_connection_to_data.from_cnode
+	line.to_cnode = _config.from_cnode
 
 	line.update_line()
 
@@ -93,18 +91,19 @@ func create_virtual_connection(_config: Dictionary) -> void:
 	if not line.to_cnode.is_connected('on_move', line.update_line):
 		line.to_cnode.connect('on_move', line.update_line)
 
-	var flow_data: HenVirtualCNode.FlowConnectionData = HenVirtualCNode.FlowConnectionData.new()
 	
-	match root.type:
-		HenCnode.TYPE.IF:
-			pass
-		_:
-			flow_data.cnode = line.to_cnode.virtual_ref
+	var flow_data: HenVirtualCNode.FlowConnectionData = root.virtual_ref.flow_connections[0]
+	var from_flow: HenVirtualCNode.FromFlowConnection = HenVirtualCNode.FromFlowConnection.new()
 
+	print(line.to_cnode.virtual_ref)
+
+	flow_data.to = line.to_cnode.virtual_ref
 	flow_data.line_ref = line
 
-	line.to_cnode.virtual_ref.from_vcnode = root.virtual_ref
-	root.virtual_ref.flow_connection = flow_data
+	from_flow.from = root.virtual_ref
+	from_flow.from_connection = flow_data
+
+	line.to_cnode.virtual_ref.from_flow_connections.append(from_flow)
 
 
 func create_connection_line(_config: Dictionary) -> HenFlowConnectionLine:
