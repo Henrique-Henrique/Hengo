@@ -677,12 +677,12 @@ static func load(_path: StringName) -> void:
 			)
 
 		# adding flow connection
-		for flow_data: Dictionary in flow_connection_list:
-			(flow_data.from as HenVirtualCNode).add_flow_connection(loaded_virtual_cnode_list[int(flow_data.cnode)])
+		# for flow_data: Dictionary in flow_connection_list:
+		# 	(flow_data.from as HenVirtualCNode).add_flow_connection(loaded_virtual_cnode_list[int(flow_data.cnode)])
 
-		for from_flow_data: Dictionary in from_flow_list:
-			(from_flow_data.from as HenVirtualCNode).from_vcnode = \
-			(loaded_virtual_cnode_list[from_flow_data.to_idx] as HenVirtualCNode)
+		# for from_flow_data: Dictionary in from_flow_list:
+		# 	(from_flow_data.from as HenVirtualCNode).from_vcnode = \
+		# 	(loaded_virtual_cnode_list[from_flow_data.to_idx] as HenVirtualCNode)
 
 
 		# creating props

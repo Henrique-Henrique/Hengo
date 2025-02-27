@@ -1,9 +1,26 @@
-[gd_scene load_steps=9 format=3 uid="uid://bxh18qk6jrul6"]
+[gd_scene load_steps=17 format=3 uid="uid://bxh18qk6jrul6"]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_ykti4"]
 [ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_ks1pc"]
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="3_8vu1l"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="4_nvxjk"]
+[ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="5_fqa58"]
+[ext_resource type="PackedScene" uid="uid://cfwcyd5bthd1j" path="res://addons/hengo/scenes/flow_slot.tscn" id="5_t32p4"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="6_gsclm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_448gq"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_color = Color(0.254902, 0.270588, 0.286275, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v3d73"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_color = Color(0.254902, 0.270588, 0.286275, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjksb"]
 resource_local_to_scene = true
@@ -14,8 +31,21 @@ content_margin_bottom = 12.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
 border_width_bottom = 2
 border_color = Color(1, 1, 1, 0.0784314)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12ubu"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_top = 2
+border_color = Color(0.254902, 0.270588, 0.286275, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kx661"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_color = Color(0.254902, 0.270588, 0.286275, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t3xrx"]
 resource_local_to_scene = true
@@ -68,8 +98,8 @@ expand_margin_right = 8.0
 expand_margin_bottom = 8.0
 
 [node name="Cnode" type="PanelContainer"]
-offset_right = 170.0
-offset_bottom = 41.0
+offset_right = 121.0
+offset_bottom = 53.0
 theme_override_styles/panel = ExtResource("1_ykti4")
 script = ExtResource("1_onkoy")
 
@@ -78,43 +108,31 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="TitleContainer" type="PanelContainer" parent="Container"]
-unique_name_in_owner = true
+[node name="HBoxContainer" type="HBoxContainer" parent="Container"]
 layout_mode = 2
-mouse_default_cursor_shape = 6
-theme_override_styles/panel = SubResource("StyleBoxFlat_bjksb")
+theme_override_constants/separation = 0
+alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Container/TitleContainer"]
-process_mode = 4
-layout_mode = 2
-size_flags_vertical = 4
-mouse_filter = 2
-theme_override_constants/separation = 8
-
-[node name="TitleIcon" type="TextureRect" parent="Container/TitleContainer/HBoxContainer2"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(20, 20)
-layout_mode = 2
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Title" type="Label" parent="Container/TitleContainer/HBoxContainer2"]
-unique_name_in_owner = true
+[node name="PanelContainer" type="PanelContainer" parent="Container/HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("3_8vu1l")
-theme_override_font_sizes/font_size = 20
-text = "Title"
+theme_override_styles/panel = SubResource("StyleBoxFlat_448gq")
 
-[node name="ArrowUp" type="Control" parent="Container/TitleContainer"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer/FlowSlot"]
 unique_name_in_owner = true
 process_mode = 4
-visible = false
 layout_mode = 2
 size_flags_vertical = 0
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="Container/TitleContainer/ArrowUp"]
+[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer/FlowSlot/ArrowUp"]
+visible = false
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 layout_mode = 1
 anchors_preset = 7
@@ -122,8 +140,7 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_top = -41.35
-offset_bottom = -6.35
+offset_top = -30.0
 grow_horizontal = 2
 grow_vertical = 0
 size_flags_horizontal = 4
@@ -132,6 +149,222 @@ texture = ExtResource("2_ks1pc")
 expand_mode = 1
 stretch_mode = 3
 flip_v = true
+
+[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer/FlowSlot"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_nvxjk")
+theme_override_font_sizes/font_size = 16
+text = "teste"
+horizontal_alignment = 1
+
+[node name="PanelContainer2" type="PanelContainer" parent="Container/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
+
+[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer2/FlowSlot"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer2/FlowSlot/ArrowUp"]
+visible = false
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_ks1pc")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+
+[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer2/FlowSlot"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_nvxjk")
+theme_override_font_sizes/font_size = 16
+text = "teste"
+horizontal_alignment = 1
+
+[node name="PanelContainer3" type="PanelContainer" parent="Container/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
+
+[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer3/FlowSlot"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer3/FlowSlot/ArrowUp"]
+visible = false
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_ks1pc")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+
+[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer3/FlowSlot"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_nvxjk")
+theme_override_font_sizes/font_size = 16
+text = "teste"
+horizontal_alignment = 1
+
+[node name="PanelContainer4" type="PanelContainer" parent="Container/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
+
+[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer4"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer4/FlowSlot"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer4/FlowSlot/ArrowUp"]
+visible = false
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_ks1pc")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+
+[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer4/FlowSlot"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_nvxjk")
+theme_override_font_sizes/font_size = 16
+text = "teste"
+horizontal_alignment = 1
+
+[node name="PanelContainer5" type="PanelContainer" parent="Container/HBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
+
+[node name="FlowSlot" type="VBoxContainer" parent="Container/HBoxContainer/PanelContainer5"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="ArrowUp" type="Control" parent="Container/HBoxContainer/PanelContainer5/FlowSlot"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="Container/HBoxContainer/PanelContainer5/FlowSlot/ArrowUp"]
+visible = false
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_ks1pc")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+
+[node name="Label" type="Label" parent="Container/HBoxContainer/PanelContainer5/FlowSlot"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_nvxjk")
+theme_override_font_sizes/font_size = 16
+text = "teste"
+horizontal_alignment = 1
+
+[node name="TitleContainer" type="PanelContainer" parent="Container"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 6
+theme_override_styles/panel = SubResource("StyleBoxFlat_bjksb")
+
+[node name="CenterContainer" type="CenterContainer" parent="Container/TitleContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Container/TitleContainer/CenterContainer"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="TitleIcon" type="TextureRect" parent="Container/TitleContainer/CenterContainer/HBoxContainer2"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Container/TitleContainer/CenterContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("3_8vu1l")
+theme_override_font_sizes/font_size = 16
+text = "Title"
 
 [node name="CenterContainer" type="HBoxContainer" parent="Container"]
 unique_name_in_owner = true
@@ -150,6 +383,70 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
+
+[node name="PanelContainer" type="PanelContainer" parent="Container"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_12ubu")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Container/PanelContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="FlowSlot" type="PanelContainer" parent="Container/PanelContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_kx661")
+
+[node name="FlowSlot" type="VBoxContainer" parent="Container/PanelContainer/HBoxContainer/FlowSlot"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot"]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_nvxjk")
+theme_override_font_sizes/font_size = 16
+text = "cnode"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot"]
+layout_mode = 2
+
+[node name="true" type="TextureRect" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot/Control"]
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
+custom_minimum_size = Vector2(20, 50)
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -19.5
+offset_right = 19.5
+offset_bottom = 20.0
+grow_horizontal = 2
+size_flags_horizontal = 7
+texture = ExtResource("5_fqa58")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+script = ExtResource("6_gsclm")
+type = "true_flow"
+
+[node name="FlowSlot2" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+visible = false
+layout_mode = 2
+
+[node name="FlowSlot3" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+visible = false
+layout_mode = 2
+
+[node name="FlowSlot4" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+visible = false
+layout_mode = 2
+
+[node name="FlowSlot5" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+visible = false
+layout_mode = 2
 
 [node name="SelectBorder" type="Panel" parent="."]
 unique_name_in_owner = true

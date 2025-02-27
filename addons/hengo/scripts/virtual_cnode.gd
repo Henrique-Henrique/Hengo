@@ -1,6 +1,50 @@
 @tool
 class_name HenVirtualCNode extends RefCounted
 
+enum Type {
+	DEFAULT,
+	IF,
+	IMG,
+	EXPRESSION,
+}
+
+enum SubType {
+	FUNC,
+	VOID,
+	VAR,
+	LOCAL_VAR,
+	DEBUG_VALUE,
+	USER_FUNC,
+	SET_VAR,
+	SET_PROP,
+	GET_PROP,
+	VIRTUAL,
+	FUNC_INPUT,
+	CAST,
+	IF,
+	RAW_CODE,
+	SELF_GO_TO_VOID,
+	FOR,
+	FOR_ARR,
+	FOR_ITEM,
+	FUNC_OUTPUT,
+	CONST,
+	SINGLETON,
+	GO_TO_VOID,
+	IMG,
+	EXPRESSION,
+	SET_LOCAL_VAR,
+	IN_PROP,
+	NOT_CONNECTED,
+	DEBUG,
+	DEBUG_PUSH,
+	DEBUG_FLOW_START,
+	START_DEBUG_STATE,
+	DEBUG_STATE,
+	BREAK,
+	CONTINUE,
+	PASS
+}
 
 var name: String
 var id: int
@@ -10,6 +54,8 @@ var cnode_ref: HenCnode
 var inputs: Array
 var outputs: Array
 var size: Vector2
+var type: Type
+var sub_type: SubType
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -368,7 +414,7 @@ func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: He
 	output_connection.to_ref = input_connection
 	output_connection.to_type = inputs[_idx].type
 
-	# # inputs
+	# inputs
 	input_connection.idx = _idx
 	input_connection.line_ref = _line
 	input_connection.type = inputs[_idx].type
@@ -395,6 +441,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 
+	v_cnode.type = _config.type if _config.has('type') else Type.DEFAULT
+	v_cnode.sub_type = _config.sub_type
 	v_cnode.name = _config.name
 	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 

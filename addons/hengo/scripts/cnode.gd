@@ -827,7 +827,7 @@ static func instantiate_and_add_pool() -> void:
 			instance.position = Vector2(50000, 50000)
 			instance.is_pool = true
 			instance.visible = false
-			instance.set_flow_connection(TYPE.DEFAULT)
+			# instance.set_flow_connection(TYPE.DEFAULT)
 
 			if not HenGlobal.can_instantiate_pool:
 				return
