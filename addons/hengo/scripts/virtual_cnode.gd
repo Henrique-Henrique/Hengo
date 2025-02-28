@@ -193,11 +193,7 @@ func show() -> void:
 
 				input.remove_in_prop()
 
-				await RenderingServer.frame_pre_draw
-
 				line_data.line_ref.conn_size = (input.get_node('%Connector') as TextureRect).size / 2
-
-				line_data.line_ref.update_line()
 				line_data.line_ref.update_colors(line_data.from_type, line_data.type)
 
 				if not cnode_ref.is_connected('on_move', line_data.line_ref.update_line):
@@ -227,18 +223,13 @@ func show() -> void:
 				line_data.line_ref.from_pool_visible = true
 				line_data.line_ref.visible = true
 
-				await RenderingServer.frame_pre_draw
 
 				line_data.line_ref.conn_size = (output.get_node('%Connector') as TextureRect).size / 2
-
-				line_data.line_ref.update_line()
 				line_data.line_ref.update_colors(line_data.type, line_data.to_type)
 
 				if not cnode_ref.is_connected('on_move', line_data.line_ref.update_line):
 					cnode_ref.connect('on_move', line_data.line_ref.update_line)
-			
-			cnode.reset_size()
-			size = cnode.size
+
 
 			# cleaning flows
 			var flow_container = cnode_ref.get_node('%FlowContainer')
@@ -249,6 +240,7 @@ func show() -> void:
 				connector.idx = flow_c.get_index()
 				connector.root = cnode_ref
 				flow_c.visible = false
+
 
 			# Showing Flows
 			match type as Type:
@@ -295,8 +287,6 @@ func show() -> void:
 				line.from_virtual_pos = from_flow_connection.from_connection.from_pos
 				line.to_pool_visible = true
 
-				await RenderingServer.frame_pre_draw
-				line.update_line()
 				idx += 1
 
 			idx = 0
@@ -305,9 +295,7 @@ func show() -> void:
 				if not flow_connection.to: continue
 				
 				var line: HenFlowConnectionLine
-			
-				
-				# prints('s: ', name, flow_connection.to, flow_connection.to_pos)
+
 
 				if flow_connection.line_ref:
 					line = flow_connection.line_ref
@@ -323,16 +311,38 @@ func show() -> void:
 				line.to_virtual_pos = flow_connection.to_pos
 				line.from_pool_visible = true
 			
-				await RenderingServer.frame_pre_draw
-				line.update_line()
-			
 				idx += 1
 
+				
+			cnode.reset_size()
+			size = cnode.size
+
+			# drawing the connections	
+			await RenderingServer.frame_post_draw
+
+			for connection: InputConnectionData in input_connections:
+				if not connection.line_ref: continue
+				connection.line_ref.update_line()
+			
+			for connection: OutputConnectionData in output_connections:
+				if not connection.line_ref: continue
+				connection.line_ref.update_line()
+
+			for connection: FlowConnectionData in flow_connections:
+				if not connection.line_ref: continue
+				connection.line_ref.update_line()
+
+			for connection: FromFlowConnection in from_flow_connections:
+				if not connection.from_connection.line_ref: continue
+				connection.from_connection.line_ref.update_line()
+			
 
 			break
 
 
 func hide() -> void:
+	is_showing = false
+	
 	if cnode_ref:
 		for signal_data: Dictionary in cnode_ref.get_signal_connection_list('on_move'):
 			cnode_ref.disconnect('on_move', signal_data.callable)
@@ -372,6 +382,7 @@ func hide() -> void:
 			
 			line_data.line_ref = null
 
+
 		for flow_connection: FlowConnectionData in flow_connections:
 			if flow_connection.line_ref:
 				flow_connection.line_ref.from_pool_visible = false
@@ -402,37 +413,6 @@ func hide() -> void:
 
 		cnode_ref.visible = false
 		cnode_ref.virtual_ref = null
-		cnode_ref = null
-
-
-func reset() -> void:
-	is_showing = false
-	
-	if cnode_ref:
-		for line_data: InputConnectionData in input_connections:
-			line_data.from_ref.to_old_pos = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.output.global_position) + line_data.line_ref.conn_size
-
-		for line_data: OutputConnectionData in output_connections:
-			line_data.to_ref.from_old_pos = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.input.global_position) + line_data.line_ref.conn_size
-
-			
-		for from_flow_connection: FromFlowConnection in from_flow_connections:
-			if not from_flow_connection.from_connection.line_ref: continue
-			var from_connector: HenFlowConnector = from_flow_connection.from_connection.line_ref.from_connector
-			from_flow_connection.from_connection.from_pos = (HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2) if from_connector else from_flow_connection.from_connection.line_ref.from_virtual_pos
-
-		for flow_connection: FlowConnectionData in flow_connections:
-			if not flow_connection.line_ref: continue
-			var to_cnode: HenCnode = flow_connection.line_ref.to_cnode
-			flow_connection.to_pos = (HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, -10)) if to_cnode else flow_connection.line_ref.to_virtual_pos
-			flow_connection.line_ref = null
-
-
-		for signal_data: Dictionary in cnode_ref.get_signal_connection_list('on_move'):
-			cnode_ref.disconnect('on_move', signal_data.callable)
-
-		cnode_ref.virtual_ref = null
-		cnode_ref.visible = false
 		cnode_ref = null
 
 

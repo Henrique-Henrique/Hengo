@@ -137,6 +137,8 @@ func show() -> void:
 
 
 func hide() -> void:
+	is_showing = false
+	
 	if state_ref:
 		for signal_data: Dictionary in state_ref.get_signal_connection_list('on_move'):
 			state_ref.disconnect('on_move', signal_data.callable)

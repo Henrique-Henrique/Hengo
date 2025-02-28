@@ -21,15 +21,11 @@ static func change_route(_route: Dictionary) -> void:
 	# hide all virtuals
 	if not current_route.is_empty() and HenGlobal.vc_list.has(current_route.id):
 		for vc: HenVirtualCNode in HenGlobal.vc_list[current_route.id]:
-			vc.reset()
+			vc.hide()
 
 
 	for line: HenConnectionLine in HenGlobal.connection_line_pool:
 		line.visible = false
-		line.from_cnode = null
-		line.to_cnode = null
-		line.input = null
-		line.output = null
 
 
 	for connection: HenConnectionLine in HenGlobal.connection_line_pool:
@@ -37,8 +33,6 @@ static func change_route(_route: Dictionary) -> void:
 
 
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
-		flow_connection.from_connector = null
-		flow_connection.to_cnode = null
 		flow_connection.visible = false
 
 
