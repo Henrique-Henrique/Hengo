@@ -4,6 +4,7 @@ class_name HenFlowConnector extends TextureRect
 @export var root: HenCnode
 @export var type: String = 'cnode'
 
+var idx: int = 0
 var connections_lines: Array = []
 var is_connected: bool = false
 
@@ -78,11 +79,9 @@ func _on_gui(_event: InputEvent) -> void:
 
 func create_virtual_connection(_config: Dictionary) -> void:
 	var line: HenFlowConnectionLine = HenPool.get_flow_line_from_pool()
-	
+
 	line.from_connector = self
 	line.to_cnode = _config.from_cnode
-
-	line.update_line()
 
 	# signal to update flow connection line
 	if not root.is_connected('on_move', line.update_line):
@@ -91,19 +90,27 @@ func create_virtual_connection(_config: Dictionary) -> void:
 	if not line.to_cnode.is_connected('on_move', line.update_line):
 		line.to_cnode.connect('on_move', line.update_line)
 
-	
-	var flow_data: HenVirtualCNode.FlowConnectionData = root.virtual_ref.flow_connections[0]
-	var from_flow: HenVirtualCNode.FromFlowConnection = HenVirtualCNode.FromFlowConnection.new()
 
-	print(line.to_cnode.virtual_ref)
+	root.virtual_ref.add_flow_connection(
+		idx,
+		line.to_cnode.virtual_ref,
+		line
+	)
 
-	flow_data.to = line.to_cnode.virtual_ref
-	flow_data.line_ref = line
+	# var flow_data: HenVirtualCNode.FlowConnectionData = root.virtual_ref.flow_connections[idx]
+	# var from_flow: HenVirtualCNode.FromFlowConnection = HenVirtualCNode.FromFlowConnection.new()
 
-	from_flow.from = root.virtual_ref
-	from_flow.from_connection = flow_data
+	# flow_data.to = line.to_cnode.virtual_ref
+	# flow_data.line_ref = line
 
-	line.to_cnode.virtual_ref.from_flow_connections.append(from_flow)
+	# from_flow.from = root.virtual_ref
+	# from_flow.from_connection = flow_data
+
+	# line.to_cnode.virtual_ref.from_flow_connections.append(from_flow)
+
+	line.to_pool_visible = true
+	line.from_pool_visible = true
+	line.update_line()
 
 
 func create_connection_line(_config: Dictionary) -> HenFlowConnectionLine:

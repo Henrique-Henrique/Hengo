@@ -389,21 +389,22 @@ theme_override_constants/separation = 0
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_12ubu")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Container/PanelContainer"]
+[node name="FlowContainer" type="HBoxContainer" parent="Container/PanelContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 alignment = 1
 
-[node name="FlowSlot" type="PanelContainer" parent="Container/PanelContainer/HBoxContainer"]
+[node name="FlowSlot" type="PanelContainer" parent="Container/PanelContainer/FlowContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_kx661")
 
-[node name="FlowSlot" type="VBoxContainer" parent="Container/PanelContainer/HBoxContainer/FlowSlot"]
+[node name="FlowSlot" type="VBoxContainer" parent="Container/PanelContainer/FlowContainer/FlowSlot"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 
-[node name="Label" type="Label" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot"]
+[node name="Label" type="Label" parent="Container/PanelContainer/FlowContainer/FlowSlot/FlowSlot"]
 visible = false
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
@@ -411,10 +412,10 @@ theme_override_font_sizes/font_size = 16
 text = "cnode"
 horizontal_alignment = 1
 
-[node name="Control" type="Control" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot"]
+[node name="Control" type="Control" parent="Container/PanelContainer/FlowContainer/FlowSlot/FlowSlot"]
 layout_mode = 2
 
-[node name="true" type="TextureRect" parent="Container/PanelContainer/HBoxContainer/FlowSlot/FlowSlot/Control" node_paths=PackedStringArray("root")]
+[node name="Connector" type="TextureRect" parent="Container/PanelContainer/FlowContainer/FlowSlot/FlowSlot/Control" node_paths=PackedStringArray("root")]
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 custom_minimum_size = Vector2(20, 50)
 layout_mode = 1
@@ -434,19 +435,19 @@ script = ExtResource("6_gsclm")
 root = NodePath("../../../../../../..")
 type = "true_flow"
 
-[node name="FlowSlot2" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+[node name="FlowSlot2" parent="Container/PanelContainer/FlowContainer" instance=ExtResource("5_t32p4")]
 visible = false
 layout_mode = 2
 
-[node name="FlowSlot3" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+[node name="FlowSlot3" parent="Container/PanelContainer/FlowContainer" instance=ExtResource("5_t32p4")]
 visible = false
 layout_mode = 2
 
-[node name="FlowSlot4" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+[node name="FlowSlot4" parent="Container/PanelContainer/FlowContainer" instance=ExtResource("5_t32p4")]
 visible = false
 layout_mode = 2
 
-[node name="FlowSlot5" parent="Container/PanelContainer/HBoxContainer" instance=ExtResource("5_t32p4")]
+[node name="FlowSlot5" parent="Container/PanelContainer/FlowContainer" instance=ExtResource("5_t32p4")]
 visible = false
 layout_mode = 2
 

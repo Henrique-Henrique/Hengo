@@ -121,16 +121,21 @@ func _on_state_gui_input(_event: InputEvent) -> void:
 					{
 						name = 'add state',
 						call = func():
-							var state_ref = HenState.instantiate_state({
-								type = 'new',
+							var state_ref = HenVirtualState.instantiate_virtual_state({
+								name = 'My State 2',
 								position = HenGlobal.STATE_CONTAINER.get_local_mouse_position()
 							})
 
-							HenGlobal.history.create_action('Add State')
-							HenGlobal.history.add_do_method(state_ref.add_to_scene)
-							HenGlobal.history.add_do_reference(state_ref)
-							HenGlobal.history.add_undo_method(state_ref.remove_from_scene)
-							HenGlobal.history.commit_action()
+							# var state_ref = HenState.instantiate_state({
+							# 	type = 'new',
+							# 	position = HenGlobal.STATE_CONTAINER.get_local_mouse_position()
+							# })
+
+							# HenGlobal.history.create_action('Add State')
+							# HenGlobal.history.add_do_method(state_ref.add_to_scene)
+							# HenGlobal.history.add_do_reference(state_ref)
+							# HenGlobal.history.add_undo_method(state_ref.remove_from_scene)
+							# HenGlobal.history.commit_action()
 					}
 					]})
 		else:
@@ -265,7 +270,6 @@ func _input(event: InputEvent) -> void:
 						print(all_states)
 			elif event.keycode == KEY_F9:
 				# This is for Debug / Development key helper
-				
 				var start: float = Time.get_ticks_usec()
 				var virtual: HenCnode = HenGlobal.CNODE_CONTAINER.get_child(0)
 

@@ -29,6 +29,8 @@ var to_virtual_pos: Vector2
 func update_line() -> void:
 	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
 	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, -10) if to_pool_visible and to_cnode else to_virtual_pos
+	
+	# if from_connector: prints(from_connector.root.virtual_ref.name, to_cnode, to_virtual_pos)
 
 	var first_point: Vector2 = from_pos + Vector2(0, POINT_WIDTH)
 	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)
@@ -36,7 +38,6 @@ func update_line() -> void:
 	if (first_point.distance_to(last_point) / POINT_WIDTH) >= 1.5:
 		# creating last point here because after_first_point need him
 		# creating first bezier curve
-
 		var before_first_point: Vector2 = first_point - Vector2(0, POINT_WIDTH_BEZIER)
 		var after_first_point: Vector2 = (
 			first_point + first_point.direction_to(last_point) * POINT_WIDTH_BEZIER
