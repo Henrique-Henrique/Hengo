@@ -61,9 +61,9 @@ func _on_gui(_event: InputEvent) -> void:
 
 				# region effects
 				if not HenGlobal.flow_connection_to_data.is_empty():
-					HenGlobal.flow_connection_to_data.from_cnode.scale = Vector2.ONE
-					HenGlobal.flow_connection_to_data.from_cnode.modulate = Color.WHITE
-					HenGlobal.flow_connection_to_data.from_cnode.get_node('%Border').visible = false
+					HenGlobal.flow_connection_to_data.to_cnode.scale = Vector2.ONE
+					HenGlobal.flow_connection_to_data.to_cnode.modulate = Color.WHITE
+					HenGlobal.flow_connection_to_data.to_cnode.get_node('%Border').visible = false
 
 
 				# root.scale = Vector2.ONE
@@ -81,7 +81,7 @@ func create_virtual_connection(_config: Dictionary) -> void:
 	var line: HenFlowConnectionLine = HenPool.get_flow_line_from_pool()
 
 	line.from_connector = self
-	line.to_cnode = _config.from_cnode
+	line.to_cnode = _config.to_cnode
 
 	# signal to update flow connection line
 	if not root.is_connected('on_move', line.update_line):
@@ -93,6 +93,7 @@ func create_virtual_connection(_config: Dictionary) -> void:
 
 	root.virtual_ref.add_flow_connection(
 		idx,
+		_config.to_idx,
 		line.to_cnode.virtual_ref,
 		line
 	)
@@ -110,6 +111,7 @@ func create_virtual_connection(_config: Dictionary) -> void:
 
 	line.to_pool_visible = true
 	line.from_pool_visible = true
+	line.from_flow_idx = _config.to_idx
 	line.update_line()
 
 

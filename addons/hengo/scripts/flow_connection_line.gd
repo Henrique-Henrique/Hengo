@@ -9,7 +9,7 @@ const debug_texture = preload('res://addons/hengo/assets/images/flow_line_debug.
 var from_connector: HenFlowConnector
 var to_cnode: HenCnode
 var flow_type: StringName = ''
-
+var from_flow_idx: int = 0
 # debug
 const DEBUG_TIMER_TIME = .15
 const DEBUG_TRANS_TIME = .7
@@ -28,7 +28,8 @@ var to_virtual_pos: Vector2
 
 func update_line() -> void:
 	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
-	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(to_cnode.global_position) + Vector2(to_cnode.size.x / 2, -10) if to_pool_visible and to_cnode else to_virtual_pos
+	var from_flow: HenFromFlow = to_cnode.get_node('%FromFlowContainer').get_child(from_flow_idx)
+	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2((from_flow.get_node('%Arrow') as TextureRect).global_position) if to_pool_visible and to_cnode else to_virtual_pos
 	
 
 	var first_point: Vector2 = from_pos + Vector2(0, POINT_WIDTH)

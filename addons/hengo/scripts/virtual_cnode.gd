@@ -70,10 +70,12 @@ class FlowConnectionData:
 	var from_pos: Vector2
 	var to_pos: Vector2
 	var to: HenVirtualCNode
+	var to_idx: int
 
 	func get_save() -> Dictionary:
 		return {
-			to_id = to.id
+			to_id = to.id,
+			to_idx = to_idx
 		}
 
 
@@ -230,9 +232,16 @@ func show() -> void:
 				if not cnode_ref.is_connected('on_move', line_data.line_ref.update_line):
 					cnode_ref.connect('on_move', line_data.line_ref.update_line)
 
+			
+			# cleaning from flows
+			var from_flow_container: HBoxContainer = cnode_ref.get_node('%FromFlowContainer')
+
+			for from_flow: HenFromFlow in from_flow_container.get_children():
+				(from_flow.get_node('%Arrow') as TextureRect).visible = false
+				from_flow.visible = false
 
 			# cleaning flows
-			var flow_container = cnode_ref.get_node('%FlowContainer')
+			var flow_container: HBoxContainer = cnode_ref.get_node('%FlowContainer')
 
 			for flow_c: PanelContainer in flow_container.get_children():
 				var connector: HenFlowConnector = flow_c.get_node('FlowSlot/Control/Connector')
@@ -241,7 +250,6 @@ func show() -> void:
 				connector.root = cnode_ref
 				flow_c.visible = false
 
-
 			# Showing Flows
 			match type as Type:
 				Type.DEFAULT:
@@ -249,6 +257,7 @@ func show() -> void:
 					var label: Label = container.get_node('FlowSlot/Label')
 					
 					container.visible = true
+					(from_flow_container.get_child(0) as HenFromFlow).visible = true
 
 					label.visible = false
 					label.text = ''
@@ -257,6 +266,8 @@ func show() -> void:
 					var true_container = flow_container.get_child(0)
 					var false_container = flow_container.get_child(1)
 					
+					(from_flow_container.get_child(0) as HenFromFlow).visible = true
+
 					true_container.visible = true
 					false_container.visible = true
 
@@ -268,7 +279,9 @@ func show() -> void:
 
 			idx = 0
 			for from_flow_connection: FromFlowConnection in from_flow_connections:
-				if not from_flow_connection.from: continue
+				if not from_flow_connection.from:
+					idx += 1
+					continue
 
 				var line: HenFlowConnectionLine
 
@@ -282,17 +295,21 @@ func show() -> void:
 				if not cnode_ref.is_connected('on_move', line.update_line):
 					cnode_ref.connect('on_move', line.update_line)
 
-
+				line.from_flow_idx = idx
 				line.to_cnode = cnode_ref
 				line.from_virtual_pos = from_flow_connection.from_connection.from_pos
 				line.to_pool_visible = true
+
+				(cnode_ref.get_node('%FromFlowContainer').get_child(idx).get_node('%Arrow') as TextureRect).visible = true
 
 				idx += 1
 
 			idx = 0
 
 			for flow_connection: FlowConnectionData in flow_connections:
-				if not flow_connection.to: continue
+				if not flow_connection.to:
+					idx += 1
+					continue
 				
 				var line: HenFlowConnectionLine
 
@@ -333,8 +350,9 @@ func show() -> void:
 				connection.line_ref.update_line()
 
 			for connection: FromFlowConnection in from_flow_connections:
-				if not connection.from_connection.line_ref: continue
-				connection.from_connection.line_ref.update_line()
+				if connection.from_connection:
+					if connection.from_connection.line_ref:
+						connection.from_connection.line_ref.update_line()
 			
 
 			break
@@ -395,20 +413,25 @@ func hide() -> void:
 					flow_connection.line_ref.visible = false
 					flow_connection.line_ref = null
 
+		var idx: int = 0
+		var from_flow_container: HBoxContainer = cnode_ref.get_node('%FromFlowContainer')
 
 		for from_flow_connection: FromFlowConnection in from_flow_connections:
-			var line: HenFlowConnectionLine = from_flow_connection.from_connection.line_ref
+			if from_flow_connection.from_connection and from_flow_connection.from_connection.line_ref:
+				var line: HenFlowConnectionLine = from_flow_connection.from_connection.line_ref
 
-			if line:
-				line.to_pool_visible = false
+				if line:
+					line.to_pool_visible = false
 
-				if from_flow_connection.from.is_showing:
-					var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(cnode_ref.global_position) + Vector2(cnode_ref.size.x / 2, -10)
-					from_flow_connection.from_connection.to_pos = pos
-					line.to_virtual_pos = pos
-				else:
-					line.visible = false
-					from_flow_connection.from_connection.line_ref = null
+					if from_flow_connection.from.is_showing:
+						var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2((from_flow_container.get_child(idx) as HenFromFlow).global_position)
+						from_flow_connection.from_connection.to_pos = pos
+						line.to_virtual_pos = pos
+					else:
+						line.visible = false
+						from_flow_connection.from_connection.line_ref = null
+			
+			idx += 1
 
 
 		cnode_ref.visible = false
@@ -441,17 +464,16 @@ func get_save() -> Dictionary:
 	return data
 
 
-func add_flow_connection(_idx: int, _to: HenVirtualCNode, _line: HenFlowConnectionLine = null) -> void:
+func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode, _line: HenFlowConnectionLine = null) -> void:
 	var flow_data: FlowConnectionData = flow_connections[_idx]
-	var from_flow: FromFlowConnection = FromFlowConnection.new()
+	var from_flow: FromFlowConnection = _to.from_flow_connections[_to_idx]
 
 	flow_data.to = _to
 	flow_data.line_ref = _line
+	flow_data.to_idx = _to_idx
 
 	from_flow.from = self
 	from_flow.from_connection = flow_data
-
-	_to.from_flow_connections.append(from_flow)
 
 
 func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: HenConnectionLine = null) -> void:
@@ -498,9 +520,12 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	match v_cnode.type:
 		Type.DEFAULT:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
+			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.IF:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
 			v_cnode.flow_connections.append(FlowConnectionData.new())
+
+			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 
 
 	v_cnode.inputs = _config.inputs if _config.has('inputs') else []

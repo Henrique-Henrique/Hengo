@@ -678,7 +678,7 @@ static func load(_path: StringName) -> void:
 
 		# adding flow connection
 		for flow_data: Dictionary in flow_connection_list:
-			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, loaded_virtual_cnode_list[int(flow_data.to_idx)])
+			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, flow_data.to_idx, loaded_virtual_cnode_list[int(flow_data.to_id)])
 
 		# for from_flow_data: Dictionary in from_flow_list:
 		# 	(from_flow_data.from as HenVirtualCNode).from_vcnode = \
@@ -919,6 +919,7 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> void:
 				flow_connection_list.append({
 					idx = idx,
 					from = vc,
-					to_idx = int(flow_connection.to_id)
+					to_id = int(flow_connection.to_id),
+					to_idx = flow_connection.to_idx
 				})
 				idx += 1

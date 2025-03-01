@@ -113,7 +113,8 @@ func _on_enter() -> void:
 
 	if HenGlobal.can_make_flow_connection:
 		HenGlobal.flow_connection_to_data = {
-			from_cnode = self
+			to_cnode = self,
+			to_idx = 0
 		}
 
 		# if not HenGlobal.CONNECTION_GUIDE.is_in_out:

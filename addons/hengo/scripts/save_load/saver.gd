@@ -224,7 +224,6 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 	var arr: Array = []
 
 	for cnode: HenCnode in _cnode_list:
-
 		# ignore cnode types
 		if _ignore_list.has(cnode.sub_type):
 			continue

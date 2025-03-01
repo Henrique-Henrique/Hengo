@@ -1,0 +1,61 @@
+[gd_scene load_steps=5 format=3 uid="uid://1s3a6exjgyym"]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/from_flow.gd" id="1_hvpu1"]
+[ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_qg77e"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="3_utk7e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v3d73"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_color = Color(0.254902, 0.270588, 0.286275, 1)
+
+[node name="PanelContainer5" type="PanelContainer"]
+visible = false
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_v3d73")
+script = ExtResource("1_hvpu1")
+
+[node name="FlowSlot" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="ArrowUp" type="Control" parent="FlowSlot"]
+process_mode = 4
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="Arrow" type="TextureRect" parent="FlowSlot/ArrowUp"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0.227451, 0.25098, 0.278431, 1)
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 0
+texture = ExtResource("2_qg77e")
+expand_mode = 1
+stretch_mode = 3
+flip_v = true
+
+[node name="Label" type="Label" parent="FlowSlot"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_utk7e")
+theme_override_font_sizes/font_size = 16
+text = "teste"
+horizontal_alignment = 1
