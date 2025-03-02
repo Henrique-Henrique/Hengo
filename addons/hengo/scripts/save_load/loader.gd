@@ -302,7 +302,9 @@ static func load_and_edit(_path: StringName) -> void:
 
 			# cnodes
 			# _load_cnode(state.cnode_list, state_inst.route, inst_id_refs)
-			_load_vc(state.cnode_list, v_state.route)
+			var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
+			print(vc_data)
+			v_state.virtual_vc_list = vc_data.virtual_vc_list
 
 			# for event_config: Dictionary in state['events']:
 			# 	state_inst.add_event(event_config)
@@ -571,14 +573,14 @@ static func load(_path: StringName) -> void:
 		})
 
 		# adding initial cnodes (update and ready)
-		HenVirtualCNode.instantiate_virtual_cnode({
+		var enter: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 			name = 'enter',
 			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
 			route = v_state.route,
 			position = Vector2.ZERO
 		})
 
-		HenVirtualCNode.instantiate_virtual_cnode({
+		var update: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 			name = 'update',
 			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
 			outputs = [ {
@@ -588,6 +590,9 @@ static func load(_path: StringName) -> void:
 			route = v_state.route,
 			position = Vector2(400, 0)
 		})
+
+		v_state.virtual_vc_list.append(enter)
+		v_state.virtual_vc_list.append(update)
 
 		HenRouter.current_route = v_state.route
 		HenGlobal.STATE_CAM._check_virtual_state()
@@ -665,7 +670,9 @@ static func load(_path: StringName) -> void:
 						v_state = v_state
 					})
 
-			_load_vc(state.cnode_list, v_state.route)
+			var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
+			print('a=> ', vc_data.virtual_vc_list)
+			v_state.virtual_vc_list = vc_data.virtual_vc_list
 
 
 		# adding in/out connections
@@ -896,7 +903,11 @@ static func script_has_state(_script_name: String, _state_name: String) -> bool:
 	return has_state
 
 
-static func _load_vc(_cnode_list: Array, _route: Dictionary) -> void:
+static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Dictionary:
+	var data: Dictionary = {
+		virtual_vc_list = []
+	}
+
 	for _config: Dictionary in _cnode_list:
 		_config.route = _route
 		var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(_config)
@@ -923,3 +934,8 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> void:
 					to_idx = flow_connection.to_idx
 				})
 				idx += 1
+		
+		if vc.sub_type == HenVirtualCNode.SubType.VIRTUAL:
+			data.virtual_vc_list.append(vc)
+
+	return data

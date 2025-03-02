@@ -61,7 +61,7 @@ static var ui_mode: UI_STATE = UI_STATE.BOTH
 static var unique_id: int = 0
 
 # code flow
-static var start_state: HenState
+static var start_state: HenVirtualState
 
 # save load
 static var current_script_path: StringName = ''

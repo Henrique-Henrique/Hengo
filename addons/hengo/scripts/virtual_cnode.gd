@@ -56,6 +56,8 @@ var outputs: Array
 var size: Vector2
 var type: Type
 var sub_type: SubType
+var route_ref: Dictionary
+var category: StringName
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -134,7 +136,7 @@ func show() -> void:
 			cnode.route_ref = HenRouter.current_route
 			cnode.change_name(name)
 			cnode.virtual_ref = self
-
+			cnode.category = category
 
 			var idx: int = 0
 
@@ -143,11 +145,33 @@ func show() -> void:
 				input.visible = false
 
 				if idx < inputs.size():
+					input.reset()
 					input.visible = true
 					
 					var input_data: Dictionary = inputs[idx]
+
+					input.input_ref = input_data
 					input.change_name(input_data.name)
-					input.change_type(input_data.type)
+
+					if input_data.has('data'):
+						input.custom_data = input_data.data
+
+					if input_data.has('category'):
+						input.category = input_data.category
+
+					if input_data.has('sub_type'):
+						input.sub_type = input_data.sub_type
+					
+					if input_data.has('type'):
+						if input_data.has('is_prop'):
+							input.reset_in_props()
+							input.add_prop_ref(input_data.value if input_data.has('value') else null, 0)
+						else:
+							input.change_type(input_data.type, input_data.value if input_data.has('value') else null)
+					else:
+						input.reset_in_props()
+						input.set_in_prop(input_data.value if input_data.has('value') else null)
+						input.root.reset_size()
 
 				idx += 1
 
@@ -454,6 +478,9 @@ func get_save() -> Dictionary:
 		flow_connections = []
 	}
 
+	if category:
+		data.category = category
+
 	for flow_connection: FlowConnectionData in flow_connections:
 		if not flow_connection.to: continue
 		data.flow_connections.append(flow_connection.get_save())
@@ -504,6 +531,189 @@ func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: He
 	input_connections.append(input_connection)
 
 
+func get_flow_token_list(_token_list: Array = []) -> Array:
+	match sub_type:
+		HenCnode.SUB_TYPE.IF:
+			_token_list.append(get_if_token())
+		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+			_token_list.append(get_for_token())
+		_:
+			_token_list.append(get_token())
+
+			if flow_connections[0].to:
+				flow_connections[0].to.get_flow_token_list(_token_list)
+
+	return _token_list
+
+
+func get_if_token() -> Dictionary:
+	var true_flow: Array = []
+	var false_flow: Array = []
+
+	if flow_connections[0]:
+		true_flow = (flow_connections[0] as FlowConnectionData).to.get_flow_token_list()
+		# debug
+		true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
+		
+	if flow_connections[1]:
+		false_flow = (flow_connections[1] as FlowConnectionData).to.get_flow_token_list()
+		false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
+
+	return {
+		type = HenCnode.SUB_TYPE.IF,
+		true_flow = true_flow,
+		false_flow = false_flow,
+		condition = get_input_token(0)
+	}
+
+
+func get_for_token() -> Dictionary:
+	return {
+		type = sub_type,
+		hash = get_instance_id(),
+		params = get_input_token_list(),
+		flow = flow_connections[0].to.get_flow_token_list() if flow_connections[0].to else []
+	}
+
+func get_input_token(_idx: int) -> Dictionary:
+	var connection: InputConnectionData
+	
+	if _idx < input_connections.size():
+		connection = input_connections[_idx]
+
+	if connection and connection.from:
+		var data: Dictionary = connection.from.get_token(_idx)
+
+		data.prop_name = inputs[_idx].name
+
+		return data
+	elif inputs[_idx].has('code_value'):
+		var data: Dictionary = {
+			type = HenCnode.SUB_TYPE.IN_PROP,
+			prop_name = inputs[_idx].name,
+			value = inputs[_idx].code_value
+		}
+		var input: Dictionary = inputs[_idx]
+		
+		if input.has('category'):
+			match input.category:
+				'callable':
+					data.use_prefix = true
+
+		if input.has('is_ref'):
+			data.is_ref = input.is_ref
+
+		return data
+	
+	return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = inputs[_idx].type}
+
+
+func get_input_token_list(_get_name: bool = false) -> Array:
+	var input_tokens: Array = []
+	var idx: int = 0
+	for connection: Dictionary in inputs:
+		input_tokens.append(get_input_token(idx))
+		idx += 1
+
+	return input_tokens
+
+# getting cnode outputs
+func get_output_token_list() -> Array:
+	return outputs
+
+
+func get_token(_id: int = 0) -> Dictionary:
+	var use_self: bool = route_ref.type != HenRouter.ROUTE_TYPE.STATE
+
+	var token: Dictionary = {
+		type = sub_type,
+		use_self = use_self,
+	}
+
+	if category:
+		token.category = category
+
+	match sub_type:
+		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
+			token.merge({
+				name = name.to_snake_case(),
+				params = get_input_token_list()
+			})
+		HenCnode.SUB_TYPE.FUNC, HenCnode.SUB_TYPE.USER_FUNC:
+			token.merge({
+				name = name.to_snake_case(),
+				params = get_input_token_list(),
+				id = _id if outputs.size() > 1 else -1,
+			})
+		HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
+			token.merge({
+				name = outputs[0].name.to_snake_case(),
+			})
+		HenCnode.SUB_TYPE.DEBUG_VALUE:
+			token.merge({
+				value = get_input_token_list()[0],
+				# id = HenCodeGeneration.get_debug_counter(_node)
+			})
+		HenCnode.SUB_TYPE.SET_VAR, HenCnode.SUB_TYPE.SET_LOCAL_VAR:
+			token.merge({
+				name = inputs[0].name.to_snake_case(),
+				value = get_input_token_list()[0],
+			})
+		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT:
+			token.merge({
+				param = outputs[_id].name,
+				id = _id
+			})
+		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+			return {
+				type = HenCnode.SUB_TYPE.FOR_ITEM,
+				hash = get_instance_id()
+			}
+		HenCnode.SUB_TYPE.CAST:
+			return {
+				type = sub_type,
+				to = outputs[0].type,
+				# from = (get_node('%InputContainer').get_child(0) as HenCnodeInOut).get_token()
+			}
+		HenCnode.SUB_TYPE.IMG:
+			token.merge({
+				name = name.to_snake_case(),
+				params = get_input_token_list()
+			})
+		HenCnode.SUB_TYPE.RAW_CODE:
+			token.merge({
+				code = get_input_token_list()[0],
+			})
+		HenCnode.SUB_TYPE.CONST:
+			token.merge({
+				name = name,
+				# value = get_node('%OutputContainer').get_child(0).get_node('%CNameOutput').get_child(0).get_value()
+			})
+		HenCnode.SUB_TYPE.SINGLETON:
+			token.merge({
+				name = name,
+				params = get_input_token_list(),
+				id = _id if outputs.size() > 1 else -1,
+			})
+		HenCnode.SUB_TYPE.GET_PROP:
+			token.merge({
+				from = get_input_token_list(),
+				name = outputs[0].name if _id <= 0 else outputs[0].name + '.' + outputs[_id].name
+			})
+		HenCnode.SUB_TYPE.SET_PROP:
+			token.merge({
+				params = get_input_token_list(true),
+				name = inputs[1].name
+			})
+		HenCnode.SUB_TYPE.EXPRESSION:
+			token.merge({
+				params = get_input_token_list(true),
+				# exp = get_node('%Container').get_child(1).get_child(0).raw_text
+			})
+
+	return token
+
+
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
@@ -512,6 +722,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.sub_type = _config.sub_type
 	v_cnode.name = _config.name
 	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
+	v_cnode.route_ref = _config.route
+
+	if _config.has('category'):
+		v_cnode.category = _config.category
 
 	if _config.has('position'):
 		v_cnode.position = _config.position if _config.position is Vector2 else str_to_var(_config.position)

@@ -11,7 +11,7 @@ var from_transitions: Array = []
 var events: Array = []
 var is_showing: bool = false
 var state_ref: HenState
-
+var virtual_vc_list: Array = [] # the virtual cnode type list
 
 class EventData:
 	var name: String
@@ -192,8 +192,16 @@ func reset() -> void:
 
 
 func add_event(_config: Dictionary) -> void:
+	if _config.type == 'start':
+		HenGlobal.start_state = self
+	
 	events.append(EventData.new(_config.name, _config.type))
 
+
+func get_transition_list_name() -> Array:
+	return transitions.map(func(x: TransitionData): return {
+		name = x.name
+	})
 
 static func instantiate_virtual_state(_config: Dictionary) -> HenVirtualState:
 	var v_state: HenVirtualState = HenVirtualState.new()
@@ -202,6 +210,7 @@ static func instantiate_virtual_state(_config: Dictionary) -> HenVirtualState:
 	v_state.name = _config.name
 	v_state.route.id = HenUtilsName.get_unique_name()
 	v_state.route.type = HenRouter.ROUTE_TYPE.STATE
+	v_state.route.state_ref = v_state
 
 	HenRouter.route_reference[v_state.route.id] = []
 	HenRouter.line_route_reference[v_state.route.id] = []

@@ -18,7 +18,7 @@ func _on_pressed() -> void:
 		'state_transition':
 			# all transitions
 			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				options = HenRouter.current_route.state_ref.get_all_transition_data()
+				options = HenRouter.current_route.state_ref.get_transition_list_name()
 		HenCnode.SUB_TYPE.CONST:
 			var const_name = get_parent().owner.root.get_cnode_name()
 

@@ -14,7 +14,7 @@ static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 	if _params.size() > 0:
 		var first: Dictionary = _params[0]
 
-		if first.has('ref'):
+		if first.has('is_ref'):
 			return [
 				_params.slice(1),
 				parse_token_by_type(first) + '.'
@@ -31,12 +31,10 @@ static func _get_signal_call_name(_name: String) -> String:
 #
 static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 	var start: float = Time.get_ticks_usec()
-	# HenSaver.save(generate(), _debug_symbols)
-	HenSaver.save('', _debug_symbols)
+	HenSaver.save(generate(), _debug_symbols)
 	var end: float = Time.get_ticks_usec()
 	
 	print('GENERATED AND SAVED HENGO SCRIPT IN -> ', (end - start) / 1000, 'ms.')
-	print('debug  => ', _debug_symbols)
 
 	HenGlobal.current_script_debug_symbols = _debug_symbols
 
@@ -62,7 +60,7 @@ static func generate() -> String:
 	for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
 		var var_name: String = variable.name
 		var var_type: String = variable.type
-		var var_export: bool = variable. export
+		var var_export: bool = variable.export
 
 		var type_value: String = 'null'
 
@@ -134,7 +132,7 @@ func _physics_process(delta: float) -> void:
 {_unhandled_input}
 
 {_unhandled_key_input}""".format({
-		start_state_name = HenGlobal.start_state.get_state_name().to_snake_case(),
+		start_state_name = HenGlobal.start_state.name.to_snake_case(),
 		start_state_debug = parse_token_by_type({type = HenCnode.SUB_TYPE.START_DEBUG_STATE, id = get_state_debug_counter(HenGlobal.start_state)}),
 		_input = 'func _input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Input') else '',
 		_shortcut_input = 'func _shortcut_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Shortcut Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Shortcut Input') else '',
@@ -211,24 +209,24 @@ func _physics_process(delta: float) -> void:
 
 
 	# parsing all states
-	for state: HenState in HenGlobal.STATE_CONTAINER.get_children():
-		var state_code_tokens = parse_tokens(state.virtual_cnode_list)
-		var state_name = state.get_state_name().to_snake_case()
+	for state: HenVirtualState in HenGlobal.vs_list:
+		var state_code_tokens = parse_tokens(state.virtual_vc_list)
+		var state_name = state.name.to_snake_case()
 		var transitions: Array = []
 
 		# transitions
-		for trans: HenStateTransition in state.get_node('%TransitionContainer').get_children():
-			if trans.line:
+		for transition: HenVirtualState.TransitionData in state.transitions:
+			if transition.to:
 				transitions.append({
-					name = trans.get_transition_name(),
-					to_state_name = trans.line.to_state.get_state_name().to_snake_case()
+					name = transition.name,
+					to_state_name = transition.to.name
 				})
 
 		states_data[state_name] = {
 			virtual_tokens = state_code_tokens,
 			transitions = transitions
 		}
-
+	
 	# parsing base template
 	# adding states and transitions
 	base_template = base_template.format({
@@ -297,17 +295,14 @@ func _physics_process(delta: float) -> void:
 static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 	var data: Dictionary = {}
 
-	for virtual_cnode: HenCnode in _virtual_cnode_list:
-		var cnode_name: String = virtual_cnode.get_cnode_name()
+	for virtual_cnode: HenVirtualCNode in _virtual_cnode_list:
+		var cnode_name: String = virtual_cnode.name
+		var from_flow: HenVirtualCNode.FlowConnectionData = virtual_cnode.flow_connections[0]
 
-		if virtual_cnode.flow_to.has('cnode'):
-			# ignore deleted cnodes
-			if virtual_cnode.flow_to.cnode.deleted:
-				continue
-
-			var token_list = [get_debug_flow_start_token(virtual_cnode)] + virtual_cnode.flow_to.cnode.get_flow_token_list()
+		if from_flow.to:
+			var token_list = [get_debug_flow_start_token()] + from_flow.to.get_flow_token_list()
 			token_list.append(get_debug_token(virtual_cnode))
-			token_list.append(get_push_debug_token(virtual_cnode))
+			token_list.append(get_push_debug_token())
 
 			if cnode_name == 'enter':
 				token_list.append({type = HenCnode.SUB_TYPE.DEBUG_STATE, id = get_state_debug_counter(virtual_cnode.route_ref.state_ref)})
@@ -326,59 +321,6 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 	return data
 
 
-static func get_input_value(_input, _get_name: bool = false) -> Dictionary:
-	if _input.in_connected_from and not _input.from_connection_lines[0].deleted:
-		var data: Dictionary = _input.in_connected_from.get_token(_input.out_from_in_out.get_index())
-
-		if _input.is_ref:
-			data['ref'] = true
-
-		if _get_name:
-			data['prop_name'] = _input.get_in_out_name()
-
-		return data
-	else:
-		# if not has connection, check if has prop input (like string, int, etc)
-		var cname_input = _input.get_node('%CNameInput')
-		if cname_input.get_child_count() > 2:
-			var prop = cname_input.get_child(2)
-			var prop_data: Dictionary = {
-				type = HenCnode.SUB_TYPE.IN_PROP,
-				value = ''
-			}
-
-			if _input.is_ref:
-				prop_data['ref'] = true
-
-			if _get_name:
-				prop_data['prop_name'] = _input.get_in_out_name()
-
-			if prop is Label:
-				if prop.text == 'self':
-					prop_data.value = '_ref'
-				else:
-					prop_data.value = prop.text
-			else:
-				prop_data.value = str(prop.get_generated_code())
-
-			if prop is HenDropdown:
-				match prop.type:
-					'all_props':
-						prop_data['is_prop'] = true
-						prop_data['use_self'] = false
-					'callable':
-						prop_data['use_prefix'] = true
-			else:
-				if _input.root.route_ref.type != HenRouter.ROUTE_TYPE.STATE \
-				or not _input.is_ref:
-					prop_data.use_self = true
-
-
-			return prop_data
-		else:
-			# if input don't have a connection
-			return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = _input.connection_type}
-
 #
 #
 # parse to code
@@ -395,6 +337,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			'native':
 				prefix = ''
 
+	print('->', _token)
 	match _token.type as HenCnode.SUB_TYPE:
 		HenCnode.SUB_TYPE.VAR:
 			return indent + prefix + _token.name
@@ -418,9 +361,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				return indent + prefix + _token.value
 			
 			if _token.has('use_self'):
-				if _token.has('ref'):
-					if _token.ref:
-						return indent + 'self'
+				if _token.has('is_ref'):
+					return indent + 'self'
 
 			return indent + _token.value
 		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
@@ -614,9 +556,9 @@ static func check_errors_in_flow(_node: HenCnode) -> void:
 				check_errors_in_flow(_node.flow_to.cnode)
 
 
-static func get_debug_token(_node: HenCnode, _flow: String = 'cnode') -> Dictionary:
+static func get_debug_token(_node: HenVirtualCNode, _flow: String = 'cnode') -> Dictionary:
 	_debug_counter *= 2.
-	_debug_symbols[str(_debug_counter)] = [_node.hash, _flow]
+	_debug_symbols[str(_debug_counter)] = [_node.id, _flow]
 	return {type = HenCnode.SUB_TYPE.DEBUG, counter = _debug_counter}
 
 
@@ -626,17 +568,17 @@ static func get_debug_counter(_node: HenCnode) -> float:
 	return _debug_counter
 
 
-static func get_state_debug_counter(_state: HenState) -> float:
+static func get_state_debug_counter(_state: HenVirtualState) -> float:
 	_debug_counter *= 2.
-	_debug_symbols[str(_debug_counter)] = [_state.hash]
+	_debug_symbols[str(_debug_counter)] = [_state.id]
 	return _debug_counter
 
 
-static func get_push_debug_token(_node: HenCnode) -> Dictionary:
+static func get_push_debug_token() -> Dictionary:
 	return {type = HenCnode.SUB_TYPE.DEBUG_PUSH}
 
 
-static func get_debug_flow_start_token(_node: HenCnode) -> Dictionary:
+static func get_debug_flow_start_token() -> Dictionary:
 	return {type = HenCnode.SUB_TYPE.DEBUG_FLOW_START}
 
 

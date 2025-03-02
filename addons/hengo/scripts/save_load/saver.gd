@@ -204,7 +204,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	var script: GDScript = GDScript.new()
 
 
-	# print(code)
+	print(code)
 
 	script.source_code = code
 
@@ -251,8 +251,8 @@ static func get_cnode_list(_cnode_list: Array, _ignore_list: Array = []) -> Arra
 				type = input.connection_type,
 			}
 
-			if input.is_ref:
-				input_data['ref'] = true
+			# if input.is_ref:
+			# 	input_data['ref'] = true
 
 			if input.category:
 				if ['state_transition'].has(input.category):

@@ -168,9 +168,6 @@ func add_event(_config: Dictionary) -> PanelContainer:
 
 	event.get_child(0).text = _config.name
 
-	match _config.type:
-		'start':
-			HenGlobal.start_state = self
 
 	event.set_meta('config', _config)
 

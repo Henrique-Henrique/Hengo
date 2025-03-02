@@ -23,11 +23,11 @@ var line_ref: HenConnectionLine
 var reparent_data: Dictionary = {}
 var old_conn_ref
 
+var input_ref: Dictionary
+
 # only when necessary
 var custom_data
 var sub_type
-
-var has_connection: bool = false
 
 # private
 #
@@ -249,6 +249,18 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 
 # public
 #
+func reset() -> void:
+	is_ref = false
+	category = ''
+
+	#reparent / remove
+	line_ref = null
+	reparent_data = {}
+	old_conn_ref = null
+	input_ref = {}
+	custom_data = null
+	sub_type = null
+
 func create_virtual_connection(_config: Dictionary) -> void:
 	var _type = type if not is_reparenting else _config.reparent_data.from_type
 	var _conn_type = connection_type if not is_reparenting else _config.reparent_data.from_conn_type
@@ -320,22 +332,26 @@ func create_virtual_connection(_config: Dictionary) -> void:
 	_to.remove_in_prop()
 	line.update_line()
 
-	has_connection = true
-	_to.has_connection = true
-
 	print(_root.virtual_ref.output_connections, ' | ', _to.root.virtual_ref.input_connections)
 
 
 func remove_virtual_connections() -> void:
 	if type == 'in':
 		# removing input connections
-		for input_data: HenVirtualCNode.InputConnectionData in root.virtual_ref.input_connections:
+		var input_data: HenVirtualCNode.InputConnectionData
+
+		for connection: HenVirtualCNode.InputConnectionData in root.virtual_ref.input_connections:
+			if connection.idx == get_index():
+				input_data = connection
+				break
+
+		if input_data:
 			# remove input connection reference on other cnode
 			input_data.from.output_connections.erase(input_data.from_ref)
 			input_data.line_ref.visible = false
 			root.virtual_ref.input_connections.erase(input_data)
 		
-		set_in_prop()
+			set_in_prop()
 
 
 func create_connection(_config: Dictionary) -> HenConnectionLine:
@@ -544,22 +560,36 @@ func set_in_prop(_default_value = null) -> void:
 						if prop_container.get_child_count() < 3:
 							if HenGlobal.script_config.type == connection_type:
 								l.text = 'self'
+								input_ref.code_value = '_ref'
+								input_ref.is_ref = true
 							else:
 								if HenEnums.VARIANT_TYPES.has(connection_type):
 									l.text = connection_type + '()'
 								elif ClassDB.can_instantiate(connection_type):
 									l.text = connection_type + '.new()'
+								
+								input_ref.code_value = l.text
 							
 							prop_container.add_child(l)
 						
 						if root.type == HenCnode.TYPE.IMG:
 							l.visible = false
+						
 
-		if _default_value:
+		if prop and prop.has_signal('value_changed'):
+			prop.value_changed.connect(_on_value.bind(prop))
+
+		if prop and _default_value:
 			prop.set_default(str(_default_value))
 
 		# props ref
 		add_prop_ref()
+
+
+func _on_value(_value, _prop) -> void:
+	if input_ref:
+		input_ref.value = _value
+		input_ref.code_value = _prop.get_generated_code()
 
 
 func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
@@ -586,7 +616,15 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 
 	input_container.add_child(prop_ref_bt)
 
+	prop_ref_bt.value_changed.connect(_on_prop_value_changed)
+
 	return prop_ref_bt
+
+
+func _on_prop_value_changed(_value) -> void:
+	input_ref.value = _value
+	input_ref.is_prop = true
+	input_ref.use_self = false
 
 
 func reset_in_props(_jump_first: bool = false) -> void:
@@ -687,13 +725,13 @@ func set_type(_type: String) -> void:
 	connection_type = _type
 	tooltip_text = _type
 
-func change_type(_type: String) -> void:
+func change_type(_type: String, _default_value = null) -> void:
 	# var remove_conn: bool = connection_type != _type
 	set_type(_type)
 
 	if type == 'in':
 		reset_in_props()
-		set_in_prop()
+		set_in_prop(_default_value)
 	
 	
 	# if remove_conn:
@@ -732,9 +770,6 @@ func get_token(_get_name: bool = false) -> Dictionary:
 	if in_connected_from and not from_connection_lines[0].deleted:
 		var data: Dictionary = in_connected_from.get_token(out_from_in_out.get_index())
 
-		if is_ref:
-			data['ref'] = true
-
 		if _get_name:
 			data['prop_name'] = get_in_out_name()
 
@@ -748,9 +783,6 @@ func get_token(_get_name: bool = false) -> Dictionary:
 				type = HenCnode.SUB_TYPE.IN_PROP,
 				value = ''
 			}
-
-			if is_ref:
-				prop_data['ref'] = true
 
 			if _get_name:
 				prop_data['prop_name'] = get_in_out_name()

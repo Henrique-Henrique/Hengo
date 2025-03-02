@@ -28,7 +28,7 @@ var to_virtual_pos: Vector2
 
 func update_line() -> void:
 	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
-	var from_flow: HenFromFlow = to_cnode.get_node('%FromFlowContainer').get_child(from_flow_idx)
+	var from_flow: HenFromFlow = to_cnode.get_node('%FromFlowContainer').get_child(from_flow_idx) if to_cnode else null
 	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2((from_flow.get_node('%Arrow') as TextureRect).global_position) if to_pool_visible and to_cnode else to_virtual_pos
 	
 

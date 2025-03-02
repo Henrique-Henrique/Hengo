@@ -250,8 +250,8 @@ func _on_gui(_event: InputEvent) -> void:
 						select()
 
 						# generate gd_preview
-						var code: String = parse_token_and_value()
-						HenGlobal.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
+						# var code: String = parse_token_and_value()
+						# HenGlobal.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
 		else:
 			moving = false
 			# group moving false
@@ -393,7 +393,7 @@ func add_input(_input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeIn
 	var in_container = get_node('%InputContainer')
 	var input: HenCnodeInOut = HenAssets.CNodeInputScene.instantiate()
 
-	if _input.has('ref'):
+	if _input.has('is_ref'):
 		input.is_ref = true
 
 	if _input.has('category'):
@@ -1057,72 +1057,72 @@ func get_token(_id: int = 0) -> Dictionary:
 	return token
 
 
-func get_flow_token_list(_token_list: Array = []) -> Array:
-	# if cnode is deleted
-	if deleted:
-		return _token_list
+# func get_flow_token_list(_token_list: Array = []) -> Array:
+# 	# if cnode is deleted
+# 	if deleted:
+# 		return _token_list
 
-	match sub_type:
-		HenCnode.SUB_TYPE.IF:
-			_token_list.append(get_if_token())
-		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
-			_token_list.append(get_for_token())
-		_:
-			_token_list.append(get_token())
+# 	match sub_type:
+# 		HenCnode.SUB_TYPE.IF:
+# 			_token_list.append(get_if_token())
+# 		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+# 			_token_list.append(get_for_token())
+# 		_:
+# 			_token_list.append(get_token())
 
-			if not flow_to.is_empty():
-				flow_to.cnode.get_flow_token_list(_token_list)
+# 			if not flow_to.is_empty():
+# 				flow_to.cnode.get_flow_token_list(_token_list)
 
-	return _token_list
+# 	return _token_list
 
 
-func get_if_token() -> Dictionary:
-	var true_flow: Array = []
-	var false_flow: Array = []
+# func get_if_token() -> Dictionary:
+# 	var true_flow: Array = []
+# 	var false_flow: Array = []
 
-	if flow_to.has('true_flow'):
-		true_flow = flow_to.true_flow.get_flow_token_list()
-		# debug
-		true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
+# 	if flow_to.has('true_flow'):
+# 		true_flow = flow_to.true_flow.get_flow_token_list()
+# 		# debug
+# 		true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
 		
-	if flow_to.has('false_flow'):
-		false_flow = flow_to.false_flow.get_flow_token_list()
-		false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
+# 	if flow_to.has('false_flow'):
+# 		false_flow = flow_to.false_flow.get_flow_token_list()
+# 		false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
 
-	return {
-		type = HenCnode.SUB_TYPE.IF,
-		true_flow = true_flow,
-		false_flow = false_flow,
-		condition = (get_node('%InputContainer').get_child(0) as HenCnodeInOut).get_token()
-	}
-
-
-func get_for_token() -> Dictionary:
-	return {
-		type = sub_type,
-		hash = get_instance_id(),
-		params = get_input_token_list(),
-		flow = flow_to.cnode.get_flow_token_list() if flow_to.has('cnode') else []
-	}
+# 	return {
+# 		type = HenCnode.SUB_TYPE.IF,
+# 		true_flow = true_flow,
+# 		false_flow = false_flow,
+# 		condition = (get_node('%InputContainer').get_child(0) as HenCnodeInOut).get_token()
+# 	}
 
 
-func parse_token_and_value(_id: int = 0) -> String:
-	var code: String
+# func get_for_token() -> Dictionary:
+# 	return {
+# 		type = sub_type,
+# 		hash = get_instance_id(),
+# 		params = get_input_token_list(),
+# 		flow = flow_to.cnode.get_flow_token_list() if flow_to.has('cnode') else []
+# 	}
 
-	match sub_type:
-		HenCnode.SUB_TYPE.IF:
-			code = HenCodeGeneration.parse_token_by_type(
-				get_if_token()
-			)
-		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
-			code = HenCodeGeneration.parse_token_by_type(
-				get_for_token()
-			)
-		HenCnode.SUB_TYPE.VIRTUAL:
-			code = '# virtual cnode'
-		_:
-			code = HenCodeGeneration.parse_token_by_type(
-				get_token(_id)
-			)
 
-	return '\n'.join((code.split('\n') as Array).filter(func(x): return not x.contains(HenGlobal.DEBUG_TOKEN))) # removes debug lines
+# func parse_token_and_value(_id: int = 0) -> String:
+# 	var code: String
+
+# 	match sub_type:
+# 		HenCnode.SUB_TYPE.IF:
+# 			code = HenCodeGeneration.parse_token_by_type(
+# 				get_if_token()
+# 			)
+# 		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+# 			code = HenCodeGeneration.parse_token_by_type(
+# 				get_for_token()
+# 			)
+# 		HenCnode.SUB_TYPE.VIRTUAL:
+# 			code = '# virtual cnode'
+# 		_:
+# 			code = HenCodeGeneration.parse_token_by_type(
+# 				get_token(_id)
+# 			)
+
+# 	return '\n'.join((code.split('\n') as Array).filter(func(x): return not x.contains(HenGlobal.DEBUG_TOKEN))) # removes debug lines
