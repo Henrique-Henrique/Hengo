@@ -621,7 +621,8 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	return prop_ref_bt
 
 
-func _on_prop_value_changed(_value) -> void:
+func _on_prop_value_changed(_value, value) -> void:
+	input_ref.code_value = value
 	input_ref.value = _value
 	input_ref.is_prop = true
 	input_ref.use_self = false
@@ -661,16 +662,13 @@ func set_default(_name: String) -> void:
 func remove_out_prop() -> void:
 	if type == 'out':
 		var prop_container = get_node('%CNameOutput')
-
-		if not prop_container.is_queued_for_deletion():
-			var out_prop = prop_container.get_child(0)
-			prop_container.remove_child(out_prop)
-			out_prop.queue_free()
-
-			await get_tree().process_frame
-			root.size = Vector2.ZERO
+		print('=>', prop_container.get_children())
+		for node in prop_container.get_children():
+			if not node is Label and not node is TextureRect:
+				prop_container.remove_child(node)
+				node.queue_free()
 		
-	await get_tree().process_frame
+	reset_size()
 
 
 func get_in_prop_by_id_or_null() -> PanelContainer:
@@ -725,6 +723,7 @@ func set_type(_type: String) -> void:
 	connection_type = _type
 	tooltip_text = _type
 
+
 func change_type(_type: String, _default_value = null) -> void:
 	# var remove_conn: bool = connection_type != _type
 	set_type(_type)
@@ -732,12 +731,9 @@ func change_type(_type: String, _default_value = null) -> void:
 	if type == 'in':
 		reset_in_props()
 		set_in_prop(_default_value)
-	
-	
-	# if remove_conn:
-	# 	hide_connection()
 
 	reset_root_size()
+
 
 func get_type_color(_type: String) -> Color:
 	match _type:

@@ -19,7 +19,7 @@ func _on_pressed() -> void:
 			# all transitions
 			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
 				options = HenRouter.current_route.state_ref.get_transition_list_name()
-		HenCnode.SUB_TYPE.CONST:
+		'const':
 			var const_name = get_parent().owner.root.get_cnode_name()
 
 			if HenEnums.CONST_API_LIST.has(const_name):
@@ -58,7 +58,20 @@ func _on_pressed() -> void:
 					custom_data.input_ref.connection_type,
 				):
 					arr.append(prop)
-		
+			
+			# print(HenEnums.NATIVE_PROPS_LIST.get('Vector3'))
+			print(custom_data.input_ref.input_ref.type)
+			for prop: Dictionary in ClassDB.class_get_property_list('Sprite2D'):
+				var _type: StringName = custom_data.input_ref.input_ref.type
+				var prop_type: StringName = type_string(prop.type)
+				
+				if (_type == 'Variant' and prop.type != TYPE_NIL) or prop_type == _type:
+					arr.append({
+						name = prop.name
+					})
+				
+				get_const_list(arr, _type, prop.name, prop_type)
+
 			options = arr
 		'signal':
 			options = ClassDB.class_get_signal_list(custom_data).map(func(x): return {
@@ -97,12 +110,17 @@ func _selected(_item: Dictionary) -> void:
 			output.change_type(_item.type)
 		'all_props':
 			var input = custom_data.input_ref
-			var group: String = 'p' + str(_item.item.get_index())
+			var value: String = text
 
 			input.remove_in_prop(true)
 
-			HenGlobal.GROUP.reset_and_add_group(self, group)
-			custom_value = str(_item.item.get_index())
+			if _item.has('value'):
+				value = _item.value
+				input.input_ref.category = 'class_props'
+
+			emit_signal('value_changed', text, value)
+			return
+
 		
 	emit_signal('value_changed', text)
 
@@ -157,3 +175,20 @@ func get_generated_code() -> String:
 			return text.to_snake_case()
 		_:
 			return '\"' + text + '\"'
+	
+
+func get_const_list(_arr: Array, _type: StringName, _name: String, _prop_type: StringName) -> Array:
+	if HenEnums.NATIVE_PROPS_LIST.has(_prop_type):
+		for prop: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(_prop_type):
+			var my_name: String = _name + ' -> ' + prop.name
+
+			if _type == 'Variant' or prop.type == _type:
+				_arr.append({
+					name = my_name,
+					value = my_name.replacen(' -> ', '.')
+				})
+				continue
+			
+			get_const_list(_arr, _type, my_name, prop.type)
+
+	return _arr

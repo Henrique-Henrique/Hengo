@@ -605,8 +605,9 @@ func start_api(_class_name: StringName = 'all') -> int:
 								outputs = [
 									{
 										name = '',
+										type = key,
 										sub_type = '@dropdown',
-										category = HenCnode.SUB_TYPE.CONST,
+										category = 'const',
 										out_prop = '...',
 										data = value
 									}

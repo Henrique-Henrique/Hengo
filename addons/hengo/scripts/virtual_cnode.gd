@@ -185,8 +185,22 @@ func show() -> void:
 					output.visible = true
 					
 					var output_data: Dictionary = outputs[idx]
+					
+					if output_data.has('data'):
+						output.custom_data = output_data.data
+
+					if output_data.has('category'):
+						output.category = output_data.category
+
+					if output_data.has('sub_type'):
+						output.sub_type = output_data.sub_type
+
 					output.change_name(output_data.name)
 					output.change_type(output_data.type)
+					output.remove_out_prop()
+
+					print('qq')
+					# output.set_out_prop(output_data.sub_type if output_data.has('sub_type') else '', output_data.get('out_prop') if output_data.has('out_prop') else null)
 
 				idx += 1
 			
@@ -597,7 +611,7 @@ func get_input_token(_idx: int) -> Dictionary:
 		
 		if input.has('category'):
 			match input.category:
-				'callable':
+				'callable', 'class_props':
 					data.use_prefix = true
 
 		if input.has('is_ref'):
