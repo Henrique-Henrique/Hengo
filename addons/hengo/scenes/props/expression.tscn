@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://dq5s743588bp6"]
+
+[ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="1_rlvaa"]
+[ext_resource type="Texture2D" uid="uid://c7d46oaj1dtda" path="res://addons/hengo/assets/icons/comment3.svg" id="2_s8301"]
+
+[node name="Expression" type="HBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+size_flags_horizontal = 3
+
+[node name="CodeEdit" parent="." instance=ExtResource("1_rlvaa")]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Expression"
+scroll_fit_content_height = true
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+icon = ExtResource("2_s8301")

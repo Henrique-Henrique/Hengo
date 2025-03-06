@@ -775,9 +775,6 @@ static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 					_config.route.item_ref.output_cnode = instance
 				HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
 					instance.get_node('%TitleContainer').visible = false
-				HenCnode.SUB_TYPE.CONST:
-					title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/enum.svg')
-					title_container.get('theme_override_styles/panel').set('bg_color', Color('#2f6063'))
 				HenCnode.SUB_TYPE.SINGLETON:
 					title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/singleton.svg')
 					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
@@ -1025,11 +1022,6 @@ func get_token(_id: int = 0) -> Dictionary:
 		HenCnode.SUB_TYPE.RAW_CODE:
 			token.merge({
 				code = get_input_token_list()[0],
-			})
-		HenCnode.SUB_TYPE.CONST:
-			token.merge({
-				name = get_cnode_name(),
-				value = get_node('%OutputContainer').get_child(0).get_node('%CNameOutput').get_child(0).get_value()
 			})
 		HenCnode.SUB_TYPE.SINGLETON:
 			token.merge({

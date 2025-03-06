@@ -6,8 +6,8 @@ class_name HenExpressionEditor extends PanelContainer
 @onready var code_edit: CodeEdit = get_node('%CodeEdit')
 @onready var save_bt: Button = get_node('%Save')
 
-var ref: HenCnode
-var bt_ref
+var v_cnode: HenVirtualCNode
+var bt_ref: HenExpressionBt
 var word_list: Array
 var completion_list: Array
 
@@ -82,27 +82,25 @@ func _on_change() -> void:
 
 
 func _on_save() -> void:
-	var in_container = ref.get_node('%InputContainer')
-	var prevent_list: Array = []
+	# cleaning inputs
+	v_cnode.inputs[0].value = code_edit.text
 
-	for input in in_container.get_children():
-		var input_name: String = input.get_in_out_name()
 
-		if not word_list.has(input_name):
-			input.remove()
-		else:
-			prevent_list.append(input_name)
+	for input: Dictionary in v_cnode.inputs.slice(1):
+		v_cnode.inputs.erase(input)
+		# TODO: remove connections
+
 
 	for word in word_list:
-		if not word in prevent_list:
-			ref.add_input({
-				name = word,
-				type = 'Variant'
-			})
+		# if not word in prevent_list:
+		v_cnode.inputs.append({
+			name = word,
+			type = 'Variant'
+		})
 	
-	bt_ref.set_exp(code_edit.text)
-	ref.size = Vector2.ZERO
+	
 	HenGlobal.GENERAL_POPUP.get_parent().hide()
+	v_cnode.update()
 
 
 func unique_array(arr: Array) -> Array:

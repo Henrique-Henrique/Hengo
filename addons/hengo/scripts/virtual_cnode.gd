@@ -127,6 +127,8 @@ func check_visibility(_rect: Rect2) -> void:
 
 
 func show() -> void:
+	is_showing = true
+
 	for cnode: HenCnode in HenGlobal.cnode_pool:
 		if not cnode.visible:
 			cnode.position = position
@@ -492,6 +494,11 @@ func hide() -> void:
 		cnode_ref = null
 
 
+func update() -> void:
+	hide()
+	show()
+
+
 func get_save() -> Dictionary:
 	var data: Dictionary = {
 		id = id,
@@ -604,6 +611,7 @@ func get_for_token() -> Dictionary:
 		flow = flow_connections[0].to.get_flow_token_list() if flow_connections[0].to else []
 	}
 
+
 func get_input_token(_idx: int) -> Dictionary:
 	var connection: InputConnectionData
 	
@@ -714,11 +722,6 @@ func get_token(_id: int = 0) -> Dictionary:
 			token.merge({
 				code = get_input_token_list()[0],
 			})
-		HenCnode.SUB_TYPE.CONST:
-			token.merge({
-				name = name,
-				# value = get_node('%OutputContainer').get_child(0).get_node('%CNameOutput').get_child(0).get_value()
-			})
 		HenCnode.SUB_TYPE.SINGLETON:
 			token.merge({
 				name = name,
@@ -749,7 +752,7 @@ func get_token(_id: int = 0) -> Dictionary:
 		HenCnode.SUB_TYPE.EXPRESSION:
 			token.merge({
 				params = get_input_token_list(true),
-				# exp = get_node('%Container').get_child(1).get_child(0).raw_text
+				exp = inputs[0].value
 			})
 
 	return token

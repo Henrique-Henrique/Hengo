@@ -24,6 +24,7 @@ corner_radius_bottom_left = 4
 [node name="Panel" type="PanelContainer"]
 offset_right = 33.0
 offset_bottom = 28.0
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_w25o5")
 script = ExtResource("1_mmpja")
 type = "in"

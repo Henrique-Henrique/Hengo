@@ -60,7 +60,7 @@ static func generate() -> String:
 	for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
 		var var_name: String = variable.name
 		var var_type: String = variable.type
-		var var_export: bool = variable.export
+		var var_export: bool = variable. export
 
 		var type_value: String = 'null'
 
@@ -499,8 +499,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + 'pass'
 		HenCnode.SUB_TYPE.RAW_CODE:
 			return _token.code.value.trim_prefix('"').trim_suffix('"')
-		HenCnode.SUB_TYPE.CONST:
-			return indent + _token.name + '.' + _token.value
 		HenCnode.SUB_TYPE.SINGLETON:
 			return indent + _token.name
 		HenCnode.SUB_TYPE.GET_PROP:
@@ -511,10 +509,10 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			if not _token.has('data'): return indent + prefix + _token.name + ' = ' + parse_token_by_type(_token.value)
 			return indent + parse_token_by_type(_token.data) + '.' + _token.name + ' = ' + parse_token_by_type(_token.value)
 		HenCnode.SUB_TYPE.EXPRESSION:
-			var new_exp: String = _token.exp.replacen('\n', '')
+			var new_exp: String = _token.exp
 			var reg: RegEx = RegEx.new()
 
-			for param in _token.params:
+			for param in _token.params.slice(1):
 				reg.compile("\\b" + param.prop_name + "\\b")
 				new_exp = reg.sub(new_exp, parse_token_by_type(param), true)
 			

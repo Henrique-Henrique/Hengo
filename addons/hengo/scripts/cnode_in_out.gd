@@ -540,6 +540,14 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 
 				prop_container.add_child(dropdown)
 				prop = dropdown
+			'expression':
+				var expression_bt: HenExpressionBt = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
+
+				expression_bt.v_cnode = root.virtual_ref
+
+				prop_container.add_child(expression_bt)
+				prop = expression_bt
+
 			_:
 				match connection_type:
 					'String', 'NodePath', 'StringName':
