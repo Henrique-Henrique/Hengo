@@ -1,6 +1,8 @@
 @tool
 extends HBoxContainer
 
+signal value_changed
+
 var my_value: Vector3 = Vector3.ZERO
 
 func _ready() -> void:
@@ -11,14 +13,17 @@ func _ready() -> void:
 
 func _on_x_changed(_value: float) -> void:
 	my_value.x = _value
+	value_changed.emit(my_value)
 
 
 func _on_y_changed(_value: float) -> void:
 	my_value.y = _value
+	value_changed.emit(my_value)
 
 
 func _on_z_changed(_value: float) -> void:
 	my_value.z = _value
+	value_changed.emit(my_value)
 
 
 # public

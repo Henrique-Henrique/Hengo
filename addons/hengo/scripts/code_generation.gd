@@ -364,7 +364,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				if _token.has('is_ref'):
 					return indent + 'self'
 
-			return indent + _token.value
+			return indent + str(_token.value)
 		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
@@ -504,21 +504,12 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenCnode.SUB_TYPE.SINGLETON:
 			return indent + _token.name
 		HenCnode.SUB_TYPE.GET_PROP:
-			return indent + parse_token_by_type(_token.from[0]) + '.' + _token.name
+			if not _token.has('data'): return indent + prefix + _token.value
+			return indent + parse_token_by_type(_token.data) + '.' + _token.value
 		HenCnode.SUB_TYPE.SET_PROP:
-			var code: String = ''
-			var idx: int = 0
-
-			for param in _token.params:
-				if param.type != HenCnode.SUB_TYPE.IN_PROP:
-					if idx == 1:
-						code += indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + ' = ' + parse_token_by_type(param)
-					elif idx > 1:
-						code += '\n' + indent + parse_token_by_type(_token.params[0]) + '.' + _token.name + '.' + param.prop_name + ' = ' + parse_token_by_type(param)
-				
-				idx += 1
-
-			return code
+			print('== ', _token)
+			if not _token.has('data'): return indent + prefix + _token.name + ' = ' + parse_token_by_type(_token.value)
+			return indent + parse_token_by_type(_token.data) + '.' + _token.name + ' = ' + parse_token_by_type(_token.value)
 		HenCnode.SUB_TYPE.EXPRESSION:
 			var new_exp: String = _token.exp.replacen('\n', '')
 			var reg: RegEx = RegEx.new()

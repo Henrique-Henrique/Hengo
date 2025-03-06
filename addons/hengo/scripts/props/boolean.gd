@@ -10,7 +10,7 @@ func _ready() -> void:
 
 
 func _on_press() -> void:
-	emit_signal('value_changed', button_pressed)
+	value_changed.emit(button_pressed)
 
 # public
 #

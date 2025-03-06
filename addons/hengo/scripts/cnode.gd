@@ -97,7 +97,7 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		print(virtual_ref.flow_connections, ' | ', virtual_ref.from_flow_connections)
+		print(virtual_ref.inputs)
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
 		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)

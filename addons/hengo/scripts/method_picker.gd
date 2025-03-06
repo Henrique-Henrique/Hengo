@@ -233,7 +233,46 @@ var native_list: Array = [
 			],
 			route = HenRouter.current_route
 		}
-	}
+	},
+	
+	{
+		name = 'Get',
+		data = {
+			name = 'Get',
+			sub_type = HenCnode.SUB_TYPE.GET_PROP,
+			outputs = [
+				{
+					name = '',
+					type = 'Variant',
+					sub_type = '@dropdown',
+					category = 'get_prop',
+				}
+			],
+			route = HenRouter.current_route
+		}
+
+	},
+	{
+		name = 'Set',
+		data = {
+			name = 'Set',
+			sub_type = HenCnode.SUB_TYPE.SET_PROP,
+			inputs = [
+				{
+					name = '',
+					type = 'Variant',
+					sub_type = '@dropdown',
+					category = 'set_prop',
+					'static' = true
+				},
+				{
+					name = 'value',
+					type = 'Variant',
+				},
+			],
+			route = HenRouter.current_route
+		}
+	},
 ]
 
 
@@ -622,7 +661,60 @@ func start_api(_class_name: StringName = 'all') -> int:
 						dt.data.route = HenRouter.current_route
 						api_list.append(dt)
 					
-					
+					# testi
+					api_list.append({
+						name = 'Set Test',
+						data = {
+							name = 'Set',
+							sub_type = HenCnode.SUB_TYPE.SET_PROP,
+							inputs = [
+								{
+									name = _class_name,
+									type = _class_name,
+									ref = true
+								},
+								{
+									name = '',
+									type = 'Variant',
+									sub_type = '@dropdown',
+									category = 'set_prop',
+									data = _class_name,
+									'static' = true
+								},
+								{
+									name = 'value',
+									type = 'Variant',
+								},
+							],
+							route = HenRouter.current_route
+						}
+					})
+					api_list.append({
+						name = 'Get Test',
+						data = {
+							name = 'Get',
+							sub_type = HenCnode.SUB_TYPE.GET_PROP,
+							inputs = [
+								{
+									name = _class_name,
+									type = _class_name,
+									ref = true
+								}
+							],
+							outputs = [
+								{
+									name = '',
+									type = 'Variant',
+									sub_type = '@dropdown',
+									category = 'get_prop',
+									data = _class_name
+								}
+							],
+							route = HenRouter.current_route
+						}
+					})
+
+
 					for prop in ClassDB.class_get_property_list(_class_name):
 						var set_data: Dictionary = {
 							name = 'Set Prop -> ' + prop.name,
@@ -676,40 +768,6 @@ func start_api(_class_name: StringName = 'all') -> int:
 						api_list.append(set_data)
 						api_list.append(get_data)
 
-					
-					# set variable
-					var idx: int = 0
-					for var_config in HenGlobal.PROPS_CONTAINER.get_all_values().filter(func(x: Dictionary) -> bool:
-						return x.prop_type == StringName('VARIABLE')):
-						api_list.append({
-							name = 'Set Var -> ' + var_config.name,
-							data = {
-								name = 'Set Var -> ' + var_config.name,
-								sub_type = HenCnode.SUB_TYPE.SET_VAR,
-								inputs = [ {
-									name = var_config.name,
-									type = var_config.type,
-									group = 'p' + str(idx),
-								}],
-								route = HenRouter.current_route
-							}
-						})
-
-						api_list.append({
-							name = 'Get Var -> ' + var_config.name,
-							data = {
-								name = '',
-								sub_type = HenCnode.SUB_TYPE.VAR,
-								outputs = [ {
-									name = var_config.name,
-									type = var_config.type,
-									group = 'p' + str(idx),
-									group_idx = idx
-								}],
-								route = HenRouter.current_route
-							}
-						})
-						idx += 1
 					
 					# functions
 					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == HenRouteReference.TYPE.FUNC):

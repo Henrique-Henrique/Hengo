@@ -1,6 +1,7 @@
 @tool
 extends SpinBox
 
+
 func _ready() -> void:
 	var line_edit: LineEdit = get_line_edit()
 

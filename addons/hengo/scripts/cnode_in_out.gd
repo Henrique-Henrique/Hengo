@@ -501,12 +501,21 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 				prop_container.add_child(dropdown)
 				prop_container.move_child(dropdown, 0)
 				prop = dropdown
+
+				dropdown.value_changed.connect(_on_out_value.bind(dropdown))
 		
 		if _default_value:
 			prop.set_default(str(_default_value))
 
 
-func set_in_prop(_default_value = null) -> void:
+func _on_out_value(_value, _type, _prop) -> void:
+	if input_ref:
+		input_ref.type = _type
+		input_ref.value = _value
+		input_ref.code_value = _prop.get_generated_code()
+
+
+func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 	if type == 'in':
 		var prop_container = get_node('%CNameInput')
 		var prop
@@ -525,6 +534,9 @@ func set_in_prop(_default_value = null) -> void:
 					'enum_list':
 						dropdown.text = ClassDB.class_get_enum_constants(custom_data[0], custom_data[1])[0]
 						dropdown.custom_value = '.'.join(custom_data) + '.' + dropdown.text
+					'get_prop', 'set_prop':
+						dropdown.alignment = HORIZONTAL_ALIGNMENT_LEFT
+						dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 				prop_container.add_child(dropdown)
 				prop = dropdown
@@ -567,8 +579,6 @@ func set_in_prop(_default_value = null) -> void:
 									l.text = connection_type + '()'
 								elif ClassDB.can_instantiate(connection_type):
 									l.text = connection_type + '.new()'
-								
-								input_ref.code_value = l.text
 							
 							prop_container.add_child(l)
 						
@@ -576,14 +586,14 @@ func set_in_prop(_default_value = null) -> void:
 							l.visible = false
 						
 
-		if prop and prop.has_signal('value_changed'):
-			prop.value_changed.connect(_on_value.bind(prop))
-
 		if prop and _default_value:
 			prop.set_default(str(_default_value))
 
+		if prop and prop.has_signal('value_changed'):
+			prop.value_changed.connect(_on_value.bind(prop))
+
 		# props ref
-		add_prop_ref()
+		if _add_prop_ref: add_prop_ref()
 
 
 func _on_value(_value, _prop) -> void:
@@ -646,9 +656,6 @@ func remove_in_prop(_ignore_prop: bool = false) -> void:
 	
 	root.reset_size()
 
-func reset_root_size() -> void:
-	root.size = Vector2.ZERO
-
 
 # only called by props signal
 func set_default(_name: String) -> void:
@@ -662,7 +669,6 @@ func set_default(_name: String) -> void:
 func remove_out_prop() -> void:
 	if type == 'out':
 		var prop_container = get_node('%CNameOutput')
-		print('=>', prop_container.get_children())
 		for node in prop_container.get_children():
 			if not node is Label and not node is TextureRect:
 				prop_container.remove_child(node)
@@ -723,16 +729,21 @@ func set_type(_type: String) -> void:
 	connection_type = _type
 	tooltip_text = _type
 
+	if root: root.reset_size()
 
-func change_type(_type: String, _default_value = null) -> void:
+
+func change_type(_type: String, _default_value = null, _sub_type: String = '', _add_prop_ref: bool = true) -> void:
 	# var remove_conn: bool = connection_type != _type
 	set_type(_type)
 
 	if type == 'in':
 		reset_in_props()
-		set_in_prop(_default_value)
+		set_in_prop(_default_value, _add_prop_ref)
+	else:
+		remove_out_prop()
+		set_out_prop(_sub_type, _default_value)
 
-	reset_root_size()
+	root.reset_size()
 
 
 func get_type_color(_type: String) -> Color:

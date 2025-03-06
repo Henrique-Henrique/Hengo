@@ -61,8 +61,6 @@ var category: StringName
 
 var input_connections: Array = []
 var output_connections: Array = []
-# var flow_connection: FlowConnectionData
-# var from_vcnode: HenVirtualCNode
 var flow_connections: Array = []
 var from_flow_connections: Array = []
 
@@ -155,6 +153,8 @@ func show() -> void:
 
 					if input_data.has('data'):
 						input.custom_data = input_data.data
+					else:
+						input.custom_data = null
 
 					if input_data.has('category'):
 						input.category = input_data.category
@@ -167,11 +167,22 @@ func show() -> void:
 							input.reset_in_props()
 							input.add_prop_ref(input_data.value if input_data.has('value') else null, 0)
 						else:
-							input.change_type(input_data.type, input_data.value if input_data.has('value') else null)
+							input.change_type(
+								input_data.type, input_data.value if input_data.has('value') else null,
+								'',
+								not input_data.has('static')
+							)
 					else:
 						input.reset_in_props()
-						input.set_in_prop(input_data.value if input_data.has('value') else null)
+						input.set_in_prop(input_data.value if input_data.has('value') else null, not input_data.has('static'))
 						input.root.reset_size()
+					
+					if input_data.has('static'):
+						(input.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 0)
+						(input.get_node('%Connector') as TextureRect).visible = false
+					else:
+						(input.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 8)
+						(input.get_node('%Connector') as TextureRect).visible = true
 
 				idx += 1
 
@@ -188,6 +199,8 @@ func show() -> void:
 					
 					if output_data.has('data'):
 						output.custom_data = output_data.data
+					else:
+						output.custom_data = null
 
 					if output_data.has('category'):
 						output.category = output_data.category
@@ -195,12 +208,14 @@ func show() -> void:
 					if output_data.has('sub_type'):
 						output.sub_type = output_data.sub_type
 
-					output.change_name(output_data.name)
-					output.change_type(output_data.type)
-					output.remove_out_prop()
+					output.input_ref = output_data
 
-					print('qq')
-					# output.set_out_prop(output_data.sub_type if output_data.has('sub_type') else '', output_data.get('out_prop') if output_data.has('out_prop') else null)
+					output.change_name(output_data.name)
+					output.change_type(
+						output_data.type,
+						output_data.value if output_data.has('value') else null,
+						output_data.sub_type if output_data.has('sub_type') else ''
+					)
 
 				idx += 1
 			
@@ -592,12 +607,13 @@ func get_for_token() -> Dictionary:
 func get_input_token(_idx: int) -> Dictionary:
 	var connection: InputConnectionData
 	
-	if _idx < input_connections.size():
-		connection = input_connections[_idx]
+	for input_connection: InputConnectionData in input_connections:
+		if input_connection.idx == _idx:
+			connection = input_connection
+			break
 
 	if connection and connection.from:
 		var data: Dictionary = connection.from.get_token(_idx)
-
 		data.prop_name = inputs[_idx].name
 
 		return data
@@ -710,15 +726,26 @@ func get_token(_id: int = 0) -> Dictionary:
 				id = _id if outputs.size() > 1 else -1,
 			})
 		HenCnode.SUB_TYPE.GET_PROP:
-			token.merge({
-				from = get_input_token_list(),
-				name = outputs[0].name if _id <= 0 else outputs[0].name + '.' + outputs[_id].name
-			})
+			var dt: Dictionary = {
+				value = outputs[0].code_value
+			}
+
+			if outputs[0].has('data'):
+				dt.data = get_input_token(0)
+
+			token.merge(dt)
 		HenCnode.SUB_TYPE.SET_PROP:
-			token.merge({
-				params = get_input_token_list(true),
-				name = inputs[1].name
-			})
+			var dt: Dictionary = {}
+
+			if inputs[0].has('ref'):
+				dt.data = get_input_token(0)
+				dt.name = get_input_token(1).value
+				dt.value = get_input_token(2)
+			else:
+				dt.name = inputs[0].code_value
+				dt.value = get_input_token(1)
+
+			token.merge(dt)
 		HenCnode.SUB_TYPE.EXPRESSION:
 			token.merge({
 				params = get_input_token_list(true),
@@ -755,6 +782,29 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 
+
+	if _config.has('inputs'):
+		for input: Dictionary in _config.inputs:
+			if not input.has('code_value') and not input.has('is_ref') and not input.has('ref'):
+				match input.type:
+					'String', 'NodePath', 'StringName':
+						input.code_value = '""'
+					'int':
+						input.code_value = '0'
+					'float':
+						input.code_value = '0.'
+					'Vector2':
+						input.code_value = 'Vector2.ZERO'
+					'bool':
+						input.code_value = false
+					'Variant':
+						input.code_value = 'null'
+					_:
+						if HenEnums.VARIANT_TYPES.has(input.type):
+							input.code_value = input.type + '()'
+						elif ClassDB.can_instantiate(input.type):
+							input.code_value = input.type + '.new()'
+							
 
 	v_cnode.inputs = _config.inputs if _config.has('inputs') else []
 	v_cnode.outputs = _config.outputs if _config.has('outputs') else []
