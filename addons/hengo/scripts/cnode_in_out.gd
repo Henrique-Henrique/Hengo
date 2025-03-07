@@ -95,14 +95,14 @@ func _on_gui(_event: InputEvent) -> void:
 					in_out_idx = get_index()
 				})
 
-				remove_virtual_connections()
-				# if is_reparenting:
-				# 	# remove connection
-				# 	HenGlobal.history.create_action('Remove connection line')
-				# 	HenGlobal.history.add_do_method(line_ref.remove_from_scene)
-				# 	HenGlobal.history.add_undo_reference(line_ref)
-				# 	HenGlobal.history.add_undo_method(line_ref.add_to_scene)
-				# 	HenGlobal.history.commit_action()
+				if type == 'in':
+					var connection: HenVirtualCNode.ConnectionReturn = root.virtual_ref.get_input_connection(get_index())
+
+					HenGlobal.history.create_action('Remove connection line')
+					HenGlobal.history.add_do_method(connection.remove)
+					HenGlobal.history.add_undo_reference(line_ref)
+					HenGlobal.history.add_undo_method(connection.add)
+					HenGlobal.history.commit_action()
 
 				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 
@@ -151,16 +151,14 @@ func _on_gui(_event: InputEvent) -> void:
 
 			elif HenGlobal.can_make_connection and not HenGlobal.connection_to_data.is_empty():
 				# try connection
-				create_virtual_connection(HenGlobal.connection_to_data)
-				# var line := create_connection(HenGlobal.connection_to_data)
+				var connection: HenVirtualCNode.ConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
 
-				# if line:
-				# 	HenGlobal.history.create_action('Add Connection')
-				# 	HenGlobal.history.add_do_method(line.add_to_scene)
-				# 	HenGlobal.history.add_do_reference(line)
-				# 	HenGlobal.history.add_undo_method(line.remove_from_scene)
-				# 	HenGlobal.history.commit_action()
-			
+				HenGlobal.history.create_action('Add Connection')
+				HenGlobal.history.add_do_method(connection.add)
+				HenGlobal.history.add_do_reference(connection)
+				HenGlobal.history.add_undo_method(connection.remove)
+				HenGlobal.history.commit_action()
+
 			HenGlobal.CONNECTION_GUIDE.end()
 
 			HenGlobal.connection_to_data = {}
@@ -261,7 +259,7 @@ func reset() -> void:
 	custom_data = null
 	sub_type = null
 
-func create_virtual_connection(_config: Dictionary) -> void:
+func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.ConnectionReturn:
 	var _type = type if not is_reparenting else _config.reparent_data.from_type
 	var _conn_type = connection_type if not is_reparenting else _config.reparent_data.from_conn_type
 
@@ -298,9 +296,6 @@ func create_virtual_connection(_config: Dictionary) -> void:
 		_to_connector = to_conn
 
 
-	# clear connection
-	_to.remove_virtual_connections()
-
 	var line: HenConnectionLine = HenPool.get_line_from_pool(
 		_root,
 		_to.root,
@@ -308,50 +303,17 @@ func create_virtual_connection(_config: Dictionary) -> void:
 		_to_connector
 	)
 	
-	line.update_colors(_conn_type, _to.connection_type)
-
-	line.from_pool_visible = true
-	line.to_pool_visible = true
-	line.conn_size = (get_node('%Connector') as TextureRect).size / 2
-
-	# signal to update connection line
-	if not _root.is_connected('on_move', line.update_line):
-		_root.connect('on_move', line.update_line)
-	
-	if not _to.root.is_connected('on_move', line.update_line):
-		_to.root.connect('on_move', line.update_line)
-
-
-	_to.root.virtual_ref.add_connection(
+	var connection_data: HenVirtualCNode.ConnectionReturn = _to.root.virtual_ref.create_connection(
 		_to.get_index(),
 		get_index(),
 		_root.virtual_ref,
 		line
 	)
 
-	_to.remove_in_prop()
-	line.update_line()
+	_to.root.virtual_ref.update()
+	_root.virtual_ref.update()
 
-	print(_root.virtual_ref.output_connections, ' | ', _to.root.virtual_ref.input_connections)
-
-
-func remove_virtual_connections() -> void:
-	if type == 'in':
-		# removing input connections
-		var input_data: HenVirtualCNode.InputConnectionData
-
-		for connection: HenVirtualCNode.InputConnectionData in root.virtual_ref.input_connections:
-			if connection.idx == get_index():
-				input_data = connection
-				break
-
-		if input_data:
-			# remove input connection reference on other cnode
-			input_data.from.output_connections.erase(input_data.from_ref)
-			input_data.line_ref.visible = false
-			root.virtual_ref.input_connections.erase(input_data)
-		
-			set_in_prop()
+	return connection_data
 
 
 func create_connection(_config: Dictionary) -> HenConnectionLine:

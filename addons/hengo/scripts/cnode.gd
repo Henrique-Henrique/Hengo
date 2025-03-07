@@ -97,10 +97,9 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		print(virtual_ref.inputs)
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
-		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
+		print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
 		# print('flow -> ', virtual_ref.flow_connection)
 		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
 		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)

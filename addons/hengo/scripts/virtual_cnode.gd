@@ -97,6 +97,7 @@ class InputConnectionData extends ConnectionData:
 	var from_old_pos: Vector2
 	var from_type: StringName
 
+
 	func get_save() -> Dictionary:
 		return {
 			idx = idx,
@@ -111,6 +112,66 @@ class OutputConnectionData extends ConnectionData:
 	var to_ref: InputConnectionData
 	var to_old_pos: Vector2
 	var to_type: StringName
+
+
+class ConnectionReturn:
+	var input_connection: InputConnectionData
+	var output_connection: OutputConnectionData
+	var from: HenVirtualCNode
+	var to: HenVirtualCNode
+
+	func _init(_in: InputConnectionData, _out: OutputConnectionData, _from: HenVirtualCNode, _to: HenVirtualCNode) -> void:
+		input_connection = _in
+		output_connection = _out
+		from = _from
+		to = _to
+	
+
+	func add(_update: bool = true) -> void:
+		from.output_connections.append(output_connection)
+		to.input_connections.append(input_connection)
+
+		if _update:
+			from.update()
+			to.update()
+
+
+	func remove() -> void:
+		from.output_connections.erase(output_connection)
+		to.input_connections.erase(input_connection)
+
+		if input_connection.line_ref:
+			input_connection.line_ref.visible = false
+			input_connection.line_ref = null
+			output_connection.line_ref = null
+
+		# TODO: remove in/out connections
+
+		from.update()
+		to.update()
+
+
+class VCNodeReturn:
+	var v_cnode: HenVirtualCNode
+
+	func _init(_v_cnode: HenVirtualCNode) -> void:
+		v_cnode = _v_cnode
+
+
+	func add() -> void:
+		if not HenGlobal.vc_list.has(v_cnode.route_ref.id):
+			HenGlobal.vc_list[v_cnode.route_ref.id] = []
+		
+		HenGlobal.vc_list[v_cnode.route_ref.id].append(v_cnode)
+		HenGlobal.CNODE_CAM._check_virtual_cnodes()
+	
+
+	func remove() -> void:
+		if HenGlobal.vc_list.has(v_cnode.route_ref.id):
+			HenGlobal.vc_list[v_cnode.route_ref.id].erase(v_cnode)
+		
+		v_cnode.hide()
+
 
 func check_visibility(_rect: Rect2) -> void:
 	is_showing = _rect.intersects(
@@ -539,7 +600,27 @@ func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode, _line: H
 	from_flow.from_connection = flow_data
 
 
-func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: HenConnectionLine = null) -> void:
+func remove_input_connection(_idx: int) -> void:
+	for connection: InputConnectionData in input_connections:
+		if connection.idx == _idx:
+			connection.from.output_connections.erase(connection.from_ref)
+			connection.line_ref.visible = false
+			input_connections.erase(connection)
+			break
+
+
+func get_input_connection(_idx: int) -> ConnectionReturn:
+	for connection: InputConnectionData in input_connections:
+		if connection.idx == _idx:
+			return ConnectionReturn.new(connection, connection.from_ref, connection.from, self)
+
+	return null
+
+
+func create_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: HenConnectionLine = null) -> ConnectionReturn:
+	# cleaning others connections
+	remove_input_connection(_idx)
+	
 	var input_connection: InputConnectionData = InputConnectionData.new()
 	var output_connection: OutputConnectionData = OutputConnectionData.new()
 
@@ -563,8 +644,11 @@ func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: He
 	input_connection.from_ref = output_connection
 	input_connection.from_type = _from.outputs[_from_idx].type
 
-	_from.output_connections.append(output_connection)
-	input_connections.append(input_connection)
+	return ConnectionReturn.new(input_connection, output_connection, _from, self)
+
+
+func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: HenConnectionLine = null) -> void:
+	create_connection(_idx, _from_idx, _from, _line).add(false)
 
 
 func get_flow_token_list(_token_list: Array = []) -> Array:
@@ -758,7 +842,11 @@ func get_token(_id: int = 0) -> Dictionary:
 	return token
 
 
-static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
+func get_history_obj() -> VCNodeReturn:
+	return VCNodeReturn.new(self)
+
+
+static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = true) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 
@@ -812,10 +900,11 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.inputs = _config.inputs if _config.has('inputs') else []
 	v_cnode.outputs = _config.outputs if _config.has('outputs') else []
 
-	if not HenGlobal.vc_list.has(_config.route.id):
-		HenGlobal.vc_list[_config.route.id] = []
-	
-	HenGlobal.vc_list[_config.route.id].append(v_cnode)
+	if _add_route:
+		if not HenGlobal.vc_list.has(_config.route.id):
+			HenGlobal.vc_list[_config.route.id] = []
+		
+		HenGlobal.vc_list[_config.route.id].append(v_cnode)
 
 	return v_cnode
 
@@ -824,3 +913,8 @@ static func instantiate_virtual_cnode_and_add(_config: Dictionary) -> HenVirtual
 	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config)
 	v_cnode.show()
 	return v_cnode
+
+
+static func instantiate(_config: Dictionary) -> VCNodeReturn:
+	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config, false)
+	return VCNodeReturn.new(v_cnode)

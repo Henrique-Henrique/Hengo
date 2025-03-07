@@ -383,44 +383,37 @@ func _select() -> void:
 
 		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 
-		print(data)
+		var v_cnode: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
 
-		var v_cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add(data)
-		# var cnode: HenCnode = HenCnode.instantiate_and_add(data)
+		HenGlobal.history.create_action('Add cNode')
+		HenGlobal.history.add_do_method(v_cnode.add)
+		HenGlobal.history.add_do_reference(v_cnode)
+		HenGlobal.history.add_undo_method(v_cnode.remove)
 
-		# # make connection
+		# make connection
 		if cnode_config.has('from_in_out'):
 			var input = v_cnode.cnode_ref.get_node('%InputContainer').get_child(0)
 
-			input.create_virtual_connection({
+			# input.create_virtual_connection({
+			# 	from = cnode_config.from_in_out,
+			# 	type = came_from,
+			# 	conn_type = connection_type,
+			# 	reparent_data = HenGlobal.reparent_data
+			# }).add()
+
+			var connection: HenVirtualCNode.ConnectionReturn = input.create_virtual_connection({
 				from = cnode_config.from_in_out,
 				type = came_from,
 				conn_type = connection_type,
 				reparent_data = HenGlobal.reparent_data
-			})
+			}).add()
 
-			# v_cnode.input_connections.append({
-			# 	idx = 0,
-			# 	to = out_virtual_ref,
-			# 	to_idx = cnode_config.in_out_idx,
-			# 	line_ref = line
-			# })
-
-			# 	input.create_connection_and_instance({
-			# 		from = output,
-			# 		type = came_from,
-			# 		conn_type = connection_type,
-			# 		reparent_data = HenGlobal.reparent_data
-			# 	})
+		# 	HenGlobal.history.add_do_method(connection.add)
+		# 	HenGlobal.history.add_do_reference(connection)
+		# 	HenGlobal.history.add_undo_method(connection.remove)
 		
 		
-		# if cnode_config.has('from_flow_connector'):
-		# 	var from_flow_connector = cnode_config.get('from_flow_connector')
-
-		# 	from_flow_connector.create_connection_line_and_instance({
-		# 		from_cnode = cnode,
-		# 	})
-
+		HenGlobal.history.commit_action()
 		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
 

@@ -239,12 +239,14 @@ func _input(event: InputEvent) -> void:
 						HenGlobal.history.create_action('Delete Node')
 
 						for cnode: HenCnode in all_nodes:
-							if cnode.sub_type == HenCnode.SUB_TYPE.VIRTUAL:
+							if not cnode.virtual_ref or cnode.sub_type == HenCnode.SUB_TYPE.VIRTUAL:
 								continue
-							
-							HenGlobal.history.add_do_method(cnode.remove_from_scene)
-							HenGlobal.history.add_undo_reference(cnode)
-							HenGlobal.history.add_undo_method(cnode.add_to_scene)
+
+							var v_cnode: HenVirtualCNode.VCNodeReturn = cnode.virtual_ref.get_history_obj()
+
+							HenGlobal.history.add_do_method(v_cnode.remove)
+							HenGlobal.history.add_undo_reference(v_cnode)
+							HenGlobal.history.add_undo_method(v_cnode.add)
 
 						HenGlobal.history.commit_action()
 					HenGlobal.STATE_CAM:

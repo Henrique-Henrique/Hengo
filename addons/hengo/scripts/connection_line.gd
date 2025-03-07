@@ -6,8 +6,8 @@ const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.
 const normal_texture = preload('res://addons/hengo/assets/images/line.png')
 const debug_texture = preload('res://addons/hengo/assets/images/line_debug.svg')
 
-var from_cnode
-var to_cnode
+var from_cnode: HenCnode
+var to_cnode: HenCnode
 var input
 var output
 var conn_size: Vector2
