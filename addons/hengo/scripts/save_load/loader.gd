@@ -72,6 +72,13 @@ static func load_and_edit(_path: StringName) -> void:
 		
 		state.visible = false
 	
+	# TODO make this reusable
+	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+		flow_connection.visible = false
+
+	for connection: HenConnectionLine in HenGlobal.connection_line_pool:
+		connection.visible = false
+
 	# reset state connection pool
 	for state_line: HenStateConnectionLine in HenGlobal.state_connection_line_pool:
 		state_line.to_state = null
@@ -182,36 +189,50 @@ static func load_and_edit(_path: StringName) -> void:
 
 				spacing = Vector2(general.position.x + general.size.x, general.position.y)
 
-		var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state({
-			name = 'My state'
-		})
+		# var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state({
+		# 	name = 'My state'
+		# })
 		
-		v_state.add_event({
-			name = 'Start',
-			type = 'start'
+		# v_state.add_event({
+		# 	name = 'Start',
+		# 	type = 'start'
+		# })
+
+		var base_route: Dictionary = {
+			name = 'Base',
+			type = HenRouter.ROUTE_TYPE.BASE,
+			id = HenUtilsName.get_unique_name(),
+		}
+
+		HenVirtualCNode.instantiate_virtual_cnode({
+			name = 'State',
+			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+			route = base_route,
+			to_flow = [ {name = 'on start'}],
+			position = Vector2(0, 0)
 		})
 
 		# adding initial cnodes (update and ready)
-		HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'enter',
-			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-			route = v_state.route,
-			position = Vector2.ZERO
-		})
+		# HenVirtualCNode.instantiate_virtual_cnode({
+		# 	name = 'enter',
+		# 	sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+		# 	route = base_route,
+		# 	position = Vector2(400, 0)
+		# })
 
-		HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'update',
-			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-			outputs = [ {
-				name = 'delta',
-				type = 'float'
-			}],
-			route = v_state.route,
-			position = Vector2(400, 0)
-		})
+		# HenVirtualCNode.instantiate_virtual_cnode({
+		# 	name = 'update',
+		# 	sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+		# 	outputs = [ {
+		# 		name = 'delta',
+		# 		type = 'float'
+		# 	}],
+		# 	route = base_route,
+		# 	position = Vector2(800, 0)
+		# })
 
-		HenRouter.current_route = v_state.route
-		HenGlobal.STATE_CAM._check_virtual_state()
+		HenRouter.current_route = base_route
+		# HenGlobal.STATE_CAM._check_virtual_state()
 	#   
 	#
 	# loading hengo script data
@@ -302,9 +323,9 @@ static func load_and_edit(_path: StringName) -> void:
 
 			# cnodes
 			# _load_cnode(state.cnode_list, state_inst.route, inst_id_refs)
-			var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
-			print(vc_data)
-			v_state.virtual_vc_list = vc_data.virtual_vc_list
+			# var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
+			# print(vc_data)
+			# v_state.virtual_vc_list = vc_data.virtual_vc_list
 
 			# for event_config: Dictionary in state['events']:
 			# 	state_inst.add_event(event_config)
@@ -400,6 +421,8 @@ static func load_and_edit(_path: StringName) -> void:
 
 
 static func load(_path: StringName) -> void:
+	var compile_bt: Button = HenGlobal.STATE_CAM.get_parent().get_node('%Compile')
+	compile_bt.disabled = false
 	# ---------------------------------------------------------------------------- #
 	# remove start message
 	loaded_virtual_cnode_list.clear()
@@ -478,6 +501,13 @@ static func load(_path: StringName) -> void:
 	HenGlobal.history = UndoRedo.new()
 
 	var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
+	var base_route: Dictionary = {
+		name = 'Base',
+		type = HenRouter.ROUTE_TYPE.BASE,
+		id = HenUtilsName.get_unique_name(),
+	}
+
+	HenGlobal.BASE_ROUTE = base_route
 
 	# create new graph
 	if script.source_code.begins_with('extends '):
@@ -488,123 +518,22 @@ static func load(_path: StringName) -> void:
 		HenGlobal.node_counter = 0
 		HenState._name_counter = 0
 
-		if ClassDB.is_parent_class(type, 'Node'):
-			var spacing: Vector2 = Vector2(-150, -200)
-
-			# creating inputs
-			for general_data in [
-				{
-					name = 'Input',
-					cnode_name = '_input',
-				},
-				# {
-				#     name = 'Shortcut Input',
-				#     cnode_name = '_shortcut_input',
-				#     color = '#1e3033'
-				# },
-				# {
-				#     name = 'Unhandled Input',
-				#     cnode_name = '_unhandled_input',
-				#     color = '#352b19'
-				# },
-				# {
-				#     name = 'Unhandled Key Input',
-				#     cnode_name = '_unhandled_key_input',
-				#     color = '#44201e'
-				# },
-				{
-					name = 'Process',
-					cnode_name = '_process',
-					color = '#401d3f',
-					param = {
-						name = 'delta',
-						type = 'float'
-					}
-				},
-				{
-					name = 'Physics Process',
-					cnode_name = '_physics_process',
-					color = '#1f2950',
-					param = {
-						name = 'delta',
-						type = 'float'
-					}
-				},
-			]:
-				var data: Dictionary = {
-					route = {
-						name = general_data.name,
-						type = HenRouter.ROUTE_TYPE.INPUT,
-						id = HenUtilsName.get_unique_name()
-					},
-					custom_data = general_data,
-					type = 'input',
-					icon = 'res://addons/hengo/assets/icons/mouse.svg'
-				}
-
-				if general_data.has('color'):
-					data.color = general_data.color
-
-				var general := HenGeneralRoute.instantiate_general(data)
-
-				general.position = spacing + Vector2(30, 0)
-
-				HenVirtualCNode.instantiate_virtual_cnode({
-					name = general_data.cnode_name,
-					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-					outputs = [ {
-						name = 'event',
-						type = 'InputEvent'
-					} if not general_data.has('param') else general_data.param],
-					route = general.route,
-					position = Vector2.ZERO
-				})
-
-
-				spacing = Vector2(general.position.x + general.size.x, general.position.y)
-
-		var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state({
-			name = 'My state'
-		})
-		
-		v_state.add_event({
-			name = 'Start',
-			type = 'start'
+		HenVirtualCNode.instantiate_virtual_cnode({
+			name = 'State',
+			sub_type = HenCnode.SUB_TYPE.STATE_START,
+			route = base_route,
+			to_flow = [ {name = 'on start'}],
+			position = Vector2(0, 0)
 		})
 
-		# adding initial cnodes (update and ready)
-		var enter: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'enter',
-			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-			route = v_state.route,
-			position = Vector2.ZERO
-		})
+		HenRouter.current_route = base_route
 
-		var update: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'update',
-			sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-			outputs = [ {
-				name = 'delta',
-				type = 'float'
-			}],
-			route = v_state.route,
-			position = Vector2(400, 0)
-		})
-
-		v_state.virtual_vc_list.append(enter)
-		v_state.virtual_vc_list.append(update)
-
-		HenRouter.current_route = v_state.route
-		HenGlobal.STATE_CAM._check_virtual_state()
 	#   
 	#
 	# loading hengo script data
 	elif script.source_code.begins_with('#[hengo] '):
 		var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
 
-		var inst_id_refs: Dictionary = {}
-		var state_trans_connections: Array = []
-	
 		# setting script configs
 		HenGlobal.script_config['type'] = data.type
 		HenGlobal.node_counter = data.node_counter
@@ -612,67 +541,28 @@ static func load(_path: StringName) -> void:
 		HenGlobal.current_script_debug_symbols = data.debug_symbols
 		HenState._name_counter = data.state_name_counter
 
-		# generating generals (like inputs)
-		# for general_config: Dictionary in data.generals:
-		# 	var dt: Dictionary = general_config.duplicate()
-
-		# 	dt.route = {
-		# 		name = general_config.name,
-		# 		type = HenRouter.ROUTE_TYPE.INPUT,
-		# 		id = HenUtilsName.get_unique_name()
-		# 	}
-
-		# 	dt.type = 'input'
-		# 	dt.icon = 'res://addons/hengo/assets/icons/mouse.svg'
-		# 	dt.custom_data = general_config
-
-		# 	var general := HenGeneralRoute.instantiate_general(dt)
-
-		# 	_load_cnode(general_config.cnode_list, general.route, inst_id_refs)
-
-		# 	inst_id_refs[float(general.id)] = general
-		
-		# functions
-		# for func_config: Dictionary in data.func_list:
-		# 	var dt: Dictionary = {
-		# 		hash = func_config.hash,
-		# 		props = func_config.props,
-		# 		name = 'Function Name',
-		# 		pos = func_config.pos,
-		# 		type = HenCnode.SUB_TYPE.FUNC,
-		# 		route = {
-		# 			name = '',
-		# 			type = HenRouter.ROUTE_TYPE.FUNC,
-		# 			id = HenUtilsName.get_unique_name()
-		# 		},
-		# 	}
-
-		# 	var func_ref = HenRouteReference.instantiate_and_add(dt)
-
-		# 	func_ref.set_ref_count(func_config.ref_count)
-
-		# 	_load_cnode(func_config.cnode_list, func_ref.route, inst_id_refs)
-			
-		# 	inst_id_refs[float(func_ref.hash)] = func_ref
-
+		# loading v_cnodes
+		_load_vc(data.virtual_cnode_list, base_route)
+	
+		# HenGlobal.vc_list[HenGlobal.BASE_ROUTE.id] = vc_data
 
 		# states
-		for state: Dictionary in data.states:
-			var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state(state)
+		# for state: Dictionary in data.states:
+		# 	var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state(state)
 
-			# transition
-			for trans: Dictionary in state.transitions:
-				v_state.add_transition(trans)
+		# 	# transition
+		# 	for trans: Dictionary in state.transitions:
+		# 		v_state.add_transition(trans)
 
-				if trans.has('to_state_id'):
-					state_trans_connections.append({
-						to_state_id = trans.get('to_state_id'),
-						v_state = v_state
-					})
+		# 		if trans.has('to_state_id'):
+		# 			state_trans_connections.append({
+		# 				to_state_id = trans.get('to_state_id'),
+		# 				v_state = v_state
+		# 			})
 
-			var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
-			print('a=> ', vc_data.virtual_vc_list)
-			v_state.virtual_vc_list = vc_data.virtual_vc_list
+		# 	var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
+		# 	print('a=> ', vc_data.virtual_vc_list)
+		# 	v_state.virtual_vc_list = vc_data.virtual_vc_list
 
 
 		# adding in/out connections
@@ -771,6 +661,7 @@ static func load(_path: StringName) -> void:
 	
 	# showing current type
 	show_class_name()
+	HenRouter.change_route(HenGlobal.BASE_ROUTE)
 
 
 static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
@@ -836,7 +727,7 @@ static func parse_hengo_json(_source: String) -> HenSaver.ScriptData:
 	script_data.state_name_counter = hengo_json.state_name_counter
 	script_data.props = hengo_json.props
 	script_data.generals = hengo_json.generals
-	script_data.states = hengo_json.states
+	script_data.virtual_cnode_list = hengo_json.virtual_cnode_list
 	script_data.connections = hengo_json.connections
 	script_data.flow_connections = hengo_json.flow_connections
 	script_data.func_list = hengo_json.func_list
@@ -862,8 +753,8 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 
 				HenGlobal.SCRIPTS_STATES[file_name.get_basename()] = []
 
-				for state_dict: Dictionary in data.states as Array:
-					(HenGlobal.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
+				# for state_dict: Dictionary in data.states as Array:
+				# 	(HenGlobal.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
 				
 				HenGlobal.SCRIPTS_INFO.append({
 					name = 'Go to \'' + file_name.get_basename() + '\' state',
@@ -891,25 +782,12 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 	_dir.list_dir_end()
 
 
-static func script_has_state(_script_name: String, _state_name: String) -> bool:
-	var has_state: bool = false
-	var script: GDScript = ResourceLoader.load('res://hengo/' + _script_name + '.gd', '', ResourceLoader.CACHE_MODE_IGNORE)
-
-	if script.source_code.begins_with('#[hengo] '):
-		var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
-	
-		return data.states.map(func(x: Dictionary) -> String: return x.name.to_lower()).has(_state_name)
-	
-	return has_state
-
-
-static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Dictionary:
-	var data: Dictionary = {
-		virtual_vc_list = []
-	}
+static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
+	var vc_list: Array = []
 
 	for _config: Dictionary in _cnode_list:
 		_config.route = _route
+
 		var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(_config)
 		loaded_virtual_cnode_list[vc.id] = vc
 
@@ -935,7 +813,10 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Dictionary:
 				})
 				idx += 1
 		
-		if vc.sub_type == HenVirtualCNode.SubType.VIRTUAL:
-			data.virtual_vc_list.append(vc)
+		# if has sub vcnodes (basically states and etc)
+		if _config.has('virtual_vc_list'):
+			vc.virtual_vc_list = _load_vc(_config.virtual_vc_list, vc.route)
 
-	return data
+		vc_list.append(vc)
+
+	return vc_list

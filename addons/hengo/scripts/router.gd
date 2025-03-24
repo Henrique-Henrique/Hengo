@@ -3,6 +3,7 @@ class_name HenRouter extends Node
 
 
 enum ROUTE_TYPE {
+	BASE,
 	STATE,
 	FUNC,
 	SIGNAL,

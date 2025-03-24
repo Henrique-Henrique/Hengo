@@ -19,7 +19,7 @@ func _on_gui(_event: InputEvent) -> void:
 		
 
 func _open_script() -> void:
-	HenLoader.load_and_edit(script_path)
+	HenLoader.load(script_path)
 	HenGlobal.DASHBOARD.hide_dashboard()
 	print('aqq -> ', HenGlobal.DASHBOARD.visible)
 

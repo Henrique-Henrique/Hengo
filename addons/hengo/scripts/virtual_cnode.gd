@@ -6,6 +6,7 @@ enum Type {
 	IF,
 	IMG,
 	EXPRESSION,
+	STATE,
 }
 
 enum SubType {
@@ -43,7 +44,9 @@ enum SubType {
 	DEBUG_STATE,
 	BREAK,
 	CONTINUE,
-	PASS
+	PASS,
+	STATE,
+	STATE_START
 }
 
 var name: String
@@ -56,8 +59,10 @@ var outputs: Array
 var size: Vector2
 var type: Type
 var sub_type: SubType
+var route: Dictionary
 var route_ref: Dictionary
 var category: StringName
+var virtual_vc_list: Array = []
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -66,11 +71,15 @@ var from_flow_connections: Array = []
 
 
 class FlowConnectionData:
+	var name: String
 	var line_ref: HenFlowConnectionLine
 	var from_pos: Vector2
 	var to_pos: Vector2
 	var to: HenVirtualCNode
 	var to_idx: int
+
+	func _init(_name: String = '') -> void:
+		name = _name
 
 	func get_save() -> Dictionary:
 		return {
@@ -377,7 +386,6 @@ func show() -> void:
 
 					label.visible = false
 					label.text = ''
-					cnode_ref.reset_size()
 				Type.IF:
 					var true_container = flow_container.get_child(0)
 					var false_container = flow_container.get_child(1)
@@ -390,8 +398,9 @@ func show() -> void:
 					(true_container.get_node('FlowSlot/Label') as Label).visible = true
 					(true_container.get_node('FlowSlot/Label') as Label).text = 'true'
 					(false_container.get_node('FlowSlot/Label') as Label).text = 'false'
+				Type.STATE:
+					(from_flow_container.get_child(0) as HenFromFlow).visible = true
 					
-					cnode_ref.reset_size()
 
 			idx = 0
 			for from_flow_connection: FromFlowConnection in from_flow_connections:
@@ -423,6 +432,16 @@ func show() -> void:
 			idx = 0
 
 			for flow_connection: FlowConnectionData in flow_connections:
+				# showing flow connections
+				var my_flow_container = flow_container.get_child(idx)
+				
+				if flow_connection.name:
+					var my_flow_label: Label = (my_flow_container.get_node('FlowSlot/Label') as Label)
+					my_flow_label.visible = true
+					my_flow_label.text = flow_connection.name
+				
+				my_flow_container.visible = true
+
 				if not flow_connection.to:
 					idx += 1
 					continue
@@ -443,7 +462,7 @@ func show() -> void:
 				line.from_connector = cnode_ref.get_node('%FlowContainer').get_child(idx).get_node('FlowSlot/Control/Connector')
 				line.to_virtual_pos = flow_connection.to_pos
 				line.from_pool_visible = true
-			
+
 				idx += 1
 
 				
@@ -584,6 +603,13 @@ func get_save() -> Dictionary:
 
 	for input: InputConnectionData in input_connections:
 		data.input_connections.append(input.get_save())
+
+	if not virtual_vc_list.is_empty():
+		data.virtual_vc_list = []
+
+		for v_cnode: HenVirtualCNode in virtual_vc_list:
+			data.virtual_vc_list.append(v_cnode.get_save())
+
 
 	return data
 
@@ -856,6 +882,9 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 	v_cnode.route_ref = _config.route
 
+	if _config.route.type == HenRouter.ROUTE_TYPE.STATE:
+		(_config.route.ref as HenVirtualCNode).virtual_vc_list.append(v_cnode)
+
 	if _config.has('category'):
 		v_cnode.category = _config.category
 
@@ -865,13 +894,31 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 
 	match v_cnode.type:
 		Type.DEFAULT:
-			v_cnode.flow_connections.append(FlowConnectionData.new())
+			if not _config.has('to_flow'): v_cnode.flow_connections.append(FlowConnectionData.new())
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.IF:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
 			v_cnode.flow_connections.append(FlowConnectionData.new())
 
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
+		Type.STATE:
+			v_cnode.route = {
+				name = v_cnode.name,
+				type = HenRouter.ROUTE_TYPE.STATE,
+				id = HenUtilsName.get_unique_name(),
+				ref = v_cnode
+			}
+
+			HenRouter.route_reference[v_cnode.route.id] = []
+			HenRouter.line_route_reference[v_cnode.route.id] = []
+			HenRouter.comment_reference[v_cnode.route.id] = []
+			
+			v_cnode.from_flow_connections.append(FromFlowConnection.new())
+
+
+	if _config.has('to_flow'):
+		for flow: Dictionary in _config.to_flow:
+			v_cnode.flow_connections.append(FlowConnectionData.new(flow.name))
 
 
 	if _config.has('inputs'):

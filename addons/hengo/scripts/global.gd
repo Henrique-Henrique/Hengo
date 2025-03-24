@@ -28,6 +28,7 @@ static var GENERAL_MENU: HenGeneralMenu
 static var GROUP: HenGroup
 static var GD_PREVIEWER: CodeEdit
 static var DASHBOARD: HenDashboard
+static var BASE_ROUTE: Dictionary
 
 # cnodes
 static var can_make_connection: bool = false

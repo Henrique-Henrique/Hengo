@@ -35,9 +35,9 @@ bg_color = Color(0.0522994, 0.0615214, 0.0861528, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1561, 1497)
-shader_parameter/offset = Vector2(51.2, 4.31359e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(912, 1362)
+shader_parameter/offset = Vector2(143.538, 290.796)
+shader_parameter/zoom_factor = 0.217379
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
@@ -87,9 +87,9 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(2260, 1495)
-shader_parameter/offset = Vector2(188.956, 267.858)
-shader_parameter/zoom_factor = 0.649992
+shader_parameter/screen_size = Vector2(2533, 1363)
+shader_parameter/offset = Vector2(-186.83, 233.033)
+shader_parameter/zoom_factor = 0.200002
 shader_parameter/alpha = 0.2
 shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -145,6 +145,7 @@ theme_override_constants/separation = 0
 split_offset = -350
 
 [node name="TabContainer" type="TabContainer" parent="Split"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_3grrq")
@@ -514,4 +515,5 @@ selection_enabled = true
 
 [node name="DashBoard" parent="." instance=ExtResource("28_nqqx4")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1

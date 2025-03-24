@@ -28,6 +28,15 @@ var selected_id: int = 0:
 
 var native_list: Array = [
 	{
+		name = 'State',
+		data = {
+			name = 'State 1',
+			type = HenCnode.TYPE.STATE,
+			sub_type = HenCnode.SUB_TYPE.STATE,
+			route = HenRouter.current_route
+		}
+	},
+	{
 		name = 'Expression',
 		data = {
 			name = 'Expression',
@@ -281,7 +290,7 @@ var native_list: Array = [
 			],
 			route = HenRouter.current_route
 		}
-	},
+	}
 ]
 
 
@@ -383,16 +392,38 @@ func _select() -> void:
 
 		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 
-		var v_cnode: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
+		var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
+
+		match data.sub_type:
+			HenVirtualCNode.SubType.STATE:
+				var v_cnode: HenVirtualCNode = vc_return.v_cnode
+
+				HenVirtualCNode.instantiate_virtual_cnode({
+					name = 'enter',
+					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+					route = v_cnode.route,
+					position = Vector2.ZERO
+				})
+
+				HenVirtualCNode.instantiate_virtual_cnode({
+					name = 'update',
+					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+					outputs = [ {
+						name = 'delta',
+						type = 'float'
+					}],
+					route = v_cnode.route,
+					position = Vector2(400, 0)
+				})
 
 		HenGlobal.history.create_action('Add cNode')
-		HenGlobal.history.add_do_method(v_cnode.add)
-		HenGlobal.history.add_do_reference(v_cnode)
-		HenGlobal.history.add_undo_method(v_cnode.remove)
+		HenGlobal.history.add_do_method(vc_return.add)
+		HenGlobal.history.add_do_reference(vc_return)
+		HenGlobal.history.add_undo_method(vc_return.remove)
 
 		# make connection
 		if cnode_config.has('from_in_out'):
-			var input = v_cnode.cnode_ref.get_node('%InputContainer').get_child(0)
+			var input = vc_return.cnode_ref.get_node('%InputContainer').get_child(0)
 
 			# input.create_virtual_connection({
 			# 	from = cnode_config.from_in_out,
@@ -500,7 +531,7 @@ func _get_sub_type(_type: Variant.Type, _usage: int) -> HenCnode.SUB_TYPE:
 func _get_typeny_arg(_arg: Dictionary) -> StringName:
 	match _arg.type:
 		TYPE_OBJECT:
-			return _arg. class_name
+			return _arg.class_name
 		TYPE_NIL:
 			if _arg.usage == 131078:
 				return 'Variant'
@@ -509,14 +540,14 @@ func _get_typeny_arg(_arg: Dictionary) -> StringName:
 
 
 func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -> Dictionary:
-	var _obj_type: StringName = _get_typeny_arg(_dict. return )
+	var _obj_type: StringName = _get_typeny_arg(_dict.return )
 
 	var obj: Dictionary = {
 		name = _dict.name,
 		type = _obj_type if _obj_type != StringName('Nil') else StringName('void'),
 		data = {
 			name = _dict.name,
-			sub_type = _get_sub_type(_dict. return .type, _dict. return .usage),
+			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage),
 			inputs = [ {
 				name = _class_name,
 				type = _class_name,
@@ -529,7 +560,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 								name = arg.name,
 								sub_type = '@dropdown',
 								category = 'enum_list',
-								data = arg. class_name .split('.'),
+								data = arg.class_name.split('.'),
 							}
 						_:
 							return {
@@ -543,10 +574,10 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 
 
 	# it's a void or return a variant
-	if _dict. return .type != TYPE_NIL or (_dict. return .type == TYPE_NIL and _dict. return .usage == 131078):
+	if _dict.return.type != TYPE_NIL or (_dict.return.type == TYPE_NIL and _dict.return.usage == 131078):
 		obj['data']['outputs'] = [ {
-			name = _dict. return .name,
-			type = _get_typeny_arg(_dict. return )
+			name = _dict.return.name,
+			type = _get_typeny_arg(_dict.return )
 		}]
 
 	return obj

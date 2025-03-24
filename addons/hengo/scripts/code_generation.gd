@@ -60,7 +60,7 @@ static func generate() -> String:
 	for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
 		var var_name: String = variable.name
 		var var_type: String = variable.type
-		var var_export: bool = variable. export
+		var var_export: bool = variable.export
 
 		var type_value: String = 'null'
 
@@ -82,7 +82,9 @@ static func generate() -> String:
 	# end variables
 
 	#region Parsing generals
+
 	var input_data: Dictionary = {}
+
 
 	for general: HenGeneralRoute in HenGlobal.GENERAL_CONTAINER.get_children():
 		match general.type:
@@ -92,9 +94,25 @@ static func generate() -> String:
 				if not tokens.is_empty():
 					input_data[general.get_general_name()] = tokens.values()[0]
 
-
-	var states_data: Dictionary = {}
 	#endregion
+	var start_state: HenVirtualCNode
+	var states_data: Dictionary = {}
+	
+	# getting states
+	for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenGlobal.BASE_ROUTE.id]:
+		match v_cnode.sub_type:
+			# getting start state cnode
+			HenVirtualCNode.SubType.STATE_START:
+				start_state = v_cnode.flow_connections[0].to
+			HenVirtualCNode.SubType.STATE:
+				var state_code_tokens = parse_tokens(v_cnode.virtual_vc_list)
+
+				states_data[v_cnode.name.to_snake_case()] = {
+					virtual_tokens = state_code_tokens,
+					transitions = []
+				}
+	
+	print('y: ', start_state.virtual_vc_list)
 
 	# base template
 	#TODO not all nodes has _process or _physics_process, make more dynamic
@@ -105,14 +123,8 @@ func _init() -> void:
 {states_dict}
 	})
 
-
-func go_to_event(_obj_ref: Node, _state_name: StringName) -> void:
-	_obj_ref._STATE_CONTROLLER.change_state(_state_name)
-
-
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
-		{start_state_debug}
 		_STATE_CONTROLLER.change_state("{start_state_name}")
 
 
@@ -132,8 +144,8 @@ func _physics_process(delta: float) -> void:
 {_unhandled_input}
 
 {_unhandled_key_input}""".format({
-		start_state_name = HenGlobal.start_state.name.to_snake_case(),
-		start_state_debug = parse_token_by_type({type = HenCnode.SUB_TYPE.START_DEBUG_STATE, id = get_state_debug_counter(HenGlobal.start_state)}),
+		start_state_name = start_state.name.to_snake_case(),
+		# start_state_debug = parse_token_by_type({type = HenCnode.SUB_TYPE.START_DEBUG_STATE, id = get_state_debug_counter(HenGlobal.start_state)}),
 		_input = 'func _input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Input') else '',
 		_shortcut_input = 'func _shortcut_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Shortcut Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Shortcut Input') else '',
 		_unhandled_input = 'func _unhandled_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Input') else '',
@@ -209,23 +221,23 @@ func _physics_process(delta: float) -> void:
 
 
 	# parsing all states
-	for state: HenVirtualState in HenGlobal.vs_list:
-		var state_code_tokens = parse_tokens(state.virtual_vc_list)
-		var state_name = state.name.to_snake_case()
-		var transitions: Array = []
+	# for state: HenVirtualState in HenGlobal.vs_list:
+	# 	var state_code_tokens = parse_tokens(state.virtual_vc_list)
+	# 	var state_name = state.name.to_snake_case()
+	# 	var transitions: Array = []
 
-		# transitions
-		for transition: HenVirtualState.TransitionData in state.transitions:
-			if transition.to:
-				transitions.append({
-					name = transition.name,
-					to_state_name = transition.to.name
-				})
+	# 	# transitions
+	# 	for transition: HenVirtualState.TransitionData in state.transitions:
+	# 		if transition.to:
+	# 			transitions.append({
+	# 				name = transition.name,
+	# 				to_state_name = transition.to.name
+	# 			})
 
-		states_data[state_name] = {
-			virtual_tokens = state_code_tokens,
-			transitions = transitions
-		}
+	# 	states_data[state_name] = {
+	# 		virtual_tokens = state_code_tokens,
+	# 		transitions = transitions
+	# 	}
 	
 	# parsing base template
 	# adding states and transitions
@@ -305,7 +317,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 			token_list.append(get_push_debug_token())
 
 			if cnode_name == 'enter':
-				token_list.append({type = HenCnode.SUB_TYPE.DEBUG_STATE, id = get_state_debug_counter(virtual_cnode.route_ref.state_ref)})
+				token_list.append({type = HenCnode.SUB_TYPE.DEBUG_STATE, id = 99})
 			
 			data[cnode_name] = {
 				tokens = token_list,
@@ -314,7 +326,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 		else:
 			if cnode_name == 'enter':
 				data[cnode_name] = {
-					tokens = [ {type = HenCnode.SUB_TYPE.DEBUG_STATE, id = get_state_debug_counter(virtual_cnode.route_ref.state_ref)}, {type = HenCnode.SUB_TYPE.PASS}],
+					tokens = [ {type = HenCnode.SUB_TYPE.DEBUG_STATE, id = 99}, {type = HenCnode.SUB_TYPE.PASS}],
 					params = []
 				}
 
