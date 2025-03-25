@@ -89,7 +89,8 @@ static func generate() -> String:
 	#endregion
 	var start_state: HenVirtualCNode
 	var states_data: Dictionary = {}
-	
+	var events: Array[Dictionary] = []
+
 	# getting states
 	for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenGlobal.BASE_ROUTE.id]:
 		match v_cnode.sub_type:
@@ -99,6 +100,7 @@ static func generate() -> String:
 			HenVirtualCNode.SubType.STATE:
 				var transitions: Array = []
 
+				# getting transition
 				for flow_connection: HenVirtualCNode.FlowConnectionData in v_cnode.flow_connections:
 					if flow_connection.to:
 						transitions.append({
@@ -110,10 +112,18 @@ static func generate() -> String:
 					virtual_tokens = parse_tokens(v_cnode.virtual_sub_type_vc_list),
 					transitions = transitions
 				}
-	
+			HenVirtualCNode.SubType.STATE_EVENT:
+				if v_cnode.flow_connections[0].to:
+					events.append({
+						name = v_cnode.name,
+						to_state_name = v_cnode.flow_connections[0].to.name
+					})
+
 	# base template
 	#TODO not all nodes has _process or _physics_process, make more dynamic
 	var base_template = """\nvar _STATE_CONTROLLER = HengoStateController.new()
+
+const _EVENTS ={events}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
@@ -141,6 +151,13 @@ func _physics_process(delta: float) -> void:
 {_unhandled_input}
 
 {_unhandled_key_input}""".format({
+		events = '{\n\t' + ',\n\t'.join(events.map(
+			func(ev: Dictionary) -> String:
+			return '{event_name}="{to_state_name}"'.format({
+				event_name = ev.name.to_snake_case(),
+				to_state_name = ev.to_state_name.to_snake_case()
+			})
+			)) + '\n}' if not events.is_empty() else '{}',
 		start_state_name = start_state.name.to_snake_case(),
 		# start_state_debug = parse_token_by_type({type = HenCnode.SUB_TYPE.START_DEBUG_STATE, id = get_state_debug_counter(HenGlobal.start_state)}),
 		_input = 'func _input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Input') else '',

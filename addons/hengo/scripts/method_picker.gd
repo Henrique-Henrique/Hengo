@@ -31,8 +31,17 @@ var native_list: Array = [
 		name = 'State',
 		data = {
 			name = 'State 1',
-			type = HenCnode.TYPE.STATE,
-			sub_type = HenCnode.SUB_TYPE.STATE,
+			type = HenVirtualCNode.Type.STATE,
+			sub_type = HenVirtualCNode.SubType.STATE,
+			route = HenRouter.current_route
+		}
+	},
+	{
+		name = 'State Event',
+		data = {
+			name = 'State Event 1',
+			type = HenVirtualCNode.Type.STATE_EVENT,
+			sub_type = HenVirtualCNode.SubType.STATE_EVENT,
 			route = HenRouter.current_route
 		}
 	},
