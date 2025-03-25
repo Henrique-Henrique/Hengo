@@ -1,54 +1,41 @@
 @tool
 class_name HenStatePropMenu extends PanelContainer
 
-var state: HenState
+const TRANSITION_PROP = preload('res://addons/hengo/scenes/state_transition_prop.tscn')
 
-# private
-#
+var virtual_state: HenVirtualCNode
+@onready var transition_container = get_node('%TransitionContainer')
+
 func _ready() -> void:
+	get_node('%StateName').value_changed.connect(_on_change_name)
 	get_node('%Add').pressed.connect(_on_add)
-	get_node('%StateName').connect('value_changed', _name_change)
+
+	for connetion: HenVirtualCNode.FlowConnectionData in virtual_state.flow_connections:
+		transition_container.add_child(_add_transition(connetion.name, connetion, virtual_state))
+
+
+func _on_change_name(_name: String) -> void:
+	virtual_state.name = _name
+	virtual_state.update()
 
 
 func _on_add() -> void:
-	var _name: String = 'Transition ' + str(get_node('%TransitionContainer').get_child_count())
-	var names = get_node('%TransitionContainer').get_children().map(func(x): return x.get_prop_name())
-	
-	if names.has(_name):
-		_name = 'Transition ' + str(Time.get_ticks_msec())
+	var flow_size: int = virtual_state.flow_connections.size()
 
-	_add_transition(_name)
+	if flow_size >= 5: # TODO flow limit, make dynamic
+		return
 
+	var flow_name: String = 'Flow ' + str(flow_size)
+	var flow_connetion_data: HenVirtualCNode.FlowConnectionData = HenVirtualCNode.FlowConnectionData.new(flow_name)
 
-func _add_transition(_name: String = '', _ref = null) -> void:
-	var transition = preload('res://addons/hengo/scenes/state_transition_prop.tscn').instantiate()
-	transition.set_prop_name(_name)
-
-	if _ref == null:
-		# TODO generate unique name when created
-		var state_transition = state.add_transition(_name)
-		transition.state_transition_ref = state_transition
-	else:
-		transition.state_transition_ref = _ref
-
-	get_node('%TransitionContainer').add_child(transition)
+	transition_container.add_child(_add_transition(flow_name, flow_connetion_data, virtual_state))
+	virtual_state.flow_connections.append(flow_connetion_data)
+	virtual_state.update()
 
 
-func _name_change(_name: String) -> void:
-	state.set_state_name(_name)
-
-
-# public
-#
-func start_prop(_state: HenState) -> void:
-	state = _state
-
-	get_node('%StateName').text = state.get_state_name()
-
-	var transition_container = get_node('%TransitionContainer')
-	# cleaning other
-	for prop in transition_container.get_children():
-		prop.queue_free()
-	
-	for transition in state.get_node('%TransitionContainer').get_children():
-		_add_transition(transition.get_transition_name(), transition)
+func _add_transition(_name: String, _ref: HenVirtualCNode.FlowConnectionData, _virtual_state: HenVirtualCNode) -> HenStateTransitionProp:
+	var transition: HenStateTransitionProp = TRANSITION_PROP.instantiate()
+	transition.virtual_state = _virtual_state
+	transition.flow_connection_data = _ref
+	transition.change_name(_name)
+	return transition

@@ -105,15 +105,11 @@ static func generate() -> String:
 			HenVirtualCNode.SubType.STATE_START:
 				start_state = v_cnode.flow_connections[0].to
 			HenVirtualCNode.SubType.STATE:
-				var state_code_tokens = parse_tokens(v_cnode.virtual_vc_list)
-
 				states_data[v_cnode.name.to_snake_case()] = {
-					virtual_tokens = state_code_tokens,
+					virtual_tokens = parse_tokens(v_cnode.virtual_sub_type_vc_list),
 					transitions = []
 				}
 	
-	print('y: ', start_state.virtual_vc_list)
-
 	# base template
 	#TODO not all nodes has _process or _physics_process, make more dynamic
 	var base_template = """\nvar _STATE_CONTROLLER = HengoStateController.new()

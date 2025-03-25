@@ -161,7 +161,7 @@ var native_list: Array = [
 					name = 'condition',
 					type = 'bool'
 				},
-			]
+			],
 		}
 	},
 	{

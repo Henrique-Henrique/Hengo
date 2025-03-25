@@ -6,7 +6,8 @@ enum TYPE {
 	IF,
 	IMG,
 	EXPRESSION,
-	STATE
+	STATE,
+	STATE_START
 }
 
 enum SUB_TYPE {
@@ -99,18 +100,17 @@ func _ready():
 
 
 func _on_enter() -> void:
-	if virtual_ref:
+	# if virtual_ref:
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
-		print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
+		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
 		# print('flow -> ', virtual_ref.flow_connection)
 		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
 		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)
-
 	_is_mouse_enter = true
 
-	_preview_timer = get_tree().create_timer(.5)
-	_preview_timer.timeout.connect(_on_tooltip)
+	# _preview_timer = get_tree().create_timer(.5)
+	# _preview_timer.timeout.connect(_on_tooltip)
 
 
 	if HenGlobal.can_make_flow_connection:
@@ -158,17 +158,17 @@ func _on_exit() -> void:
 		modulate = Color.WHITE
 		get_node('%Border').visible = false
 
-	_is_mouse_enter = false
+	# _is_mouse_enter = false
 	
-	_preview_timer.timeout.disconnect(_on_tooltip)
+	# _preview_timer.timeout.disconnect(_on_tooltip)
 
 	#TODO: reset this timer if hover again on other cnode
-	get_tree().create_timer(.2).timeout.connect(func():
-		if HenGlobal.DOCS_TOOLTIP.first_show:
-			HenGlobal.DOCS_TOOLTIP.first_show = false
-		else:
-			HenGlobal.DOCS_TOOLTIP.hide_docs()
-		)
+	# get_tree().create_timer(.2).timeout.connect(func():
+	# 	if HenGlobal.DOCS_TOOLTIP.first_show:
+	# 		HenGlobal.DOCS_TOOLTIP.first_show = false
+	# 	else:
+	# 		HenGlobal.DOCS_TOOLTIP.hide_docs()
+	# 	)
 
 
 func _on_tooltip() -> Variant:
@@ -240,6 +240,7 @@ func _on_gui(_event: InputEvent) -> void:
 			elif _event.double_click:
 				if virtual_ref and not virtual_ref.route.is_empty():
 					HenRouter.change_route(virtual_ref.route)
+				
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
@@ -257,6 +258,13 @@ func _on_gui(_event: InputEvent) -> void:
 						# generate gd_preview
 						# var code: String = parse_token_and_value()
 						# HenGlobal.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
+				elif _event.button_index == MOUSE_BUTTON_RIGHT:
+					# showing state config on doubleclick
+					if virtual_ref:
+						var state_prop_menu: HenStatePropMenu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
+						state_prop_menu.virtual_state = virtual_ref
+						HenGlobal.GENERAL_POPUP.get_parent().show_content(state_prop_menu, 'State Config', get_global_mouse_position())
+					
 		else:
 			moving = false
 			# group moving false
@@ -465,46 +473,47 @@ func add_output(_output: Dictionary) -> void:
 	out_container.add_child(output)
 
 func check_error() -> void:
-	var in_container = get_node('%InputContainer')
-	var out_container = get_node('%OutputContainer')
-	var errors: Array[Dictionary] = []
+	pass
+	# var in_container = get_node('%InputContainer')
+	# var out_container = get_node('%OutputContainer')
+	# var errors: Array[Dictionary] = []
 
-	match sub_type:
-		HenCnode.SUB_TYPE.GO_TO_VOID:
-			var input = in_container.get_child(1)
+	# match sub_type:
+	# 	HenCnode.SUB_TYPE.GO_TO_VOID:
+	# 		var input = in_container.get_child(1)
 
-			# checking if other script has changed state name
-			if not HenLoader.script_has_state(input.custom_data, input.get_in_prop_by_id_or_null().get_value()):
-				errors.append({
-					input_instance_id = input.get_instance_id(),
-					msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
-				})
-		HenCnode.SUB_TYPE.CAST:
-			var output = out_container.get_child(0)
+	# 		# checking if other script has changed state name
+	# 		if not HenLoader.script_has_state(input.custom_data, input.get_in_prop_by_id_or_null().get_value()):
+	# 			errors.append({
+	# 				input_instance_id = input.get_instance_id(),
+	# 				msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
+	# 			})
+	# 	HenCnode.SUB_TYPE.CAST:
+	# 		var output = out_container.get_child(0)
 			
-			# if not connected pass
-			if output.to_connection_lines.is_empty():
-				disable_error()
-				return
+	# 		# if not connected pass
+	# 		if output.to_connection_lines.is_empty():
+	# 			disable_error()
+	# 			return
 
-			var input = in_container.get_child(0)
+	# 		var input = in_container.get_child(0)
 
-			# checking if it's connected
-			# signal connection need a ref
-			if input.in_connected_from:
-				disable_error()
-				return
+	# 		# checking if it's connected
+	# 		# signal connection need a ref
+	# 		if input.in_connected_from:
+	# 			disable_error()
+	# 			return
 
-			errors.append({
-				input_instance_id = input.get_instance_id(),
-				msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
-			})
+	# 		errors.append({
+	# 			input_instance_id = input.get_instance_id(),
+	# 			msg = input.get_in_out_name() + ": the input type isn't derived from the current object; please set its value explicitly"
+	# 		})
 
-	if errors.size() > 0:
-		get_node('%ErrorBorder').visible = true
-		HenGlobal.ERROR_BT.set_error_on_id(get_instance_id(), errors)
-	else:
-		disable_error()
+	# if errors.size() > 0:
+	# 	get_node('%ErrorBorder').visible = true
+	# 	HenGlobal.ERROR_BT.set_error_on_id(get_instance_id(), errors)
+	# else:
+	# 	disable_error()
 
 
 func disable_error() -> void:

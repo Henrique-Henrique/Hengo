@@ -7,6 +7,7 @@ enum Type {
 	IMG,
 	EXPRESSION,
 	STATE,
+	STATE_START
 }
 
 enum SubType {
@@ -62,7 +63,8 @@ var sub_type: SubType
 var route: Dictionary
 var route_ref: Dictionary
 var category: StringName
-var virtual_vc_list: Array = []
+var virtual_cnode_list: Array = []
+var virtual_sub_type_vc_list: Array = []
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -86,7 +88,7 @@ class FlowConnectionData:
 			to_id = to.id,
 			to_idx = to_idx
 		}
-
+		
 
 class FromFlowConnection:
 	var from: HenVirtualCNode
@@ -182,7 +184,7 @@ class VCNodeReturn:
 		v_cnode.hide()
 
 
-func check_visibility(_rect: Rect2) -> void:
+func check_visibility(_rect: Rect2 = HenGlobal.CNODE_CAM.get_rect()) -> void:
 	is_showing = _rect.intersects(
 		Rect2(
 			position,
@@ -387,17 +389,16 @@ func show() -> void:
 					label.visible = false
 					label.text = ''
 				Type.IF:
-					var true_container = flow_container.get_child(0)
-					var false_container = flow_container.get_child(1)
-					
+					# var true_container = flow_container.get_child(0)
+					# var false_container = flow_container.get_child(1)
 					(from_flow_container.get_child(0) as HenFromFlow).visible = true
 
-					true_container.visible = true
-					false_container.visible = true
+					# true_container.visible = true
+					# false_container.visible = true
 
-					(true_container.get_node('FlowSlot/Label') as Label).visible = true
-					(true_container.get_node('FlowSlot/Label') as Label).text = 'true'
-					(false_container.get_node('FlowSlot/Label') as Label).text = 'false'
+					# (true_container.get_node('FlowSlot/Label') as Label).visible = true
+					# (true_container.get_node('FlowSlot/Label') as Label).text = 'true'
+					# (false_container.get_node('FlowSlot/Label') as Label).text = 'false'
 				Type.STATE:
 					(from_flow_container.get_child(0) as HenFromFlow).visible = true
 					
@@ -576,7 +577,7 @@ func hide() -> void:
 
 func update() -> void:
 	hide()
-	show()
+	check_visibility()
 
 
 func get_save() -> Dictionary:
@@ -604,12 +605,21 @@ func get_save() -> Dictionary:
 	for input: InputConnectionData in input_connections:
 		data.input_connections.append(input.get_save())
 
-	if not virtual_vc_list.is_empty():
-		data.virtual_vc_list = []
+	if not virtual_cnode_list.is_empty():
+		data.virtual_cnode_list = []
 
-		for v_cnode: HenVirtualCNode in virtual_vc_list:
-			data.virtual_vc_list.append(v_cnode.get_save())
+		for v_cnode: HenVirtualCNode in virtual_cnode_list:
+			data.virtual_cnode_list.append(v_cnode.get_save())
 
+	if [Type.IF, Type.DEFAULT].has(type):
+		if not flow_connections.is_empty():
+			var flows: Array = []
+
+			for flow_connection: FlowConnectionData in flow_connections:
+				if flow_connection.name:
+					flows.append({name = flow_connection.name})
+			
+			if not flows.is_empty(): data.to_flow = flows
 
 	return data
 
@@ -882,8 +892,13 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 	v_cnode.route_ref = _config.route
 
+	if v_cnode.sub_type == SubType.VIRTUAL:
+		_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)
+
+
 	if _config.route.type == HenRouter.ROUTE_TYPE.STATE:
-		(_config.route.ref as HenVirtualCNode).virtual_vc_list.append(v_cnode)
+		(_config.route.ref as HenVirtualCNode).virtual_cnode_list.append(v_cnode)
+	
 
 	if _config.has('category'):
 		v_cnode.category = _config.category
@@ -891,15 +906,13 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 	if _config.has('position'):
 		v_cnode.position = _config.position if _config.position is Vector2 else str_to_var(_config.position)
 
-
 	match v_cnode.type:
 		Type.DEFAULT:
 			if not _config.has('to_flow'): v_cnode.flow_connections.append(FlowConnectionData.new())
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.IF:
-			v_cnode.flow_connections.append(FlowConnectionData.new())
-			v_cnode.flow_connections.append(FlowConnectionData.new())
-
+			v_cnode.flow_connections.append(FlowConnectionData.new('true'))
+			v_cnode.flow_connections.append(FlowConnectionData.new('false'))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE:
 			v_cnode.route = {
@@ -914,11 +927,13 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 			HenRouter.comment_reference[v_cnode.route.id] = []
 			
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
-
-
-	if _config.has('to_flow'):
-		for flow: Dictionary in _config.to_flow:
-			v_cnode.flow_connections.append(FlowConnectionData.new(flow.name))
+		Type.STATE_START:
+			v_cnode.flow_connections.append(FlowConnectionData.new('on start'))
+			v_cnode.from_flow_connections.append(FromFlowConnection.new())
+		_:
+			if _config.has('to_flow'):
+				for flow: Dictionary in _config.to_flow:
+					v_cnode.flow_connections.append(FlowConnectionData.new(flow.name))
 
 
 	if _config.has('inputs'):

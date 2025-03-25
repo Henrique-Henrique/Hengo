@@ -424,7 +424,6 @@ static func load(_path: StringName) -> void:
 	var compile_bt: Button = HenGlobal.STATE_CAM.get_parent().get_node('%Compile')
 	compile_bt.disabled = false
 	# ---------------------------------------------------------------------------- #
-	# remove start message
 	loaded_virtual_cnode_list.clear()
 	connection_list.clear()
 	flow_connection_list.clear()
@@ -520,9 +519,9 @@ static func load(_path: StringName) -> void:
 
 		HenVirtualCNode.instantiate_virtual_cnode({
 			name = 'State',
-			sub_type = HenCnode.SUB_TYPE.STATE_START,
+			type = HenVirtualCNode.Type.STATE_START,
+			sub_type = HenVirtualCNode.SubType.STATE_START,
 			route = base_route,
-			to_flow = [ {name = 'on start'}],
 			position = Vector2(0, 0)
 		})
 
@@ -543,27 +542,6 @@ static func load(_path: StringName) -> void:
 
 		# loading v_cnodes
 		_load_vc(data.virtual_cnode_list, base_route)
-	
-		# HenGlobal.vc_list[HenGlobal.BASE_ROUTE.id] = vc_data
-
-		# states
-		# for state: Dictionary in data.states:
-		# 	var v_state: HenVirtualState = HenVirtualState.instantiate_virtual_state(state)
-
-		# 	# transition
-		# 	for trans: Dictionary in state.transitions:
-		# 		v_state.add_transition(trans)
-
-		# 		if trans.has('to_state_id'):
-		# 			state_trans_connections.append({
-		# 				to_state_id = trans.get('to_state_id'),
-		# 				v_state = v_state
-		# 			})
-
-		# 	var vc_data: Dictionary = _load_vc(state.cnode_list, v_state.route)
-		# 	print('a=> ', vc_data.virtual_vc_list)
-		# 	v_state.virtual_vc_list = vc_data.virtual_vc_list
-
 
 		# adding in/out connections
 		for input_data: Dictionary in connection_list:
@@ -814,8 +792,8 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
 				idx += 1
 		
 		# if has sub vcnodes (basically states and etc)
-		if _config.has('virtual_vc_list'):
-			vc.virtual_vc_list = _load_vc(_config.virtual_vc_list, vc.route)
+		if _config.has('virtual_cnode_list'):
+			vc.virtual_cnode_list = _load_vc(_config.virtual_cnode_list, vc.route)
 
 		vc_list.append(vc)
 

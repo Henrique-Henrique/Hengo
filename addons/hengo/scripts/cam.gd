@@ -135,18 +135,18 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 	# )
 
 
-func _check_virtual_state(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
+func _check_virtual_state() -> void:
 	if self != HenGlobal.STATE_CAM:
 		return
-	
-	var rect: Rect2 = Rect2(
-		_pos / -_zoom, # position
-		(get_parent() as Panel).size / _zoom
-	)
 
 	for v_state: HenVirtualState in HenGlobal.vs_list:
-		v_state.check_visibility(rect)
+		v_state.check_visibility(get_rect())
 
+func get_rect() -> Rect2:
+	return Rect2(
+		transform.origin / -transform.x.x, # position
+		(get_parent() as Panel).size / transform.x.x
+	)
 
 # public
 #
