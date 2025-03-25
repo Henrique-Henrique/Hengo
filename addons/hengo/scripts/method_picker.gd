@@ -69,6 +69,7 @@ var native_list: Array = [
 			inputs = [
 				{
 					name = 'name',
+					type = 'StringName',
 					sub_type = '@dropdown',
 					category = 'state_transition'
 				}
@@ -531,7 +532,7 @@ func _get_sub_type(_type: Variant.Type, _usage: int) -> HenCnode.SUB_TYPE:
 func _get_typeny_arg(_arg: Dictionary) -> StringName:
 	match _arg.type:
 		TYPE_OBJECT:
-			return _arg.class_name
+			return _arg. class_name
 		TYPE_NIL:
 			if _arg.usage == 131078:
 				return 'Variant'
@@ -540,14 +541,14 @@ func _get_typeny_arg(_arg: Dictionary) -> StringName:
 
 
 func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -> Dictionary:
-	var _obj_type: StringName = _get_typeny_arg(_dict.return )
+	var _obj_type: StringName = _get_typeny_arg(_dict. return )
 
 	var obj: Dictionary = {
 		name = _dict.name,
 		type = _obj_type if _obj_type != StringName('Nil') else StringName('void'),
 		data = {
 			name = _dict.name,
-			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage),
+			sub_type = _get_sub_type(_dict. return .type, _dict. return .usage),
 			inputs = [ {
 				name = _class_name,
 				type = _class_name,
@@ -560,7 +561,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 								name = arg.name,
 								sub_type = '@dropdown',
 								category = 'enum_list',
-								data = arg.class_name.split('.'),
+								data = arg. class_name .split('.'),
 							}
 						_:
 							return {
@@ -574,10 +575,10 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 
 
 	# it's a void or return a variant
-	if _dict.return.type != TYPE_NIL or (_dict.return.type == TYPE_NIL and _dict.return.usage == 131078):
+	if _dict. return .type != TYPE_NIL or (_dict. return .type == TYPE_NIL and _dict. return .usage == 131078):
 		obj['data']['outputs'] = [ {
-			name = _dict.return.name,
-			type = _get_typeny_arg(_dict.return )
+			name = _dict. return .name,
+			type = _get_typeny_arg(_dict. return )
 		}]
 
 	return obj

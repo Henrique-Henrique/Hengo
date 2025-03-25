@@ -261,9 +261,10 @@ func _on_gui(_event: InputEvent) -> void:
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
 					# showing state config on doubleclick
 					if virtual_ref:
-						var state_prop_menu: HenStatePropMenu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
-						state_prop_menu.virtual_state = virtual_ref
-						HenGlobal.GENERAL_POPUP.get_parent().show_content(state_prop_menu, 'State Config', get_global_mouse_position())
+						if virtual_ref.type == HenVirtualCNode.Type.STATE:
+							var state_prop_menu: HenStatePropMenu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
+							state_prop_menu.virtual_state = virtual_ref
+							HenGlobal.GENERAL_POPUP.get_parent().show_content(state_prop_menu, 'State Config', get_global_mouse_position())
 					
 		else:
 			moving = false

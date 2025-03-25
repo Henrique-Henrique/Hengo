@@ -60,7 +60,7 @@ static func generate() -> String:
 	for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
 		var var_name: String = variable.name
 		var var_type: String = variable.type
-		var var_export: bool = variable.export
+		var var_export: bool = variable. export
 
 		var type_value: String = 'null'
 
@@ -86,14 +86,6 @@ static func generate() -> String:
 	var input_data: Dictionary = {}
 
 
-	for general: HenGeneralRoute in HenGlobal.GENERAL_CONTAINER.get_children():
-		match general.type:
-			'input':
-				var tokens: Dictionary = parse_tokens(general.virtual_cnode_list)
-
-				if not tokens.is_empty():
-					input_data[general.get_general_name()] = tokens.values()[0]
-
 	#endregion
 	var start_state: HenVirtualCNode
 	var states_data: Dictionary = {}
@@ -105,9 +97,18 @@ static func generate() -> String:
 			HenVirtualCNode.SubType.STATE_START:
 				start_state = v_cnode.flow_connections[0].to
 			HenVirtualCNode.SubType.STATE:
+				var transitions: Array = []
+
+				for flow_connection: HenVirtualCNode.FlowConnectionData in v_cnode.flow_connections:
+					if flow_connection.to:
+						transitions.append({
+							name = flow_connection.name,
+							to_state_name = flow_connection.to.name
+						})
+
 				states_data[v_cnode.name.to_snake_case()] = {
 					virtual_tokens = parse_tokens(v_cnode.virtual_sub_type_vc_list),
-					transitions = []
+					transitions = transitions
 				}
 	
 	# base template
@@ -247,7 +248,7 @@ func _physics_process(delta: float) -> void:
 					func(trans: Dictionary) -> String:
 					return '{state_name}="{to_state_name}"'.format({
 						state_name = trans.name.to_snake_case(),
-						to_state_name = trans.to_state_name
+						to_state_name = trans.to_state_name.to_snake_case()
 					})
 					)) + '\n\t\t}' if states_data[state_name].transitions.size() > 0 else ''
 				})

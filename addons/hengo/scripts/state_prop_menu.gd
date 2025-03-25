@@ -10,6 +10,8 @@ func _ready() -> void:
 	get_node('%StateName').value_changed.connect(_on_change_name)
 	get_node('%Add').pressed.connect(_on_add)
 
+	get_node('%StateName').text = virtual_state.name
+
 	for connetion: HenVirtualCNode.FlowConnectionData in virtual_state.flow_connections:
 		transition_container.add_child(_add_transition(connetion.name, connetion, virtual_state))
 
