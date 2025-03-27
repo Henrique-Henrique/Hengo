@@ -403,41 +403,13 @@ func remove_from_scene() -> void:
 	deleted = true
 
 
-func add_input(_input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
+func add_input(__input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
 	var in_container = get_node('%InputContainer')
 	var input: HenCnodeInOut = HenAssets.CNodeInputScene.instantiate()
 
-	if _input.has('is_ref'):
-		input.is_ref = true
-
-	if _input.has('category'):
-		input.category = _input.category
- 
-		match _input.category:
-			# make connector invisible
-			# useful when input don't want a connection
-			'state_transition', 'hengo_events', 'disabled':
-				input.get_node('%CNameInput').get_child(0).visible = false
-
-	if _input.has('sub_type'):
-		input.sub_type = _input.sub_type
-
-	if _input.has('data'):
-		input.custom_data = _input.get('data')
-
-	if _input.has('group'):
-		HenGlobal.GROUP.add_to_group(_input.get('group'), input)
-
-
-	input.set_type(_input.get('type') if _input.has('type') else 'Variant')
-	input.get_node('%Name').text = _input.name
+	input.set_type(__input.get('type') if __input.has('type') else 'Variant')
+	(input.get_node('%Name') as Label).text = __input.name
 	input.root = self
-
-	if _instantiate_prop:
-		if _input.has('is_prop'):
-			input.add_prop_ref(_input.get('in_prop'), int(_input.get('prop_idx')) if _input.has('prop_idx') else -1)
-		else:
-			input.set_in_prop(_input.get('in_prop') if _input.has('in_prop') else null)
 
 	in_container.add_child(input)
 
@@ -446,31 +418,12 @@ func add_input(_input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeIn
 
 func add_output(_output: Dictionary) -> void:
 	var out_container = get_node('%OutputContainer')
-
-	var output := HenAssets.CNodeOutputScene.instantiate()
-
-	if _output.has('category'):
-		output.category = _output.category
-
-	if _output.has('sub_type'):
-		output.sub_type = _output.sub_type
-
-	if _output.has('data'):
-		output.custom_data = _output.get('data')
-
-	if _output.has('group_idx'):
-		var idx = _output.get('group_idx')
-		HenGlobal.GROUP.add_to_group('p' + str(idx), output)
-		output.custom_data = idx
-
-	if _output.has('group'):
-		HenGlobal.GROUP.add_to_group(_output.get('group'), output)
+	var output: HenCnodeInOut = HenAssets.CNodeOutputScene.instantiate()
 
 	output.set_type(_output.get('type') if _output.has('type') else 'Variant')
-	output.get_node('%Name').text = _output.name
+	(output.get_node('%Name') as Label).text = _output.name
 	output.root = self
 
-	output.set_out_prop(_output.sub_type if _output.has('sub_type') else '', _output.get('out_prop') if _output.has('out_prop') else null)
 	out_container.add_child(output)
 
 func check_error() -> void:
@@ -594,219 +547,6 @@ func show_debug_value(_value) -> void:
 #
 static func instantiate_cnode(_config: Dictionary) -> HenCnode:
 	var instance: HenCnode = HenAssets.CNodeScene.instantiate()
-
-	if not _config.is_empty():
-		instance.hash = HenGlobal.get_new_node_counter() if not _config.has('hash') else _config.hash
-		instance.raw_name = _config.name
-		instance.change_name(_config.get('fantasy_name') if _config.has('fantasy_name') else _config.name)
-
-		var title_container = instance.get_node('%TitleContainer')
-
-		if not _config.has('type'):
-			if _config.has('sub_type'):
-				match _config.sub_type as SUB_TYPE:
-					SUB_TYPE.VAR, SUB_TYPE.LOCAL_VAR:
-						_config.type = ''
-					SUB_TYPE.DEBUG_VALUE:
-						var debug_value_scene = preload('res://addons/hengo/scenes/props/debug_value.tscn').instantiate()
-						var container: VBoxContainer = instance.get_node('%Container')
-						
-						container.add_child(debug_value_scene)
-						container.move_child(debug_value_scene, 1)
-
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/debug.svg')
-						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#8a7346'))
-
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.FUNC, SUB_TYPE.USER_FUNC:
-						# color
-						# match _config.name:
-							# 'make_transition':
-								# title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
-							# _:
-								# title_container.get('theme_override_styles/panel').set('bg_color', Color('#464A73'))
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/func.svg')
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.VOID:
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/void.svg')
-						# title_container.get('theme_override_styles/panel').set('bg_color', EditorInterface.get_editor_settings().get_setting('interface/theme/base_color').darkened(.4))
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.SET_VAR, SUB_TYPE.SET_PROP, SUB_TYPE.GET_PROP:
-						# color
-						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#4A7346'))
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/set_var.svg')
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.VIRTUAL, SUB_TYPE.FUNC_INPUT:
-						# color
-						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#734646'))
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/virtual.svg')
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.CAST, SUB_TYPE.RAW_CODE:
-						match _config.sub_type as SUB_TYPE:
-							SUB_TYPE.RAW_CODE:
-								title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/raw.svg')
-							SUB_TYPE.CAST:
-								title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/cast.svg')
-
-						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.SELF_GO_TO_VOID:
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/go_to.svg')
-						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
-						_config.type = TYPE.DEFAULT
-					SUB_TYPE.FOR, SUB_TYPE.FOR_ARR:
-						title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/for.svg')
-						# title_container.get('theme_override_styles/panel').set('bg_color', Color('#8c5c37'))
-						_config.type = TYPE.DEFAULT
-					_:
-						_config.type = TYPE.DEFAULT
-
-		instance.type = _config.type
-		
-		# hash of user function coming from group singleton
-		var func_id: String = ''
-
-		if _config.has('group'):
-			HenGlobal.GROUP.add_to_group(_config.group, instance)
-			
-			if _config.group.begins_with('f_'):
-				func_id = _config.group.split('f_')[1]
-
-		# this tell hengo how to generate code
-		if _config.has('category'):
-			instance.category = _config.get('category')
-
-		if _config.has('inputs'):
-			var idx: int = 0
-
-			for input_config in _config.get('inputs'):
-				if not func_id.is_empty():
-					# adding user function inputs group
-					match _config.sub_type as SUB_TYPE:
-						HenCnode.SUB_TYPE.FUNC_OUTPUT:
-							input_config.group = 'fo_' + func_id + '_' + str(idx)
-						_:
-							input_config.group = 'fi_' + func_id + '_' + str(idx)
-				
-				instance.add_input(input_config)
-				idx += 1
-
-		if _config.has('outputs'):
-			var idx: int = 0
-
-			for output_config in _config.get('outputs'):
-				if not func_id.is_empty():
-					# adding user function ouputs group
-					match _config.sub_type as SUB_TYPE:
-						HenCnode.SUB_TYPE.FUNC_INPUT:
-							output_config.group = 'fi_' + func_id + '_' + str(idx)
-						_:
-							output_config.group = 'fo_' + func_id + '_' + str(idx)
-				
-				instance.add_output(output_config)
-				idx += 1
-
-		# custom data
-		if _config.has('data'):
-			instance.data = _config.data
-		
-
-		# instance flow connections
-		match _config.type as TYPE:
-			TYPE.DEFAULT:
-				var default_flow := HenAssets.CNodeFlowScene.instantiate()
-				var connector = default_flow.get_child(0)
-				connector.root = instance
-				instance.get_node('%Container').add_child(default_flow)
-				instance.connectors.cnode = connector
-			TYPE.IF:
-				var if_flow := HenAssets.CNodeIfFlowScene.instantiate()
-				for i in if_flow.get_node('%FlowContainer').get_children():
-					i.root = instance
-					instance.connectors[i.type] = i
-				
-				# var input = HenAssets.CNodeInputScene.instantiate()
-				# var container = title_container.get_child(0)
-				# container.add_child(input)
-				# container.move_child(input, 0)
-				# container.process_mode = Node.PROCESS_MODE_INHERIT
-				# input.root = instance
-				# input.set_type('bool')
-				instance.get_node('%Container').add_child(if_flow)
-
-				# color
-				title_container.get('theme_override_styles/panel').set('bg_color', Color('#674883'))
-				title_container.get_node('%TitleIcon').visible = false
-				(title_container.get_node('%Title') as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-			TYPE.IMG:
-				var center_img = HenAssets.CNodeCenterImage.instantiate()
-				var img = center_img.get_node('%Img')
-				var center_container = instance.get_node('%CenterContainer')
-
-				img.texture = load('res://addons/hengo/assets/icons/' + _config.category + '.svg')
-
-				center_container.set('theme_override_constants/separation', 5)
-				center_container.add_child(center_img)
-				center_container.move_child(center_img, 1)
-
-				instance.get_node('%OutputContainer').alignment = BoxContainer.ALIGNMENT_CENTER
-				title_container.visible = false
-			TYPE.EXPRESSION:
-				title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/math.svg')
-				title_container.get('theme_override_styles/panel').set('bg_color', Color('#000'))
-
-				var container = instance.get_node('%Container')
-				var bt_container = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
-				
-				var bt = bt_container.get_child(0)
-				bt.ref = instance
-				
-				if _config.has('exp'):
-					bt.set_exp(_config.exp)
-				
-				container.add_child(bt_container)
-				container.move_child(bt_container, 1)
-
-		if _config.has('sub_type'):
-			var _sub_type = _config.get('sub_type')
-			instance.sub_type = _sub_type
-
-			match _sub_type as SUB_TYPE:
-				# adding virtual cnodes references
-				HenCnode.SUB_TYPE.VIRTUAL:
-					match _config.route.type as HenRouter.ROUTE_TYPE:
-						HenRouter.ROUTE_TYPE.STATE:
-							var ref = _config.route.state_ref
-							ref.virtual_cnode_list.append(instance)
-						HenRouter.ROUTE_TYPE.INPUT:
-							var ref = _config.route.general_ref
-							ref.virtual_cnode_list.append(instance)
-				# virtual node of signal and func
-				HenCnode.SUB_TYPE.FUNC_INPUT:
-					var ref = _config.route.item_ref
-					ref.virtual_cnode_list.append(instance)
-				HenCnode.SUB_TYPE.FUNC_OUTPUT:
-					_config.route.item_ref.output_cnode = instance
-				HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
-					instance.get_node('%TitleContainer').visible = false
-				HenCnode.SUB_TYPE.SINGLETON:
-					title_container.get_node('%TitleIcon').texture = preload('res://addons/hengo/assets/icons/cnode/singleton.svg')
-					title_container.get('theme_override_styles/panel').set('bg_color', Color('#691818'))
-
-		HenRouter.route_reference[_config.route.id].append(instance)
-
-	
-	instance.route_ref = _config.route
-
-	if _config.has('pos'):
-		instance.position = str_to_var(_config.pos)
-	elif _config.has('position'):
-		instance.position = _config.position
-	else:
-		instance.position = Vector2.ZERO
-
-	instance.size = Vector2.ZERO
 
 	return instance
 

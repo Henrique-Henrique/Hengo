@@ -87,13 +87,6 @@ func _on_gui(_event: InputEvent) -> void:
 							i.unselect()
 
 						select()
-				elif _event.button_index == MOUSE_BUTTON_RIGHT:
-					var menu = preload('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
-					var pos = global_position
-
-					pos.x += size.x * HenGlobal.STATE_CAM.transform.x.x + 4
-					menu.start_prop(self)
-					HenGlobal.GENERAL_POPUP.get_parent().show_content(menu, 'State Prop', pos)
 		else:
 			moving = false
 			# group moving false

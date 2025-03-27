@@ -57,7 +57,7 @@ var native_list: Array = [
 					name = '',
 					type = 'Variant',
 					sub_type = 'expression',
-					'static' = true
+					is_static = true
 				}
 			],
 			outputs = [
@@ -291,7 +291,7 @@ var native_list: Array = [
 					type = 'Variant',
 					sub_type = '@dropdown',
 					category = 'set_prop',
-					'static' = true
+					is_static = true
 				},
 				{
 					name = 'value',
@@ -402,6 +402,7 @@ func _select() -> void:
 
 		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 
+		print(data)
 		var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
 
 		match data.sub_type:
@@ -561,7 +562,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 			inputs = [ {
 				name = _class_name,
 				type = _class_name,
-				ref = true
+				is_ref = true
 			}] + (_dict.args as Array).map(
 				func(arg) -> Dictionary:
 					match arg.usage:
@@ -631,7 +632,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 										{
 											name = _class_name,
 											type = _class_name,
-											ref = true
+											is_ref = true
 										}
 									],
 									outputs = [
@@ -654,7 +655,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 										{
 											name = _class_name,
 											type = _class_name,
-											ref = true
+											is_ref = true
 										},
 										{
 											name = prop.name,
@@ -691,7 +692,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								{
 									name = _class_name,
 									type = _class_name,
-									ref = true
+									is_ref = true
 								},
 								{
 									name = '',
@@ -699,7 +700,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 									sub_type = '@dropdown',
 									category = 'set_prop',
 									data = _class_name,
-									'static' = true
+									is_static = true
 								},
 								{
 									name = 'value',
@@ -718,7 +719,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								{
 									name = _class_name,
 									type = _class_name,
-									ref = true
+									is_ref = true
 								}
 							],
 							outputs = [
@@ -746,12 +747,12 @@ func start_api(_class_name: StringName = 'all') -> int:
 									{
 										name = _class_name,
 										type = _class_name,
-										ref = true
+										is_ref = true
 									},
 									{
 										name = prop.name,
 										type = type_string(prop.type),
-										ref = true
+										is_ref = true
 									}
 								],
 								route = HenRouter.current_route
@@ -768,7 +769,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 									{
 										name = _class_name,
 										type = _class_name,
-										ref = true
+										is_ref = true
 									}
 								],
 								outputs = [

@@ -23,7 +23,7 @@ var line_ref: HenConnectionLine
 var reparent_data: Dictionary = {}
 var old_conn_ref
 
-var input_ref: Dictionary
+var input_ref: HenVirtualCNode.InOutData
 
 # only when necessary
 var custom_data
@@ -137,13 +137,13 @@ func _on_gui(_event: InputEvent) -> void:
 				var cast_input = cast_cnode.get_node('%InputContainer').get_child(0)
 				var cast_output = cast_cnode.get_node('%OutputContainer').get_child(0)
 
-				var first_line = cast_input.create_connection_and_instance({
+				cast_input.create_connection_and_instance({
 					from = self,
 					type = type,
 					conn_type = connection_type
 				})
 
-				var second_line = cast_output.create_connection_and_instance(HenGlobal.connection_to_data)
+				cast_output.create_connection_and_instance(HenGlobal.connection_to_data)
 
 				cast_cnode.position.x -= cast_cnode.size.x / 4
 
@@ -248,16 +248,7 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 # public
 #
 func reset() -> void:
-	is_ref = false
-	category = ''
-
-	#reparent / remove
-	line_ref = null
-	reparent_data = {}
-	old_conn_ref = null
-	input_ref = {}
-	custom_data = null
-	sub_type = null
+	pass
 
 func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.ConnectionReturn:
 	var _type = type if not is_reparenting else _config.reparent_data.from_type
@@ -513,9 +504,9 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 			_:
 				match connection_type:
 					'String', 'NodePath', 'StringName':
-						var str = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
-						prop_container.add_child(str)
-						prop = str
+						var _str = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
+						prop_container.add_child(_str)
+						prop = _str
 					'int':
 						var prop_int = preload('res://addons/hengo/scenes/props/int.tscn').instantiate()
 						prop_container.add_child(prop_int)
@@ -744,48 +735,4 @@ func get_type_color(_type: String) -> Color:
 
 
 func get_token(_get_name: bool = false) -> Dictionary:
-	if in_connected_from and not from_connection_lines[0].deleted:
-		var data: Dictionary = in_connected_from.get_token(out_from_in_out.get_index())
-
-		if _get_name:
-			data['prop_name'] = get_in_out_name()
-
-		return data
-	else:
-		# if not has connection, check if has prop input (like string, int, etc)
-		var cname_input = get_node('%CNameInput')
-		if cname_input.get_child_count() > 2:
-			var prop = cname_input.get_child(2)
-			var prop_data: Dictionary = {
-				type = HenCnode.SUB_TYPE.IN_PROP,
-				value = ''
-			}
-
-			if _get_name:
-				prop_data['prop_name'] = get_in_out_name()
-
-			if prop is Label:
-				if prop.text == 'self':
-					prop_data.value = '_ref'
-				else:
-					prop_data.value = prop.text
-			else:
-				prop_data.value = str(prop.get_generated_code())
-
-			if prop is HenDropdown:
-				match prop.type:
-					'all_props':
-						prop_data['is_prop'] = true
-						prop_data['use_self'] = false
-					'callable':
-						prop_data['use_prefix'] = true
-			else:
-				if root.route_ref.type != HenRouter.ROUTE_TYPE.STATE \
-				or not is_ref:
-					prop_data.use_self = true
-
-
-			return prop_data
-		else:
-			# if input don't have a connection
-			return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = connection_type}
+	return {}

@@ -54,7 +54,7 @@ static func _generate_native_api() -> void:
 							inputs = [ {
 								name = dict.name,
 								type = dict.name,
-								ref = true
+								is_ref = true
 							}]
 						}
 						

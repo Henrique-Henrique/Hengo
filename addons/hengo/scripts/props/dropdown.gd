@@ -157,7 +157,7 @@ func _selected(_item: Dictionary) -> void:
 				'Vector2':
 					input.input_ref.code_value = 'Vector2.ZERO'
 				'bool':
-					input.input_ref.code_value = false
+					input.input_ref.code_value = 'false'
 				'Variant':
 					input.input_ref.code_value = 'null'
 				_:

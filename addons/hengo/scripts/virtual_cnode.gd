@@ -57,8 +57,8 @@ var id: int
 var position: Vector2
 var is_showing: bool = false
 var cnode_ref: HenCnode
-var inputs: Array
-var outputs: Array
+var inputs: Array[InOutData]
+var outputs: Array[InOutData]
 var size: Vector2
 var type: Type
 var sub_type: SubType
@@ -72,6 +72,54 @@ var input_connections: Array = []
 var output_connections: Array = []
 var flow_connections: Array = []
 var from_flow_connections: Array = []
+
+
+class InOutData:
+	var name: String
+	var type: StringName
+	var sub_type: StringName
+	var category: StringName
+	var is_ref: bool
+	var code_value: String
+	var value: Variant
+	var data: Variant
+	var is_prop: bool
+	var use_self: bool
+	var is_static: bool
+	
+
+	func _init(_data: Dictionary) -> void:
+		name = _data.name
+		type = _data.type
+
+		if _data.has('sub_type'): sub_type = _data.sub_type
+		if _data.has('category'): category = _data.category
+		if _data.has('is_ref'): is_ref = _data.is_ref
+		if _data.has('code_value'): code_value = _data.code_value
+		if _data.has('value'): value = _data.value
+		if _data.has('data'): data = _data.data
+		if _data.has('is_prop'): is_prop = _data.is_prop
+		if _data.has('use_self'): use_self = _data.use_self
+		if _data.has('is_static'): is_static = _data.is_static
+	
+
+	func get_save() -> Dictionary:
+		var dt: Dictionary = {
+			name = name,
+			type = type
+		}
+
+		if sub_type: dt.sub_type = sub_type
+		if category: dt.category = category
+		if is_ref: dt.is_ref = is_ref
+		if code_value: dt.code_value = code_value
+		if value: dt.value = value
+		if data: dt.data = data
+		if is_prop: dt.is_prop = is_prop
+		if use_self: dt.use_self = use_self
+		if is_static: dt.is_static = is_static
+
+		return dt
 
 
 class FlowConnectionData:
@@ -222,38 +270,31 @@ func show() -> void:
 					input.reset()
 					input.visible = true
 					
-					var input_data: Dictionary = inputs[idx]
+					var input_data: InOutData = inputs[idx]
 
-					input.input_ref = input_data
 					input.change_name(input_data.name)
 
-					if input_data.has('data'):
-						input.custom_data = input_data.data
-					else:
-						input.custom_data = null
-
-					if input_data.has('category'):
-						input.category = input_data.category
-
-					if input_data.has('sub_type'):
-						input.sub_type = input_data.sub_type
+					input.input_ref = input_data
+					input.custom_data = input_data.data
+					input.category = input_data.category
+					input.sub_type = input_data.sub_type
 					
-					if input_data.has('type'):
-						if input_data.has('is_prop'):
+					if input_data.type:
+						if input_data.is_prop:
 							input.reset_in_props()
-							input.add_prop_ref(input_data.value if input_data.has('value') else null, 0)
+							input.add_prop_ref(input_data.value if input_data.value else null, 0)
 						else:
 							input.change_type(
-								input_data.type, input_data.value if input_data.has('value') else null,
+								input_data.type, input_data.value if input_data.value else null,
 								'',
-								not input_data.has('static')
+								not input_data.is_static
 							)
 					else:
 						input.reset_in_props()
-						input.set_in_prop(input_data.value if input_data.has('value') else null, not input_data.has('static'))
+						input.set_in_prop(input_data.value if input_data.value else null, not input_data.is_static)
 						input.root.reset_size()
 					
-					if input_data.has('static'):
+					if input_data.is_static:
 						(input.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 0)
 						(input.get_node('%Connector') as TextureRect).visible = false
 					else:
@@ -271,26 +312,18 @@ func show() -> void:
 				if idx < outputs.size():
 					output.visible = true
 					
-					var output_data: Dictionary = outputs[idx]
+					var output_data: InOutData = outputs[idx]
 					
-					if output_data.has('data'):
-						output.custom_data = output_data.data
-					else:
-						output.custom_data = null
-
-					if output_data.has('category'):
-						output.category = output_data.category
-
-					if output_data.has('sub_type'):
-						output.sub_type = output_data.sub_type
-
 					output.input_ref = output_data
+					output.custom_data = output_data.data
+					output.category = output_data.category
+					output.sub_type = output_data.sub_type
 
 					output.change_name(output_data.name)
 					output.change_type(
 						output_data.type,
-						output_data.value if output_data.has('value') else null,
-						output_data.sub_type if output_data.has('sub_type') else ''
+						output_data.value if output_data.value else null,
+						output_data.sub_type if output_data.sub_type else &''
 					)
 
 				idx += 1
@@ -585,13 +618,23 @@ func get_save() -> Dictionary:
 		sub_type = sub_type,
 		name = name,
 		position = var_to_str(position),
-		inputs = inputs,
-		outputs = outputs,
 		size = var_to_str(size),
 		input_connections = [],
 		output_connections = [],
 		flow_connections = []
 	}
+
+	if not inputs.is_empty():
+		data.inputs = []
+
+		for input: InOutData in inputs:
+			data.inputs.append(input.get_save())
+	
+	if not outputs.is_empty():
+		data.outputs = []
+
+		for output: InOutData in outputs:
+			data.outputs.append(output.get_save())
 
 	if category:
 		data.category = category
@@ -743,20 +786,20 @@ func get_input_token(_idx: int) -> Dictionary:
 		data.prop_name = inputs[_idx].name
 
 		return data
-	elif inputs[_idx].has('code_value'):
+	elif inputs[_idx].code_value:
 		var data: Dictionary = {
 			type = HenCnode.SUB_TYPE.IN_PROP,
 			prop_name = inputs[_idx].name,
 			value = inputs[_idx].code_value
 		}
-		var input: Dictionary = inputs[_idx]
+		var input: InOutData = inputs[_idx]
 		
-		if input.has('category'):
+		if input.category:
 			match input.category:
 				'callable', 'class_props':
 					data.use_prefix = true
 
-		if input.has('is_ref'):
+		if input.is_ref:
 			data.is_ref = input.is_ref
 
 		return data
@@ -767,7 +810,8 @@ func get_input_token(_idx: int) -> Dictionary:
 func get_input_token_list(_get_name: bool = false) -> Array:
 	var input_tokens: Array = []
 	var idx: int = 0
-	for connection: Dictionary in inputs:
+
+	for connection: InOutData in inputs:
 		input_tokens.append(get_input_token(idx))
 		idx += 1
 
@@ -851,14 +895,14 @@ func get_token(_id: int = 0) -> Dictionary:
 				value = outputs[0].code_value
 			}
 
-			if outputs[0].has('data'):
+			if outputs[0].data:
 				dt.data = get_input_token(0)
 
 			token.merge(dt)
 		HenCnode.SUB_TYPE.SET_PROP:
 			var dt: Dictionary = {}
 
-			if inputs[0].has('ref'):
+			if inputs[0].is_ref:
 				dt.data = get_input_token(0)
 				dt.name = get_input_token(1).value
 				dt.value = get_input_token(2)
@@ -938,7 +982,7 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 
 	if _config.has('inputs'):
 		for input: Dictionary in _config.inputs:
-			if not input.has('code_value') and not input.has('is_ref') and not input.has('ref'):
+			if not input.has('code_value') and not input.has('is_ref'):
 				match input.type:
 					'String', 'NodePath', 'StringName':
 						input.code_value = '""'
@@ -949,7 +993,7 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 					'Vector2':
 						input.code_value = 'Vector2.ZERO'
 					'bool':
-						input.code_value = false
+						input.code_value = 'false'
 					'Variant':
 						input.code_value = 'null'
 					_:
@@ -957,10 +1001,16 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 							input.code_value = input.type + '()'
 						elif ClassDB.can_instantiate(input.type):
 							input.code_value = input.type + '.new()'
-							
 
-	v_cnode.inputs = _config.inputs if _config.has('inputs') else []
-	v_cnode.outputs = _config.outputs if _config.has('outputs') else []
+
+	if _config.has('inputs'):
+		for input_data: Dictionary in _config.inputs:
+			v_cnode.inputs.append(InOutData.new(input_data))
+
+	if _config.has('outputs'):
+		for output_data: Dictionary in _config.outputs:
+			v_cnode.outputs.append(InOutData.new(output_data))
+
 
 	if _add_route:
 		if not HenGlobal.vc_list.has(_config.route.id):
