@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dcpyg6oh21jjy"]
 
 [ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="1_46l5v"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="2_6kffk"]
+[ext_resource type="Script" uid="uid://duabhyiaan0or" path="res://addons/hengo/scripts/flow_connector.gd" id="2_6kffk"]
 
 [node name="CNodeFlow" type="Control"]
 layout_mode = 3

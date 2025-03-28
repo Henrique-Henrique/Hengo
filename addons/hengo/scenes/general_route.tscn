@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cs864x5dkfa7o"]
 
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_e8s7e"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/general_route.gd" id="2_81cqh"]
+[ext_resource type="Script" uid="uid://642rs61prd3h" path="res://addons/hengo/scripts/general_route.gd" id="2_81cqh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xfiej"]
 resource_local_to_scene = true

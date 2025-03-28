@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://ghgm3it1dt4l"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/state_transition.gd" id="1_317fd"]
+[ext_resource type="Script" uid="uid://rpgga21gd0td" path="res://addons/hengo/scripts/state_transition.gd" id="1_317fd"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x0ytf"]
 content_margin_left = 8.0

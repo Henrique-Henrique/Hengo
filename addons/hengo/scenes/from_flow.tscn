@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://1s3a6exjgyym"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/from_flow.gd" id="1_hvpu1"]
+[ext_resource type="Script" uid="uid://b31tn2tskxwkf" path="res://addons/hengo/scripts/from_flow.gd" id="1_hvpu1"]
 [ext_resource type="Texture2D" uid="uid://es342h5nsvyx" path="res://addons/hengo/assets/icons/flow_arrow_hover.svg" id="2_qg77e"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="3_utk7e"]
 

@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bndv7bbtjlyrk"]
 
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="1_106ed"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/connection_line.gd" id="1_ck24c"]
+[ext_resource type="Script" uid="uid://bv17u31wtvw0f" path="res://addons/hengo/scripts/connection_line.gd" id="1_ck24c"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pxqr5"]
 resource_local_to_scene = true

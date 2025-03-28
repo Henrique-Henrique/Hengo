@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://0desvnqpa0qx"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connection_line.gd" id="1_56q0h"]
+[ext_resource type="Script" uid="uid://yovnmlkc65ii" path="res://addons/hengo/scripts/flow_connection_line.gd" id="1_56q0h"]
 [ext_resource type="Texture2D" uid="uid://cjfr27210nif2" path="res://addons/hengo/assets/images/line_dashed.png" id="1_oqqwv"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gr23u"]

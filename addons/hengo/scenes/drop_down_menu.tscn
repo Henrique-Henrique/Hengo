@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bd8qatv1gtb"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/drop_down_menu.gd" id="1_uesla"]
+[ext_resource type="Script" uid="uid://cj0u7w1pe6ind" path="res://addons/hengo/scripts/drop_down_menu.gd" id="1_uesla"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_w7cid"]
 
 [node name="DropDownMenu" type="PanelContainer"]

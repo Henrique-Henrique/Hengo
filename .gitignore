@@ -2,4 +2,3 @@
 .godot/
 .api/
 extension_api.json
-*.uid

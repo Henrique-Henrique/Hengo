@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dsbg6l0e3fd4a"]
 
 [ext_resource type="PackedScene" uid="uid://bx2a83vq644wl" path="res://addons/hengo/scenes/props/vec2.tscn" id="1_8uwfs"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/props/debug_value.gd" id="1_f802b"]
+[ext_resource type="Script" uid="uid://dqluvjuechjy7" path="res://addons/hengo/scripts/props/debug_value.gd" id="1_f802b"]
 [ext_resource type="PackedScene" uid="uid://c51y6x7dlt4ef" path="res://addons/hengo/scenes/props/vec3.tscn" id="2_wxv03"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k8qki"]

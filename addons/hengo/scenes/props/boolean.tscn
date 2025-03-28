@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://5s8d2ghcspne"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/props/boolean.gd" id="1_uq40l"]
+[ext_resource type="Script" uid="uid://bnsd4c4y2c3w3" path="res://addons/hengo/scripts/props/boolean.gd" id="1_uq40l"]
 
 [node name="Bool" type="CheckButton"]
 offset_right = 50.0

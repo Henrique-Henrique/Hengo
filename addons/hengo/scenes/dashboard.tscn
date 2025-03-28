@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://dcyvdoty8t12u"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/dashboard.gd" id="1_6bswm"]
+[ext_resource type="Script" uid="uid://0ka1u8kwhsnd" path="res://addons/hengo/scripts/dashboard.gd" id="1_6bswm"]
 [ext_resource type="Texture2D" uid="uid://d2isosfg5l71r" path="res://addons/hengo/assets/icons/add.svg" id="1_e6sgy"]
-[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/popup.gdshader" id="1_wb7a1"]
+[ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/popup.gdshader" id="1_wb7a1"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_4j4ao"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="3_dqmrb"]
 

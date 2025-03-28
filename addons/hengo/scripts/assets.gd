@@ -26,7 +26,7 @@ static func get_icon_texture(_type: StringName) -> ImageTexture:
     var path: String = 'res://addons/hengo/assets/.editor_icons/' + _type + '.svg'
 
     if not FileAccess.file_exists(path):
-        path = 'res://addons/hengo/assets/icons/circle.svg'
+        path = 'res://addons/hengo/assets/.editor_icons/circle.svg'
 
     var icon: Image = Image.load_from_file(path)
     var image: ImageTexture = ImageTexture.create_from_image(icon)

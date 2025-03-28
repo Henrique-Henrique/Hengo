@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cbbbrefmjb7l8"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/props/function_input_output.gd" id="1_ecrjo"]
+[ext_resource type="Script" uid="uid://bdyiosa2tbvkn" path="res://addons/hengo/scripts/props/function_input_output.gd" id="1_ecrjo"]
 [ext_resource type="Texture2D" uid="uid://d2isosfg5l71r" path="res://addons/hengo/assets/icons/add.svg" id="2_jwh0h"]
 
 [node name="FunctionInputOutput" type="VBoxContainer"]

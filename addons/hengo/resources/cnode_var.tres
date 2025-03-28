@@ -1,6 +1,3 @@
-[gd_resource type="Resource" load_steps=2 format=3 uid="uid://xqotggkyfuc"]
-
-[ext_resource type="Script" path="res://addons/hengo/scripts/res/cnode_var.gd" id="1_m7phh"]
+[gd_resource type="Resource" format=3 uid="uid://xqotggkyfuc"]
 
 [resource]
-script = ExtResource("1_m7phh")

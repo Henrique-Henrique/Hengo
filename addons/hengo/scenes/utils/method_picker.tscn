@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ds1l212xog53y"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/method_picker.gd" id="1_8ff1r"]
+[ext_resource type="Script" uid="uid://c7sfsj0bnw26x" path="res://addons/hengo/scripts/method_picker.gd" id="1_8ff1r"]
 
 [node name="MethodPicker" type="VBoxContainer"]
 custom_minimum_size = Vector2(350, 0)

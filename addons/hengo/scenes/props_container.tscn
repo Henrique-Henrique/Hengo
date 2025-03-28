@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b3fjufjpvcq01"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/props_container.gd" id="1_gpwl4"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/prop_bt.gd" id="1_rtn48"]
+[ext_resource type="Script" uid="uid://rqk6a060ggpj" path="res://addons/hengo/scripts/props_container.gd" id="1_gpwl4"]
+[ext_resource type="Script" uid="uid://d3dpy5togp1fa" path="res://addons/hengo/scripts/prop_bt.gd" id="1_rtn48"]
 
 [node name="Props" type="VBoxContainer"]
 script = ExtResource("1_gpwl4")

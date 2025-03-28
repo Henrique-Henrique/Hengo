@@ -1,17 +1,17 @@
 [gd_scene load_steps=45 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
+[ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
+[ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
+[ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
+[ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
-[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
+[ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="9_si04b"]
 [ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
+[ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
 [ext_resource type="Texture2D" uid="uid://bngwf5vpsmtgo" path="res://addons/hengo/assets/images/grid_cnode_out.png" id="12_7rfh3"]
@@ -22,10 +22,10 @@
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://dcyvdoty8t12u" path="res://addons/hengo/scenes/dashboard.tscn" id="28_nqqx4"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
+[ext_resource type="Script" uid="uid://cj0s8k31oba27" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
+[ext_resource type="Script" uid="uid://b4dpuahtnx0un" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
+[ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
@@ -39,8 +39,8 @@ shader_parameter/screen_size = Vector2(912, 1362)
 shader_parameter/offset = Vector2(143.538, 290.796)
 shader_parameter/zoom_factor = 0.217379
 shader_parameter/alpha = 0.2
-shader_parameter/text_size = 100.0
 shader_parameter/text = ExtResource("4_ngl72")
+shader_parameter/text_size = 100.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k3ul"]
 bg_color = Color(0.0462, 0.58905, 0.77, 0.286275)
@@ -91,8 +91,8 @@ shader_parameter/screen_size = Vector2(2533, 1363)
 shader_parameter/offset = Vector2(-186.83, 233.033)
 shader_parameter/zoom_factor = 0.200002
 shader_parameter/alpha = 0.2
-shader_parameter/text_size = 200.0
 shader_parameter/text = ExtResource("12_7rfh3")
+shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
 colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)

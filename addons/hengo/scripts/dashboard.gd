@@ -2,7 +2,7 @@
 class_name HenDashboard extends PanelContainer
 
 
-const DashBoardItemScene = preload('res://addons/hengo/scenes/dashboard_item.tscn')
+@onready var DashBoardItemScene = preload('res://addons/hengo/scenes/dashboard_item.tscn')
 
 var can_close: bool = false
 
@@ -61,6 +61,7 @@ func show_dashboard(_can_close: bool = false) -> void:
 
 	for script in script_data:
 		var item = DashBoardItemScene.instantiate()
+
 		item.set_item_data({
 			name = script[0],
 			path = script[1],
@@ -77,6 +78,10 @@ func get_script_list(_dir: DirAccess, _list: Array[Array] = []) -> Array[Array]:
 
 	# TODO cache script that don't changed
 	while file_name != '':
+		if file_name.get_extension() != 'gd':
+			file_name = _dir.get_next()
+			continue
+
 		if _dir.current_is_dir():
 			get_script_list(DirAccess.open('res://hengo/' + file_name), _list)
 		else:

@@ -1,13 +1,13 @@
 [gd_scene load_steps=16 format=3 uid="uid://bxh18qk6jrul6"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
+[ext_resource type="Script" uid="uid://c1reshk0q8buo" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_ykti4"]
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="3_8vu1l"]
 [ext_resource type="PackedScene" uid="uid://1s3a6exjgyym" path="res://addons/hengo/scenes/from_flow.tscn" id="3_348vq"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="4_nvxjk"]
 [ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="5_fqa58"]
 [ext_resource type="PackedScene" uid="uid://cfwcyd5bthd1j" path="res://addons/hengo/scenes/flow_slot.tscn" id="5_t32p4"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="6_gsclm"]
+[ext_resource type="Script" uid="uid://duabhyiaan0or" path="res://addons/hengo/scripts/flow_connector.gd" id="6_gsclm"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x0qsl"]
 content_margin_left = 8.0

@@ -2,7 +2,7 @@
 
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_77o4p"]
 [ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="1_rsbep"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="2_2nb45"]
+[ext_resource type="Script" uid="uid://duabhyiaan0or" path="res://addons/hengo/scripts/flow_connector.gd" id="2_2nb45"]
 
 [node name="CNodeIFFlow" type="VBoxContainer"]
 offset_right = 171.0

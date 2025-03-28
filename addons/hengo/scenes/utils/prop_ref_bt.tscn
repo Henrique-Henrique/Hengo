@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://be7jm0i23g62x" path="res://addons/hengo/assets/icons/comment.svg" id="1_k47h3"]
 [ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="2_0jsuf"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/prop_ref_bt.gd" id="3_qarbm"]
+[ext_resource type="Script" uid="uid://vkjiar4wcq6h" path="res://addons/hengo/scripts/prop_ref_bt.gd" id="3_qarbm"]
 
 [node name="PropRefBt" type="TextureButton"]
 offset_right = 24.0

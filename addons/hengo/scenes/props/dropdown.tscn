@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cgo5l4r43cdyy"]
 
 [ext_resource type="Texture2D" uid="uid://dvwar0heqfh58" path="res://addons/hengo/assets/icons/search.svg" id="1_kf6tg"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/props/dropdown.gd" id="1_oknia"]
+[ext_resource type="Script" uid="uid://cdt5u6to8oims" path="res://addons/hengo/scripts/props/dropdown.gd" id="1_oknia"]
 
 [node name="DropDown" type="Button"]
 offset_right = 8.0

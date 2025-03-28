@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://xtmxq5nxt3ce"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/state_prop_menu.gd" id="1_il2r4"]
+[ext_resource type="Script" uid="uid://bpolerq1ciwxc" path="res://addons/hengo/scripts/state_prop_menu.gd" id="1_il2r4"]
 [ext_resource type="PackedScene" uid="uid://cmu4eb6jplyhf" path="res://addons/hengo/scenes/props/string.tscn" id="1_twdxd"]
 
 [node name="PanelContainer" type="PanelContainer"]

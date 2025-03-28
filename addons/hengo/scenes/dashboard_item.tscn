@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://dlbtw3e4yecw2"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/dashboard_item.gd" id="1_5gobi"]
+[ext_resource type="Script" uid="uid://qe3tuq0dnvf5" path="res://addons/hengo/scripts/dashboard_item.gd" id="1_5gobi"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="1_vcmxp"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_eprif"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="3_sr023"]

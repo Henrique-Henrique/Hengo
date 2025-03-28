@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="1_ot4qg"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_wkeep"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/flow_connector.gd" id="2_f5mdk"]
+[ext_resource type="Script" uid="uid://duabhyiaan0or" path="res://addons/hengo/scripts/flow_connector.gd" id="2_f5mdk"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ygsf2"]
 content_margin_left = 8.0

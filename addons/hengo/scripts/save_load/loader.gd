@@ -729,7 +729,7 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 	# TODO cache script that don't changed
 	while file_name != '':
 		# not parse the current file
-		if HenGlobal.script_config.name == file_name.get_basename():
+		if HenGlobal.script_config.name == file_name.get_basename() or file_name.get_extension() != 'gd':
 			file_name = _dir.get_next()
 			continue
 		

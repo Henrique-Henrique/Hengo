@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://c51y6x7dlt4ef"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/props/vec_3.gd" id="1_aowt1"]
+[ext_resource type="Script" uid="uid://twfnwooscc10" path="res://addons/hengo/scripts/props/vec_3.gd" id="1_aowt1"]
 [ext_resource type="PackedScene" uid="uid://ddjla4dq0g2k5" path="res://addons/hengo/scenes/props/float.tscn" id="2_16xfq"]
 
 [node name="Vec2" type="HBoxContainer"]

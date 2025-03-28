@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bmxrtibga4vum"]
 
-[ext_resource type="Script" path="res://addons/hengo/scripts/props/function_param.gd" id="1_1spal"]
+[ext_resource type="Script" uid="uid://ctjb20503baj5" path="res://addons/hengo/scripts/props/function_param.gd" id="1_1spal"]
 [ext_resource type="PackedScene" uid="uid://cmu4eb6jplyhf" path="res://addons/hengo/scenes/props/string.tscn" id="1_jvpu6"]
 [ext_resource type="Texture2D" uid="uid://d2w7gmwebkwol" path="res://addons/hengo/assets/icons/example.svg" id="2_t474t"]
 [ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="3_8ofcq"]
