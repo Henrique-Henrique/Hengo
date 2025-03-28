@@ -15,6 +15,7 @@ class ScriptData:
 	var func_list: Array
 	var comments: Array
 	var virtual_cnode_list: Array
+	var state_event_list: Array
 
 	func get_save() -> Dictionary:
 		return {
@@ -29,7 +30,8 @@ class ScriptData:
 			flow_connections = flow_connections,
 			func_list = func_list,
 			comments = comments,
-			virtual_cnode_list = virtual_cnode_list
+			virtual_cnode_list = virtual_cnode_list,
+			state_event_list = state_event_list
 		}
 
 
@@ -53,6 +55,13 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 		v_cnode_list.append(v_cnode.get_save())
 			
 	script_data.virtual_cnode_list = v_cnode_list
+
+
+	# getting data from cnodes
+	for v_cnode_arr: Array in HenGlobal.vc_list.values():
+		for v_cnode: HenVirtualCNode in v_cnode_arr:
+			if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
+				script_data.state_event_list.append(v_cnode.name)
 
 	# ---------------------------------------------------------------------------- #
 	# ---------------------------------------------------------------------------- #

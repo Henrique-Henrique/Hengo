@@ -70,7 +70,7 @@ static var script_config: Dictionary = {}
 static var reparent_data: Dictionary = {}
 
 # parser
-static var SCRIPTS_INFO: Array = []
+static var SCRIPTS_INFO: Dictionary = {}
 static var SCRIPTS_STATES: Dictionary = {}
 
 # debug

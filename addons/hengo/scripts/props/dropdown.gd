@@ -94,6 +94,11 @@ func _on_pressed() -> void:
 				get_const_list(arr, '', prop.name, prop_type, false)
 
 			options = arr
+		'state_event_list':
+			var data: Dictionary = HenGlobal.SCRIPTS_INFO.get(custom_data)
+
+			if data.has('state_event_list'):
+				options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
 
 
 	HenGlobal.DROPDOWN_MENU.position = global_position

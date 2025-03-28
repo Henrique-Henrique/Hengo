@@ -53,6 +53,7 @@ enum SubType {
 }
 
 var name: String
+var name_to_code: String
 var id: int
 var position: Vector2
 var is_showing: bool = false
@@ -836,7 +837,7 @@ func get_token(_id: int = 0) -> Dictionary:
 	match sub_type:
 		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
 			token.merge({
-				name = name.to_snake_case(),
+				name = name.to_snake_case() if not name_to_code else name_to_code,
 				params = get_input_token_list()
 			})
 		HenCnode.SUB_TYPE.FUNC, HenCnode.SUB_TYPE.USER_FUNC:
@@ -928,11 +929,13 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 
+	v_cnode.name = _config.name
 	v_cnode.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.sub_type = _config.sub_type
-	v_cnode.name = _config.name
 	v_cnode.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
 	v_cnode.route_ref = _config.route
+	
+	if _config.has('name_to_code'): v_cnode.name_to_code = _config.name_to_code
 
 	if v_cnode.sub_type == SubType.VIRTUAL:
 		_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)

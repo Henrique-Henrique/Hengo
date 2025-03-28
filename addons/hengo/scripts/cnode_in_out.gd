@@ -98,11 +98,12 @@ func _on_gui(_event: InputEvent) -> void:
 				if type == 'in':
 					var connection: HenVirtualCNode.ConnectionReturn = root.virtual_ref.get_input_connection(get_index())
 
-					HenGlobal.history.create_action('Remove connection line')
-					HenGlobal.history.add_do_method(connection.remove)
-					HenGlobal.history.add_undo_reference(line_ref)
-					HenGlobal.history.add_undo_method(connection.add)
-					HenGlobal.history.commit_action()
+					if connection:
+						HenGlobal.history.create_action('Remove connection line')
+						HenGlobal.history.add_do_method(connection.remove)
+						HenGlobal.history.add_undo_reference(line_ref)
+						HenGlobal.history.add_undo_method(connection.add)
+						HenGlobal.history.commit_action()
 
 				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 

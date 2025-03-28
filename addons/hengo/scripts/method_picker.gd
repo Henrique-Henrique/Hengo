@@ -595,11 +595,36 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 
 
 func start_api(_class_name: StringName = 'all') -> int:
-	api_list = HenGlobal.SCRIPTS_INFO.map(
-		func(x: Dictionary) -> Dictionary:
-			x['data']['route'] = HenRouter.current_route
-			return x
-	)
+	api_list = []
+
+	# getting other scripts data
+	for script_data: Dictionary in HenGlobal.SCRIPTS_INFO.values():
+		if script_data.has('state_event_list'):
+			api_list.append({
+				name = script_data.name + ' Event Trigger',
+				data = {
+					name = script_data.name + ' Event Trigger',
+					name_to_code = 'trigger_event',
+					sub_type = HenVirtualCNode.SubType.VOID,
+					inputs = [
+						{
+							name = script_data.type,
+							type = 'Sprite2D',
+							# change this
+							is_ref = true
+						},
+						{
+							name = 'event',
+							type = 'StringName',
+							sub_type = '@dropdown',
+							category = 'state_event_list',
+							data = script_data.name
+						}
+					],
+					route = HenRouter.current_route
+				}
+			})
+
 
 	match _class_name:
 		'all':

@@ -134,6 +134,9 @@ func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("{start_state_name}")
 
+func trigger_event(_event: String) -> void:
+	if _EVENTS.has(_event):
+		_STATE_CONTROLLER.change_state(_EVENTS[_event])
 
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)

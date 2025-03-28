@@ -88,7 +88,7 @@ static func load_and_edit(_path: StringName) -> void:
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config
 	var dir: DirAccess = DirAccess.open('res://hengo')
-	HenGlobal.SCRIPTS_INFO = []
+	# HenGlobal.SCRIPTS_INFO = []
 	parse_other_scripts_data(dir)
 
 	# ---------------------------------------------------------------------------- #
@@ -109,8 +109,9 @@ static func load_and_edit(_path: StringName) -> void:
 	if script.source_code.begins_with('extends '):
 		# setting script type
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
-	
-		HenGlobal.script_config['type'] = type
+
+		# HenGlobal.script_config.name = type
+		HenGlobal.script_config.type = type
 		HenGlobal.node_counter = 0
 		HenState._name_counter = 0
 
@@ -241,6 +242,7 @@ static func load_and_edit(_path: StringName) -> void:
 
 		var inst_id_refs: Dictionary = {}
 		var state_trans_connections: Array = []
+	
 	
 		# setting script configs
 		HenGlobal.script_config['type'] = data.type
@@ -480,13 +482,6 @@ static func load(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
-
-	# ---------------------------------------------------------------------------- #
-	# setting other scripts config
-	var dir: DirAccess = DirAccess.open('res://hengo')
-	HenGlobal.SCRIPTS_INFO = []
-	parse_other_scripts_data(dir)
-
 	# ---------------------------------------------------------------------------- #
 
 	# confirming queue free before check errors
@@ -507,13 +502,14 @@ static func load(_path: StringName) -> void:
 	}
 
 	HenGlobal.BASE_ROUTE = base_route
+	HenGlobal.script_config.name = _path.get_file().get_basename()
 
 	# create new graph
 	if script.source_code.begins_with('extends '):
 		# setting script type
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
-	
-		HenGlobal.script_config['type'] = type
+
+		HenGlobal.script_config.type = type
 		HenGlobal.node_counter = 0
 		HenState._name_counter = 0
 
@@ -534,7 +530,7 @@ static func load(_path: StringName) -> void:
 		var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
 
 		# setting script configs
-		HenGlobal.script_config['type'] = data.type
+		HenGlobal.script_config.type = data.type
 		HenGlobal.node_counter = data.node_counter
 		HenGlobal.prop_counter = data.prop_counter
 		HenGlobal.current_script_debug_symbols = data.debug_symbols
@@ -641,6 +637,12 @@ static func load(_path: StringName) -> void:
 	show_class_name()
 	HenRouter.change_route(HenGlobal.BASE_ROUTE)
 
+	# ---------------------------------------------------------------------------- #
+	# setting other scripts config
+	var dir: DirAccess = DirAccess.open('res://hengo')
+	HenGlobal.SCRIPTS_INFO.clear()
+	parse_other_scripts_data(dir)
+
 
 static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
 	for cnode: Dictionary in _cnode_list:
@@ -710,50 +712,45 @@ static func parse_hengo_json(_source: String) -> HenSaver.ScriptData:
 	script_data.flow_connections = hengo_json.flow_connections
 	script_data.func_list = hengo_json.func_list
 	script_data.comments = hengo_json.comments
+	script_data.state_event_list = hengo_json.state_event_list
 
 	return script_data
 
 
 static func parse_other_scripts_data(_dir: DirAccess) -> void:
+	if not _dir:
+		printerr('Hengo dir not found!')
+		return
+	
 	_dir.list_dir_begin()
 
 	var file_name: String = _dir.get_next()
 
 	# TODO cache script that don't changed
 	while file_name != '':
+		# not parse the current file
+		if HenGlobal.script_config.name == file_name.get_basename():
+			file_name = _dir.get_next()
+			continue
+		
 		if _dir.current_is_dir():
 			parse_other_scripts_data(DirAccess.open('res://hengo/' + file_name))
 		else:
+			# print("-> ", file_name, ' = ', HenGlobal.script_config.name)
 			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
 
 			if script.source_code.begins_with('#[hengo] '):
 				var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
 
-				HenGlobal.SCRIPTS_STATES[file_name.get_basename()] = []
+				print('Name -> ', file_name.get_basename(), ' = ', data.state_event_list)
 
-				# for state_dict: Dictionary in data.states as Array:
-				# 	(HenGlobal.SCRIPTS_STATES[file_name.get_basename()] as Array).append({name = state_dict.name})
-				
-				HenGlobal.SCRIPTS_INFO.append({
-					name = 'Go to \'' + file_name.get_basename() + '\' state',
-					data = {
-						name = 'go_to_event',
-						fantasy_name = 'Go to \'' + file_name.get_basename() + '\' state',
-						sub_type = HenCnode.SUB_TYPE.GO_TO_VOID,
-						inputs = [
-							{
-								name = 'hengo',
-								type = 'Node',
-							},
-							{
-								name = 'state',
-								sub_type = '@dropdown',
-								category = 'hengo_states',
-								data = file_name.get_basename()
-							}
-						]
-					}
-				})
+				var script_data: Dictionary = {
+					name = file_name.get_basename(),
+					type = data.type,
+					state_event_list = data.state_event_list
+				}
+
+				HenGlobal.SCRIPTS_INFO[file_name.get_basename()] = script_data
 		
 		file_name = _dir.get_next()
 
