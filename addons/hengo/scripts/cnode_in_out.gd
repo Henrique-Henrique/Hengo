@@ -91,7 +91,8 @@ func _on_gui(_event: InputEvent) -> void:
 				print('type:: ', connection_type)
 				var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
-					from_in_out = self,
+					from_in_out = input_ref,
+					from = root.virtual_ref,
 					in_out_idx = get_index()
 				})
 

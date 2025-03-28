@@ -101,6 +101,7 @@ func _ready():
 
 func _on_enter() -> void:
 	# if virtual_ref:
+	# 	print(JSON.stringify(virtual_ref.inputs.map(func(x): return x.is_ref)))
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)
 		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)

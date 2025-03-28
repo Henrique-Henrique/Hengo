@@ -782,18 +782,22 @@ func get_input_token(_idx: int) -> Dictionary:
 			connection = input_connection
 			break
 
+	var input: InOutData = inputs[_idx]
+
 	if connection and connection.from:
 		var data: Dictionary = connection.from.get_token(_idx)
-		data.prop_name = inputs[_idx].name
+		data.prop_name = input.name
+
+		if input.is_ref:
+			data.is_ref = input.is_ref
 
 		return data
-	elif inputs[_idx].code_value:
+	elif input.code_value:
 		var data: Dictionary = {
 			type = HenCnode.SUB_TYPE.IN_PROP,
-			prop_name = inputs[_idx].name,
-			value = inputs[_idx].code_value
+			prop_name = input.name,
+			value = input.code_value
 		}
-		var input: InOutData = inputs[_idx]
 		
 		if input.category:
 			match input.category:

@@ -60,7 +60,7 @@ static func generate() -> String:
 	for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
 		var var_name: String = variable.name
 		var var_type: String = variable.type
-		var var_export: bool = variable. export
+		var var_export: bool = variable.export
 
 		var type_value: String = 'null'
 

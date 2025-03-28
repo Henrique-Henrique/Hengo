@@ -402,7 +402,6 @@ func _select() -> void:
 
 		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
 
-		print(data)
 		var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
 
 		match data.sub_type:
@@ -434,27 +433,12 @@ func _select() -> void:
 
 		# make connection
 		if cnode_config.has('from_in_out'):
-			var input = vc_return.cnode_ref.get_node('%InputContainer').get_child(0)
+			vc_return.v_cnode.create_connection(
+				0,
+				cnode_config.in_out_idx,
+				cnode_config.from,
+			).add()
 
-			# input.create_virtual_connection({
-			# 	from = cnode_config.from_in_out,
-			# 	type = came_from,
-			# 	conn_type = connection_type,
-			# 	reparent_data = HenGlobal.reparent_data
-			# }).add()
-
-			var connection: HenVirtualCNode.ConnectionReturn = input.create_virtual_connection({
-				from = cnode_config.from_in_out,
-				type = came_from,
-				conn_type = connection_type,
-				reparent_data = HenGlobal.reparent_data
-			}).add()
-
-		# 	HenGlobal.history.add_do_method(connection.add)
-		# 	HenGlobal.history.add_do_reference(connection)
-		# 	HenGlobal.history.add_undo_method(connection.remove)
-		
-		
 		HenGlobal.history.commit_action()
 		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
@@ -542,7 +526,7 @@ func _get_sub_type(_type: Variant.Type, _usage: int) -> HenCnode.SUB_TYPE:
 func _get_typeny_arg(_arg: Dictionary) -> StringName:
 	match _arg.type:
 		TYPE_OBJECT:
-			return _arg. class_name
+			return _arg.class_name
 		TYPE_NIL:
 			if _arg.usage == 131078:
 				return 'Variant'
@@ -551,14 +535,14 @@ func _get_typeny_arg(_arg: Dictionary) -> StringName:
 
 
 func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -> Dictionary:
-	var _obj_type: StringName = _get_typeny_arg(_dict. return )
+	var _obj_type: StringName = _get_typeny_arg(_dict.return )
 
 	var obj: Dictionary = {
 		name = _dict.name,
 		type = _obj_type if _obj_type != StringName('Nil') else StringName('void'),
 		data = {
 			name = _dict.name,
-			sub_type = _get_sub_type(_dict. return .type, _dict. return .usage),
+			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage),
 			inputs = [ {
 				name = _class_name,
 				type = _class_name,
@@ -571,7 +555,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 								name = arg.name,
 								sub_type = '@dropdown',
 								category = 'enum_list',
-								data = arg. class_name .split('.'),
+								data = arg.class_name.split('.'),
 							}
 						_:
 							return {
@@ -585,10 +569,10 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 
 
 	# it's a void or return a variant
-	if _dict. return .type != TYPE_NIL or (_dict. return .type == TYPE_NIL and _dict. return .usage == 131078):
+	if _dict.return.type != TYPE_NIL or (_dict.return.type == TYPE_NIL and _dict.return.usage == 131078):
 		obj['data']['outputs'] = [ {
-			name = _dict. return .name,
-			type = _get_typeny_arg(_dict. return )
+			name = _dict.return.name,
+			type = _get_typeny_arg(_dict.return )
 		}]
 
 	return obj
@@ -609,8 +593,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 					inputs = [
 						{
 							name = script_data.type,
-							type = 'Sprite2D',
-							# change this
+							type = 'Variant',
 							is_ref = true
 						},
 						{
