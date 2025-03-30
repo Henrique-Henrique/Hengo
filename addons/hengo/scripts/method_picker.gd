@@ -33,7 +33,7 @@ var native_list: Array = [
 			name = 'State 1',
 			type = HenVirtualCNode.Type.STATE,
 			sub_type = HenVirtualCNode.SubType.STATE,
-			route = HenRouter.current_route
+			route = HenRouter.current_route,
 		}
 	},
 	{
@@ -42,7 +42,7 @@ var native_list: Array = [
 			name = 'State Event 1',
 			type = HenVirtualCNode.Type.STATE_EVENT,
 			sub_type = HenVirtualCNode.SubType.STATE_EVENT,
-			route = HenRouter.current_route
+			route = HenRouter.current_route,
 		}
 	},
 	{

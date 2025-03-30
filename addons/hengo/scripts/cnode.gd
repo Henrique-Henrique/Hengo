@@ -100,10 +100,9 @@ func _ready():
 
 
 func _on_enter() -> void:
-	if virtual_ref:
-		for conn: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
-			print(conn.from_connections)
-		
+	# if virtual_ref:
+	# 	for conn: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
+	# 		print(conn.from_connections)
 		# prints('flow: ', ;, virtual_ref.from_flow_connections)
 	# 	print(JSON.stringify(virtual_ref.inputs.map(func(x): return x.is_ref)))
 		# for dict: Dictionary in virtual_ref.output_connections:
@@ -267,15 +266,39 @@ func _on_gui(_event: InputEvent) -> void:
 					# showing state config on doubleclick
 					if virtual_ref:
 						if virtual_ref.type == HenVirtualCNode.Type.STATE:
-							var state_prop_menu: HenStatePropMenu = load('res://addons/hengo/scenes/state_prop_menu.tscn').instantiate()
-							state_prop_menu.virtual_state = virtual_ref
-							HenGlobal.GENERAL_POPUP.get_parent().show_content(state_prop_menu, 'State Config', get_global_mouse_position())
+							var state_inspector: HenInspector = HenInspector.start([
+									HenInspector.InspectorItem.new({
+										name = 'name',
+										type = &'String',
+										value = virtual_ref.name,
+										ref = virtual_ref
+									}),
+									HenInspector.InspectorItem.new({
+										name = 'outputs',
+										type = &'Array',
+										value = virtual_ref.flow_connections,
+										item_creation_callback = virtual_ref.create_flow_connection,
+										field = {name = 'name', type = 'String'}
+									}),
+								])
+							
+							state_inspector.item_changed.connect(_on_state_inspector)
+
+							HenGlobal.GENERAL_POPUP.get_parent().show_content(
+								state_inspector,
+								'State Config',
+								get_global_mouse_position()
+							)
 					
 		else:
 			moving = false
 			# group moving false
 			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 				i.moving = false
+
+
+func _on_state_inspector() -> void:
+	if virtual_ref: virtual_ref.update()
 
 
 func _input(_event: InputEvent):

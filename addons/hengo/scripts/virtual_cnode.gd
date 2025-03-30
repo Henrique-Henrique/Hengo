@@ -1015,6 +1015,10 @@ func get_history_obj() -> VCNodeReturn:
 	return VCNodeReturn.new(self)
 
 
+func create_flow_connection() -> void:
+	flow_connections.append(FlowConnectionData.new('Flow ' + str(flow_connections.size())))
+
+
 static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = true) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
@@ -1067,6 +1071,7 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE_EVENT:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
+
 		_:
 			if _config.has('to_flow'):
 				for flow: Dictionary in _config.to_flow:

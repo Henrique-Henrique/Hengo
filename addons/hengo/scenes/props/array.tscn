@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://c3kwvpch0psfr"]
+
+[ext_resource type="Script" uid="uid://imi8swagofye" path="res://addons/hengo/scripts/props/prop_array.gd" id="1_kvuht"]
+[ext_resource type="Texture2D" uid="uid://ddtmaua4a6yqk" path="res://addons/hengo/assets/icons/plus.svg" id="1_mawd7"]
+
+[node name="Array" type="VBoxContainer"]
+offset_right = 219.0
+offset_bottom = 36.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_kvuht")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+alignment = 2
+
+[node name="Add" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("1_mawd7")
+
+[node name="Container" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2

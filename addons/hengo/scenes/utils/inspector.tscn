@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://djuxthpmcrgh2"]
+
+[ext_resource type="Script" uid="uid://c0piu5nc1hmal" path="res://addons/hengo/scripts/utils/inspector.gd" id="1_re6mj"]
+
+[node name="Inspector" type="VBoxContainer"]
+offset_right = 245.0
+offset_bottom = 52.0
+script = ExtResource("1_re6mj")
