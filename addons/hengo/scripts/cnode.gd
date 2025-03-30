@@ -100,7 +100,11 @@ func _ready():
 
 
 func _on_enter() -> void:
-	# if virtual_ref:
+	if virtual_ref:
+		for conn: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
+			print(conn.from_connections)
+		
+		# prints('flow: ', ;, virtual_ref.from_flow_connections)
 	# 	print(JSON.stringify(virtual_ref.inputs.map(func(x): return x.is_ref)))
 		# for dict: Dictionary in virtual_ref.output_connections:
 		# 	print(dict.to.input_connections)

@@ -131,6 +131,7 @@ class FlowConnectionData:
 	var from: HenVirtualCNode
 	var to: HenVirtualCNode
 	var to_idx: int
+	var to_from_ref: FromFlowConnection
 
 	func _init(_name: String = '') -> void:
 		name = _name
@@ -215,6 +216,10 @@ class ConnectionReturn:
 
 class VCNodeReturn:
 	var v_cnode: HenVirtualCNode
+	var old_inputs_connections: Array
+	var old_outputs_connections: Array
+	var old_flow_connections: Array
+	var old_from_flow_connections: Array
 
 	func _init(_v_cnode: HenVirtualCNode) -> void:
 		v_cnode = _v_cnode
@@ -225,15 +230,91 @@ class VCNodeReturn:
 			HenGlobal.vc_list[v_cnode.route_ref.id] = []
 		
 		HenGlobal.vc_list[v_cnode.route_ref.id].append(v_cnode)
-		HenGlobal.CNODE_CAM._check_virtual_cnodes()
+
+		v_cnode.input_connections.append_array(old_inputs_connections)
+		v_cnode.output_connections.append_array(old_outputs_connections)
+
+		# inputs
+		for input_connection: InputConnectionData in old_inputs_connections:
+			input_connection.from.output_connections.append(input_connection.from_ref)
+
+		# outputs
+		for input_connection: OutputConnectionData in old_outputs_connections:
+			input_connection.to.input_connections.append(input_connection.to_ref)
+
+		# flow connection
+		for flow_connection: FlowConnectionData in old_flow_connections:
+			if flow_connection.to:
+				flow_connection.to_from_ref.from_connections.append(flow_connection)
+				flow_connection.to.update()
+
+		# from flow connections
+		for from_flow_connection: FromFlowConnection in old_from_flow_connections:
+			for flow_connection: FlowConnectionData in from_flow_connection.from_connections:
+				flow_connection.to = v_cnode
+				flow_connection.from.update()
+
+		old_inputs_connections.clear()
+		old_outputs_connections.clear()
+		old_from_flow_connections.clear()
+		old_flow_connections.clear()
+
+		v_cnode.update()
 	
 
 	func remove() -> void:
 		if HenGlobal.vc_list.has(v_cnode.route_ref.id):
 			HenGlobal.vc_list[v_cnode.route_ref.id].erase(v_cnode)
-		
-		v_cnode.hide()
+	
+		old_inputs_connections.append_array(v_cnode.input_connections)
+		old_outputs_connections.append_array(v_cnode.output_connections)
+		old_flow_connections.append_array(v_cnode.flow_connections)
+		old_from_flow_connections.append_array(v_cnode.from_flow_connections)
 
+		# inputs
+		for input_connection: InputConnectionData in v_cnode.input_connections:
+			input_connection.from.output_connections.erase(input_connection.from_ref)
+
+			if input_connection.line_ref:
+				input_connection.line_ref.visible = false
+
+				# remove the line reference from both inputs
+				input_connection.line_ref = null
+				input_connection.from_ref.line_ref = null
+
+		# outputs
+		for input_connection: OutputConnectionData in v_cnode.output_connections:
+			input_connection.to.input_connections.erase(input_connection.to_ref)
+
+			if input_connection.line_ref:
+				input_connection.line_ref.visible = false
+
+				# remove the line reference from both inputs
+				input_connection.line_ref = null
+				input_connection.to_ref.line_ref = null
+
+		# flow connections
+		for flow_connection: FlowConnectionData in v_cnode.flow_connections:
+			if flow_connection.line_ref:
+				flow_connection.line_ref.visible = false
+				flow_connection.line_ref = null
+			
+			if flow_connection.to:
+				flow_connection.to_from_ref.from_connections.erase(flow_connection)
+
+		# from flow connections
+		for from_flow_connection: FromFlowConnection in v_cnode.from_flow_connections:
+			for from_connection: FlowConnectionData in from_flow_connection.from_connections:
+				if from_connection.line_ref:
+					from_connection.line_ref.visible = false
+					from_connection.line_ref = null
+
+				from_connection.to = null
+
+		v_cnode.input_connections.clear()
+		v_cnode.output_connections.clear()
+		v_cnode.hide()
+	
 
 func check_visibility(_rect: Rect2 = HenGlobal.CNODE_CAM.get_rect()) -> void:
 	is_showing = _rect.intersects(
@@ -571,7 +652,7 @@ func hide() -> void:
 		for flow_connection: FlowConnectionData in flow_connections:
 			if flow_connection.line_ref:
 				flow_connection.line_ref.from_pool_visible = false
-
+			
 				if flow_connection.to.is_showing:
 					var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(flow_connection.line_ref.from_connector.global_position) + flow_connection.line_ref.from_connector.size / 2
 					flow_connection.from_pos = pos
@@ -608,6 +689,10 @@ func hide() -> void:
 
 
 func update() -> void:
+	if route_ref.id != HenRouter.current_route.id:
+		hide()
+		return
+
 	hide()
 	check_visibility()
 
@@ -674,6 +759,7 @@ func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode, _line: H
 	flow_data.line_ref = _line
 	flow_data.to_idx = _to_idx
 	flow_data.from = self
+	flow_data.to_from_ref = from_flow
 
 	from_flow.from_connections.append(flow_data)
 

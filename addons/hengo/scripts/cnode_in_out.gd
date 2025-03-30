@@ -102,7 +102,7 @@ func _on_gui(_event: InputEvent) -> void:
 					if connection:
 						HenGlobal.history.create_action('Remove connection line')
 						HenGlobal.history.add_do_method(connection.remove)
-						HenGlobal.history.add_undo_reference(line_ref)
+						HenGlobal.history.add_undo_reference(connection.input_connection.line_ref)
 						HenGlobal.history.add_undo_method(connection.add)
 						HenGlobal.history.commit_action()
 
@@ -154,7 +154,7 @@ func _on_gui(_event: InputEvent) -> void:
 			elif HenGlobal.can_make_connection and not HenGlobal.connection_to_data.is_empty():
 				# try connection
 				var connection: HenVirtualCNode.ConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
-
+			
 				HenGlobal.history.create_action('Add Connection')
 				HenGlobal.history.add_do_method(connection.add)
 				HenGlobal.history.add_do_reference(connection)

@@ -1,12 +1,12 @@
 {
     "files.exclude": {
-        // "**/.gitignore": false,
-        // "**/*.tscn": true,
-        // "**/*.svg": true,
-        // "**/*.*.import": true,
-        // "**/*.godot": true,
-        // "**/*.png": true,
-        // "**/*.cfg": true,
-        // "**/*.uid": true,
+        "**/.gitignore": false,
+        "**/*.tscn": true,
+        "**/*.svg": true,
+        "**/*.*.import": true,
+        "**/*.godot": true,
+        "**/*.png": true,
+        "**/*.cfg": true,
+        "**/*.uid": true,
     }
 }
