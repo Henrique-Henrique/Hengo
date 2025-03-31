@@ -1,5 +1,5 @@
 @tool
-class_name HenInspector extends VBoxContainer
+class_name HenInspector extends MarginContainer
 
 const INSPECTOR_ITEM = preload('res://addons/hengo/scenes/utils/inspector_item.tscn')
 
@@ -13,6 +13,7 @@ class InspectorItem:
     var ref: Variant
     var field: Dictionary
     var item_creation_callback: Callable
+    var prop_array_ref: HenPropArray
 
     func _init(_data: Dictionary) -> void:
         type = _data.type
@@ -29,14 +30,19 @@ class InspectorItem:
 
         if _data.has('ref'):
             ref = _data.ref
+
+        if _data.has('prop_array_ref'):
+            prop_array_ref = _data.prop_array_ref
         
 
 static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector:
     var inspector: HenInspector = preload('res://addons/hengo/scenes/utils/inspector.tscn').instantiate() if not _inspector else _inspector
+    var container: VBoxContainer = inspector.get_node('%InspectorContainer')
 
+    # cleaning inputs to update inspector
     if _inspector:
-        for chd in inspector.get_children():
-            inspector.remove_child(chd)
+        for chd in container.get_children():
+            container.remove_child(chd)
             chd.queue_free()
 
     for item_data: InspectorItem in _list:
@@ -45,6 +51,14 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
         var prop: Control
 
         (item.get_node('%Name') as Label).text = item_data.name
+
+        # binding move buttons to array prop
+        if item_data.prop_array_ref:
+            var array_container: HBoxContainer = item.get_node('%ArrayContainer')
+            array_container.visible = true
+            (array_container.get_node('%Up') as Button).pressed.connect(item_data.prop_array_ref.on_item_move.bind(HenPropArray.ArrayMove.UP, item_data.ref))
+            (array_container.get_node('%Down') as Button).pressed.connect(item_data.prop_array_ref.on_item_move.bind(HenPropArray.ArrayMove.DOWN, item_data.ref))
+            (array_container.get_node('%Delete') as Button).pressed.connect(item_data.prop_array_ref.on_item_delete.bind(item_data.ref))
 
         match item_data.type:
             'String':
@@ -60,7 +74,7 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
             'Array':
                 prop = preload('res://addons/hengo/scenes/props/array.tscn').instantiate()
                 prop.start(item_data.field, item_data.value, item_data.item_creation_callback)
-            
+
         if prop:
             field_container.add_child(prop)
 
@@ -70,7 +84,7 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
             if prop.has_signal('value_changed'):
                 prop.connect('value_changed', inspector.item_value_changed.bind(item_data.name, item_data.ref))
 
-        inspector.add_child(item)
+        container.add_child(item)
 
     HenGlobal.GENERAL_POPUP.reset_size()
     return inspector

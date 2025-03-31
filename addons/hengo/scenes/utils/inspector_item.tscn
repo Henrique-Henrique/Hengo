@@ -1,15 +1,48 @@
 [gd_scene format=3 uid="uid://da4px8a78qjkv"]
 
 [node name="InspectorItem" type="VBoxContainer"]
-offset_right = 68.0
+offset_right = 164.0
 offset_bottom = 48.0
 theme_override_constants/separation = 0
 
-[node name="Name" type="Label" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 text = "field name"
+
+[node name="ArrayContainer" type="HBoxContainer" parent="HBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Up" type="Button" parent="HBoxContainer/ArrayContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 8
+text = "up"
+
+[node name="Down" type="Button" parent="HBoxContainer/ArrayContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 8
+text = "down"
+
+[node name="Delete" type="Button" parent="HBoxContainer/ArrayContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 8
+text = "del"
 
 [node name="FieldContainer" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
