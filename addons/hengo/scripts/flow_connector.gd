@@ -50,14 +50,13 @@ func _on_gui(_event: InputEvent) -> void:
 					})
 					HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 				elif HenGlobal.can_make_flow_connection and not HenGlobal.flow_connection_to_data.is_empty():
-					create_virtual_connection(HenGlobal.flow_connection_to_data)
-					# var line := create_connection_line(HenGlobal.flow_connection_to_data)
-
-					# HenGlobal.history.create_action('Add Flow Connection')
-					# HenGlobal.history.add_do_method(line.add_to_scene)
-					# HenGlobal.history.add_do_reference(line)
-					# HenGlobal.history.add_undo_method(line.remove_from_scene)
-					# HenGlobal.history.commit_action()
+					var connection: HenVirtualCNode.FlowConnectionReturn = create_virtual_connection(HenGlobal.flow_connection_to_data)
+					
+					HenGlobal.history.create_action('Add Connection')
+					HenGlobal.history.add_do_method(connection.add)
+					HenGlobal.history.add_do_reference(connection)
+					HenGlobal.history.add_undo_method(connection.remove)
+					HenGlobal.history.commit_action()
 
 				# region effects
 				if not HenGlobal.flow_connection_to_data.is_empty():
@@ -77,42 +76,12 @@ func _on_gui(_event: InputEvent) -> void:
 				HenGlobal.CONNECTION_GUIDE.end()
 
 
-func create_virtual_connection(_config: Dictionary) -> void:
-	var line: HenFlowConnectionLine = HenPool.get_flow_line_from_pool()
-
-	line.from_connector = self
-	line.to_cnode = _config.to_cnode
-
-	# signal to update flow connection line
-	if not root.is_connected('on_move', line.update_line):
-		root.connect('on_move', line.update_line)
-	
-	if not line.to_cnode.is_connected('on_move', line.update_line):
-		line.to_cnode.connect('on_move', line.update_line)
-
-
-	root.virtual_ref.add_flow_connection(
+func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.FlowConnectionReturn:
+	return root.virtual_ref.add_flow_connection(
 		idx,
 		_config.to_idx,
-		line.to_cnode.virtual_ref,
-		line
+		_config.to_cnode.virtual_ref
 	)
-
-	# var flow_data: HenVirtualCNode.FlowConnectionData = root.virtual_ref.flow_connections[idx]
-	# var from_flow: HenVirtualCNode.FromFlowConnection = HenVirtualCNode.FromFlowConnection.new()
-
-	# flow_data.to = line.to_cnode.virtual_ref
-	# flow_data.line_ref = line
-
-	# from_flow.from = root.virtual_ref
-	# from_flow.from_connection = flow_data
-
-	# line.to_cnode.virtual_ref.from_flow_connections.append(from_flow)
-
-	line.to_pool_visible = true
-	line.from_pool_visible = true
-	line.from_flow_idx = _config.to_idx
-	line.update_line()
 
 
 func create_connection_line(_config: Dictionary) -> HenFlowConnectionLine:

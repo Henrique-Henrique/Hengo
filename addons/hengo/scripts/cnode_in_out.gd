@@ -289,24 +289,11 @@ func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.Connectio
 		_to_connector = to_conn
 
 
-	var line: HenConnectionLine = HenPool.get_line_from_pool(
-		_root,
-		_to.root,
-		_from_connector,
-		_to_connector
-	)
-	
-	var connection_data: HenVirtualCNode.ConnectionReturn = _to.root.virtual_ref.create_connection(
+	return _to.root.virtual_ref.create_connection(
 		_to.get_index(),
 		get_index(),
-		_root.virtual_ref,
-		line
+		_root.virtual_ref
 	)
-
-	_to.root.virtual_ref.update()
-	_root.virtual_ref.update()
-
-	return connection_data
 
 
 func create_connection(_config: Dictionary) -> HenConnectionLine:

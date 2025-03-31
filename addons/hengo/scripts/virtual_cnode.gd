@@ -177,11 +177,83 @@ class OutputConnectionData extends ConnectionData:
 	var to_type: StringName
 
 
+class FlowConnectionReturn:
+	var flow_connection: FlowConnectionData
+	
+	var to: HenVirtualCNode
+	var to_idx: int
+	var from: HenVirtualCNode
+	var to_from_ref: FromFlowConnection
+
+	# old
+	var old_to: HenVirtualCNode
+	var old_to_idx: int
+	var old_from: HenVirtualCNode
+	var old_to_from_ref: FromFlowConnection
+
+	func _init(_flow: FlowConnectionData, _to: HenVirtualCNode, _to_idx: int, _from: HenVirtualCNode, _to_from_ref: FromFlowConnection) -> void:
+		flow_connection = _flow
+		to = _to
+		to_idx = _to_idx
+		from = _from
+		to_from_ref = _to_from_ref
+
+	func add() -> void:
+		# remove other flow connection
+		if flow_connection.to:
+			flow_connection.to_from_ref.from_connections.erase(flow_connection)
+
+			if flow_connection.line_ref:
+				flow_connection.line_ref.visible = false
+				flow_connection.line_ref = null
+			
+			old_to = flow_connection.to
+			old_to_idx = flow_connection.to_idx
+			old_from = flow_connection.from
+			old_to_from_ref = flow_connection.to_from_ref
+
+		flow_connection.to = to
+		flow_connection.to_idx = to_idx
+		flow_connection.from = from
+		flow_connection.to_from_ref = to_from_ref
+		flow_connection.line_ref = null
+
+		flow_connection.to_from_ref.from_connections.append(flow_connection)
+
+		flow_connection.from.update()
+		flow_connection.to.update()
+
+	func remove() -> void:
+		flow_connection.to = null
+		flow_connection.to_from_ref.from_connections.erase(flow_connection)
+
+		if flow_connection.line_ref:
+			flow_connection.line_ref.visible = false
+		
+		flow_connection.line_ref = null
+
+		# adding old flow connection
+		if old_to:
+			flow_connection.to = old_to
+			flow_connection.to_idx = old_to_idx
+			flow_connection.from = old_from
+			flow_connection.to_from_ref = old_to_from_ref
+
+			old_to_from_ref.from_connections.append(flow_connection)
+			old_to.update()
+
+		old_to = null
+
+		flow_connection.from.update()
+
+		
 class ConnectionReturn:
 	var input_connection: InputConnectionData
 	var output_connection: OutputConnectionData
 	var from: HenVirtualCNode
 	var to: HenVirtualCNode
+
+	var old_inputs_connections: Array
 
 	func _init(_in: InputConnectionData, _out: OutputConnectionData, _from: HenVirtualCNode, _to: HenVirtualCNode) -> void:
 		input_connection = _in
@@ -191,13 +263,25 @@ class ConnectionReturn:
 	
 
 	func add(_update: bool = true) -> void:
+		# removing old inputs
+		old_inputs_connections.append_array(to.input_connections)
+
+		for connection: InputConnectionData in to.input_connections:
+			connection.from.output_connections.erase(connection.from_ref)
+
+			if connection.line_ref:
+				connection.line_ref.visible = false
+				connection.line_ref = null
+				connection.from_ref.line_ref = null
+
+		to.input_connections.clear()
+
 		from.output_connections.append(output_connection)
 		to.input_connections.append(input_connection)
 
 		if _update:
 			from.update()
 			to.update()
-
 
 	func remove() -> void:
 		from.output_connections.erase(output_connection)
@@ -208,11 +292,16 @@ class ConnectionReturn:
 			input_connection.line_ref = null
 			output_connection.line_ref = null
 
-		# TODO: remove in/out connections
+		# add old input connections
+		to.input_connections.append_array(old_inputs_connections)
+	
+		for connection: InputConnectionData in old_inputs_connections:
+			connection.from.output_connections.append(connection.from_ref)
+
+		old_inputs_connections.clear()
 
 		from.update()
 		to.update()
-
 
 class VCNodeReturn:
 	var v_cnode: HenVirtualCNode
@@ -248,6 +337,8 @@ class VCNodeReturn:
 				flow_connection.to_from_ref.from_connections.append(flow_connection)
 				flow_connection.to.update()
 
+
+		print(old_from_flow_connections)
 		# from flow connections
 		for from_flow_connection: FromFlowConnection in old_from_flow_connections:
 			for flow_connection: FlowConnectionData in from_flow_connection.from_connections:
@@ -751,17 +842,11 @@ func get_save() -> Dictionary:
 	return data
 
 
-func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode, _line: HenFlowConnectionLine = null) -> void:
-	var flow_data: FlowConnectionData = flow_connections[_idx]
-	var from_flow: FromFlowConnection = _to.from_flow_connections[_to_idx]
+func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode) -> FlowConnectionReturn:
+	var flow_connection: FlowConnectionData = flow_connections[_idx]
+	var flow_from_connection: FromFlowConnection = _to.from_flow_connections[_to_idx]
 
-	flow_data.to = _to
-	flow_data.line_ref = _line
-	flow_data.to_idx = _to_idx
-	flow_data.from = self
-	flow_data.to_from_ref = from_flow
-
-	from_flow.from_connections.append(flow_data)
+	return FlowConnectionReturn.new(flow_connection, _to, _to_idx, self, flow_from_connection)
 
 
 func remove_input_connection(_idx: int) -> void:
@@ -783,8 +868,7 @@ func get_input_connection(_idx: int) -> ConnectionReturn:
 
 func create_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: HenConnectionLine = null) -> ConnectionReturn:
 	# cleaning others connections
-	remove_input_connection(_idx)
-	
+	# if _remove_old: remove_input_connection(_idx)
 	var input_connection: InputConnectionData = InputConnectionData.new()
 	var output_connection: OutputConnectionData = OutputConnectionData.new()
 
