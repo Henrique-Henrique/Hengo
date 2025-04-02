@@ -407,7 +407,7 @@ class VCNodeReturn:
 		v_cnode.hide()
 	
 
-func check_visibility(_rect: Rect2 = HenGlobal.CNODE_CAM.get_rect()) -> void:
+func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 	is_showing = _rect.intersects(
 		Rect2(
 			position,
@@ -711,7 +711,7 @@ func hide() -> void:
 			line_data.line_ref.to_pool_visible = false
 
 			if line_data.from.is_showing:
-				var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.output.global_position) + line_data.line_ref.conn_size
+				var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(line_data.line_ref.output.global_position) + line_data.line_ref.conn_size
 				line_data.from_ref.to_old_pos = pos
 
 				if not line_data.from_ref.line_ref:
@@ -731,7 +731,7 @@ func hide() -> void:
 			line_data.line_ref.from_pool_visible = false
 
 			if line_data.to.is_showing:
-				var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(line_data.line_ref.input.global_position) + line_data.line_ref.conn_size
+				var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(line_data.line_ref.input.global_position) + line_data.line_ref.conn_size
 				line_data.to_ref.from_old_pos = pos
 				line_data.to_ref.line_ref.from_virtual_pos = pos
 			else:
@@ -745,7 +745,7 @@ func hide() -> void:
 				flow_connection.line_ref.from_pool_visible = false
 			
 				if flow_connection.to.is_showing:
-					var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(flow_connection.line_ref.from_connector.global_position) + flow_connection.line_ref.from_connector.size / 2
+					var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(flow_connection.line_ref.from_connector.global_position) + flow_connection.line_ref.from_connector.size / 2
 					flow_connection.from_pos = pos
 					flow_connection.line_ref.from_virtual_pos = pos
 				else:
@@ -764,7 +764,7 @@ func hide() -> void:
 						line.to_pool_visible = false
 
 						if from_connection.from.is_showing:
-							var pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2((from_flow_container.get_child(idx) as HenFromFlow).global_position)
+							var pos: Vector2 = HenGlobal.CAM.get_relative_vec2((from_flow_container.get_child(idx) as HenFromFlow).global_position)
 							from_connection.to_pos = pos
 							line.to_virtual_pos = pos
 						else:

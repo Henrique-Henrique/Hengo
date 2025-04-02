@@ -104,5 +104,4 @@ func get_script_list(_dir: DirAccess, _list: Array[Array] = []) -> Array[Array]:
 func hide_dashboard() -> void:
 	visible = false
 
-	HenGlobal.CNODE_CAM.can_scroll = true
-	HenGlobal.STATE_CAM.can_scroll = true
+	HenGlobal.CAM.can_scroll = true

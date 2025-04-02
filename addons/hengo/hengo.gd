@@ -56,7 +56,6 @@ func _enter_tree():
 
 	# setting scene reference here to prevent crash on development when reload scripts on editor :)
 	HenAssets.ConnectionLineScene = load('res://addons/hengo/scenes/connection_line.tscn')
-	HenAssets.StateConnectionLineScene = load('res://addons/hengo/scenes/state_connection_line.tscn')
 	HenAssets.FlowConnectionLineScene = load('res://addons/hengo/scenes/flow_connection_line.tscn')
 	HenAssets.HengoRootScene = load('res://addons/hengo/scenes/hengo_root.tscn')
 	HenAssets.CNodeInputScene = load('res://addons/hengo/scenes/cnode_input.tscn')
@@ -235,5 +234,3 @@ func change_colors() -> void:
 	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)
 	route_ref.bg_color = base_color.lightened(.1)
-	
-	HenGlobal.STATE_CAM.get_parent().get_theme_stylebox('panel').bg_color = base_color.darkened(color_factor)

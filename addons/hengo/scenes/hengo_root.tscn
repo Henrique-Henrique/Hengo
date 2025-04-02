@@ -1,9 +1,8 @@
-[gd_scene load_steps=45 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=37 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
-[ext_resource type="Texture2D" uid="uid://ou14r0dmdyks" path="res://addons/hengo/assets/images/grid_state_out.png" id="4_ngl72"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
@@ -16,38 +15,13 @@
 [ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
 [ext_resource type="Texture2D" uid="uid://bngwf5vpsmtgo" path="res://addons/hengo/assets/images/grid_cnode_out.png" id="12_7rfh3"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
-[ext_resource type="Texture2D" uid="uid://bxajxich16tmm" path="res://addons/hengo/assets/images/grid_state.png" id="12_x1ww2"]
 [ext_resource type="Texture2D" uid="uid://ctlaqfkdcnini" path="res://addons/hengo/assets/images/grid_cnode.png" id="13_w5ssd"]
-[ext_resource type="PackedScene" uid="uid://b3fjufjpvcq01" path="res://addons/hengo/scenes/props_container.tscn" id="15_syiqm"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://dcyvdoty8t12u" path="res://addons/hengo/scenes/dashboard.tscn" id="28_nqqx4"]
-[ext_resource type="Script" uid="uid://cj0s8k31oba27" path="res://addons/hengo/scripts/general_menu.gd" id="31_keoa0"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
-[ext_resource type="Script" uid="uid://b4dpuahtnx0un" path="res://addons/hengo/scripts/route_reference_props.gd" id="34_wyhwi"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3grrq"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0522994, 0.0615214, 0.0861528, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_dfn6x"]
-shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(912, 1362)
-shader_parameter/offset = Vector2(143.538, 290.796)
-shader_parameter/zoom_factor = 0.217379
-shader_parameter/alpha = 0.2
-shader_parameter/text = ExtResource("4_ngl72")
-shader_parameter/text_size = 100.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0k3ul"]
-bg_color = Color(0.0462, 0.58905, 0.77, 0.286275)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
-content_margin_right = 8.0
-content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gn4j7"]
 content_margin_left = 2.0
@@ -85,11 +59,14 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
+bg_color = Color(0.0522994, 0.0615214, 0.0861528, 1)
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(2533, 1363)
-shader_parameter/offset = Vector2(-186.83, 233.033)
-shader_parameter/zoom_factor = 0.200002
+shader_parameter/offset = Vector2(645.872, 155.182)
+shader_parameter/zoom_factor = 0.349987
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
@@ -99,6 +76,10 @@ colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
 content_margin_left = 4.0
@@ -142,121 +123,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
-split_offset = -350
-
-[node name="TabContainer" type="TabContainer" parent="Split"]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_3grrq")
-current_tab = 0
-
-[node name="StateUI" type="Panel" parent="Split/TabContainer"]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
-metadata/_tab_index = 0
-
-[node name="Grid" type="TextureRect" parent="Split/TabContainer/StateUI"]
-process_mode = 4
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_dfn6x")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("12_x1ww2")
-
-[node name="Cam" type="Node2D" parent="Split/TabContainer/StateUI"]
-position = Vector2(100, 8.42499e-06)
-script = ExtResource("3_84akk")
-
-[node name="RefPoint" type="Marker2D" parent="Split/TabContainer/StateUI/Cam"]
-visible = false
-position = Vector2(289, 313)
-
-[node name="StateContainer" type="Control" parent="Split/TabContainer/StateUI/Cam"]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("1_2muha")
-
-[node name="GeneralContainer" type="Control" parent="Split/TabContainer/StateUI/Cam"]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-
-[node name="RouteReferenceContainer" type="Control" parent="Split/TabContainer/StateUI/Cam"]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-
-[node name="StateConnectionGuide" type="Line2D" parent="Split/TabContainer/StateUI/Cam"]
-unique_name_in_owner = true
-visible = false
-z_index = 2
-width = 6.0
-texture = ExtResource("7_6jref")
-texture_mode = 1
-script = ExtResource("7_gj1gq")
-
-[node name="Lines" type="Node2D" parent="Split/TabContainer/StateUI/Cam"]
-
-[node name="SelectionRect" type="ReferenceRect" parent="Split/TabContainer/StateUI/Cam"]
-process_mode = 4
-visible = false
-offset_left = 153.0
-offset_top = 148.0
-offset_right = 193.0
-offset_bottom = 188.0
-border_color = Color(0.044248, 0.585155, 0.767195, 1)
-border_width = 3.0
-
-[node name="Panel" type="Panel" parent="Split/TabContainer/StateUI/Cam/SelectionRect"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_0k3ul")
-
-[node name="Center" type="Marker2D" parent="Split/TabContainer/StateUI"]
-visible = false
-
-[node name="StateStatLabel" type="Label" parent="Split/TabContainer/StateUI"]
-unique_name_in_owner = true
-process_mode = 4
-modulate = Color(1, 1, 1, 0.658824)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -20.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
-horizontal_alignment = 2
-
-[node name="PropsUI" parent="Split/TabContainer" instance=ExtResource("15_syiqm")]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
+split_offset = -805
 
 [node name="HSplitContainer" type="HSplitContainer" parent="Split"]
 layout_mode = 2
@@ -432,23 +299,6 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
-
-[node name="GeneralMenu" type="PopupMenu" parent="."]
-unique_name_in_owner = true
-size = Vector2i(134, 60)
-script = ExtResource("31_keoa0")
-
-[node name="RouteReferenceProps" parent="." instance=ExtResource("8_uxy8l")]
-unique_name_in_owner = true
-visible = false
-
-[node name="RRProps" type="PanelContainer" parent="RouteReferenceProps"]
-offset_right = 5.0
-theme_override_styles/panel = ExtResource("33_n637n")
-script = ExtResource("34_wyhwi")
-
-[node name="List" type="VBoxContainer" parent="RouteReferenceProps/RRProps"]
-layout_mode = 2
 
 [node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
 visible = false

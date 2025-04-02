@@ -388,16 +388,6 @@ func add_to_scene() -> void:
 
 	if not (HenRouter.route_reference[route_ref.id] as Array).has(self):
 		HenRouter.route_reference[route_ref.id].append(self)
-	
-
-	var groups: Array = HenGlobal.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
-
-	if not groups.is_empty():
-		var group = groups[0]
-		var id = int((group as String).split('f_')[1])
-		var route_ref_node = HenRouteReference.get_route_ref_by_id_or_null(id)
-	
-		route_ref_node.change_ref_count()
 
 	deleted = false
 
@@ -422,16 +412,6 @@ func remove_from_scene() -> void:
 
 		HenRouter.route_reference[route_ref.id].erase(self)
 		HenGlobal.CNODE_CONTAINER.remove_child(self)
-	
-
-	var groups: Array = HenGlobal.GROUP.get_group_list(self).filter(func(x): return x.begins_with('f_'))
-
-	if not groups.is_empty():
-		var group = groups[0]
-		var id = int((group as String).split('f_')[1])
-		var route_ref_node = HenRouteReference.get_route_ref_by_id_or_null(id)
-	
-		route_ref_node.change_ref_count(-1)
 
 	deleted = true
 
@@ -631,7 +611,7 @@ static func instantiate_and_add_pool() -> void:
 			line.visible = false
 			line.position = Vector2(50000, 50000)
 			HenGlobal.connection_line_pool.append(line)
-			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
+			HenGlobal.CAM.get_node('Lines').add_child(line)
 		
 
 		for flow_connection_line_idx in range(30): # flow connection line pool size
@@ -639,27 +619,7 @@ static func instantiate_and_add_pool() -> void:
 			line.visible = false
 			line.position = Vector2(50000, 50000)
 			HenGlobal.flow_connection_line_pool.append(line)
-			HenGlobal.CNODE_CAM.get_node('Lines').add_child(line)
-
-
-		for state_idx in range(4): # state pool size
-			var state: HenState = preload('res://addons/hengo/scenes/state.tscn').instantiate()
-
-			for transition_idx in range(5): # trnasition size pool
-				state.add_transition('content')
-
-			state.visible = false
-			state.position = Vector2(50000, 50000)
-			HenGlobal.state_pool.append(state)
-			HenGlobal.STATE_CONTAINER.add_child(state)
-		
-
-		for state_transition_line_idx in range(5):
-			var line: HenStateConnectionLine = HenAssets.StateConnectionLineScene.instantiate()
-			line.visible = false
-			line.position = Vector2(50000, 50000)
-			HenGlobal.state_connection_line_pool.append(line)
-			HenGlobal.STATE_CAM.get_node('Lines').add_child(line)
+			HenGlobal.CAM.get_node('Lines').add_child(line)
 
 
 		var end: float = Time.get_ticks_usec()

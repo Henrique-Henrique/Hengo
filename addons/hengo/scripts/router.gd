@@ -42,7 +42,7 @@ static func change_route(_route: Dictionary) -> void:
 
 	if route_reference.has(_route.id):
 		# show/hide cnodes
-		HenGlobal.CNODE_CAM._check_virtual_cnodes()
+		HenGlobal.CAM._check_virtual_cnodes()
 
 
 		# clearing comments
@@ -55,25 +55,10 @@ static func change_route(_route: Dictionary) -> void:
 		for cnode: HenCnode in cnode_list:
 			HenGlobal.CNODE_CONTAINER.add_child(cnode)
 
-		# showing lines
-		# for line in line_route_reference.get(_route.id):
-		# 	line_container.add_child(line)
-
 		# showing comments
 		for comment in comment_reference.get(_route.id):
 			HenGlobal.COMMENT_CONTAINER.add_child(comment)
 
-		# match _route.type:
-		# 	ROUTE_TYPE.STATE:
-		# 		# debug
-		# 		for cnode: HenCnode in cnode_list:
-		# 			if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
-		# 				HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
-				
-		# 		for state in HenGlobal.STATE_CAM.get_tree().get_nodes_in_group(HenEnums.STATE_SELECTED_GROUP):
-		# 			state.unselect()
-				
-		# 		_route.state_ref.select()
 
 	else:
 		# TODO error msg

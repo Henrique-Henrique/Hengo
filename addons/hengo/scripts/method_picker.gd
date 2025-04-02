@@ -312,29 +312,9 @@ func _ready() -> void:
 	# disabling coming from inputs (for now)
 	if error != OK or came_from == 'in':
 		await get_tree().process_frame
-		HenGlobal.CNODE_CAM.can_scroll = true
+		HenGlobal.CAM.can_scroll = true
 		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
-
-	match HenRouter.current_route.type:
-		HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.FUNC:
-			native_list.append(
-				{
-					name = 'Go to Event',
-					data = {
-						name = 'go_to_event',
-						sub_type = HenCnode.SUB_TYPE.SELF_GO_TO_VOID,
-						inputs = [
-							{
-								name = 'state',
-								sub_type = '@dropdown',
-								category = 'current_states'
-							}
-						],
-						route = HenRouter.current_route
-					}
-				},
-			)
 
 	_show_list(native_list if show_native_first else api_list.slice(0, 20), false)
 
@@ -357,7 +337,7 @@ func _on_search_gui_input(_event: InputEvent) -> void:
 
 
 func _select() -> void:
-	HenGlobal.CNODE_CAM.can_scroll = true
+	HenGlobal.CAM.can_scroll = true
 	if list_container.get_child_count() > 0:
 		var item = list_container.get_child(selected_id)
 		var item_data = item.get_meta('data')
@@ -367,7 +347,7 @@ func _select() -> void:
 				Type.COMMENT:
 					var comment = preload('res://addons/hengo/scenes/utils/comment.tscn').instantiate()
 					comment.route_ref = HenRouter.current_route
-					comment.position = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
+					comment.position = HenGlobal.CAM.get_relative_vec2(start_pos)
 					HenRouter.comment_reference[HenRouter.current_route.id].append(comment)
 					HenGlobal.COMMENT_CONTAINER.add_child(comment)
 					HenGlobal.GENERAL_POPUP.get_parent().hide()
@@ -400,7 +380,7 @@ func _select() -> void:
 					input.data = data.inputs[0].type
 
 
-		data['position'] = HenGlobal.CNODE_CAM.get_relative_vec2(start_pos)
+		data['position'] = HenGlobal.CAM.get_relative_vec2(start_pos)
 
 		var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
 
@@ -799,36 +779,36 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 					
 					# functions
-					for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
-						var dt_name: String = func_ref.props[0].value
+					# for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
+					# 	var dt_name: String = func_ref.props[0].value
 
-						var dt: Dictionary = {
-							name = 'Func -> ' + dt_name,
-							data = {
-								name = dt_name,
-								fantasy_name = 'Func -> ' + dt_name,
-								sub_type = HenCnode.SUB_TYPE.USER_FUNC,
-								inputs = [],
-								outputs = [],
-								route = HenRouter.current_route,
-								group = 'f_' + str(func_ref.hash)
-							}
-						}
+					# 	var dt: Dictionary = {
+					# 		name = 'Func -> ' + dt_name,
+					# 		data = {
+					# 			name = dt_name,
+					# 			fantasy_name = 'Func -> ' + dt_name,
+					# 			sub_type = HenCnode.SUB_TYPE.USER_FUNC,
+					# 			inputs = [],
+					# 			outputs = [],
+					# 			route = HenRouter.current_route,
+					# 			group = 'f_' + str(func_ref.hash)
+					# 		}
+					# 	}
 						
-						var p_idx: int = 0
-						for prop_config in func_ref.props[1].value:
-							prop_config.group = 'fi_' + str(func_ref.hash) + '_' + str(p_idx)
-							dt.data.inputs.append(prop_config)
-							p_idx += 1
+					# 	var p_idx: int = 0
+					# 	for prop_config in func_ref.props[1].value:
+					# 		prop_config.group = 'fi_' + str(func_ref.hash) + '_' + str(p_idx)
+					# 		dt.data.inputs.append(prop_config)
+					# 		p_idx += 1
 						
 
-						p_idx = 0
-						for prop_config in func_ref.props[2].value:
-							prop_config.group = 'fo_' + str(func_ref.hash) + '_' + str(p_idx)
-							dt.data.outputs.append(prop_config)
-							p_idx += 1
+					# 	p_idx = 0
+					# 	for prop_config in func_ref.props[2].value:
+					# 		prop_config.group = 'fo_' + str(func_ref.hash) + '_' + str(p_idx)
+					# 		dt.data.outputs.append(prop_config)
+					# 		p_idx += 1
 
-						api_list.append(dt)
+					# 	api_list.append(dt)
 
 
 	return OK

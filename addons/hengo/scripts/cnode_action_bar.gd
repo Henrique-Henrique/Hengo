@@ -7,7 +7,5 @@ func _ready() -> void:
 
 
 func _on_dashboard() -> void:
-    HenGlobal.CNODE_CAM.can_scroll = false
-    HenGlobal.STATE_CAM.can_scroll = false
-
+    HenGlobal.CAM.can_scroll = false
     HenGlobal.DASHBOARD.show_dashboard(true)

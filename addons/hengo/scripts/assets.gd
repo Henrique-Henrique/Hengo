@@ -2,7 +2,6 @@
 class_name HenAssets extends Resource
 
 static var ConnectionLineScene: PackedScene
-static var StateConnectionLineScene: PackedScene
 static var FlowConnectionLineScene: PackedScene
 static var HengoRootScene: PackedScene
 static var CNodeInputScene: PackedScene

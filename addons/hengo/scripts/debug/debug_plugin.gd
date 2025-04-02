@@ -1,10 +1,6 @@
 @tool
 extends EditorDebuggerPlugin
 
-# imports
-const HenGlobal = preload('res://addons/hengo/scripts/global.gd')
-const HenRouter = preload('res://addons/hengo/scripts/router.gd')
-
 const PREFIX = 'hengo'
 
 func _has_capture(prefix) -> bool:
@@ -114,10 +110,6 @@ func load_references() -> void:
 	HenGlobal.node_references = {}
 	HenGlobal.state_references = {}
 
-	# getting states
-	for state in HenGlobal.STATE_CONTAINER.get_children():
-		HenGlobal.state_references[state.hash] = state
-
 	# getting cnodes
 	for cnode in HenRouter.route_reference[HenRouter.current_route.id]:
 		if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
@@ -150,11 +142,5 @@ func _on_started() -> void:
 func _on_stopped() -> void:
 	HenGlobal.node_references = {}
 	HenGlobal.HENGO_DEBUGGER_PLUGIN = null
-
-	if HenGlobal.old_state_debug:
-		if not HenGlobal.old_state_debug.is_queued_for_deletion():
-			HenGlobal.old_state_debug.hide_debug()
-		
-		HenGlobal.old_state_debug = null
 
 	print('Hengo Debugger Stopped!')

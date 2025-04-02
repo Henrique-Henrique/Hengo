@@ -55,30 +55,30 @@ static func generate() -> String:
 # ***************************************************************\n\nextends {0}\n\n'.format([HenGlobal.script_config.type])
 
 	# variables
-	var var_code: String =' # Variables #\n'
+	# var var_code: String =' # Variables #\n'
 
-	for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
-		var var_name: String = variable.name
-		var var_type: String = variable.type
-		var var_export: bool = variable.export
+	# for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
+	# 	var var_name: String = variable.name
+	# 	var var_type: String = variable.type
+	# 	var var_export: bool = variable.export
 
-		var type_value: String = 'null'
+	# 	var type_value: String = 'null'
 
-		if HenEnums.VARIANT_TYPES.has(var_type):
-			if var_type == 'Variant':
-				type_value = 'null'
-			else:
-				type_value = var_type + '()'
-		elif ClassDB.can_instantiate(var_type):
-			type_value = var_type + '.new()'
+	# 	if HenEnums.VARIANT_TYPES.has(var_type):
+	# 		if var_type == 'Variant':
+	# 			type_value = 'null'
+	# 		else:
+	# 			type_value = var_type + '()'
+	# 	elif ClassDB.can_instantiate(var_type):
+	# 		type_value = var_type + '.new()'
 
-		var_code += '{export_var}var {name} = {value}\n'.format({
-			name = var_name.to_snake_case(),
-			value = type_value,
-			export_var = '@export ' if var_export else ''
-		})
+	# 	var_code += '{export_var}var {name} = {value}\n'.format({
+	# 		name = var_name.to_snake_case(),
+	# 		value = type_value,
+	# 		export_var = '@export ' if var_export else ''
+	# 	})
 
-	code += var_code
+	# code += var_code
 	# end variables
 
 	#region Parsing generals
@@ -154,7 +154,7 @@ func _physics_process(delta: float) -> void:
 {_unhandled_input}
 
 {_unhandled_key_input}""".format({
-		events = '{\n\t' + ',\n\t'.join(events.map(
+		events = ' { \n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
 			return '{event_name}="{to_state_name}"'.format({
 				event_name = ev.name.to_snake_case(),
@@ -172,90 +172,71 @@ func _physics_process(delta: float) -> void:
 	})
 
 	# functions
-	var func_code: String = '# Functions\n'
+	# var func_code: String = '# Functions\n'
 
-	for func_item: HenRouteReference in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
-		var func_name: String = func_item.props[0].value
+	# for func_item: HenRouteReference in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
+	# 	var func_name: String = func_item.props[0].value
 
-		func_code += 'func {name}({params}):\n'.format({
-			name = func_name.to_snake_case(),
-			params = ', '.join(func_item.props[1].value.map(
-				func(x: Dictionary) -> String:
-					return x.name
-		))
-		})
+	# 	func_code += 'func {name}({params}):\n'.format({
+	# 		name = func_name.to_snake_case(),
+	# 		params = ', '.join(func_item.props[1].value.map(
+	# 			func(x: Dictionary) -> String:
+	# 				return x.name
+	# 	))
+	# 	})
 
-		# debug
-		func_code += '\t' + get_debug_var_start()
+	# 	# debug
+	# 	func_code += '\t' + get_debug_var_start()
 		
-		# local variable
-		var local_var_list: Array = []
+	# 	# local variable
+	# 	var local_var_list: Array = []
 
-		if not local_var_list.is_empty():
-			func_code += '\n'.join(local_var_list) + '\n\n'
+	# 	if not local_var_list.is_empty():
+	# 		func_code += '\n'.join(local_var_list) + '\n\n'
 		
-		# end local variable
+	# 	# end local variable
 
-		# func output (return)
-		var output_code: Array = []
+	# 	# func output (return)
+	# 	var output_code: Array = []
 		
-		for token in func_item.output_cnode.get_input_token_list():
-			output_code.append(parse_token_by_type(token))
+	# 	for token in func_item.output_cnode.get_input_token_list():
+	# 		output_code.append(parse_token_by_type(token))
 
-		var func_flow_to: Dictionary = func_item.virtual_cnode_list[0].flow_to
+	# 	var func_flow_to: Dictionary = func_item.virtual_cnode_list[0].flow_to
 
-		if func_flow_to.has('cnode'):
-			var func_tokens: Array = func_item.virtual_cnode_list[0].flow_to.cnode.get_flow_token_list()
-			var func_block: Array = []
+	# 	if func_flow_to.has('cnode'):
+	# 		var func_tokens: Array = func_item.virtual_cnode_list[0].flow_to.cnode.get_flow_token_list()
+	# 		var func_block: Array = []
 
-			for token in func_tokens:
-				func_block.append(parse_token_by_type(token, 1))
+	# 		for token in func_tokens:
+	# 			func_block.append(parse_token_by_type(token, 1))
 
-			# debug
-			func_block.append(parse_token_by_type(
-				get_debug_token(func_item.virtual_cnode_list[0]),
-				1
-			))
+	# 		# debug
+	# 		func_block.append(parse_token_by_type(
+	# 			get_debug_token(func_item.virtual_cnode_list[0]),
+	# 			1
+	# 		))
 
-			func_code += '\n'.join(func_block) + '\n'
-			func_code += '\t' + get_debug_push_str() + '\n'
-		else:
-			func_code += '\tpass\n\n' if local_var_list.is_empty() and output_code.is_empty() else ''
+	# 		func_code += '\n'.join(func_block) + '\n'
+	# 		func_code += '\t' + get_debug_push_str() + '\n'
+	# 	else:
+	# 		func_code += '\tpass\n\n' if local_var_list.is_empty() and output_code.is_empty() else ''
 		
-		#TODO output when not connected return empty field, make a default values for all types
-		if output_code.size() == 1:
-			func_code += '\treturn {output}\n\n'.format({
-				output = ', '.join(output_code)
-			})
-		elif not output_code.is_empty():
-			func_code += '\treturn [{outputs}]\n\n'.format({
-				outputs = ', '.join(output_code)
-			})
+	# 	#TODO output when not connected return empty field, make a default values for all types
+	# 	if output_code.size() == 1:
+	# 		func_code += '\treturn {output}\n\n'.format({
+	# 			output = ', '.join(output_code)
+	# 		})
+	# 	elif not output_code.is_empty():
+	# 		func_code += '\treturn [{outputs}]\n\n'.format({
+	# 			outputs = ', '.join(output_code)
+	# 		})
 		# end func output
 	
-	base_template += func_code
+	# base_template += func_code
 	# end functions
 
 
-	# parsing all states
-	# for state: HenVirtualState in HenGlobal.vs_list:
-	# 	var state_code_tokens = parse_tokens(state.virtual_vc_list)
-	# 	var state_name = state.name.to_snake_case()
-	# 	var transitions: Array = []
-
-	# 	# transitions
-	# 	for transition: HenVirtualState.TransitionData in state.transitions:
-	# 		if transition.to:
-	# 			transitions.append({
-	# 				name = transition.name,
-	# 				to_state_name = transition.to.name
-	# 			})
-
-	# 	states_data[state_name] = {
-	# 		virtual_tokens = state_code_tokens,
-	# 		transitions = transitions
-	# 	}
-	
 	# parsing base template
 	# adding states and transitions
 	base_template = base_template.format({
@@ -561,11 +542,6 @@ static func get_sequence_name(_name: String) -> String:
 	return _name
 
 
-static func check_state_errors(_state: HenState) -> void:
-	for _node in HenGlobal.CNODE_CONTAINER.get_children():
-		_node.check_error()
-
-
 static func check_errors_in_flow(_node: HenCnode) -> void:
 	match _node.sub_type:
 		HenCnode.SUB_TYPE.GO_TO_VOID:
@@ -586,10 +562,10 @@ static func get_debug_counter(_node: HenCnode) -> float:
 	return _debug_counter
 
 
-static func get_state_debug_counter(_state: HenVirtualState) -> float:
-	_debug_counter *= 2.
-	_debug_symbols[str(_debug_counter)] = [_state.id]
-	return _debug_counter
+# static func get_state_debug_counter(_state: HenVirtualState) -> float:
+# 	_debug_counter *= 2.
+# 	_debug_symbols[str(_debug_counter)] = [_state.id]
+# 	return _debug_counter
 
 
 static func get_push_debug_token() -> Dictionary:

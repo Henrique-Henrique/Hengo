@@ -52,7 +52,6 @@ class State1 extends HengoState:
 class State2 extends HengoState:
 	func enter() -> void:
 		#hen_dbg#var __hen_id__: float = 0.
-
 		print("Testingg")
 		#hen_dbg#__hen_id__ += 2
 		#hen_dbg#EngineDebugger.send_message('hengo:cnode', [__hen_id__])

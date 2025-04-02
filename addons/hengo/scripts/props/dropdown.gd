@@ -33,8 +33,6 @@ func _on_pressed() -> void:
 			options = HenGlobal.SCRIPTS_STATES[custom_data] if HenGlobal.SCRIPTS_STATES.has(custom_data) else []
 		'cast_type':
 			options = HenEnums.DROPDOWN_ALL_CLASSES
-		'current_states':
-			options = HenGlobal.STATE_CONTAINER.get_children().map(func(state): return {name = state.get_state_name()})
 		'enum_list':
 			var enum_reference: Dictionary = {}
 
@@ -45,14 +43,14 @@ func _on_pressed() -> void:
 		'all_props':
 			var arr: Array = []
 
-			for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
-				if custom_data.input_ref.is_type_relatable(
-					'out',
-					'in',
-					prop.type,
-					custom_data.input_ref.connection_type,
-				):
-					arr.append(prop)
+			# for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
+			# 	if custom_data.input_ref.is_type_relatable(
+			# 		'out',
+			# 		'in',
+			# 		prop.type,
+			# 		custom_data.input_ref.connection_type,
+			# 	):
+			# 		arr.append(prop)
 			
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type):
 				var _type: StringName = custom_data.input_ref.input_ref.type
@@ -71,17 +69,18 @@ func _on_pressed() -> void:
 				name = x.name
 			})
 		'callable':
-			options = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
-				name = x.route.name
-			})
+			options = []
+			# options = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
+			# 	name = x.route.name
+			# })
 		'get_prop', 'set_prop':
 			var arr: Array = []
 
 			print(custom_data)
 
-			if not custom_data:
-				for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
-					arr.append(prop)
+			# if not custom_data:
+			# 	for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
+			# 		arr.append(prop)
 			
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type if not custom_data else custom_data):
 				var prop_type: StringName = type_string(prop.type)
@@ -110,7 +109,7 @@ func _selected(_item: Dictionary) -> void:
 	text = _item.name
 
 	match type:
-		'hengo_states', 'state_transition', 'current_states':
+		'hengo_states', 'state_transition':
 			text = (_item.name as String).to_snake_case()
 		'enum_list':
 			text = _item.name
@@ -134,12 +133,12 @@ func _selected(_item: Dictionary) -> void:
 				input.input_ref.category = 'class_props'
 
 			emit_signal('value_changed', text, value)
-			HenGlobal.CNODE_CAM.can_scroll = true
+			HenGlobal.CAM.can_scroll = true
 			return
 		'get_prop':
 			emit_signal('value_changed', text, _item.type)
 			get_parent().owner.set_type(_item.type)
-			HenGlobal.CNODE_CAM.can_scroll = true
+			HenGlobal.CAM.can_scroll = true
 			return
 		'set_prop':
 			emit_signal('value_changed', text)
@@ -173,15 +172,10 @@ func _selected(_item: Dictionary) -> void:
 
 			input.input_ref.erase('value')
 
-			HenGlobal.CNODE_CAM.can_scroll = true
+			HenGlobal.CAM.can_scroll = true
 			return
 
 	value_changed.emit(text)
-
-	match type:
-		'hengo_states':
-			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				HenCodeGeneration.check_state_errors(HenRouter.current_route.state_ref)
 
 	if get_parent() and get_parent().owner:
 		get_parent().owner.root.size = Vector2.ZERO

@@ -6,26 +6,16 @@ static var editor_interface: EditorInterface
 
 # nodes referencs
 static var CAM: HenCam
-static var STATE_CAM: HenCam
-static var CNODE_CAM: HenCam
 static var CNODE_CONTAINER: Control
-static var GENERAL_CONTAINER: Control
-static var ROUTE_REFERENCE_CONTAINER: Control
 static var COMMENT_CONTAINER: Control
-static var STATE_CONTAINER: Control
 static var SIDE_MENU_POPUP: PanelContainer
 static var DROPDOWN_MENU: HenDropDownMenu
 static var POPUP_CONTAINER: CanvasLayer
 static var GENERAL_POPUP: PanelContainer
-static var ROUTE_REFERENCE_PROPS: HenRouteReferenceProps
 static var DOCS_TOOLTIP: HenDocsToolTip
 static var ERROR_BT: HenErrorBt
 static var CONNECTION_GUIDE: HenConnectionGuide
-static var STATE_CONNECTION_GUIDE: HenConnectionGuide
-static var PROPS_CONTAINER: HenPropsContainer
 static var HENGO_ROOT: HenHengoRoot
-static var GENERAL_MENU: HenGeneralMenu
-static var GROUP: HenGroup
 static var GD_PREVIEWER: CodeEdit
 static var DASHBOARD: HenDashboard
 static var BASE_ROUTE: Dictionary
@@ -44,7 +34,6 @@ static var mouse_on_cnode_ui: bool = false
 # states
 static var can_make_state_connection: bool = false
 static var state_connection_to_date: Dictionary = {}
-static var current_state_transition: HenStateTransition
 
 # history
 static var history: UndoRedo
@@ -61,8 +50,6 @@ static var ui_mode: UI_STATE = UI_STATE.BOTH
 # name generator
 static var unique_id: int = 0
 
-# code flow
-static var start_state: HenVirtualState
 
 # save load
 static var current_script_path: StringName = ''
@@ -76,7 +63,6 @@ static var SCRIPTS_STATES: Dictionary = {}
 # debug
 static var node_references: Dictionary = {}
 static var state_references: Dictionary = {}
-static var old_state_debug: HenState = null
 
 # counter
 static var node_counter: int = 0

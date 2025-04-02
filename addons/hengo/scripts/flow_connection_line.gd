@@ -27,9 +27,9 @@ var to_virtual_pos: Vector2
 
 
 func update_line() -> void:
-	var from_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
+	var from_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
 	var from_flow: HenFromFlow = to_cnode.get_node('%FromFlowContainer').get_child(from_flow_idx) if to_cnode else null
-	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2((from_flow.get_node('%Arrow') as TextureRect).global_position) if to_pool_visible and to_cnode else to_virtual_pos
+	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2((from_flow.get_node('%Arrow') as TextureRect).global_position) if to_pool_visible and to_cnode else to_virtual_pos
 	
 
 	var first_point: Vector2 = from_pos + Vector2(0, POINT_WIDTH)
@@ -68,8 +68,8 @@ func update_line() -> void:
 
 
 func add_to_scene(_add_to_list: bool = true) -> void:
-	HenGlobal.CNODE_CAM.get_node('Lines').add_child(self)
-	global_position = HenGlobal.CNODE_CAM.global_position
+	HenGlobal.CAM.get_node('Lines').add_child(self)
+	global_position = HenGlobal.CAM.global_position
 
 	update_line()
 
@@ -97,7 +97,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 
 func remove_from_scene(_remove_from_list: bool = true) -> void:
 	if is_inside_tree():
-		HenGlobal.CNODE_CAM.get_node('Lines').remove_child(self)
+		HenGlobal.CAM.get_node('Lines').remove_child(self)
 		
 		if from_connector.root.is_connected('on_move', update_line):
 			from_connector.root.disconnect('on_move', update_line)

@@ -7,7 +7,6 @@ class ScriptData:
 	var node_counter: int
 	var prop_counter: int
 	var debug_symbols: Dictionary
-	var state_name_counter: int
 	var props: Array
 	var generals: Array
 	var connections: Array
@@ -23,7 +22,6 @@ class ScriptData:
 			prop_counter = prop_counter,
 			node_counter = node_counter,
 			debug_symbols = debug_symbols,
-			state_name_counter = state_name_counter,
 			props = props,
 			generals = generals,
 			connections = connections,
@@ -42,11 +40,9 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	script_data.node_counter = HenGlobal.node_counter
 	script_data.prop_counter = HenGlobal.prop_counter
 	script_data.debug_symbols = _debug_symbols
-	script_data.state_name_counter = HenState._name_counter
 
 	# ---------------------------------------------------------------------------- #
 	# Props
-	script_data.props = HenGlobal.PROPS_CONTAINER.get_all_values()
 
 	# ---------------------------------------------------------------------------- #
 	var v_cnode_list: Array[Dictionary] = []

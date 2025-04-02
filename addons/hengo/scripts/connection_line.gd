@@ -31,8 +31,8 @@ var to_virtual_pos: Vector2
 
 
 func update_line() -> void:
-	var start_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(input.global_position) + conn_size if from_pool_visible and input else from_virtual_pos
-	var end_pos: Vector2 = HenGlobal.CNODE_CAM.get_relative_vec2(output.global_position) + conn_size if to_pool_visible and output else to_virtual_pos
+	var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) + conn_size if from_pool_visible and input else from_virtual_pos
+	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) + conn_size if to_pool_visible and output else to_virtual_pos
 
 	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
 	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)
@@ -120,8 +120,8 @@ func get_type_color(_type: String) -> Color:
 
 
 func add_to_scene(_add_to_list: bool = true) -> void:
-	HenGlobal.CNODE_CAM.get_node('Lines').add_child(self)
-	global_position = HenGlobal.CNODE_CAM.global_position
+	HenGlobal.CAM.get_node('Lines').add_child(self)
+	global_position = HenGlobal.CAM.global_position
 
 	update_line()
 
@@ -149,7 +149,7 @@ func add_to_scene(_add_to_list: bool = true) -> void:
 
 func remove_from_scene(_remove_from_list: bool = true) -> void:
 	if is_inside_tree():
-		HenGlobal.CNODE_CAM.get_node('Lines').remove_child(self)
+		HenGlobal.CAM.get_node('Lines').remove_child(self)
 
 		if from_cnode.is_connected('on_move', update_line):
 			from_cnode.disconnect('on_move', update_line)

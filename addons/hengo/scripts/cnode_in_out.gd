@@ -570,10 +570,6 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	if _default:
 		prop_ref_bt.set_default(_default)
 
-	if _prop_idx > -1:
-		HenGlobal.GROUP.reset_and_add_group(prop_ref_bt, 'p' + str(_prop_idx))
-		prop_ref_bt.custom_value = str(_prop_idx)
-
 	input_container.add_child(prop_ref_bt)
 
 	prop_ref_bt.value_changed.connect(_on_prop_value_changed)

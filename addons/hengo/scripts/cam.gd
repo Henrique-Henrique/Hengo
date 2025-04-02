@@ -45,7 +45,6 @@ func _input(event: InputEvent) -> void:
 				set_physics_process(false)
 
 				_check_virtual_cnodes()
-				_check_virtual_state()
 		
 		elif event is InputEventMouseButton:
 			if event.is_pressed():
@@ -99,7 +98,6 @@ func _physics_process(_delta: float) -> void:
 		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
 		_check_virtual_cnodes()
-		_check_virtual_state()
 
 		if is_equal_approx(transform.origin.x, pos.x):
 			set_physics_process(false)
@@ -108,9 +106,6 @@ func _physics_process(_delta: float) -> void:
 
 # checking virtual cnodes positions
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
-	if self != HenGlobal.CNODE_CAM:
-		return
-	
 	var start: float = Time.get_ticks_usec()
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom, # position
@@ -128,19 +123,6 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 	if s > 10.:
 		print('showed: ', s, 'ms')
 
-	# print(
-	# 	HenGlobal.vc_list[HenRouter.current_route.id].map(func(x): return x.is_showing),
-	# 	' = ',
-	# 	HenGlobal.cnode_pool.map(func(x): return x.visible)
-	# )
-
-
-func _check_virtual_state() -> void:
-	if self != HenGlobal.STATE_CAM:
-		return
-
-	for v_state: HenVirtualState in HenGlobal.vs_list:
-		v_state.check_visibility(get_rect())
 
 func get_rect() -> Rect2:
 	return Rect2(
