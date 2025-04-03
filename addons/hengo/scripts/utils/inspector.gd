@@ -74,6 +74,11 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
             'Array':
                 prop = preload('res://addons/hengo/scenes/props/array.tscn').instantiate()
                 prop.start(item_data.field, item_data.value, item_data.item_creation_callback)
+            '@Param':
+                prop = preload('res://addons/hengo/scenes/props/param.tscn').instantiate()
+                # name and type are obligatory
+                prop.set_values(item_data.ref.name, item_data.ref.type)
+                prop.param_changed.connect(inspector.item_value_changed.bind(item_data.ref))
 
         if prop:
             field_container.add_child(prop)

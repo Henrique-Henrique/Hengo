@@ -19,6 +19,8 @@ static var HENGO_ROOT: HenHengoRoot
 static var GD_PREVIEWER: CodeEdit
 static var DASHBOARD: HenDashboard
 static var BASE_ROUTE: Dictionary
+static var SIDE_BAR_LIST: HenSideBar.SideBarList
+static var SIDE_BAR: HenSideBar
 
 # cnodes
 static var can_make_connection: bool = false

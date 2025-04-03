@@ -1,11 +1,23 @@
-[gd_scene format=3 uid="uid://c4qu2ti8efl61"]
+[gd_scene load_steps=3 format=3 uid="uid://c4qu2ti8efl61"]
+
+[ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1kkq"]
+bg_color = Color(0.0871138, 0.0869645, 0.30677, 1)
 
 [node name="SideBar" type="PanelContainer"]
-offset_right = 138.0
-offset_bottom = 87.0
+offset_right = 167.0
+offset_bottom = 424.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_y1kkq")
+script = ExtResource("1_y1kkq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
+
+[node name="Name" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
 
 [node name="LineEdit" type="LineEdit" parent="VBoxContainer"]
 layout_mode = 2
@@ -13,19 +25,27 @@ layout_mode = 2
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Button2" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="Var" type="Button" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "var"
 
-[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="Func" type="Button" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "func"
 
-[node name="Button3" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="Signal" type="Button" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 text = "signal"
 
-[node name="List" type="Tree" parent="VBoxContainer"]
+[node name="Add" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "+"
+
+[node name="List" type="ItemList" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3

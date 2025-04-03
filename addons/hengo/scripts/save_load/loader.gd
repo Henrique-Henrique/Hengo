@@ -28,6 +28,7 @@ static func load(_path: StringName) -> void:
 
 	HenGlobal.vc_list.clear()
 	HenGlobal.vs_list.clear()
+	HenGlobal.SIDE_BAR_LIST.clear()
 
 	# hide all virtuals
 	for cnode: HenCnode in HenGlobal.cnode_pool:
