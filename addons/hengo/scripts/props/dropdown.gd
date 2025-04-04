@@ -58,7 +58,8 @@ func _on_pressed() -> void:
 				
 				if (_type == 'Variant' and prop.type != TYPE_NIL) or prop_type == _type:
 					arr.append({
-						name = prop.name
+						name = prop.name,
+						category = 'class_props',
 					})
 				
 				get_const_list(arr, _type, prop.name, prop_type)
@@ -128,8 +129,7 @@ func _selected(_item: Dictionary) -> void:
 
 			input.remove_in_prop(true)
 
-			if _item.has('value'):
-				value = _item.value
+			if _item.has('category'):
 				input.input_ref.category = 'class_props'
 
 			emit_signal('value_changed', text, value)
@@ -150,25 +150,7 @@ func _selected(_item: Dictionary) -> void:
 
 			input.change_type(_item.type)
 			input.input_ref.type = _item.type
-			
-			match _item.type:
-				'String', 'NodePath', 'StringName':
-					input.input_ref.code_value = '""'
-				'int':
-					input.input_ref.code_value = '0'
-				'float':
-					input.input_ref.code_value = '0.'
-				'Vector2':
-					input.input_ref.code_value = 'Vector2.ZERO'
-				'bool':
-					input.input_ref.code_value = 'false'
-				'Variant':
-					input.input_ref.code_value = 'null'
-				_:
-					if HenEnums.VARIANT_TYPES.has(input.input_ref.type):
-						input.input_ref.code_value = input.input_ref.type + '()'
-					elif ClassDB.can_instantiate(input.input_ref.type):
-						input.input_ref.code_value = input.input_ref.type + '.new()'
+			input.input_ref.reset_input_value()
 
 			input.input_ref.erase('value')
 

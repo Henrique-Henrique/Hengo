@@ -130,6 +130,36 @@ class InOutData:
 		if ref_id > 0: dt.ref_id = ref_id
 
 		return dt
+	
+
+	func reset_input_value() -> void:
+		category = &'default_value'
+		value = null
+		is_prop = false
+
+		if HenGlobal.script_config.type == type:
+			code_value = '_ref'
+			is_ref = true
+			return
+		
+		match type:
+			'String', 'NodePath', 'StringName':
+				code_value = '""'
+			'int':
+				code_value = '0'
+			'float':
+				code_value = '0.'
+			'Vector2':
+				code_value = 'Vector2.ZERO'
+			'bool':
+				code_value = 'false'
+			'Variant':
+				code_value = 'null'
+			_:
+				if HenEnums.VARIANT_TYPES.has(type):
+					code_value = type + '()'
+				elif ClassDB.can_instantiate(type):
+					code_value = type + '.new()'
 
 
 class FlowConnectionData:
@@ -168,6 +198,7 @@ class InputConnectionData extends ConnectionData:
 	var from_ref: OutputConnectionData
 	var from_old_pos: Vector2
 	var from_type: StringName
+	var input_ref: InOutData
 
 
 	func get_save() -> Dictionary:
@@ -184,6 +215,7 @@ class OutputConnectionData extends ConnectionData:
 	var to_ref: InputConnectionData
 	var to_old_pos: Vector2
 	var to_type: StringName
+	var output_ref: InOutData
 
 
 class FlowConnectionReturn:
@@ -308,6 +340,8 @@ class ConnectionReturn:
 			connection.from.output_connections.append(connection.from_ref)
 
 		old_inputs_connections.clear()
+
+		input_connection.input_ref.reset_input_value()
 
 		from.update()
 		to.update()
@@ -884,25 +918,30 @@ func create_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line:
 	var input_connection: InputConnectionData = InputConnectionData.new()
 	var output_connection: OutputConnectionData = OutputConnectionData.new()
 
+	var input: InOutData = inputs[_idx]
+	var output: InOutData = _from.outputs[_from_idx]
+
 	# output
 	output_connection.idx = _from_idx
 	output_connection.line_ref = _line
-	output_connection.type = _from.outputs[_from_idx].type
+	output_connection.type = output.type
 	
 	output_connection.to_idx = _idx
 	output_connection.to = self
 	output_connection.to_ref = input_connection
-	output_connection.to_type = inputs[_idx].type
+	output_connection.to_type = input.type
+	output_connection.output_ref = output
 
 	# inputs
 	input_connection.idx = _idx
 	input_connection.line_ref = _line
-	input_connection.type = inputs[_idx].type
+	input_connection.type = input.type
 	
 	input_connection.from = _from
 	input_connection.from_idx = _from_idx
 	input_connection.from_ref = output_connection
-	input_connection.from_type = _from.outputs[_from_idx].type
+	input_connection.from_type = output.type
+	input_connection.input_ref = input
 
 	return ConnectionReturn.new(input_connection, output_connection, _from, self)
 
@@ -980,14 +1019,22 @@ func get_input_token(_idx: int) -> Dictionary:
 			prop_name = input.name,
 			value = input.code_value
 		}
-		
+
+		if input.is_ref:
+			data.is_ref = input.is_ref
+
 		if input.category:
 			match input.category:
 				'callable', 'class_props':
 					data.use_prefix = true
+				'default_value':
+					data.use_value = true
 
-		if input.is_ref:
-			data.is_ref = input.is_ref
+					if route_ref.type != HenRouter.ROUTE_TYPE.STATE:
+						data.value = 'self'
+
+		if route_ref.type != HenRouter.ROUTE_TYPE.STATE:
+			data.use_self = true
 
 		return data
 	
@@ -1048,7 +1095,7 @@ func get_token(_id: int = 0) -> Dictionary:
 			})
 		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT:
 			token.merge({
-				param = outputs[_id].name,
+				param = outputs[_id].name.to_snake_case(),
 				id = _id
 			})
 		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
@@ -1116,11 +1163,28 @@ func create_flow_connection() -> void:
 
 
 func _on_change_name(_name: String) -> void:
+	# restrict name change by sub_type
+	match sub_type:
+		SubType.FUNC_INPUT, SubType.FUNC_OUTPUT:
+			return
+
 	name = _name
 	update()
 
 
-func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) -> void:
+func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) -> InOutData:
+	# restrict creation by sub_type
+	if _update:
+		match sub_type:
+			SubType.FUNC_INPUT:
+				if not _is_input: return
+			
+				_is_input = not _is_input
+			SubType.FUNC_OUTPUT:
+				if _is_input: return
+			
+				_is_input = not _is_input
+	
 	var in_out: InOutData = InOutData.new(_data)
 
 	if _data.has('ref_id'):
@@ -1142,6 +1206,8 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 	
 	if _update: update()
 
+	return in_out
+
 
 func _on_in_out_data_changed() -> void:
 	update()
@@ -1159,12 +1225,25 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 	
 	if _config.has('name_to_code'): v_cnode.name_to_code = _config.name_to_code
 
-	if v_cnode.sub_type == SubType.VIRTUAL:
-		_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)
+	match v_cnode.sub_type:
+		SubType.VIRTUAL:
+			_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)
 
 
-	if _config.route.type == HenRouter.ROUTE_TYPE.STATE:
-		(_config.route.ref as HenVirtualCNode).virtual_cnode_list.append(v_cnode)
+	match _config.route.type:
+		HenRouter.ROUTE_TYPE.STATE:
+			(_config.route.ref as HenVirtualCNode).virtual_cnode_list.append(v_cnode)
+		HenRouter.ROUTE_TYPE.FUNC:
+			var ref: HenSideBar.FuncData = _config.route.ref
+			
+			ref.virtual_cnode_list.append(v_cnode)
+
+			match v_cnode.sub_type:
+				SubType.FUNC_INPUT:
+					ref.input_ref = v_cnode
+				SubType.FUNC_OUTPUT:
+					ref.output_ref = v_cnode
+
 	
 	if _config.has('ref_id'):
 		_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
@@ -1220,29 +1299,14 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 
 
 	if _config.has('inputs'):
-		for input: Dictionary in _config.inputs:
-			if not input.has('code_value') and not input.has('is_ref'):
-				match input.type:
-					'String', 'NodePath', 'StringName':
-						input.code_value = '""'
-					'int':
-						input.code_value = '0'
-					'float':
-						input.code_value = '0.'
-					'Vector2':
-						input.code_value = 'Vector2.ZERO'
-					'bool':
-						input.code_value = 'false'
-					'Variant':
-						input.code_value = 'null'
-					_:
-						if HenEnums.VARIANT_TYPES.has(input.type):
-							input.code_value = input.type + '()'
-						elif ClassDB.can_instantiate(input.type):
-							input.code_value = input.type + '.new()'
-		
+		print(_config.inputs)
 		for input_data: Dictionary in _config.inputs:
-			v_cnode._on_in_out_added(true, input_data, false)
+			var input: InOutData = v_cnode._on_in_out_added(true, input_data, false)
+
+			print('e->', input_data, input)
+
+			if not input_data.has('code_value'):
+				input.reset_input_value()
 
 	if _config.has('outputs'):
 		for output_data: Dictionary in _config.outputs:

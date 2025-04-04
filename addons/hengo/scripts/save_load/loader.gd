@@ -203,38 +203,6 @@ static func load(_path: StringName) -> void:
 	parse_other_scripts_data(dir)
 
 
-static func _load_cnode(_cnode_list: Array, _route, _inst_id_refs) -> void:
-	for cnode: Dictionary in _cnode_list:
-		var cnode_data: Dictionary = {
-			pos = cnode.pos,
-			name = cnode.name,
-			sub_type = cnode.sub_type,
-			inputs = cnode.inputs,
-			outputs = cnode.outputs,
-			hash = cnode.hash,
-			route = _route,
-		}
-
-		if cnode.has('fantasy_name'):
-			cnode_data['fantasy_name'] = cnode.get('fantasy_name')
-
-		if cnode.has('type'):
-			cnode_data['type'] = cnode.type
-
-		if cnode.has('category'):
-			cnode_data['category'] = cnode.get('category')
-
-		if cnode.has('exp'):
-			cnode_data['exp'] = cnode.get('exp')
-
-		if cnode.has('group'):
-			cnode_data['group'] = cnode.group
-		
-		var cnode_inst = HenCnode.instantiate_cnode(cnode_data)
-
-		_inst_id_refs[cnode.hash] = cnode_inst
-
-
 static func show_class_name() -> void:
 	var cl_label: Label = HenGlobal.HENGO_ROOT.get_node('%ClassName')
 	var type = HenGlobal.script_config['type']
@@ -300,8 +268,6 @@ static func parse_other_scripts_data(_dir: DirAccess) -> void:
 
 			if script.source_code.begins_with('#[hengo] '):
 				var data: HenSaver.ScriptData = parse_hengo_json(script.source_code)
-
-				print('Name -> ', file_name.get_basename(), ' = ', data.state_event_list)
 
 				var script_data: Dictionary = {
 					name = file_name.get_basename(),

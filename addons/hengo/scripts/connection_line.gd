@@ -119,58 +119,6 @@ func get_type_color(_type: String) -> Color:
 			return Color.WHITE
 
 
-func add_to_scene(_add_to_list: bool = true) -> void:
-	HenGlobal.CAM.get_node('Lines').add_child(self)
-	global_position = HenGlobal.CAM.global_position
-
-	update_line()
-
-	if not from_cnode.is_connected('on_move', update_line):
-		from_cnode.connect('on_move', update_line)
-	
-	if not to_cnode.is_connected('on_move', update_line):
-		to_cnode.connect('on_move', update_line)
-
-	output.owner.remove_in_prop()
-	output.owner.root.check_error()
-
-	deleted = false
-
-	# reconnecting
-	if _add_to_list:
-		input.owner.to_connection_lines.append(self)
-		output.owner.from_connection_lines.append(self)
-		output.owner.in_connected_from = input.owner.root
-
-	print(to_cnode.route_ref)
-	if not (HenRouter.line_route_reference[to_cnode.route_ref.id] as Array).has(self):
-		HenRouter.line_route_reference[to_cnode.route_ref.id].append(self)
-
-
-func remove_from_scene(_remove_from_list: bool = true) -> void:
-	if is_inside_tree():
-		HenGlobal.CAM.get_node('Lines').remove_child(self)
-
-		if from_cnode.is_connected('on_move', update_line):
-			from_cnode.disconnect('on_move', update_line)
-		
-		if to_cnode.is_connected('on_move', update_line):
-			to_cnode.disconnect('on_move', update_line)
-		
-		HenRouter.line_route_reference[to_cnode.route_ref.id].erase(self)
-
-	output.owner.set_in_prop()
-	output.owner.root.check_error()
-
-	deleted = true
-
-	# # reseting connection
-	if _remove_from_list:
-		input.owner.to_connection_lines.erase(self)
-		output.owner.from_connection_lines.erase(self)
-		output.owner.in_connected_from = null
-
-
 func reparent_conn(_old_conn, _new_conn) -> void:
 	if _old_conn.owner.root.is_connected('on_move', update_line):
 		_old_conn.owner.root.disconnect('on_move', update_line)

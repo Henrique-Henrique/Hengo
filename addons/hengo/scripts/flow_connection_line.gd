@@ -67,58 +67,6 @@ func update_line() -> void:
 		points = [from_pos, end_pos]
 
 
-func add_to_scene(_add_to_list: bool = true) -> void:
-	HenGlobal.CAM.get_node('Lines').add_child(self)
-	global_position = HenGlobal.CAM.global_position
-
-	update_line()
-
-	if not from_connector.root.is_connected('on_move', update_line):
-		from_connector.root.connect('on_move', update_line)
-	
-	if not to_cnode.is_connected('on_move', update_line):
-		to_cnode.connect('on_move', update_line)
-
-	from_connector.is_connected = true
-	from_connector.texture = preload('res://addons/hengo/assets/images/flow_out.svg')
-	to_cnode.get_node('%ArrowUp').visible = true
-
-
-	if _add_to_list:
-		(from_connector.root.flow_to as Dictionary)[flow_type] = to_cnode
-		to_cnode.from_lines.append(self)
-		from_connector.connections_lines.append(self)
-	
-	to_cnode.check_error()
-
-	if not (HenRouter.line_route_reference[to_cnode.route_ref.id] as Array).has(self):
-		HenRouter.line_route_reference[to_cnode.route_ref.id].append(self)
-	
-
-func remove_from_scene(_remove_from_list: bool = true) -> void:
-	if is_inside_tree():
-		HenGlobal.CAM.get_node('Lines').remove_child(self)
-		
-		if from_connector.root.is_connected('on_move', update_line):
-			from_connector.root.disconnect('on_move', update_line)
-		
-		if to_cnode.is_connected('on_move', update_line):
-			to_cnode.disconnect('on_move', update_line)
-		
-		HenRouter.line_route_reference[to_cnode.route_ref.id].erase(self)
-	
-	from_connector.is_connected = false
-	from_connector.texture = preload('res://addons/hengo/assets/images/flow_out.svg')
-	to_cnode.get_node('%ArrowUp').visible = false
-
-	if _remove_from_list:
-		(from_connector.root.flow_to as Dictionary).erase(flow_type)
-		to_cnode.from_lines.erase(self)
-		from_connector.connections_lines.erase(self)
-	
-	to_cnode.check_error()
-
-
 func show_debug() -> void:
 	if not is_inside_tree():
 		return

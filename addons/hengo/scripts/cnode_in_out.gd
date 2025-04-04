@@ -108,49 +108,6 @@ func _on_gui(_event: InputEvent) -> void:
 
 				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 
-			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data.has('auto_cast'):
-				var to_cnode: HenCnode = HenGlobal.connection_to_data.from.root
-
-				# making auto cast
-				var cast_cnode: HenCnode = HenCnode.instantiate_and_add(
-					{
-						name = 'Casting -> BBT',
-						sub_type = HenCnode.SUB_TYPE.CAST,
-						category = 'native',
-						inputs = [
-							{
-								name = 'from',
-								type = connection_type
-							}
-						],
-						outputs = [
-							{
-								name = 'to',
-								sub_type = '@dropdown',
-								category = 'cast_type',
-								out_prop = HenGlobal.connection_to_data.conn_type
-							}
-						],
-						position = lerp(to_cnode.position, root.position, .5),
-						route = HenRouter.current_route
-					}
-				)
-
-				var cast_input = cast_cnode.get_node('%InputContainer').get_child(0)
-				var cast_output = cast_cnode.get_node('%OutputContainer').get_child(0)
-
-				cast_input.create_connection_and_instance({
-					from = self,
-					type = type,
-					conn_type = connection_type
-				})
-
-				cast_output.create_connection_and_instance(HenGlobal.connection_to_data)
-
-				cast_cnode.position.x -= cast_cnode.size.x / 4
-
-				print(cast_cnode)
-
 			elif HenGlobal.can_make_connection and not HenGlobal.connection_to_data.is_empty():
 				# try connection
 				var connection: HenVirtualCNode.ConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
@@ -520,15 +477,18 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						var l: Label = HenAssets.CNodeInputLabel.instantiate()
 
 						if prop_container.get_child_count() < 3:
-							if HenGlobal.script_config.type == connection_type:
+							l.text = input_ref.code_value
+							if l.text == '_ref':
 								l.text = 'self'
-								input_ref.code_value = '_ref'
-								input_ref.is_ref = true
-							else:
-								if HenEnums.VARIANT_TYPES.has(connection_type):
-									l.text = connection_type + '()'
-								elif ClassDB.can_instantiate(connection_type):
-									l.text = connection_type + '.new()'
+							# if HenGlobal.script_config.type == connection_type:
+							# 	l.text = input_ref.code_value
+								# input_ref.code_value = '_ref'
+								# input_ref.is_ref = true
+							# else:
+							# 	if HenEnums.VARIANT_TYPES.has(connection_type):
+							# 		l.text = connection_type + '()'
+							# 	elif ClassDB.can_instantiate(connection_type):
+							# 		l.text = connection_type + '.new()'
 							
 							prop_container.add_child(l)
 						

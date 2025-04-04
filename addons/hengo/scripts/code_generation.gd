@@ -172,24 +172,23 @@ func _physics_process(delta: float) -> void:
 	})
 
 	# functions
-	# var func_code: String = '# Functions\n'
+	var func_code: String = '# Functions\n'
 
-	# for func_item: HenRouteReference in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
-	# 	var func_name: String = func_item.props[0].value
-
-	# 	func_code += 'func {name}({params}):\n'.format({
-	# 		name = func_name.to_snake_case(),
-	# 		params = ', '.join(func_item.props[1].value.map(
-	# 			func(x: Dictionary) -> String:
-	# 				return x.name
-	# 	))
-	# 	})
+	for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+		# generating function
+		func_code += 'func {name}({params}):\n'.format({
+			name = func_data.name.to_snake_case(),
+			params = ', '.join(func_data.inputs.map(
+				func(x: HenSideBar.FuncData.Param) -> String:
+					return x.name.to_snake_case()
+		))
+		})
 
 	# 	# debug
 	# 	func_code += '\t' + get_debug_var_start()
 		
 	# 	# local variable
-	# 	var local_var_list: Array = []
+		var local_var_list: Array = []
 
 	# 	if not local_var_list.is_empty():
 	# 		func_code += '\n'.join(local_var_list) + '\n\n'
@@ -197,43 +196,41 @@ func _physics_process(delta: float) -> void:
 	# 	# end local variable
 
 	# 	# func output (return)
-	# 	var output_code: Array = []
+		var output_code: Array = []
 		
-	# 	for token in func_item.output_cnode.get_input_token_list():
-	# 		output_code.append(parse_token_by_type(token))
+		for token: Dictionary in func_data.output_ref.get_input_token_list():
+			output_code.append(parse_token_by_type(token))
 
-	# 	var func_flow_to: Dictionary = func_item.virtual_cnode_list[0].flow_to
+		if func_data.input_ref.flow_connections[0].to:
+			var func_tokens: Array = func_data.input_ref.flow_connections[0].to.get_flow_token_list()
+			var func_block: Array = []
 
-	# 	if func_flow_to.has('cnode'):
-	# 		var func_tokens: Array = func_item.virtual_cnode_list[0].flow_to.cnode.get_flow_token_list()
-	# 		var func_block: Array = []
+			for token in func_tokens:
+				func_block.append(parse_token_by_type(token, 1))
 
-	# 		for token in func_tokens:
-	# 			func_block.append(parse_token_by_type(token, 1))
+			# debug
+			func_block.append(parse_token_by_type(
+				get_debug_token(func_data.virtual_cnode_list[0]),
+				1
+			))
 
-	# 		# debug
-	# 		func_block.append(parse_token_by_type(
-	# 			get_debug_token(func_item.virtual_cnode_list[0]),
-	# 			1
-	# 		))
-
-	# 		func_code += '\n'.join(func_block) + '\n'
-	# 		func_code += '\t' + get_debug_push_str() + '\n'
-	# 	else:
-	# 		func_code += '\tpass\n\n' if local_var_list.is_empty() and output_code.is_empty() else ''
+			func_code += '\n'.join(func_block) + '\n'
+			func_code += '\t' + get_debug_push_str() + '\n'
+		else:
+			func_code += '\tpass\n\n' if local_var_list.is_empty() and output_code.is_empty() else ''
 		
 	# 	#TODO output when not connected return empty field, make a default values for all types
-	# 	if output_code.size() == 1:
-	# 		func_code += '\treturn {output}\n\n'.format({
-	# 			output = ', '.join(output_code)
-	# 		})
-	# 	elif not output_code.is_empty():
-	# 		func_code += '\treturn [{outputs}]\n\n'.format({
-	# 			outputs = ', '.join(output_code)
-	# 		})
+		if output_code.size() == 1:
+			func_code += '\treturn {output}\n\n'.format({
+				output = ', '.join(output_code)
+			})
+		elif not output_code.is_empty():
+			func_code += '\treturn [{outputs}]\n\n'.format({
+				outputs = ', '.join(output_code)
+			})
 		# end func output
 	
-	# base_template += func_code
+	base_template += func_code + '\n\n'
 	# end functions
 
 
@@ -347,7 +344,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			'native':
 				prefix = ''
 
-	print('->', _token)
+
 	match _token.type as HenCnode.SUB_TYPE:
 		HenCnode.SUB_TYPE.VAR:
 			return indent + prefix + _token.name
@@ -364,6 +361,9 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenCnode.SUB_TYPE.LOCAL_VAR:
 			return indent + _token.name
 		HenCnode.SUB_TYPE.IN_PROP:
+			if _token.has('use_value'):
+				return indent + _token.value
+
 			if _token.has('use_prefix'):
 				return indent + prefix + _token.value
 
@@ -477,16 +477,16 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + 'break'
 		HenCnode.SUB_TYPE.CONTINUE:
 			return indent + 'continue'
-		HenCnode.SUB_TYPE.CAST:
-			var from = parse_token_by_type(_token.from)
+		# HenCnode.SUB_TYPE.CAST:
+		# 	var from = parse_token_by_type(_token.from)
 
-			if from == 'null':
-				return prefix.replace('.', '')
+		# 	if from == 'null':
+		# 		return prefix.replace('.', '')
 
-			return '(({from}) as {to})'.format({
-				from = from,
-				to = _token.to
-			})
+		# 	return '(({from}) as {to})'.format({
+		# 		from = from,
+		# 		to = _token.to
+		# 	})
 		HenCnode.SUB_TYPE.IMG:
 			return '{a} {op} {b}'.format({
 				a = parse_token_by_type(_token.params[0]),
@@ -540,14 +540,6 @@ static func get_sequence_name(_name: String) -> String:
 
 	_name_list.append(_name)
 	return _name
-
-
-static func check_errors_in_flow(_node: HenCnode) -> void:
-	match _node.sub_type:
-		HenCnode.SUB_TYPE.GO_TO_VOID:
-			_node.check_error()
-			if not _node.flow_to.is_empty():
-				check_errors_in_flow(_node.flow_to.cnode)
 
 
 static func get_debug_token(_node: HenVirtualCNode, _flow: String = 'cnode') -> Dictionary:

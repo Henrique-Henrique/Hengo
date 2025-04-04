@@ -100,7 +100,7 @@ class SideBarList:
 	func load_save(_data: Dictionary) -> void:
 		if _data.has('func_list'):
 			for item_data: Dictionary in _data.func_list:
-				var item: FuncData = FuncData.new()
+				var item: FuncData = FuncData.new(false)
 				item.load_save(item_data)
 				func_list.append(item)
 		
@@ -115,6 +115,10 @@ class FuncData:
 	var name: String = 'func ' + str(Time.get_ticks_usec()): set = on_change_name
 	var inputs: Array
 	var outputs: Array
+	var route: Dictionary
+	var virtual_cnode_list: Array = []
+	var input_ref: HenVirtualCNode
+	var output_ref: HenVirtualCNode
 
 	enum ParamType {INPUT, OUTPUT}
 
@@ -153,6 +157,37 @@ class FuncData:
 			type = _data.type
 
 
+	func _init(_load_vc: bool = true) -> void:
+		route = {
+			name = name,
+			type = HenRouter.ROUTE_TYPE.FUNC,
+			id = HenUtilsName.get_unique_name(),
+			ref = self
+		}
+
+		HenRouter.route_reference[route.id] = []
+		HenRouter.line_route_reference[route.id] = []
+		HenRouter.comment_reference[route.id] = []
+
+		if _load_vc:
+			HenVirtualCNode.instantiate_virtual_cnode({
+				name = 'input',
+				sub_type = HenVirtualCNode.SubType.FUNC_INPUT,
+				outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_data()),
+				route = route,
+				position = Vector2.ZERO,
+				ref = self
+			})
+
+			HenVirtualCNode.instantiate_virtual_cnode({
+				name = 'output',
+				sub_type = HenVirtualCNode.SubType.FUNC_OUTPUT,
+				route = route,
+				inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_data()),
+				position = Vector2(400, 0),
+				ref = self
+			})
+
 	func on_change_name(_name: String) -> void:
 		name = _name
 		name_changed.emit(_name)
@@ -184,7 +219,8 @@ class FuncData:
 			id = id,
 			name = name,
 			inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_save()),
-			outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_save())
+			outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_save()),
+			virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
 		}
 	
 	func load_save(_data: Dictionary) -> void:
@@ -203,6 +239,7 @@ class FuncData:
 			item.load_save(item_data)
 			outputs.append(item)
 
+		HenLoader._load_vc(_data.virtual_cnode_list, route)
 
 func _ready() -> void:
 	list_data = SideBarList.new()
@@ -221,7 +258,14 @@ func _ready() -> void:
 	(get_node('%Func') as Button).pressed.connect(_on_change_list.bind(AddType.FUNC))
 	(get_node('%Signal') as Button).pressed.connect(_on_change_list.bind(AddType.SIGNAL))
 
+	list.item_activated.connect(_on_enter)
 	list.item_clicked.connect(_on_click)
+
+
+func _on_enter(_index: int) -> void:
+	match HenGlobal.SIDE_BAR_LIST.type:
+		AddType.FUNC:
+			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.func_list[_index] as FuncData).route)
 
 
 func _on_click(_index: int, _at_position: Vector2, _mouse_button_index: int) -> void:
