@@ -15,6 +15,7 @@ class ScriptData:
 	var comments: Array
 	var virtual_cnode_list: Array
 	var state_event_list: Array
+	var side_bar_list: Dictionary
 
 	func get_save() -> Dictionary:
 		return {
@@ -29,7 +30,8 @@ class ScriptData:
 			func_list = func_list,
 			comments = comments,
 			virtual_cnode_list = virtual_cnode_list,
-			state_event_list = state_event_list
+			state_event_list = state_event_list,
+			side_bar_list = side_bar_list
 		}
 
 
@@ -42,7 +44,8 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	script_data.debug_symbols = _debug_symbols
 
 	# ---------------------------------------------------------------------------- #
-	# Props
+	# Side Bar List
+	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save()
 
 	# ---------------------------------------------------------------------------- #
 	var v_cnode_list: Array[Dictionary] = []

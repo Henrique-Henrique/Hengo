@@ -90,35 +90,129 @@ class SideBarList:
 
 	func _on_config_changed() -> void:
 		list_changed.emit()
+	
+	func get_save() -> Dictionary:
+		return {
+			var_list = [],
+			func_list = func_list.map(func(x: FuncData): return x.get_save())
+		}
+	
+	func load_save(_data: Dictionary) -> void:
+		if _data.has('func_list'):
+			for item_data: Dictionary in _data.func_list:
+				var item: FuncData = FuncData.new()
+				item.load_save(item_data)
+				func_list.append(item)
+		
+		list_changed.emit()
 
 
 class FuncData:
-	class Param:
-		var name: String
-		var type: String = &'Variant'
-
-	var name: String = 'func ' + str(Time.get_ticks_usec())
+	signal name_changed
+	signal in_out_added(_is_input: bool, _data: Dictionary)
+	
+	var id: int = HenGlobal.get_new_node_counter()
+	var name: String = 'func ' + str(Time.get_ticks_usec()): set = on_change_name
 	var inputs: Array
 	var outputs: Array
-	
+
 	enum ParamType {INPUT, OUTPUT}
 
+	class Param:
+		var id: int = HenGlobal.get_new_node_counter()
+		var name: String: set = on_change_name
+		var type: String = &'Variant': set = on_change_type
+
+		# used in inOut virtual cnode
+		signal data_changed(_property: String, _value)
+
+		func on_change_name(_name) -> void:
+			data_changed.emit('name', _name)
+			name = _name
+
+		func on_change_type(_type) -> void:
+			data_changed.emit('type', _type)
+			type = _type
+
+		func get_data() -> Dictionary:
+			return {name = name, type = type, ref = self}
+		
+		func get_save() -> Dictionary:
+			return {
+				name = name,
+				type = type,
+				id = id
+			}
+		
+		func load_save(_data: Dictionary) -> void:
+			id = _data.id
+			
+			HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+
+			name = _data.name
+			type = _data.type
+
+
+	func on_change_name(_name: String) -> void:
+		name = _name
+		name_changed.emit(_name)
+
 	func create_param(_type: ParamType) -> void:
+		var in_out: Param = Param.new()
+
 		match _type:
 			ParamType.INPUT:
-				inputs.append(Param.new())
+				inputs.append(in_out)
+				in_out_added.emit(true, in_out.get_data())
 			ParamType.OUTPUT:
-				outputs.append(Param.new())
+				outputs.append(in_out)
+				in_out_added.emit(false, in_out.get_data())
+			
+	func get_cnode_data() -> Dictionary:
+		return {
+				name = name,
+				fantasy_name = 'Func -> ' + name,
+				sub_type = HenCnode.SUB_TYPE.USER_FUNC,
+				inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_data()),
+				outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_data()),
+				route = HenRouter.current_route,
+				ref = self
+		}
+	
+	func get_save() -> Dictionary:
+		return {
+			id = id,
+			name = name,
+			inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_save()),
+			outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_save())
+		}
+	
+	func load_save(_data: Dictionary) -> void:
+		name = _data.name
+		id = _data.id
+
+		HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+
+		for item_data: Dictionary in _data.inputs:
+			var item: Param = Param.new()
+			item.load_save(item_data)
+			inputs.append(item)
+
+		for item_data: Dictionary in _data.outputs:
+			var item: Param = Param.new()
+			item.load_save(item_data)
+			outputs.append(item)
 
 
 func _ready() -> void:
 	list_data = SideBarList.new()
 	list_data.list_changed.connect(_on_list_changed)
 
-	_on_change_list(AddType.VAR)
 
 	HenGlobal.SIDE_BAR = self
 	HenGlobal.SIDE_BAR_LIST = list_data
+
+	_on_change_list(AddType.VAR)
 
 	(get_node('%Add') as Button).pressed.connect(_on_add)
 

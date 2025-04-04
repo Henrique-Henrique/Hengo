@@ -68,6 +68,7 @@ var route_ref: Dictionary
 var category: StringName
 var virtual_cnode_list: Array = []
 var virtual_sub_type_vc_list: Array = []
+var ref_id: int = -1
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -87,7 +88,9 @@ class InOutData:
 	var is_prop: bool
 	var use_self: bool
 	var is_static: bool
+	var ref_id: int = -1
 	
+	signal data_changed
 
 	func _init(_data: Dictionary) -> void:
 		name = _data.name
@@ -104,6 +107,11 @@ class InOutData:
 		if _data.has('is_static'): is_static = _data.is_static
 	
 
+	func on_data_changed(_name: String, _value) -> void:
+		set(_name, _value)
+		data_changed.emit()
+
+
 	func get_save() -> Dictionary:
 		var dt: Dictionary = {
 			name = name,
@@ -119,6 +127,7 @@ class InOutData:
 		if is_prop: dt.is_prop = is_prop
 		if use_self: dt.use_self = use_self
 		if is_static: dt.is_static = is_static
+		if ref_id > 0: dt.ref_id = ref_id
 
 		return dt
 
@@ -780,7 +789,7 @@ func hide() -> void:
 
 
 func update() -> void:
-	if route_ref.id != HenRouter.current_route.id:
+	if not route_ref or not HenRouter.current_route or route_ref.id != HenRouter.current_route.id:
 		hide()
 		return
 
@@ -800,6 +809,9 @@ func get_save() -> Dictionary:
 		output_connections = [],
 		flow_connections = []
 	}
+
+	if ref_id > 0:
+		data.ref_id = ref_id
 
 	if not inputs.is_empty():
 		data.inputs = []
@@ -1103,6 +1115,38 @@ func create_flow_connection() -> void:
 	flow_connections.append(FlowConnectionData.new('Flow ' + str(flow_connections.size())))
 
 
+func _on_change_name(_name: String) -> void:
+	name = _name
+	update()
+
+
+func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) -> void:
+	var in_out: InOutData = InOutData.new(_data)
+
+	if _data.has('ref_id'):
+		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
+
+	if _data.has('ref'):
+		# ref is required to have id to save and load work
+		in_out.ref_id = _data.ref.id
+
+		if _data.ref.has_signal('data_changed'):
+			_data.ref.data_changed.connect(in_out.on_data_changed)
+
+	in_out.data_changed.connect(_on_in_out_data_changed)
+
+	if _is_input:
+		inputs.append(in_out)
+	else:
+		outputs.append(in_out)
+	
+	if _update: update()
+
+
+func _on_in_out_data_changed() -> void:
+	update()
+
+
 static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = true) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
@@ -1122,6 +1166,19 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 	if _config.route.type == HenRouter.ROUTE_TYPE.STATE:
 		(_config.route.ref as HenVirtualCNode).virtual_cnode_list.append(v_cnode)
 	
+	if _config.has('ref_id'):
+		_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
+
+	if _config.has('ref'):
+		# ref is required to have id to save and load work
+		v_cnode.ref_id = _config.ref.id
+
+		if _config.ref.has_signal('name_changed'):
+			_config.ref.name_changed.connect(v_cnode._on_change_name)
+
+		if _config.ref.has_signal('in_out_added'):
+			_config.ref.in_out_added.connect(v_cnode._on_in_out_added)
+
 
 	if _config.has('category'):
 		v_cnode.category = _config.category
@@ -1183,15 +1240,13 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 							input.code_value = input.type + '()'
 						elif ClassDB.can_instantiate(input.type):
 							input.code_value = input.type + '.new()'
-
-
-	if _config.has('inputs'):
+		
 		for input_data: Dictionary in _config.inputs:
-			v_cnode.inputs.append(InOutData.new(input_data))
+			v_cnode._on_in_out_added(true, input_data, false)
 
 	if _config.has('outputs'):
 		for output_data: Dictionary in _config.outputs:
-			v_cnode.outputs.append(InOutData.new(output_data))
+			v_cnode._on_in_out_added(false, output_data, false)
 
 
 	if _add_route:

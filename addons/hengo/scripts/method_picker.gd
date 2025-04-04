@@ -779,37 +779,13 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 					
 					# functions
-					# for func_ref in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference) -> bool: return x.type == HenRouteReference.TYPE.FUNC):
-					# 	var dt_name: String = func_ref.props[0].value
+					for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+						var dt: Dictionary = {
+							name = 'Func -> ' + func_data.name,
+							data = func_data.get_cnode_data()
+						}
 
-					# 	var dt: Dictionary = {
-					# 		name = 'Func -> ' + dt_name,
-					# 		data = {
-					# 			name = dt_name,
-					# 			fantasy_name = 'Func -> ' + dt_name,
-					# 			sub_type = HenCnode.SUB_TYPE.USER_FUNC,
-					# 			inputs = [],
-					# 			outputs = [],
-					# 			route = HenRouter.current_route,
-					# 			group = 'f_' + str(func_ref.hash)
-					# 		}
-					# 	}
-						
-					# 	var p_idx: int = 0
-					# 	for prop_config in func_ref.props[1].value:
-					# 		prop_config.group = 'fi_' + str(func_ref.hash) + '_' + str(p_idx)
-					# 		dt.data.inputs.append(prop_config)
-					# 		p_idx += 1
-						
-
-					# 	p_idx = 0
-					# 	for prop_config in func_ref.props[2].value:
-					# 		prop_config.group = 'fo_' + str(func_ref.hash) + '_' + str(p_idx)
-					# 		dt.data.outputs.append(prop_config)
-					# 		p_idx += 1
-
-					# 	api_list.append(dt)
-
+						api_list.append(dt)
 
 	return OK
 

@@ -29,6 +29,7 @@ static func load(_path: StringName) -> void:
 	HenGlobal.vc_list.clear()
 	HenGlobal.vs_list.clear()
 	HenGlobal.SIDE_BAR_LIST.clear()
+	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
 
 	# hide all virtuals
 	for cnode: HenCnode in HenGlobal.cnode_pool:
@@ -95,6 +96,9 @@ static func load(_path: StringName) -> void:
 		HenGlobal.prop_counter = data.prop_counter
 		HenGlobal.current_script_debug_symbols = data.debug_symbols
 
+		# loading side bar list
+		HenGlobal.SIDE_BAR_LIST.load_save(data.side_bar_list)
+
 		# loading v_cnodes
 		_load_vc(data.virtual_cnode_list, base_route)
 
@@ -108,7 +112,7 @@ static func load(_path: StringName) -> void:
 
 		# adding flow connection
 		for flow_data: Dictionary in flow_connection_list:
-			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, flow_data.to_idx, loaded_virtual_cnode_list[int(flow_data.to_id)])
+			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, flow_data.to_idx, loaded_virtual_cnode_list[int(flow_data.to_id)]).add()
 
 		# for from_flow_data: Dictionary in from_flow_list:
 		# 	(from_flow_data.from as HenVirtualCNode).from_vcnode = \
@@ -267,6 +271,7 @@ static func parse_hengo_json(_source: String) -> HenSaver.ScriptData:
 	script_data.func_list = hengo_json.func_list
 	script_data.comments = hengo_json.comments
 	script_data.state_event_list = hengo_json.state_event_list
+	script_data.side_bar_list = hengo_json.side_bar_list
 
 	return script_data
 

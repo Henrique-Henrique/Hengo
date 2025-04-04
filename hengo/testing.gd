@@ -1,4 +1,4 @@
-#[hengo] {"comments":[],"connections":[],"debug_symbols":{"2.0":[3,"cnode"]},"flow_connections":[],"func_list":[],"generals":[],"node_counter":6,"prop_counter":0,"props":[],"state_event_list":[],"type":"Sprite2D","virtual_cnode_list":[{"flow_connections":[{"to_id":2,"to_idx":0}],"id":1,"input_connections":[],"name":"State","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(91, 84)","sub_type":36,"type":5},{"flow_connections":[],"id":2,"input_connections":[],"name":"State 1","output_connections":[],"position":"Vector2(28.4643, 341.715)","size":"Vector2(77, 60)","sub_type":35,"type":4,"virtual_cnode_list":[{"flow_connections":[{"to_id":5,"to_idx":0}],"id":3,"input_connections":[],"name":"enter","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(66, 68)","sub_type":9,"type":0},{"flow_connections":[],"id":4,"input_connections":[],"name":"update","output_connections":[],"outputs":[{"name":"delta","type":"float"}],"position":"Vector2(400, 0)","size":"Vector2(112, 111)","sub_type":9,"type":0},{"category":"native","flow_connections":[],"id":5,"input_connections":[{"from_idx":0,"from_vc_id":6,"idx":0}],"inputs":[{"code_value":"null","name":"content","type":"Variant"}],"name":"print","output_connections":[],"position":"Vector2(1.4028, 284.062)","size":"Vector2(135, 111)","sub_type":1,"type":0},{"flow_connections":[],"id":6,"input_connections":[],"inputs":[{"code_value":"_ref","is_ref":true,"name":"Sprite2D","type":"Sprite2D"}],"name":"get_frame","output_connections":[],"outputs":[{"name":"","type":"int"}],"position":"Vector2(-428.051, 254.647)","size":"Vector2(259, 112)","sub_type":0,"type":0}]}]}
+#[hengo] {"comments":[],"connections":[],"debug_symbols":{},"flow_connections":[],"func_list":[],"generals":[],"node_counter":9,"prop_counter":0,"props":[],"side_bar_list":{"func_list":[{"id":2,"inputs":[{"id":3,"name":"agora sim","type":"Variant"}],"name":"holy moly","outputs":[]}],"var_list":[]},"state_event_list":[],"type":"Sprite2D","virtual_cnode_list":[{"flow_connections":[{"to_id":4,"to_idx":0}],"id":1,"input_connections":[],"name":"State","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(91, 84)","sub_type":36,"type":5},{"flow_connections":[],"id":4,"input_connections":[],"name":"State 1","output_connections":[],"position":"Vector2(2.94747, 292.616)","size":"Vector2(77, 60)","sub_type":35,"type":4,"virtual_cnode_list":[{"flow_connections":[],"id":5,"input_connections":[],"name":"enter","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(66, 68)","sub_type":9,"type":0},{"flow_connections":[],"id":6,"input_connections":[],"name":"update","output_connections":[],"outputs":[{"name":"delta","type":"float"}],"position":"Vector2(400, 0)","size":"Vector2(112, 111)","sub_type":9,"type":0},{"flow_connections":[],"id":7,"input_connections":[],"inputs":[{"code_value":"null","name":"agora sim","ref_id":3,"type":"Variant"}],"name":"holy moly","output_connections":[],"position":"Vector2(-92.4626, 264.917)","ref_id":2,"size":"Vector2(218, 112)","sub_type":5,"type":0}]}]}
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -44,12 +44,8 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		#hen_dbg#var __hen_id__: float = 0.
-
-		print(_ref.get_frame())
-		#hen_dbg#__hen_id__ += 2.0
-		#hen_dbg#EngineDebugger.send_message('hengo:cnode', [__hen_id__])
 		#hen_dbg#EngineDebugger.send_message('hengo:debug_state', [99])
+		pass
 
 
 

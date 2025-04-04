@@ -65,9 +65,9 @@ bg_color = Color(0.0522994, 0.0615214, 0.0861528, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(2533, 1363)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1152, 621)
+shader_parameter/offset = Vector2(6905.24, -141.741)
+shader_parameter/zoom_factor = 0.99999
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
@@ -106,8 +106,6 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 1381.0
-offset_bottom = 742.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
@@ -117,9 +115,12 @@ theme = ExtResource("1_2muha")
 script = ExtResource("2_velgh")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 2
-offset_right = 2533.0
-offset_bottom = 1390.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 0
 
 [node name="MenuBar" type="PanelContainer" parent="VBoxContainer"]
