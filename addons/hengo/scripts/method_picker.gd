@@ -45,6 +45,47 @@ var native_list: Array = [
 			route = HenRouter.current_route,
 		}
 	},
+	
+	
+	{
+		name = 'Get',
+		data = {
+			name = 'Get',
+			sub_type = HenCnode.SUB_TYPE.GET_PROP,
+			outputs = [
+				{
+					name = '',
+					type = 'Variant',
+					sub_type = '@dropdown',
+					category = 'get_prop',
+				}
+			],
+			route = HenRouter.current_route
+		}
+
+	},
+	{
+		name = 'Set',
+		data = {
+			name = 'Set',
+			sub_type = HenCnode.SUB_TYPE.SET_PROP,
+			inputs = [
+				{
+					name = '',
+					type = 'Variant',
+					sub_type = '@dropdown',
+					category = 'set_prop',
+					code_value = '__a',
+					is_static = true
+				},
+				{
+					name = 'value',
+					type = 'Variant',
+				},
+			],
+			route = HenRouter.current_route
+		}
+	},
 	{
 		name = 'Expression',
 		data = {
@@ -262,45 +303,6 @@ var native_list: Array = [
 			route = HenRouter.current_route
 		}
 	},
-	
-	{
-		name = 'Get',
-		data = {
-			name = 'Get',
-			sub_type = HenCnode.SUB_TYPE.GET_PROP,
-			outputs = [
-				{
-					name = '',
-					type = 'Variant',
-					sub_type = '@dropdown',
-					category = 'get_prop',
-				}
-			],
-			route = HenRouter.current_route
-		}
-
-	},
-	{
-		name = 'Set',
-		data = {
-			name = 'Set',
-			sub_type = HenCnode.SUB_TYPE.SET_PROP,
-			inputs = [
-				{
-					name = '',
-					type = 'Variant',
-					sub_type = '@dropdown',
-					category = 'set_prop',
-					is_static = true
-				},
-				{
-					name = 'value',
-					type = 'Variant',
-				},
-			],
-			route = HenRouter.current_route
-		}
-	}
 ]
 
 

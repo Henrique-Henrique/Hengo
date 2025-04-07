@@ -14,8 +14,8 @@ func _on_press() -> void:
 
 # public
 #
-func set_default(_value: String) -> void:
-	button_pressed = str_to_var(_value)
+func set_default(_value) -> void:
+	button_pressed = str_to_var(_value) if _value is String else _value
 
 func get_value() -> bool:
 	return button_pressed

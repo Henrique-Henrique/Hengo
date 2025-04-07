@@ -55,30 +55,26 @@ static func generate() -> String:
 # ***************************************************************\n\nextends {0}\n\n'.format([HenGlobal.script_config.type])
 
 	# variables
-	# var var_code: String =' # Variables #\n'
+	var var_code: String =' # Variables #\n'
 
-	# for variable in HenGlobal.PROPS_CONTAINER.get_values().variables:
-	# 	var var_name: String = variable.name
-	# 	var var_type: String = variable.type
-	# 	var var_export: bool = variable.export
+	for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+		var type_value: String = 'null'
 
-	# 	var type_value: String = 'null'
+		if HenEnums.VARIANT_TYPES.has(var_data.type):
+			if var_data.type == 'Variant':
+				type_value = 'null'
+			else:
+				type_value = var_data.type + '()'
+		elif ClassDB.can_instantiate(var_data.type):
+			type_value = var_data.type + '.new()'
 
-	# 	if HenEnums.VARIANT_TYPES.has(var_type):
-	# 		if var_type == 'Variant':
-	# 			type_value = 'null'
-	# 		else:
-	# 			type_value = var_type + '()'
-	# 	elif ClassDB.can_instantiate(var_type):
-	# 		type_value = var_type + '.new()'
+		var_code += '{export_var}var {name} = {value}\n'.format({
+			name = var_data.name.to_snake_case(),
+			value = type_value,
+			export_var = '@export ' if var_data.export else ''
+		})
 
-	# 	var_code += '{export_var}var {name} = {value}\n'.format({
-	# 		name = var_name.to_snake_case(),
-	# 		value = type_value,
-	# 		export_var = '@export ' if var_export else ''
-	# 	})
-
-	# code += var_code
+	code += var_code
 	# end variables
 
 	#region Parsing generals

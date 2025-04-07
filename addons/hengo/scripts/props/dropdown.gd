@@ -5,9 +5,9 @@ var options: Array = []
 @export var type: String = ''
 var custom_data
 var custom_value: String = ''
+var input_ref: HenVirtualCNode.InOutData
 
 signal value_changed
-
 
 func _ready() -> void:
 	button_down.connect(_on_pressed)
@@ -31,7 +31,7 @@ func _on_pressed() -> void:
 			options = arr
 		'hengo_states':
 			options = HenGlobal.SCRIPTS_STATES[custom_data] if HenGlobal.SCRIPTS_STATES.has(custom_data) else []
-		'cast_type':
+		'all_classes':
 			options = HenEnums.DROPDOWN_ALL_CLASSES
 		'enum_list':
 			var enum_reference: Dictionary = {}
@@ -42,15 +42,6 @@ func _on_pressed() -> void:
 			options = enum_reference.keys().map(func(x: String) -> Dictionary: return {name = x, code_name = enum_reference[x]}) if not enum_reference.is_empty() else []
 		'all_props':
 			var arr: Array = []
-
-			# for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
-			# 	if custom_data.input_ref.is_type_relatable(
-			# 		'out',
-			# 		'in',
-			# 		prop.type,
-			# 		custom_data.input_ref.connection_type,
-			# 	):
-			# 		arr.append(prop)
 			
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type):
 				var _type: StringName = custom_data.input_ref.input_ref.type
@@ -76,13 +67,11 @@ func _on_pressed() -> void:
 			# })
 		'get_prop', 'set_prop':
 			var arr: Array = []
+			print('q')
+						
+			for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+				arr.append({name = var_data.name, type = var_data.type, ref = var_data})
 
-			print(custom_data)
-
-			# if not custom_data:
-			# 	for prop in HenGlobal.PROPS_CONTAINER.get_all_values(true):
-			# 		arr.append(prop)
-			
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type if not custom_data else custom_data):
 				var prop_type: StringName = type_string(prop.type)
 				if prop.type != TYPE_NIL:
@@ -109,6 +98,8 @@ func _on_pressed() -> void:
 func _selected(_item: Dictionary) -> void:
 	text = _item.name
 
+	HenGlobal.CAM.can_scroll = true
+
 	match type:
 		'hengo_states', 'state_transition':
 			text = (_item.name as String).to_snake_case()
@@ -117,12 +108,6 @@ func _selected(_item: Dictionary) -> void:
 			custom_value = _item.code_name
 			emit_signal('value_changed', custom_value)
 			return
-		'cast_type':
-			var output = get_parent().owner
-
-			if output:
-				output.hide_connection()
-				output.set_type((_item.name as String))
 		'all_props':
 			var input = custom_data.input_ref
 			var value: String = text
@@ -133,34 +118,33 @@ func _selected(_item: Dictionary) -> void:
 				input.input_ref.category = 'class_props'
 
 			emit_signal('value_changed', text, value)
-			HenGlobal.CAM.can_scroll = true
 			return
 		'get_prop':
 			emit_signal('value_changed', text, _item.type)
-			get_parent().owner.set_type(_item.type)
-			HenGlobal.CAM.can_scroll = true
+
+			if _item.has('ref'):
+				input_ref.set_ref(_item.ref)
+			else:
+				input_ref.remove_ref()
 			return
 		'set_prop':
 			emit_signal('value_changed', text)
-			var input: HenCnodeInOut = get_parent().owner.get_parent().get_child(1 if not custom_data else 2)
-
-			for input_key: String in input.input_ref.keys():
-				if not ['name', 'type'].has(input_key):
-					input.input_ref.erase(input_key)
-
-			input.change_type(_item.type)
-			input.input_ref.type = _item.type
-			input.input_ref.reset_input_value()
-
-			input.input_ref.erase('value')
-
-			HenGlobal.CAM.can_scroll = true
+			
+			var second_input: HenCnodeInOut = get_parent().owner.get_parent().get_child(1 if not custom_data else 2)
+			
+			if _item.has('ref'):
+				second_input.input_ref.type = _item.ref.type
+				second_input.input_ref.reset_input_value()
+				second_input.input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.TYPE_CHANGE)
+				input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+			else:
+				second_input.input_ref.remove_ref()
+				second_input.input_ref.type = _item.type
+				second_input.input_ref.reset_input_value()
+				second_input.input_ref.update_changes.emit()
 			return
 
 	value_changed.emit(text)
-
-	if get_parent() and get_parent().owner:
-		get_parent().owner.root.size = Vector2.ZERO
 
 # public
 #
@@ -169,11 +153,6 @@ func set_default(_text: String) -> void:
 		'enum_list':
 			text = _text.split('.')[-1] as String
 			custom_value = _text
-		'cast_type':
-			text = _text
-
-			if get_parent().owner:
-				get_parent().owner.set_type(_text)
 		'all_props':
 			if _text.begins_with('t:'):
 				if custom_data.input_ref.is_type_relatable('out', 'in', _text.split('t:')[1], custom_data.input_ref.connection_type):

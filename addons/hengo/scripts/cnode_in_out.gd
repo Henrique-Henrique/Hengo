@@ -391,6 +391,7 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 
 				dropdown.type = category
 				dropdown.custom_data = custom_data
+				dropdown.input_ref = input_ref
 
 				if not _default_value:
 					dropdown.set_default('Node')
@@ -409,8 +410,8 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 
 func _on_out_value(_value, _type, _prop) -> void:
 	if input_ref:
-		input_ref.type = _type
 		input_ref.value = _value
+		input_ref.type = _type
 		input_ref.code_value = _prop.get_generated_code()
 
 
@@ -426,8 +427,9 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 			'@dropdown':
 				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 
-				dropdown.type = category
+				dropdown.type = input_ref.category
 				dropdown.custom_data = custom_data
+				dropdown.input_ref = input_ref
 
 				match category:
 					'enum_list':
@@ -437,6 +439,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						dropdown.alignment = HORIZONTAL_ALIGNMENT_LEFT
 						dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
+				
 				prop_container.add_child(dropdown)
 				prop = dropdown
 			'expression':
@@ -480,15 +483,6 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 							l.text = input_ref.code_value
 							if l.text == '_ref':
 								l.text = 'self'
-							# if HenGlobal.script_config.type == connection_type:
-							# 	l.text = input_ref.code_value
-								# input_ref.code_value = '_ref'
-								# input_ref.is_ref = true
-							# else:
-							# 	if HenEnums.VARIANT_TYPES.has(connection_type):
-							# 		l.text = connection_type + '()'
-							# 	elif ClassDB.can_instantiate(connection_type):
-							# 		l.text = connection_type + '.new()'
 							
 							prop_container.add_child(l)
 						
@@ -547,9 +541,10 @@ func _on_prop_value_changed(_value, value) -> void:
 func reset_in_props(_jump_first: bool = false) -> void:
 	if type == 'in':
 		for in_prop in get_node('%CNameInput').get_children().slice(3 if _jump_first else 2):
-			in_prop.free()
+			get_node('%CNameInput').remove_child(in_prop)
+			in_prop.queue_free()
 		
-	root.size = Vector2.ZERO
+	root.reset_size()
 
 
 func remove_in_prop(_ignore_prop: bool = false) -> void:

@@ -89,8 +89,16 @@ class InOutData:
 	var use_self: bool
 	var is_static: bool
 	var ref_id: int = -1
-	
-	signal data_changed
+	var ref: Object
+	var ref_change_rule: RefChangeRule
+
+	signal update_changes
+
+	enum RefChangeRule {
+		NONE = 0,
+		TYPE_CHANGE = 1,
+		VALUE_CODE_VALUE_CHANGE = 2
+	}
 
 	func _init(_data: Dictionary) -> void:
 		name = _data.name
@@ -105,11 +113,47 @@ class InOutData:
 		if _data.has('is_prop'): is_prop = _data.is_prop
 		if _data.has('use_self'): use_self = _data.use_self
 		if _data.has('is_static'): is_static = _data.is_static
+		if _data.has('ref'): set_ref(_data.ref, _data.ref_change_rule if _data.has('ref_change_rule') else RefChangeRule.NONE)
+
+	func set_ref(_ref, _ref_change_rule: RefChangeRule = RefChangeRule.NONE) -> void:
+		ref = _ref
+		# ref is required to have id to save and load work
+		ref_id = _ref.id
+		ref_change_rule = _ref_change_rule
+
+		if _ref.has_signal('data_changed'):
+			_ref.data_changed.connect(on_data_changed)
+		
+		update_changes.emit()
 	
+	func remove_ref() -> void:
+		ref_id = -1
+
+		if ref:
+			for signal_connetion: Dictionary in ref.get_signal_connection_list('data_changed'):
+				signal_connetion.signal.disconnect(signal_connetion.callable)
+		
+		ref_change_rule = RefChangeRule.NONE
+		update_changes.emit()
 
 	func on_data_changed(_name: String, _value) -> void:
+		if ref_change_rule != RefChangeRule.NONE:
+			match ref_change_rule:
+				RefChangeRule.TYPE_CHANGE:
+					if _name != 'type':
+						return
+				RefChangeRule.VALUE_CODE_VALUE_CHANGE:
+					if not ['value', 'code_value'].has(_name):
+						return
+
 		set(_name, _value)
-		data_changed.emit()
+
+		if sub_type != '@dropdown':
+			match _name:
+				'type':
+					reset_input_value()
+
+		update_changes.emit()
 
 
 	func get_save() -> Dictionary:
@@ -128,13 +172,13 @@ class InOutData:
 		if use_self: dt.use_self = use_self
 		if is_static: dt.is_static = is_static
 		if ref_id > 0: dt.ref_id = ref_id
+		if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
 
 		return dt
 	
 
 	func reset_input_value() -> void:
 		category = &'default_value'
-		value = null
 		is_prop = false
 
 		if HenGlobal.script_config.type == type:
@@ -160,6 +204,12 @@ class InOutData:
 					code_value = type + '()'
 				elif ClassDB.can_instantiate(type):
 					code_value = type + '.new()'
+
+		match type:
+			'String', 'NodePath', 'StringName':
+				value = ''
+			_:
+				value = code_value
 
 
 class FlowConnectionData:
@@ -1126,7 +1176,7 @@ func get_token(_id: int = 0) -> Dictionary:
 			})
 		HenCnode.SUB_TYPE.GET_PROP:
 			var dt: Dictionary = {
-				value = outputs[0].code_value
+				value = outputs[0].code_value.to_snake_case()
 			}
 
 			if outputs[0].data:
@@ -1185,19 +1235,12 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 			
 				_is_input = not _is_input
 	
-	var in_out: InOutData = InOutData.new(_data)
-
 	if _data.has('ref_id'):
 		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
+	
+	var in_out: InOutData = InOutData.new(_data)
 
-	if _data.has('ref'):
-		# ref is required to have id to save and load work
-		in_out.ref_id = _data.ref.id
-
-		if _data.ref.has_signal('data_changed'):
-			_data.ref.data_changed.connect(in_out.on_data_changed)
-
-	in_out.data_changed.connect(_on_in_out_data_changed)
+	in_out.update_changes.connect(_on_in_out_data_changed)
 
 	if _is_input:
 		inputs.append(in_out)
@@ -1302,8 +1345,6 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 		print(_config.inputs)
 		for input_data: Dictionary in _config.inputs:
 			var input: InOutData = v_cnode._on_in_out_added(true, input_data, false)
-
-			print('e->', input_data, input)
 
 			if not input_data.has('code_value'):
 				input.reset_input_value()

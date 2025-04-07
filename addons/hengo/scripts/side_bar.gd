@@ -32,6 +32,8 @@ class SideBarList:
 		match type:
 			AddType.FUNC:
 				func_list.append(FuncData.new())
+			AddType.VAR:
+				var_list.append(VarData.new())
 			
 		list_changed.emit()
 
@@ -43,6 +45,8 @@ class SideBarList:
 		match type:
 			AddType.FUNC:
 				return func_list.map(func(x: FuncData): return {name = x.name})
+			AddType.VAR:
+				return var_list.map(func(x: VarData): return {name = x.name})
 			
 		return []
 	
@@ -76,6 +80,30 @@ class SideBarList:
 						field = {name = '', type = '@Param'}
 					})
 				]
+			AddType.VAR:
+				var item: VarData = var_list[_index]
+				name = item.name
+				inspector_item_arr = [
+					HenInspector.InspectorItem.new({
+						name = 'name',
+						type = &'String',
+						value = item.name,
+						ref = item
+					}),
+					HenInspector.InspectorItem.new({
+						name = 'type',
+						type = &'@dropdown',
+						value = item.type,
+						category = 'all_classes',
+						ref = item
+					}),
+					HenInspector.InspectorItem.new({
+						name = 'export',
+						type = &'bool',
+						value = item.export ,
+						ref = item
+					}),
+				]
 
 
 		var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
@@ -93,18 +121,57 @@ class SideBarList:
 	
 	func get_save() -> Dictionary:
 		return {
-			var_list = [],
+			var_list = var_list.map(func(x: VarData): return x.get_save()),
 			func_list = func_list.map(func(x: FuncData): return x.get_save())
 		}
 	
 	func load_save(_data: Dictionary) -> void:
-		if _data.has('func_list'):
-			for item_data: Dictionary in _data.func_list:
-				var item: FuncData = FuncData.new(false)
-				item.load_save(item_data)
-				func_list.append(item)
+		for item_data: Dictionary in _data.func_list:
+			var item: FuncData = FuncData.new(false)
+			item.load_save(item_data)
+			func_list.append(item)
+		
+		for item_data: Dictionary in _data.var_list:
+			var item: VarData = VarData.new()
+			item.load_save(item_data)
+			var_list.append(item)
 		
 		list_changed.emit()
+
+
+class VarData:
+	var id: int = HenGlobal.get_new_node_counter()
+	var name: String = 'var ' + str(Time.get_ticks_usec()): set = on_change_name
+	var type: StringName = &'Variant': set = on_change_type
+	var export: bool = false
+
+	# used in inOut virtual cnode
+	signal data_changed(_property: String, _value)
+
+	func on_change_type(_type: StringName) -> void:
+		type = _type
+		data_changed.emit('type', _type)
+
+	func on_change_name(_name: String) -> void:
+		name = _name
+		data_changed.emit('value', _name)
+		data_changed.emit('code_value', _name.to_snake_case())
+
+	func get_save() -> Dictionary:
+		return {
+			id = id,
+			name = name,
+			type = type,
+			export = export
+		}
+	
+	func load_save(_data: Dictionary) -> void:
+		id = _data.id
+		name = _data.name
+		type = _data.type
+		export = _data.export
+
+		HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
 
 
 class FuncData:
