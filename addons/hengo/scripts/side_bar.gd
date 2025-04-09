@@ -70,6 +70,8 @@ class SideBarList:
 						type = &'Array',
 						value = item.inputs,
 						item_creation_callback = item.create_param.bind(FuncData.ParamType.INPUT),
+						item_move_callback = item.move_param.bind(FuncData.ParamType.INPUT),
+						item_delete_callback = item.delete_param.bind(FuncData.ParamType.INPUT),
 						field = {name = '', type = '@Param'}
 					}),
 					HenInspector.InspectorItem.new({
@@ -77,6 +79,8 @@ class SideBarList:
 						type = &'Array',
 						value = item.outputs,
 						item_creation_callback = item.create_param.bind(FuncData.ParamType.OUTPUT),
+						item_move_callback = item.move_param.bind(FuncData.ParamType.OUTPUT),
+						item_delete_callback = item.delete_param.bind(FuncData.ParamType.OUTPUT),
 						field = {name = '', type = '@Param'}
 					})
 				]
@@ -177,7 +181,7 @@ class VarData:
 class FuncData:
 	signal name_changed
 	signal in_out_added(_is_input: bool, _data: Dictionary)
-	
+
 	var id: int = HenGlobal.get_new_node_counter()
 	var name: String = 'func ' + str(Time.get_ticks_usec()): set = on_change_name
 	var inputs: Array
@@ -193,6 +197,9 @@ class FuncData:
 		var id: int = HenGlobal.get_new_node_counter()
 		var name: String: set = on_change_name
 		var type: String = &'Variant': set = on_change_type
+		
+		signal moved
+		signal deleted
 
 		# used in inOut virtual cnode
 		signal data_changed(_property: String, _value)
@@ -269,7 +276,20 @@ class FuncData:
 			ParamType.OUTPUT:
 				outputs.append(in_out)
 				in_out_added.emit(false, in_out.get_data())
-			
+		
+
+	func move_param(_ref: Param, _type: ParamType) -> void:
+		match _type:
+			ParamType.INPUT:
+				_ref.moved.emit(true, inputs.find(_ref))
+			ParamType.OUTPUT:
+				_ref.moved.emit(false, outputs.find(_ref))
+
+
+	func delete_param(_ref: Param, _type: ParamType) -> void:
+		_ref.deleted.emit(_type == ParamType.INPUT)
+
+
 	func get_cnode_data() -> Dictionary:
 		return {
 				name = name,
@@ -307,6 +327,7 @@ class FuncData:
 			outputs.append(item)
 
 		HenLoader._load_vc(_data.virtual_cnode_list, route)
+
 
 func _ready() -> void:
 	list_data = SideBarList.new()

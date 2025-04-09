@@ -13,6 +13,8 @@ class InspectorItem:
 	var ref: Variant
 	var field: Dictionary
 	var item_creation_callback: Callable
+	var item_move_callback: Callable
+	var item_delete_callback: Callable
 	var prop_array_ref: HenPropArray
 	var category: StringName
 
@@ -22,6 +24,12 @@ class InspectorItem:
 		if type == 'Array':
 			field = _data.field
 			item_creation_callback = _data.item_creation_callback
+
+			if _data.has('item_move_callback'):
+				item_move_callback = _data.item_move_callback
+			
+			if _data.has('item_delete_callback'):
+				item_delete_callback = _data.item_delete_callback
 
 		if _data.has('name'):
 			name = _data.name
@@ -77,7 +85,7 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
 				prop = preload('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
 			'Array':
 				prop = preload('res://addons/hengo/scenes/props/array.tscn').instantiate()
-				prop.start(item_data.field, item_data.value, item_data.item_creation_callback)
+				prop.start(item_data.field, item_data.value, item_data.item_creation_callback, item_data.item_move_callback, item_data.item_delete_callback)
 			'@dropdown':
 				prop = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 

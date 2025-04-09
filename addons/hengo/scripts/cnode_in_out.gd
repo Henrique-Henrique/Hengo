@@ -404,7 +404,7 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 
 				dropdown.value_changed.connect(_on_out_value.bind(dropdown))
 		
-		if _default_value:
+		if prop and _default_value:
 			prop.set_default(str(_default_value))
 
 

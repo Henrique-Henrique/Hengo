@@ -10,6 +10,8 @@ var array_ref: Array
 var inspector: HenInspector
 var field: Dictionary
 var item_create_callback: Callable
+var item_move_callback: Callable
+var item_delete_callback: Callable
 
 func _ready() -> void:
     (get_node('%Add') as Button).pressed.connect(_add)
@@ -24,41 +26,35 @@ func _add() -> void:
 func on_item_delete(_ref) -> void:
     #TODO make undo redo with callbacks like the item creation
     array_ref.erase(_ref)
+    if item_delete_callback: item_delete_callback.call(_ref)
+
     create_inspector(inspector)
     value_changed.emit(null)
 
 
 func on_item_move(_direction: ArrayMove, _ref) -> void:
+    var can_move: bool = false
+
+
     match _direction:
         ArrayMove.UP:
-            _move_item(_ref, 1)
+            can_move = HenUtils.move_array_item(array_ref, _ref, 1)
         ArrayMove.DOWN:
-            _move_item(_ref, -1)
+            can_move = HenUtils.move_array_item(array_ref, _ref, -1)
     
+    if not can_move: return
+    if item_move_callback: item_move_callback.call(_ref)
+
     create_inspector(inspector)
     value_changed.emit(null)
 
 
-func _move_item(_ref, _factor: int) -> void:
-    var target_idx: int = array_ref.find(_ref) - _factor
-    var can_move: bool = false
-
-    match _factor:
-        1:
-            can_move = target_idx >= 0
-        (-1):
-            can_move = target_idx < array_ref.size()
-
-    if can_move:
-        var value_to_change = array_ref[target_idx]
-        array_ref[target_idx] = _ref
-        array_ref[target_idx + _factor] = value_to_change
-
-
-func start(_field: Dictionary, _arr: Array, _item_create_callback: Callable) -> void:
+func start(_field: Dictionary, _arr: Array, _item_create_callback: Callable, _item_move_callback: Callable, _item_delete_callback: Callable) -> void:
     field = _field
     array_ref = _arr
     item_create_callback = _item_create_callback
+    item_move_callback = _item_move_callback
+    item_delete_callback = _item_delete_callback
 
     create_inspector()
 

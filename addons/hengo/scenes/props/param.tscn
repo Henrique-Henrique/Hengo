@@ -19,4 +19,4 @@ placeholder_text = "name"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-type = "cast_type"
+type = "all_classes"

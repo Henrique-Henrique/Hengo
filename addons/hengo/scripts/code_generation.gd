@@ -77,12 +77,6 @@ static func generate() -> String:
 	code += var_code
 	# end variables
 
-	#region Parsing generals
-
-	var input_data: Dictionary = {}
-
-
-	#endregion
 	var start_state: HenVirtualCNode
 	var states_data: Dictionary = {}
 	var events: Array[Dictionary] = []
@@ -136,20 +130,10 @@ func trigger_event(_event: String) -> void:
 
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
-{_process}
-
 
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
-{_physics_process}
-
-{_input}
-
-{_shortcut_input}
-
-{_unhandled_input}
-
-{_unhandled_key_input}""".format({
+""".format({
 		events = ' { \n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
 			return '{event_name}="{to_state_name}"'.format({
@@ -158,13 +142,6 @@ func _physics_process(delta: float) -> void:
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
 		start_state_name = start_state.name.to_snake_case(),
-		# start_state_debug = parse_token_by_type({type = HenCnode.SUB_TYPE.START_DEBUG_STATE, id = get_state_debug_counter(HenGlobal.start_state)}),
-		_input = 'func _input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Input') else '',
-		_shortcut_input = 'func _shortcut_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Shortcut Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Shortcut Input') else '',
-		_unhandled_input = 'func _unhandled_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Input') else '',
-		_unhandled_key_input = 'func _unhandled_key_input(event: InputEvent) -> void:\n' + '\n'.join(input_data['Unhandled Key Input'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Unhandled Key Input') else '',
-		_process = '\n'.join(input_data['Process'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Process') else '',
-		_physics_process = '\n'.join(input_data['Physics Process'].tokens.map(func(x: Dictionary): return parse_token_by_type(x, 1))) if input_data.has('Physics Process') else '',
 	})
 
 	# functions
@@ -340,6 +317,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			'native':
 				prefix = ''
 
+
+	print('t-> ', _token)
 
 	match _token.type as HenCnode.SUB_TYPE:
 		HenCnode.SUB_TYPE.VAR:

@@ -93,6 +93,8 @@ class InOutData:
 	var ref_change_rule: RefChangeRule
 
 	signal update_changes
+	signal moved
+	signal deleted
 
 	enum RefChangeRule {
 		NONE = 0,
@@ -121,11 +123,25 @@ class InOutData:
 		ref_id = _ref.id
 		ref_change_rule = _ref_change_rule
 
+		# when param is moved
+		if ref.has_signal('moved'):
+			ref.moved.connect(_on_move)
+
+		if ref.has_signal('deleted'):
+			print('dd')
+			ref.deleted.connect(_on_delete)
+
 		if _ref.has_signal('data_changed'):
 			_ref.data_changed.connect(on_data_changed)
 		
 		update_changes.emit()
 	
+	func _on_move(_is_input: bool, _pos: int) -> void:
+		moved.emit(_is_input, _pos, self)
+
+	func _on_delete(_is_input: bool) -> void:
+		deleted.emit(_is_input, self)
+
 	func remove_ref() -> void:
 		ref_id = -1
 
@@ -194,7 +210,7 @@ class InOutData:
 			'float':
 				code_value = '0.'
 			'Vector2':
-				code_value = 'Vector2.ZERO'
+				code_value = 'Vector2(0, 0)'
 			'bool':
 				code_value = 'false'
 			'Variant':
@@ -1056,7 +1072,7 @@ func get_input_token(_idx: int) -> Dictionary:
 	var input: InOutData = inputs[_idx]
 
 	if connection and connection.from:
-		var data: Dictionary = connection.from.get_token(_idx)
+		var data: Dictionary = connection.from.get_token(connection.from_idx)
 		data.prop_name = input.name
 
 		if input.is_ref:
@@ -1191,7 +1207,7 @@ func get_token(_id: int = 0) -> Dictionary:
 				dt.name = get_input_token(1).value
 				dt.value = get_input_token(2)
 			else:
-				dt.name = inputs[0].code_value
+				dt.name = inputs[0].code_value.to_snake_case()
 				dt.value = get_input_token(1)
 
 			token.merge(dt)
@@ -1222,6 +1238,44 @@ func _on_change_name(_name: String) -> void:
 	update()
 
 
+func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: InOutData) -> void:
+	var is_input: bool = _is_input
+
+	match sub_type:
+		SubType.FUNC_INPUT:
+			if is_input: is_input = false
+			else: return
+		SubType.FUNC_OUTPUT:
+			if not is_input: is_input = true
+			else: return
+
+	if is_input:
+		HenUtils.move_array_item_to_idx(inputs, _in_ou_ref, _pos)
+	else:
+		HenUtils.move_array_item_to_idx(outputs, _in_ou_ref, _pos)
+	
+	update()
+
+
+func _on_in_out_deleted(_is_input: bool, _in_ou_ref: InOutData) -> void:
+	var is_input: bool = _is_input
+
+	match sub_type:
+		SubType.FUNC_INPUT:
+			if is_input: is_input = false
+			else: return
+		SubType.FUNC_OUTPUT:
+			if not is_input: is_input = true
+			else: return
+
+	if is_input:
+		inputs.erase(_in_ou_ref)
+	else:
+		outputs.erase(_in_ou_ref)
+	
+	update()
+
+
 func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) -> InOutData:
 	# restrict creation by sub_type
 	if _update:
@@ -1240,6 +1294,8 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 	
 	var in_out: InOutData = InOutData.new(_data)
 
+	in_out.moved.connect(_on_in_out_moved)
+	in_out.deleted.connect(_on_in_out_deleted)
 	in_out.update_changes.connect(_on_in_out_data_changed)
 
 	if _is_input:
