@@ -63,7 +63,7 @@ func start(_field: Dictionary, _arr: Array, _item_create_callback: Callable, _it
     get_node('%Container').add_child(inspector)
 
 
-func on_value_changed() -> void:
+func on_value_changed(_name: StringName, _ref, _inspector: HenInspector) -> void:
     value_changed.emit(null)
 
 

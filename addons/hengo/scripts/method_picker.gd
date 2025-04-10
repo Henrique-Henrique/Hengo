@@ -789,6 +789,22 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 						api_list.append(dt)
 
+
+					# signals
+					for signal_data: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
+						var connect_dt: Dictionary = {
+							name = 'Signal -> ' + signal_data.name,
+							data = signal_data.get_connect_cnode_data()
+						}
+
+						var disconnect_dt: Dictionary = {
+							name = 'Dis Signal -> ' + signal_data.name,
+							data = signal_data.get_diconnect_cnode_data()
+						}
+
+						api_list.append(connect_dt)
+						api_list.append(disconnect_dt)
+
 	return OK
 
 

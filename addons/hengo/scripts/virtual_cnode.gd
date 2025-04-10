@@ -49,7 +49,10 @@ enum SubType {
 	PASS,
 	STATE,
 	STATE_START,
-	STATE_EVENT
+	STATE_EVENT,
+	SIGNAL_ENTER,
+	SIGNAL_CONNECTION,
+	SIGNAL_DISCONNECTION
 }
 
 var name: String
@@ -69,6 +72,7 @@ var category: StringName
 var virtual_cnode_list: Array = []
 var virtual_sub_type_vc_list: Array = []
 var ref_id: int = -1
+var ref: Object
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -1216,6 +1220,18 @@ func get_token(_id: int = 0) -> Dictionary:
 				params = get_input_token_list(true),
 				exp = inputs[0].value
 			})
+		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
+			token.merge({
+				params = get_input_token_list(true),
+				signal_name = (ref as HenSideBar.SignalData).signal_name_to_code,
+				name = (ref as HenSideBar.SignalData).name
+			})
+		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			token.merge({
+				params = get_input_token_list(true),
+				signal_name = (ref as HenSideBar.SignalData).signal_name_to_code,
+				name = (ref as HenSideBar.SignalData).name.to_snake_case()
+			})
 
 	return token
 
@@ -1226,6 +1242,14 @@ func get_history_obj() -> VCNodeReturn:
 
 func create_flow_connection() -> void:
 	flow_connections.append(FlowConnectionData.new('Flow ' + str(flow_connections.size())))
+
+
+func clear_in_out(_is_input: bool) -> void:
+	#TODO clear connections
+	if _is_input:
+		inputs.clear()
+	else:
+		outputs.clear()
 
 
 func _on_change_name(_name: String) -> void:
@@ -1240,19 +1264,23 @@ func _on_change_name(_name: String) -> void:
 
 func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: InOutData) -> void:
 	var is_input: bool = _is_input
+	var index_slice: int = 0
 
 	match sub_type:
-		SubType.FUNC_INPUT:
+		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER:
 			if is_input: is_input = false
 			else: return
 		SubType.FUNC_OUTPUT:
 			if not is_input: is_input = true
 			else: return
+		SubType.SIGNAL_CONNECTION:
+			# they have reference input, so start from 1
+			index_slice = 1
 
 	if is_input:
-		HenUtils.move_array_item_to_idx(inputs, _in_ou_ref, _pos)
+		HenUtils.move_array_item_to_idx(inputs, _in_ou_ref, _pos + index_slice)
 	else:
-		HenUtils.move_array_item_to_idx(outputs, _in_ou_ref, _pos)
+		HenUtils.move_array_item_to_idx(outputs, _in_ou_ref, _pos + index_slice)
 	
 	update()
 
@@ -1261,7 +1289,7 @@ func _on_in_out_deleted(_is_input: bool, _in_ou_ref: InOutData) -> void:
 	var is_input: bool = _is_input
 
 	match sub_type:
-		SubType.FUNC_INPUT:
+		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER:
 			if is_input: is_input = false
 			else: return
 		SubType.FUNC_OUTPUT:
@@ -1280,7 +1308,7 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 	# restrict creation by sub_type
 	if _update:
 		match sub_type:
-			SubType.FUNC_INPUT:
+			SubType.FUNC_INPUT, SubType.SIGNAL_ENTER:
 				if not _is_input: return
 			
 				_is_input = not _is_input
@@ -1288,6 +1316,8 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 				if _is_input: return
 			
 				_is_input = not _is_input
+			SubType.SIGNAL_DISCONNECTION:
+				return
 	
 	if _data.has('ref_id'):
 		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
@@ -1309,6 +1339,31 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 
 
 func _on_in_out_data_changed() -> void:
+	update()
+
+
+func _on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array = []) -> void:
+	var is_input: bool = _is_input
+
+	match sub_type:
+		SubType.SIGNAL_ENTER:
+			if is_input: is_input = false
+			else: return
+	
+	# filtering sub_types
+	if not _subtype_filter.is_empty():
+		if not _subtype_filter.has(sub_type):
+			return
+	
+	clear_in_out(is_input)
+
+	for input_data: Dictionary in _new_inputs:
+		var in_out: InOutData = _on_in_out_added(is_input, input_data, false)
+
+		match sub_type:
+			SubType.SIGNAL_CONNECTION:
+				in_out.reset_input_value()
+
 	update()
 
 
@@ -1342,6 +1397,14 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 					ref.input_ref = v_cnode
 				SubType.FUNC_OUTPUT:
 					ref.output_ref = v_cnode
+		HenRouter.ROUTE_TYPE.SIGNAL:
+			var ref: HenSideBar.SignalData = _config.route.ref
+			
+			ref.virtual_cnode_list.append(v_cnode)
+
+			match v_cnode.sub_type:
+				SubType.SIGNAL_ENTER:
+					ref.signal_enter = v_cnode
 
 	
 	if _config.has('ref_id'):
@@ -1349,6 +1412,7 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 
 	if _config.has('ref'):
 		# ref is required to have id to save and load work
+		v_cnode.ref = _config.ref
 		v_cnode.ref_id = _config.ref.id
 
 		if _config.ref.has_signal('name_changed'):
@@ -1356,6 +1420,9 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 
 		if _config.ref.has_signal('in_out_added'):
 			_config.ref.in_out_added.connect(v_cnode._on_in_out_added)
+
+		if _config.ref.has_signal('in_out_reseted'):
+			_config.ref.in_out_reseted.connect(v_cnode._on_in_out_reset)
 
 
 	if _config.has('category'):

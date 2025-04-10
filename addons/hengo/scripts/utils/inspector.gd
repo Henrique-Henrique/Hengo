@@ -17,6 +17,7 @@ class InspectorItem:
 	var item_delete_callback: Callable
 	var prop_array_ref: HenPropArray
 	var category: StringName
+	var data: Variant
 
 	func _init(_data: Dictionary) -> void:
 		type = _data.type
@@ -45,6 +46,9 @@ class InspectorItem:
 
 		if _data.has('prop_array_ref'):
 			prop_array_ref = _data.prop_array_ref
+		
+		if _data.has('data'):
+			data = _data.data
 		
 
 static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector:
@@ -83,13 +87,16 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
 				prop = preload('res://addons/hengo/scenes/props/vec2.tscn').instantiate()
 			'bool':
 				prop = preload('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
+			'Label':
+				prop = Label.new()
+				prop.text = item_data.value
 			'Array':
 				prop = preload('res://addons/hengo/scenes/props/array.tscn').instantiate()
 				prop.start(item_data.field, item_data.value, item_data.item_creation_callback, item_data.item_move_callback, item_data.item_delete_callback)
 			'@dropdown':
 				prop = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
-
 				(prop as HenDropdown).type = item_data.category
+				(prop as HenDropdown).custom_data = item_data.data
 			'@Param':
 				prop = preload('res://addons/hengo/scenes/props/param.tscn').instantiate()
 				# name and type are obligatory
@@ -113,4 +120,4 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
 
 func item_value_changed(_value: Variant, _name: String, _ref: Object) -> void:
 	if _ref: _ref.set(_name, _value)
-	item_changed.emit()
+	item_changed.emit(_name, _ref, self)

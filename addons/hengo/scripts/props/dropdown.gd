@@ -88,6 +88,25 @@ func _on_pressed() -> void:
 
 			if data.has('state_event_list'):
 				options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
+		'signal_list':
+			var arr: Array = []
+			var all_classes: PackedStringArray = ClassDB.get_class_list()
+
+			# print(ClassDB.class_get_signal_list('BaseButton', true))
+
+			for class_name_data: String in all_classes:
+				for signal_data: Dictionary in ClassDB.class_get_signal_list(class_name_data, true):
+					arr.append(
+						{
+							name = '{name}   ({class})'.format({
+								name = signal_data.name,
+								'class' = class_name_data
+							}),
+							signal_name = signal_data.name,
+							signal_class = class_name_data
+						})
+				
+			options = arr
 
 
 	HenGlobal.DROPDOWN_MENU.position = global_position
@@ -143,6 +162,9 @@ func _selected(_item: Dictionary) -> void:
 				second_input.input_ref.reset_input_value()
 				second_input.input_ref.update_changes.emit()
 			return
+		'signal_list':
+			var item: HenSideBar.SignalData = custom_data.signal_ref
+			item.set_signal_params(_item.signal_class, _item.signal_name)
 
 	value_changed.emit(text)
 

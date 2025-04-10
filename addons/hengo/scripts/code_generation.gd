@@ -152,7 +152,7 @@ func _physics_process(delta: float) -> void:
 		func_code += 'func {name}({params}):\n'.format({
 			name = func_data.name.to_snake_case(),
 			params = ', '.join(func_data.inputs.map(
-				func(x: HenSideBar.FuncData.Param) -> String:
+				func(x: HenSideBar.Param) -> String:
 					return x.name.to_snake_case()
 		))
 		})
@@ -182,10 +182,10 @@ func _physics_process(delta: float) -> void:
 				func_block.append(parse_token_by_type(token, 1))
 
 			# debug
-			func_block.append(parse_token_by_type(
-				get_debug_token(func_data.virtual_cnode_list[0]),
-				1
-			))
+			# func_block.append(parse_token_by_type(
+			# 	get_debug_token(func_data.virtual_cnode_list[0]),
+			# 	1
+			# ))
 
 			func_code += '\n'.join(func_block) + '\n'
 			func_code += '\t' + get_debug_push_str() + '\n'
@@ -205,6 +205,49 @@ func _physics_process(delta: float) -> void:
 	
 	base_template += func_code + '\n\n'
 	# end functions
+
+	# signal callables
+	var signal_code: String = '#\n\n# Signals Callables\n'
+
+	for signal_item: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
+		var signal_name = _get_signal_call_name(signal_item.name)
+
+		signal_code += 'func {name}({params}):\n'.format({
+			name = signal_name,
+			params = ', '.join(signal_item.params.map( # parsing raw inputs from signal
+			func(x: HenSideBar.Param) -> String:
+				return x.name.to_snake_case()
+		# parsing custom inputs
+		) + signal_item.bind_params.map(
+				func(x: HenSideBar.Param) -> String:
+					return x.name.to_snake_case()
+		))
+		})
+
+		# debug
+		# signal_code += '\t' + get_debug_var_start()
+
+
+		if signal_item.signal_enter.flow_connections[0].to:
+			var signal_tokens: Array = signal_item.signal_enter.flow_connections[0].to.get_flow_token_list()
+			var signal_block: Array = []
+
+			for token in signal_tokens:
+				signal_block.append(parse_token_by_type(token, 1))
+
+			# debug
+			signal_block.append(parse_token_by_type(
+				get_debug_token(signal_item.virtual_cnode_list[0]),
+				1
+			))
+
+			signal_code += '\n'.join(signal_block) + '\n\n'
+			signal_code += '\t' + get_debug_push_str() + '\n\n\n'
+		else:
+			signal_code += '\tpass\n\n'
+	
+	base_template += signal_code
+	# end signal callables
 
 
 	# parsing base template
@@ -502,6 +545,40 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				new_exp = reg.sub(new_exp, parse_token_by_type(param), true)
 			
 			return new_exp
+		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
+			var values: Array = _provide_params_ref(_token.params, prefix)
+			var params: Array = values[0]
+			var my_prefix = values[1]
+
+			print('yyyy ', params)
+
+			if not params.is_empty():
+				return indent + '{ref}connect("{signal_name}", {call_ref}{callable}.bind({params}))'.format({
+					ref = my_prefix,
+					params = ', '.join(params.map(func(x: Dictionary) -> String:
+						return parse_token_by_type(x))),
+					signal_name = _token.signal_name,
+					call_ref = prefix,
+					callable = _get_signal_call_name(_token.name)
+				})
+
+			return indent + '{ref}connect("{signal_name}", {call_ref}{callable})'.format({
+				ref = my_prefix,
+				signal_name = _token.signal_name,
+				call_ref = prefix,
+				callable = _get_signal_call_name(_token.name)
+			})
+		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			var values: Array = _provide_params_ref(_token.params, prefix)
+			var params: Array = values[0]
+			var my_prefix = values[1]
+
+			return indent + '{ref}disconnect("{signal_name}", {call_ref}{callable})'.format({
+				ref = my_prefix,
+				signal_name = _token.signal_name,
+				call_ref = prefix,
+				callable = _get_signal_call_name(_token.name)
+			})
 		_:
 			return ''
 

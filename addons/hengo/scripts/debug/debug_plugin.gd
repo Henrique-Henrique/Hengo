@@ -40,7 +40,7 @@ func _capture(message, data, session_id) -> bool:
 
 			return true
 		'hengo:debugger_loaded':
-			get_session(session_id).send_message('hengo:start_script', [HenGlobal.current_script_path, HenGlobal.DEBUG_TOKEN])
+			# get_session(session_id).send_message('hengo:start_script', [HenGlobal.current_script_path, HenGlobal.DEBUG_TOKEN])
 			return true
 		'hengo:debug_value':
 			var id_str: String = str(data[0])

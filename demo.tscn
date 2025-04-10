@@ -10,18 +10,17 @@ position = Vector2(261, 153)
 texture = ExtResource("1_wvpun")
 script = ExtResource("3_c6xj6")
 
+[node name="Button" type="Button" parent="Icon"]
+offset_left = 4.0
+offset_top = 264.0
+offset_right = 190.0
+offset_bottom = 422.0
+text = "CLICK TO TEST"
+
 [node name="Icon2" type="Sprite2D" parent="."]
 modulate = Color(0.898675, 0.199437, 7.70092e-07, 1)
 position = Vector2(550, 303)
 texture = ExtResource("1_wvpun")
-
-[node name="Button" type="Button" parent="."]
-visible = false
-offset_left = 265.0
-offset_top = 417.0
-offset_right = 451.0
-offset_bottom = 575.0
-text = "CLICK TO TEST"
 
 [node name="Button2" type="Button" parent="."]
 visible = false
