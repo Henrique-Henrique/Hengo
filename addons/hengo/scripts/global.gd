@@ -93,8 +93,6 @@ static var state_pool: Array = []
 static var connection_line_pool: Array = []
 static var flow_connection_line_pool: Array = []
 static var state_connection_line_pool: Array = []
-# virtual cnode list
-static var vc_list: Dictionary = {}
 # virtual state list
 static var vs_list: Array = []
 static var can_instantiate_pool: bool = true

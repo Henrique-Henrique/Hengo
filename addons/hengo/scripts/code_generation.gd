@@ -84,7 +84,7 @@ static func generate() -> String:
 	var events: Array[Dictionary] = []
 
 	# getting states
-	for v_cnode: HenVirtualCNode in HenGlobal.vc_list[HenGlobal.BASE_ROUTE.id]:
+	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
 		match v_cnode.sub_type:
 			# getting start state cnode
 			HenVirtualCNode.SubType.STATE_START:
@@ -341,7 +341,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 		else:
 			if cnode_name == 'enter':
 				data[cnode_name] = {
-					tokens = [ {type = HenCnode.SUB_TYPE.DEBUG_STATE, id = 99}, {type = HenCnode.SUB_TYPE.PASS}],
+					tokens = [ {type = HenCnode.SUB_TYPE.PASS, use_self = false}],
 					params = []
 				}
 

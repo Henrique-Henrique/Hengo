@@ -258,7 +258,6 @@ class FuncData:
 			ref = self
 		}
 
-		HenRouter.route_reference[route.id] = []
 		HenRouter.line_route_reference[route.id] = []
 		HenRouter.comment_reference[route.id] = []
 
@@ -372,7 +371,6 @@ class SignalData:
 			ref = self
 		}
 
-		HenRouter.route_reference[route.id] = []
 		HenRouter.line_route_reference[route.id] = []
 		HenRouter.comment_reference[route.id] = []
 

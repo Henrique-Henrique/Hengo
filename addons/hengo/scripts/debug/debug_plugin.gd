@@ -107,29 +107,7 @@ func _setup_session(session_id):
 
 
 func load_references() -> void:
-	HenGlobal.node_references = {}
-	HenGlobal.state_references = {}
-
-	# getting cnodes
-	for cnode in HenRouter.route_reference[HenRouter.current_route.id]:
-		if [HenCnode.SUB_TYPE.VIRTUAL, HenCnode.TYPE.IF].has(cnode.sub_type):
-			HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
-		elif cnode.sub_type == HenCnode.SUB_TYPE.DEBUG_VALUE:
-			var line_config: Dictionary = cnode.get_connection_lines_in_flow()
-			line_config['cnode'].append(cnode)
-
-			HenGlobal.node_references[cnode.hash] = line_config
-
-
-	# getting funcs
-	#
-	#
-	#
-	#
-	#
-	# for func_item in HenGlobal.SIDE_BAR.get_node('%Function').get_node('%Container').get_children():
-	# 	var cnode = func_item.virtual_cnode_list[0]
-	# 	HenGlobal.node_references[cnode.hash] = cnode.get_connection_lines_in_flow()
+	pass
 
 
 func _on_started() -> void:

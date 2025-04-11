@@ -8,7 +8,12 @@ static var flow_connection_list: Array = []
 static var from_flow_list: Array = []
 
 
+class BaseRouteRef:
+	var virtual_cnode_list: Array = []
+
 static func load(_path: StringName) -> void:
+	var start: int = Time.get_ticks_usec()
+
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
 	compile_bt.disabled = false
 	# ---------------------------------------------------------------------------- #
@@ -26,7 +31,6 @@ static func load(_path: StringName) -> void:
 		cnode.queue_free()
 
 
-	HenGlobal.vc_list.clear()
 	HenGlobal.vs_list.clear()
 	HenGlobal.SIDE_BAR_LIST.clear()
 	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
@@ -51,7 +55,6 @@ static func load(_path: StringName) -> void:
 
 	HenGlobal.current_script_path = _path
 	HenRouter.current_route = {}
-	HenRouter.route_reference = {}
 	HenRouter.line_route_reference = {}
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()
@@ -61,6 +64,7 @@ static func load(_path: StringName) -> void:
 		name = 'Base',
 		type = HenRouter.ROUTE_TYPE.BASE,
 		id = HenUtilsName.get_unique_name(),
+		ref = BaseRouteRef.new()
 	}
 
 	HenGlobal.BASE_ROUTE = base_route
@@ -114,79 +118,6 @@ static func load(_path: StringName) -> void:
 		for flow_data: Dictionary in flow_connection_list:
 			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, flow_data.to_idx, loaded_virtual_cnode_list[int(flow_data.to_id)]).add()
 
-		# for from_flow_data: Dictionary in from_flow_list:
-		# 	(from_flow_data.from as HenVirtualCNode).from_vcnode = \
-		# 	(loaded_virtual_cnode_list[from_flow_data.to_idx] as HenVirtualCNode)
-
-
-		# creating props
-		# for prop: Dictionary in data.props:
-		# 	match prop.prop_type:
-		# 		StringName('VARIABLE'):
-		# 			var prop_scene = preload('res://addons/hengo/scenes/prop_variable.tscn').instantiate()
-		# 			HenGlobal.PROPS_CONTAINER.get_node('%List').add_child(prop_scene)
-		# 			prop_scene.set_value(prop)
-
-		# ---------------------------------------------------------------------------- #
-		# creating comments
-		# var comment_scene = preload('res://addons/hengo/scenes/utils/comment.tscn')
-		# for comment_config: Dictionary in data.comments:
-		# 	var comment = comment_scene.instantiate()
-		# 	var router = inst_id_refs[comment_config.router_ref_id].route_ref
-
-		# 	comment.route_ref = router
-		# 	HenRouter.comment_reference[router.id].append(comment)
-
-		# 	comment.is_pinned = comment_config.is_pinned
-		# 	comment.position = str_to_var(comment_config.pos)
-		# 	comment.size = str_to_var(comment_config.size)
-		# 	comment.cnode_inside = comment_config.cnode_inside_ids.map(
-		# 		func(x: int) -> Variant:
-		# 			return inst_id_refs[float(x)]
-		# 	)
-		# 	HenGlobal.COMMENT_CONTAINER.add_child(comment)
-		# 	comment.check_pin.button_pressed = comment_config.is_pinned
-		# 	comment._on_color(str_to_var(comment_config.color as String) as Color)
-		# 	comment.get_node('%ColorButton').color = str_to_var(comment_config.color as String) as Color
-		# 	comment.set_comment(comment_config.comment)
-
-		# # ---------------------------------------------------------------------------- #
-		# # creating connections
-		# for connection: Dictionary in data.connections:
-		# 	var from_in_out = (inst_id_refs[connection.from_cnode] as HenCnode).get_node('%OutputContainer').get_child(connection.input)
-		# 	var to_cnode = (inst_id_refs[connection.to_cnode] as HenCnode)
-		# 	var to_in_out = to_cnode.get_node('%InputContainer').get_child(connection.output)
-
-		# 	from_in_out.create_connection_and_instance({
-		# 		from = to_in_out,
-		# 		type = to_in_out.type,
-		# 		conn_type = to_in_out.connection_type,
-		# 	})
-		
-		# # flow connections
-		# for flow_connection: Dictionary in data.flow_connections:
-		# 	var cnode := inst_id_refs[flow_connection.from_cnode] as HenCnode
-
-		# 	match cnode.type:
-		# 		HenCnode.TYPE.DEFAULT:
-		# 			var connector = cnode.get_node('%Container').get_children()[-1].get_child(0)
-
-		# 			connector.create_connection_line_and_instance({
-		# 				from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
-		# 			})
-		# 		HenCnode.TYPE.IF:
-		# 			var connector = cnode.get_node('%Container').get_child(2).get_node('%FlowContainer').get_child(flow_connection.from_connector)
-					
-		# 			connector.create_connection_line_and_instance({
-		# 				from_cnode = (inst_id_refs[flow_connection.to_cnode] as HenCnode)
-		# 			})
-
-		# HenRouter.change_route(HenGlobal.start_state.route)
-
-		# folding comments after add to scene
-		for comment in HenGlobal.COMMENT_CONTAINER.get_children():
-			comment.pin_to_cnodes(true)
-
 	# checking if debugging
 	# change debugger script path
 	if HenGlobal.HENGO_DEBUGGER_PLUGIN:
@@ -201,6 +132,9 @@ static func load(_path: StringName) -> void:
 	var dir: DirAccess = DirAccess.open('res://hengo')
 	HenGlobal.SCRIPTS_INFO.clear()
 	parse_other_scripts_data(dir)
+
+	var end: int = Time.get_ticks_usec()
+	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
 
 
 static func show_class_name() -> void:

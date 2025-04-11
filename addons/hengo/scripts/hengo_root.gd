@@ -22,7 +22,6 @@ func _ready() -> void:
 	set_process(true)
 	# initializing
 	HenRouter.current_route = {}
-	HenRouter.route_reference = {}
 	HenRouter.line_route_reference = {}
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()

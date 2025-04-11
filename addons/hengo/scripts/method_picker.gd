@@ -386,28 +386,6 @@ func _select() -> void:
 
 		var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
 
-		match data.sub_type:
-			HenVirtualCNode.SubType.STATE:
-				var v_cnode: HenVirtualCNode = vc_return.v_cnode
-
-				HenVirtualCNode.instantiate_virtual_cnode({
-					name = 'enter',
-					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-					route = v_cnode.route,
-					position = Vector2.ZERO
-				})
-
-				HenVirtualCNode.instantiate_virtual_cnode({
-					name = 'update',
-					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
-					outputs = [ {
-						name = 'delta',
-						type = 'float'
-					}],
-					route = v_cnode.route,
-					position = Vector2(400, 0)
-				})
-
 		HenGlobal.history.create_action('Add cNode')
 		HenGlobal.history.add_do_method(vc_return.add)
 		HenGlobal.history.add_do_reference(vc_return)

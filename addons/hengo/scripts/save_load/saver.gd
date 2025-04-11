@@ -50,61 +50,13 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# ---------------------------------------------------------------------------- #
 	var v_cnode_list: Array[Dictionary] = []
 
-	for v_cnode: HenVirtualCNode in HenGlobal.vc_list.get(HenGlobal.BASE_ROUTE.id):
+	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
 		v_cnode_list.append(v_cnode.get_save())
+
+		if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
+			script_data.state_event_list.append(v_cnode.name)
 			
 	script_data.virtual_cnode_list = v_cnode_list
-
-
-	# getting data from cnodes
-	for v_cnode_arr: Array in HenGlobal.vc_list.values():
-		for v_cnode: HenVirtualCNode in v_cnode_arr:
-			if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
-				script_data.state_event_list.append(v_cnode.name)
-
-	# ---------------------------------------------------------------------------- #
-	# ---------------------------------------------------------------------------- #
-	# ---------------------------------------------------------------------------- #
-	# ---------------------------------------------------------------------------- #
-	# Funcions
-	# var func_list: Array[Dictionary] = []
-
-	# for func_item in HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().filter(func(x: HenRouteReference): return x.type == HenRouteReference.TYPE.FUNC):
-	# 	func_list.append({
-	# 		hash = func_item.hash,
-	# 		props = func_item.props,
-	# 		ref_count = func_item.ref_count,
-	# 		cnode_list = get_cnode_list(HenRouter.route_reference[func_item.route.id]),
-	# 		pos = var_to_str(func_item.position)
-	# 	})
-
-	# script_data.func_list = func_list
-
-	# ---------------------------------------------------------------------------- #
-	# loading comments
-	var comment_list: Array[Dictionary] = []
-	var comment_node_list: Array = []
-
-	for c_arr in HenRouter.comment_reference.values():
-		comment_node_list += c_arr
-
-	for comment in comment_node_list:
-		comment_list.append({
-			id = comment.get_instance_id(),
-			is_pinned = comment.is_pinned,
-			comment = comment.get_comment(),
-			# getting the first cnode of router that comment are in (this is needed to get router ref later)
-			router_ref_id = HenRouter.route_reference[comment.route_ref.id][0].hash,
-			color = var_to_str(comment.get_color()),
-			pos = var_to_str(comment.position),
-			size = var_to_str(comment.size),
-			cnode_inside_ids = comment.cnode_inside.map(
-				func(x: HenCnode) -> int:
-					return x.hash
-		)
-		})
-
-	script_data.comments = comment_list
 
 	print(JSON.stringify(script_data.get_save()))
 

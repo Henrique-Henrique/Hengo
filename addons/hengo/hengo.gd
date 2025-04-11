@@ -226,11 +226,9 @@ func change_colors() -> void:
 	var color_factor: float = .55
 	var cnode_style_box: StyleBoxFlat = preload('res://addons/hengo/resources/style_box/cnode.tres')
 	var event_style_box: StyleBoxFlat = preload('res://addons/hengo/resources/style_box/event.tres')
-	var route_ref: StyleBoxFlat = preload('res://addons/hengo/resources/style_box/route_reference.tres')
 
 	HenGlobal.HENGO_ROOT.get_node('%MenuBar').get_theme_stylebox('panel').bg_color = base_color
 	cnode_style_box.bg_color = base_color.lightened(.07)
 	cnode_style_box.border_color = cnode_style_box.bg_color.darkened(.3)
 	event_style_box.bg_color = base_color.lightened(.05)
 	event_style_box.border_color = base_color.lightened(.2)
-	route_ref.bg_color = base_color.lightened(.1)

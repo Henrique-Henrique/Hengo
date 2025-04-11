@@ -425,10 +425,8 @@ class VCNodeReturn:
 
 
 	func add() -> void:
-		if not HenGlobal.vc_list.has(v_cnode.route_ref.id):
-			HenGlobal.vc_list[v_cnode.route_ref.id] = []
-		
-		HenGlobal.vc_list[v_cnode.route_ref.id].append(v_cnode)
+		if not v_cnode.route_ref.ref.virtual_cnode_list.has(v_cnode):
+			v_cnode.route_ref.ref.virtual_cnode_list.append(v_cnode)
 
 		v_cnode.input_connections.append_array(old_inputs_connections)
 		v_cnode.output_connections.append_array(old_outputs_connections)
@@ -448,7 +446,6 @@ class VCNodeReturn:
 				flow_connection.to.update()
 
 
-		print(old_from_flow_connections)
 		# from flow connections
 		for from_flow_connection: FromFlowConnection in old_from_flow_connections:
 			for flow_connection: FlowConnectionData in from_flow_connection.from_connections:
@@ -464,9 +461,8 @@ class VCNodeReturn:
 	
 
 	func remove() -> void:
-		if HenGlobal.vc_list.has(v_cnode.route_ref.id):
-			HenGlobal.vc_list[v_cnode.route_ref.id].erase(v_cnode)
-	
+		v_cnode.route_ref.ref.virtual_cnode_list.erase(v_cnode)
+
 		old_inputs_connections.append_array(v_cnode.input_connections)
 		old_outputs_connections.append_array(v_cnode.output_connections)
 		old_flow_connections.append_array(v_cnode.flow_connections)
@@ -1357,7 +1353,7 @@ func _on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Arra
 	update()
 
 
-static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = true) -> HenVirtualCNode:
+static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 
@@ -1375,6 +1371,8 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 
 
 	match _config.route.type:
+		HenRouter.ROUTE_TYPE.BASE:
+			(_config.route.ref as HenLoader.BaseRouteRef).virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.STATE:
 			(_config.route.ref as HenVirtualCNode).virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.FUNC:
@@ -1437,10 +1435,28 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 				ref = v_cnode
 			}
 
-			HenRouter.route_reference[v_cnode.route.id] = []
 			HenRouter.line_route_reference[v_cnode.route.id] = []
 			HenRouter.comment_reference[v_cnode.route.id] = []
 			
+			if not _config.has('virtual_cnode_list'):
+				HenVirtualCNode.instantiate_virtual_cnode({
+					name = 'enter',
+					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+					route = v_cnode.route,
+					position = Vector2.ZERO
+				})
+
+				HenVirtualCNode.instantiate_virtual_cnode({
+					name = 'update',
+					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+					outputs = [ {
+						name = 'delta',
+						type = 'float'
+					}],
+					route = v_cnode.route,
+					position = Vector2(400, 0)
+				})
+
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE_START:
 			v_cnode.flow_connections.append(FlowConnectionData.new('on start'))
@@ -1466,13 +1482,6 @@ static func instantiate_virtual_cnode(_config: Dictionary, _add_route: bool = tr
 		for output_data: Dictionary in _config.outputs:
 			v_cnode._on_in_out_added(false, output_data, false)
 
-
-	if _add_route:
-		if not HenGlobal.vc_list.has(_config.route.id):
-			HenGlobal.vc_list[_config.route.id] = []
-		
-		HenGlobal.vc_list[_config.route.id].append(v_cnode)
-
 	return v_cnode
 
 
@@ -1483,5 +1492,5 @@ static func instantiate_virtual_cnode_and_add(_config: Dictionary) -> HenVirtual
 
 
 static func instantiate(_config: Dictionary) -> VCNodeReturn:
-	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config, false)
+	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config)
 	return VCNodeReturn.new(v_cnode)

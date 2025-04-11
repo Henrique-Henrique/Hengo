@@ -367,56 +367,6 @@ func get_cnode_name() -> String:
 func get_fantasy_name() -> String:
 	return get_node('%Title').text
 
-# using on undo / redo
-func add_to_scene() -> void:
-	var in_container = get_node('%InputContainer')
-	var out_container = get_node('%OutputContainer')
-
-	HenGlobal.CNODE_CONTAINER.add_child(self)
-
-	for input in in_container.get_children():
-		input.show_connection(false)
-
-	for output in out_container.get_children():
-		output.show_connection(false)
-
-	for line in from_lines:
-		line.add_to_scene(false)
-
-	for conn_key in flow_to.keys():
-		for line in get_connector(conn_key).connections_lines:
-			line.add_to_scene(false)
-
-
-	if not (HenRouter.route_reference[route_ref.id] as Array).has(self):
-		HenRouter.route_reference[route_ref.id].append(self)
-
-	deleted = false
-
-
-func remove_from_scene() -> void:
-	if is_inside_tree():
-		var in_container = get_node('%InputContainer')
-		var out_container = get_node('%OutputContainer')
-
-		for input in in_container.get_children():
-			input.hide_connection(false)
-
-		for output in out_container.get_children():
-			output.hide_connection(false)
-
-		for line in from_lines.duplicate():
-			line.remove_from_scene(false)
-
-		for conn_key in flow_to.keys():
-			for line in get_connector(conn_key).connections_lines:
-				line.remove_from_scene(false)
-
-		HenRouter.route_reference[route_ref.id].erase(self)
-		HenGlobal.CNODE_CONTAINER.remove_child(self)
-
-	deleted = true
-
 
 func add_input(__input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
 	var in_container = get_node('%InputContainer')
