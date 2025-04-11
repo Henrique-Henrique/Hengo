@@ -90,7 +90,6 @@ class InOutData:
 	var value: Variant
 	var data: Variant
 	var is_prop: bool
-	var use_self: bool
 	var is_static: bool
 	var ref_id: int = -1
 	var ref: Object
@@ -117,7 +116,6 @@ class InOutData:
 		if _data.has('value'): value = _data.value
 		if _data.has('data'): data = _data.data
 		if _data.has('is_prop'): is_prop = _data.is_prop
-		if _data.has('use_self'): use_self = _data.use_self
 		if _data.has('is_static'): is_static = _data.is_static
 		if _data.has('ref'): set_ref(_data.ref, _data.ref_change_rule if _data.has('ref_change_rule') else RefChangeRule.NONE)
 
@@ -189,7 +187,6 @@ class InOutData:
 		if value: dt.value = value
 		if data: dt.data = data
 		if is_prop: dt.is_prop = is_prop
-		if use_self: dt.use_self = use_self
 		if is_static: dt.is_static = is_static
 		if ref_id > 0: dt.ref_id = ref_id
 		if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
@@ -202,7 +199,7 @@ class InOutData:
 		is_prop = false
 
 		if HenGlobal.script_config.type == type:
-			code_value = '_ref'
+			code_value = '_ref.'
 			is_ref = true
 			return
 		
@@ -1087,7 +1084,8 @@ func get_input_token(_idx: int) -> Dictionary:
 		var data: Dictionary = {
 			type = HenCnode.SUB_TYPE.IN_PROP,
 			prop_name = input.name,
-			value = input.code_value
+			value = input.code_value,
+			use_self = route_ref.type != HenRouter.ROUTE_TYPE.STATE,
 		}
 
 		if input.is_ref:
@@ -1099,12 +1097,6 @@ func get_input_token(_idx: int) -> Dictionary:
 					data.use_prefix = true
 				'default_value':
 					data.use_value = true
-
-					if route_ref.type != HenRouter.ROUTE_TYPE.STATE:
-						data.value = 'self'
-
-		if route_ref.type != HenRouter.ROUTE_TYPE.STATE:
-			data.use_self = true
 
 		return data
 	
@@ -1127,11 +1119,9 @@ func get_output_token_list() -> Array:
 
 
 func get_token(_id: int = 0) -> Dictionary:
-	var use_self: bool = route_ref.type != HenRouter.ROUTE_TYPE.STATE
-
 	var token: Dictionary = {
 		type = sub_type,
-		use_self = use_self,
+		use_self = route_ref.type != HenRouter.ROUTE_TYPE.STATE,
 	}
 
 	if category:

@@ -481,7 +481,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 
 						if prop_container.get_child_count() < 3:
 							l.text = input_ref.code_value
-							if l.text == '_ref':
+							if l.text == '_ref.':
 								l.text = 'self'
 							
 							prop_container.add_child(l)
@@ -535,7 +535,6 @@ func _on_prop_value_changed(_value, value) -> void:
 	input_ref.code_value = value
 	input_ref.value = _value
 	input_ref.is_prop = true
-	input_ref.use_self = false
 
 
 func reset_in_props(_jump_first: bool = false) -> void:

@@ -14,10 +14,12 @@ static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 	if _params.size() > 0:
 		var first: Dictionary = _params[0]
 
+		print('jj ', first)
+
 		if first.has('is_ref'):
 			return [
 				_params.slice(1),
-				parse_token_by_type(first) + '.'
+				parse_token_by_type(first)
 			]
 	
 	return [_params, _prefix]
@@ -145,7 +147,7 @@ func _physics_process(delta: float) -> void:
 	})
 
 	# functions
-	var func_code: String = '# Functions\n'
+	var func_code: String = '\n# Functions\n'
 
 	for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
 		# generating function
@@ -201,6 +203,8 @@ func _physics_process(delta: float) -> void:
 			func_code += '\treturn [{outputs}]\n\n'.format({
 				outputs = ', '.join(output_code)
 			})
+		
+		func_code += '\n'
 		# end func output
 	
 	base_template += func_code + '\n\n'
@@ -236,10 +240,10 @@ func _physics_process(delta: float) -> void:
 				signal_block.append(parse_token_by_type(token, 1))
 
 			# debug
-			signal_block.append(parse_token_by_type(
-				get_debug_token(signal_item.virtual_cnode_list[0]),
-				1
-			))
+			# signal_block.append(parse_token_by_type(
+			# 	get_debug_token(signal_item.virtual_cnode_list[0]),
+			# 	1
+			# ))
 
 			signal_code += '\n'.join(signal_block) + '\n\n'
 			signal_code += '\t' + get_debug_push_str() + '\n\n\n'
@@ -323,12 +327,12 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 		var from_flow: HenVirtualCNode.FlowConnectionData = virtual_cnode.flow_connections[0]
 
 		if from_flow.to:
-			var token_list = [get_debug_flow_start_token()] + from_flow.to.get_flow_token_list()
-			token_list.append(get_debug_token(virtual_cnode))
-			token_list.append(get_push_debug_token())
+			var token_list = from_flow.to.get_flow_token_list()
+			# token_list.append(get_debug_token(virtual_cnode))
+			# token_list.append(get_push_debug_token())
 
-			if cnode_name == 'enter':
-				token_list.append({type = HenCnode.SUB_TYPE.DEBUG_STATE, id = 99})
+			# if cnode_name == 'enter':
+			# 	token_list.append({type = HenCnode.SUB_TYPE.DEBUG_STATE, id = 99})
 			
 			data[cnode_name] = {
 				tokens = token_list,
@@ -351,17 +355,11 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 	var indent: StringName = '\t'.repeat(_level)
 	var prefix: StringName = '_ref.'
 
-	if _token.has('use_self'):
-		if _token.use_self == true:
-			prefix = 'self.'
+	print('yy ', _token)
 
-	if _token.has('category'):
-		match _token.get('category'):
-			'native':
-				prefix = ''
+	if _token.use_self == true or (_token.has('category') and _token.get('category') == 'native'):
+		prefix = ''
 
-
-	print('t-> ', _token)
 
 	match _token.type as HenCnode.SUB_TYPE:
 		HenCnode.SUB_TYPE.VAR:
@@ -379,6 +377,11 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenCnode.SUB_TYPE.LOCAL_VAR:
 			return indent + _token.name
 		HenCnode.SUB_TYPE.IN_PROP:
+			if _token.has('use_self'):
+				if _token.has('is_ref'):
+					if _token.use_self: return indent
+					else: return indent + prefix
+
 			if _token.has('use_value'):
 				return indent + _token.value
 
@@ -387,10 +390,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 			if _token.has('is_prop') and _token.get('is_prop') == true:
 				return indent + prefix + _token.value
-			
-			if _token.has('use_self'):
-				if _token.has('is_ref'):
-					return indent + 'self'
 
 			return indent + str(_token.value)
 		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
