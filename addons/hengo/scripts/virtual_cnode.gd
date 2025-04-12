@@ -102,7 +102,8 @@ class InOutData:
 	enum RefChangeRule {
 		NONE = 0,
 		TYPE_CHANGE = 1,
-		VALUE_CODE_VALUE_CHANGE = 2
+		VALUE_CODE_VALUE_CHANGE = 2,
+		IS_PROP = 3
 	}
 
 	func _init(_data: Dictionary) -> void:
@@ -163,6 +164,17 @@ class InOutData:
 				RefChangeRule.VALUE_CODE_VALUE_CHANGE:
 					if not ['value', 'code_value'].has(_name):
 						return
+				RefChangeRule.IS_PROP:
+					if _name == 'type':
+						# if new type is diffent, reset input
+						if _value != 'Variant' and type != 'Variant' and _value != type:
+							reset_input_value()
+							remove_ref()
+							return
+					
+					if not ['value', 'code_value'].has(_name):
+						return
+
 
 		set(_name, _value)
 
@@ -1089,9 +1101,12 @@ func get_input_token(_idx: int) -> Dictionary:
 
 		if input.category:
 			match input.category:
-				'callable', 'class_props':
-					data.use_prefix = true
 				'default_value':
+					if not input.is_ref:
+						data.use_self = true
+
+					data.use_value = true
+				'class_props':
 					data.use_value = true
 
 		return data

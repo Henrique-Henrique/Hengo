@@ -42,9 +42,31 @@ func _on_pressed() -> void:
 			options = enum_reference.keys().map(func(x: String) -> Dictionary: return {name = x, code_name = enum_reference[x]}) if not enum_reference.is_empty() else []
 		'all_props':
 			var arr: Array = []
+
+			# local variables
+			match HenRouter.current_route.type:
+				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL:
+					if HenRouter.current_route.ref.get(&'local_vars') is Array:
+						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
+							if (input_ref.type == &'Variant' or var_data.type == &'Variant') or var_data.type == input_ref.type:
+								arr.append({
+									name = var_data.name,
+									category = 'class_props',
+									ref = var_data
+								})
+
+			# variables
+			for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+				if (input_ref.type == &'Variant' or var_data.type == &'Variant') or var_data.type == input_ref.type:
+					arr.append({
+						name = var_data.name,
+						category = 'class_props',
+						ref = var_data
+					})
 			
+			# properties
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type):
-				var _type: StringName = custom_data.input_ref.input_ref.type
+				var _type: StringName = input_ref.type
 				var prop_type: StringName = type_string(prop.type)
 				
 				if (_type == 'Variant' and prop.type != TYPE_NIL) or prop_type == _type:
@@ -67,11 +89,19 @@ func _on_pressed() -> void:
 			# })
 		'get_prop', 'set_prop':
 			var arr: Array = []
-			print('q')
-						
+			
+			# local variables
+			match HenRouter.current_route.type:
+				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL:
+					if HenRouter.current_route.ref.get(&'local_vars') is Array:
+						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
+							arr.append({name = var_data.name, type = var_data.type, ref = var_data})
+
+			# variables
 			for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
 				arr.append({name = var_data.name, type = var_data.type, ref = var_data})
 
+			# properties
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type if not custom_data else custom_data):
 				var prop_type: StringName = type_string(prop.type)
 				if prop.type != TYPE_NIL:
@@ -128,15 +158,17 @@ func _selected(_item: Dictionary) -> void:
 			emit_signal('value_changed', custom_value)
 			return
 		'all_props':
-			var input = custom_data.input_ref
-			var value: String = text
+			emit_signal('value_changed', text, text.to_snake_case())
+			var input = get_parent().owner
 
 			input.remove_in_prop(true)
 
-			if _item.has('category'):
-				input.input_ref.category = 'class_props'
+			input_ref.category = 'class_props'
 
-			emit_signal('value_changed', text, value)
+			if _item.has('ref'):
+				input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.IS_PROP)
+			else:
+				input_ref.remove_ref()
 			return
 		'get_prop':
 			emit_signal('value_changed', text, _item.type)
@@ -175,17 +207,6 @@ func set_default(_text: String) -> void:
 		'enum_list':
 			text = _text.split('.')[-1] as String
 			custom_value = _text
-		'all_props':
-			if _text.begins_with('t:'):
-				if custom_data.input_ref.is_type_relatable('out', 'in', _text.split('t:')[1], custom_data.input_ref.connection_type):
-					return
-				
-				queue_free()
-
-				custom_data.input_ref.reset_in_props(true)
-				custom_data.input_ref.set_in_prop()
-
-			text = _text
 		_:
 			text = _text
 

@@ -5,13 +5,15 @@ var list_data: SideBarList
 
 @onready var name_label: Label = %Name
 @onready var list: ItemList = %List
+@onready var local_var_bt: Button = %LocalVar
 
-enum AddType {VAR, FUNC, SIGNAL}
+enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR}
 
 const NAME = {
 	AddType.VAR: 'Variables',
 	AddType.FUNC: 'Functions',
 	AddType.SIGNAL: 'Signals',
+	AddType.LOCAL_VAR: 'Local Variables'
 }
 
 class SideBarList:
@@ -28,6 +30,8 @@ class SideBarList:
 		func_list.clear()
 		signal_list.clear()
 
+		change(AddType.VAR)
+		HenGlobal.SIDE_BAR.local_var_bt.visible = false
 		list_changed.emit()
 
 	func add() -> void:
@@ -38,6 +42,10 @@ class SideBarList:
 				func_list.append(FuncData.new())
 			AddType.SIGNAL:
 				signal_list.append(SignalData.new())
+			AddType.LOCAL_VAR:
+				print(HenRouter.current_route.ref.get(&'local_vars') is Array)
+				if HenRouter.current_route.ref.get(&'local_vars') is Array:
+					(HenRouter.current_route.ref.local_vars as Array).append(VarData.new())
 			
 		list_changed.emit()
 
@@ -53,72 +61,32 @@ class SideBarList:
 				return func_list.map(func(x: FuncData): return {name = x.name})
 			AddType.SIGNAL:
 				return signal_list.map(func(x: SignalData): return {name = x.name})
+			AddType.LOCAL_VAR:
+				if HenRouter.current_route.ref.get(&'local_vars') is Array:
+					return (HenRouter.current_route.ref.local_vars as Array).map(func(x: VarData): return {name = x.name})
 			
 		return []
 	
 	func on_click(_index: int) -> void:
 		var inspector_item_arr: Array
 		var name: String = ''
+		var item: Variant
 
 		match type:
 			AddType.VAR:
-				var item: VarData = var_list[_index]
-				name = item.name
-				inspector_item_arr = [
-					HenInspector.InspectorItem.new({
-						name = 'name',
-						type = &'String',
-						value = item.name,
-						ref = item
-					}),
-					HenInspector.InspectorItem.new({
-						name = 'type',
-						type = &'@dropdown',
-						value = item.type,
-						category = 'all_classes',
-						ref = item
-					}),
-					HenInspector.InspectorItem.new({
-						name = 'export',
-						type = &'bool',
-						value = item.export ,
-						ref = item
-					}),
-				]
-			AddType.FUNC:
-				var item: FuncData = func_list[_index]
-				name = item.name
-				inspector_item_arr = [
-					HenInspector.InspectorItem.new({
-						name = 'name',
-						type = &'String',
-						value = item.name,
-						ref = item
-					}),
-					HenInspector.InspectorItem.new({
-						name = 'inputs',
-						type = &'Array',
-						value = item.inputs,
-						item_creation_callback = item.create_param.bind(FuncData.ParamType.INPUT),
-						item_move_callback = item.move_param.bind(FuncData.ParamType.INPUT),
-						item_delete_callback = item.delete_param.bind(FuncData.ParamType.INPUT),
-						field = {name = '', type = '@Param'}
-					}),
-					HenInspector.InspectorItem.new({
-						name = 'outputs',
-						type = &'Array',
-						value = item.outputs,
-						item_creation_callback = item.create_param.bind(FuncData.ParamType.OUTPUT),
-						item_move_callback = item.move_param.bind(FuncData.ParamType.OUTPUT),
-						item_delete_callback = item.delete_param.bind(FuncData.ParamType.OUTPUT),
-						field = {name = '', type = '@Param'}
-					})
-				]
-			AddType.SIGNAL:
-				var item: SignalData = signal_list[_index]
-				name = item.name
+				item = var_list[_index]
 				inspector_item_arr = item.get_inspector_array_list()
-
+			AddType.FUNC:
+				item = func_list[_index]
+				inspector_item_arr = item.get_inspector_array_list()
+			AddType.SIGNAL:
+				item = signal_list[_index]
+				inspector_item_arr = item.get_inspector_array_list()
+			AddType.LOCAL_VAR:
+				item = (HenRouter.current_route.ref.local_vars as Array)[_index] if HenRouter.current_route.ref.get(&'local_vars') is Array else []
+				inspector_item_arr = item.get_inspector_array_list(true)
+			
+		name = item.name
 
 		var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
 
@@ -195,6 +163,30 @@ class VarData:
 		export = _data.export
 
 		HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+	
+	func get_inspector_array_list(_is_local: bool = false) -> Array:
+		return [
+			HenInspector.InspectorItem.new({
+				name = 'name',
+				type = &'String',
+				value = name,
+				ref = self
+			}),
+			HenInspector.InspectorItem.new({
+				name = 'type',
+				type = &'@dropdown',
+				value = type,
+				category = 'all_classes',
+				ref = self
+			})
+		] + ([
+			HenInspector.InspectorItem.new({
+				name = 'export',
+				type = &'bool',
+				value = export ,
+				ref = self
+			}),
+		] if not _is_local else [])
 
 
 class Param:
@@ -244,9 +236,10 @@ class FuncData:
 	var inputs: Array
 	var outputs: Array
 	var route: Dictionary
-	var virtual_cnode_list: Array = []
+	var virtual_cnode_list: Array
 	var input_ref: HenVirtualCNode
 	var output_ref: HenVirtualCNode
+	var local_vars: Array
 
 	enum ParamType {INPUT, OUTPUT}
 
@@ -326,6 +319,7 @@ class FuncData:
 			inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_save()),
 			outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_save()),
 			virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
+			local_vars = local_vars.map(func(x: VarData) -> Dictionary: return x.get_save()),
 		}
 	
 	func load_save(_data: Dictionary) -> void:
@@ -343,8 +337,41 @@ class FuncData:
 			var item: Param = Param.new()
 			item.load_save(item_data)
 			outputs.append(item)
+		
+		for item_data: Dictionary in _data.local_vars:
+			var item: VarData = VarData.new()
+			item.load_save(item_data)
+			local_vars.append(item)
 
 		HenLoader._load_vc(_data.virtual_cnode_list, route)
+
+	func get_inspector_array_list() -> Array:
+		return [
+			HenInspector.InspectorItem.new({
+				name = 'name',
+				type = &'String',
+				value = name,
+				ref = self
+			}),
+			HenInspector.InspectorItem.new({
+				name = 'inputs',
+				type = &'Array',
+				value = inputs,
+				item_creation_callback = create_param.bind(FuncData.ParamType.INPUT),
+				item_move_callback = move_param.bind(FuncData.ParamType.INPUT),
+				item_delete_callback = delete_param.bind(FuncData.ParamType.INPUT),
+				field = {name = '', type = '@Param'}
+			}),
+			HenInspector.InspectorItem.new({
+				name = 'outputs',
+				type = &'Array',
+				value = outputs,
+				item_creation_callback = create_param.bind(FuncData.ParamType.OUTPUT),
+				item_move_callback = move_param.bind(FuncData.ParamType.OUTPUT),
+				item_delete_callback = delete_param.bind(FuncData.ParamType.OUTPUT),
+				field = {name = '', type = '@Param'}
+			})
+		]
 
 
 class SignalData:
@@ -362,6 +389,7 @@ class SignalData:
 	var signal_name: StringName
 	var signal_name_to_code: StringName
 	var signal_enter: HenVirtualCNode
+	var local_vars: Array
 
 	func _init(_load_vc: bool = true) -> void:
 		route = {
@@ -487,6 +515,7 @@ class SignalData:
 			params = params.map(func(x: Param) -> Dictionary: return x.get_save()),
 			bind_params = bind_params.map(func(x: Param) -> Dictionary: return x.get_save()),
 			virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
+			local_vars = local_vars.map(func(x: VarData) -> Dictionary: return x.get_save()),
 		}
 	
 	func load_save(_data: Dictionary) -> void:
@@ -508,6 +537,12 @@ class SignalData:
 			item.load_save(item_data)
 			bind_params.append(item)
 
+		
+		for item_data: Dictionary in _data.local_vars:
+			var item: VarData = VarData.new()
+			item.load_save(item_data)
+			local_vars.append(item)
+
 		HenLoader._load_vc(_data.virtual_cnode_list, route)
 
 
@@ -520,6 +555,9 @@ func _ready() -> void:
 	HenGlobal.SIDE_BAR_LIST = list_data
 
 	_on_change_list(AddType.VAR)
+
+	local_var_bt.visible = false
+	local_var_bt.pressed.connect(_on_change_list.bind(AddType.LOCAL_VAR))
 
 	(get_node('%Add') as Button).pressed.connect(_on_add)
 
@@ -545,6 +583,23 @@ func _on_click(_index: int, _at_position: Vector2, _mouse_button_index: int) -> 
 		list_data.on_click(_index)
 
 
+func _on_add() -> void:
+	HenGlobal.SIDE_BAR_LIST.add()
+
+
+func _on_change_list(_type: AddType) -> void:
+	HenGlobal.SIDE_BAR_LIST.change(_type)
+	match _type:
+		AddType.LOCAL_VAR:
+			name_label.text = HenRouter.current_route.ref.name + ' \n' + NAME[_type]
+		_:
+			name_label.text = NAME[_type]
+
+
+func _on_list_changed() -> void:
+	update_list()
+
+
 func update_list() -> void:
 	list.clear()
 
@@ -552,14 +607,10 @@ func update_list() -> void:
 		list.add_item(item_data.name)
 
 
-func _on_add() -> void:
-	HenGlobal.SIDE_BAR_LIST.add()
-
-
-func _on_change_list(_type: AddType) -> void:
-	HenGlobal.SIDE_BAR_LIST.change(_type)
-	name_label.text = NAME[_type]
-
-
-func _on_list_changed() -> void:
-	update_list()
+func show_local_var_bt() -> void:
+	match HenRouter.current_route.type:
+		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL:
+			local_var_bt.visible = true
+		_:
+			local_var_bt.visible = false
+			_on_change_list(AddType.VAR)

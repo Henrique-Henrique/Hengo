@@ -60,21 +60,7 @@ static func generate() -> String:
 	var var_code: String =' # Variables #\n'
 
 	for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
-		var type_value: String = 'null'
-
-		if HenEnums.VARIANT_TYPES.has(var_data.type):
-			if var_data.type == 'Variant':
-				type_value = 'null'
-			else:
-				type_value = var_data.type + '()'
-		elif ClassDB.can_instantiate(var_data.type):
-			type_value = var_data.type + '.new()'
-
-		var_code += '{export_var}var {name} = {value}\n'.format({
-			name = var_data.name.to_snake_case(),
-			value = type_value,
-			export_var = '@export ' if var_data.export else ''
-		})
+		var_code += generate_var_code(var_data)
 
 	code += var_code
 	# end variables
@@ -159,18 +145,14 @@ func _physics_process(delta: float) -> void:
 		))
 		})
 
-	# 	# debug
-	# 	func_code += '\t' + get_debug_var_start()
+		# debug
+		# func_code += '\t' + get_debug_var_start()
 		
-	# 	# local variable
-		var local_var_list: Array = []
+		# local variable
+		func_code += '\n'.join(func_data.local_vars.map(func(x: HenSideBar.VarData):
+			return '\t' + generate_var_code(x))) + '\n'
 
-	# 	if not local_var_list.is_empty():
-	# 		func_code += '\n'.join(local_var_list) + '\n\n'
-		
-	# 	# end local variable
-
-	# 	# func output (return)
+		# func output (return)
 		var output_code: Array = []
 		
 		for token: Dictionary in func_data.output_ref.get_input_token_list():
@@ -192,7 +174,7 @@ func _physics_process(delta: float) -> void:
 			func_code += '\n'.join(func_block) + '\n'
 			func_code += '\t' + get_debug_push_str() + '\n'
 		else:
-			func_code += '\tpass\n\n' if local_var_list.is_empty() and output_code.is_empty() else ''
+			func_code += '\tpass\n\n' if func_data.local_vars.is_empty() and output_code.is_empty() else ''
 		
 	# 	#TODO output when not connected return empty field, make a default values for all types
 		if output_code.size() == 1:
@@ -213,6 +195,7 @@ func _physics_process(delta: float) -> void:
 	# signal callables
 	var signal_code: String = '#\n\n# Signals Callables\n'
 
+
 	for signal_item: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
 		var signal_name = _get_signal_call_name(signal_item.name)
 
@@ -227,6 +210,10 @@ func _physics_process(delta: float) -> void:
 					return x.name.to_snake_case()
 		))
 		})
+
+		# local variable
+		signal_code += '\n'.join(signal_item.local_vars.map(func(x: HenSideBar.VarData):
+			return '\t' + generate_var_code(x))) + '\n'
 
 		# debug
 		# signal_code += '\t' + get_debug_var_start()
@@ -348,6 +335,26 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 	return data
 
 
+static func generate_var_code(_var_data: HenSideBar.VarData) -> String:
+	var var_code: String = ''
+	var type_value: String = 'null'
+
+	if HenEnums.VARIANT_TYPES.has(_var_data.type):
+		if _var_data.type == 'Variant':
+			type_value = 'null'
+		else:
+			type_value = _var_data.type + '()'
+	elif ClassDB.can_instantiate(_var_data.type):
+		type_value = _var_data.type + '.new()'
+
+	var_code += '{export_var}var {name} = {value}\n'.format({
+		name = _var_data.name.to_snake_case(),
+		value = type_value,
+		export_var = '@export ' if _var_data.export else ''
+	})
+
+	return var_code
+
 #
 #
 # parse to code
@@ -377,13 +384,13 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenCnode.SUB_TYPE.LOCAL_VAR:
 			return indent + _token.name
 		HenCnode.SUB_TYPE.IN_PROP:
-			if _token.has('use_self'):
-				if _token.has('is_ref'):
-					if _token.use_self: return indent
-					else: return indent + prefix
-
+			if _token.has('is_ref'):
+				if _token.use_self: return indent
+				else: return indent + prefix
+				
 			if _token.has('use_value'):
-				return indent + _token.value
+				if _token.use_self: return indent + _token.value
+				else: return indent + prefix + _token.value
 
 			if _token.has('use_prefix'):
 				return indent + prefix + _token.value

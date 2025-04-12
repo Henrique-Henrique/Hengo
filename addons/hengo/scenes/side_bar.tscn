@@ -17,6 +17,7 @@ layout_mode = 2
 [node name="Name" type="Label" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+text = "Variables"
 horizontal_alignment = 1
 
 [node name="LineEdit" type="LineEdit" parent="VBoxContainer"]
@@ -39,6 +40,11 @@ text = "func"
 unique_name_in_owner = true
 layout_mode = 2
 text = "signal"
+
+[node name="LocalVar" type="Button" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "local var"
 
 [node name="Add" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true

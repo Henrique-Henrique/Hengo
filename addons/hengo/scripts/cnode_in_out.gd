@@ -516,10 +516,7 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	prop_ref_bt.tooltip_text = 'Bind prop value'
 	
 	prop_ref_bt.add_theme_stylebox_override('normal', StyleBoxEmpty.new())
-
-	prop_ref_bt.custom_data = {
-		input_ref = self
-	}
+	prop_ref_bt.input_ref = input_ref
 
 	if _default:
 		prop_ref_bt.set_default(_default)
@@ -531,9 +528,9 @@ func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	return prop_ref_bt
 
 
-func _on_prop_value_changed(_value, value) -> void:
-	input_ref.code_value = value
+func _on_prop_value_changed(_value, _code_value) -> void:
 	input_ref.value = _value
+	input_ref.code_value = _code_value
 	input_ref.is_prop = true
 
 
