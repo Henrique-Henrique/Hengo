@@ -23,7 +23,7 @@ static func format(_virtual_cnode: HenCnode, _old_cnode: HenCnode, _move: bool =
 	arr.append(_virtual_cnode)
 
 	match _virtual_cnode.type:
-		HenCnode.TYPE.IF:
+		HenVirtualCNode.Type.IF:
 			var max_y: float = format_inputs_y(_virtual_cnode, _virtual_cnode.position.y + _virtual_cnode.size.y)
 
 			if _virtual_cnode.flow_to.has('true_flow'):

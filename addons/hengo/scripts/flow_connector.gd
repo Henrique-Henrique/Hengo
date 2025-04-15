@@ -91,7 +91,7 @@ func create_connection_line(_config: Dictionary) -> HenFlowConnectionLine:
 	line.to_cnode = _config.from_cnode
 
 	match self.root.type:
-		HenCnode.TYPE.IF:
+		HenVirtualCNode.Type.IF:
 			self.root.flow_to[type] = _config.from_cnode
 			line.flow_type = type
 		_:

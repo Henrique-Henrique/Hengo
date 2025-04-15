@@ -8,7 +8,10 @@ enum Type {
 	EXPRESSION,
 	STATE,
 	STATE_START,
-	STATE_EVENT
+	STATE_EVENT,
+	MACRO,
+	MACRO_INPUT,
+	MACRO_OUTPUT
 }
 
 enum SubType {
@@ -52,7 +55,11 @@ enum SubType {
 	STATE_EVENT,
 	SIGNAL_ENTER,
 	SIGNAL_CONNECTION,
-	SIGNAL_DISCONNECTION
+	SIGNAL_DISCONNECTION,
+	MACRO,
+	MACRO_INPUT,
+	MACRO_OUTPUT,
+	OVERRIDE_VIRTUAL
 }
 
 var name: String
@@ -131,7 +138,6 @@ class InOutData:
 			ref.moved.connect(_on_move)
 
 		if ref.has_signal('deleted'):
-			print('dd')
 			ref.deleted.connect(_on_delete)
 
 		if _ref.has_signal('data_changed'):
@@ -241,8 +247,34 @@ class InOutData:
 				value = code_value
 
 
-class FlowConnectionData:
+class FlowConnection:
 	var name: String
+	var ref: Object
+
+	signal moved
+	signal deleted
+
+	func _init(_name: String = '', _ref: Object = null) -> void:
+		name = _name
+
+		if _ref: set_ref(_ref)
+
+	func set_ref(_ref) -> void:
+		ref = _ref
+		# when param is moved
+		if ref.has_signal('moved'):
+			ref.moved.connect(_on_move)
+
+		if ref.has_signal('deleted'):
+			ref.deleted.connect(_on_delete)
+	
+	func _on_move(_pos: int) -> void:
+		moved.emit(self is FromFlowConnection, _pos, self)
+
+	func _on_delete() -> void:
+		deleted.emit(self is FromFlowConnection, self)
+
+class FlowConnectionData extends FlowConnection:
 	var line_ref: HenFlowConnectionLine
 	var from_pos: Vector2
 	var to_pos: Vector2
@@ -251,9 +283,6 @@ class FlowConnectionData:
 	var to_idx: int
 	var to_from_ref: FromFlowConnection
 
-	func _init(_name: String = '') -> void:
-		name = _name
-
 	func get_save() -> Dictionary:
 		return {
 			to_id = to.id,
@@ -261,7 +290,7 @@ class FlowConnectionData:
 		}
 		
 
-class FromFlowConnection:
+class FromFlowConnection extends FlowConnection:
 	var from_connections: Array[FlowConnectionData]
 
 
@@ -440,6 +469,12 @@ class VCNodeReturn:
 		if not v_cnode.route_ref.ref.virtual_cnode_list.has(v_cnode):
 			v_cnode.route_ref.ref.virtual_cnode_list.append(v_cnode)
 
+		if v_cnode.sub_type == SubType.MACRO:
+			var _ref: HenSideBar.MacroData = v_cnode.ref
+
+			if not _ref.macro_ref_list.has(v_cnode):
+				_ref.macro_ref_list.append(v_cnode)
+
 		v_cnode.input_connections.append_array(old_inputs_connections)
 		v_cnode.output_connections.append_array(old_outputs_connections)
 
@@ -474,6 +509,9 @@ class VCNodeReturn:
 
 	func remove() -> void:
 		v_cnode.route_ref.ref.virtual_cnode_list.erase(v_cnode)
+
+		if v_cnode.sub_type == SubType.MACRO:
+			(v_cnode.ref as HenSideBar.MacroData).macro_ref_list.erase(v_cnode)
 
 		old_inputs_connections.append_array(v_cnode.input_connections)
 		old_outputs_connections.append_array(v_cnode.output_connections)
@@ -723,6 +761,18 @@ func show() -> void:
 			idx = 0
 
 			for from_flow_connection: FromFlowConnection in from_flow_connections:
+				# showing from flow connections
+				var my_from_flow_container = from_flow_container.get_child(idx)
+				var label: Label = my_from_flow_container.get_node('%Label')
+
+				if from_flow_connection.name:
+					label.visible = true
+					label.text = from_flow_connection.name
+				else:
+					label.visible = false
+
+				my_from_flow_container.visible = true
+
 				if from_flow_connection.from_connections.is_empty():
 					idx += 1
 					continue
@@ -949,16 +999,21 @@ func get_save() -> Dictionary:
 
 		for v_cnode: HenVirtualCNode in virtual_cnode_list:
 			data.virtual_cnode_list.append(v_cnode.get_save())
+	
 
-	if [Type.IF, Type.DEFAULT].has(type):
-		if not flow_connections.is_empty():
-			var flows: Array = []
+	# match type:
+		
+	# if [Type.IF, Type.DEFAULT].has(type):
+	match type:
+		Type.IF, Type.DEFAULT:
+			if not flow_connections.is_empty():
+				var flows: Array = []
 
-			for flow_connection: FlowConnectionData in flow_connections:
-				if flow_connection.name:
-					flows.append({name = flow_connection.name})
-			
-			if not flows.is_empty(): data.to_flow = flows
+				for flow_connection: FlowConnectionData in flow_connections:
+					if flow_connection.name:
+						flows.append({name = flow_connection.name})
+				
+				if not flows.is_empty(): data.to_flow = flows
 
 	return data
 
@@ -1025,39 +1080,70 @@ func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: He
 	create_connection(_idx, _from_idx, _from, _line).add(false)
 
 
-func get_flow_token_list(_token_list: Array = []) -> Array:
+func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 	match sub_type:
-		HenCnode.SUB_TYPE.IF:
+		HenVirtualCNode.SubType.IF:
 			_token_list.append(get_if_token())
-		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			_token_list.append(get_for_token())
+		HenVirtualCNode.SubType.MACRO:
+			_token_list.append(get_macro_token(_input_idx))
+		HenVirtualCNode.SubType.MACRO_OUTPUT:
+			print('ytt ', HenGlobal.USE_MACRO_REF)
+			if HenGlobal.USE_MACRO_REF:
+				var flow: FlowConnectionData = HenGlobal.MACRO_REF.flow_connections[_input_idx]
+
+				if flow.to:
+					flow.to.get_flow_token_list(flow.to_idx, _token_list)
 		_:
-			_token_list.append(get_token())
+			_token_list.append(get_token(0))
 
 			if flow_connections[0].to:
-				flow_connections[0].to.get_flow_token_list(_token_list)
+				flow_connections[0].to.get_flow_token_list(flow_connections[0].to_idx, _token_list)
 
 	return _token_list
+
+
+func get_macro_token(_input_idx: int) -> Dictionary:
+	var flow_tokens: Array
+	var input_flow: FlowConnectionData = (ref as HenSideBar.MacroData).input_ref.flow_connections[_input_idx]
+
+	if input_flow.to:
+		HenGlobal.USE_MACRO_REF = true
+		HenGlobal.MACRO_REF = self
+		HenGlobal.MACRO_USE_SELF = route_ref.type != HenRouter.ROUTE_TYPE.STATE
+		HenGlobal.USE_MACRO_USE_SELF = true
+		flow_tokens = input_flow.to.get_flow_token_list(input_flow.to_idx)
+		HenGlobal.USE_MACRO_USE_SELF = false
+
+	return {
+		type = HenVirtualCNode.SubType.MACRO,
+		flow_tokens = flow_tokens,
+		use_self = false
+	}
 
 
 func get_if_token() -> Dictionary:
 	var true_flow: Array = []
 	var false_flow: Array = []
 
-	if flow_connections[0]:
-		true_flow = (flow_connections[0] as FlowConnectionData).to.get_flow_token_list()
+	if flow_connections[0].to:
+		var flow: FlowConnectionData = flow_connections[0]
+		true_flow = flow.to.get_flow_token_list(flow.to_idx)
 		# debug
-		true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
+		# true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
 		
-	if flow_connections[1]:
-		false_flow = (flow_connections[1] as FlowConnectionData).to.get_flow_token_list()
-		false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
+	if flow_connections[1].to:
+		var flow: FlowConnectionData = flow_connections[1]
+		false_flow = flow.to.get_flow_token_list(flow.to_idx)
+		# false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
 
 	return {
-		type = HenCnode.SUB_TYPE.IF,
+		type = HenVirtualCNode.SubType.IF,
 		true_flow = true_flow,
 		false_flow = false_flow,
-		condition = get_input_token(0)
+		condition = get_input_token(0),
+		use_self = false
 	}
 
 
@@ -1066,7 +1152,7 @@ func get_for_token() -> Dictionary:
 		type = sub_type,
 		hash = get_instance_id(),
 		params = get_input_token_list(),
-		flow = flow_connections[0].to.get_flow_token_list() if flow_connections[0].to else []
+		flow = flow_connections[0].to.get_flow_token_list(flow_connections[0].to_idx) if flow_connections[0].to else []
 	}
 
 
@@ -1081,20 +1167,34 @@ func get_input_token(_idx: int) -> Dictionary:
 	var input: InOutData = inputs[_idx]
 
 	if connection and connection.from:
-		var data: Dictionary = connection.from.get_token(connection.from_idx)
-		data.prop_name = input.name
+		match connection.from.sub_type:
+			SubType.MACRO_INPUT:
+				if HenGlobal.USE_MACRO_REF:
+					var data: Dictionary = HenGlobal.MACRO_REF.get_input_token(connection.from_idx)
+					return data
+			SubType.MACRO:
+				HenGlobal.USE_MACRO_USE_SELF = true
+				HenGlobal.MACRO_USE_SELF = route_ref.type != HenRouter.ROUTE_TYPE.STATE
+				var data: Dictionary = (connection.from.ref as HenSideBar.MacroData).output_ref.get_input_token(connection.from_idx)
+				HenGlobal.USE_MACRO_USE_SELF = false
+				return data
+			_:
+				var data: Dictionary = connection.from.get_token(connection.from_idx)
+				data.prop_name = input.name
 
-		if input.is_ref:
-			data.is_ref = input.is_ref
+				if input.is_ref:
+					data.is_ref = input.is_ref
 
-		return data
+				return data
 	elif input.code_value:
 		var data: Dictionary = {
-			type = HenCnode.SUB_TYPE.IN_PROP,
+			type = HenVirtualCNode.SubType.IN_PROP,
 			prop_name = input.name,
 			value = input.code_value,
-			use_self = route_ref.type != HenRouter.ROUTE_TYPE.STATE,
+			use_self = (route_ref.type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF
 		}
+
+		print('kkk ', HenGlobal.MACRO_USE_SELF, '  ', input.name)
 
 		if input.is_ref:
 			data.is_ref = input.is_ref
@@ -1111,7 +1211,7 @@ func get_input_token(_idx: int) -> Dictionary:
 
 		return data
 	
-	return {type = HenCnode.SUB_TYPE.NOT_CONNECTED, input_type = inputs[_idx].type}
+	return {type = HenVirtualCNode.SubType.NOT_CONNECTED, input_type = inputs[_idx].type, use_self = true}
 
 
 func get_input_token_list(_get_name: bool = false) -> Array:
@@ -1126,76 +1226,79 @@ func get_input_token_list(_get_name: bool = false) -> Array:
 
 # getting cnode outputs
 func get_output_token_list() -> Array:
-	return outputs
+	return outputs.map(
+		func(x: InOutData) -> Dictionary:
+			return {name = x.name, type = x.type}
+	)
 
 
 func get_token(_id: int = 0) -> Dictionary:
 	var token: Dictionary = {
 		type = sub_type,
-		use_self = route_ref.type != HenRouter.ROUTE_TYPE.STATE,
+		use_self = (route_ref.type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF,
 	}
 
 	if category:
 		token.category = category
 
 	match sub_type:
-		HenCnode.SUB_TYPE.VOID, HenCnode.SUB_TYPE.GO_TO_VOID, HenCnode.SUB_TYPE.SELF_GO_TO_VOID:
+		HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 			token.merge({
 				name = name.to_snake_case() if not name_to_code else name_to_code,
 				params = get_input_token_list()
 			})
-		HenCnode.SUB_TYPE.FUNC, HenCnode.SUB_TYPE.USER_FUNC:
+		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC:
 			token.merge({
 				name = name.to_snake_case(),
 				params = get_input_token_list(),
 				id = _id if outputs.size() > 1 else -1,
 			})
-		HenCnode.SUB_TYPE.VAR, HenCnode.SUB_TYPE.LOCAL_VAR:
+		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.LOCAL_VAR:
 			token.merge({
 				name = outputs[0].name.to_snake_case(),
 			})
-		HenCnode.SUB_TYPE.DEBUG_VALUE:
+		HenVirtualCNode.SubType.DEBUG_VALUE:
 			token.merge({
 				value = get_input_token_list()[0],
 				# id = HenCodeGeneration.get_debug_counter(_node)
 			})
-		HenCnode.SUB_TYPE.SET_VAR, HenCnode.SUB_TYPE.SET_LOCAL_VAR:
+		HenVirtualCNode.SubType.SET_VAR, HenVirtualCNode.SubType.SET_LOCAL_VAR:
 			token.merge({
 				name = inputs[0].name.to_snake_case(),
 				value = get_input_token_list()[0],
 			})
-		HenCnode.SUB_TYPE.VIRTUAL, HenCnode.SUB_TYPE.FUNC_INPUT:
+		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT:
 			token.merge({
 				param = outputs[_id].name.to_snake_case(),
 				id = _id
 			})
-		HenCnode.SUB_TYPE.FOR, HenCnode.SUB_TYPE.FOR_ARR:
+		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			return {
-				type = HenCnode.SUB_TYPE.FOR_ITEM,
+				type = HenVirtualCNode.SubType.FOR_ITEM,
 				hash = get_instance_id()
 			}
-		HenCnode.SUB_TYPE.CAST:
+		HenVirtualCNode.SubType.CAST:
 			return {
 				type = sub_type,
 				to = outputs[0].type,
 				# from = (get_node('%InputContainer').get_child(0) as HenCnodeInOut).get_token()
 			}
-		HenCnode.SUB_TYPE.IMG:
+		HenVirtualCNode.SubType.IMG:
 			token.merge({
 				name = name.to_snake_case(),
 				params = get_input_token_list()
 			})
-		HenCnode.SUB_TYPE.RAW_CODE:
+		HenVirtualCNode.SubType.RAW_CODE:
 			token.merge({
 				code = get_input_token_list()[0],
 			})
-		HenCnode.SUB_TYPE.SINGLETON:
+		HenVirtualCNode.SubType.SINGLETON:
 			token.merge({
 				name = name,
 				params = get_input_token_list(),
 				id = _id if outputs.size() > 1 else -1,
 			})
-		HenCnode.SUB_TYPE.GET_PROP:
+		HenVirtualCNode.SubType.GET_PROP:
 			var dt: Dictionary = {
 				value = outputs[0].code_value.to_snake_case()
 			}
@@ -1204,7 +1307,7 @@ func get_token(_id: int = 0) -> Dictionary:
 				dt.data = get_input_token(0)
 
 			token.merge(dt)
-		HenCnode.SUB_TYPE.SET_PROP:
+		HenVirtualCNode.SubType.SET_PROP:
 			var dt: Dictionary = {}
 
 			if inputs[0].is_ref:
@@ -1216,7 +1319,7 @@ func get_token(_id: int = 0) -> Dictionary:
 				dt.value = get_input_token(1)
 
 			token.merge(dt)
-		HenCnode.SUB_TYPE.EXPRESSION:
+		HenVirtualCNode.SubType.EXPRESSION:
 			token.merge({
 				params = get_input_token_list(true),
 				exp = inputs[0].value
@@ -1268,10 +1371,10 @@ func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: InOutData) -> void
 	var index_slice: int = 0
 
 	match sub_type:
-		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER:
+		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER, SubType.MACRO_INPUT:
 			if is_input: is_input = false
 			else: return
-		SubType.FUNC_OUTPUT:
+		SubType.FUNC_OUTPUT, SubType.MACRO_OUTPUT:
 			if not is_input: is_input = true
 			else: return
 		SubType.SIGNAL_CONNECTION:
@@ -1290,13 +1393,14 @@ func _on_in_out_deleted(_is_input: bool, _in_ou_ref: InOutData) -> void:
 	var is_input: bool = _is_input
 
 	match sub_type:
-		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER:
+		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER, SubType.MACRO_INPUT:
 			if is_input: is_input = false
 			else: return
-		SubType.FUNC_OUTPUT:
+		SubType.FUNC_OUTPUT, SubType.MACRO_OUTPUT:
 			if not is_input: is_input = true
 			else: return
 
+	#TODO remove connections
 	if is_input:
 		inputs.erase(_in_ou_ref)
 	else:
@@ -1305,20 +1409,17 @@ func _on_in_out_deleted(_is_input: bool, _in_ou_ref: InOutData) -> void:
 	update()
 
 
-func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) -> InOutData:
+func _on_in_out_added(_is_input: bool, _data: Dictionary) -> InOutData:
 	# restrict creation by sub_type
-	if _update:
-		match sub_type:
-			SubType.FUNC_INPUT, SubType.SIGNAL_ENTER:
-				if not _is_input: return
-			
-				_is_input = not _is_input
-			SubType.FUNC_OUTPUT:
-				if _is_input: return
-			
-				_is_input = not _is_input
-			SubType.SIGNAL_DISCONNECTION:
-				return
+	match sub_type:
+		SubType.FUNC_INPUT, SubType.SIGNAL_ENTER, SubType.MACRO_INPUT:
+			if not _is_input: return
+			_is_input = not _is_input
+		SubType.FUNC_OUTPUT, SubType.MACRO_OUTPUT:
+			if _is_input: return
+			_is_input = not _is_input
+		SubType.SIGNAL_DISCONNECTION:
+			return
 	
 	if _data.has('ref_id'):
 		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
@@ -1334,7 +1435,7 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _update: bool = true) 
 	else:
 		outputs.append(in_out)
 	
-	if _update: update()
+	update()
 
 	return in_out
 
@@ -1359,12 +1460,56 @@ func _on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Arra
 	clear_in_out(is_input)
 
 	for input_data: Dictionary in _new_inputs:
-		var in_out: InOutData = _on_in_out_added(is_input, input_data, false)
+		var in_out: InOutData = _on_in_out_added(is_input, input_data)
 
 		match sub_type:
 			SubType.SIGNAL_CONNECTION:
 				in_out.reset_input_value()
 
+	update()
+
+
+func _on_flow_added(_is_input: bool, _data: Dictionary) -> void:
+	# restrict creation by sub_type
+	match sub_type:
+		SubType.MACRO_INPUT:
+			if not _is_input: return
+			_is_input = not _is_input
+		SubType.MACRO_OUTPUT:
+			if _is_input: return
+			_is_input = not _is_input
+	
+
+	if _is_input:
+		var flow: FromFlowConnection = FromFlowConnection.new(_data.name, _data.ref)
+		flow.moved.connect(_on_flow_moved)
+		flow.deleted.connect(_on_flow_deleted)
+		from_flow_connections.append(flow)
+	else:
+		var flow: FlowConnectionData = FlowConnectionData.new(_data.name, _data.ref)
+		flow.moved.connect(_on_flow_moved)
+		flow.deleted.connect(_on_flow_deleted)
+		flow_connections.append(flow)
+	
+	update()
+
+func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: FlowConnection) -> void:
+	var index_slice: int = 0
+
+	if _is_input:
+		HenUtils.move_array_item_to_idx(from_flow_connections, _flow_ref, _pos + index_slice)
+	else:
+		HenUtils.move_array_item_to_idx(flow_connections, _flow_ref, _pos + index_slice)
+	
+	update()
+
+
+func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
+	if _is_input:
+		from_flow_connections.erase(_flow_ref)
+	else:
+		flow_connections.erase(_flow_ref)
+	
 	update()
 
 
@@ -1379,10 +1524,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.route_ref = _config.route
 	
 	if _config.has('name_to_code'): v_cnode.name_to_code = _config.name_to_code
-
-	match v_cnode.sub_type:
-		SubType.VIRTUAL:
-			_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)
 
 
 	match _config.route.type:
@@ -1408,6 +1549,16 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			match v_cnode.sub_type:
 				SubType.SIGNAL_ENTER:
 					ref.signal_enter = v_cnode
+		HenRouter.ROUTE_TYPE.MACRO:
+			var ref: HenSideBar.MacroData = _config.route.ref
+			
+			ref.virtual_cnode_list.append(v_cnode)
+
+			match v_cnode.sub_type:
+				SubType.MACRO_INPUT:
+					ref.input_ref = v_cnode
+				SubType.MACRO_OUTPUT:
+					ref.output_ref = v_cnode
 
 	
 	if _config.has('ref_id'):
@@ -1427,12 +1578,28 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		if _config.ref.has_signal('in_out_reseted'):
 			_config.ref.in_out_reseted.connect(v_cnode._on_in_out_reset)
 
+		if _config.ref.has_signal('flow_added'):
+			_config.ref.flow_added.connect(v_cnode._on_flow_added)
+
 
 	if _config.has('category'):
 		v_cnode.category = _config.category
 
 	if _config.has('position'):
 		v_cnode.position = _config.position if _config.position is Vector2 else str_to_var(_config.position)
+
+	match v_cnode.sub_type:
+		SubType.VIRTUAL:
+			_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)
+		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
+			var _ref: HenSideBar.MacroData = _config.ref
+
+			_config.to_flow = _ref.inputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
+			_config.from_flow = _ref.outputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
+
+			if v_cnode.sub_type == SubType.MACRO:
+				(v_cnode.ref as HenSideBar.MacroData).macro_ref_list.append(v_cnode)
+
 
 	match v_cnode.type:
 		Type.DEFAULT:
@@ -1456,14 +1623,14 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			if not _config.has('virtual_cnode_list'):
 				HenVirtualCNode.instantiate_virtual_cnode({
 					name = 'enter',
-					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+					sub_type = HenVirtualCNode.SubType.VIRTUAL,
 					route = v_cnode.route,
 					position = Vector2.ZERO
 				})
 
 				HenVirtualCNode.instantiate_virtual_cnode({
 					name = 'update',
-					sub_type = HenCnode.SUB_TYPE.VIRTUAL,
+					sub_type = HenVirtualCNode.SubType.VIRTUAL,
 					outputs = [ {
 						name = 'delta',
 						type = 'float'
@@ -1478,24 +1645,26 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE_EVENT:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
-
 		_:
 			if _config.has('to_flow'):
 				for flow: Dictionary in _config.to_flow:
-					v_cnode.flow_connections.append(FlowConnectionData.new(flow.name))
+					v_cnode._on_flow_added(true, flow)
 
+			if _config.has('from_flow'):
+				for flow: Dictionary in _config.from_flow:
+					v_cnode._on_flow_added(false, flow)
+			
 
 	if _config.has('inputs'):
-		print(_config.inputs)
 		for input_data: Dictionary in _config.inputs:
-			var input: InOutData = v_cnode._on_in_out_added(true, input_data, false)
+			var input: InOutData = v_cnode._on_in_out_added(true, input_data)
 
 			if not input_data.has('code_value'):
 				input.reset_input_value()
 
 	if _config.has('outputs'):
 		for output_data: Dictionary in _config.outputs:
-			v_cnode._on_in_out_added(false, output_data, false)
+			v_cnode._on_in_out_added(false, output_data)
 
 	return v_cnode
 

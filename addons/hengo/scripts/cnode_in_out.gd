@@ -486,9 +486,6 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 							
 							prop_container.add_child(l)
 						
-						if root.type == HenCnode.TYPE.IMG:
-							l.visible = false
-						
 
 		if prop and _default_value:
 			prop.set_default(str(_default_value))
@@ -668,7 +665,3 @@ func get_type_color(_type: String) -> Color:
 				return Color('#c368ed')
 
 			return Color.WHITE
-
-
-func get_token(_get_name: bool = false) -> Dictionary:
-	return {}

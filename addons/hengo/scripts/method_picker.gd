@@ -51,7 +51,7 @@ var native_list: Array = [
 		name = 'Get',
 		data = {
 			name = 'Get',
-			sub_type = HenCnode.SUB_TYPE.GET_PROP,
+			sub_type = HenVirtualCNode.SubType.GET_PROP,
 			outputs = [
 				{
 					name = '',
@@ -68,7 +68,7 @@ var native_list: Array = [
 		name = 'Set',
 		data = {
 			name = 'Set',
-			sub_type = HenCnode.SUB_TYPE.SET_PROP,
+			sub_type = HenVirtualCNode.SubType.SET_PROP,
 			inputs = [
 				{
 					name = '',
@@ -90,8 +90,8 @@ var native_list: Array = [
 		name = 'Expression',
 		data = {
 			name = 'Expression',
-			type = HenCnode.TYPE.EXPRESSION,
-			sub_type = HenCnode.SUB_TYPE.EXPRESSION,
+			type = HenVirtualCNode.Type.EXPRESSION,
+			sub_type = HenVirtualCNode.SubType.EXPRESSION,
 			category = 'native',
 			inputs = [
 				{
@@ -114,7 +114,7 @@ var native_list: Array = [
 		name = 'Make Transition',
 		data = {
 			name = 'make_transition',
-			sub_type = HenCnode.SUB_TYPE.FUNC,
+			sub_type = HenVirtualCNode.SubType.FUNC,
 			category = 'native',
 			inputs = [
 				{
@@ -131,7 +131,7 @@ var native_list: Array = [
 		name = 'Cast To ->',
 		data = {
 			name = 'Cast To',
-			sub_type = HenCnode.SUB_TYPE.CAST,
+			sub_type = HenVirtualCNode.SubType.CAST,
 			category = 'native',
 			inputs = [
 				{
@@ -159,7 +159,7 @@ var native_list: Array = [
 		data = {
 			name = '',
 			fantasy_name = 'Debug Value',
-			sub_type = HenCnode.SUB_TYPE.DEBUG_VALUE,
+			sub_type = HenVirtualCNode.SubType.DEBUG_VALUE,
 			category = 'native',
 			inputs = [
 				{
@@ -174,7 +174,7 @@ var native_list: Array = [
 		name = 'print',
 		data = {
 			name = 'print',
-			sub_type = HenCnode.SUB_TYPE.VOID,
+			sub_type = HenVirtualCNode.SubType.VOID,
 			category = 'native',
 			inputs = [
 				{
@@ -189,7 +189,7 @@ var native_list: Array = [
 		name = 'Print Text',
 		data = {
 			name = 'print',
-			sub_type = HenCnode.SUB_TYPE.VOID,
+			sub_type = HenVirtualCNode.SubType.VOID,
 			category = 'native',
 			inputs = [
 				{
@@ -204,8 +204,8 @@ var native_list: Array = [
 		name = 'IF Condition',
 		data = {
 			name = 'IF',
-			type = HenCnode.TYPE.IF,
-			sub_type = HenCnode.SUB_TYPE.IF,
+			type = HenVirtualCNode.Type.IF,
+			sub_type = HenVirtualCNode.SubType.IF,
 			route = HenRouter.current_route,
 			inputs = [
 				{
@@ -219,7 +219,7 @@ var native_list: Array = [
 		name = 'For -> Range',
 		data = {
 			name = 'For -> Range',
-			sub_type = HenCnode.SUB_TYPE.FOR,
+			sub_type = HenVirtualCNode.SubType.FOR,
 			inputs = [
 				{
 					name = 'start',
@@ -247,7 +247,7 @@ var native_list: Array = [
 		name = 'For -> Item',
 		data = {
 			name = 'For -> Item',
-			sub_type = HenCnode.SUB_TYPE.FOR_ARR,
+			sub_type = HenVirtualCNode.SubType.FOR_ARR,
 			inputs = [
 				{
 					name = 'array',
@@ -267,7 +267,7 @@ var native_list: Array = [
 		name = 'break',
 		data = {
 			name = 'break',
-			sub_type = HenCnode.SUB_TYPE.BREAK,
+			sub_type = HenVirtualCNode.SubType.BREAK,
 			category = 'native',
 			route = HenRouter.current_route
 		}
@@ -276,7 +276,7 @@ var native_list: Array = [
 		name = 'continue',
 		data = {
 			name = 'continue',
-			sub_type = HenCnode.SUB_TYPE.CONTINUE,
+			sub_type = HenVirtualCNode.SubType.CONTINUE,
 			category = 'native',
 			route = HenRouter.current_route
 		}
@@ -285,7 +285,7 @@ var native_list: Array = [
 		name = 'Raw Code',
 		data = {
 			name = 'Raw Code',
-			sub_type = HenCnode.SUB_TYPE.RAW_CODE,
+			sub_type = HenVirtualCNode.SubType.RAW_CODE,
 			category = 'native',
 			inputs = [
 				{
@@ -472,15 +472,15 @@ func _search(_text: String) -> void:
 # ---------------------------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------------------------
 # GENERATING API
-func _get_sub_type(_type: Variant.Type, _usage: int) -> HenCnode.SUB_TYPE:
+func _get_sub_type(_type: Variant.Type, _usage: int) -> HenVirtualCNode.SubType:
 	match _type:
 		TYPE_NIL:
 			if _usage == 131078: # is the code for nil returning variant, so... a func
-				return HenCnode.SUB_TYPE.FUNC
+				return HenVirtualCNode.SubType.FUNC
 			else:
-				return HenCnode.SUB_TYPE.VOID
+				return HenVirtualCNode.SubType.VOID
 		_:
-			return HenCnode.SUB_TYPE.FUNC
+			return HenVirtualCNode.SubType.FUNC
 
 
 func _get_typeny_arg(_arg: Dictionary) -> StringName:
@@ -497,12 +497,13 @@ func _get_typeny_arg(_arg: Dictionary) -> StringName:
 func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -> Dictionary:
 	var _obj_type: StringName = _get_typeny_arg(_dict.return )
 
+
 	var obj: Dictionary = {
 		name = _dict.name,
 		type = _obj_type if _obj_type != StringName('Nil') else StringName('void'),
 		data = {
 			name = _dict.name,
-			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage),
+			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage) if _dict.flags != METHOD_FLAG_VIRTUAL else HenVirtualCNode.SubType.OVERRIDE_VIRTUAL,
 			inputs = [ {
 				name = _class_name,
 				type = _class_name,
@@ -595,7 +596,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								data = {
 									name = prop.name,
 									fantasy_name = 'Get Prop -> ' + prop.name,
-									sub_type = HenCnode.SUB_TYPE.GET_PROP,
+									sub_type = HenVirtualCNode.SubType.GET_PROP,
 									inputs = [
 										{
 											name = _class_name,
@@ -618,7 +619,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 								data = {
 									name = prop.name,
 									fantasy_name = 'Set Prop -> ' + prop.name,
-									sub_type = HenCnode.SUB_TYPE.SET_PROP,
+									sub_type = HenVirtualCNode.SubType.SET_PROP,
 									inputs = [
 										{
 											name = _class_name,
@@ -640,7 +641,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 					api_list = []
 
 				else:
-					for dict in ClassDB.class_get_method_list(_class_name):
+					for dict: Dictionary in ClassDB.class_get_method_list(_class_name):
 						api_list.append(_get_class_obj(dict, _class_name, _class_name))
 					
 
@@ -655,7 +656,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 						name = 'Set Test',
 						data = {
 							name = 'Set',
-							sub_type = HenCnode.SUB_TYPE.SET_PROP,
+							sub_type = HenVirtualCNode.SubType.SET_PROP,
 							inputs = [
 								{
 									name = _class_name,
@@ -682,7 +683,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 						name = 'Get Test',
 						data = {
 							name = 'Get',
-							sub_type = HenCnode.SUB_TYPE.GET_PROP,
+							sub_type = HenVirtualCNode.SubType.GET_PROP,
 							inputs = [
 								{
 									name = _class_name,
@@ -710,7 +711,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							data = {
 								name = prop.name,
 								fantasy_name = 'Set Prop -> ' + prop.name,
-								sub_type = HenCnode.SUB_TYPE.SET_PROP,
+								sub_type = HenVirtualCNode.SubType.SET_PROP,
 								inputs = [
 									{
 										name = _class_name,
@@ -732,7 +733,7 @@ func start_api(_class_name: StringName = 'all') -> int:
 							data = {
 								name = prop.name,
 								fantasy_name = 'Get Prop -> ' + prop.name,
-								sub_type = HenCnode.SUB_TYPE.GET_PROP,
+								sub_type = HenVirtualCNode.SubType.GET_PROP,
 								inputs = [
 									{
 										name = _class_name,
@@ -782,6 +783,15 @@ func start_api(_class_name: StringName = 'all') -> int:
 
 						api_list.append(connect_dt)
 						api_list.append(disconnect_dt)
+					
+					# macro
+					for macro_data: HenSideBar.MacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+						var dt: Dictionary = {
+							name = 'Macro -> ' + macro_data.name,
+							data = macro_data.get_cnode_data()
+						}
+
+						api_list.append(dt)
 
 	return OK
 

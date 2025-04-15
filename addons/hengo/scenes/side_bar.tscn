@@ -41,8 +41,14 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "signal"
 
+[node name="Macro" type="Button" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "macro"
+
 [node name="LocalVar" type="Button" parent="VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 text = "local var"
 

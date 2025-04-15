@@ -96,3 +96,10 @@ static var state_connection_line_pool: Array = []
 # virtual state list
 static var vs_list: Array = []
 static var can_instantiate_pool: bool = true
+
+
+# macro
+static var USE_MACRO_USE_SELF: bool = false
+static var MACRO_REF: HenVirtualCNode
+static var USE_MACRO_REF: bool = false
+static var MACRO_USE_SELF: bool = false

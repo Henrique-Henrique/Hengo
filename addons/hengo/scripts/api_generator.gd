@@ -31,7 +31,7 @@ static func _generate_native_api() -> void:
 					if method.is_static:
 						var dt: Dictionary = {
 							name = '',
-							sub_type = HenCnode.SUB_TYPE.SINGLETON,
+							sub_type = HenVirtualCNode.SubType.SINGLETON,
 						}
 
 						if method.has('arguments'):
@@ -50,7 +50,7 @@ static func _generate_native_api() -> void:
 					else:
 						var dt: Dictionary = {
 							name = method.name,
-							sub_type = HenCnode.SUB_TYPE.FUNC,
+							sub_type = HenVirtualCNode.SubType.FUNC,
 							inputs = [ {
 								name = dict.name,
 								type = dict.name,
@@ -103,7 +103,7 @@ static func _generate_native_api() -> void:
 					var dt: Dictionary = {
 						name = dict.name + '.' + method.name,
 						fantasy_name = dict.name + ' -> ' + method.name,
-						sub_type = HenCnode.SUB_TYPE.SINGLETON,
+						sub_type = HenVirtualCNode.SubType.SINGLETON,
 					}
 
 					if method.has('arguments'):

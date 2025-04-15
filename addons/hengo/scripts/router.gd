@@ -7,7 +7,8 @@ enum ROUTE_TYPE {
 	STATE,
 	FUNC,
 	SIGNAL,
-	INPUT
+	INPUT,
+	MACRO
 }
 
 static var current_route: Dictionary = {} # name: String, type: ROUTE_TYPE, id: String

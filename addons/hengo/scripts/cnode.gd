@@ -1,59 +1,7 @@
 @tool
 class_name HenCnode extends PanelContainer
 
-enum TYPE {
-	DEFAULT,
-	IF,
-	IMG,
-	EXPRESSION,
-	STATE,
-	STATE_START
-}
-
-enum SUB_TYPE {
-	FUNC,
-	VOID,
-	VAR,
-	LOCAL_VAR,
-	DEBUG_VALUE,
-	USER_FUNC,
-	SET_VAR,
-	SET_PROP,
-	GET_PROP,
-	VIRTUAL,
-	FUNC_INPUT,
-	CAST,
-	IF,
-	RAW_CODE,
-	SELF_GO_TO_VOID,
-	FOR,
-	FOR_ARR,
-	FOR_ITEM,
-	FUNC_OUTPUT,
-	CONST,
-	SINGLETON,
-	GO_TO_VOID,
-	IMG,
-	EXPRESSION,
-	SET_LOCAL_VAR,
-	IN_PROP,
-	NOT_CONNECTED,
-	DEBUG,
-	DEBUG_PUSH,
-	DEBUG_FLOW_START,
-	START_DEBUG_STATE,
-	DEBUG_STATE,
-	BREAK,
-	CONTINUE,
-	PASS,
-	STATE,
-	STATE_START
-}
-
-
 var flow_to: Dictionary = {}
-var type: TYPE
-var sub_type: SUB_TYPE
 var route_ref: Dictionary
 var data: Dictionary = {}
 var category: String
@@ -198,24 +146,24 @@ func _on_tooltip() -> Variant:
 						return null
 					'make_transition':
 						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the node current state. Use this functionality to shift from one active state to another", 'Make a Transition')
-			else:
-				match sub_type:
-					SUB_TYPE.FUNC, HenCnode.SUB_TYPE.VOID:
-						var first_input = get_node('%InputContainer').get_child(0)
-						var current_class: String = first_input.connection_type
+			# else:
+			# 	match sub_type:
+			# 		SUB_TYPE.FUNC, HenVirtualCNode.SubType.VOID:
+			# 			var first_input = get_node('%InputContainer').get_child(0)
+			# 			var current_class: String = first_input.connection_type
 
-						if not HenEnums.VARIANT_TYPES.has(current_class):
-							# getting where member is located in class reference
-							while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
-								current_class = ClassDB.get_parent_class(current_class)
+			# 			if not HenEnums.VARIANT_TYPES.has(current_class):
+			# 				# getting where member is located in class reference
+			# 				while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
+			# 					current_class = ClassDB.get_parent_class(current_class)
 
-								# last class do verify
-								if current_class == 'Object':
-									break
+			# 					# last class do verify
+			# 					if current_class == 'Object':
+			# 						break
 						
-						HenGlobal.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
-					TYPE.IF:
-						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
+			# 			HenGlobal.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
+			# 		TYPE.IF:
+			# 			HenGlobal.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
 
 			await get_tree().process_frame
 			HenGlobal.DOCS_TOOLTIP.position.x = self.global_position.x
@@ -397,25 +345,26 @@ func disable_error() -> void:
 
 
 func get_connection_lines_in_flow() -> Dictionary:
-	match type:
-		TYPE.IF:
-			var flow_dict: Dictionary = {
-				base_conn = get_input_connection_lines()
-			}
+	return {}
+	# match type:
+	# 	TYPE.IF:
+	# 		var flow_dict: Dictionary = {
+	# 			base_conn = get_input_connection_lines()
+	# 		}
 
-			for conn in connectors.values():
-				var connector = get_connector(conn.type)
+	# 		for conn in connectors.values():
+	# 			var connector = get_connector(conn.type)
 
-				if connector:
-					var result: Array = get_connector_lines(connector)
-					flow_dict[conn.type] = result
+	# 			if connector:
+	# 				var result: Array = get_connector_lines(connector)
+	# 				flow_dict[conn.type] = result
 			
-			return flow_dict
-		_:
-			var connector = get_connector()
-			var result: Array = get_connector_lines(connector)
+	# 		return flow_dict
+	# 	_:
+	# 		var connector = get_connector()
+	# 		var result: Array = get_connector_lines(connector)
 
-			return {cnode = result}
+	# 		return {cnode = result}
 
 
 func get_connector_lines(_connector) -> Array:

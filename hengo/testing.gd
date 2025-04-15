@@ -1,4 +1,4 @@
-#[hengo] {"comments":[],"connections":[],"debug_symbols":{},"flow_connections":[],"func_list":[],"generals":[],"node_counter":25,"prop_counter":0,"props":[],"side_bar_list":{"func_list":[{"id":10,"inputs":[],"local_vars":[{"export":false,"id":13,"name":"var da funckoko","type":"bool"}],"name":"func 1576218249","outputs":[],"virtual_cnode_list":[{"flow_connections":[{"to_id":14,"to_idx":0}],"id":11,"input_connections":[],"name":"input","output_connections":[],"position":"Vector2(0, 0)","ref_id":10,"size":"Vector2(64, 68)","sub_type":10,"type":0},{"flow_connections":[],"id":12,"input_connections":[],"name":"output","output_connections":[],"position":"Vector2(400, 0)","ref_id":10,"size":"Vector2(76, 68)","sub_type":18,"type":0},{"category":"native","flow_connections":[],"id":14,"input_connections":[{"from_idx":0,"from_vc_id":15,"idx":0}],"inputs":[{"category":"default_value","code_value":"\"\"","name":"content","type":"String"}],"name":"print","output_connections":[],"position":"Vector2(-37.445, 264.766)","size":"Vector2(135, 111)","sub_type":1,"type":0},{"flow_connections":[],"id":15,"input_connections":[],"name":"Get","output_connections":[],"outputs":[{"category":"get_prop","code_value":"var_da_funckoko","name":"","ref_id":13,"sub_type":"@dropdown","type":"bool","value":"var da funckoko"}],"position":"Vector2(-491.022, 236.085)","size":"Vector2(216, 116)","sub_type":8,"type":0}]}],"signal_list":[{"bind_params":[],"id":5,"local_vars":[{"export":false,"id":7,"name":"var do signal","type":"bool"}],"name":"signal 1449643309","params":[{"id":8,"name":"toggled_on","type":"bool"}],"signal_name":"toggled   (BaseButton)","signal_name_to_code":"toggled","type":"BaseButton","virtual_cnode_list":[{"flow_connections":[{"to_id":9,"to_idx":0}],"id":6,"input_connections":[],"name":"signal","output_connections":[],"outputs":[{"name":"toggled_on","ref_id":8,"type":"bool"}],"position":"Vector2(0, 0)","ref_id":5,"size":"Vector2(165, 111)","sub_type":38,"type":0},{"category":"native","flow_connections":[],"id":9,"input_connections":[],"inputs":[{"category":"default_value","code_value":"\"\"","name":"content","type":"String"}],"name":"print","output_connections":[],"position":"Vector2(-45.2381, 295.272)","size":"Vector2(215, 116)","sub_type":1,"type":0}]}],"var_list":[]},"state_event_list":[],"type":"Sprite2D","virtual_cnode_list":[{"flow_connections":[{"to_id":2,"to_idx":0}],"id":1,"input_connections":[],"name":"State","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(0, 0)","sub_type":36,"type":5},{"flow_connections":[],"id":2,"input_connections":[],"name":"State 1","output_connections":[],"position":"Vector2(-4.6714, 340.452)","size":"Vector2(77, 60)","sub_type":35,"type":4,"virtual_cnode_list":[{"flow_connections":[],"id":3,"input_connections":[],"name":"enter","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(66, 68)","sub_type":9,"type":0},{"flow_connections":[],"id":4,"input_connections":[],"name":"update","output_connections":[],"outputs":[{"name":"delta","type":"float"}],"position":"Vector2(400, 0)","size":"Vector2(112, 111)","sub_type":9,"type":0}]}]}
+#[hengo] {"comments":[],"connections":[],"debug_symbols":{},"flow_connections":[],"func_list":[],"generals":[],"node_counter":17,"prop_counter":0,"props":[],"side_bar_list":{"func_list":[{"id":13,"inputs":[],"local_vars":[],"name":"func 10693114652","outputs":[],"virtual_cnode_list":[{"flow_connections":[{"to_id":16,"to_idx":0}],"id":14,"input_connections":[],"name":"input","output_connections":[],"position":"Vector2(0, 0)","ref_id":13,"size":"Vector2(64, 68)","sub_type":10,"type":0},{"flow_connections":[],"id":15,"input_connections":[],"name":"output","output_connections":[],"position":"Vector2(400, 0)","ref_id":13,"size":"Vector2(76, 68)","sub_type":18,"type":0},{"category":"native","flow_connections":[],"id":16,"input_connections":[{"from_idx":0,"from_vc_id":17,"idx":0}],"inputs":[{"category":"default_value","code_value":"null","name":"content","type":"Variant","value":"null"}],"name":"print","output_connections":[],"position":"Vector2(-42.9445, 313.63)","size":"Vector2(135, 111)","sub_type":1,"type":0},{"flow_connections":[],"id":17,"input_connections":[],"name":"macro 10117438621","output_connections":[],"outputs":[{"name":"ata","ref_id":8,"type":"bool"}],"position":"Vector2(-392.146, 327.144)","ref_id":5,"size":"Vector2(179, 95)","sub_type":41,"type":7}]}],"macro_list":[{"id":5,"inputs":[],"local_vars":[],"name":"macro 10117438621","outputs":[],"virtual_cnode_list":[{"flow_connections":[],"id":6,"input_connections":[],"name":"input","output_connections":[],"position":"Vector2(0, 0)","ref_id":5,"size":"Vector2(64, 52)","sub_type":42,"type":8},{"flow_connections":[],"id":7,"input_connections":[{"from_idx":0,"from_vc_id":12,"idx":0}],"inputs":[{"category":"default_value","code_value":"false","name":"ata","ref_id":8,"type":"bool","value":"false"}],"name":"output","output_connections":[],"position":"Vector2(538.826, -11.7649)","ref_id":5,"size":"Vector2(96, 95)","sub_type":43,"type":9},{"flow_connections":[],"id":12,"input_connections":[],"inputs":[{"category":"default_value","code_value":"_ref.","is_ref":true,"name":"Sprite2D","type":"Sprite2D"}],"name":"is_centered","output_connections":[],"outputs":[{"name":"","type":"bool"}],"position":"Vector2(286.421, 195.631)","size":"Vector2(259, 112)","sub_type":0,"type":0}]}],"signal_list":[],"var_list":[]},"state_event_list":[],"type":"Sprite2D","virtual_cnode_list":[{"flow_connections":[{"to_id":2,"to_idx":0}],"id":1,"input_connections":[],"name":"State","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(91, 92)","sub_type":36,"type":5},{"flow_connections":[],"id":2,"input_connections":[],"name":"State 1","output_connections":[],"position":"Vector2(10.1699, 342.703)","size":"Vector2(77, 60)","sub_type":35,"type":4,"virtual_cnode_list":[{"flow_connections":[{"to_id":10,"to_idx":0}],"id":3,"input_connections":[],"name":"enter","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(66, 68)","sub_type":9,"type":0},{"flow_connections":[],"id":4,"input_connections":[],"name":"update","output_connections":[],"outputs":[{"name":"delta","type":"float"}],"position":"Vector2(400, 0)","size":"Vector2(112, 111)","sub_type":9,"type":0},{"flow_connections":[],"id":9,"input_connections":[],"name":"macro 10117438621","output_connections":[],"outputs":[{"category":"default_value","code_value":"false","name":"ata","ref_id":8,"type":"bool","value":"false"}],"position":"Vector2(-339.617, 269.785)","ref_id":5,"size":"Vector2(179, 95)","sub_type":41,"type":7},{"category":"native","flow_connections":[],"id":10,"input_connections":[{"from_idx":0,"from_vc_id":9,"idx":0}],"inputs":[{"category":"default_value","code_value":"null","name":"content","type":"Variant","value":"null"}],"name":"print","output_connections":[],"position":"Vector2(-36.8127, 264.987)","size":"Vector2(135, 111)","sub_type":1,"type":0}]}]}
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -23,6 +23,8 @@ func _init() -> void:
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
+	
+
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -35,10 +37,9 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 # Functions
-func func_1576218249():
-	var var_da_funckoko = bool()
+func func_10693114652():
 
-	print(var_da_funckoko)
+	print(is_centered())
 	#hen_dbg#EngineDebugger.send_message('hengo:cnode', [__hen_id__])
 
 
@@ -46,17 +47,9 @@ func func_1576218249():
 #
 
 # Signals Callables
-func _on_signal_1449643309_signal_(toggled_on):
-	var var_do_signal = bool()
-
-	print("")
-
-	#hen_dbg#EngineDebugger.send_message('hengo:cnode', [__hen_id__])
-
-
 class State1 extends HengoState:
 	func enter() -> void:
-		pass
+		print(_ref.is_centered())
 
 
 

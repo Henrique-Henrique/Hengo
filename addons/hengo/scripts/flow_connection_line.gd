@@ -87,8 +87,8 @@ func show_debug() -> void:
 		var border_style: StyleBoxFlat = cnode_border.get('theme_override_styles/panel')
 		var from_border_style: StyleBoxFlat = from_cnode_border.get('theme_override_styles/panel')
 
-		var to_color: Color = Color('#FABC3F') if to_cnode.sub_type == HenCnode.SUB_TYPE.DEBUG_VALUE else Color('#52b788')
-		var from_color: Color = Color('#FABC3F') if from_connector.root.sub_type == HenCnode.SUB_TYPE.DEBUG_VALUE else Color('#52b788')
+		var to_color: Color = Color('#FABC3F') if to_cnode.sub_type == HenVirtualCNode.SubType.DEBUG_VALUE else Color('#52b788')
+		var from_color: Color = Color('#FABC3F') if from_connector.root.sub_type == HenVirtualCNode.SubType.DEBUG_VALUE else Color('#52b788')
 
 		# arrows colors
 		from_connector.modulate = to_color

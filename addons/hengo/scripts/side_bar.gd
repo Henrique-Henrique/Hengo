@@ -7,13 +7,16 @@ var list_data: SideBarList
 @onready var list: ItemList = %List
 @onready var local_var_bt: Button = %LocalVar
 
-enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR}
+enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR, MACRO}
+enum ParamType {INPUT, OUTPUT}
+
 
 const NAME = {
 	AddType.VAR: 'Variables',
 	AddType.FUNC: 'Functions',
 	AddType.SIGNAL: 'Signals',
-	AddType.LOCAL_VAR: 'Local Variables'
+	AddType.LOCAL_VAR: 'Local Variables',
+	AddType.MACRO: 'Macro'
 }
 
 class SideBarList:
@@ -22,6 +25,7 @@ class SideBarList:
 	var var_list: Array
 	var func_list: Array
 	var signal_list: Array
+	var macro_list: Array
 
 	signal list_changed
 
@@ -29,6 +33,7 @@ class SideBarList:
 		var_list.clear()
 		func_list.clear()
 		signal_list.clear()
+		macro_list.clear()
 
 		change(AddType.VAR)
 		HenGlobal.SIDE_BAR.local_var_bt.visible = false
@@ -42,11 +47,12 @@ class SideBarList:
 				func_list.append(FuncData.new())
 			AddType.SIGNAL:
 				signal_list.append(SignalData.new())
+			AddType.MACRO:
+				macro_list.append(MacroData.new())
 			AddType.LOCAL_VAR:
-				print(HenRouter.current_route.ref.get(&'local_vars') is Array)
 				if HenRouter.current_route.ref.get(&'local_vars') is Array:
 					(HenRouter.current_route.ref.local_vars as Array).append(VarData.new())
-			
+
 		list_changed.emit()
 
 	func change(_type: AddType) -> void:
@@ -61,6 +67,8 @@ class SideBarList:
 				return func_list.map(func(x: FuncData): return {name = x.name})
 			AddType.SIGNAL:
 				return signal_list.map(func(x: SignalData): return {name = x.name})
+			AddType.MACRO:
+				return macro_list.map(func(x: MacroData): return {name = x.name})
 			AddType.LOCAL_VAR:
 				if HenRouter.current_route.ref.get(&'local_vars') is Array:
 					return (HenRouter.current_route.ref.local_vars as Array).map(func(x: VarData): return {name = x.name})
@@ -81,6 +89,9 @@ class SideBarList:
 				inspector_item_arr = item.get_inspector_array_list()
 			AddType.SIGNAL:
 				item = signal_list[_index]
+				inspector_item_arr = item.get_inspector_array_list()
+			AddType.MACRO:
+				item = macro_list[_index]
 				inspector_item_arr = item.get_inspector_array_list()
 			AddType.LOCAL_VAR:
 				item = (HenRouter.current_route.ref.local_vars as Array)[_index] if HenRouter.current_route.ref.get(&'local_vars') is Array else []
@@ -109,24 +120,35 @@ class SideBarList:
 			var_list = var_list.map(func(x: VarData): return x.get_save()),
 			func_list = func_list.map(func(x: FuncData): return x.get_save()),
 			signal_list = signal_list.map(func(x: SignalData): return x.get_save()),
+			macro_list = macro_list.map(func(x: MacroData): return x.get_save())
 		}
 	
 	func load_save(_data: Dictionary) -> void:
-		for item_data: Dictionary in _data.func_list:
-			var item: FuncData = FuncData.new(false)
-			item.load_save(item_data)
-			func_list.append(item)
-		
 		for item_data: Dictionary in _data.var_list:
 			var item: VarData = VarData.new()
 			item.load_save(item_data)
 			var_list.append(item)
 
+		for item_data: Dictionary in _data.func_list:
+			var item: FuncData = FuncData.new(false)
+			item.load_save(item_data)
+			func_list.append(item)
+		
 		for item_data: Dictionary in _data.signal_list:
 			var item: SignalData = SignalData.new(false)
 			item.load_save(item_data)
 			signal_list.append(item)
+
+		for item_data: Dictionary in _data.macro_list:
+			var item: MacroData = MacroData.new(false)
+			item.load_save(item_data)
+			macro_list.append(item)
 		
+		# loading cnodes
+		for item in HenGlobal.SIDE_BAR_LIST_CACHE.values():
+			if item.get('cnode_list_to_load') is Array:
+				HenLoader._load_vc(item.cnode_list_to_load, item.route)
+
 		list_changed.emit()
 
 
@@ -240,8 +262,7 @@ class FuncData:
 	var input_ref: HenVirtualCNode
 	var output_ref: HenVirtualCNode
 	var local_vars: Array
-
-	enum ParamType {INPUT, OUTPUT}
+	var cnode_list_to_load: Array
 
 	func _init(_load_vc: bool = true) -> void:
 		route = {
@@ -305,7 +326,7 @@ class FuncData:
 		return {
 				name = name,
 				fantasy_name = 'Func -> ' + name,
-				sub_type = HenCnode.SUB_TYPE.USER_FUNC,
+				sub_type = HenVirtualCNode.SubType.USER_FUNC,
 				inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_data()),
 				outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_data()),
 				route = HenRouter.current_route,
@@ -343,7 +364,8 @@ class FuncData:
 			item.load_save(item_data)
 			local_vars.append(item)
 
-		HenLoader._load_vc(_data.virtual_cnode_list, route)
+		cnode_list_to_load = _data.virtual_cnode_list
+		# HenLoader._load_vc(_data.virtual_cnode_list, route)
 
 	func get_inspector_array_list() -> Array:
 		return [
@@ -357,18 +379,18 @@ class FuncData:
 				name = 'inputs',
 				type = &'Array',
 				value = inputs,
-				item_creation_callback = create_param.bind(FuncData.ParamType.INPUT),
-				item_move_callback = move_param.bind(FuncData.ParamType.INPUT),
-				item_delete_callback = delete_param.bind(FuncData.ParamType.INPUT),
+				item_creation_callback = create_param.bind(ParamType.INPUT),
+				item_move_callback = move_param.bind(ParamType.INPUT),
+				item_delete_callback = delete_param.bind(ParamType.INPUT),
 				field = {name = '', type = '@Param'}
 			}),
 			HenInspector.InspectorItem.new({
 				name = 'outputs',
 				type = &'Array',
 				value = outputs,
-				item_creation_callback = create_param.bind(FuncData.ParamType.OUTPUT),
-				item_move_callback = move_param.bind(FuncData.ParamType.OUTPUT),
-				item_delete_callback = delete_param.bind(FuncData.ParamType.OUTPUT),
+				item_creation_callback = create_param.bind(ParamType.OUTPUT),
+				item_move_callback = move_param.bind(ParamType.OUTPUT),
+				item_delete_callback = delete_param.bind(ParamType.OUTPUT),
 				field = {name = '', type = '@Param'}
 			})
 		]
@@ -390,6 +412,7 @@ class SignalData:
 	var signal_name_to_code: StringName
 	var signal_enter: HenVirtualCNode
 	var local_vars: Array
+	var cnode_list_to_load: Array
 
 	func _init(_load_vc: bool = true) -> void:
 		route = {
@@ -543,7 +566,228 @@ class SignalData:
 			item.load_save(item_data)
 			local_vars.append(item)
 
-		HenLoader._load_vc(_data.virtual_cnode_list, route)
+		cnode_list_to_load = _data.virtual_cnode_list
+		# HenLoader._load_vc(_data.virtual_cnode_list, route)
+
+
+class MacroData:
+	signal name_changed
+	signal flow_added(_is_input: bool, _data: Dictionary)
+	signal in_out_added(_is_input: bool, _data: Dictionary)
+
+	var id: int = HenGlobal.get_new_node_counter()
+	var name: String = 'macro ' + str(Time.get_ticks_usec()): set = on_change_name
+	var route: Dictionary
+	var virtual_cnode_list: Array = []
+	var inputs: Array
+	var outputs: Array
+	var inputs_value: Array
+	var outputs_value: Array
+	var input_ref: HenVirtualCNode
+	var output_ref: HenVirtualCNode
+	var local_vars: Array
+	var cnode_list_to_load: Array
+	var macro_ref_list: Array
+
+	class MacroInOut:
+		var id: int = HenGlobal.get_new_node_counter()
+		var name: String
+
+		signal moved
+		signal deleted
+
+		func get_data() -> Dictionary:
+			return {name = name, ref = self}
+		
+		func get_save() -> Dictionary:
+			return {
+				name = name,
+				id = id
+			}
+		
+		func load_save(_data: Dictionary) -> void:
+			id = _data.id
+			name = _data.name
+			
+			HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+
+	func _init(_load_vc: bool = true) -> void:
+		route = {
+			name = name,
+			type = HenRouter.ROUTE_TYPE.MACRO,
+			id = HenUtilsName.get_unique_name(),
+			ref = self
+		}
+
+		HenRouter.line_route_reference[route.id] = []
+		HenRouter.comment_reference[route.id] = []
+
+		if _load_vc:
+			HenVirtualCNode.instantiate_virtual_cnode({
+				name = 'input',
+				type = HenVirtualCNode.Type.MACRO_INPUT,
+				sub_type = HenVirtualCNode.SubType.MACRO_INPUT,
+				route = route,
+				position = Vector2.ZERO,
+				ref = self
+			})
+
+			HenVirtualCNode.instantiate_virtual_cnode({
+				name = 'output',
+				type = HenVirtualCNode.Type.MACRO_OUTPUT,
+				sub_type = HenVirtualCNode.SubType.MACRO_OUTPUT,
+				route = route,
+				position = Vector2(400, 0),
+				ref = self
+			})
+
+	func on_change_name(_name: String) -> void:
+		name = _name
+		name_changed.emit(_name)
+
+	func crate_flow(_type: ParamType) -> void:
+		var flow: MacroInOut = MacroInOut.new()
+
+		match _type:
+			ParamType.INPUT:
+				flow.name = 'Flow ' + str(inputs.size())
+				inputs.append(flow)
+				flow_added.emit(true, flow.get_data())
+			ParamType.OUTPUT:
+				flow.name = 'Flow ' + str(outputs.size())
+				outputs.append(flow)
+				flow_added.emit(false, flow.get_data())
+
+	
+	func create_param(_type: ParamType) -> void:
+		var in_out: Param = Param.new()
+
+		match _type:
+			ParamType.INPUT:
+				inputs_value.append(in_out)
+				in_out_added.emit(true, in_out.get_data())
+			ParamType.OUTPUT:
+				outputs_value.append(in_out)
+				in_out_added.emit(false, in_out.get_data())
+		
+
+	func move_param(_ref: Param, _type: ParamType) -> void:
+		match _type:
+			ParamType.INPUT:
+				_ref.moved.emit(true, inputs_value.find(_ref))
+			ParamType.OUTPUT:
+				_ref.moved.emit(false, outputs_value.find(_ref))
+
+
+	func delete_param(_ref: Param, _type: ParamType) -> void:
+		_ref.deleted.emit(_type == ParamType.INPUT)
+
+
+	func move_flow(_ref: MacroInOut, _type: ParamType) -> void:
+		match _type:
+			ParamType.INPUT:
+				_ref.moved.emit(inputs.find(_ref))
+			ParamType.OUTPUT:
+				_ref.moved.emit(outputs.find(_ref))
+
+
+	func delete_flow(_ref: MacroInOut, _type: ParamType) -> void:
+		_ref.deleted.emit()
+
+
+	func get_cnode_data() -> Dictionary:
+		return {
+				name = name,
+				type = HenVirtualCNode.Type.MACRO,
+				sub_type = HenVirtualCNode.SubType.MACRO,
+				inputs = inputs_value.map(func(x: Param) -> Dictionary: return x.get_data()),
+				outputs = outputs_value.map(func(x: Param) -> Dictionary: return x.get_data()),
+				route = HenRouter.current_route,
+				ref = self
+		}
+
+
+	func get_inspector_array_list() -> Array:
+		return [
+			HenInspector.InspectorItem.new({
+				name = 'name',
+				type = &'String',
+				value = name,
+				ref = self
+			}),
+			HenInspector.InspectorItem.new({
+				name = 'inputs',
+				type = &'Array',
+				value = inputs,
+				item_creation_callback = crate_flow.bind(ParamType.INPUT),
+				item_move_callback = move_flow.bind(ParamType.INPUT),
+				item_delete_callback = delete_flow.bind(ParamType.INPUT),
+				field = {name = 'name', type = 'String'}
+			}),
+			HenInspector.InspectorItem.new({
+				name = 'outputs',
+				type = &'Array',
+				value = outputs,
+				item_creation_callback = crate_flow.bind(ParamType.OUTPUT),
+				item_move_callback = move_flow.bind(ParamType.OUTPUT),
+				item_delete_callback = delete_flow.bind(ParamType.OUTPUT),
+				field = {name = 'name', type = 'String'}
+			}),
+			
+			HenInspector.InspectorItem.new({
+				name = 'inputs_value',
+				type = &'Array',
+				value = inputs_value,
+				item_creation_callback = create_param.bind(ParamType.INPUT),
+				item_move_callback = move_param.bind(ParamType.INPUT),
+				item_delete_callback = delete_param.bind(ParamType.INPUT),
+				field = {name = '', type = '@Param'}
+			}),
+			HenInspector.InspectorItem.new({
+				name = 'outputs_value',
+				type = &'Array',
+				value = outputs_value,
+				item_creation_callback = create_param.bind(ParamType.OUTPUT),
+				item_move_callback = move_param.bind(ParamType.OUTPUT),
+				item_delete_callback = delete_param.bind(ParamType.OUTPUT),
+				field = {name = '', type = '@Param'}
+			})
+		]
+
+		
+	func get_save() -> Dictionary:
+		return {
+			id = id,
+			name = name,
+			inputs = inputs.map(func(x: MacroInOut) -> Dictionary: return x.get_save()),
+			outputs = outputs.map(func(x: MacroInOut) -> Dictionary: return x.get_save()),
+			virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
+			local_vars = local_vars.map(func(x: VarData) -> Dictionary: return x.get_save()),
+		}
+	
+	func load_save(_data: Dictionary) -> void:
+		name = _data.name
+		id = _data.id
+
+		HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+
+		for item_data: Dictionary in _data.inputs:
+			var item: MacroInOut = MacroInOut.new()
+			item.load_save(item_data)
+			inputs.append(item)
+
+		for item_data: Dictionary in _data.outputs:
+			var item: MacroInOut = MacroInOut.new()
+			item.load_save(item_data)
+			outputs.append(item)
+		
+		for item_data: Dictionary in _data.local_vars:
+			var item: VarData = VarData.new()
+			item.load_save(item_data)
+			local_vars.append(item)
+
+		cnode_list_to_load = _data.virtual_cnode_list
+		# HenLoader._load_vc(_data.virtual_cnode_list, route)
 
 
 func _ready() -> void:
@@ -565,6 +809,7 @@ func _ready() -> void:
 	(get_node('%Var') as Button).pressed.connect(_on_change_list.bind(AddType.VAR))
 	(get_node('%Func') as Button).pressed.connect(_on_change_list.bind(AddType.FUNC))
 	(get_node('%Signal') as Button).pressed.connect(_on_change_list.bind(AddType.SIGNAL))
+	(get_node('%Macro') as Button).pressed.connect(_on_change_list.bind(AddType.MACRO))
 
 	list.item_activated.connect(_on_enter)
 	list.item_clicked.connect(_on_click)
@@ -576,6 +821,8 @@ func _on_enter(_index: int) -> void:
 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.func_list[_index] as FuncData).route)
 		AddType.SIGNAL:
 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.signal_list[_index] as SignalData).route)
+		AddType.MACRO:
+			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.macro_list[_index] as MacroData).route)
 
 
 func _on_click(_index: int, _at_position: Vector2, _mouse_button_index: int) -> void:
@@ -609,7 +856,7 @@ func update_list() -> void:
 
 func show_local_var_bt() -> void:
 	match HenRouter.current_route.type:
-		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL:
+		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
 			local_var_bt.visible = true
 		_:
 			local_var_bt.visible = false
