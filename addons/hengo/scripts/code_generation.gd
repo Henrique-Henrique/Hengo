@@ -109,6 +109,12 @@ static func generate() -> String:
 	
 	# search for override virtual inside macros
 	for macro: HenSideBar.MacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+		# macro variables
+		for macro_var: HenSideBar.VarData in macro.local_vars:
+			for macro_ref: HenVirtualCNode in macro.macro_ref_list:
+				code += generate_var_code(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}))
+
+		# macro override virtuals
 		for v_cnode: HenVirtualCNode in macro.virtual_cnode_list:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				for macro_ref: HenVirtualCNode in macro.macro_ref_list:
@@ -381,7 +387,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 	return data
 
 
-static func generate_var_code(_var_data: HenSideBar.VarData) -> String:
+static func generate_var_code(_var_data: HenSideBar.VarData, _custom_name: String = '') -> String:
 	var var_code: String = ''
 	var type_value: String = 'null'
 
@@ -394,7 +400,7 @@ static func generate_var_code(_var_data: HenSideBar.VarData) -> String:
 		type_value = _var_data.type + '.new()'
 
 	var_code += '{export_var}var {name} = {value}\n'.format({
-		name = _var_data.name.to_snake_case(),
+		name = _var_data.name.to_snake_case() if not _custom_name else _custom_name,
 		value = type_value,
 		export_var = '@export ' if _var_data.export else ''
 	})

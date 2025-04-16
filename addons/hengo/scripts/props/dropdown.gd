@@ -45,7 +45,7 @@ func _on_pressed() -> void:
 
 			# local variables
 			match HenRouter.current_route.type:
-				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL:
+				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
 					if HenRouter.current_route.ref.get(&'local_vars') is Array:
 						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
 							if (input_ref.type == &'Variant' or var_data.type == &'Variant') or var_data.type == input_ref.type:
@@ -92,7 +92,7 @@ func _on_pressed() -> void:
 			
 			# local variables
 			match HenRouter.current_route.type:
-				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL:
+				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
 					if HenRouter.current_route.ref.get(&'local_vars') is Array:
 						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
 							arr.append({name = var_data.name, type = var_data.type, ref = var_data})

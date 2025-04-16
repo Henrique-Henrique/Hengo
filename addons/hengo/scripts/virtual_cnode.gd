@@ -80,6 +80,7 @@ var virtual_cnode_list: Array = []
 var virtual_sub_type_vc_list: Array = []
 var ref_id: int = -1
 var ref: Object
+var is_deleted: bool = false
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -504,6 +505,7 @@ class VCNodeReturn:
 		old_from_flow_connections.clear()
 		old_flow_connections.clear()
 
+		v_cnode.is_deleted = false
 		v_cnode.update()
 	
 
@@ -561,6 +563,7 @@ class VCNodeReturn:
 		v_cnode.input_connections.clear()
 		v_cnode.output_connections.clear()
 		v_cnode.hide()
+		v_cnode.is_deleted = true
 	
 
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
@@ -948,7 +951,7 @@ func hide() -> void:
 
 
 func update() -> void:
-	if not route_ref or not HenRouter.current_route or route_ref.id != HenRouter.current_route.id:
+	if is_deleted or (not route_ref or not HenRouter.current_route or route_ref.id != HenRouter.current_route.id):
 		hide()
 		return
 
@@ -1089,7 +1092,6 @@ func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 		HenVirtualCNode.SubType.MACRO:
 			_token_list.append(get_macro_token(_input_idx))
 		HenVirtualCNode.SubType.MACRO_OUTPUT:
-			print('ytt ', HenGlobal.USE_MACRO_REF)
 			if HenGlobal.USE_MACRO_REF:
 				var flow: FlowConnectionData = HenGlobal.MACRO_REF.flow_connections[_input_idx]
 
@@ -1182,6 +1184,9 @@ func get_input_token(_idx: int) -> Dictionary:
 				var data: Dictionary = connection.from.get_token(connection.from_idx)
 				data.prop_name = input.name
 
+				if HenGlobal.USE_MACRO_REF:
+					data.value += '_' + str(HenGlobal.MACRO_REF.id)
+
 				if input.is_ref:
 					data.is_ref = input.is_ref
 
@@ -1194,7 +1199,9 @@ func get_input_token(_idx: int) -> Dictionary:
 			use_self = (route_ref.type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF
 		}
 
-		print('kkk ', HenGlobal.MACRO_USE_SELF, '  ', input.name)
+		if HenGlobal.USE_MACRO_REF:
+			if input.category == 'class_props':
+				data.value += '_' + str(HenGlobal.MACRO_REF.id)
 
 		if input.is_ref:
 			data.is_ref = input.is_ref

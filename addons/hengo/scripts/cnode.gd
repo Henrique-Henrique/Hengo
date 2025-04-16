@@ -49,8 +49,7 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		for out in virtual_ref.inputs:
-			print(out.get_save())
+		print(virtual_ref.id)
 	# 	for conf: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
 	# 		print(conf.from_connections)
 		# print('int: ', virtual_ref.input_connections)
