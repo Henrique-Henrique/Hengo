@@ -761,6 +761,8 @@ class MacroData:
 			name = name,
 			inputs = inputs.map(func(x: MacroInOut) -> Dictionary: return x.get_save()),
 			outputs = outputs.map(func(x: MacroInOut) -> Dictionary: return x.get_save()),
+			inputs_value = inputs_value.map(func(x: Param) -> Dictionary: return x.get_save()),
+			outputs_value = outputs_value.map(func(x: Param) -> Dictionary: return x.get_save()),
 			virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
 			local_vars = local_vars.map(func(x: VarData) -> Dictionary: return x.get_save()),
 		}
@@ -785,6 +787,16 @@ class MacroData:
 			var item: VarData = VarData.new()
 			item.load_save(item_data)
 			local_vars.append(item)
+
+		for item_data: Dictionary in _data.inputs_value:
+			var item: Param = Param.new()
+			item.load_save(item_data)
+			inputs_value.append(item)
+
+		for item_data: Dictionary in _data.outputs_value:
+			var item: Param = Param.new()
+			item.load_save(item_data)
+			outputs_value.append(item)
 
 		cnode_list_to_load = _data.virtual_cnode_list
 		# HenLoader._load_vc(_data.virtual_cnode_list, route)

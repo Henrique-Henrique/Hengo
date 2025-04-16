@@ -1420,7 +1420,7 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary) -> InOutData:
 			_is_input = not _is_input
 		SubType.SIGNAL_DISCONNECTION:
 			return
-	
+
 	if _data.has('ref_id'):
 		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
 	
@@ -1657,14 +1657,14 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('inputs'):
 		for input_data: Dictionary in _config.inputs:
-			var input: InOutData = v_cnode._on_in_out_added(true, input_data)
+			var input: InOutData = v_cnode._on_in_out_added(v_cnode.sub_type != SubType.MACRO_OUTPUT, input_data)
 
 			if not input_data.has('code_value'):
 				input.reset_input_value()
 
 	if _config.has('outputs'):
 		for output_data: Dictionary in _config.outputs:
-			v_cnode._on_in_out_added(false, output_data)
+			v_cnode._on_in_out_added(v_cnode.sub_type == SubType.MACRO_INPUT, output_data)
 
 	return v_cnode
 
