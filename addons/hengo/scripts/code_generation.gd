@@ -95,9 +95,12 @@ static func generate() -> String:
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				if v_cnode.flow_connections[0].to:
 					if not override_virtual_data.has(v_cnode.name):
-						override_virtual_data[v_cnode.name] = []
+						override_virtual_data[v_cnode.name] = {
+							params = v_cnode.get_output_token_list(),
+							tokens = []
+						}
 
-					override_virtual_data[v_cnode.name].append_array(v_cnode.get_flow_token_list(0))
+					override_virtual_data[v_cnode.name].tokens.append_array((v_cnode.flow_connections[0].to as HenVirtualCNode).get_flow_token_list(0))
 
 	
 	# search for override virtual inside macros
@@ -117,19 +120,32 @@ static func generate() -> String:
 					HenGlobal.USE_MACRO_USE_SELF = true
 					if v_cnode.flow_connections[0].to:
 						if not override_virtual_data.has(v_cnode.name):
-							override_virtual_data[v_cnode.name] = []
+							override_virtual_data[v_cnode.name] = {
+								params = v_cnode.get_output_token_list(),
+								tokens = []
+							}
 
-						override_virtual_data[v_cnode.name].append_array(v_cnode.get_flow_token_list(0))
+						override_virtual_data[v_cnode.name].tokens.append_array((v_cnode.flow_connections[0].to as HenVirtualCNode).get_flow_token_list(0))
 					HenGlobal.USE_MACRO_REF = false
 
 	var ready_code: Array = []
+	var process_code: Array = []
+	var physics_process_code: Array = []
 
 	for key: StringName in override_virtual_data.keys():
 		match key:
-			'_ready':
-				for token: Dictionary in override_virtual_data.get(key):
+			&'_ready':
+				for token: Dictionary in override_virtual_data.get(key).tokens:
 					var _code: String = parse_token_by_type(token, 1)
 					if _code: ready_code.append(_code)
+			&'_process':
+				for token: Dictionary in override_virtual_data.get(key).tokens:
+					var _code: String = parse_token_by_type(token, 1)
+					if _code: process_code.append(_code)
+			&'_physics_process':
+				for token: Dictionary in override_virtual_data.get(key).tokens:
+					var _code: String = parse_token_by_type(token, 1)
+					if _code: physics_process_code.append(_code)
 
 	# print('tr ', ready_code)
 
@@ -156,9 +172,11 @@ func trigger_event(_event: String) -> void:
 
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
+{_process}
 
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
+{_physics_process}
 """.format({
 		events = ' { \n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
@@ -168,8 +186,28 @@ func _physics_process(delta: float) -> void:
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
 		start_state_name = start_state.name.to_snake_case() if start_state else '',
-		_ready = '\n'.join(ready_code)
+		_ready = '\n'.join(ready_code),
+		_process = '\n'.join(process_code),
+		_physics_process = '\n'.join(physics_process_code)
 	})
+
+	# override methods
+	print('tt ', override_virtual_data)
+	for key: String in override_virtual_data:
+		if not [&'_ready', &'_process', &'_physics_process'].has(key):
+			var virtual_token: Dictionary = override_virtual_data.get(key)
+			
+			base_template += 'func {name}({params}):\n'.format({
+				name = key.to_snake_case(),
+				params = ', '.join(virtual_token.params.map(
+					func(x: Dictionary) -> String:
+						return x.name.to_snake_case()
+			))
+			})
+
+			for token: Dictionary in virtual_token.tokens:
+				base_template += '\t' + parse_token_by_type(token) + '\n'
+			
 
 	# functions
 	var func_code: String = ''
@@ -206,11 +244,6 @@ func _physics_process(delta: float) -> void:
 			for token in func_tokens:
 				func_block.append(parse_token_by_type(token, 1))
 
-			# debug
-			# func_block.append(parse_token_by_type(
-			# 	get_debug_token(func_data.virtual_cnode_list[0]),
-			# 	1
-			# ))
 
 			func_code += '\n'.join(func_block) + '\n'
 			func_code += '\t' + get_debug_push_str() + '\n'
@@ -486,7 +519,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						return parse_token_by_type(x)
 			))
 			})
-		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT:
+		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 			return _token.param
 		HenVirtualCNode.SubType.IF:
 			var base: String = 'if {condition}:\n'.format({

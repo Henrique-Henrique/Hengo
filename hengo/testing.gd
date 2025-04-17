@@ -1,4 +1,4 @@
-#[hengo] {"comments":[],"connections":[],"debug_symbols":{},"flow_connections":[],"func_list":[],"generals":[],"node_counter":5,"prop_counter":0,"props":[],"side_bar_list":{"func_list":[],"macro_list":[],"signal_list":[],"var_list":[]},"state_event_list":[],"type":"Sprite2D","virtual_cnode_list":[{"flow_connections":[],"id":1,"input_connections":[],"name":"State","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(91, 92)","sub_type":36,"type":6},{"flow_connections":[{"to_id":3,"to_idx":0}],"id":2,"input_connections":[],"inputs":[{"category":"default_value","code_value":"_ref.","is_ref":true,"name":"Sprite2D","type":"Sprite2D"}],"name":"_ready","output_connections":[],"position":"Vector2(437.038, 12.639)","size":"Vector2(210, 112)","sub_type":44,"type":0},{"category":"native","flow_connections":[],"id":3,"input_connections":[],"inputs":[{"category":"default_value","code_value":"null","name":"content","type":"Variant","value":"null"}],"name":"print","output_connections":[],"position":"Vector2(438.942, 437.274)","size":"Vector2(200, 112)","sub_type":1,"type":0},{"flow_connections":[{"to_id":3,"to_idx":0}],"id":4,"input_connections":[],"inputs":[{"category":"default_value","code_value":"_ref.","is_ref":true,"name":"Sprite2D","type":"Sprite2D"},{"category":"default_value","code_value":"0.","name":"delta","type":"float","value":"0."}],"name":"_process","output_connections":[],"position":"Vector2(987.581, 0.357783)","size":"Vector2(210, 160)","sub_type":44,"type":0},{"flow_connections":[{"to_id":3,"to_idx":0}],"id":5,"input_connections":[],"inputs":[{"category":"default_value","code_value":"_ref.","is_ref":true,"name":"Sprite2D","type":"Sprite2D"},{"category":"default_value","code_value":"0.","name":"delta","type":"float","value":"0."}],"name":"_physics_process","output_connections":[],"position":"Vector2(1313.08, 27.4831)","size":"Vector2(210, 160)","sub_type":44,"type":0}]}
+#[hengo] {"comments":[],"connections":[],"debug_symbols":{},"flow_connections":[],"func_list":[],"generals":[],"node_counter":15,"prop_counter":0,"props":[],"side_bar_list":{"func_list":[],"macro_list":[{"id":2,"inputs":[],"inputs_value":[],"local_vars":[],"name":"my macro","outputs":[],"outputs_value":[],"virtual_cnode_list":[{"flow_connections":[],"id":3,"input_connections":[],"name":"my macro","output_connections":[],"position":"Vector2(0, 0)","ref_id":2,"size":"Vector2(0, 0)","sub_type":42,"type":9},{"flow_connections":[],"id":4,"input_connections":[],"name":"my macro","output_connections":[],"position":"Vector2(400, 0)","ref_id":2,"size":"Vector2(0, 0)","sub_type":43,"type":10},{"flow_connections":[{"to_id":6,"to_idx":0}],"id":5,"input_connections":[],"name":"_input","output_connections":[],"outputs":[{"name":"event","type":"InputEvent"}],"position":"Vector2(-520.41, 19.7222)","size":"Vector2(0, 0)","sub_type":44,"type":0},{"category":"native","flow_connections":[],"id":6,"input_connections":[],"inputs":[{"category":"default_value","code_value":"\"dddd\"","name":"content","type":"String","value":"dddd"}],"name":"print","output_connections":[],"position":"Vector2(-572.719, 358.197)","size":"Vector2(0, 0)","sub_type":1,"type":0}]}],"signal_list":[],"var_list":[]},"state_event_list":[],"type":"Sprite2D","virtual_cnode_list":[{"flow_connections":[],"id":1,"input_connections":[],"name":"State","output_connections":[],"position":"Vector2(0, 0)","size":"Vector2(91, 92)","sub_type":36,"type":6},{"flow_connections":[],"id":8,"input_connections":[],"name":"my macro","output_connections":[],"position":"Vector2(423.307, 38.2495)","ref_id":2,"size":"Vector2(100, 52)","sub_type":41,"type":8},{"flow_connections":[],"id":9,"input_connections":[],"name":"my macro","output_connections":[],"position":"Vector2(786.405, 9.01698)","ref_id":2,"size":"Vector2(100, 52)","sub_type":41,"type":8},{"flow_connections":[{"to_id":11,"to_idx":0}],"id":10,"input_connections":[],"name":"_input","output_connections":[],"outputs":[{"name":"event","type":"InputEvent"}],"position":"Vector2(760.25, 193.643)","size":"Vector2(117, 111)","sub_type":44,"type":0},{"category":"native","flow_connections":[],"id":11,"input_connections":[{"from_idx":0,"from_vc_id":10,"idx":0}],"inputs":[{"category":"default_value","code_value":"null","name":"content","type":"Variant","value":"null"}],"name":"print","output_connections":[],"position":"Vector2(754.095, 573.666)","size":"Vector2(135, 111)","sub_type":1,"type":0},{"flow_connections":[{"to_id":14,"to_idx":0}],"id":13,"input_connections":[],"name":"_ready","output_connections":[],"position":"Vector2(1128.22, 140.778)","size":"Vector2(77, 68)","sub_type":44,"type":0},{"category":"native","flow_connections":[],"id":14,"input_connections":[],"inputs":[{"category":"default_value","code_value":"\"dsa\"","name":"content","type":"String","value":"dsa"}],"name":"print","output_connections":[],"position":"Vector2(1059.05, 424.042)","size":"Vector2(215, 116)","sub_type":1,"type":0}]}
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -24,7 +24,7 @@ func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("")
 	
-	print(null)
+	print("dsa")
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -33,7 +33,13 @@ func trigger_event(_event: String) -> void:
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
 
+
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
+
+func _input(event):
+	print(event)
+	print("dddd")
+	print("dddd")
 
 

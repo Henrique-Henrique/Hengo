@@ -506,29 +506,48 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _type: String) -
 		data = {
 			name = _dict.name,
 			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage) if _dict.flags != METHOD_FLAG_VIRTUAL else HenVirtualCNode.SubType.OVERRIDE_VIRTUAL,
-			inputs = [ {
-				name = _class_name,
-				type = _class_name,
-				is_ref = true
-			}] + (_dict.args as Array).map(
-				func(arg) -> Dictionary:
-					match arg.usage:
-						65542:
-							return {
-								name = arg.name,
-								sub_type = '@dropdown',
-								category = 'enum_list',
-								data = arg.class_name.split('.'),
-							}
-						_:
-							return {
-							name = arg.name,
-							type = _get_typeny_arg(arg)
-						}
-					),
 			route = HenRouter.current_route
 		},
 	}
+
+	if _dict.flags == METHOD_FLAG_VIRTUAL:
+		obj.data.outputs = (_dict.args as Array).map(
+			func(arg) -> Dictionary:
+				match arg.usage:
+					65542:
+						return {
+							name = arg.name,
+							sub_type = '@dropdown',
+							category = 'enum_list',
+							data = arg.class_name.split('.'),
+						}
+					_:
+						return {
+						name = arg.name,
+						type = _get_typeny_arg(arg)
+					}
+				)
+	else:
+		obj.data.inputs = [ {
+			name = _class_name,
+			type = _class_name,
+			is_ref = true
+		}] + (_dict.args as Array).map(
+			func(arg) -> Dictionary:
+				match arg.usage:
+					65542:
+						return {
+							name = arg.name,
+							sub_type = '@dropdown',
+							category = 'enum_list',
+							data = arg.class_name.split('.'),
+						}
+					_:
+						return {
+						name = arg.name,
+						type = _get_typeny_arg(arg)
+					}
+				)
 
 
 	# it's a void or return a variant
