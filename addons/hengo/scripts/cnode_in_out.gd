@@ -111,12 +111,13 @@ func _on_gui(_event: InputEvent) -> void:
 			elif HenGlobal.can_make_connection and not HenGlobal.connection_to_data.is_empty():
 				# try connection
 				var connection: HenVirtualCNode.ConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
-			
-				HenGlobal.history.create_action('Add Connection')
-				HenGlobal.history.add_do_method(connection.add)
-				HenGlobal.history.add_do_reference(connection)
-				HenGlobal.history.add_undo_method(connection.remove)
-				HenGlobal.history.commit_action()
+
+				if connection:
+					HenGlobal.history.create_action('Add Connection')
+					HenGlobal.history.add_do_method(connection.add)
+					HenGlobal.history.add_do_reference(connection)
+					HenGlobal.history.add_undo_method(connection.remove)
+					HenGlobal.history.commit_action()
 
 			HenGlobal.CONNECTION_GUIDE.end()
 
@@ -181,27 +182,10 @@ func is_type_relatable(_from_type: String, _to_type: String, _from_conn_type: St
 	or not _from_type == 'out' and _to_type == 'in':
 		return false
 
-	if _from_conn_type == _to_conn_type:
-		return true
-
-	if _from_conn_type == 'Variant' or _to_conn_type == 'Variant':
-		return true
-
-	# checking if is native types
-	if HenEnums.VARIANT_TYPES.has(_from_conn_type):
-		if not _from_conn_type == _to_conn_type:
-			return false
-	# if it's not native, it's a class
-	else:
-		# checking if types is relatable
-		if _from_type == 'out':
-			if not ClassDB.is_parent_class(_from_conn_type, _to_conn_type):
-				return false
-		else:
-			if not ClassDB.is_parent_class(_to_conn_type, _from_conn_type):
-				return false
-
-	return true
+	return HenUtils.is_type_relation_valid(
+		_from_conn_type if _from_type == 'out' else _to_conn_type,
+		_to_conn_type if _to_type == 'in' else _from_conn_type
+	)
 
 
 # public

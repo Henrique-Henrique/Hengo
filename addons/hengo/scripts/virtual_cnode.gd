@@ -174,7 +174,8 @@ class InOutData:
 				RefChangeRule.IS_PROP:
 					if _name == 'type':
 						# if new type is diffent, reset input
-						if _value != 'Variant' and type != 'Variant' and _value != type:
+						if not HenUtils.is_type_relation_valid(_value, type):
+						# if _value != 'Variant' and type != 'Variant' and _value != type:
 							reset_input_value()
 							remove_ref()
 							return

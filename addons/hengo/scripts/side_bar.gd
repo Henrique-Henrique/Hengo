@@ -467,7 +467,7 @@ class SignalData:
 				name = name,
 				fantasy_name = 'Signal -> ' + name,
 				sub_type = HenVirtualCNode.SubType.SIGNAL_CONNECTION,
-				inputs = [ {name = type, type = 'Variant', is_ref = true}] + bind_params.map(func(x: Param) -> Dictionary: return x.get_data()),
+				inputs = [ {name = type, type = type, is_ref = true}] + bind_params.map(func(x: Param) -> Dictionary: return x.get_data()),
 				route = HenRouter.current_route,
 				ref = self
 		}
@@ -477,7 +477,7 @@ class SignalData:
 				name = name,
 				fantasy_name = 'Dis Signal -> ' + name,
 				sub_type = HenVirtualCNode.SubType.SIGNAL_DISCONNECTION,
-				inputs = [ {name = type, type = 'Variant', is_ref = true}],
+				inputs = [ {name = type, type = type, is_ref = true}],
 				route = HenRouter.current_route,
 				ref = self
 		}

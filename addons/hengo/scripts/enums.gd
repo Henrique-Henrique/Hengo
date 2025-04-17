@@ -55,6 +55,33 @@ const VARIANT_TYPES: PackedStringArray = [
     'Variant',
 ]
 
+const RULES_TO_CONNECT: Dictionary = {
+    int = ['float'],
+    float = ['int'],
+    String = ['StringName'],
+    StringName = ['String'],
+    Vector2 = ['Vector2i'],
+    Vector2i = ['Vector2'],
+    Vector3 = ['Vector3i'],
+    Vector3i = ['Vector3'],
+    Vector4 = ['Vector4i'],
+    Vector4i = ['Vector4'],
+    Rect2 = ['Rect2i'],
+    Rect2i = ['Rect2'],
+    Array = ['PackedByteArray', 'PackedInt32Array', 'PackedInt64Array', 'PackedFloat32Array', 'PackedFloat64Array', 'PackedStringArray', 'PackedVector2Array', 'PackedVector3Array', 'PackedColorArray'],
+    PackedFloat32Array = ['Array'],
+    PackedInt32Array = ['Array'],
+    PackedVector2Array = ['Array'],
+    PackedVector3Array = ['Array'],
+    PackedStringArray = ['Array'],
+    PackedByteArray = ['Array'],
+    PackedColorArray = ['Array'],
+    PackedFloat64Array = ['Array'],
+    PackedInt64Array = ['Array'],
+}
+
+var string: String = NodePath()
+
 # dynamic native api
 static var NATIVE_API_LIST: Dictionary = {}
 static var CONST_API_LIST: Dictionary = {}

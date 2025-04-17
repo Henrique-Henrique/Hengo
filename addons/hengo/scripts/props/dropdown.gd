@@ -48,7 +48,7 @@ func _on_pressed() -> void:
 				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
 					if HenRouter.current_route.ref.get(&'local_vars') is Array:
 						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
-							if (input_ref.type == &'Variant' or var_data.type == &'Variant') or var_data.type == input_ref.type:
+							if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 								arr.append({
 									name = var_data.name,
 									category = 'class_props',
@@ -57,7 +57,7 @@ func _on_pressed() -> void:
 
 			# variables
 			for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
-				if (input_ref.type == &'Variant' or var_data.type == &'Variant') or var_data.type == input_ref.type:
+				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 					arr.append({
 						name = var_data.name,
 						category = 'class_props',
@@ -69,7 +69,7 @@ func _on_pressed() -> void:
 				var _type: StringName = input_ref.type
 				var prop_type: StringName = type_string(prop.type)
 				
-				if (_type == 'Variant' and prop.type != TYPE_NIL) or prop_type == _type:
+				if (_type == 'Variant' and prop.type != TYPE_NIL) or HenUtils.is_type_relation_valid(_type, prop_type):
 					arr.append({
 						name = prop.name,
 						category = 'class_props',
