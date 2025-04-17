@@ -219,6 +219,7 @@ var native_list: Array = [
 		name = 'For -> Range',
 		data = {
 			name = 'For -> Range',
+			type = HenVirtualCNode.Type.FOR,
 			sub_type = HenVirtualCNode.SubType.FOR,
 			inputs = [
 				{
@@ -247,6 +248,7 @@ var native_list: Array = [
 		name = 'For -> Item',
 		data = {
 			name = 'For -> Item',
+			type = HenVirtualCNode.Type.FOR,
 			sub_type = HenVirtualCNode.SubType.FOR_ARR,
 			inputs = [
 				{

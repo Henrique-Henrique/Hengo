@@ -4,6 +4,7 @@ class_name HenVirtualCNode extends RefCounted
 enum Type {
 	DEFAULT,
 	IF,
+	FOR,
 	IMG,
 	EXPRESSION,
 	STATE,
@@ -1004,12 +1005,9 @@ func get_save() -> Dictionary:
 		for v_cnode: HenVirtualCNode in virtual_cnode_list:
 			data.virtual_cnode_list.append(v_cnode.get_save())
 	
-
-	# match type:
-		
-	# if [Type.IF, Type.DEFAULT].has(type):
+	# these types don't need to save the flow connections, are hengo's native
 	match type:
-		Type.IF, Type.DEFAULT:
+		Type.IF, Type.FOR, Type.DEFAULT:
 			if not flow_connections.is_empty():
 				var flows: Array = []
 
@@ -1133,13 +1131,10 @@ func get_if_token() -> Dictionary:
 	if flow_connections[0].to:
 		var flow: FlowConnectionData = flow_connections[0]
 		true_flow = flow.to.get_flow_token_list(flow.to_idx)
-		# debug
-		# true_flow.append(HenCodeGeneration.get_debug_token(self, 'true_flow'))
 		
 	if flow_connections[1].to:
 		var flow: FlowConnectionData = flow_connections[1]
 		false_flow = flow.to.get_flow_token_list(flow.to_idx)
-		# false_flow.append(HenCodeGeneration.get_debug_token(self, 'false_flow'))
 
 	return {
 		type = HenVirtualCNode.SubType.IF,
@@ -1151,11 +1146,25 @@ func get_if_token() -> Dictionary:
 
 
 func get_for_token() -> Dictionary:
+	var body_flow: Array = []
+	var then_flow: Array = []
+
+	if flow_connections[0].to:
+		var flow: FlowConnectionData = flow_connections[0]
+		body_flow = flow.to.get_flow_token_list(flow.to_idx)
+		
+	if flow_connections[1].to:
+		var flow: FlowConnectionData = flow_connections[1]
+		then_flow = flow.to.get_flow_token_list(flow.to_idx)
+
 	return {
 		type = sub_type,
-		hash = get_instance_id(),
+		id = id,
+		body_flow = body_flow,
+		then_flow = then_flow,
 		params = get_input_token_list(),
-		flow = flow_connections[0].to.get_flow_token_list(flow_connections[0].to_idx) if flow_connections[0].to else []
+		index_name = outputs[0].name.to_snake_case(),
+		use_self = false
 	}
 
 
@@ -1278,18 +1287,13 @@ func get_token(_id: int = 0) -> Dictionary:
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT:
 			token.merge({
 				param = outputs[_id].name.to_snake_case(),
-				id = _id
 			})
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			return {
+				id = id,
 				type = HenVirtualCNode.SubType.FOR_ITEM,
-				hash = get_instance_id()
-			}
-		HenVirtualCNode.SubType.CAST:
-			return {
-				type = sub_type,
-				to = outputs[0].type,
-				# from = (get_node('%InputContainer').get_child(0) as HenCnodeInOut).get_token()
+				name = outputs[0].name.to_snake_case(),
+				use_self = true
 			}
 		HenVirtualCNode.SubType.IMG:
 			token.merge({
@@ -1616,6 +1620,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		Type.IF:
 			v_cnode.flow_connections.append(FlowConnectionData.new('true'))
 			v_cnode.flow_connections.append(FlowConnectionData.new('false'))
+			v_cnode.from_flow_connections.append(FromFlowConnection.new())
+		Type.FOR:
+			v_cnode.flow_connections.append(FlowConnectionData.new('body'))
+			v_cnode.flow_connections.append(FlowConnectionData.new('then'))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE:
 			v_cnode.route = {

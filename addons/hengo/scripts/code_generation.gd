@@ -1,10 +1,6 @@
 @tool
 class_name HenCodeGeneration extends Node
 
-# references
-static var _name_list: Array = []
-static var _name_counter: int = 0
-static var _name_ref: Dictionary = {}
 # debug
 static var _debug_counter: float = 1.
 static var _debug_symbols: Dictionary = {}
@@ -41,9 +37,6 @@ static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 
 static func generate() -> String:
 	# reseting internal variables
-	_name_list = []
-	_name_counter = 0
-	_name_ref = {}
 	_debug_counter = 1.
 	_debug_symbols = {}
 
@@ -174,12 +167,12 @@ func _physics_process(delta: float) -> void:
 				to_state_name = ev.to_state_name.to_snake_case()
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
-		start_state_name = start_state.name.to_snake_case(),
+		start_state_name = start_state.name.to_snake_case() if start_state else '',
 		_ready = '\n'.join(ready_code)
 	})
 
 	# functions
-	var func_code: String = '\n# Functions\n'
+	var func_code: String = ''
 
 	for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
 		# generating function
@@ -241,7 +234,7 @@ func _physics_process(delta: float) -> void:
 	# end functions
 
 	# signal callables
-	var signal_code: String = '#\n\n# Signals Callables\n'
+	var signal_code: String = ''
 
 
 	for signal_item: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
@@ -293,23 +286,30 @@ func _physics_process(delta: float) -> void:
 
 	# parsing base template
 	# adding states and transitions
-	base_template = base_template.format({
-		states_dict = ',\n'.join(states_data.keys().map(
-			func(state_name: String) -> String:
-				return '\t\t{key}={c_name}.new(self{transitions})'.format({
-					key = state_name,
-					c_name = state_name.to_pascal_case(),
-					transitions = ', {\n\t\t\t' + ',\n\t\t\t'.join(states_data[state_name].transitions.map(
-					func(trans: Dictionary) -> String:
-					return '{state_name}="{to_state_name}"'.format({
-						state_name = trans.name.to_snake_case(),
-						to_state_name = trans.to_state_name.to_snake_case()
+
+	if not states_data.is_empty():
+		base_template = base_template.format({
+			states_dict = ',\n'.join(states_data.keys().map(
+				func(state_name: String) -> String:
+					return '\t\t{key}={c_name}.new(self{transitions})'.format({
+						key = state_name,
+						c_name = state_name.to_pascal_case(),
+						transitions = ', {\n\t\t\t' + ',\n\t\t\t'.join(states_data[state_name].transitions.map(
+						func(trans: Dictionary) -> String:
+						return '{state_name}="{to_state_name}"'.format({
+							state_name = trans.name.to_snake_case(),
+							to_state_name = trans.to_state_name.to_snake_case()
+						})
+						)) + '\n\t\t}' if states_data[state_name].transitions.size() > 0 else ''
 					})
-					)) + '\n\t\t}' if states_data[state_name].transitions.size() > 0 else ''
-				})
-	)),
-		first_state = states_data.keys()[0]
-	})
+		)),
+			first_state = states_data.keys()[0]
+		})
+	else:
+		base_template = base_template.format({
+			states_dict = ''
+		})
+
 
 	code += base_template
 
@@ -502,7 +502,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						parse_token_by_type(token, _level + 1)
 					)
 
-			code_list.append('')
+			# code_list.append('')
 
 			for token in _token.false_flow:
 				code_list.append(
@@ -519,20 +519,21 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.NOT_CONNECTED:
 			return 'null'
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
-			var flow: Array = []
-			var loop_item: String = get_sequence_name('loop_idx') if _token.type == HenVirtualCNode.SubType.FOR else get_sequence_name('loop_item')
+			var base: String = ''
+			var code_list: Array = []
+			var loop_item: String = _token.index_name + '_' + str(_token.id)
 
-			_name_ref[_token.hash] = loop_item
-
-			if _token.flow.size() <= 0:
-				flow.append(indent + '\tpass')
-
-			for token in _token.flow:
-				flow.append(parse_token_by_type(token, _level + 1))
+			if _token.body_flow.is_empty():
+				base += indent + '\tpass\n'
+			else:
+				for token: Dictionary in _token.body_flow:
+					code_list.append(parse_token_by_type(token, _level + 1))
 			
+			for token: Dictionary in _token.then_flow:
+				code_list.append(parse_token_by_type(token, _level))
+
 			if _token.type == HenVirtualCNode.SubType.FOR:
-				return indent + 'for {item_name} in range({params}):\n{flow}'.format({
-					flow = '\n'.join(flow),
+				base += 'for {item_name} in range({params}):\n'.format({
 					item_name = loop_item,
 					params = ', '.join(_token.params.map(
 						func(x: Dictionary) -> String:
@@ -540,13 +541,20 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				))
 				})
 			else:
-				return indent + 'for {item_name} in {arr}:\n{flow}'.format({
-					flow = '\n'.join(flow),
+				base += 'for {item_name} in {arr}:\n'.format({
 					item_name = loop_item,
 					arr = parse_token_by_type(_token.params[0])
 				})
+			
+			if code_list.is_empty():
+				if not _token.body_flow.is_empty():
+					base += indent + '\tpass'
+			else:
+				base += '\n'.join(code_list) + '\n\n'
+			
+			return '\n' + indent + base
 		HenVirtualCNode.SubType.FOR_ITEM:
-			return _name_ref[_token.hash]
+			return _token.name + '_' + str(_token.id)
 		HenVirtualCNode.SubType.BREAK:
 			# TODO check break and continue if is inside for loop
 			return indent + 'break'
@@ -631,17 +639,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level)))
 		_:
 			return ''
-
-
-static func get_sequence_name(_name: String) -> String:
-	if _name_list.has(_name):
-		_name_counter += 1
-		var new_name = _name + '_' + str(_name_counter)
-		_name_list.append(new_name)
-		return new_name
-
-	_name_list.append(_name)
-	return _name
 
 
 static func get_debug_token(_node: HenVirtualCNode, _flow: String = 'cnode') -> Dictionary:
