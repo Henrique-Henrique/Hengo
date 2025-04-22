@@ -843,7 +843,10 @@ func show() -> void:
 
 				
 			cnode.reset_size()
+			cnode.pivot_offset = cnode.size / 2
 			size = cnode.size
+
+			cnode.modulate = Color.WHITE
 
 			# drawing the connections	
 			await RenderingServer.frame_post_draw
@@ -1618,12 +1621,12 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			if not _config.has('to_flow'): v_cnode.flow_connections.append(FlowConnectionData.new())
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.IF:
-			v_cnode.flow_connections.append(FlowConnectionData.new('true'))
-			v_cnode.flow_connections.append(FlowConnectionData.new('false'))
+			v_cnode.flow_connections.append(FlowConnectionData.new('True'))
+			v_cnode.flow_connections.append(FlowConnectionData.new('False'))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.FOR:
-			v_cnode.flow_connections.append(FlowConnectionData.new('body'))
-			v_cnode.flow_connections.append(FlowConnectionData.new('then'))
+			v_cnode.flow_connections.append(FlowConnectionData.new('Body'))
+			v_cnode.flow_connections.append(FlowConnectionData.new('Then'))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE:
 			v_cnode.route = {

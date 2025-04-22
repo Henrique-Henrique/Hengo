@@ -48,85 +48,45 @@ func _ready():
 
 
 func _on_enter() -> void:
-	if virtual_ref:
-		print(virtual_ref.id)
-	# 	for conf: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
-	# 		print(conf.from_connections)
-		# print('int: ', virtual_ref.input_connections)
-		# print('out: ', virtual_ref.output_connections)
-	# 	print(virtual_ref.from_flow_connections[0].from_connections)
-	# 	for conn: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
-	# 		print(conn.from_connections)
-		# prints('flow: ', ;, virtual_ref.from_flow_connections)
-	# 	print(JSON.stringify(virtual_ref.inputs.map(func(x): return x.is_ref)))
-		# for dict: Dictionary in virtual_ref.output_connections:
-		# 	print(dict.to.input_connections)
-		# print('out: ', virtual_ref.output_connections, ' | ', virtual_ref.input_connections)
-		# print('flow -> ', virtual_ref.flow_connection)
-		# for out: HenVirtualCNode.OutputConnectionData in virtual_ref.output_connections:
-		# 	print(out.to_old_pos, ' ', out.line_ref.to_virtual_pos)
+	# if virtual_ref:
+	# 	print(virtual_ref.id)
 	_is_mouse_enter = true
-
-	# _preview_timer = get_tree().create_timer(.5)
-	# _preview_timer.timeout.connect(_on_tooltip)
-
 
 	if HenGlobal.can_make_flow_connection:
 		HenGlobal.flow_connection_to_data = {
 			to_cnode = self,
 			to_idx = 0
 		}
+	
+	# animations
+	var tween: Tween = get_tree().create_tween()
 
-		# if not HenGlobal.CONNECTION_GUIDE.is_in_out:
-		# 	var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(global_position)
-		# 	pos.x += size.x / 2
-
-		# 	HenGlobal.CONNECTION_GUIDE.hover_pos = pos
-		# 	HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color('#00f6ff'), Color('#00f6ff')]
-
-		# 	pivot_offset = size / 2
-		# 	var tween = create_tween().set_trans(Tween.TRANS_SPRING)
-		# 	tween.tween_property(self, 'scale', Vector2(1.05, 1.05), .03)
-		# 	tween.tween_property(HenGlobal.flow_cnode_from, 'scale', Vector2(1.05, 1.05), .03)
-			
-		# 	HenGlobal.flow_cnode_from.modulate = Color('#00f6ff')
-		# 	HenGlobal.flow_cnode_from.get_node('%Border').visible = true
-			
-		# 	modulate = Color('#00f6ff')
-		# 	get_node('%Border').visible = true
-		# 	get_node('%Border').get('theme_override_styles/panel').set('border_color', Color('#00f6ff'))
+	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .05)
+	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2(1.03, 1.03), .05).set_delay(0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
 
 
 func _on_exit() -> void:
 	HenGlobal.flow_connection_to_data = {}
 
-	if not HenGlobal.CONNECTION_GUIDE.is_in_out:
-		HenGlobal.DOCS_TOOLTIP.visible = false
-		HenGlobal.CONNECTION_GUIDE.hover_pos = null
-		HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color.GRAY, Color.GRAY]
+	# (%Border as Panel).modulate = Color.WHITE
+	var tween: Tween = get_tree().create_tween()
 
-		var tween2 = create_tween().set_trans(Tween.TRANS_SPRING)
-		tween2.tween_property(self, 'scale', Vector2(1, 1), .05)
-		
-		if HenGlobal.flow_cnode_from:
-			tween2.tween_property(HenGlobal.flow_cnode_from, 'scale', Vector2(1, 1), .05)
-			HenGlobal.flow_cnode_from.modulate = Color.WHITE
-			HenGlobal.flow_cnode_from.get_node('%Border').visible = false
+	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .2)
+	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2.ONE, .05).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
 
-		modulate = Color.WHITE
-		get_node('%Border').visible = false
 
-	# _is_mouse_enter = false
-	
-	# _preview_timer.timeout.disconnect(_on_tooltip)
+func _scale_and_update_line(_scale: Vector2) -> void:
+	scale = _scale
 
-	#TODO: reset this timer if hover again on other cnode
-	# get_tree().create_timer(.2).timeout.connect(func():
-	# 	if HenGlobal.DOCS_TOOLTIP.first_show:
-	# 		HenGlobal.DOCS_TOOLTIP.first_show = false
-	# 	else:
-	# 		HenGlobal.DOCS_TOOLTIP.hide_docs()
-	# 	)
+	if virtual_ref:
+		for from_connection: HenVirtualCNode.FromFlowConnection in virtual_ref.from_flow_connections:
+			for connetion: HenVirtualCNode.FlowConnectionData in from_connection.from_connections:
+				if connetion.line_ref:
+					connetion.line_ref.update_line()
+				
+		for connetion: HenVirtualCNode.FlowConnectionData in virtual_ref.flow_connections:
+				if connetion.line_ref:
+					connetion.line_ref.update_line()
 
 
 func _on_tooltip() -> Variant:
@@ -290,13 +250,13 @@ func move(_pos: Vector2) -> void:
 
 func select() -> void:
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
-	get_node('%SelectBorder').visible = true
+	# get_node('%SelectBorder').visible = true
 	selected = true
 
 
 func unselect() -> void:
 	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
-	get_node('%SelectBorder').visible = false
+	# get_node('%SelectBorder').visible = false
 	selected = false
 
 func change_name(_name: String) -> void:

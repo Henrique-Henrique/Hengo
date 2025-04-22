@@ -60,4 +60,4 @@ process_mode = 4
 modulate = Color(1, 1, 1, 0.54902)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_ldyji")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14

@@ -61,13 +61,13 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0522994, 0.0615214, 0.0861528, 1)
+bg_color = Color(0.0980392, 0.105882, 0.113725, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1152, 621)
-shader_parameter/offset = Vector2(6905.24, -141.741)
-shader_parameter/zoom_factor = 0.99999
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0

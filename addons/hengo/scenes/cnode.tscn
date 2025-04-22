@@ -10,12 +10,8 @@
 [ext_resource type="Script" uid="uid://duabhyiaan0or" path="res://addons/hengo/scripts/flow_connector.gd" id="6_gsclm"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x0qsl"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
-border_color = Color(0.254902, 0.270588, 0.286275, 1)
+border_color = Color(0.301961, 0.313726, 0.321569, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bjksb"]
 resource_local_to_scene = true
@@ -23,26 +19,19 @@ content_margin_left = 12.0
 content_margin_top = 12.0
 content_margin_right = 12.0
 content_margin_bottom = 12.0
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_bottom = 2
-border_color = Color(1, 1, 1, 0.0784314)
+bg_color = Color(0.168627, 0.172549, 0.176471, 1)
+border_color = Color(0.301961, 0.313726, 0.321569, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12ubu"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
 border_width_top = 2
-border_color = Color(0.254902, 0.270588, 0.286275, 1)
+border_color = Color(0.301961, 0.313726, 0.321569, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kx661"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
-border_color = Color(0.254902, 0.270588, 0.286275, 1)
+border_color = Color(0.301961, 0.313726, 0.321569, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_t3xrx"]
 resource_local_to_scene = true
@@ -63,16 +52,16 @@ expand_margin_bottom = 4.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vwobo"]
 resource_local_to_scene = true
-bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0, 0.964706, 1, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+bg_color = Color(1, 1, 1, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 expand_margin_left = 4.0
 expand_margin_top = 4.0
 expand_margin_right = 4.0
@@ -116,12 +105,9 @@ visible = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_x0qsl")
 
-[node name="Arrow" parent="Container/FromFlowContainer/PanelContainer5/FlowSlot/ArrowUp" index="0"]
-visible = true
-custom_minimum_size = Vector2(0, 40)
-
 [node name="Label" parent="Container/FromFlowContainer/PanelContainer5/FlowSlot" index="1"]
 visible = false
+text = ""
 
 [node name="PanelContainer6" parent="Container/FromFlowContainer" instance=ExtResource("3_348vq")]
 layout_mode = 2
@@ -164,7 +150,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("3_8vu1l")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "Title"
 
 [node name="CenterContainer" type="HBoxContainer" parent="Container"]
@@ -206,9 +192,10 @@ alignment = 1
 
 [node name="Label" type="Label" parent="Container/PanelContainer/FlowContainer/FlowSlot/FlowSlot"]
 visible = false
+modulate = Color(1, 1, 1, 0.666667)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_nvxjk")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 12
 text = "cnode"
 horizontal_alignment = 1
 
@@ -262,7 +249,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_t3xrx")
 [node name="Border" type="Panel" parent="."]
 unique_name_in_owner = true
 process_mode = 4
-visible = false
+modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vwobo")

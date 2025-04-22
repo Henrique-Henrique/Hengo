@@ -48,7 +48,7 @@ alignment = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_tnm7t")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 text = "output"
 
 [node name="Connector" type="TextureRect" parent="MarginContainer/CNameOutput"]

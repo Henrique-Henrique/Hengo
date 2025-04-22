@@ -59,10 +59,10 @@ func _on_gui(_event: InputEvent) -> void:
 					HenGlobal.history.commit_action()
 
 				# region effects
-				if not HenGlobal.flow_connection_to_data.is_empty():
-					HenGlobal.flow_connection_to_data.to_cnode.scale = Vector2.ONE
-					HenGlobal.flow_connection_to_data.to_cnode.modulate = Color.WHITE
-					HenGlobal.flow_connection_to_data.to_cnode.get_node('%Border').visible = false
+				# if not HenGlobal.flow_connection_to_data.is_empty():
+				# 	HenGlobal.flow_connection_to_data.to_cnode.scale = Vector2.ONE
+				# 	HenGlobal.flow_connection_to_data.to_cnode.modulate = Color.WHITE
+				# 	HenGlobal.flow_connection_to_data.to_cnode.get_node('%Border').visible = false
 
 
 				# root.scale = Vector2.ONE
