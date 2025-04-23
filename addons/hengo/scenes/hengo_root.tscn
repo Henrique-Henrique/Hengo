@@ -66,14 +66,14 @@ bg_color = Color(0.0980392, 0.105882, 0.113725, 1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1152, 621)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/offset = Vector2(-879.52, -138.873)
+shader_parameter/zoom_factor = 0.226093
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
@@ -136,6 +136,7 @@ script = ExtResource("7_sagw0")
 [node name="Left" type="HBoxContainer" parent="VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
+alignment = 2
 
 [node name="DashBoard" type="Button" parent="VBoxContainer/MenuBar/CNodeActionBar/Left"]
 layout_mode = 2
@@ -357,10 +358,10 @@ unique_name_in_owner = true
 layout_mode = 1
 
 [node name="SideBar" parent="." instance=ExtResource("22_x5h56")]
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_top = 179.0
-offset_right = 138.0
+offset_right = 38.0
 offset_bottom = 0.0
 grow_vertical = 2

@@ -1,15 +1,28 @@
 @tool
 class_name HenSideBar extends PanelContainer
 
-var list_data: SideBarList
-
-@onready var name_label: Label = %Name
-@onready var list: ItemList = %List
-@onready var local_var_bt: Button = %LocalVar
+@onready var list: Tree = %List
+# @onready var name_label: Label = %Name
+# @onready var local_var_bt: Button = %LocalVar
 
 enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
 
+const BG_COLOR = {
+	AddType.VAR: Color('#2F3C43'),
+	AddType.FUNC: Color('#432F2F'),
+	AddType.SIGNAL: Color('#2F4335'),
+	AddType.MACRO: Color('#332F43'),
+	AddType.LOCAL_VAR: Color('#433B2F')
+}
+
+const ICONS = {
+	AddType.VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg'),
+	AddType.MACRO: preload('res://addons/hengo/assets/icons/menu/text.svg'),
+	AddType.FUNC: preload('res://addons/hengo/assets/icons/menu/void.svg'),
+	AddType.SIGNAL: preload('res://addons/hengo/assets/icons/menu/wifi.svg'),
+	AddType.LOCAL_VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg')
+}
 
 const NAME = {
 	AddType.VAR: 'Variables',
@@ -36,7 +49,6 @@ class SideBarList:
 		macro_list.clear()
 
 		change(AddType.VAR)
-		HenGlobal.SIDE_BAR.local_var_bt.visible = false
 		list_changed.emit()
 
 	func add() -> void:
@@ -57,7 +69,7 @@ class SideBarList:
 
 	func change(_type: AddType) -> void:
 		type = _type
-		list_changed.emit()
+		# list_changed.emit()
 
 	func get_list_to_draw() -> Array:
 		match type:
@@ -75,29 +87,17 @@ class SideBarList:
 			
 		return []
 	
-	func on_click(_index: int) -> void:
+	func on_click(_item) -> void:
 		var inspector_item_arr: Array
 		var name: String = ''
-		var item: Variant
 
 		match type:
-			AddType.VAR:
-				item = var_list[_index]
-				inspector_item_arr = item.get_inspector_array_list()
-			AddType.FUNC:
-				item = func_list[_index]
-				inspector_item_arr = item.get_inspector_array_list()
-			AddType.SIGNAL:
-				item = signal_list[_index]
-				inspector_item_arr = item.get_inspector_array_list()
-			AddType.MACRO:
-				item = macro_list[_index]
-				inspector_item_arr = item.get_inspector_array_list()
+			AddType.VAR, AddType.FUNC, AddType.SIGNAL, AddType.MACRO:
+				inspector_item_arr = _item.get_inspector_array_list()
 			AddType.LOCAL_VAR:
-				item = (HenRouter.current_route.ref.local_vars as Array)[_index] if HenRouter.current_route.ref.get(&'local_vars') is Array else []
-				inspector_item_arr = item.get_inspector_array_list(true)
+				inspector_item_arr = _item.get_inspector_array_list(true)
 			
-		name = item.name
+		name = _item.name
 
 		var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
 
@@ -803,73 +803,142 @@ class MacroData:
 
 
 func _ready() -> void:
-	list_data = SideBarList.new()
-	list_data.list_changed.connect(_on_list_changed)
-
+	list.button_clicked.connect(_on_list_button_clicked)
+	list.item_mouse_selected.connect(_on_item_selected)
 
 	HenGlobal.SIDE_BAR = self
-	HenGlobal.SIDE_BAR_LIST = list_data
-
-	_on_change_list(AddType.VAR)
-
-	local_var_bt.visible = false
-	local_var_bt.pressed.connect(_on_change_list.bind(AddType.LOCAL_VAR))
-
-	(get_node('%Add') as Button).pressed.connect(_on_add)
-
-	# change list
-	(get_node('%Var') as Button).pressed.connect(_on_change_list.bind(AddType.VAR))
-	(get_node('%Func') as Button).pressed.connect(_on_change_list.bind(AddType.FUNC))
-	(get_node('%Signal') as Button).pressed.connect(_on_change_list.bind(AddType.SIGNAL))
-	(get_node('%Macro') as Button).pressed.connect(_on_change_list.bind(AddType.MACRO))
-
-	list.item_activated.connect(_on_enter)
-	list.item_clicked.connect(_on_click)
+	HenGlobal.SIDE_BAR_LIST = SideBarList.new()
+	HenGlobal.SIDE_BAR_LIST.list_changed.connect(_on_list_changed)
 
 
-func _on_enter(_index: int) -> void:
-	match HenGlobal.SIDE_BAR_LIST.type:
-		AddType.FUNC:
-			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.func_list[_index] as FuncData).route)
-		AddType.SIGNAL:
-			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.signal_list[_index] as SignalData).route)
-		AddType.MACRO:
-			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.macro_list[_index] as MacroData).route)
-
-
-func _on_click(_index: int, _at_position: Vector2, _mouse_button_index: int) -> void:
-	if _mouse_button_index == MOUSE_BUTTON_RIGHT:
-		list_data.on_click(_index)
-
-
-func _on_add() -> void:
-	HenGlobal.SIDE_BAR_LIST.add()
-
-
-func _on_change_list(_type: AddType) -> void:
-	HenGlobal.SIDE_BAR_LIST.change(_type)
-	match _type:
-		AddType.LOCAL_VAR:
-			name_label.text = HenRouter.current_route.ref.name + ' \n' + NAME[_type]
-		_:
-			name_label.text = NAME[_type]
+func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> void:
+	match _mouse_button_index:
+		2:
+			HenGlobal.SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0))
 
 
 func _on_list_changed() -> void:
-	update_list()
-
-
-func update_list() -> void:
 	list.clear()
 
-	for item_data: Dictionary in HenGlobal.SIDE_BAR_LIST.get_list_to_draw():
-		list.add_item(item_data.name)
+	var root: TreeItem = list.create_item()
+	var base: TreeItem = root.create_child()
+
+	base.set_text(0, 'Base')
+
+	# variables
+	_add_categories(root, 'Variables', AddType.VAR)
+	_add_categories(root, 'Functions', AddType.FUNC)
+	_add_categories(root, 'Signals', AddType.SIGNAL)
+	_add_categories(root, 'Macros', AddType.MACRO)
 
 
-func show_local_var_bt() -> void:
-	match HenRouter.current_route.type:
-		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-			local_var_bt.visible = true
-		_:
-			local_var_bt.visible = false
-			_on_change_list(AddType.VAR)
+func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
+	# variables
+	var category: TreeItem = _root.create_child()
+	category.set_text(0, _name)
+	category.add_button(0, preload('res://addons/hengo/assets/icons/menu/square-plus.svg'))
+	category.set_metadata(0, _type)
+	category.set_selectable(0, false)
+	category.set_custom_bg_color(0, BG_COLOR[_type])
+	category.set_button_color(0, 0, (BG_COLOR[_type] as Color).lightened(0.6))
+	category.set_icon(0, ICONS[_type])
+
+	var arr: Array
+
+	match _type:
+		AddType.VAR:
+			arr = HenGlobal.SIDE_BAR_LIST.var_list
+		AddType.FUNC:
+			arr = HenGlobal.SIDE_BAR_LIST.func_list
+		AddType.SIGNAL:
+			arr = HenGlobal.SIDE_BAR_LIST.signal_list
+		AddType.MACRO:
+			arr = HenGlobal.SIDE_BAR_LIST.macro_list
+		# AddType.LOCAL_VAR:
+		# 	if HenRouter.current_route.ref.get(&'local_vars') is Array:
+		# 		arr = (HenRouter.current_route.ref.local_vars as Array)
+
+	for item_data in arr:
+		var item: TreeItem = category.create_child()
+		item.set_text(0, item_data.name)
+		item.set_metadata(0, item_data)
+		item.set_custom_bg_color(0, Color((BG_COLOR[_type] as Color).darkened(0.4), .6))
+		item.set_custom_color(0, Color(1, 1, 1, .6))
+
+		match _type:
+			AddType.VAR:
+				item.set_icon(0, HenAssets.get_icon_texture(item_data.type))
+			_:
+				item.set_icon(0, ICONS[_type])
+
+
+func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:
+	var _type: AddType = _item.get_metadata(0)
+
+	HenGlobal.SIDE_BAR_LIST.change(_type)
+	HenGlobal.SIDE_BAR_LIST.add()
+
+
+	# _on_change_list(AddType.VAR)
+
+	# local_var_bt.visible = false
+	# local_var_bt.pressed.connect(_on_change_list.bind(AddType.LOCAL_VAR))
+
+	# (get_node('%Add') as Button).pressed.connect(_on_add)
+
+	# # change list
+	# (get_node('%Var') as Button).pressed.connect(_on_change_list.bind(AddType.VAR))
+	# (get_node('%Func') as Button).pressed.connect(_on_change_list.bind(AddType.FUNC))
+	# (get_node('%Signal') as Button).pressed.connect(_on_change_list.bind(AddType.SIGNAL))
+	# (get_node('%Macro') as Button).pressed.connect(_on_change_list.bind(AddType.MACRO))
+
+	# list.item_activated.connect(_on_enter)
+	# list.item_clicked.connect(_on_click)
+
+
+# func _on_enter(_index: int) -> void:
+# 	match HenGlobal.SIDE_BAR_LIST.type:
+# 		AddType.FUNC:
+# 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.func_list[_index] as FuncData).route)
+# 		AddType.SIGNAL:
+# 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.signal_list[_index] as SignalData).route)
+# 		AddType.MACRO:
+# 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.macro_list[_index] as MacroData).route)
+
+
+# func _on_click(_index: int, _at_position: Vector2, _mouse_button_index: int) -> void:
+# 	if _mouse_button_index == MOUSE_BUTTON_RIGHT:
+# 		list_data.on_click(_index)
+
+
+# func _on_add() -> void:
+# 	HenGlobal.SIDE_BAR_LIST.add()
+
+
+# func _on_change_list(_type: AddType) -> void:
+# 	HenGlobal.SIDE_BAR_LIST.change(_type)
+# 	match _type:
+# 		AddType.LOCAL_VAR:
+# 			name_label.text = HenRouter.current_route.ref.name + ' \n' + NAME[_type]
+# 		_:
+# 			name_label.text = NAME[_type]
+
+
+# func _on_list_changed() -> void:
+# 	update_list()
+
+
+# func update_list() -> void:
+# 	list.clear()
+
+# 	for item_data: Dictionary in HenGlobal.SIDE_BAR_LIST.get_list_to_draw():
+# 		list.add_item(item_data.name)
+
+
+# func show_local_var_bt() -> void:
+# 	match HenRouter.current_route.type:
+# 		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
+# 			local_var_bt.visible = true
+# 		_:
+# 			local_var_bt.visible = false
+# 			_on_change_list(AddType.VAR)

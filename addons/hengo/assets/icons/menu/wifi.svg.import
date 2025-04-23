@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bap05qsv3ji1r"
-path="res://.godot/imported/void.svg-4cddee5c5befe839b65dc85979acbdcf.ctex"
+uid="uid://bhmd2yvs4thvm"
+path="res://.godot/imported/wifi.svg-224d47a3a42915f74f886096434ec624.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/icons/cnode/void.svg"
-dest_files=["res://.godot/imported/void.svg-4cddee5c5befe839b65dc85979acbdcf.ctex"]
+source_file="res://addons/hengo/assets/icons/menu/wifi.svg"
+dest_files=["res://.godot/imported/wifi.svg-224d47a3a42915f74f886096434ec624.ctex"]
 
 [params]
 
@@ -32,6 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
+svg/scale=0.7
 editor/scale_with_editor_scale=false
 editor/convert_colors_with_editor_theme=false

@@ -5,7 +5,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7pkyu"]
 shader = ExtResource("2_lrxjm")
-shader_parameter/lod = 1.2
+shader_parameter/lod = 0.8
 
 [node name="PopupContainer" type="CanvasLayer"]
 layer = 100
