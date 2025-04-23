@@ -126,6 +126,7 @@ static func load(_path: StringName) -> void:
 	# showing current type
 	show_class_name()
 	HenRouter.change_route(HenGlobal.BASE_ROUTE)
+	HenGlobal.SIDE_BAR._on_list_changed()
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config

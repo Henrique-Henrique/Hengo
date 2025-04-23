@@ -42,8 +42,15 @@ func _on_gui(_event: InputEvent) -> void:
 				HenGlobal.CONNECTION_GUIDE.gradient.colors = [Color.GRAY, Color.GRAY]
 		else:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
-				remove_connection()
 				if HenGlobal.can_make_flow_connection and HenGlobal.flow_connection_to_data.is_empty():
+					var connection: HenVirtualCNode.FlowConnectionReturn = root.virtual_ref.get_flow_connection(idx)
+
+					if connection:
+						HenGlobal.history.create_action('Remove Flow Connection')
+						HenGlobal.history.add_do_method(connection.remove)
+						HenGlobal.history.add_undo_method(connection.add)
+						HenGlobal.history.commit_action()
+
 					var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 					method_list.start(HenGlobal.script_config.type, get_global_mouse_position(), true, 'out', {
 						from_flow_connector = self
@@ -52,11 +59,12 @@ func _on_gui(_event: InputEvent) -> void:
 				elif HenGlobal.can_make_flow_connection and not HenGlobal.flow_connection_to_data.is_empty():
 					var connection: HenVirtualCNode.FlowConnectionReturn = create_virtual_connection(HenGlobal.flow_connection_to_data)
 					
-					HenGlobal.history.create_action('Add Connection')
-					HenGlobal.history.add_do_method(connection.add)
-					HenGlobal.history.add_do_reference(connection)
-					HenGlobal.history.add_undo_method(connection.remove)
-					HenGlobal.history.commit_action()
+					if connection:
+						HenGlobal.history.create_action('Add Connection')
+						HenGlobal.history.add_do_method(connection.add)
+						HenGlobal.history.add_do_reference(connection)
+						HenGlobal.history.add_undo_method(connection.remove)
+						HenGlobal.history.commit_action()
 
 				# region effects
 				# if not HenGlobal.flow_connection_to_data.is_empty():

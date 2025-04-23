@@ -1030,6 +1030,18 @@ func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode) -> FlowC
 	return FlowConnectionReturn.new(flow_connection, _to, _to_idx, self, flow_from_connection)
 
 
+func get_flow_connection(_idx: int) -> FlowConnectionReturn:
+	if _idx > flow_connections.size():
+		return null
+
+	var flow_connection: FlowConnectionData = flow_connections[_idx]
+
+	if not flow_connection.to:
+		return null
+
+	return FlowConnectionReturn.new(flow_connection, flow_connection.to, flow_connection.to_idx, self, flow_connection.to_from_ref)
+
+
 func remove_input_connection(_idx: int) -> void:
 	for connection: InputConnectionData in input_connections:
 		if connection.idx == _idx:
