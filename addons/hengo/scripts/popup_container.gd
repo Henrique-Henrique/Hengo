@@ -34,6 +34,13 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
     gp.reset_size()
     HenUtils.reposition_control_inside(gp)
     show()
+
+    # animations
+    var tween: Tween = get_tree().create_tween()
+
+    gp.scale = Vector2(.95, .95)
+    tween.tween_property(gp, 'scale', Vector2.ONE, .5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+
     HenGlobal.CAM.can_scroll = false
 
 

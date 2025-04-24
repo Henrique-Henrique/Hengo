@@ -72,9 +72,9 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 902)
-shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1152, 648)
+shader_parameter/offset = Vector2(21440.6, 3475.15)
+shader_parameter/zoom_factor = 0.999991
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0

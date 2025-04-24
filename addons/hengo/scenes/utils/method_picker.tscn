@@ -1,11 +1,26 @@
-[gd_scene load_steps=2 format=3 uid="uid://ds1l212xog53y"]
+[gd_scene load_steps=5 format=3 uid="uid://ds1l212xog53y"]
 
 [ext_resource type="Script" uid="uid://c7sfsj0bnw26x" path="res://addons/hengo/scripts/method_picker.gd" id="1_8ff1r"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="2_mxkhq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mxkhq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mxkhq"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="MethodPicker" type="VBoxContainer"]
-custom_minimum_size = Vector2(350, 0)
+custom_minimum_size = Vector2(400, 0)
 offset_right = 350.0
-offset_bottom = 779.0
+offset_bottom = 122.0
 size_flags_vertical = 3
 script = ExtResource("1_8ff1r")
 
@@ -14,7 +29,66 @@ unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Type to search..."
 
-[node name="List" type="VBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SelfBt" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Self"
+
+[node name="ClassBt" parent="HBoxContainer" instance=ExtResource("2_mxkhq")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Other Type"
+type = "all_classes"
+
+[node name="FilterList" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="All" type="Button" parent="FilterList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "All"
+
+[node name="Native" type="Button" parent="FilterList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Native"
+
+[node name="Func" type="Button" parent="FilterList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Func"
+
+[node name="Signal" type="Button" parent="FilterList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "signals"
+
+[node name="Macro" type="Button" parent="FilterList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "macros"
+
+[node name="List" type="Tree" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mxkhq")
+hide_root = true
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 2
+
+[node name="ClassBorder" type="Panel" parent="Control"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 0
+offset_left = -2.0
+offset_top = -93.0
+offset_right = 39.0
+offset_bottom = -58.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mxkhq")

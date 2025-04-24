@@ -1,6 +1,7 @@
-[gd_resource type="Theme" load_steps=4 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=5 format=3 uid="uid://xxj7abqbehjg"]
 
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
+[ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="2_nhkyk"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
 
@@ -11,4 +12,24 @@ default_font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
 LineEdit/fonts/font = ExtResource("1_revyj")
+LineEdit/styles/normal = ExtResource("2_nhkyk")
+SpinBox/colors/down_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)
+SpinBox/colors/down_hover_icon_modulate = Color(0.95, 0.95, 0.95, 0)
+SpinBox/colors/down_icon_modulate = Color(0.88, 0.88, 0.88, 0)
+SpinBox/colors/down_pressed_icon_modulate = Color(0.95, 0.95, 0.95, 0)
+SpinBox/colors/up_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)
+SpinBox/colors/up_hover_icon_modulate = Color(0.95, 0.95, 0.95, 0)
+SpinBox/colors/up_icon_modulate = Color(0.88, 0.88, 0.88, 0)
+SpinBox/colors/up_pressed_icon_modulate = Color(0.95, 0.95, 0.95, 0)
+SpinBox/constants/buttons_width = 0
+SpinBox/constants/field_and_buttons_separation = 0
+SpinBox/constants/set_min_buttons_width_from_icons = 0
+SpinBox/icons/down = null
+SpinBox/icons/down_disabled = null
+SpinBox/icons/down_hover = null
+SpinBox/icons/down_pressed = null
+SpinBox/icons/up = null
+SpinBox/icons/up_disabled = null
+SpinBox/icons/up_hover = null
+SpinBox/icons/up_pressed = null
 SpinBox/icons/updown = SubResource("ImageTexture_6gb4l")

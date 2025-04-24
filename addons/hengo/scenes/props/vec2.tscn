@@ -7,11 +7,11 @@
 script = ExtResource("1_dumkb")
 
 [node name="x" parent="." instance=ExtResource("1_gjr0v")]
-modulate = Color(0.603611, 1, 0.573066, 1)
+modulate = Color(0.86, 1, 0.85, 1)
 layout_mode = 2
 prefix = "x"
 
 [node name="y" parent="." instance=ExtResource("1_gjr0v")]
-modulate = Color(0.999864, 0.357496, 0.290377, 1)
+modulate = Color(1, 0.85, 0.85, 1)
 layout_mode = 2
 prefix = "y"

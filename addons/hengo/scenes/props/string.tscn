@@ -1,10 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://cmu4eb6jplyhf"]
+[gd_scene load_steps=3 format=3 uid="uid://cmu4eb6jplyhf"]
 
+[ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="1_221ej"]
 [ext_resource type="Script" uid="uid://burpfltt7v4cs" path="res://addons/hengo/scripts/props/prop_string.gd" id="1_c07fc"]
 
 [node name="String" type="LineEdit"]
 offset_right = 67.0625
 offset_bottom = 31.0
 size_flags_horizontal = 3
+theme_override_styles/normal = ExtResource("1_221ej")
 expand_to_text_length = true
 script = ExtResource("1_c07fc")

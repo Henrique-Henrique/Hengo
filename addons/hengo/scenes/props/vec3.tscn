@@ -7,16 +7,16 @@
 script = ExtResource("1_aowt1")
 
 [node name="x" parent="." instance=ExtResource("2_16xfq")]
-modulate = Color(0.603611, 1, 0.573066, 1)
+modulate = Color(0.86, 1, 0.85, 1)
 layout_mode = 2
 prefix = "x"
 
 [node name="y" parent="." instance=ExtResource("2_16xfq")]
-modulate = Color(0.999864, 0.357496, 0.290377, 1)
+modulate = Color(1, 0.85, 0.85, 1)
 layout_mode = 2
 prefix = "y"
 
 [node name="z" parent="." instance=ExtResource("2_16xfq")]
-modulate = Color(0.500311, 0.566757, 0.96885, 1)
+modulate = Color(0.8245, 0.97, 0.96515, 1)
 layout_mode = 2
 prefix = "z"
