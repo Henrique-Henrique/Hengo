@@ -1,6 +1,8 @@
 @tool
 class_name HenCam extends Node2D
 
+@export var grid: TextureRect
+
 var target_zoom: float = 1.
 
 const MIN_ZOOM: float = .2
@@ -27,12 +29,12 @@ func _ready() -> void:
 
 	parent.item_rect_changed.connect(_on_ui_size_changed)
 
-	((parent.get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
-	((parent.get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
+	(grid.material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
+	(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
 	
 func _on_ui_size_changed() -> void:
-	((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('screen_size', get_parent().size)
+	(grid.material as ShaderMaterial).set_shader_parameter('screen_size', get_parent().size)
 
 
 func _input(event: InputEvent) -> void:
@@ -41,7 +43,7 @@ func _input(event: InputEvent) -> void:
 			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 				transform.origin += (event as InputEventMouseMotion).relative
 
-				((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
+				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
 
 				_check_virtual_cnodes()
@@ -94,8 +96,8 @@ func _physics_process(_delta: float) -> void:
 
 		transform.origin = lerp(transform.origin, pos, factor)
 
-		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
-		((get_parent().get_child(0) as TextureRect).material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
+		(grid.material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
+		(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
 		_check_virtual_cnodes()
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=37 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -19,20 +19,41 @@
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
-[ext_resource type="PackedScene" uid="uid://dcyvdoty8t12u" path="res://addons/hengo/scenes/dashboard.tscn" id="28_nqqx4"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gn4j7"]
-content_margin_left = 2.0
-content_margin_top = 1.0
-content_margin_right = 2.0
-content_margin_bottom = 1.0
-bg_color = Color(0.145098, 0.145098, 0.145098, 1)
-shadow_color = Color(0, 0, 0, 0.027451)
-shadow_size = 12
-shadow_offset = Vector2(0, 1.265)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
+bg_color = Color(0.0980392, 0.105882, 0.113725, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x5h56"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.168627, 0.172549, 0.176471, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.301961, 0.313726, 0.321569, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 1
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.431373, 0.564706, 0.905882, 0.2)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rluxx"]
 bg_color = Color(0.212471, 0.21937, 0.260652, 1)
@@ -49,31 +70,17 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ny40n"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(0.431373, 0.564706, 0.905882, 0.2)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0980392, 0.105882, 0.113725, 1)
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1152, 621)
-shader_parameter/offset = Vector2(-879.52, -138.873)
-shader_parameter/zoom_factor = 0.226093
+shader_parameter/screen_size = Vector2(1904, 902)
+shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(0, 0.65, 0.1625, 0.270588)
@@ -123,41 +130,58 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="MenuBar" type="PanelContainer" parent="VBoxContainer"]
+[node name="CNodeUI" type="Panel" parent="VBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -134.0
+offset_bottom = 40.0
+grow_horizontal = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+
+[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_gn4j7")
+theme_override_styles/panel = SubResource("StyleBoxFlat_x5h56")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/MenuBar"]
+[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
 layout_mode = 2
 alignment = 2
 script = ExtResource("7_sagw0")
+dashboard = NodePath("DashBoard")
 
-[node name="Left" type="HBoxContainer" parent="VBoxContainer/MenuBar/CNodeActionBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-alignment = 2
-
-[node name="DashBoard" type="Button" parent="VBoxContainer/MenuBar/CNodeActionBar/Left"]
+[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 tooltip_text = "Dashboard"
 icon = ExtResource("11_rvhdl")
 
-[node name="Right" type="HBoxContainer" parent="VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
-size_flags_horizontal = 3
-alignment = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/MenuBar/CNodeActionBar/Right"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
 
-[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/MenuBar/CNodeActionBar/Right/PanelContainer"]
+[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer"]
 layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="VBoxContainer/MenuBar/CNodeActionBar/Right/PanelContainer/CompileContainer"]
+[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("23_tlngq")
@@ -168,25 +192,11 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
 disabled = true
 text = "Compile"
 
-[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/MenuBar/CNodeActionBar/Right/PanelContainer/CompileContainer"]
+[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
 layout_mode = 2
 texture = ExtResource("11_xut0q")
 expand_mode = 2
 stretch_mode = 3
-
-[node name="ClassName" type="Label" parent="VBoxContainer/MenuBar/CNodeActionBar/Right"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
-
-[node name="CNodeUI" type="Panel" parent="VBoxContainer"]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
 [node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]
 process_mode = 4
@@ -202,9 +212,10 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("13_w5ssd")
 
-[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI"]
+[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI" node_paths=PackedStringArray("grid")]
 position = Vector2(100, 8.42499e-06)
 script = ExtResource("3_84akk")
+grid = NodePath("../Grid")
 
 [node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/Cam"]
 visible = false
@@ -353,15 +364,11 @@ Note: Assignments to text clear the tag stack and reconstruct it from the proper
 Note: RichTextLabel doesn't support entangled BBCode tags. For example, instead of using [b]bold[i]bold italic[/b]italic[/i], use [b]bold[i]bold italic[/i][/b][i]italic[/i]."
 selection_enabled = true
 
-[node name="DashBoard" parent="." instance=ExtResource("28_nqqx4")]
-unique_name_in_owner = true
-layout_mode = 1
-
 [node name="SideBar" parent="." instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_right = 38.0
+offset_right = 58.0
 offset_bottom = 0.0
 grow_vertical = 2

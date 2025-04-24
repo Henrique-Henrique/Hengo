@@ -67,7 +67,6 @@ func _ready() -> void:
 	HenGlobal.DOCS_TOOLTIP = get_node('%DocsToolTip')
 	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	HenGlobal.HENGO_ROOT = self
-	HenGlobal.DASHBOARD = get_node('%DashBoard')
 
 	cnode_stat_label = get_node('%CNodeStatLabel')
 

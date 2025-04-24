@@ -2,17 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwglllmr5b0qj"
-path="res://.godot/imported/square-plus.svg-00bcabbbe33bf9e40421e34cfa7a4db0.ctex"
+uid="uid://u8if7b26sm4b"
+path="res://.godot/imported/folder.svg-748ff44c164b4e30bd4081743068015f.ctex"
 metadata={
-"has_editor_variant": true,
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/icons/menu/square-plus.svg"
-dest_files=["res://.godot/imported/square-plus.svg-00bcabbbe33bf9e40421e34cfa7a4db0.ctex"]
+source_file="res://addons/hengo/assets/icons/menu/folder.svg"
+dest_files=["res://.godot/imported/folder.svg-748ff44c164b4e30bd4081743068015f.ctex"]
 
 [params]
 
@@ -34,5 +33,5 @@ process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=0.7
-editor/scale_with_editor_scale=true
-editor/convert_colors_with_editor_theme=true
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

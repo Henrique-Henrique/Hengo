@@ -1,7 +1,7 @@
 @tool
 class_name HenSideBar extends PanelContainer
 
-@onready var list: Tree = %List
+var list: Tree
 # @onready var name_label: Label = %Name
 # @onready var local_var_bt: Button = %LocalVar
 
@@ -803,6 +803,7 @@ class MacroData:
 
 
 func _ready() -> void:
+	list = get_node('%List')
 	list.button_clicked.connect(_on_list_button_clicked)
 	list.item_mouse_selected.connect(_on_item_selected)
 
@@ -830,6 +831,8 @@ func _on_list_changed() -> void:
 	_add_categories(root, 'Functions', AddType.FUNC)
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Macros', AddType.MACRO)
+	
+	print(list.get_scroll())
 
 
 func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:

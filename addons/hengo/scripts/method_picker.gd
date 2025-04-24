@@ -13,6 +13,8 @@ var came_from: String = ''
 var cnode_config: Dictionary = {}
 var api_list = []
 
+const LIST_SIZE: int = 40
+
 var selected_id: int = 0:
 	set(new_value):
 		var item = list_container.get_child(new_value)
@@ -320,7 +322,7 @@ func _ready() -> void:
 		HenGlobal.GENERAL_POPUP.get_parent().hide()
 
 
-	_show_list(native_list if show_native_first else api_list.slice(0, 20), false)
+	_show_list(native_list if show_native_first else api_list.slice(0, LIST_SIZE), false)
 
 	var search_bar = (get_node('%Search') as LineEdit)
 
@@ -410,7 +412,7 @@ func _show_list(_list: Array, _slice: bool = true) -> void:
 	for item in list_container.get_children():
 		item.queue_free()
 
-	for dict: Dictionary in _list.slice(0, 20) if _slice else _list:
+	for dict: Dictionary in _list.slice(0, LIST_SIZE) if _slice else _list:
 		var item = preload('res://addons/hengo/scenes/method_picker_item.tscn').instantiate()
 		item.set_meta('data', dict)
 		item.mouse_entered.connect(_on_item_hover.bind(item))

@@ -87,7 +87,7 @@ static func load(_path: StringName) -> void:
 		})
 
 		HenRouter.current_route = base_route
-
+		HenGlobal.CAM._check_virtual_cnodes()
 	#   
 	#
 	# loading hengo script data
@@ -126,7 +126,6 @@ static func load(_path: StringName) -> void:
 	# showing current type
 	show_class_name()
 	HenRouter.change_route(HenGlobal.BASE_ROUTE)
-	HenGlobal.SIDE_BAR._on_list_changed()
 
 	# ---------------------------------------------------------------------------- #
 	# setting other scripts config

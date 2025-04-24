@@ -31,7 +31,8 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
     else:
         gp.position = _pos
     
-    gp.size = Vector2.ZERO
+    gp.reset_size()
+    HenUtils.reposition_control_inside(gp)
     show()
     HenGlobal.CAM.can_scroll = false
 

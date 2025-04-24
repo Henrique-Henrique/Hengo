@@ -1,52 +1,58 @@
-[gd_scene load_steps=5 format=3 uid="uid://c4qu2ti8efl61"]
+[gd_scene load_steps=7 format=3 uid="uid://c4qu2ti8efl61"]
 
 [ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="2_k7ch5"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y1kkq"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k7ch5"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_axb3u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_axb3u"]
 content_margin_left = 2.0
 content_margin_top = 2.0
 content_margin_right = 2.0
 content_margin_bottom = 2.0
-bg_color = Color(0.168627, 0.172549, 0.176471, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_right = 1
 border_color = Color(0.301961, 0.313726, 0.321569, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_y1kkq"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4nava"]
 
-[node name="MarginContainer" type="MarginContainer"]
-offset_right = 159.0
-offset_bottom = 416.0
+[node name="SideBar" type="PanelContainer"]
+offset_right = 80.0
+offset_bottom = 320.0
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_k7ch5")
+script = ExtResource("1_y1kkq")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="SideBar" type="PanelContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_y1kkq")
-script = ExtResource("1_y1kkq")
+mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="SideBar"]
-layout_mode = 2
-
-[node name="SearchBar" type="LineEdit" parent="SideBar/VBoxContainer"]
+[node name="SearchBar" type="LineEdit" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 placeholder_text = "Type to search..."
 
-[node name="List" type="Tree" parent="SideBar/VBoxContainer"]
+[node name="List" type="Tree" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("2_k7ch5")
-theme_override_styles/panel = SubResource("StyleBoxEmpty_y1kkq")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_axb3u")
+theme_override_styles/focus = SubResource("StyleBoxFlat_axb3u")
+theme_override_styles/hovered = SubResource("StyleBoxFlat_4nava")
 allow_rmb_select = true
 hide_root = true
