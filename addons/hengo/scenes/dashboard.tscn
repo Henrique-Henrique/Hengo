@@ -7,20 +7,22 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_26g6y"]
 
 [node name="VBoxContainer" type="VBoxContainer"]
-offset_right = 350.0
-offset_bottom = 1310.0
+offset_right = 300.0
+offset_bottom = 648.0
 size_flags_vertical = 3
 script = ExtResource("1_6bswm")
 
 [node name="LineEdit" type="LineEdit" parent="."]
 layout_mode = 2
 theme_override_styles/normal = ExtResource("2_pywj1")
+placeholder_text = "Search script"
 
 [node name="Tree" type="Tree" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(350, 1275.6)
+custom_minimum_size = Vector2(300, 605.4)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_fonts/font = ExtResource("2_7b2fy")
+theme_override_font_sizes/font_size = 16
 theme_override_styles/panel = SubResource("StyleBoxEmpty_26g6y")
 hide_root = true

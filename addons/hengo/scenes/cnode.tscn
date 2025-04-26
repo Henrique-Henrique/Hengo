@@ -26,7 +26,6 @@ corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12ubu"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_top = 2
 border_color = Color(0.301961, 0.313726, 0.321569, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kx661"]

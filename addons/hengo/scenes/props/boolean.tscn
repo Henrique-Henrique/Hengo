@@ -1,8 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://5s8d2ghcspne"]
+[gd_scene load_steps=3 format=3 uid="uid://5s8d2ghcspne"]
 
 [ext_resource type="Script" uid="uid://bnsd4c4y2c3w3" path="res://addons/hengo/scripts/props/boolean.gd" id="1_uq40l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5efyi"]
 
 [node name="Bool" type="CheckButton"]
 offset_right = 50.0
 offset_bottom = 26.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_5efyi")
 script = ExtResource("1_uq40l")

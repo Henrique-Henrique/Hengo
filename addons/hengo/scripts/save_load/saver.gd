@@ -58,14 +58,14 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			
 	script_data.virtual_cnode_list = v_cnode_list
 
-	print(JSON.stringify(script_data.get_save()))
+	# print(JSON.stringify(script_data.get_save()))
 
 	# ---------------------------------------------------------------------------- #
 	var code = '#[hengo] ' + JSON.stringify(script_data.get_save()) + '\n\n' + _code
 	var script: GDScript = GDScript.new()
 
 
-	print(code)
+	# print(code)
 
 	script.source_code = code
 

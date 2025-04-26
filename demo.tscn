@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=4 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 [ext_resource type="Script" uid="uid://c7i71t4jb7rlo" path="res://hengo/testing.gd" id="3_c6xj6"]
+[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="3_m0rpm"]
 
 [node name="Node" type="Node"]
 
@@ -28,3 +29,18 @@ offset_left = 576.0
 offset_top = 418.0
 offset_right = 762.0
 offset_bottom = 576.0
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 169.0
+offset_bottom = 178.0
+theme = ExtResource("3_m0rpm")
+
+[node name="Button" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 14.0
+offset_right = 81.0
+offset_bottom = 59.0
+text = "teste"

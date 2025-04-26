@@ -151,40 +151,47 @@ func _input(event: InputEvent) -> void:
 					HenGlobal.history.add_undo_method(v_cnode.add)
 
 				HenGlobal.history.commit_action()
-			elif event.keycode == KEY_F9:
-				# This is for Debug / Development key helper
-				var start: float = Time.get_ticks_usec()
-				var virtual: HenCnode = HenGlobal.CNODE_CONTAINER.get_child(0)
-
-				virtual.position = Vector2.ZERO
-
-				HenFormatter.arr = []
-				HenFormatter.start_position = virtual.position + virtual.size / 2
-				HenFormatter.format(
-					virtual.flow_to.cnode,
-					virtual
-				)
-				HenFormatter.format_y()
-
-				virtual.move(
-					Vector2(
-						virtual.flow_to.cnode.position.x - (
-							virtual.size.x - virtual.flow_to.cnode.size.x
-						) / 2,
-						virtual.position.y
-					)
-				)
-
-				HenFormatter.format_comments()
-
-				var end: float = Time.get_ticks_usec()
-
-				print('Formatted in: ', (end - start) / 1000., 'ms')
 				
 			elif event.keycode == KEY_F8:
 				# just for test
 				HenRouter.change_route(HenGlobal.BASE_ROUTE)
-					
+			elif event.keycode == KEY_F9:
+				var old: HenVirtualCNode
+				for i in range(2000):
+					var cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
+						name = 'IF',
+						type = HenVirtualCNode.Type.IF,
+						sub_type = HenVirtualCNode.SubType.IF,
+						route = HenRouter.current_route,
+						inputs = [
+							{
+								name = 'condition',
+								type = 'bool'
+							},
+						],
+						position = Vector2(100, 600 * i)
+					})
+
+					var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
+						name = 'print',
+						sub_type = HenVirtualCNode.SubType.VOID,
+						category = 'native',
+						inputs = [
+							{
+								name = 'content',
+								type = 'String'
+							}
+						],
+						route = HenRouter.current_route,
+						position = Vector2(0, 500 * i + 1)
+					})
+
+					cnode.add_flow_connection(1, 0, cnode2).add()
+
+					if i > 0:
+						old.add_flow_connection(0, 0, cnode).add()
+
+					old = cnode2
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:

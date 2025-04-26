@@ -11,22 +11,7 @@ func _ready() -> void:
 
 
 func _on_compile_press() -> void:
-	# icon.pivot_offset = icon.size / 2
-	# icon.texture = load('res://addons/hengo/assets/icons/menu/loading.svg')
-	# set_process(true)
-
 	HenCodeGeneration.generate_and_save(self)
-
-
-# func generate() -> void:
-# 	HenCodeGeneration.generate_and_save(self)
-
-
-# func success() -> void:
-# 	set_process(false)
-
-# 	icon.rotation = 0
-# 	icon.texture = load('res://addons/hengo/assets/icons/menu/compile.svg')
 
 
 func _process(_delta: float) -> void:

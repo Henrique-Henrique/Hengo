@@ -4,7 +4,8 @@ class_name HenCodeGeneration extends Node
 # debug
 static var _debug_counter: float = 1.
 static var _debug_symbols: Dictionary = {}
-
+static var flow_id: int = 0
+static var flows_refs: Dictionary = {}
 
 static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 	if _params.size() > 0:
@@ -22,6 +23,10 @@ static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 static func _get_signal_call_name(_name: String) -> String:
 	return '_on_' + _name.to_snake_case() + '_signal_'
 
+static func get_flow_id() -> int:
+	flow_id += 1
+	return flow_id
+
 #
 #
 #
@@ -38,7 +43,9 @@ static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 static func generate() -> String:
 	# reseting internal variables
 	_debug_counter = 1.
-	_debug_symbols = {}
+	_debug_symbols.clear()
+	flow_id = 0
+	flows_refs.clear()
 
 	# reseting macro use self condition
 	HenGlobal.USE_MACRO_USE_SELF = false
@@ -522,32 +529,29 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 			return _token.param
 		HenVirtualCNode.SubType.IF:
+			var flow = HenCodeGeneration.flows_refs[_token.flow_id]
+
 			var base: String = 'if {condition}:\n'.format({
 				condition = parse_token_by_type(_token.condition)
 			})
 			var code_list: Array = []
-
-			if _token.true_flow.is_empty():
+			if flow.true_flow.is_empty():
 				base += indent + '\tpass\n'
 			else:
-				for token in _token.true_flow:
+				for token in flow.true_flow:
 					code_list.append(
 						parse_token_by_type(token, _level + 1)
 					)
-
 			# code_list.append('')
-
-			for token in _token.false_flow:
+			for token in flow.false_flow:
 				code_list.append(
 					parse_token_by_type(token, _level)
 				)
-
 			if code_list.is_empty():
-				if not _token.true_flow.is_empty():
+				if not flow.true_flow.is_empty():
 					base += indent + '\tpass'
 			else:
 				base += '\n'.join(code_list) + '\n\n'
-		
 			return '\n' + indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
 			return 'null'

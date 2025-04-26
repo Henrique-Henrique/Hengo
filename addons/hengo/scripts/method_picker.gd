@@ -34,7 +34,6 @@ var name_to_search: String = ''
 
 var first_time: bool = true
 
-@onready var class_border: Panel = %ClassBorder
 @onready var tree: Tree = %List
 
 
@@ -386,7 +385,6 @@ func _on_search(_text: String) -> void:
 
 func _on_class_bt(_class: StringName, _button: Button, _type: CLASS_TYPE) -> void:
 	selected_class = _class
-	_select_class(_button)
 
 	match _type:
 		CLASS_TYPE.SELF:
@@ -432,20 +430,6 @@ func _on_class_bt(_class: StringName, _button: Button, _type: CLASS_TYPE) -> voi
 
 				api_list.append(dt)
 
-
-func _select_class(_button: Button) -> void:
-	class_border.visible = true
-
-	await RenderingServer.frame_pre_draw
-
-	if not first_time:
-		var tween: Tween = get_tree().create_tween()
-		tween.tween_property(class_border, 'global_position', _button.global_position, .2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	else:
-		class_border.global_position = _button.global_position
-		first_time = false
-	
-	class_border.size = _button.size
 
 func build_list() -> void:
 	tree.clear()
@@ -506,6 +490,10 @@ func build_list() -> void:
 		var rect: Rect2 = HenGlobal.CAM.get_viewport_rect()
 		if tree.custom_minimum_size.y > rect.size.y:
 			tree.custom_minimum_size.y = rect.size.y * .4
+	else:
+		tree.custom_minimum_size.y = 0
+		
+	HenGlobal.GENERAL_POPUP.get_parent().reset_size()
 
 
 func _on_select() -> void:

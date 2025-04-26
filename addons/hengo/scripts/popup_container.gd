@@ -44,6 +44,11 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
     HenGlobal.CAM.can_scroll = false
 
 
+func reset_size() -> void:
+    var gp = get_node('%GeneralPopUp')
+    gp.reset_size()
+
+
 func show_container() -> void:
     HenGlobal.CAM.can_scroll = false
     show()
