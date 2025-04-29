@@ -70,6 +70,10 @@ func _ready() -> void:
 
 	cnode_stat_label = get_node('%CNodeStatLabel')
 
+	# loading script list data
+	HenEnums.SCRIPT_LIST_DATA.clear()
+	get_script_list(DirAccess.open('res://hengo'))
+
 
 func _on_cnode_gui_input(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
@@ -157,7 +161,7 @@ func _input(event: InputEvent) -> void:
 				HenRouter.change_route(HenGlobal.BASE_ROUTE)
 			elif event.keycode == KEY_F9:
 				var old: HenVirtualCNode
-				for i in range(2000):
+				for i in range(2):
 					var cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
 						name = 'IF',
 						type = HenVirtualCNode.Type.IF,
@@ -172,26 +176,26 @@ func _input(event: InputEvent) -> void:
 						position = Vector2(100, 600 * i)
 					})
 
-					var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
-						name = 'print',
-						sub_type = HenVirtualCNode.SubType.VOID,
-						category = 'native',
-						inputs = [
-							{
-								name = 'content',
-								type = 'String'
-							}
-						],
-						route = HenRouter.current_route,
-						position = Vector2(0, 500 * i + 1)
-					})
+					# var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
+					# 	name = 'print',
+					# 	sub_type = HenVirtualCNode.SubType.VOID,
+					# 	category = 'native',
+					# 	inputs = [
+					# 		{
+					# 			name = 'content',
+					# 			type = 'String'
+					# 		}
+					# 	],
+					# 	route = HenRouter.current_route,
+					# 	position = Vector2(0, 500 * i + 1)
+					# })
 
-					cnode.add_flow_connection(1, 0, cnode2).add()
+					# cnode.add_flow_connection(1, 0, cnode2).add()
 
 					if i > 0:
-						old.add_flow_connection(0, 0, cnode).add()
+						old.add_flow_connection(1, 0, cnode).add()
 
-					old = cnode2
+					old = cnode
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:
@@ -201,3 +205,49 @@ func _input(event: InputEvent) -> void:
 					HenGlobal.history.redo()
 				elif event.keycode == KEY_C:
 					HenGlobal.history.clear_history()
+
+
+func get_script_list(_dir: DirAccess, _list: Array = []) -> void:
+	_dir.list_dir_begin()
+
+	var file_name: String = _dir.get_next()
+
+	# TODO cache script that don't changed
+	while file_name != '':
+		if file_name.get_extension() != 'gd' and not _dir.current_is_dir():
+			file_name = _dir.get_next()
+			continue
+
+		if _dir.current_is_dir():
+			get_script_list(DirAccess.open(_dir.get_current_dir() + '/' + file_name))
+		else:
+			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
+
+			if script.source_code.begins_with('#[hengo] '):
+				var data_path = script.source_code.split('\n').slice(0, 1)[0].split('#[hengo] ')[1]
+				var data: HenScriptData = ResourceLoader.load(data_path)
+
+				var dict_data: Dictionary = {
+					name = file_name.get_basename(),
+					path = _dir.get_current_dir() + '/' + file_name,
+					type = data.type,
+					data_path = data_path
+				}
+
+				HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
+			
+				_list.append(dict_data)
+			else:
+				var _code: String = script.source_code.trim_prefix(' ')
+				if _code.begins_with('extends '):
+					var _type: String = _code.split('extends ')[1]
+
+					_list.append({
+						name = file_name.get_basename(),
+						path = _dir.get_current_dir() + '/' + file_name,
+						type = _type
+					})
+		
+		file_name = _dir.get_next()
+
+	_dir.list_dir_end()

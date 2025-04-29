@@ -407,12 +407,7 @@ static func parse_tokens(_virtual_cnode_list: Array) -> Dictionary:
 
 		if from_flow.to:
 			var token_list = from_flow.to.get_flow_token_list(from_flow.to_idx)
-			# token_list.append(get_debug_token(virtual_cnode))
-			# token_list.append(get_push_debug_token())
 
-			# if cnode_name == 'enter':
-			# 	token_list.append({type = HenVirtualCNode.SubType.DEBUG_STATE, id = 99})
-			
 			data[cnode_name] = {
 				tokens = token_list,
 				params = virtual_cnode.get_output_token_list()

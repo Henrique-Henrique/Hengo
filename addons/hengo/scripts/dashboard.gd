@@ -119,22 +119,12 @@ func get_script_list(_dir: DirAccess, _list: Array = []) -> Array:
 				folder = get_script_list(DirAccess.open(_dir.get_current_dir() + '/' + file_name))
 			})
 		else:
-			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
-
-			if script.source_code.begins_with('#[hengo] '):
-				var data: HenSaver.ScriptData = HenLoader.parse_hengo_json(script.source_code)
-
-				_list.append({
-					name = file_name.get_basename(),
-					path = _dir.get_current_dir() + '/' + file_name,
-					type = data.type,
-				})
-			else:
-				_list.append({
-					name = file_name.get_basename(),
-					path = _dir.get_current_dir() + '/' + file_name,
-					type = 'Variant'
-				})
+			var _path: String = _dir.get_current_dir() + '/' + file_name
+			_list.append({
+				name = file_name.get_basename(),
+				path = _path,
+				type = HenEnums.SCRIPT_LIST_DATA[_path].type if HenEnums.SCRIPT_LIST_DATA.has(_path) else 'Variant'
+			})
 		
 		file_name = _dir.get_next()
 

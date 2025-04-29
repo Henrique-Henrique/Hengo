@@ -1109,7 +1109,7 @@ func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 
 		match vc.sub_type:
 			HenVirtualCNode.SubType.IF:
-				_token_list.append(vc.get_if_token())
+				_token_list.append(vc.get_if_token(stack))
 			HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 				_token_list.append(vc.get_for_token())
 			HenVirtualCNode.SubType.MACRO:
@@ -1121,10 +1121,14 @@ func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 					if flow.to:
 						stack.append({node = flow.to, idx = flow.to_idx})
 			_:
+				_token_list.append(vc.get_token())
+
+	
 				if vc.flow_connections[0].to:
 					stack.append({node = vc.flow_connections[0].to, idx = vc.flow_connections[0].to_idx})
 
 	return _token_list
+
 
 func get_macro_token(_input_idx: int) -> Dictionary:
 	var flow_tokens: Array
@@ -1145,12 +1149,11 @@ func get_macro_token(_input_idx: int) -> Dictionary:
 	}
 
 
-func get_if_token() -> Dictionary:
+func get_if_token(_stack: Array) -> Dictionary:
 	var true_flow: Array = []
 	var false_flow: Array = []
 
 	# this causing stack overflow when using a lot of if cnodes
-
 	if flow_connections[0].to:
 		var flow: FlowConnectionData = flow_connections[0]
 		true_flow = flow.to.get_flow_token_list(flow.to_idx)

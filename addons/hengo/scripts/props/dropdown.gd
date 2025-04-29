@@ -114,10 +114,11 @@ func _on_pressed() -> void:
 
 			options = arr
 		'state_event_list':
-			var data: Dictionary = HenGlobal.SCRIPTS_INFO.get(custom_data)
+			pass
+			# var data: Dictionary = HenGlobal.SCRIPTS_INFO.get(custom_data)
 
-			if data.has('state_event_list'):
-				options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
+			# if data.has('state_event_list'):
+			# 	options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
 		'signal_list':
 			var arr: Array = []
 			var all_classes: PackedStringArray = ClassDB.get_class_list()
