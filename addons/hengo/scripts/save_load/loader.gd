@@ -8,7 +8,9 @@ static var flow_connection_list: Array = []
 static var from_flow_list: Array = []
 
 
-class BaseRouteRef:
+class BaseRouteRef extends Object:
+	signal loaded_new_project
+
 	var virtual_cnode_list: Array = []
 
 static func load(_path: StringName) -> void:
@@ -21,15 +23,6 @@ static func load(_path: StringName) -> void:
 	connection_list.clear()
 	flow_connection_list.clear()
 	from_flow_list.clear()
-
-	var cnode_msg: PanelContainer = HenGlobal.CAM.get_parent().get_node_or_null('StartMessage')
-	
-	if cnode_msg:
-		cnode_msg.get_parent().remove_child(cnode_msg)
-
-	for cnode in HenGlobal.COMMENT_CONTAINER.get_children():
-		cnode.queue_free()
-
 
 	HenGlobal.vs_list.clear()
 	HenGlobal.SIDE_BAR_LIST.clear()
@@ -48,6 +41,32 @@ static func load(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
+
+	# cleaning instances
+	if HenGlobal.BASE_ROUTE.has('ref'):
+		for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
+			if v_cnode.get('virtual_cnode_list'):
+				for vc: HenVirtualCNode in v_cnode.virtual_cnode_list:
+					# inputs
+					for in_out: HenVirtualCNode.InOutData in vc.inputs:
+						in_out.free()
+
+					# outputs
+					for in_out: HenVirtualCNode.InOutData in vc.outputs:
+						in_out.free()
+					
+					# flows
+					for flow_connection: HenVirtualCNode.FlowConnection in vc.flow_connections:
+						flow_connection.free()
+
+					# from flow
+					for flow_connection: HenVirtualCNode.FlowConnection in vc.from_flow_connections:
+						flow_connection.free()
+					
+					vc.free()
+
+			v_cnode.free()
+ 
 	# ---------------------------------------------------------------------------- #
 
 	# confirming queue free before check errors
@@ -58,9 +77,6 @@ static func load(_path: StringName) -> void:
 	HenRouter.line_route_reference = {}
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()
-
-	print(_path, ' = ', HenEnums.SCRIPT_LIST_DATA)
-
 
 	var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
 	var base_route: Dictionary = {
@@ -79,13 +95,11 @@ static func load(_path: StringName) -> void:
 		var item_data: Dictionary = HenEnums.SCRIPT_LIST_DATA[_path]
 		var data: HenScriptData = ResourceLoader.load(item_data.data_path, '', ResourceLoader.CACHE_MODE_IGNORE)
 
-		print(data.side_bar_list)
-
 		# setting script configs
 		HenGlobal.script_config.type = data.type
 		HenGlobal.node_counter = data.node_counter
 		HenGlobal.prop_counter = data.prop_counter
-		HenGlobal.current_script_debug_symbols = data.debug_symbols
+		# HenGlobal.current_script_debug_symbols = data.debug_symbols
 
 		# loading side bar list
 		HenGlobal.SIDE_BAR_LIST.load_save(data.side_bar_list)

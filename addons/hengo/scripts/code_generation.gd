@@ -449,8 +449,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 	var indent: StringName = '\t'.repeat(_level)
 	var prefix: StringName = '_ref.'
 
-	print('yy ', _token)
-
 	if _token.use_self == true or (_token.has('category') and _token.get('category') == 'native'):
 		prefix = ''
 
@@ -524,26 +522,27 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 			return _token.param
 		HenVirtualCNode.SubType.IF:
-			var flow = HenCodeGeneration.flows_refs[_token.flow_id]
+			var true_flow = HenCodeGeneration.flows_refs[_token.true_flow_id]
+			var false_flow = HenCodeGeneration.flows_refs[_token.false_flow_id]
 
 			var base: String = 'if {condition}:\n'.format({
 				condition = parse_token_by_type(_token.condition)
 			})
 			var code_list: Array = []
-			if flow.true_flow.is_empty():
+			if true_flow.is_empty():
 				base += indent + '\tpass\n'
 			else:
-				for token in flow.true_flow:
+				for token in true_flow:
 					code_list.append(
 						parse_token_by_type(token, _level + 1)
 					)
 			# code_list.append('')
-			for token in flow.false_flow:
+			for token in false_flow:
 				code_list.append(
 					parse_token_by_type(token, _level)
 				)
 			if code_list.is_empty():
-				if not flow.true_flow.is_empty():
+				if not true_flow.is_empty():
 					base += indent + '\tpass'
 			else:
 				base += '\n'.join(code_list) + '\n\n'

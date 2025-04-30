@@ -1,5 +1,5 @@
 @tool
-class_name HenVirtualCNode extends RefCounted
+class_name HenVirtualCNode extends Object
 
 enum Type {
 	DEFAULT,
@@ -89,7 +89,7 @@ var flow_connections: Array = []
 var from_flow_connections: Array = []
 
 
-class InOutData:
+class InOutData extends Object:
 	var name: String
 	var type: StringName
 	var sub_type: StringName
@@ -250,7 +250,7 @@ class InOutData:
 				value = code_value
 
 
-class FlowConnection:
+class FlowConnection extends Object:
 	var name: String
 	var ref: Object
 
@@ -297,7 +297,7 @@ class FromFlowConnection extends FlowConnection:
 	var from_connections: Array[FlowConnectionData]
 
 
-class ConnectionData:
+class ConnectionData extends Object:
 	var idx: int
 	var line_ref: HenConnectionLine
 	var type: StringName
@@ -566,7 +566,7 @@ class VCNodeReturn:
 		v_cnode.output_connections.clear()
 		v_cnode.hide()
 		v_cnode.is_deleted = true
-	
+
 
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 	is_showing = _rect.intersects(
@@ -1099,6 +1099,7 @@ func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line: He
 
 func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 	var stack: Array = []
+	var token_list: Array = _token_list
 
 	stack.append({node = self, idx = _input_idx})
 
@@ -1106,6 +1107,11 @@ func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 		var current: Dictionary = stack.pop_back()
 		var vc: HenVirtualCNode = current.node
 		var idx: int = current.idx
+
+
+		if current.has('flow_id'):
+			token_list = HenCodeGeneration.flows_refs[current.flow_id]
+
 
 		match vc.sub_type:
 			HenVirtualCNode.SubType.IF:
@@ -1150,28 +1156,25 @@ func get_macro_token(_input_idx: int) -> Dictionary:
 
 
 func get_if_token(_stack: Array) -> Dictionary:
-	var true_flow: Array = []
-	var false_flow: Array = []
+	var true_flow_id: int = HenCodeGeneration.get_flow_id()
+	var false_flow_id: int = HenCodeGeneration.get_flow_id()
+
+	HenCodeGeneration.flows_refs[true_flow_id] = []
+	HenCodeGeneration.flows_refs[false_flow_id] = []
 
 	# this causing stack overflow when using a lot of if cnodes
 	if flow_connections[0].to:
 		var flow: FlowConnectionData = flow_connections[0]
-		true_flow = flow.to.get_flow_token_list(flow.to_idx)
+		_stack.append({node = flow.to, idx = flow.to_idx, flow_id = true_flow_id})
 		
 	if flow_connections[1].to:
 		var flow: FlowConnectionData = flow_connections[1]
-		false_flow = flow.to.get_flow_token_list(flow.to_idx)
-
-	var flow_id: int = HenCodeGeneration.get_flow_id()
-
-	HenCodeGeneration.flows_refs[flow_id] = {
-		true_flow = true_flow,
-		false_flow = false_flow
-	}
+		_stack.append({node = flow.to, idx = flow.to_idx, flow_id = false_flow_id})
 
 	return {
 		type = HenVirtualCNode.SubType.IF,
-		flow_id = flow_id,
+		true_flow_id = true_flow_id,
+		false_flow_id = false_flow_id,
 		condition = get_input_token(0),
 		use_self = false
 	}
@@ -1665,7 +1668,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			}
 
 			HenRouter.line_route_reference[v_cnode.route.id] = []
-			HenRouter.comment_reference[v_cnode.route.id] = []
 			
 			if not _config.has('virtual_cnode_list'):
 				HenVirtualCNode.instantiate_virtual_cnode({

@@ -108,7 +108,6 @@ func _physics_process(_delta: float) -> void:
 
 # checking virtual cnodes positions
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
-	var start: float = Time.get_ticks_usec()
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom, # position
 		(get_parent() as Panel).size / _zoom
@@ -117,12 +116,6 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 	if HenRouter.current_route:
 		for v_cnode: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
 			v_cnode.check_visibility(rect)
-	
-	var end: float = Time.get_ticks_usec()
-
-	var s = (end - start) / 1000.
-	if s > 10.:
-		print('showed: ', s, 'ms')
 
 
 func get_rect() -> Rect2:
