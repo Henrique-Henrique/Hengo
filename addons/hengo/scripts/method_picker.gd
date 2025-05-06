@@ -321,17 +321,19 @@ var native_list: Array = [
 
 
 func _ready() -> void:
+	var _type: StringName = HenGlobal.script_config.type if HenGlobal.script_config.has('type') else 'Variant'
+
 	tree.item_activated.connect(_on_select)
 	(%Search as LineEdit).text_changed.connect(_on_search)
 	(%Search as LineEdit).grab_focus()
-	(%SelfBt as Button).pressed.connect(_on_class_bt.bind(HenGlobal.script_config.type, %SelfBt, CLASS_TYPE.SELF))
+	(%SelfBt as Button).pressed.connect(_on_class_bt.bind(_type, %SelfBt, CLASS_TYPE.SELF))
 	(%ClassBt as HenDropdown).value_changed.connect(_on_class_bt.bind(%ClassBt, CLASS_TYPE.OTHER))
 
 	# filter buttons
 	for chd: Button in (%FilterList as HBoxContainer).get_children():
 		chd.pressed.connect(_filter_change.bind(chd.name))
 
-	_on_class_bt(HenGlobal.script_config.type, %SelfBt, CLASS_TYPE.SELF)
+	_on_class_bt(_type, %SelfBt, CLASS_TYPE.SELF)
 
 	for data: Dictionary in native_list:
 		data.type = FILTER_TYPE.NATIVE
