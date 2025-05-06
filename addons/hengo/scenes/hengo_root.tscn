@@ -72,18 +72,18 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1152, 648)
-shader_parameter/offset = Vector2(21440.6, 3475.15)
-shader_parameter/zoom_factor = 0.999991
+shader_parameter/screen_size = Vector2(3824, 1651)
+shader_parameter/offset = Vector2(1627.53, 478.777)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
-bg_color = Color(0, 0.65, 0.1625, 0.270588)
+bg_color = Color(1, 1, 1, 0.0862745)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
 content_margin_right = 8.0
@@ -257,7 +257,7 @@ offset_top = 148.0
 offset_right = 193.0
 offset_bottom = 188.0
 mouse_filter = 2
-border_color = Color(3.41728e-06, 0.648138, 0.159242, 1)
+border_color = Color(0.749928, 0.915784, 0.889306, 1)
 border_width = 3.0
 
 [node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/Cam/SelectionRect"]
@@ -270,11 +270,13 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
 [node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/Cam"]
+visible = false
 modulate = Color(0.270724, 0.690067, 0.0733794, 1)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
 [node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/Cam"]
+visible = false
 modulate = Color(0.270724, 0.690067, 0.0733794, 1)
 position = Vector2(0, 3000)
 scale = Vector2(0.21, 0.21)

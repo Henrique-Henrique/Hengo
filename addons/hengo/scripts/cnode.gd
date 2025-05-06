@@ -59,20 +59,25 @@ func _on_enter() -> void:
 		}
 	
 	# animations
-	var tween: Tween = get_tree().create_tween()
-
-	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .05)
-	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2(1.03, 1.03), .05).set_delay(0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
+	if not selected: hover_animation()
 
 
 func _on_exit() -> void:
 	HenGlobal.flow_connection_to_data = {}
+	if not selected: exit_animation()
 
-	# (%Border as Panel).modulate = Color.WHITE
+
+func hover_animation() -> void:
 	var tween: Tween = get_tree().create_tween()
 
-	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .2)
-	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2.ONE, .05).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
+	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .03)
+	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2(1.03, 1.03), .03).set_delay(0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
+
+func exit_animation() -> void:
+	var tween: Tween = get_tree().create_tween()
+
+	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .03)
+	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2.ONE, .03).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
 
 
 func _scale_and_update_line(_scale: Vector2) -> void:
@@ -249,15 +254,15 @@ func move(_pos: Vector2) -> void:
 	emit_signal('on_move')
 
 func select() -> void:
-	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
-	# get_node('%SelectBorder').visible = true
 	selected = true
+	hover_animation()
+	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 
 
 func unselect() -> void:
-	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
-	# get_node('%SelectBorder').visible = false
 	selected = false
+	exit_animation()
+	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
 
 func change_name(_name: String) -> void:
 	get_node('%Title').text = _name
@@ -305,25 +310,6 @@ func disable_error() -> void:
 
 func get_connection_lines_in_flow() -> Dictionary:
 	return {}
-	# match type:
-	# 	TYPE.IF:
-	# 		var flow_dict: Dictionary = {
-	# 			base_conn = get_input_connection_lines()
-	# 		}
-
-	# 		for conn in connectors.values():
-	# 			var connector = get_connector(conn.type)
-
-	# 			if connector:
-	# 				var result: Array = get_connector_lines(connector)
-	# 				flow_dict[conn.type] = result
-			
-	# 		return flow_dict
-	# 	_:
-	# 		var connector = get_connector()
-	# 		var result: Array = get_connector_lines(connector)
-
-	# 		return {cnode = result}
 
 
 func get_connector_lines(_connector) -> Array:

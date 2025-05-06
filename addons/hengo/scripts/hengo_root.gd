@@ -76,6 +76,9 @@ func _ready() -> void:
 
 
 func _on_cnode_gui_input(_event: InputEvent) -> void:
+	if _event is InputEventMouseMotion and can_select:
+		_select_cnode()
+
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			match _event.button_index:
@@ -96,6 +99,7 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 				MOUSE_BUTTON_LEFT:
 					if can_select:
 						_select_cnode()
+						can_select = false
 
 					cnode_selecting_rect = false
 					start_select_pos = Vector2.ZERO
@@ -105,9 +109,12 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 func _select_cnode() -> void:
 	var selection_rect: ReferenceRect = HenGlobal.CAM.get_node('SelectionRect')
 
-	for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
-		if selection_rect.get_global_rect().has_point(cnode.global_position):
-			cnode.select()
+	for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
+		if v_cnode.cnode_ref:
+			if selection_rect.get_global_rect().has_point(v_cnode.cnode_ref.global_position):
+				v_cnode.cnode_ref.select()
+			else:
+				v_cnode.cnode_ref.unselect()
 
 
 func _process(_delta: float) -> void:

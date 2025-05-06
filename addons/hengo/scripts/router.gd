@@ -15,6 +15,12 @@ static var current_route: Dictionary = {} # name: String, type: ROUTE_TYPE, id: 
 static var line_route_reference: Dictionary = {}
 static var comment_reference: Dictionary = {}
 
+static func get_current_route_v_cnodes() -> Array:
+	if current_route:
+		return current_route.ref.virtual_cnode_list
+
+	return []
+
 static func change_route(_route: Dictionary) -> void:
 	if current_route == _route:
 		return
