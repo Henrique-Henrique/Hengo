@@ -211,7 +211,7 @@ func _on_gui(_event: InputEvent) -> void:
 				i.moving = false
 
 
-func _on_state_inspector() -> void:
+func _on_state_inspector(_name: String, _value: Variant, _ref: Object) -> void:
 	if virtual_ref: virtual_ref.update()
 
 

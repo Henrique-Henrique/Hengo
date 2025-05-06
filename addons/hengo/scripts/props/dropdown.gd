@@ -18,7 +18,8 @@ func _on_pressed() -> void:
 		'state_transition':
 			# all transitions
 			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				options = HenRouter.current_route.ref.flow_connections.map(func(x): return {name = x.name})
+				options = HenRouter.current_route.ref.flow_connections.map(func(x):
+					return {name = x.name, ref = x})
 		'action':
 			var arr: Array = []
 
@@ -151,8 +152,12 @@ func _selected(_item: Dictionary) -> void:
 	HenGlobal.CAM.can_scroll = true
 
 	match type:
-		'hengo_states', 'state_transition':
+		'hengo_states':
 			text = (_item.name as String).to_snake_case()
+		'state_transition':
+			emit_signal('value_changed', text)
+			input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+			return
 		'enum_list':
 			text = _item.name
 			custom_value = _item.code_name
@@ -228,8 +233,8 @@ func get_generated_code() -> String:
 			return text.to_snake_case()
 		'get_prop', 'set_prop':
 			return text.replacen(' -> ', '.')
-		_:
-			return '\"' + text + '\"'
+	
+	return text
 	
 
 func get_const_list(_arr: Array, _type: StringName, _name: String, _prop_type: StringName, _check_type: bool = true) -> Array:

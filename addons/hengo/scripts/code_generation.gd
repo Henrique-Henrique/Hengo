@@ -395,6 +395,8 @@ func _physics_process(delta: float) -> void:
 
 		code += base + '\n\n'
 
+	print(code)
+
 	return code
 
 

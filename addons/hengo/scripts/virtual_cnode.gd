@@ -136,13 +136,13 @@ class InOutData extends Object:
 		ref_change_rule = _ref_change_rule
 
 		# when param is moved
-		if ref.has_signal('moved'):
+		if ref.has_signal('moved') and not ref.is_connected('moved', _on_move):
 			ref.moved.connect(_on_move)
 
-		if ref.has_signal('deleted'):
+		if ref.has_signal('deleted') and not ref.is_connected('deleted', _on_delete):
 			ref.deleted.connect(_on_delete)
 
-		if _ref.has_signal('data_changed'):
+		if _ref.has_signal('data_changed') and not ref.is_connected('data_changed', on_data_changed):
 			_ref.data_changed.connect(on_data_changed)
 		
 		update_changes.emit()
@@ -251,16 +251,25 @@ class InOutData extends Object:
 
 
 class FlowConnection extends Object:
-	var name: String
+	var name: String: set = _on_change_name
+	var id: int
 	var ref: Object
-
+	
+	signal update_changes
+	signal data_changed
 	signal moved
 	signal deleted
 
-	func _init(_name: String = '', _ref: Object = null) -> void:
+	func _on_change_name(_name: String) -> void:
 		name = _name
+		data_changed.emit('value', _name)
+		data_changed.emit('code_value', _name)
 
-		if _ref: set_ref(_ref)
+	func _init(_data: Dictionary = {}) -> void:
+		name = _data.name if _data.has('name') else ''
+		id = _data.id if _data.has('id') else HenGlobal.get_new_node_counter()
+
+		if _data.has('ref'): set_ref(_data.ref)
 
 	func set_ref(_ref) -> void:
 		ref = _ref
@@ -270,12 +279,21 @@ class FlowConnection extends Object:
 
 		if ref.has_signal('deleted'):
 			ref.deleted.connect(_on_delete)
+		
+		if _ref.has_signal('data_changed'):
+			_ref.data_changed.connect(on_data_changed)
 	
+
 	func _on_move(_pos: int) -> void:
 		moved.emit(self is FromFlowConnection, _pos, self)
 
 	func _on_delete() -> void:
 		deleted.emit(self is FromFlowConnection, self)
+	
+	func on_data_changed(_name: String, _value) -> void:
+		set(_name, _value)
+		update_changes.emit()
+
 
 class FlowConnectionData extends FlowConnection:
 	var line_ref: HenFlowConnectionLine
@@ -1019,6 +1037,11 @@ func get_save() -> Dictionary:
 						flows.append({name = flow_connection.name})
 				
 				if not flows.is_empty(): data.to_flow = flows
+		Type.STATE:
+			data.to_flow = []
+			for flow_connection: FlowConnectionData in flow_connections:
+					if flow_connection.name:
+						data.to_flow.append({name = flow_connection.name, id = flow_connection.id})
 
 	return data
 
@@ -1259,6 +1282,9 @@ func get_input_token(_idx: int) -> Dictionary:
 					data.use_value = true
 				'class_props':
 					data.use_value = true
+				'state_transition':
+					print('t=>', data)
+					data.value = '&"{0}"'.format([data.value.to_snake_case()])
 
 		return data
 	
@@ -1391,7 +1417,7 @@ func get_history_obj() -> VCNodeReturn:
 
 
 func create_flow_connection() -> void:
-	flow_connections.append(FlowConnectionData.new('Flow ' + str(flow_connections.size())))
+	flow_connections.append(FlowConnectionData.new({name = 'Flow ' + str(flow_connections.size())}))
 
 
 func clear_in_out(_is_input: bool) -> void:
@@ -1524,19 +1550,24 @@ func _on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 		SubType.MACRO_OUTPUT:
 			if _is_input: return
 			_is_input = not _is_input
-	
+
+	var flow: FlowConnection
 
 	if _is_input:
-		var flow: FromFlowConnection = FromFlowConnection.new(_data.name, _data.ref)
-		flow.moved.connect(_on_flow_moved)
-		flow.deleted.connect(_on_flow_deleted)
+		flow = FromFlowConnection.new(_data)
 		from_flow_connections.append(flow)
 	else:
-		var flow: FlowConnectionData = FlowConnectionData.new(_data.name, _data.ref)
-		flow.moved.connect(_on_flow_moved)
-		flow.deleted.connect(_on_flow_deleted)
+		flow = FlowConnectionData.new(_data)
 		flow_connections.append(flow)
 	
+	
+	if _data.has('id'):
+		HenGlobal.SIDE_BAR_LIST_CACHE[_data.id] = flow
+
+	flow.moved.connect(_on_flow_moved)
+	flow.deleted.connect(_on_flow_deleted)
+	flow.update_changes.connect(_on_in_out_data_changed)
+
 	update()
 
 func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: FlowConnection) -> void:
@@ -1640,8 +1671,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
 			var _ref: HenSideBar.MacroData = _config.ref
 
-			_config.to_flow = _ref.inputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
-			_config.from_flow = _ref.outputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
+			_config.from_flow = _ref.inputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
+			_config.to_flow = _ref.outputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
 
 			if v_cnode.sub_type == SubType.MACRO:
 				(v_cnode.ref as HenSideBar.MacroData).macro_ref_list.append(v_cnode)
@@ -1652,12 +1683,12 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			if not _config.has('to_flow'): v_cnode.flow_connections.append(FlowConnectionData.new())
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.IF:
-			v_cnode.flow_connections.append(FlowConnectionData.new('True'))
-			v_cnode.flow_connections.append(FlowConnectionData.new('False'))
+			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'True'}))
+			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'False'}))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.FOR:
-			v_cnode.flow_connections.append(FlowConnectionData.new('Body'))
-			v_cnode.flow_connections.append(FlowConnectionData.new('Then'))
+			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Body'}))
+			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Then'}))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE:
 			v_cnode.route = {
@@ -1690,18 +1721,19 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE_START:
-			v_cnode.flow_connections.append(FlowConnectionData.new('on start'))
+			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'On Start'}))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE_EVENT:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
-		_:
-			if _config.has('to_flow'):
-				for flow: Dictionary in _config.to_flow:
-					v_cnode._on_flow_added(true, flow)
 
-			if _config.has('from_flow'):
-				for flow: Dictionary in _config.from_flow:
-					v_cnode._on_flow_added(false, flow)
+
+	if _config.has('to_flow'):
+		for flow: Dictionary in _config.to_flow:
+			v_cnode._on_flow_added(false, flow)
+
+	if _config.has('from_flow'):
+		for flow: Dictionary in _config.from_flow:
+			v_cnode._on_flow_added(true, flow)
 			
 
 	if _config.has('inputs'):

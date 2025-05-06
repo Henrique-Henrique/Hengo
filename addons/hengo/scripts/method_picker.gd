@@ -159,30 +159,8 @@ var native_list: Array = [
 					name = 'name',
 					type = 'StringName',
 					sub_type = '@dropdown',
+					code_value = '',
 					category = 'state_transition'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'Cast To ->',
-		data = {
-			name = 'Cast To',
-			sub_type = HenVirtualCNode.SubType.CAST,
-			category = 'native',
-			inputs = [
-				{
-					name = 'from',
-					type = 'Variant'
-				}
-			],
-			outputs = [
-				{
-					name = 'to',
-					type = 'Node',
-					sub_type = '@dropdown',
-					category = 'cast_type'
 				}
 			],
 			route = HenRouter.current_route

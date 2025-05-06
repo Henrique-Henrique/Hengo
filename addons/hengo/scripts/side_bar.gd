@@ -591,10 +591,15 @@ class MacroData:
 
 	class MacroInOut:
 		var id: int = HenGlobal.get_new_node_counter()
-		var name: String
+		var name: String: set = on_change_name
 
+		signal data_changed(_property: String, _value)
 		signal moved
 		signal deleted
+
+		func on_change_name(_name: String) -> void:
+			name = _name
+			data_changed.emit('name', _name)
 
 		func get_data() -> Dictionary:
 			return {name = name, ref = self}
@@ -806,11 +811,18 @@ func _ready() -> void:
 	list = get_node('%List')
 	list.button_clicked.connect(_on_list_button_clicked)
 	list.item_mouse_selected.connect(_on_item_selected)
+	list.item_activated.connect(_on_select)
 
 	HenGlobal.SIDE_BAR = self
 	HenGlobal.SIDE_BAR_LIST = SideBarList.new()
 	HenGlobal.SIDE_BAR_LIST.list_changed.connect(_on_list_changed)
 
+
+func _on_select() -> void:
+	var obj = list.get_selected().get_metadata(0)
+	
+	if obj.get('route'):
+		HenRouter.change_route(obj.get('route'))
 
 func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> void:
 	match _mouse_button_index:
