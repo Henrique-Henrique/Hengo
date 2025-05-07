@@ -18,6 +18,7 @@ class InspectorItem:
 	var prop_array_ref: HenPropArray
 	var category: StringName
 	var data: Variant
+	var max_size: int = -1
 
 	func _init(_data: Dictionary) -> void:
 		type = _data.type
@@ -49,6 +50,9 @@ class InspectorItem:
 		
 		if _data.has('data'):
 			data = _data.data
+		
+		if _data.has('max_size'):
+			max_size = _data.max_size
 		
 
 static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector:
@@ -92,6 +96,7 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
 				prop.text = item_data.value
 			'Array':
 				prop = preload('res://addons/hengo/scenes/props/array.tscn').instantiate()
+				prop.max_size = item_data.max_size
 				prop.start(item_data.field, item_data.value, item_data.item_creation_callback, item_data.item_move_callback, item_data.item_delete_callback)
 			'@dropdown':
 				prop = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()

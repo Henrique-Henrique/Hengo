@@ -13,11 +13,18 @@ var item_create_callback: Callable
 var item_move_callback: Callable
 var item_delete_callback: Callable
 
+# rules
+var max_size: int = -1
+
 func _ready() -> void:
     (get_node('%Add') as Button).pressed.connect(_add)
 
 
 func _add() -> void:
+    if array_ref.size() >= max_size:
+        push_warning('Array Size Limit Reached')
+        return
+
     item_create_callback.call()
     create_inspector(inspector)
     value_changed.emit(null)

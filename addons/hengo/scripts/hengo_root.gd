@@ -20,6 +20,7 @@ func _ready() -> void:
 		return
 
 	set_process(true)
+
 	# initializing
 	HenRouter.current_route = {}
 	HenRouter.line_route_reference = {}
