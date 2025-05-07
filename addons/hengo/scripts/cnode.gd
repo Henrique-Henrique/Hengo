@@ -48,8 +48,8 @@ func _ready():
 
 
 func _on_enter() -> void:
-	if virtual_ref:
-		print(virtual_ref.id)
+	# if virtual_ref:
+	# 	print(virtual_ref.id)
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection:
@@ -63,8 +63,10 @@ func _on_enter() -> void:
 
 
 func _on_exit() -> void:
+	_is_mouse_enter = false
 	HenGlobal.flow_connection_to_data = {}
 	if not selected: exit_animation()
+	HenGlobal.TOOLTIP.close()
 
 
 func hover_animation() -> void:
@@ -93,68 +95,10 @@ func _scale_and_update_line(_scale: Vector2) -> void:
 				if connetion.line_ref:
 					connetion.line_ref.update_line()
 
-
-func _on_tooltip() -> Variant:
-	if _is_mouse_enter:
-		if HenGlobal.DOCS_TOOLTIP.visible:
-			HenGlobal.DOCS_TOOLTIP.position.x = self.global_position.x
-			HenGlobal.DOCS_TOOLTIP.pivot_offset = Vector2(
-				0,
-				HenGlobal.DOCS_TOOLTIP.size.y
-			)
-			HenGlobal.DOCS_TOOLTIP.position.y = self.global_position.y - HenGlobal.DOCS_TOOLTIP.size.y
-		else:
-			if category == 'native':
-				match raw_name:
-					'print':
-						return null
-					'make_transition':
-						HenGlobal.DOCS_TOOLTIP.set_custom_doc("Executes a transition to change the node current state. Use this functionality to shift from one active state to another", 'Make a Transition')
-			# else:
-			# 	match sub_type:
-			# 		SUB_TYPE.FUNC, HenVirtualCNode.SubType.VOID:
-			# 			var first_input = get_node('%InputContainer').get_child(0)
-			# 			var current_class: String = first_input.connection_type
-
-			# 			if not HenEnums.VARIANT_TYPES.has(current_class):
-			# 				# getting where member is located in class reference
-			# 				while not ClassDB.class_has_method(current_class, get_cnode_name(), true):
-			# 					current_class = ClassDB.get_parent_class(current_class)
-
-			# 					# last class do verify
-			# 					if current_class == 'Object':
-			# 						break
-						
-			# 			HenGlobal.DOCS_TOOLTIP.start_docs(current_class, get_cnode_name())
-			# 		TYPE.IF:
-			# 			HenGlobal.DOCS_TOOLTIP.set_custom_doc("Evaluates a condition and provides three possible outputs: the left output is triggered if the condition is true, the middle output is followed if no condition is met, and the right output is used if the condition is false", 'IF Condition')
-
-			await get_tree().process_frame
-			HenGlobal.DOCS_TOOLTIP.position.x = self.global_position.x
-			HenGlobal.DOCS_TOOLTIP.pivot_offset = Vector2(
-				0,
-				HenGlobal.DOCS_TOOLTIP.size.y
-			)
-
-			HenGlobal.DOCS_TOOLTIP.position.y = self.global_position.y - HenGlobal.DOCS_TOOLTIP.size.y
-			HenGlobal.DOCS_TOOLTIP.scale = Vector2.ZERO
-			HenGlobal.DOCS_TOOLTIP.modulate = Color.TRANSPARENT
-			HenGlobal.DOCS_TOOLTIP.visible = true
-
-			var tween = create_tween().set_trans(Tween.TRANS_CUBIC)
-			tween.set_parallel(true)
-			tween.tween_property(HenGlobal.DOCS_TOOLTIP, 'scale', Vector2.ONE, .1)
-			tween.tween_property(HenGlobal.DOCS_TOOLTIP, 'modulate', Color.WHITE, .3)
-	
-	return null
-
-
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			HenGlobal.DOCS_TOOLTIP.visible = false
-			# this is for tooltip
-			_is_mouse_enter = false
 			if _event.ctrl_pressed:
 				if selected:
 					unselect()
@@ -215,6 +159,12 @@ func _on_gui(_event: InputEvent) -> void:
 			# group moving false
 			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 				i.moving = false
+	elif _event is InputEventMouseMotion and _is_mouse_enter:
+		match virtual_ref.type:
+			HenVirtualCNode.Type.STATE:
+				HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
+			_:
+				HenGlobal.TOOLTIP.close()
 
 
 func _on_state_inspector(_name: String, _value: Variant, _ref: Object) -> void:

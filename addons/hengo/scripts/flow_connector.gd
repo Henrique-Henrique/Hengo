@@ -21,6 +21,8 @@ func _on_hover() -> void:
 
 
 func _on_exit() -> void:
+	HenGlobal.TOOLTIP.close()
+
 	if not is_connected:
 		texture = preload('res://addons/hengo/assets/images/flow_out.svg')
 
@@ -82,7 +84,9 @@ func _on_gui(_event: InputEvent) -> void:
 				HenGlobal.can_make_flow_connection = false
 				HenGlobal.flow_cnode_from = null
 				HenGlobal.CONNECTION_GUIDE.end()
-
+				HenGlobal.TOOLTIP.close()
+	elif _event is InputEventMouseMotion:
+		HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), '{0} {1}'.format([HenEnums.TOOLTIP_TEXT.MOUSE_ICON, 'Left Click And Drag to Connect']))
 
 func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.FlowConnectionReturn:
 	return root.virtual_ref.add_flow_connection(

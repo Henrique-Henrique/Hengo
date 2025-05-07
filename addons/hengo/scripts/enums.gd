@@ -101,6 +101,13 @@ static var DROPDOWN_OBJECT_TYPES: Array
 static var DROPDOWN_STATES: Array = []
 
 
+const TOOLTIP_TEXT = {
+    MOUSE_ICON = '[img]res://addons/hengo/assets/icons/mouse.svg[/img]',
+    RIGHT_MOUSE_INSPECT = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Right Click to Inspect[/i]',
+    DOUBLE_CLICK = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Double Click to Enter[/i]'
+}
+
+
 class ScriptDataFile:
     var name: String
     var path: StringName

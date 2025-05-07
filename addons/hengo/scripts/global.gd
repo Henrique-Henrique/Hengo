@@ -22,6 +22,7 @@ static var BASE_ROUTE: Dictionary
 static var SIDE_BAR_LIST: HenSideBar.SideBarList
 static var SIDE_BAR: HenSideBar
 static var SIDE_BAR_LIST_CACHE: Dictionary = {}
+static var TOOLTIP: HenTooltip
 
 # cnodes
 static var can_make_connection: bool = false

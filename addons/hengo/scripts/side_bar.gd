@@ -816,14 +816,70 @@ class MacroData:
 
 func _ready() -> void:
 	list = get_node('%List')
+	list.auto_tooltip = false
 	list.button_clicked.connect(_on_list_button_clicked)
 	list.item_mouse_selected.connect(_on_item_selected)
 	list.item_activated.connect(_on_select)
+	list.gui_input.connect(_on_gui)
+	list.mouse_exited.connect(_on_exit)
 
 	HenGlobal.SIDE_BAR = self
 	HenGlobal.SIDE_BAR_LIST = SideBarList.new()
 	HenGlobal.SIDE_BAR_LIST.list_changed.connect(_on_list_changed)
 
+
+func _on_exit() -> void:
+	HenGlobal.TOOLTIP.close()
+
+
+func _on_gui(_event: InputEvent) -> void:
+	if _event is InputEventMouseMotion:
+		var item: TreeItem = list.get_item_at_position((_event as InputEventMouseMotion).position)
+		var bt_id: int = list.get_button_id_at_position((_event as InputEventMouseMotion).position)
+
+		if bt_id >= 0:
+			HenGlobal.TOOLTIP.close()
+			return
+
+		if item:
+			var data = item.get_metadata(0)
+			var pos: Vector2 = (_event as InputEventMouseMotion).global_position + Vector2(20, 20)
+
+			if not data is int:
+				if data is VarData:
+					HenGlobal.TOOLTIP.go_to(pos, '[b]{type}[/b]\n{name}\n\n{inspect}'.format({
+						name = data.name,
+						type = data.type,
+						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT
+					}))
+				elif data is FuncData:
+					HenGlobal.TOOLTIP.go_to(pos, '{name}\n\n[b]Input size: [/b]{in_size}\n\n[b]Output size: [/b]{out_size}\n\n{inspect}\n{enter}'.format({
+						name = data.name,
+						in_size = data.inputs.size(),
+						out_size = data.outputs.size(),
+						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT,
+						enter = HenEnums.TOOLTIP_TEXT.DOUBLE_CLICK
+					}))
+				elif data is SignalData:
+					HenGlobal.TOOLTIP.go_to(pos, '{name}\n\n[b]Signal: [/b] {s_name}\n\n{inspect}\n{enter}'.format({
+						name = data.name,
+						s_name = data.signal_name if data.signal_name else 'Not Selected',
+						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT,
+						enter = HenEnums.TOOLTIP_TEXT.DOUBLE_CLICK
+					}))
+				elif data is MacroData:
+					HenGlobal.TOOLTIP.go_to(pos, '{name}\n\n[b]Flow Input Size: [/b] {fi_size}\n[b]Flow Output Size: [/b] {fo_size}\n\n[b]Input Size: [/b] {i_size}\n[b]Output Size: [/b] {o_size}\n\n{inspect}\n{enter}'.format({
+						name = data.name,
+						fi_size = data.inputs.size(),
+						fo_size = data.outputs.size(),
+						i_size = data.inputs_value.size(),
+						o_size = data.outputs_value.size(),
+						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT,
+						enter = HenEnums.TOOLTIP_TEXT.DOUBLE_CLICK
+					}))
+			else:
+				HenGlobal.TOOLTIP.close()
+		
 
 func _on_select() -> void:
 	var obj = list.get_selected().get_metadata(0)
@@ -916,51 +972,3 @@ func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_but
 
 	# list.item_activated.connect(_on_enter)
 	# list.item_clicked.connect(_on_click)
-
-
-# func _on_enter(_index: int) -> void:
-# 	match HenGlobal.SIDE_BAR_LIST.type:
-# 		AddType.FUNC:
-# 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.func_list[_index] as FuncData).route)
-# 		AddType.SIGNAL:
-# 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.signal_list[_index] as SignalData).route)
-# 		AddType.MACRO:
-# 			HenRouter.change_route((HenGlobal.SIDE_BAR_LIST.macro_list[_index] as MacroData).route)
-
-
-# func _on_click(_index: int, _at_position: Vector2, _mouse_button_index: int) -> void:
-# 	if _mouse_button_index == MOUSE_BUTTON_RIGHT:
-# 		list_data.on_click(_index)
-
-
-# func _on_add() -> void:
-# 	HenGlobal.SIDE_BAR_LIST.add()
-
-
-# func _on_change_list(_type: AddType) -> void:
-# 	HenGlobal.SIDE_BAR_LIST.change(_type)
-# 	match _type:
-# 		AddType.LOCAL_VAR:
-# 			name_label.text = HenRouter.current_route.ref.name + ' \n' + NAME[_type]
-# 		_:
-# 			name_label.text = NAME[_type]
-
-
-# func _on_list_changed() -> void:
-# 	update_list()
-
-
-# func update_list() -> void:
-# 	list.clear()
-
-# 	for item_data: Dictionary in HenGlobal.SIDE_BAR_LIST.get_list_to_draw():
-# 		list.add_item(item_data.name)
-
-
-# func show_local_var_bt() -> void:
-# 	match HenRouter.current_route.type:
-# 		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-# 			local_var_bt.visible = true
-# 		_:
-# 			local_var_bt.visible = false
-# 			_on_change_list(AddType.VAR)

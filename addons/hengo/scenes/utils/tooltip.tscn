@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3 uid="uid://xg0nsq20dlya"]
+
+[ext_resource type="Script" uid="uid://e77fkqwrtpaw" path="res://addons/hengo/scripts/utils/tooltip.gd" id="1_6luta"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60crp"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.0845774, 0.0865195, 0.0860414, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.287295, 0.287295, 0.287295, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Tooltip" type="RichTextLabel"]
+process_mode = 4
+offset_right = 56.0
+offset_bottom = 23.0
+mouse_filter = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_60crp")
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+script = ExtResource("1_6luta")

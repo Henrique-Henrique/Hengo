@@ -127,6 +127,12 @@ func _on_gui(_event: InputEvent) -> void:
 			HenGlobal.can_make_connection = false
 			is_reparenting = false
 			line_ref = null
+			HenGlobal.TOOLTIP.close()
+	elif _event is InputEventMouseMotion:
+		if type == 'out':
+			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), '[i]Connect[/i]')
+		else:
+			HenGlobal.TOOLTIP.close()
 
 func _on_enter() -> void:
 	if not HenGlobal.can_make_connection:
@@ -168,6 +174,7 @@ func _on_enter() -> void:
 func _on_exit() -> void:
 	get('theme_override_styles/panel/').set('border_color', Color.TRANSPARENT)
 	
+	HenGlobal.TOOLTIP.close()
 	HenGlobal.connection_to_data = {}
 
 	if HenGlobal.CONNECTION_GUIDE.is_in_out:
