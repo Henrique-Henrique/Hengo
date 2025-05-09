@@ -471,7 +471,7 @@ func _on_select() -> void:
 
 	var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
 
-	HenGlobal.history.create_action('Add cNode')
+	HenGlobal.history.create_action('Add CNode')
 	HenGlobal.history.add_do_method(vc_return.add)
 	HenGlobal.history.add_do_reference(vc_return)
 	HenGlobal.history.add_undo_method(vc_return.remove)
@@ -483,6 +483,12 @@ func _on_select() -> void:
 			cnode_config.in_out_idx,
 			cnode_config.from,
 		).add()
+
+	# add connection when dragging from connector
+	if cnode_config.has('from_flow_connector'):
+		var connector: HenFlowConnector = cnode_config.from_flow_connector
+
+		connector.root.virtual_ref.add_flow_connection(cnode_config.from_flow_connector.idx, 0, vc_return.v_cnode).add()
 
 	HenGlobal.history.commit_action()
 	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()

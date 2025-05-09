@@ -9,10 +9,10 @@ enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
 
 const BG_COLOR = {
-	AddType.VAR: Color('#2F3C43'),
-	AddType.FUNC: Color('#432F2F'),
-	AddType.SIGNAL: Color('#2F4335'),
-	AddType.MACRO: Color('#332F43'),
+	AddType.VAR: Color.WHITE,
+	AddType.FUNC: Color.RED,
+	AddType.SIGNAL: Color.GREEN,
+	AddType.MACRO: Color.MEDIUM_PURPLE,
 	AddType.LOCAL_VAR: Color('#433B2F')
 }
 
@@ -917,7 +917,7 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	category.add_button(0, preload('res://addons/hengo/assets/icons/menu/square-plus.svg'))
 	category.set_metadata(0, _type)
 	category.set_selectable(0, false)
-	category.set_custom_bg_color(0, BG_COLOR[_type])
+	category.set_icon_modulate(0, BG_COLOR[_type])
 	category.set_button_color(0, 0, (BG_COLOR[_type] as Color).lightened(0.6))
 	category.set_icon(0, ICONS[_type])
 
@@ -940,7 +940,8 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		var item: TreeItem = category.create_child()
 		item.set_text(0, item_data.name)
 		item.set_metadata(0, item_data)
-		item.set_custom_bg_color(0, Color((BG_COLOR[_type] as Color).darkened(0.4), .6))
+		# item.set_custom_bg_color(0, Color((BG_COLOR[_type] as Color), .1))
+		item.set_icon_modulate(0, BG_COLOR[_type])
 		item.set_custom_color(0, Color(1, 1, 1, .6))
 
 		match _type:

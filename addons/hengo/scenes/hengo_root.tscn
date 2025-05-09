@@ -73,8 +73,8 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1152, 648)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/screen_size = Vector2(3824, 1973)
+shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
 shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -367,14 +367,23 @@ Note: Assignments to text clear the tag stack and reconstruct it from the proper
 Note: RichTextLabel doesn't support entangled BBCode tags. For example, instead of using [b]bold[i]bold italic[/b]italic[/i], use [b]bold[i]bold italic[/i][/b][i]italic[/i]."
 selection_enabled = true
 
-[node name="SideBar" parent="." instance=ExtResource("22_x5h56")]
-custom_minimum_size = Vector2(250, 0)
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 58.0
-offset_bottom = 0.0
+grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+
+[node name="SideBar" parent="HSplitContainer" instance=ExtResource("22_x5h56")]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+
+[node name="Control" type="Control" parent="HSplitContainer"]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
 
 [node name="TooltipCanvas" type="CanvasLayer" parent="."]
 

@@ -13,17 +13,18 @@ extends Sprite2D
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
-const _EVENTS = {}
+const _EVENTS ={}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_1 = State1.new(self)
+		state_1=State1.new(self)
 	})
 
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
 	
+
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -36,7 +37,21 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
+func func_256773520161():
+
+	pass
+
+
+func func_256773669830():
+
+	pass
+
+
+
 
 class State1 extends HengoState:
 	func enter() -> void:
 		pass
+
+
+

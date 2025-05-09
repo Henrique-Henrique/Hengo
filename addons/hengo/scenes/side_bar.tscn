@@ -11,20 +11,22 @@ bg_color = Color(0.6, 0.6, 0.6, 0)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k7ch5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4nava"]
+bg_color = Color(1, 1, 1, 0.0901961)
 
 [node name="SideBar" type="PanelContainer"]
-offset_right = 80.0
-offset_bottom = 320.0
-mouse_filter = 1
+offset_right = 295.0
+offset_bottom = 379.0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_k7ch5")
 script = ExtResource("1_y1kkq")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
@@ -32,6 +34,7 @@ mouse_filter = 2
 
 [node name="SearchBar" type="LineEdit" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 placeholder_text = "Type to search..."
 
@@ -39,9 +42,11 @@ placeholder_text = "Type to search..."
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/v_separation = 8
 theme_override_fonts/font = ExtResource("2_k7ch5")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_axb3u")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_k7ch5")
 theme_override_styles/hovered = SubResource("StyleBoxFlat_4nava")
 allow_rmb_select = true
 hide_root = true
+auto_tooltip = false
