@@ -194,7 +194,7 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
 			var idx: int = 0
 			for flow_connection: Dictionary in _config.flow_connections:
 				flow_connection_list.append({
-					idx = idx,
+					idx = flow_connection.idx,
 					from = vc,
 					to_id = int(flow_connection.to_id),
 					to_idx = flow_connection.to_idx

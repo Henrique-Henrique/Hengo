@@ -17,7 +17,10 @@ const _EVENTS ={}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_1=State1.new(self)
+		state_1=State1.new(self, {
+			flow_1="state_8"
+		}),
+		state_8=State8.new(self)
 	})
 
 func _ready() -> void:
@@ -40,6 +43,12 @@ func _physics_process(delta: float) -> void:
 
 
 class State1 extends HengoState:
+	func enter() -> void:
+		pass
+
+
+
+class State8 extends HengoState:
 	func enter() -> void:
 		pass
 

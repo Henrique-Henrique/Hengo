@@ -297,6 +297,7 @@ class FlowConnection extends Object:
 
 class FlowConnectionData extends FlowConnection:
 	var line_ref: HenFlowConnectionLine
+	var from_idx: int
 	var from_pos: Vector2
 	var to_pos: Vector2
 	var from: HenVirtualCNode
@@ -306,6 +307,7 @@ class FlowConnectionData extends FlowConnection:
 
 	func get_save() -> Dictionary:
 		return {
+			idx = from_idx,
 			to_id = to.id,
 			to_idx = to_idx
 		}
@@ -353,15 +355,18 @@ class FlowConnectionReturn:
 	var to: HenVirtualCNode
 	var to_idx: int
 	var from: HenVirtualCNode
+	var from_idx: int
 	var to_from_ref: FromFlowConnection
 
 	# old
 	var old_to: HenVirtualCNode
 	var old_to_idx: int
+	var old_from_idx: int
 	var old_from: HenVirtualCNode
 	var old_to_from_ref: FromFlowConnection
 
-	func _init(_flow: FlowConnectionData, _to: HenVirtualCNode, _to_idx: int, _from: HenVirtualCNode, _to_from_ref: FromFlowConnection) -> void:
+	func _init(_flow: FlowConnectionData, _from_idx: int, _to: HenVirtualCNode, _to_idx: int, _from: HenVirtualCNode, _to_from_ref: FromFlowConnection) -> void:
+		from_idx = _from_idx
 		flow_connection = _flow
 		to = _to
 		to_idx = _to_idx
@@ -378,10 +383,12 @@ class FlowConnectionReturn:
 				flow_connection.line_ref = null
 			
 			old_to = flow_connection.to
+			old_from_idx = flow_connection.from_idx
 			old_to_idx = flow_connection.to_idx
 			old_from = flow_connection.from
 			old_to_from_ref = flow_connection.to_from_ref
 
+		flow_connection.from_idx = from_idx
 		flow_connection.to = to
 		flow_connection.to_idx = to_idx
 		flow_connection.from = from
@@ -404,6 +411,7 @@ class FlowConnectionReturn:
 
 		# adding old flow connection
 		if old_to:
+			flow_connection.from_idx = old_from_idx
 			flow_connection.to = old_to
 			flow_connection.to_idx = old_to_idx
 			flow_connection.from = old_from
@@ -1050,7 +1058,7 @@ func add_flow_connection(_idx: int, _to_idx: int, _to: HenVirtualCNode) -> FlowC
 	var flow_connection: FlowConnectionData = flow_connections[_idx]
 	var flow_from_connection: FromFlowConnection = _to.from_flow_connections[_to_idx]
 
-	return FlowConnectionReturn.new(flow_connection, _to, _to_idx, self, flow_from_connection)
+	return FlowConnectionReturn.new(flow_connection, _idx, _to, _to_idx, self, flow_from_connection)
 
 
 func get_flow_connection(_idx: int) -> FlowConnectionReturn:
@@ -1062,7 +1070,7 @@ func get_flow_connection(_idx: int) -> FlowConnectionReturn:
 	if not flow_connection.to:
 		return null
 
-	return FlowConnectionReturn.new(flow_connection, flow_connection.to, flow_connection.to_idx, self, flow_connection.to_from_ref)
+	return FlowConnectionReturn.new(flow_connection, _idx, flow_connection.to, flow_connection.to_idx, self, flow_connection.to_from_ref)
 
 
 func remove_input_connection(_idx: int) -> void:
