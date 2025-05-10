@@ -48,8 +48,8 @@ func _ready():
 
 
 func _on_enter() -> void:
-	# if virtual_ref:
-	# 	print(virtual_ref.id)
+	if virtual_ref:
+		print(virtual_ref.id)
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection:

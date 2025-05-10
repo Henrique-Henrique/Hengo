@@ -526,11 +526,12 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.IF:
 			var true_flow = HenCodeGeneration.flows_refs[_token.true_flow_id]
 			var false_flow = HenCodeGeneration.flows_refs[_token.false_flow_id]
+			var code_list: Array = []
 
 			var base: String = 'if {condition}:\n'.format({
 				condition = parse_token_by_type(_token.condition)
 			})
-			var code_list: Array = []
+
 			if true_flow.is_empty():
 				base += indent + '\tpass\n'
 			else:
@@ -554,16 +555,9 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			var base: String = ''
 			var code_list: Array = []
+			var body_flow = HenCodeGeneration.flows_refs[_token.body_flow_id]
+			var then_flow = HenCodeGeneration.flows_refs[_token.then_flow_id]
 			var loop_item: String = _token.index_name + '_' + str(_token.id)
-
-			if _token.body_flow.is_empty():
-				base += indent + '\tpass\n'
-			else:
-				for token: Dictionary in _token.body_flow:
-					code_list.append(parse_token_by_type(token, _level + 1))
-			
-			for token: Dictionary in _token.then_flow:
-				code_list.append(parse_token_by_type(token, _level))
 
 			if _token.type == HenVirtualCNode.SubType.FOR:
 				base += 'for {item_name} in range({params}):\n'.format({
@@ -579,8 +573,17 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 					arr = parse_token_by_type(_token.params[0])
 				})
 			
+			if body_flow.is_empty():
+				base += indent + '\tpass\n'
+			else:
+				for token: Dictionary in body_flow:
+					code_list.append(parse_token_by_type(token, _level + 1))
+			
+			for token: Dictionary in then_flow:
+				code_list.append(parse_token_by_type(token, _level))
+
 			if code_list.is_empty():
-				if not _token.body_flow.is_empty():
+				if not body_flow.is_empty():
 					base += indent + '\tpass'
 			else:
 				base += '\n'.join(code_list) + '\n\n'
@@ -668,7 +671,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				callable = _get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.MACRO:
-			# print('lll ', _token)
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level)))
 		_:
 			return ''

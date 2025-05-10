@@ -1131,26 +1131,27 @@ func get_flow_token_list(_input_idx: int, _token_list: Array = []) -> Array:
 		var vc: HenVirtualCNode = current.node
 		var idx: int = current.idx
 
-
 		if current.has('flow_id'):
 			token_list = HenCodeGeneration.flows_refs[current.flow_id]
 
 
 		match vc.sub_type:
 			HenVirtualCNode.SubType.IF:
-				_token_list.append(vc.get_if_token(stack))
+				token_list.append(vc.get_if_token(stack))
 			HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
-				_token_list.append(vc.get_for_token())
+				token_list.append(vc.get_for_token(stack))
 			HenVirtualCNode.SubType.MACRO:
-				_token_list.append(vc.get_macro_token(idx))
+				token_list.append(vc.get_macro_token(idx))
 			HenVirtualCNode.SubType.MACRO_OUTPUT:
 				if HenGlobal.USE_MACRO_REF:
 					var flow: FlowConnectionData = HenGlobal.MACRO_REF.flow_connections[idx]
 
 					if flow.to:
 						stack.append({node = flow.to, idx = flow.to_idx})
+					
+					HenGlobal.USE_MACRO_REF = false
 			_:
-				_token_list.append(vc.get_token())
+				token_list.append(vc.get_token())
 
 	
 				if vc.flow_connections[0].to:
@@ -1203,23 +1204,26 @@ func get_if_token(_stack: Array) -> Dictionary:
 	}
 
 
-func get_for_token() -> Dictionary:
-	var body_flow: Array = []
-	var then_flow: Array = []
+func get_for_token(_stack: Array) -> Dictionary:
+	var body_flow_id: int = HenCodeGeneration.get_flow_id()
+	var then_flow_id: int = HenCodeGeneration.get_flow_id()
+
+	HenCodeGeneration.flows_refs[body_flow_id] = []
+	HenCodeGeneration.flows_refs[then_flow_id] = []
 
 	if flow_connections[0].to:
 		var flow: FlowConnectionData = flow_connections[0]
-		body_flow = flow.to.get_flow_token_list(flow.to_idx)
+		_stack.append({node = flow.to, idx = flow.to_idx, flow_id = body_flow_id})
 		
 	if flow_connections[1].to:
 		var flow: FlowConnectionData = flow_connections[1]
-		then_flow = flow.to.get_flow_token_list(flow.to_idx)
+		_stack.append({node = flow.to, idx = flow.to_idx, flow_id = then_flow_id})
 
 	return {
 		type = sub_type,
 		id = id,
-		body_flow = body_flow,
-		then_flow = then_flow,
+		body_flow_id = body_flow_id,
+		then_flow_id = then_flow_id,
 		params = get_input_token_list(),
 		index_name = outputs[0].name.to_snake_case(),
 		use_self = false
@@ -1256,7 +1260,7 @@ func get_input_token(_idx: int) -> Dictionary:
 
 				if input.is_ref:
 					data.is_ref = input.is_ref
-
+					
 				return data
 	elif input.code_value:
 		var data: Dictionary = {
@@ -1720,20 +1724,23 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				})
 
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
+
+			if _config.has('to_flow'):
+				for flow: Dictionary in _config.to_flow:
+					v_cnode._on_flow_added(false, flow)
 		Type.STATE_START:
 			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'On Start'}))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new())
 		Type.STATE_EVENT:
 			v_cnode.flow_connections.append(FlowConnectionData.new())
+		_:
+			if _config.has('to_flow'):
+				for flow: Dictionary in _config.to_flow:
+					v_cnode._on_flow_added(false, flow)
 
-
-	if _config.has('to_flow'):
-		for flow: Dictionary in _config.to_flow:
-			v_cnode._on_flow_added(false, flow)
-
-	if _config.has('from_flow'):
-		for flow: Dictionary in _config.from_flow:
-			v_cnode._on_flow_added(true, flow)
+			if _config.has('from_flow'):
+				for flow: Dictionary in _config.from_flow:
+					v_cnode._on_flow_added(true, flow)
 			
 
 	if _config.has('inputs'):

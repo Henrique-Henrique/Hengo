@@ -918,6 +918,7 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	category.set_metadata(0, _type)
 	category.set_selectable(0, false)
 	category.set_icon_modulate(0, BG_COLOR[_type])
+	category.set_custom_color(0, BG_COLOR[_type])
 	category.set_button_color(0, 0, (BG_COLOR[_type] as Color).lightened(0.6))
 	category.set_icon(0, ICONS[_type])
 
