@@ -147,6 +147,7 @@ static func load(_path: StringName) -> void:
 	HenRouter.change_route(HenGlobal.BASE_ROUTE)
 
 	var end: int = Time.get_ticks_usec()
+
 	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
 
 

@@ -199,7 +199,6 @@ func _physics_process(delta: float) -> void:
 	})
 
 	# override methods
-	print('tt ', override_virtual_data)
 	for key: String in override_virtual_data:
 		if not [&'_ready', &'_process', &'_physics_process'].has(key):
 			var virtual_token: Dictionary = override_virtual_data.get(key)
@@ -372,8 +371,6 @@ func _physics_process(delta: float) -> void:
 
 			if func_tokens.is_empty():
 				continue
-
-			# print('ttt ', item.virtual_tokens)
 
 			var func_base: String = '\tfunc {name}({params}) -> void:\n'.format({
 				name = virtual_name,

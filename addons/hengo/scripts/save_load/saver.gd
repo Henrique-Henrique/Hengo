@@ -2,40 +2,14 @@
 class_name HenSaver extends Node
 
 
-# class ScriptData:
-# 	var type: String
-# 	var node_counter: int
-# 	var prop_counter: int
-# 	var debug_symbols: Dictionary
-# 	var props: Array
-# 	var generals: Array
-# 	var connections: Array
-# 	var flow_connections: Array
-# 	var func_list: Array
-# 	var comments: Array
-# 	var virtual_cnode_list: Array
-# 	var state_event_list: Array
-# 	var side_bar_list: Dictionary
-
-# 	func get_save() -> Dictionary:
-# 		return {
-# 			type = type,
-# 			prop_counter = prop_counter,
-# 			node_counter = node_counter,
-# 			debug_symbols = debug_symbols,
-# 			props = props,
-# 			generals = generals,
-# 			connections = connections,
-# 			flow_connections = flow_connections,
-# 			func_list = func_list,
-# 			comments = comments,
-# 			virtual_cnode_list = virtual_cnode_list,
-# 			state_event_list = state_event_list,
-# 			side_bar_list = side_bar_list
-# 		}
-
-
 static func save(_code: String, _debug_symbols: Dictionary) -> void:
+	# check if save dierctory exists
+	if not DirAccess.dir_exists_absolute('res://hengo'):
+		DirAccess.make_dir_absolute('res://hengo')
+
+	if not DirAccess.dir_exists_absolute('res://hengo/save'):
+		DirAccess.make_dir_absolute('res://hengo/save')
+	
 	var script_data: HenScriptData = HenScriptData.new()
 
 	script_data.type = HenGlobal.script_config.type
@@ -58,8 +32,12 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 			
 	script_data.virtual_cnode_list = v_cnode_list
 
+	var script_name: String = HenGlobal.script_config.name if HenGlobal.script_config.has('name') else str(Time.get_ticks_usec())
+	var data_path: StringName = 'res://hengo/save/' + script_name + '.res'
+	var script_path: StringName = 'res://hengo/' + script_name + '.gd'
+
 	# saving data
-	var error: int = ResourceSaver.save(script_data, 'res://hengo/save/testing.res')
+	var error: int = ResourceSaver.save(script_data, data_path)
 
 	if error != OK:
 		printerr('Error saving script data.')
@@ -67,14 +45,21 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	# ---------------------------------------------------------------------------- #
 	var script: GDScript = GDScript.new()
 
-	script.source_code = '#[hengo] res://hengo/save/testing.res\n\n' + _code
+	script.source_code = '#[hengo] ' + data_path + '\n\n' + _code
 
 	var reload_err: int = script.reload()
 
 	if reload_err == OK:
-		var err: int = ResourceSaver.save(script, 'res://hengo/testing.gd')
+		var err: int = ResourceSaver.save(script, script_path)
 
 		if err == OK:
+			var dict_data: Dictionary = {
+				name = script_name,
+				path = script_path,
+				type = script_data.type,
+				data_path = data_path
+			}
+			HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
 			print('SAVED HENGO SCRIPT')
 	else:
 		pass
