@@ -15,7 +15,7 @@ var can_select: bool = false
 # private
 #
 func _ready() -> void:
-	if HenGlobal.editor_interface.get_edited_scene_root() == self:
+	if EditorInterface.get_edited_scene_root() == self:
 		set_process(false)
 		return
 
@@ -96,6 +96,7 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 
 					cnode_selecting_rect = true
 					start_select_pos = get_global_mouse_position()
+					HenGlobal.ACTION_BAR.filesystem_dock(true)
 		else:
 			match _event.button_index:
 				MOUSE_BUTTON_LEFT:

@@ -59,7 +59,6 @@ func _enter_tree():
 	HenAssets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
 	HenAssets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')
 
-	HenGlobal.editor_interface = get_editor_interface()
 	print('setted')
 
 	main_scene = HenAssets.HengoRootScene.instantiate()
@@ -131,6 +130,9 @@ func _enter_tree():
 
 func _get_window_layout(_configuration: ConfigFile) -> void:
 	if main_scene.visible:
+		if HenGlobal.ACTION_BAR.filesystem_parent:
+			return
+
 		hide_docks()
 	else:
 		set_docks()
@@ -139,7 +141,6 @@ func _get_window_layout(_configuration: ConfigFile) -> void:
 func _on_change_main_screen(_name: String) -> void:
 	if _name == PLUGIN_NAME:
 		hide_docks()
-		# change_colors()
 
 
 func _exit_tree():
@@ -159,7 +160,9 @@ func _exit_tree():
 func _make_visible(_visible: bool):
 	if main_scene:
 		if _visible: hide_docks()
-		else: show_docks()
+		else:
+			HenGlobal.ACTION_BAR.filesystem_dock()
+			show_docks()
 
 		main_scene.visible = _visible
 
@@ -168,6 +171,14 @@ func _get_plugin_name():
 
 func _has_main_screen() -> bool:
 	return true
+
+func _handles(object: Object) -> bool:
+	if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
+		HenLoader.load((object as GDScript).resource_path)
+		HenGlobal.CAM.can_scroll = true
+		return true
+
+	return false
 
 # public
 #

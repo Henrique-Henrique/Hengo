@@ -1,9 +1,6 @@
 @tool
 class_name HenGlobal extends Node
 
-# plugin
-static var editor_interface: EditorInterface
-
 # nodes referencs
 static var CAM: HenCam
 static var CNODE_CONTAINER: Control
@@ -24,6 +21,7 @@ static var SIDE_BAR: HenSideBar
 static var SIDE_BAR_LIST_CACHE: Dictionary = {}
 static var TOOLTIP: HenTooltip
 static var DOCKS: Dictionary = {}
+static var ACTION_BAR: HenCNodeActionBar
 
 # cnodes
 static var can_make_connection: bool = false

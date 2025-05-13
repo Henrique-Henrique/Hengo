@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=4 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
+[ext_resource type="Script" uid="uid://cmr0k13rd5jaw" path="res://hengo/bt.gd" id="2_m0rpm"]
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="3_m0rpm"]
 
 [node name="Node" type="Node"]
@@ -8,6 +9,7 @@
 [node name="Icon" type="Sprite2D" parent="."]
 position = Vector2(261, 153)
 texture = ExtResource("1_wvpun")
+script = ExtResource("2_m0rpm")
 
 [node name="Button" type="Button" parent="Icon"]
 offset_left = 4.0
