@@ -6,28 +6,18 @@ const MENU_NATIVE_API_NAME = "Hengo Generate Native Api"
 
 var main_scene
 var gd_previewer: CodeEdit
-var tabs_hide_helper
-var tabs_container
-
-# docks
-#
-var dock_container
-# left docks
-var dock_left_1
-var dock_left_2
-# right docks
-var dock_right_1
-var dock_right_2
-# scene tabs
-var scene_tabs
-var docks_references: Array = []
-
-# file system tree
-var file_system_tree: Tree
-var file_tree_signals: Array = []
 
 # debug
 var debug_plugin: EditorDebuggerPlugin
+
+class DockConfig:
+	var id: EditorPlugin.DockSlot
+	var ref: TabContainer
+	var tab_control: Control
+
+	func _init(_id: EditorPlugin.DockSlot, _ref: TabContainer) -> void:
+		id = _id
+		ref = _ref
 
 func _enter_tree():
 	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
@@ -79,15 +69,27 @@ func _enter_tree():
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)
 
-	var root = get_node('/root')
 
-	# setting tabs references
-	dock_container = root.find_child('DockHSplitLeftL', true, false)
-	dock_left_1 = dock_container.find_child('DockVSplitLeftL', true, false)
-	dock_left_2 = dock_container.find_child('DockVSplitLeftR', true, false)
-	dock_right_1 = dock_container.find_child('DockVSplitRightL', true, false)
-	dock_right_2 = dock_container.find_child('DockVSplitRightR', true, false)
-	scene_tabs = EditorInterface.get_editor_main_screen().get_node('../..').get_child(0)
+	# getting tabs
+	if HenGlobal.DOCKS.is_empty():
+		var docks: Array[int] = [
+			EditorPlugin.DOCK_SLOT_LEFT_UL,
+			EditorPlugin.DOCK_SLOT_LEFT_UR,
+			EditorPlugin.DOCK_SLOT_LEFT_BL,
+			EditorPlugin.DOCK_SLOT_LEFT_BR,
+			EditorPlugin.DOCK_SLOT_RIGHT_UL,
+			EditorPlugin.DOCK_SLOT_RIGHT_UR,
+			EditorPlugin.DOCK_SLOT_RIGHT_BL,
+			EditorPlugin.DOCK_SLOT_RIGHT_BR,
+		]
+
+		for dock in docks:
+			var c: Control = Control.new()
+			add_control_to_dock(dock, c)
+			var parent: TabContainer = c.get_parent()
+			HenGlobal.DOCKS[dock] = DockConfig.new(dock, parent)
+			parent.remove_child(c)
+
 	
 	add_tool_menu_item(MENU_NATIVE_API_NAME, HenApiGenerator._generate_native_api)
 
@@ -137,9 +139,7 @@ func _get_window_layout(_configuration: ConfigFile) -> void:
 func _on_change_main_screen(_name: String) -> void:
 	if _name == PLUGIN_NAME:
 		hide_docks()
-		change_colors()
-	else:
-		show_docks()
+		# change_colors()
 
 
 func _exit_tree():
@@ -148,10 +148,6 @@ func _exit_tree():
 	remove_debugger_plugin(debug_plugin)
 	remove_tool_menu_item(MENU_NATIVE_API_NAME)
 	remove_control_from_bottom_panel(gd_previewer)
-
-	# reseting file system tree signals
-	for signal_config: Dictionary in file_tree_signals:
-		file_system_tree.connect('item_activated', signal_config.callable)
 
 	if main_scene:
 		main_scene.queue_free()
@@ -176,49 +172,27 @@ func _has_main_screen() -> bool:
 # public
 #
 func set_docks() -> void:
-	docks_references = []
-
-	# hiding left docks
-	for dock in dock_left_1.get_children():
-		docks_references.append({
-			dock = dock,
-			old_visibility = dock.visible
-		})
-
-	for dock in dock_left_2.get_children():
-		docks_references.append({
-			dock = dock,
-			old_visibility = dock.visible
-		})
-
-	# hiding right docks
-	for dock in dock_right_1.get_children():
-		docks_references.append({
-			dock = dock,
-			old_visibility = dock.visible
-		})
-	
-	for dock in dock_right_2.get_children():
-		docks_references.append({
-			dock = dock,
-			old_visibility = dock.visible
-		})
+	for dock: DockConfig in HenGlobal.DOCKS.values():
+		dock.tab_control = dock.ref.get_current_tab_control()
 
 func hide_docks() -> void:
-	scene_tabs.visible = false
+	tab_visibility(false)
 
-	# hiding all docks
-	for obj in docks_references:
-		obj.dock.visible = false
+	for dock: DockConfig in HenGlobal.DOCKS.values():
+		dock.ref.visible = false
 
 func show_docks() -> void:
-	if scene_tabs:
-		scene_tabs.visible = true
-
-	# backuping docks visibility
-	for obj in docks_references:
-		obj.dock.visible = obj.old_visibility
+	tab_visibility(true)
 	
+	for dock: DockConfig in HenGlobal.DOCKS.values():
+		if dock.tab_control:
+			dock.ref.visible = true
+			dock.tab_control.visible = true
 
-func change_colors() -> void:
-	pass
+func tab_visibility(_show: bool) -> void:
+	var tabs_container = EditorInterface.get_editor_main_screen().get_node_or_null('../..')
+	
+	if tabs_container:
+		var tab = tabs_container.get_child(0) if tabs_container.get_child_count() > 0 else null
+
+		if tab: tab.visible = _show
