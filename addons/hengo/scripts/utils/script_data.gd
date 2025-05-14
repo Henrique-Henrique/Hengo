@@ -1,6 +1,7 @@
 class_name HenScriptData
 extends Resource
 
+@export var path: StringName
 @export var type: String
 @export var node_counter: int
 @export var prop_counter: int

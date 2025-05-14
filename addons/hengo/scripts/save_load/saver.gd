@@ -12,6 +12,7 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 	
 	var script_data: HenScriptData = HenScriptData.new()
 
+	script_data.path = HenGlobal.script_config.path
 	script_data.type = HenGlobal.script_config.type
 	script_data.node_counter = HenGlobal.node_counter
 	script_data.prop_counter = HenGlobal.prop_counter
@@ -57,7 +58,8 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 				name = script_name,
 				path = script_path,
 				type = script_data.type,
-				data_path = data_path
+				data_path = data_path,
+				side_bar_list = script_data.side_bar_list
 			}
 			HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
 			print('SAVED HENGO SCRIPT')

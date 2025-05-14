@@ -38,68 +38,6 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 		1:
 			HenLoader.load(tree.get_selected().get_metadata(0))
 
-	# %Search.text_changed.connect(_on_search)
-	# %Create.pressed.connect(_on_create_press)
-	# gui_input.connect(_on_gui)
-
-	# show_dashboard()
-
-
-# func _on_gui(_event: InputEvent) -> void:
-# 	if _event is InputEventMouseButton:
-# 		if _event.pressed and (_event.button_index == MOUSE_BUTTON_LEFT or _event.button_index == MOUSE_BUTTON_RIGHT):
-# 			if can_close:
-# 				hide_dashboard()
-
-
-# func _on_search(_text: String) -> void:
-# 	if _text.is_empty():
-# 		for item in %List.get_children():
-# 			item.visible = true
-# 		return
-		
-# 	for item in %List.get_children():
-# 		if (item.item_name as String).to_lower().contains(_text.to_lower()):
-# 			item.visible = true
-# 		else:
-# 			item.visible = false
-
-
-# func _on_create_press() -> void:
-# 	var script_dialog: ScriptCreateDialog = ScriptCreateDialog.new()
-# 	script_dialog.script_created.connect(_on_script_created.bind(script_dialog))
-# 	script_dialog.config('Node', 'res://hengo/', false, false)
-
-# 	add_child(script_dialog)
-
-# 	script_dialog.popup_centered()
-
-
-# func _on_script_created(_script: Script, _dialog: ScriptCreateDialog) -> void:
-# 	_dialog.queue_free()
-# 	hide_dashboard()
-
-
-# func show_dashboard(_can_close: bool = false) -> void:
-# 	visible = true
-# 	can_close = _can_close
-
-# 	# cleaning old list
-# 	for item in %List.get_children():
-# 		item.queue_free()
-
-# 	var script_data: Array = get_script_list(DirAccess.open('res://hengo'))
-
-# 	for script in script_data:
-# 		var item = DashBoardItemScene.instantiate()
-
-# 		item.set_item_data({
-# 			name = script[0],
-# 			path = script[1],
-# 			type = script[2]
-# 		})
-# 		%List.add_child(item)
-
 
 # parsing scripts
 func get_script_list(_dir: DirAccess, _list: Array = []) -> Array:

@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/bt.res
+#[hengo] res://hengo/save/new.res
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -7,9 +7,11 @@
 # *       Edit only if you are confident in your changes.       *
 # ***************************************************************
 
-extends Sprite2D
+extends Node
 
  # Variables #
+var my_variable = String()
+var other_variable = bool()
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -41,7 +43,7 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.other_variable)
+		pass
 
 
 

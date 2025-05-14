@@ -73,8 +73,7 @@ func _ready() -> void:
 	cnode_stat_label = get_node('%CNodeStatLabel')
 
 	# loading script list data
-	HenEnums.SCRIPT_LIST_DATA.clear()
-	get_script_list(DirAccess.open('res://hengo'))
+	get_script_list()
 
 
 func _on_cnode_gui_input(_event: InputEvent) -> void:
@@ -217,47 +216,20 @@ func _input(event: InputEvent) -> void:
 					HenGlobal.history.clear_history()
 
 
-func get_script_list(_dir: DirAccess, _list: Array = []) -> void:
-	_dir.list_dir_begin()
+func get_script_list() -> void:
+	HenEnums.SCRIPT_LIST_DATA.clear()
+	var dir_files: PackedStringArray = DirAccess.get_files_at('res://hengo/save') if DirAccess.dir_exists_absolute('res://hengo/save') else PackedStringArray()
 
-	var file_name: String = _dir.get_next()
-
-	# TODO cache script that don't changed
-	while file_name != '':
-		if file_name.get_extension() != 'gd' and not _dir.current_is_dir():
-			file_name = _dir.get_next()
-			continue
-
-		if _dir.current_is_dir():
-			get_script_list(DirAccess.open(_dir.get_current_dir() + '/' + file_name))
-		else:
-			var script: GDScript = ResourceLoader.load(_dir.get_current_dir() + '/' + file_name, '', ResourceLoader.CACHE_MODE_IGNORE)
-
-			if script.source_code.begins_with('#[hengo] '):
-				var data_path = script.source_code.split('\n').slice(0, 1)[0].split('#[hengo] ')[1]
-				var data: HenScriptData = ResourceLoader.load(data_path)
-
-				var dict_data: Dictionary = {
-					name = file_name.get_basename(),
-					path = _dir.get_current_dir() + '/' + file_name,
-					type = data.type,
-					data_path = data_path
-				}
-
-				HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
-			
-				_list.append(dict_data)
-			else:
-				var _code: String = script.source_code.trim_prefix(' ')
-				if _code.begins_with('extends '):
-					var _type: String = _code.split('extends ')[1]
-
-					_list.append({
-						name = file_name.get_basename(),
-						path = _dir.get_current_dir() + '/' + file_name,
-						type = _type
-					})
+	for file_path: StringName in dir_files:
+		var path: StringName = 'res://hengo/save/' + file_path
+		var data: HenScriptData = ResourceLoader.load(path)
 		
-		file_name = _dir.get_next()
+		var dict_data: Dictionary = {
+			name = file_path.get_basename(),
+			path = data.path,
+			type = data.type,
+			data_path = path,
+			side_bar_list = data.side_bar_list
+		}
 
-	_dir.list_dir_end()
+		HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data

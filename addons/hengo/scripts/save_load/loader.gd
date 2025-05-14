@@ -88,7 +88,7 @@ static func load(_path: StringName) -> void:
 
 	HenGlobal.BASE_ROUTE = base_route
 	HenGlobal.script_config.name = _path.get_file().get_basename()
-
+	HenGlobal.script_config.path = _path
 
 	# loading hengo script data
 	if HenEnums.SCRIPT_LIST_DATA.has(_path):
@@ -121,6 +121,10 @@ static func load(_path: StringName) -> void:
 	else:
 		# setting script type
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
+
+		if type.begins_with('res://hengo/save'):
+			push_warning("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type)
+			return
 
 		HenGlobal.script_config.type = type
 		HenGlobal.node_counter = 0
