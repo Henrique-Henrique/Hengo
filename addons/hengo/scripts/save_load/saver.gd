@@ -2,7 +2,7 @@
 class_name HenSaver extends Node
 
 
-static func save(_code: String, _debug_symbols: Dictionary) -> void:
+static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
@@ -44,24 +44,27 @@ static func save(_code: String, _debug_symbols: Dictionary) -> void:
 		printerr('Error saving script data.')
 
 	# ---------------------------------------------------------------------------- #
-	var script: GDScript = GDScript.new()
+	if _generate_code:
+		HenCodeGeneration.get_code(script_data)
 
-	script.source_code = '#[hengo] ' + data_path + '\n\n' + _code
+	# var script: GDScript = GDScript.new()
 
-	var reload_err: int = script.reload()
+	# script.source_code = '#[hengo] ' + data_path + '\n\n' + _code
 
-	if reload_err == OK:
-		var err: int = ResourceSaver.save(script, script_path)
+	# var reload_err: int = script.reload()
 
-		if err == OK:
-			var dict_data: Dictionary = {
-				name = script_name,
-				path = script_path,
-				type = script_data.type,
-				data_path = data_path,
-				side_bar_list = script_data.side_bar_list
-			}
-			HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
-			print('SAVED HENGO SCRIPT')
-	else:
-		pass
+	# if reload_err == OK:
+	# 	var err: int = ResourceSaver.save(script, script_path)
+
+	# 	if err == OK:
+	# 		var dict_data: Dictionary = {
+	# 			name = script_name,
+	# 			path = script_path,
+	# 			type = script_data.type,
+	# 			data_path = data_path,
+	# 			side_bar_list = script_data.side_bar_list
+	# 		}
+	# 		HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
+	# 		print('SAVED HENGO SCRIPT')
+	# else:
+	# 	pass
