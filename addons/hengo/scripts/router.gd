@@ -45,3 +45,4 @@ static func change_route(_route: Dictionary) -> void:
 	current_route = _route
 
 	HenGlobal.CAM._check_virtual_cnodes()
+	HenGlobal.SIDE_BAR._on_list_changed()

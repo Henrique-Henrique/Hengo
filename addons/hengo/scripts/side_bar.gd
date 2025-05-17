@@ -13,7 +13,7 @@ const BG_COLOR = {
 	AddType.FUNC: Color.RED,
 	AddType.SIGNAL: Color.GREEN,
 	AddType.MACRO: Color.MEDIUM_PURPLE,
-	AddType.LOCAL_VAR: Color('#433B2F')
+	AddType.LOCAL_VAR: Color.ORANGE
 }
 
 const ICONS = {
@@ -91,12 +91,8 @@ class SideBarList:
 		var inspector_item_arr: Array
 		var name: String = ''
 
-		match type:
-			AddType.VAR, AddType.FUNC, AddType.SIGNAL, AddType.MACRO:
-				inspector_item_arr = _item.get_inspector_array_list()
-			AddType.LOCAL_VAR:
-				inspector_item_arr = _item.get_inspector_array_list(true)
-			
+		inspector_item_arr = _item.get_inspector_array_list()
+
 		name = _item.name
 
 		var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
@@ -460,8 +456,14 @@ class SignalData:
 
 		in_out_reseted.emit(
 			true,
-			[ {name = type, type = 'Variant', is_ref = true}] + bind_inputs,
+			[ {name = type, type = type, is_ref = true}] + bind_inputs,
 			[HenVirtualCNode.SubType.SIGNAL_CONNECTION],
+		)
+
+		in_out_reseted.emit(
+			true,
+			[ {name = type, type = type, is_ref = true}],
+			[HenVirtualCNode.SubType.SIGNAL_DISCONNECTION],
 		)
 	
 	func get_connect_cnode_data() -> Dictionary:
@@ -519,16 +521,16 @@ class SignalData:
 				},
 				ref = self
 			}),
-			HenInspector.InspectorItem.new({
-				name = 'bind_params',
-				type = &'Array',
-				value = bind_params,
-				max_size = 5,
-				item_creation_callback = create_param,
-				item_move_callback = move_param,
-				item_delete_callback = delete_param,
-				field = {name = '', type = '@Param'}
-			}),
+			# HenInspector.InspectorItem.new({
+			# 	name = 'bind_params',
+			# 	type = &'Array',
+			# 	value = bind_params,
+			# 	max_size = 5,
+			# 	item_creation_callback = create_param,
+			# 	item_move_callback = move_param,
+			# 	item_delete_callback = delete_param,
+			# 	field = {name = '', type = '@Param'}
+			# }),
 		]
 	
 	func get_save() -> Dictionary:
@@ -590,7 +592,6 @@ class MacroData:
 	var output_ref: HenVirtualCNode
 	var local_vars: Array
 	var cnode_list_to_load: Array
-	var macro_ref_list: Array
 
 	class MacroInOut:
 		var id: int = HenGlobal.get_new_node_counter()
@@ -906,7 +907,10 @@ func _on_list_changed() -> void:
 	_add_categories(root, 'Functions', AddType.FUNC)
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Macros', AddType.MACRO)
-	
+
+	if not HenRouter.current_route.is_empty() and HenRouter.current_route.ref.get(&'local_vars') is Array:
+		_add_categories(root, 'Local Variables', AddType.LOCAL_VAR)
+
 	print(list.get_scroll())
 
 
@@ -933,9 +937,9 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 			arr = HenGlobal.SIDE_BAR_LIST.signal_list
 		AddType.MACRO:
 			arr = HenGlobal.SIDE_BAR_LIST.macro_list
-		# AddType.LOCAL_VAR:
-		# 	if HenRouter.current_route.ref.get(&'local_vars') is Array:
-		# 		arr = (HenRouter.current_route.ref.local_vars as Array)
+		AddType.LOCAL_VAR:
+			if HenRouter.current_route.ref.get(&'local_vars') is Array:
+				arr = (HenRouter.current_route.ref.local_vars as Array)
 
 	for item_data in arr:
 		var item: TreeItem = category.create_child()

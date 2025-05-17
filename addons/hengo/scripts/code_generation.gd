@@ -122,7 +122,7 @@ static func generate() -> String:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				for macro_ref: HenVirtualCNode in macro.macro_ref_list:
 					HenGlobal.USE_MACRO_REF = true
-					HenGlobal.MACRO_REF = macro_ref
+					# HenGlobal.MACRO_REF = macro_ref
 					HenGlobal.MACRO_USE_SELF = macro_ref.route_ref.type != HenRouter.ROUTE_TYPE.STATE
 					HenGlobal.USE_MACRO_USE_SELF = true
 					if v_cnode.flow_connections[0].to:
@@ -223,7 +223,7 @@ func _physics_process(delta: float) -> void:
 		func_code += 'func {name}({params}):\n'.format({
 			name = func_data.name.to_snake_case(),
 			params = ', '.join(func_data.inputs.map(
-				func(x: HenSideBar.Param) -> String:
+				func(x: Param) -> String:
 					return x.name.to_snake_case()
 		))
 		})
@@ -282,11 +282,11 @@ func _physics_process(delta: float) -> void:
 		signal_code += 'func {name}({params}):\n'.format({
 			name = signal_name,
 			params = ', '.join(signal_item.params.map( # parsing raw inputs from signal
-			func(x: HenSideBar.Param) -> String:
+			func(x: Param) -> String:
 				return x.name.to_snake_case()
 		# parsing custom inputs
 		) + signal_item.bind_params.map(
-				func(x: HenSideBar.Param) -> String:
+				func(x: Param) -> String:
 					return x.name.to_snake_case()
 		))
 		})
@@ -634,6 +634,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			
 			return new_exp
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
+			print('uu ', _token)
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
 			var my_prefix = values[1]
@@ -749,7 +750,9 @@ class Variable:
 	var type: StringName
 	var export_var: bool
 
+
 class Func:
+	var id: int
 	var name: String
 	var inputs: Array[Param]
 	var outputs: Array[Param]
@@ -760,6 +763,7 @@ class Func:
 
 
 class SignalData:
+	var id: int
 	var name: String
 	var signal_name: String
 	var signal_name_to_code: String
@@ -771,7 +775,22 @@ class SignalData:
 	var signal_enter: CNode
 
 
+class Macro:
+	var id: int
+	var name: String
+	var input_ref: CNode
+	var flow_inputs: Array[Flow]
+	var flow_outputs: Array[Flow]
+	var virtual_cnode_list: Array[CNode]
+	var local_vars: Array[Variable]
+	var macro_ref_list: Array[CNode]
+
+class Flow:
+	var id: int
+	var name: String
+
 class Param:
+	var id: int
 	var name: String
 	var type: StringName
 
@@ -788,6 +807,7 @@ class CNode:
 	var virtual_sub_type_vc_list: Array[CNode]
 	var input_connections: Array[InputConnection]
 	var route_type: HenRouter.ROUTE_TYPE
+	var ref: Variant
 
 
 	func get_flow_tokens(_input_idx: int, _token_list: Array = []) -> Array:
@@ -804,7 +824,6 @@ class CNode:
 			if current.has('flow_id'):
 				token_list = HenCodeGeneration.flows_refs[current.flow_id]
 
-
 			match vc.sub_type:
 				HenVirtualCNode.SubType.IF:
 					token_list.append(vc.get_if_token(stack))
@@ -812,14 +831,14 @@ class CNode:
 					token_list.append(vc.get_for_token(stack))
 				HenVirtualCNode.SubType.MACRO:
 					token_list.append(vc.get_macro_token(idx))
-				# HenVirtualCNode.SubType.MACRO_OUTPUT:
-				# 	if HenGlobal.USE_MACRO_REF:
-				# 		var flow: FlowConnection = HenGlobal.MACRO_REF.flow_connections[idx]
+				HenVirtualCNode.SubType.MACRO_OUTPUT:
+					if HenGlobal.USE_MACRO_REF:
+						var flow: FlowConnection = HenGlobal.MACRO_REF.flow_connections[idx] if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
 
-				# 		if flow.to:
-				# 			stack.append({node = flow.to, idx = flow.to_idx})
+						if flow and flow.to:
+							stack.append({node = flow.to, idx = flow.to_idx})
 						
-				# 		HenGlobal.USE_MACRO_REF = false
+						HenGlobal.USE_MACRO_REF = false
 				_:
 					token_list.append(vc.get_token())
 
@@ -828,7 +847,76 @@ class CNode:
 
 		return _token_list
 	
-	
+	func get_macro_token(_input_idx: int) -> Dictionary:
+		var flow_tokens: Array
+		var input_flow: FlowConnection = ref.input_ref.flow_connections[_input_idx]
+
+		if input_flow.to:
+			HenGlobal.USE_MACRO_REF = true
+			HenGlobal.MACRO_REF = self
+			HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
+			HenGlobal.USE_MACRO_USE_SELF = true
+			flow_tokens = input_flow.to.get_flow_tokens(input_flow.to_idx)
+			HenGlobal.USE_MACRO_USE_SELF = false
+
+		return {
+			type = HenVirtualCNode.SubType.MACRO,
+			flow_tokens = flow_tokens,
+			use_self = false
+		}
+
+
+	func get_if_token(_stack: Array) -> Dictionary:
+		var true_flow_id: int = HenCodeGeneration.get_flow_id()
+		var false_flow_id: int = HenCodeGeneration.get_flow_id()
+
+		HenCodeGeneration.flows_refs[true_flow_id] = []
+		HenCodeGeneration.flows_refs[false_flow_id] = []
+
+		# this causing stack overflow when using a lot of if cnodes
+		if not flow_connections.is_empty() and flow_connections[0].to:
+			var flow: FlowConnection = flow_connections[0]
+			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = true_flow_id})
+			
+		if not flow_connections.is_empty() and flow_connections[1].to:
+			var flow: FlowConnection = flow_connections[1]
+			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = false_flow_id})
+
+		return {
+			type = HenVirtualCNode.SubType.IF,
+			true_flow_id = true_flow_id,
+			false_flow_id = false_flow_id,
+			condition = get_input_token(0),
+			use_self = false
+		}
+
+
+	func get_for_token(_stack: Array) -> Dictionary:
+		var body_flow_id: int = HenCodeGeneration.get_flow_id()
+		var then_flow_id: int = HenCodeGeneration.get_flow_id()
+
+		HenCodeGeneration.flows_refs[body_flow_id] = []
+		HenCodeGeneration.flows_refs[then_flow_id] = []
+
+		if not flow_connections.is_empty() and flow_connections[0].to:
+			var flow: FlowConnection = flow_connections[0]
+			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = body_flow_id})
+			
+		if not flow_connections.is_empty() and flow_connections[1].to:
+			var flow: FlowConnection = flow_connections[1]
+			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = then_flow_id})
+
+		return {
+			type = sub_type,
+			id = id,
+			body_flow_id = body_flow_id,
+			then_flow_id = then_flow_id,
+			params = get_input_token_list(),
+			index_name = outputs[0].name.to_snake_case(),
+			use_self = false
+		}
+
+
 	func get_input_token(_idx: int) -> Dictionary:
 		var connection: InputConnection
 		for input_connection: InputConnection in input_connections:
@@ -844,18 +932,21 @@ class CNode:
 					if HenGlobal.USE_MACRO_REF:
 						var data: Dictionary = HenGlobal.MACRO_REF.get_input_token(connection.from_idx)
 						return data
-				# HenVirtualCNode.SubType.MACRO:
-				# 	HenGlobal.USE_MACRO_USE_SELF = true
-				# 	HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
-				# 	var data: Dictionary = (connection.from.ref as HenSideBar.MacroData).output_ref.get_input_token(connection.from_idx)
-				# 	HenGlobal.USE_MACRO_USE_SELF = false
-				# 	return data
+				HenVirtualCNode.SubType.MACRO:
+					HenGlobal.USE_MACRO_USE_SELF = true
+					HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
+					var data: Dictionary = (connection.from.ref as HenSideBar.MacroData).output_ref.get_input_token(connection.from_idx)
+					HenGlobal.USE_MACRO_USE_SELF = false
+					return data
 				_:
 					var data: Dictionary = connection.from.get_token(connection.from_idx)
 					data.prop_name = input.name
 
+					prints('tt ', data, HenGlobal.USE_MACRO_REF)
+
 					if HenGlobal.USE_MACRO_REF:
-						data.value += '_' + str(HenGlobal.MACRO_REF.id)
+						if data.has('value'):
+							data.value += '_' + str(HenGlobal.MACRO_REF.id)
 
 					if input.is_ref:
 						data.is_ref = input.is_ref
@@ -994,18 +1085,18 @@ class CNode:
 					params = get_input_token_list(true),
 					exp = inputs[0].value
 				})
-			# HenVirtualCNode.SubType.SIGNAL_CONNECTION:
-			# 	token.merge({
-			# 		params = get_input_token_list(true),
-			# 		signal_name = (ref as HenSideBar.SignalData).signal_name_to_code,
-			# 		name = (ref as HenSideBar.SignalData).name
-			# 	})
-			# HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
-			# 	token.merge({
-			# 		params = get_input_token_list(true),
-			# 		signal_name = (ref as HenSideBar.SignalData).signal_name_to_code,
-			# 		name = (ref as HenSideBar.SignalData).name.to_snake_case()
-			# 	})
+			HenVirtualCNode.SubType.SIGNAL_CONNECTION:
+				token.merge({
+					params = get_input_token_list(true),
+					signal_name = (ref as SignalData).signal_name_to_code,
+					name = (ref as SignalData).name
+				})
+			HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+				token.merge({
+					params = get_input_token_list(true),
+					signal_name = (ref as SignalData).signal_name_to_code,
+					name = (ref as SignalData).name.to_snake_case()
+				})
 
 		return token
 
@@ -1049,6 +1140,8 @@ class References:
 	var variables: Array[Variable]
 	var functions: Array[Func]
 	var signals: Array[SignalData]
+	var macros: Array[Macro]
+	var side_bar_item_ref: Dictionary = {}
 
 
 static func get_code(_data: HenScriptData) -> String:
@@ -1056,43 +1149,91 @@ static func get_code(_data: HenScriptData) -> String:
 	var refs: References = References.new()
 	var code: String = ''
 
+	# generating macro references
+	for macro_data: Dictionary in _data.side_bar_list.macro_list:
+		var macro: Macro = Macro.new()
+
+		macro.id = macro_data.id
+		macro.name = macro_data.name
+
+		refs.side_bar_item_ref[macro.id] = macro
+
+		for input: Dictionary in macro_data.inputs:
+			var flow: Flow = Flow.new()
+			flow.id = input.id
+			flow.name = input.name
+			macro.flow_inputs.append(flow)
+
+		for output: Dictionary in macro_data.outputs:
+			var flow: Flow = Flow.new()
+			flow.id = output.id
+			flow.name = output.name
+			macro.flow_outputs.append(flow)
+
+		if macro_data.has(&'local_vars'):
+			for local_var: Dictionary in macro_data.local_vars:
+				macro.local_vars.append(_get_variable_from_dict(local_var))
+
+		if macro_data.has(&'virtual_cnode_list'):
+			for cnode: Dictionary in macro_data.virtual_cnode_list:
+				macro.virtual_cnode_list.append(_get_cnode_from_dict(cnode, refs, macro))
+
+		refs.macros.append(macro)
+
 	# generating variables references
 	for variable_data: Dictionary in _data.side_bar_list.var_list:
-		var variable: Variable = Variable.new()
-		
-		variable.name = variable_data.name
-		variable.type = variable_data.type
-		variable.export_var = variable_data.export
-
-		refs.variables.append(variable)
+		refs.variables.append(_get_variable_from_dict(variable_data))
 
 	# generating function references
 	for func_data: Dictionary in _data.side_bar_list.func_list:
 		var function: Func = Func.new()
 
+		function.id = func_data.id
 		function.name = func_data.name
+
+		refs.side_bar_item_ref[function.id] = function
+
+		for input: Dictionary in func_data.inputs:
+			function.inputs.append(_get_param_from_dict(input))
+
+		for output: Dictionary in func_data.outputs:
+			function.outputs.append(_get_param_from_dict(output))
+
+		if func_data.has(&'local_vars'):
+			for local_var: Dictionary in func_data.local_vars:
+				function.local_vars.append(_get_variable_from_dict(local_var))
 
 		if func_data.has(&'virtual_cnode_list'):
 			for cnode: Dictionary in func_data.virtual_cnode_list:
 				function.virtual_cnode_list.append(_get_cnode_from_dict(cnode, refs, function))
 
-
 		refs.functions.append(function)
 
-
+	# generating macro references
 	for signal_data: Dictionary in _data.side_bar_list.signal_list:
 		var signal_item: SignalData = SignalData.new()
 
+		signal_item.id = signal_data.id
 		signal_item.name = signal_data.name
 		signal_item.type = signal_data.type
 		signal_item.signal_name = signal_data.signal_name
 		signal_item.signal_name_to_code = signal_data.signal_name_to_code
+
+		refs.side_bar_item_ref[signal_item.id] = signal_item
+
+		for param: Dictionary in signal_data.params:
+			signal_item.params.append(_get_param_from_dict(param))
+	
+		if signal_data.has(&'local_vars'):
+			for local_var: Dictionary in signal_data.local_vars:
+				signal_item.local_vars.append(_get_variable_from_dict(local_var))
 
 		if signal_data.has(&'virtual_cnode_list'):
 			for cnode: Dictionary in signal_data.virtual_cnode_list:
 				signal_item.virtual_cnode_list.append(_get_cnode_from_dict(cnode, refs, signal_item))
 
 		refs.signals.append(signal_item)
+
 
 	# generating cnode references
 	for cnode: Dictionary in _data.virtual_cnode_list:
@@ -1127,6 +1268,24 @@ static func get_code(_data: HenScriptData) -> String:
 	return ''
 
 
+static func _get_variable_from_dict(_data: Dictionary) -> Variable:
+	var variable: Variable = Variable.new()
+		
+	variable.name = _data.name
+	variable.type = _data.type
+	variable.export_var = _data.export
+
+	return variable
+
+static func _get_param_from_dict(_data: Dictionary) -> Param:
+	var param: Param = Param.new()
+
+	param.name = _data.name
+	param.type = _data.type
+
+	return param
+
+
 static func _get_cnode_from_dict(_cnode: Dictionary, _refs: References, _parent_ref = null) -> CNode:
 	var cn: CNode = CNode.new()
 
@@ -1134,8 +1293,11 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: References, _parent_
 	cn.name = _cnode.name
 	cn.sub_type = _cnode.sub_type
 	cn.type = _cnode.type
-
+	
 	_refs.cnode_ref[cn.id] = cn
+
+	if _cnode.has(&'ref_id'):
+		cn.ref = _refs.side_bar_item_ref[_cnode.ref_id]
 
 	if _cnode.has(&'category'):
 		cn.category = _cnode.category
@@ -1184,14 +1346,24 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: References, _parent_
 				HenVirtualCNode.SubType.FUNC_OUTPUT:
 					_parent_ref.output_ref = cn
 		elif _parent_ref is SignalData:
+			cn.route_type = HenRouter.ROUTE_TYPE.SIGNAL
+
 			if cn.sub_type == HenVirtualCNode.SubType.SIGNAL_ENTER:
 				_parent_ref.signal_enter = cn
+		elif _parent_ref is Macro:
+			cn.route_type = HenRouter.ROUTE_TYPE.MACRO
+
+			if cn.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
+				_parent_ref.input_ref = cn
 
 
 	match cn.type:
 		HenVirtualCNode.Type.STATE:
 			cn.route_type = HenRouter.ROUTE_TYPE.STATE
 			_refs.states.append(cn)
+		HenVirtualCNode.Type.MACRO:
+			cn.route_type = HenRouter.ROUTE_TYPE.MACRO
+			(cn.ref as Macro).macro_ref_list.append(cn)
 	
 	match cn.sub_type:
 		HenVirtualCNode.SubType.VIRTUAL:
@@ -1307,7 +1479,7 @@ static func _set_base_cnodes(_refs: References) -> String:
 						to_state_name = cnode.flow_connections[0].to.name
 					})
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-				if cnode.flow_connections[0].to:
+				if not cnode.flow_connections.is_empty() and cnode.flow_connections[0].to:
 					if not override_virtual_data.has(cnode.name):
 						override_virtual_data[cnode.name] = {
 							params = cnode.get_output_token_list(),
@@ -1319,19 +1491,19 @@ static func _set_base_cnodes(_refs: References) -> String:
 	print(_refs.states_data)
 
 	# search for override virtual inside macros
-	for macro: HenSideBar.MacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+	for macro: Macro in _refs.macros:
 		# macro variables
-		for macro_var: HenSideBar.VarData in macro.local_vars:
-			for macro_ref: HenVirtualCNode in macro.macro_ref_list:
-				code += generate_var_code(macro_var, ' {name}_ {id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}))
+		for macro_var: Variable in macro.local_vars:
+			for macro_ref: CNode in macro.macro_ref_list:
+				code += _generate_var_code(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}))
 
 		# macro override virtuals
-		for v_cnode: HenVirtualCNode in macro.virtual_cnode_list:
+		for v_cnode: CNode in macro.virtual_cnode_list:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-				for macro_ref: HenVirtualCNode in macro.macro_ref_list:
+				for macro_ref: CNode in macro.macro_ref_list:
 					HenGlobal.USE_MACRO_REF = true
 					HenGlobal.MACRO_REF = macro_ref
-					HenGlobal.MACRO_USE_SELF = macro_ref.route_ref.type != HenRouter.ROUTE_TYPE.STATE
+					HenGlobal.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 					HenGlobal.USE_MACRO_USE_SELF = true
 					if v_cnode.flow_connections[0].to:
 						if not override_virtual_data.has(v_cnode.name):
@@ -1340,7 +1512,7 @@ static func _set_base_cnodes(_refs: References) -> String:
 								tokens = []
 							}
 
-						override_virtual_data[v_cnode.name].tokens.append_array((v_cnode.flow_connections[0].to as HenVirtualCNode).get_flow_token_list(0))
+						override_virtual_data[v_cnode.name].tokens.append_array(v_cnode.flow_connections[0].to.get_flow_tokens(0))
 					HenGlobal.USE_MACRO_REF = false
 
 
@@ -1485,7 +1657,7 @@ static func _parse_functions(_refs: References) -> String:
 		func_code += 'func {name}({params}):\n'.format({
 			name = func_data.name.to_snake_case(),
 			params = ', '.join(func_data.inputs.map(
-				func(x: HenSideBar.Param) -> String:
+				func(x: Param) -> String:
 					return x.name.to_snake_case()
 		))
 		})

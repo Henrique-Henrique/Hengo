@@ -95,6 +95,9 @@ static func load(_path: StringName) -> void:
 		var item_data: Dictionary = HenEnums.SCRIPT_LIST_DATA[_path]
 		var data: HenScriptData = ResourceLoader.load(item_data.data_path, '', ResourceLoader.CACHE_MODE_IGNORE)
 
+
+		print(JSON.stringify(data.get_save()))
+
 		# setting script configs
 		HenGlobal.script_config.type = data.type
 		HenGlobal.node_counter = data.node_counter
@@ -108,6 +111,7 @@ static func load(_path: StringName) -> void:
 		_load_vc(data.virtual_cnode_list, base_route)
 
 		# adding in/out connections
+		print('cc ', connection_list)
 		for input_data: Dictionary in connection_list:
 			(input_data.from as HenVirtualCNode).add_connection(
 				input_data.idx,
