@@ -57,42 +57,10 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 	if _generate_code:
 		generate(script_data, data_path, ResourceUID.get_id_path(HenGlobal.script_config.id))
 
-
-		# generation dependencies
-		if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
-			for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
-				var need_reload: bool = false
-
-				var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
-
-				for vc: Dictionary in res.virtual_cnode_list:
-					if vc.sub_type == HenVirtualCNode.SubType.GET_FROM_PROP:
-						# TODO
-						print('vuu ')
-
-					if vc.has(&'virtual_cnode_list'):
-						for vc_chd: Dictionary in vc.virtual_cnode_list:
-							if vc_chd.sub_type == HenVirtualCNode.SubType.GET_FROM_PROP:
-								var output: Dictionary = vc_chd.outputs[0]
-								
-								for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
-									if var_data.id == output.from_side_bar_id:
-										if var_data.name != output.value or var_data.type != output.type:
-											output.code_value = var_data.name
-											output.value = var_data.name
-
-											# TODO - CHANGE TYPE
-
-											need_reload = true
-
-				if need_reload:
-					var res_error: int = ResourceSaver.save(res)
-
-					if res_error == OK:
-						generate(res, data_path, ResourceUID.get_id_path(id))
-
-				print('vuu ', need_reload)
-				print('vu2 ', JSON.stringify(res.get_save()))
+		var start: int = Time.get_ticks_usec()
+		HenCodeGeneration.regenerate()
+		var end: int = Time.get_ticks_usec()
+		print('REGENERATE IN: ', (end - start) / 1000.)
 
 
 static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName) -> void:

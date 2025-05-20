@@ -672,7 +672,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level)))
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			# TODO
-			return indent + 'print("{0}")'.format([_token.name])
+			return indent + '"{0}"'.format([_token.name])
 		_:
 			return ''
 
@@ -1269,7 +1269,7 @@ static func get_code(_data: HenScriptData) -> String:
 	code += _parse_signals(refs)
 	code += _set_base_cnodes(refs)
 
-	print(code)
+	# print(code)
 
 	return code
 
@@ -1775,3 +1775,88 @@ static func _parse_virtual_cnode(_cnode_list: Array[CNode]) -> Dictionary:
 				}
 
 	return data
+
+
+class RegenerateRefs:
+	var reload: bool = false: set = can_reload
+	var cnode_list: Dictionary = {}
+	var disconnect_list: Array = []
+
+	func can_reload(_can: bool) -> void:
+		if reload == true:
+			return
+		
+		reload = _can
+
+static func regenerate() -> void:
+	# generation dependencies
+	if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
+		for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
+			var refs: RegenerateRefs = RegenerateRefs.new()
+			var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
+
+			_parse_vc_list(res.virtual_cnode_list, refs)
+
+			if refs.reload:
+				var res_error: int = ResourceSaver.save(res)
+				if res_error == OK:
+					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
+
+			print('vuu ', refs)
+			print('vu2 ', JSON.stringify(res.get_save()))
+
+
+static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
+	_refs.disconnect_list.clear()
+
+	for cnode: Dictionary in _cnode_list:
+		# base route
+		if cnode.sub_type == HenVirtualCNode.SubType.GET_FROM_PROP:
+			_refs.reload = _check_changes_var(cnode, _refs)
+
+		_refs.cnode_list[cnode.id] = cnode
+
+		if cnode.has(&'virtual_cnode_list'):
+			_parse_vc_list(cnode.virtual_cnode_list, _refs)
+	
+	# cleaning connections
+	for cnode: Dictionary in _refs.cnode_list.values():
+		if cnode.has('input_connections'):
+			for connection: Dictionary in cnode.input_connections:
+				for ref: Dictionary in _refs.disconnect_list:
+					if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
+						cnode.input_connections.erase(connection)
+						break
+
+
+static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> bool:
+	var need_reload: bool = false
+	var output: Dictionary = _dict.outputs[0]
+	
+	var var_data: HenSideBar.VarData
+
+	for _var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+		if _var_data.id == output.from_side_bar_id:
+			var_data = _var_data
+			break
+
+	if var_data:
+		if var_data.name != output.value or var_data.type != output.type:
+			output.code_value = var_data.name
+			output.value = var_data.name
+
+			# TODO - CHANGE TYPE
+			if output.type != var_data.type:
+				output.type = var_data.type
+
+				_refs.disconnect_list.append({
+					id = _dict.id,
+					output_id = output.id,
+				})
+
+			need_reload = true
+	else:
+		# TODO - deleted
+		pass
+	
+	return need_reload

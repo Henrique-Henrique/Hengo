@@ -91,6 +91,7 @@ var from_flow_connections: Array = []
 
 
 class InOutData extends Object:
+	var id: int = HenGlobal.get_new_node_counter()
 	var name: String
 	var type: StringName
 	var sub_type: StringName
@@ -200,6 +201,7 @@ class InOutData extends Object:
 
 	func get_save() -> Dictionary:
 		var dt: Dictionary = {
+			id = id,
 			name = name,
 			type = type
 		}
@@ -329,6 +331,8 @@ class ConnectionData extends Object:
 
 
 class InputConnectionData extends ConnectionData:
+	var from_id: int
+	var to_id: int
 	var from: HenVirtualCNode
 	var from_idx: int
 	var from_ref: OutputConnectionData
@@ -339,6 +343,8 @@ class InputConnectionData extends ConnectionData:
 
 	func get_save() -> Dictionary:
 		return {
+			from_id = from_id,
+			to_id = to_id,
 			idx = idx,
 			from_vc_id = from.id,
 			from_idx = from_idx,
@@ -1120,6 +1126,9 @@ func create_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode, _line:
 	output_connection.output_ref = output
 
 	# inputs
+	input_connection.from_id = output.id
+	input_connection.to_id = input.id
+
 	input_connection.idx = _idx
 	input_connection.line_ref = _line
 	input_connection.type = input.type
@@ -1474,11 +1483,25 @@ func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: InOutData) -> void
 			# they have reference input, so start from 1
 			index_slice = 1
 
+	var new_idx: int = _pos + index_slice
+
 	if is_input:
-		HenUtils.move_array_item_to_idx(inputs, _in_ou_ref, _pos + index_slice)
+		var old_idx: int = inputs.find(_in_ou_ref)
+		HenUtils.move_array_item_to_idx(inputs, _in_ou_ref, new_idx)
+
+		for input_connection: InputConnectionData in input_connections:
+			if input_connection.idx == old_idx:
+				input_connection.idx = new_idx
+				input_connection.from_ref.to_idx = new_idx
 	else:
+		var old_idx: int = outputs.find(_in_ou_ref)
 		HenUtils.move_array_item_to_idx(outputs, _in_ou_ref, _pos + index_slice)
-	
+
+		for input_connection: OutputConnectionData in output_connections:
+			if input_connection.idx == old_idx:
+				input_connection.idx = new_idx
+				input_connection.to_ref.from_idx = new_idx
+
 	update()
 
 

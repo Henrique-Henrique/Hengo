@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/3567223492641660476.res
+#[hengo] res://hengo/save/313841558820763155.res
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -40,6 +40,6 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print("okok")
+		"gaga"
 
 

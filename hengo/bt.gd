@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/3567223492641660476.res
+#[hengo] res://hengo/save/5651739105259045626.res
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -11,6 +11,11 @@ extends Sprite2D
 
  # Variables #
 @export var ata = NodePath()
+
+func func_951575039(c):
+
+	return [null, null]
+
 
 
 var _STATE_CONTROLLER = HengoStateController.new()
@@ -41,6 +46,6 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print("okok")
+		print(null)
 
 

@@ -10,7 +10,7 @@
 extends Node
 
  # Variables #
-var okok = null
+var gaga = Vector3()
 
 
 var _STATE_CONTROLLER = HengoStateController.new()
