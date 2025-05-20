@@ -178,6 +178,11 @@ func _handles(object: Object) -> bool:
 		HenGlobal.CAM.can_scroll = true
 		return true
 
+	if object is Resource and (object as Resource).resource_path.begins_with('res://hengo/save/'):
+		HenLoader.load((object as Resource).resource_path)
+		HenGlobal.CAM.can_scroll = true
+		return true
+
 	return false
 
 # public

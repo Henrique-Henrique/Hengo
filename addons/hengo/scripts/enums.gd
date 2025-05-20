@@ -93,7 +93,6 @@ static var MATH_UTILITY_NAME_LIST: Array = []
 #
 static var OBJECT_TYPES: PackedStringArray
 static var ALL_CLASSES: PackedStringArray
-static var SCRIPT_LIST_DATA: Dictionary
 
 # dropdown
 static var DROPDOWN_ALL_CLASSES: Array

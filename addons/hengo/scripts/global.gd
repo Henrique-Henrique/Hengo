@@ -22,6 +22,7 @@ static var SIDE_BAR_LIST_CACHE: Dictionary = {}
 static var TOOLTIP: HenTooltip
 static var DOCKS: Dictionary = {}
 static var ACTION_BAR: HenCNodeActionBar
+static var FROM_REFERENCES: HenSideBarReferences
 
 # cnodes
 static var can_make_connection: bool = false
@@ -54,9 +55,14 @@ static var ui_mode: UI_STATE = UI_STATE.BOTH
 static var unique_id: int = 0
 
 
+class ScriptData:
+    var id: int
+    var path: StringName
+    var type: StringName
+
 # save load
 static var current_script_path: StringName = ''
-static var script_config: Dictionary = {}
+static var script_config: ScriptData
 static var reparent_data: Dictionary = {}
 
 # parser

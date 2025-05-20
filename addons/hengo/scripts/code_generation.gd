@@ -670,6 +670,9 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			})
 		HenVirtualCNode.SubType.MACRO:
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level)))
+		HenVirtualCNode.SubType.GET_FROM_PROP:
+			# TODO
+			return indent + 'print("{0}")'.format([_token.name])
 		_:
 			return ''
 
@@ -744,7 +747,6 @@ static func get_debug_push_str() -> String:
 # NEW
 # NEW
 # NEW
-
 class Variable:
 	var name: String
 	var type: StringName
@@ -1097,6 +1099,10 @@ class CNode:
 					signal_name = (ref as SignalData).signal_name_to_code,
 					name = (ref as SignalData).name.to_snake_case()
 				})
+			HenVirtualCNode.SubType.GET_FROM_PROP:
+				token.merge({
+					name = outputs[0].code_value.to_snake_case(),
+				})
 
 		return token
 
@@ -1265,7 +1271,7 @@ static func get_code(_data: HenScriptData) -> String:
 
 	print(code)
 
-	return ''
+	return code
 
 
 static func _get_variable_from_dict(_data: Dictionary) -> Variable:

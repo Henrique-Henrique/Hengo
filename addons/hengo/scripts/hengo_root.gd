@@ -73,7 +73,7 @@ func _ready() -> void:
 	cnode_stat_label = get_node('%CNodeStatLabel')
 
 	# loading script list data
-	get_script_list()
+	# get_script_list()
 
 
 func _on_cnode_gui_input(_event: InputEvent) -> void:
@@ -85,7 +85,7 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 			match _event.button_index:
 				MOUSE_BUTTON_RIGHT:
 					var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
-					method_list.start(HenGlobal.script_config.type if HenGlobal.script_config.has('type') else 'all', get_global_mouse_position())
+					method_list.start(HenGlobal.script_config.type, get_global_mouse_position())
 					HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 				MOUSE_BUTTON_LEFT:
 					for cnode in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
@@ -217,7 +217,6 @@ func _input(event: InputEvent) -> void:
 
 
 func get_script_list() -> void:
-	HenEnums.SCRIPT_LIST_DATA.clear()
 	var dir_files: PackedStringArray = DirAccess.get_files_at('res://hengo/save') if DirAccess.dir_exists_absolute('res://hengo/save') else PackedStringArray()
 
 	for file_path: StringName in dir_files:
@@ -231,5 +230,3 @@ func get_script_list() -> void:
 			data_path = path,
 			side_bar_list = data.side_bar_list
 		}
-
-		HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data

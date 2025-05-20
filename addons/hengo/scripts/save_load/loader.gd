@@ -28,6 +28,8 @@ static func load(_path: StringName) -> void:
 	HenGlobal.SIDE_BAR_LIST.clear()
 	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
 
+	HenGlobal.script_config = HenGlobal.ScriptData.new()
+
 	# hide all virtuals
 	for cnode: HenCnode in HenGlobal.cnode_pool:
 		for signal_data: Dictionary in cnode.get_signal_connection_list('on_move'):
@@ -78,7 +80,7 @@ static func load(_path: StringName) -> void:
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()
 
-	var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
+	# var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
 	var base_route: Dictionary = {
 		name = 'Base',
 		type = HenRouter.ROUTE_TYPE.BASE,
@@ -87,16 +89,16 @@ static func load(_path: StringName) -> void:
 	}
 
 	HenGlobal.BASE_ROUTE = base_route
-	HenGlobal.script_config.name = _path.get_file().get_basename()
+
+	var resource_id: int = ResourceLoader.get_resource_uid(_path)
+	var is_resource: bool = _path.begins_with('res://hengo/save/') and _path.get_extension() == 'res'
+
 	HenGlobal.script_config.path = _path
+	HenGlobal.script_config.id = resource_id
 
 	# loading hengo script data
-	if HenEnums.SCRIPT_LIST_DATA.has(_path):
-		var item_data: Dictionary = HenEnums.SCRIPT_LIST_DATA[_path]
-		var data: HenScriptData = ResourceLoader.load(item_data.data_path, '', ResourceLoader.CACHE_MODE_IGNORE)
-
-
-		print(JSON.stringify(data.get_save()))
+	if is_resource or FileAccess.file_exists(get_data_path(resource_id)):
+		var data: HenScriptData = ResourceLoader.load(get_data_path(resource_id) if not is_resource else _path, '', ResourceLoader.CACHE_MODE_IGNORE)
 
 		# setting script configs
 		HenGlobal.script_config.type = data.type
@@ -111,7 +113,6 @@ static func load(_path: StringName) -> void:
 		_load_vc(data.virtual_cnode_list, base_route)
 
 		# adding in/out connections
-		print('cc ', connection_list)
 		for input_data: Dictionary in connection_list:
 			(input_data.from as HenVirtualCNode).add_connection(
 				input_data.idx,
@@ -124,6 +125,7 @@ static func load(_path: StringName) -> void:
 			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, flow_data.to_idx, loaded_virtual_cnode_list[int(flow_data.to_id)]).add()
 	else:
 		# setting script type
+		var script: GDScript = load(_path)
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
 
 		if type.begins_with('res://hengo/save'):
@@ -161,7 +163,7 @@ static func load(_path: StringName) -> void:
 
 static func show_class_name() -> void:
 	var cl_label: Label = HenGlobal.HENGO_ROOT.get_node('%ClassName')
-	var type = HenGlobal.script_config['type']
+	var type = HenGlobal.script_config.type
 	var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
 
 	cl_label.visible = true
@@ -217,3 +219,7 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
 		vc_list.append(vc)
 
 	return vc_list
+
+
+static func get_data_path(_id: int) -> StringName:
+	return 'res://hengo/save/' + str(_id) + '.res'

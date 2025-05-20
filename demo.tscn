@@ -10,6 +10,7 @@
 position = Vector2(261, 153)
 texture = ExtResource("1_wvpun")
 script = ExtResource("2_m0rpm")
+ata = NodePath("../Icon2")
 
 [node name="Button" type="Button" parent="Icon"]
 offset_left = 4.0

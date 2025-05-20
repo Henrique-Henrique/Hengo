@@ -71,8 +71,6 @@ var native_list: Array = [
 			route = HenRouter.current_route,
 		}
 	},
-	
-	
 	{
 		name = 'Get',
 		data = {
@@ -84,6 +82,32 @@ var native_list: Array = [
 					type = 'Variant',
 					sub_type = '@dropdown',
 					category = 'get_prop',
+				}
+			],
+			route = HenRouter.current_route
+		}
+
+	},
+	{
+		name = 'Get From',
+		data = {
+			name = 'Get From',
+			sub_type = HenVirtualCNode.SubType.GET_FROM_PROP,
+			inputs = [
+				{
+					name = '',
+					code_value = 'Variant',
+					type = 'Variant',
+					sub_type = '@dropdown',
+					category = 'get_from_name',
+				}
+			],
+			outputs = [
+				{
+					name = '',
+					type = 'Variant',
+					sub_type = '@dropdown',
+					category = 'get_from',
 				}
 			],
 			route = HenRouter.current_route
@@ -309,7 +333,7 @@ var native_list: Array = [
 
 
 func _ready() -> void:
-	var _type: StringName = HenGlobal.script_config.type if HenGlobal.script_config.has('type') else 'Variant'
+	var _type: StringName = HenGlobal.script_config.type
 
 	tree.item_activated.connect(_on_select)
 	(%Search as LineEdit).text_changed.connect(_on_search)

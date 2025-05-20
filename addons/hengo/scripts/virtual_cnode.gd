@@ -2,65 +2,66 @@
 class_name HenVirtualCNode extends Object
 
 enum Type {
-	DEFAULT,
-	IF,
-	FOR,
-	IMG,
-	EXPRESSION,
-	STATE,
-	STATE_START,
-	STATE_EVENT,
-	MACRO,
-	MACRO_INPUT,
-	MACRO_OUTPUT
+	DEFAULT = 0,
+	IF = 1,
+	FOR = 2,
+	IMG = 3,
+	EXPRESSION = 4,
+	STATE = 5,
+	STATE_START = 6,
+	STATE_EVENT = 7,
+	MACRO = 8,
+	MACRO_INPUT = 9,
+	MACRO_OUTPUT = 10
 }
 
 enum SubType {
-	FUNC,
-	VOID,
-	VAR,
-	LOCAL_VAR,
-	DEBUG_VALUE,
-	USER_FUNC,
-	SET_VAR,
-	SET_PROP,
-	GET_PROP,
-	VIRTUAL,
-	FUNC_INPUT,
-	CAST,
-	IF,
-	RAW_CODE,
-	SELF_GO_TO_VOID,
-	FOR,
-	FOR_ARR,
-	FOR_ITEM,
-	FUNC_OUTPUT,
-	CONST,
-	SINGLETON,
-	GO_TO_VOID,
-	IMG,
-	EXPRESSION,
-	SET_LOCAL_VAR,
-	IN_PROP,
-	NOT_CONNECTED,
-	DEBUG,
-	DEBUG_PUSH,
-	DEBUG_FLOW_START,
-	START_DEBUG_STATE,
-	DEBUG_STATE,
-	BREAK,
-	CONTINUE,
-	PASS,
-	STATE,
-	STATE_START,
-	STATE_EVENT,
-	SIGNAL_ENTER,
-	SIGNAL_CONNECTION,
-	SIGNAL_DISCONNECTION,
-	MACRO,
-	MACRO_INPUT,
-	MACRO_OUTPUT,
-	OVERRIDE_VIRTUAL
+	FUNC = 0,
+	VOID = 1,
+	VAR = 2,
+	LOCAL_VAR = 3,
+	DEBUG_VALUE = 4,
+	USER_FUNC = 5,
+	SET_VAR = 6,
+	SET_PROP = 7,
+	GET_PROP = 8,
+	GET_FROM_PROP = 9,
+	VIRTUAL = 10,
+	FUNC_INPUT = 11,
+	CAST = 12,
+	IF = 13,
+	RAW_CODE = 14,
+	SELF_GO_TO_VOID = 15,
+	FOR = 16,
+	FOR_ARR = 17,
+	FOR_ITEM = 18,
+	FUNC_OUTPUT = 19,
+	CONST = 20,
+	SINGLETON = 21,
+	GO_TO_VOID = 22,
+	IMG = 23,
+	EXPRESSION = 24,
+	SET_LOCAL_VAR = 25,
+	IN_PROP = 26,
+	NOT_CONNECTED = 27,
+	DEBUG = 28,
+	DEBUG_PUSH = 29,
+	DEBUG_FLOW_START = 30,
+	START_DEBUG_STATE = 31,
+	DEBUG_STATE = 32,
+	BREAK = 33,
+	CONTINUE = 34,
+	PASS = 35,
+	STATE = 36,
+	STATE_START = 37,
+	STATE_EVENT = 38,
+	SIGNAL_ENTER = 39,
+	SIGNAL_CONNECTION = 40,
+	SIGNAL_DISCONNECTION = 41,
+	MACRO = 42,
+	MACRO_INPUT = 43,
+	MACRO_OUTPUT = 44,
+	OVERRIDE_VIRTUAL = 45
 }
 
 var name: String
@@ -103,6 +104,8 @@ class InOutData extends Object:
 	var ref_id: int = -1
 	var ref: Object
 	var ref_change_rule: RefChangeRule
+	var get_from_id: int = -1
+	var from_side_bar_id: int = -1
 
 	signal update_changes
 	signal moved
@@ -211,6 +214,8 @@ class InOutData extends Object:
 		if is_static: dt.is_static = is_static
 		if ref_id > 0: dt.ref_id = ref_id
 		if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
+		if get_from_id > -1: dt.get_from_id = get_from_id
+		if from_side_bar_id > -1: dt.from_side_bar_id = from_side_bar_id
 
 		return dt
 	
@@ -1042,6 +1047,19 @@ func get_save() -> Dictionary:
 					if flow_connection.name:
 						data.to_flow.append({name = flow_connection.name, id = flow_connection.id})
 
+
+	if sub_type == SubType.GET_FROM_PROP:
+		var _id: int = inputs[0].get_from_id
+
+		if not HenGlobal.FROM_REFERENCES.references.has(_id):
+			HenGlobal.FROM_REFERENCES.references[_id] = []
+
+		var arr: Array = HenGlobal.FROM_REFERENCES.references[_id]
+		
+		if not arr.has(HenGlobal.script_config.id):
+			arr.append(HenGlobal.script_config.id)
+
+
 	return data
 
 
@@ -1499,8 +1517,14 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 
 	if _data.has('ref_id'):
 		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
-	
+
 	var in_out: InOutData = InOutData.new(_data)
+
+	if _data.has('get_from_id'):
+		in_out.get_from_id = _data.get_from_id
+	
+	if _data.has('from_side_bar_id'):
+		in_out.from_side_bar_id = _data.from_side_bar_id
 
 	in_out.moved.connect(_on_in_out_moved)
 	in_out.deleted.connect(_on_in_out_deleted)

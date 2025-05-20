@@ -10,6 +10,13 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 	if not DirAccess.dir_exists_absolute('res://hengo/save'):
 		DirAccess.make_dir_absolute('res://hengo/save')
 	
+	if not FileAccess.file_exists('res://hengo/save/references.res'):
+		ResourceSaver.save(HenSideBarReferences.new(), 'res://hengo/save/references.res')
+
+	var side_bar_refs: HenSideBarReferences = ResourceLoader.load('res://hengo/save/references.res')
+
+	HenGlobal.FROM_REFERENCES = side_bar_refs
+
 	var script_data: HenScriptData = HenScriptData.new()
 
 	script_data.path = HenGlobal.script_config.path
@@ -33,38 +40,72 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 			
 	script_data.virtual_cnode_list = v_cnode_list
 
-	var script_name: String = HenGlobal.script_config.name if HenGlobal.script_config.has('name') else str(Time.get_ticks_usec())
-	var data_path: StringName = 'res://hengo/save/' + script_name + '.res'
-	var script_path: StringName = 'res://hengo/' + script_name + '.gd'
+	var data_path: StringName = 'res://hengo/save/' + str(HenGlobal.script_config.id) + '.res'
 
 	# saving data
 	var error: int = ResourceSaver.save(script_data, data_path)
 
 	if error != OK:
 		printerr('Error saving script data.')
+		return
+
+
+	if not HenGlobal.FROM_REFERENCES.references.is_empty():
+		ResourceSaver.save(HenGlobal.FROM_REFERENCES)
 
 	# ---------------------------------------------------------------------------- #
 	if _generate_code:
-		HenCodeGeneration.get_code(script_data)
+		generate(script_data, data_path, ResourceUID.get_id_path(HenGlobal.script_config.id))
 
-	# var script: GDScript = GDScript.new()
 
-	# script.source_code = '#[hengo] ' + data_path + '\n\n' + _code
+		# generation dependencies
+		if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
+			for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
+				var need_reload: bool = false
 
-	# var reload_err: int = script.reload()
+				var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
 
-	# if reload_err == OK:
-	# 	var err: int = ResourceSaver.save(script, script_path)
+				for vc: Dictionary in res.virtual_cnode_list:
+					if vc.sub_type == HenVirtualCNode.SubType.GET_FROM_PROP:
+						# TODO
+						print('vuu ')
 
-	# 	if err == OK:
-	# 		var dict_data: Dictionary = {
-	# 			name = script_name,
-	# 			path = script_path,
-	# 			type = script_data.type,
-	# 			data_path = data_path,
-	# 			side_bar_list = script_data.side_bar_list
-	# 		}
-	# 		HenEnums.SCRIPT_LIST_DATA[dict_data.path] = dict_data
-	# 		print('SAVED HENGO SCRIPT')
-	# else:
-	# 	pass
+					if vc.has(&'virtual_cnode_list'):
+						for vc_chd: Dictionary in vc.virtual_cnode_list:
+							if vc_chd.sub_type == HenVirtualCNode.SubType.GET_FROM_PROP:
+								var output: Dictionary = vc_chd.outputs[0]
+								
+								for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+									if var_data.id == output.from_side_bar_id:
+										if var_data.name != output.value or var_data.type != output.type:
+											output.code_value = var_data.name
+											output.value = var_data.name
+
+											# TODO - CHANGE TYPE
+
+											need_reload = true
+
+				if need_reload:
+					var res_error: int = ResourceSaver.save(res)
+
+					if res_error == OK:
+						generate(res, data_path, ResourceUID.get_id_path(id))
+
+				print('vuu ', need_reload)
+				print('vu2 ', JSON.stringify(res.get_save()))
+
+
+static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName) -> void:
+	var code: String = HenCodeGeneration.get_code(_script_data)
+
+	var script: GDScript = GDScript.new()
+	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code
+
+	var reload_err: int = script.reload()
+
+	if reload_err == OK:
+		print('vii ', ResourceUID.get_id_path(HenGlobal.script_config.id))
+		var err: int = ResourceSaver.save(script, _path)
+
+		if err == OK:
+			print('SAVED HENGO SCRIPT')
