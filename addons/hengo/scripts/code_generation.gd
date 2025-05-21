@@ -501,7 +501,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						return parse_token_by_type(x)
 			))
 			})
-		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.SINGLETON:
+		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.SINGLETON, HenVirtualCNode.SubType.FUNC_FROM:
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
 			
@@ -509,6 +509,10 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 			if _token.type == HenVirtualCNode.SubType.SINGLETON:
 				prefix = ''
+			elif _token.type == HenVirtualCNode.SubType.FUNC_FROM:
+				if prefix == '_ref.':
+					# TODO
+					return indent + 'Vector2.ZERO'
 
 			return indent + prefix + '{name}({params}){id}'.format({
 				name = _token.name,
@@ -799,6 +803,7 @@ class Param:
 class CNode:
 	var id: int
 	var name: String
+	var name_to_code: String
 	var sub_type: HenVirtualCNode.SubType
 	var type: HenVirtualCNode.Type
 	var category: StringName
@@ -1017,12 +1022,12 @@ class CNode:
 		match sub_type:
 			HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 				token.merge({
-					name = name.to_snake_case(),
+					name = name.to_snake_case() if not name_to_code else name_to_code,
 					params = get_input_token_list()
 				})
-			HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC:
+			HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
 				token.merge({
-					name = name.to_snake_case(),
+					name = name.to_snake_case() if not name_to_code else name_to_code,
 					params = get_input_token_list(),
 					id = _id if outputs.size() > 1 else -1,
 				})
@@ -1308,6 +1313,8 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: References, _parent_
 	if _cnode.has(&'category'):
 		cn.category = _cnode.category
 	
+	if _cnode.has(&'name_to_code'):
+		cn.name_to_code = _cnode.name_to_code
 	
 	if _cnode.has('flow_connections'):
 		for connection: Dictionary in _cnode.flow_connections:
@@ -1793,11 +1800,27 @@ static func regenerate() -> void:
 	if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
 		for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
 			var refs: RegenerateRefs = RegenerateRefs.new()
+			var path: StringName = HenLoader.get_data_path(id)
+
+			if not FileAccess.file_exists(path):
+				push_warning('Error: resource not found to re-generate: ', str(id))
+				continue
+
 			var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
 
 			_parse_vc_list(res.virtual_cnode_list, refs)
 
+
 			if refs.reload:
+				# cleaning connections that dont using
+				for cnode: Dictionary in refs.cnode_list.values():
+					if not cnode.input_connections.is_empty():
+						for connection: Dictionary in cnode.input_connections:
+							for ref: Dictionary in refs.disconnect_list:
+								if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
+									cnode.input_connections.erase(connection)
+									break
+
 				var res_error: int = ResourceSaver.save(res)
 				if res_error == OK:
 					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
@@ -1807,26 +1830,22 @@ static func regenerate() -> void:
 
 
 static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
-	_refs.disconnect_list.clear()
-
 	for cnode: Dictionary in _cnode_list:
-		# base route
-		if cnode.sub_type == HenVirtualCNode.SubType.GET_FROM_PROP:
-			_refs.reload = _check_changes_var(cnode, _refs)
-
 		_refs.cnode_list[cnode.id] = cnode
+
+		if not cnode.has('from_id'):
+			if cnode.has(&'virtual_cnode_list'):
+				_parse_vc_list(cnode.virtual_cnode_list, _refs)
+			continue
+
+		match cnode.sub_type:
+			HenVirtualCNode.SubType.GET_FROM_PROP:
+				_check_changes_var(cnode, _refs)
+			HenVirtualCNode.SubType.FUNC_FROM:
+				_check_changes_func(cnode, _refs)
 
 		if cnode.has(&'virtual_cnode_list'):
 			_parse_vc_list(cnode.virtual_cnode_list, _refs)
-	
-	# cleaning connections
-	for cnode: Dictionary in _refs.cnode_list.values():
-		if cnode.has('input_connections'):
-			for connection: Dictionary in cnode.input_connections:
-				for ref: Dictionary in _refs.disconnect_list:
-					if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
-						cnode.input_connections.erase(connection)
-						break
 
 
 static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> bool:
@@ -1860,3 +1879,137 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> bool
 		pass
 	
 	return need_reload
+
+
+static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> void:
+	var func_data: HenSideBar.FuncData
+
+	for _func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+		if _func_data.id == _dict.from_side_bar_id:
+			func_data = _func_data
+			break
+	
+	if func_data:
+		var real_output_size: int = func_data.outputs.size()
+		var real_input_size: int = func_data.inputs.size()
+		var output_size: int = _dict.outputs.size() if _dict.has('outputs') else 0
+		var input_size: int = _dict.inputs.size() - 1 if _dict.has('inputs') else 0
+		var type_ref: Dictionary
+
+		# getting type references (need to check to disconnect if don't match)
+		if _dict.has('outputs'):
+			for output_data: Dictionary in _dict.outputs:
+				type_ref[output_data.id] = output_data.type
+		
+		if _dict.has('inputs'):
+			for input_data: Dictionary in _dict.inputs.slice(1):
+				type_ref[input_data.id] = input_data.type
+
+		_check_func_inouts(true, func_data, _dict, type_ref, input_size, real_input_size, _refs)
+		_check_func_inouts(false, func_data, _dict, type_ref, output_size, real_output_size, _refs)
+
+
+	else:
+		#TODO - deleted
+		pass
+
+
+static func _check_func_inouts(
+	_is_inputs: bool,
+	_func_data: HenSideBar.FuncData,
+	_dict: Dictionary,
+	_type_ref: Dictionary,
+	_output_size: int,
+	_real_output_size: int,
+	_refs: RegenerateRefs
+) -> void:
+	var idx: int = 0
+	var func_arr: Array = _func_data.outputs if not _is_inputs else _func_data.inputs
+	var arr: Array
+
+	if _is_inputs:
+		if _dict.has('inputs'):
+			arr = _dict.inputs
+		elif _real_output_size > 0:
+			_dict.inputs = []
+			arr = _dict.inputs
+		else:
+			return
+	else:
+		if _dict.has('outputs'):
+			arr = _dict.outputs
+		elif _real_output_size > 0:
+			_dict.outputs = []
+			arr = _dict.outputs
+		else:
+			return
+
+
+	if _real_output_size == 0 and _output_size > 0:
+		for output_data: Dictionary in arr:
+			if output_data.has('is_ref'):
+				continue
+
+			_refs.disconnect_list.append({
+				id = _dict.id,
+				output_id = output_data.id,
+			})
+
+			arr.erase(output_data)
+		
+		_refs.reload = true
+	elif _output_size == 0 and _real_output_size > 0:
+		for output_data: HenSideBar.Param in func_arr:
+			arr.append(output_data.get_save_without_id())
+		
+		_refs.reload = true
+	elif _real_output_size > _output_size:
+		idx = 0
+		for output_data: HenSideBar.Param in func_arr:
+			if idx < _output_size:
+				if arr[idx].has('is_ref'):
+					idx += 1
+					continue
+				
+				arr[idx].merge(output_data.get_save_without_id(), true)
+				_check_connection_func(_type_ref, _dict, arr[idx], _refs)
+			else:
+				arr.append(output_data.get_save_without_id())
+			
+			idx += 1
+
+		_refs.reload = true
+	elif _real_output_size < _output_size:
+		idx = 0
+		for output_data: Dictionary in arr:
+			if idx < _real_output_size:
+				if output_data.has('is_ref'):
+					idx += 1
+					continue
+
+				output_data.merge(func_arr[idx].get_save_without_id(), true)
+				_check_connection_func(_type_ref, _dict, output_data, _refs)
+			else:
+				arr.erase(output_data)
+				_refs.disconnect_list.append({
+					id = _dict.id,
+					output_id = output_data.id,
+				})
+
+			idx += 1
+
+		_refs.reload = true
+
+
+static func _check_connection_func(_type_ref: Dictionary, _dict: Dictionary, _output_data: Dictionary, _refs: RegenerateRefs) -> void:
+	if _type_ref.has(_output_data.id):
+		if _type_ref[_output_data.id] != _output_data.type:
+			_refs.disconnect_list.append({
+				id = _dict.id,
+				output_id = _output_data.id,
+			})
+	else:
+		_refs.disconnect_list.append({
+			id = _dict.id,
+			output_id = _output_data.id,
+		})

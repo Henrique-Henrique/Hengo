@@ -61,7 +61,8 @@ enum SubType {
 	MACRO = 42,
 	MACRO_INPUT = 43,
 	MACRO_OUTPUT = 44,
-	OVERRIDE_VIRTUAL = 45
+	OVERRIDE_VIRTUAL = 45,
+	FUNC_FROM = 46
 }
 
 var name: String
@@ -83,6 +84,8 @@ var virtual_sub_type_vc_list: Array = []
 var ref_id: int = -1
 var ref: Object
 var is_deleted: bool = false
+var from_side_bar_id: int = -1
+var from_id: int = -1
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -105,8 +108,6 @@ class InOutData extends Object:
 	var ref_id: int = -1
 	var ref: Object
 	var ref_change_rule: RefChangeRule
-	var get_from_id: int = -1
-	var from_side_bar_id: int = -1
 
 	signal update_changes
 	signal moved
@@ -123,6 +124,7 @@ class InOutData extends Object:
 		name = _data.name
 		type = _data.type
 
+		if _data.has('id'): id = _data.id
 		if _data.has('sub_type'): sub_type = _data.sub_type
 		if _data.has('category'): category = _data.category
 		if _data.has('is_ref'): is_ref = _data.is_ref
@@ -216,8 +218,6 @@ class InOutData extends Object:
 		if is_static: dt.is_static = is_static
 		if ref_id > 0: dt.ref_id = ref_id
 		if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
-		if get_from_id > -1: dt.get_from_id = get_from_id
-		if from_side_bar_id > -1: dt.from_side_bar_id = from_side_bar_id
 
 		return dt
 	
@@ -1008,6 +1008,12 @@ func get_save() -> Dictionary:
 	if ref_id > 0:
 		data.ref_id = ref_id
 
+	if from_side_bar_id > -1:
+		data.from_side_bar_id = from_side_bar_id
+
+	if from_id > -1:
+		data.from_id = from_id
+
 	if not inputs.is_empty():
 		data.inputs = []
 
@@ -1054,13 +1060,11 @@ func get_save() -> Dictionary:
 						data.to_flow.append({name = flow_connection.name, id = flow_connection.id})
 
 
-	if sub_type == SubType.GET_FROM_PROP:
-		var _id: int = inputs[0].get_from_id
+	if from_id > -1:
+		if not HenGlobal.FROM_REFERENCES.references.has(from_id):
+			HenGlobal.FROM_REFERENCES.references[from_id] = []
 
-		if not HenGlobal.FROM_REFERENCES.references.has(_id):
-			HenGlobal.FROM_REFERENCES.references[_id] = []
-
-		var arr: Array = HenGlobal.FROM_REFERENCES.references[_id]
+		var arr: Array = HenGlobal.FROM_REFERENCES.references[from_id]
 		
 		if not arr.has(HenGlobal.script_config.id):
 			arr.append(HenGlobal.script_config.id)
@@ -1543,12 +1547,6 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 
 	var in_out: InOutData = InOutData.new(_data)
 
-	if _data.has('get_from_id'):
-		in_out.get_from_id = _data.get_from_id
-	
-	if _data.has('from_side_bar_id'):
-		in_out.from_side_bar_id = _data.from_side_bar_id
-
 	in_out.moved.connect(_on_in_out_moved)
 	in_out.deleted.connect(_on_in_out_deleted)
 	in_out.update_changes.connect(_on_in_out_data_changed)
@@ -1689,7 +1687,12 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.MACRO_OUTPUT:
 					ref.output_ref = v_cnode
 
-	
+	if _config.has('from_side_bar_id'):
+		v_cnode.from_side_bar_id = _config.from_side_bar_id
+
+	if _config.has('from_id'):
+		v_cnode.from_id = _config.from_id
+
 	if _config.has('ref_id'):
 		_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
 

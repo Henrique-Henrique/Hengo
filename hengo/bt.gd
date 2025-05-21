@@ -10,12 +10,6 @@
 extends Sprite2D
 
  # Variables #
-@export var ata = NodePath()
-
-func func_951575039(c):
-
-	return [null, null]
-
 
 
 var _STATE_CONTROLLER = HengoStateController.new()

@@ -24,7 +24,8 @@ enum FILTER_TYPE {
 	NATIVE,
 	FUNC,
 	SIGNAL,
-	MACRO
+	MACRO,
+	FUNC_FROM
 }
 
 var class_type: CLASS_TYPE = CLASS_TYPE.SELF
@@ -42,6 +43,7 @@ const BG_COLOR = {
 	FILTER_TYPE.SIGNAL: Color('#2F4335'),
 	FILTER_TYPE.MACRO: Color('#332F43'),
 	FILTER_TYPE.NATIVE: Color.BLACK,
+	FILTER_TYPE.FUNC_FROM: Color.BLUE
 }
 
 const FILTER_ICONS = {
@@ -421,6 +423,42 @@ func _on_class_bt(_class: StringName, _button: Button, _type: CLASS_TYPE) -> voi
 				}
 
 				api_list.append(dt)
+			
+			# from funcs
+			for script_path: String in DirAccess.get_files_at('res://hengo/save'):
+				var id: int = int(script_path.get_basename())
+
+				if id == 0:
+					continue
+
+				var path: StringName = HenLoader.get_data_path(id)
+				var res: HenScriptData = ResourceLoader.load(path)
+
+				for func_data: Dictionary in res.side_bar_list.func_list:
+					var dt: Dictionary = {
+						name = '({0}) {1}'.format([ResourceUID.get_id_path(id).get_file().get_basename(), func_data.name]),
+						type = FILTER_TYPE.FUNC_FROM,
+						data = {
+							name = func_data.name,
+							from_side_bar_id = func_data.id,
+							from_id = id,
+							sub_type = HenVirtualCNode.SubType.FUNC_FROM,
+							name_to_code = func_data.name,
+							inputs = [
+								{
+									name = 'from',
+									type = 'Variant',
+									is_ref = true,
+								}
+							] + func_data.inputs.map(func(x): return {name = x.name, type = x.type}),
+							outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type}),
+							route = HenRouter.current_route,
+						}
+					}
+
+					api_list.append(dt)
+
+				print('mp ', script_path)
 
 
 func build_list() -> void:

@@ -12,6 +12,11 @@ extends Node
  # Variables #
 var gaga = Vector3()
 
+func func_2635567860(v):
+
+	return null
+
+
 
 var _STATE_CONTROLLER = HengoStateController.new()
 

@@ -236,6 +236,12 @@ class Param:
 			id = id
 		}
 	
+	func get_save_without_id() -> Dictionary:
+		return {
+			name = name,
+			type = type
+		}
+
 	func load_save(_data: Dictionary) -> void:
 		id = _data.id
 		

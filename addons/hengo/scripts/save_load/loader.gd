@@ -100,6 +100,8 @@ static func load(_path: StringName) -> void:
 	if is_resource or FileAccess.file_exists(get_data_path(resource_id)):
 		var data: HenScriptData = ResourceLoader.load(get_data_path(resource_id) if not is_resource else _path, '', ResourceLoader.CACHE_MODE_IGNORE)
 
+		print(JSON.stringify(data.get_save()))
+
 		# setting script configs
 		HenGlobal.script_config.type = data.type
 		HenGlobal.node_counter = data.node_counter
