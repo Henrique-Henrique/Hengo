@@ -236,6 +236,7 @@ func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.Connectio
 		_from_connector = from_conn
 		_to_connector = to_conn
 
+
 	return _to.root.virtual_ref.create_connection(
 		_to.input_ref.id,
 		input_ref.id,

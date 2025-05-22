@@ -907,6 +907,11 @@ class RegenerateRefs:
 	var reload: bool = false: set = can_reload
 	var cnode_list: Dictionary = {}
 	var disconnect_list: Array = []
+	var counter: int
+
+	func get_new_node_counter() -> int:
+		counter += 1
+		return counter
 
 	func can_reload(_can: bool) -> void:
 		if reload == true:
@@ -914,10 +919,10 @@ class RegenerateRefs:
 		
 		reload = _can
 
+
 static func regenerate() -> void:
 	# generation dependencies
 	if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
-		print('yy ', HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id))
 		for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
 			var refs: RegenerateRefs = RegenerateRefs.new()
 			var path: StringName = HenLoader.get_data_path(id)
@@ -928,19 +933,26 @@ static func regenerate() -> void:
 
 			var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
 
-			_parse_vc_list(res.virtual_cnode_list, refs)
+			refs.counter = res.node_counter
 
+			_parse_vc_list(res.virtual_cnode_list, refs)
 
 			if refs.reload:
 				# cleaning connections that dont using
 				for cnode: Dictionary in refs.cnode_list.values():
+					var remove_connections: Array = []
+
 					if not cnode.input_connections.is_empty():
 						for connection: Dictionary in cnode.input_connections:
 							for ref: Dictionary in refs.disconnect_list:
 								if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
-									cnode.input_connections.erase(connection)
+									remove_connections.append(connection)
 									break
 
+					for connection: Dictionary in remove_connections:
+						cnode.input_connections.erase(connection)
+
+				res.node_counter = refs.counter
 				var res_error: int = ResourceSaver.save(res)
 				if res_error == OK:
 					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
@@ -1014,35 +1026,50 @@ static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> voi
 		var real_input_size: int = func_data.inputs.size()
 		var output_size: int = _dict.outputs.size() if _dict.has('outputs') else 0
 		var input_size: int = _dict.inputs.size() - 1 if _dict.has('inputs') else 0
-		var type_ref: Dictionary
 
-		# getting type references (need to check to disconnect if don't match)
-		if _dict.has('outputs'):
-			for output_data: Dictionary in _dict.outputs:
-				type_ref[output_data.id] = output_data.type
-		
-		if _dict.has('inputs'):
-			for input_data: Dictionary in _dict.inputs.slice(1):
-				type_ref[input_data.id] = input_data.type
-
-		_check_func_inouts(true, func_data, _dict, type_ref, input_size, real_input_size, _refs)
-		_check_func_inouts(false, func_data, _dict, type_ref, output_size, real_output_size, _refs)
+		_check_func_inouts(true, func_data, _dict, input_size, real_input_size, _refs)
+		_check_func_inouts(false, func_data, _dict, output_size, real_output_size, _refs)
 
 	else:
 		#TODO - deleted
 		pass
 
 
+static func _reset_inout_dict_value(_dict: Dictionary) -> void:
+	match _dict.type:
+		'String', 'NodePath', 'StringName':
+			_dict.code_value = '""'
+		'int':
+			_dict.code_value = '0'
+		'float':
+			_dict.code_value = '0.'
+		'Vector2':
+			_dict.code_value = 'Vector2(0, 0)'
+		'bool':
+			_dict.code_value = 'false'
+		'Variant':
+			_dict.code_value = 'null'
+		_:
+			if HenEnums.VARIANT_TYPES.has(_dict.type):
+				_dict.code_value = _dict.type + '()'
+			elif ClassDB.can_instantiate(_dict.type):
+				_dict.code_value = _dict.type + '.new()'
+
+	match _dict.type:
+		'String', 'NodePath', 'StringName':
+			_dict.value = ''
+		_:
+			_dict.value = _dict.code_value
+	
+
 static func _check_func_inouts(
 	_is_inputs: bool,
 	_func_data: HenSideBar.FuncData,
 	_dict: Dictionary,
-	_type_ref: Dictionary,
 	_output_size: int,
 	_real_output_size: int,
 	_refs: RegenerateRefs
 ) -> void:
-	var idx: int = 0
 	var func_arr: Array = _func_data.outputs if not _is_inputs else _func_data.inputs
 	var arr: Array
 
@@ -1064,71 +1091,86 @@ static func _check_func_inouts(
 			return
 
 
-	if _real_output_size == 0 and _output_size > 0:
-		for output_data: Dictionary in arr:
-			if output_data.has('is_ref'):
+	var old_map: Dictionary = {}
+	
+	for inout: Dictionary in arr:
+		if inout.has('is_ref'):
+			continue
+		
+		old_map[inout.from_id] = {
+			id = inout.id,
+			type = inout.type
+		}
+	
+
+	if arr.is_empty():
+		for new_inout: HenSideBar.Param in func_arr:
+			arr.append({
+				id = _refs.get_new_node_counter(),
+				name = new_inout.name,
+				type = new_inout.type,
+				from_id = new_inout.id
+			})
+		
+			# _refs.reload = true
+	else:
+		var idx: int = 0
+		var remove: Array = []
+		var inout_size: int = arr.size() if not _is_inputs else arr.size() - 1
+
+		# add the news inouts
+		if func_arr.size() > inout_size:
+			for i in range(func_arr.size() - inout_size):
+				var data: Dictionary = func_arr[inout_size + i].get_save_with_from_id()
+				data.id = _refs.get_new_node_counter()
+				arr.append(data)
+			
+			# _refs.reload = true
+
+		# change current inouts
+		for new_inout: Dictionary in arr:
+			if new_inout.has('is_ref'):
 				continue
 
-			_refs.disconnect_list.append({
-				id = _dict.id,
-				output_id = output_data.id,
-			})
-
-			arr.erase(output_data)
-		
-		_refs.reload = true
-	elif _output_size == 0 and _real_output_size > 0:
-		for output_data: HenSideBar.Param in func_arr:
-			arr.append(output_data.get_save_without_id())
-		
-		_refs.reload = true
-	elif _real_output_size > _output_size:
-		idx = 0
-		for output_data: HenSideBar.Param in func_arr:
-			if idx < _output_size:
-				if arr[idx].has('is_ref'):
-					idx += 1
-					continue
-				
-				arr[idx].merge(output_data.get_save_without_id(), true)
-				# _check_connection_func(_type_ref, _dict, arr[idx], _refs)
-			else:
-				arr.append(output_data.get_save_without_id())
-			
-			idx += 1
-
-		_refs.reload = true
-	elif _real_output_size < _output_size:
-		idx = 0
-		for output_data: Dictionary in arr:
-			if idx < _real_output_size:
-				if output_data.has('is_ref'):
-					idx += 1
-					continue
-
-				output_data.merge(func_arr[idx].get_save_without_id(), true)
-				# _check_connection_func(_type_ref, _dict, output_data, _refs)
-			else:
-				arr.erase(output_data)
+			if idx >= func_arr.size():
+				remove.append(new_inout)
 				_refs.disconnect_list.append({
 					id = _dict.id,
-					output_id = output_data.id,
+					output_id = new_inout.id
 				})
+				# _refs.reload = true
+				continue
 
+			var inout_ref: HenSideBar.Param = func_arr[idx]
+			new_inout.merge(inout_ref.get_save_without_id(), true)
+			
+			if old_map.has(new_inout.from_id):
+				var old: Dictionary = old_map[new_inout.from_id]
+				new_inout.id = old.id
+
+				# check input connections
+				if old.type != new_inout.type:
+					if _is_inputs and _dict.has('input_connections'):
+						for connection: Dictionary in _dict.input_connections:
+							_refs.disconnect_list.append({
+								id = connection.from_vc_id,
+								output_id = connection.from_id
+							})
+					else:
+						_refs.disconnect_list.append({
+							id = _dict.id,
+							output_id = old.id
+						})
+					
+					if _is_inputs: _reset_inout_dict_value(new_inout)
+					
+				prints('vvv DD ', _refs.disconnect_list)
+				# _refs.reload = true
+
+			new_inout.from_id = inout_ref.id
 			idx += 1
-
-		_refs.reload = true
-
-
-# static func _check_connection_func(_type_ref: Dictionary, _dict: Dictionary, _output_data: Dictionary, _refs: RegenerateRefs) -> void:
-# 	if _type_ref.has(_output_data.id):
-# 		if _type_ref[_output_data.id] != _output_data.type:
-# 			_refs.disconnect_list.append({
-# 				id = _dict.id,
-# 				output_id = _output_data.id,
-# 			})
-# 	else:
-# 		_refs.disconnect_list.append({
-# 			id = _dict.id,
-# 			output_id = _output_data.id,
-# 		})
+		
+		for inout: Dictionary in remove:
+			arr.erase(inout)
+	
+	print('vvv NEW -> ', arr)

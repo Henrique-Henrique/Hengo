@@ -242,6 +242,13 @@ class Param:
 			type = type
 		}
 
+	func get_save_with_from_id() -> Dictionary:
+		return {
+			name = name,
+			type = type,
+			from_id = id
+		}
+
 	func load_save(_data: Dictionary) -> void:
 		id = _data.id
 		

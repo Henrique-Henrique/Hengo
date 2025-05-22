@@ -450,8 +450,8 @@ func _on_class_bt(_class: StringName, _button: Button, _type: CLASS_TYPE) -> voi
 									type = 'Variant',
 									is_ref = true,
 								}
-							] + func_data.inputs.map(func(x): return {name = x.name, type = x.type}),
-							outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type}),
+							] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
+							outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
 							route = HenRouter.current_route,
 						}
 					}

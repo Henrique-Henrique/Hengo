@@ -11,9 +11,9 @@ extends Node
 
  # Variables #
 
-func func_2880016253(cc):
+func func_2880016253(a, g):
 
-	return [null, null]
+	return null
 
 
 

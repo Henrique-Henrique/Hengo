@@ -108,6 +108,7 @@ class InOutData extends Object:
 	var ref_id: int = -1
 	var ref: Object
 	var ref_change_rule: RefChangeRule
+	var from_id: int = -1
 
 	signal update_changes
 	signal moved
@@ -124,6 +125,7 @@ class InOutData extends Object:
 		name = _data.name
 		type = _data.type
 
+		if _data.has('from_id'): from_id = _data.from_id
 		if _data.has('id'): id = _data.id
 		if _data.has('sub_type'): sub_type = _data.sub_type
 		if _data.has('category'): category = _data.category
@@ -208,6 +210,7 @@ class InOutData extends Object:
 			type = type
 		}
 
+		if from_id > -1: dt.from_id = from_id
 		if sub_type: dt.sub_type = sub_type
 		if category: dt.category = category
 		if is_ref: dt.is_ref = is_ref
@@ -441,29 +444,38 @@ class ConnectionReturn:
 	var output_connection: OutputConnectionData
 	var from: HenVirtualCNode
 	var to: HenVirtualCNode
+	var to_id: int
 
 	var old_inputs_connections: Array
 
-	func _init(_in: InputConnectionData, _out: OutputConnectionData, _from: HenVirtualCNode, _to: HenVirtualCNode) -> void:
+	func _init(_in: InputConnectionData, _out: OutputConnectionData, _from: HenVirtualCNode, _to: HenVirtualCNode, _to_id = -1) -> void:
 		input_connection = _in
 		output_connection = _out
 		from = _from
 		to = _to
+		to_id = _to_id
 	
 
 	func add(_update: bool = true) -> void:
 		# removing old inputs
-		old_inputs_connections.append_array(to.input_connections)
-
+		old_inputs_connections.clear()
+		var remove_connection: Array = []
+		
 		for connection: InputConnectionData in to.input_connections:
-			connection.from.output_connections.erase(connection.from_ref)
+			if connection.to_id != to_id:
+				continue
 
 			if connection.line_ref:
 				connection.line_ref.visible = false
 				connection.line_ref = null
 				connection.from_ref.line_ref = null
+			
+			remove_connection.append(connection)
 
-		to.input_connections.clear()
+		for connection in remove_connection:
+			to.input_connections.erase(connection)
+			connection.from.output_connections.erase(connection.from_ref)
+			old_inputs_connections.append(connection)
 
 		from.output_connections.append(output_connection)
 		to.input_connections.append(input_connection)
@@ -473,6 +485,9 @@ class ConnectionReturn:
 			to.update()
 
 	func remove() -> void:
+		prints(to.input_connections, input_connection, old_inputs_connections)
+		# TODO BUG WHEN REMOVE
+
 		from.output_connections.erase(output_connection)
 		to.input_connections.erase(input_connection)
 
@@ -481,10 +496,9 @@ class ConnectionReturn:
 			input_connection.line_ref = null
 			output_connection.line_ref = null
 
-		# add old input connections
-		to.input_connections.append_array(old_inputs_connections)
-	
+
 		for connection: InputConnectionData in old_inputs_connections:
+			to.input_connections.append(connection)
 			connection.from.output_connections.append(connection.from_ref)
 
 		old_inputs_connections.clear()
@@ -1150,7 +1164,7 @@ func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> Conne
 	input_connection.from_type = output.type
 	input_connection.input_ref = input
 
-	return ConnectionReturn.new(input_connection, output_connection, _from, self)
+	return ConnectionReturn.new(input_connection, output_connection, _from, self, _id)
 
 
 func add_connection(_idx: int, _from_idx: int, _from: HenVirtualCNode) -> void:
