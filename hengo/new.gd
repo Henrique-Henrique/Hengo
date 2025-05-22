@@ -10,11 +10,10 @@
 extends Node
 
  # Variables #
-var gaga = Vector3()
 
-func func_2635567860(v):
+func func_2880016253(cc):
 
-	return null
+	return [null, null]
 
 
 

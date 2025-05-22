@@ -541,8 +541,8 @@ func _on_select() -> void:
 	# make connection
 	if cnode_config.has('from_in_out'):
 		vc_return.v_cnode.create_connection(
-			0,
-			cnode_config.in_out_idx,
+			vc_return.v_cnode.inputs[0].id,
+			cnode_config.in_out_id,
 			cnode_config.from,
 		).add()
 

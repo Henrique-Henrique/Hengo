@@ -49,7 +49,7 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		print(virtual_ref.sub_type)
+		print(virtual_ref.input_connections.map(func(x): return x.get_save()))
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection:

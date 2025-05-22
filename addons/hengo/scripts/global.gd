@@ -106,6 +106,6 @@ static var can_instantiate_pool: bool = true
 
 # macro
 static var USE_MACRO_USE_SELF: bool = false
-static var MACRO_REF: HenCodeGeneration.CNode
+static var MACRO_REF: HenSaveCodeType.CNode
 static var USE_MACRO_REF: bool = false
 static var MACRO_USE_SELF: bool = false

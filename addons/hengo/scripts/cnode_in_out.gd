@@ -93,11 +93,11 @@ func _on_gui(_event: InputEvent) -> void:
 				method_list.start(connection_type, get_global_mouse_position(), false, type, {
 					from_in_out = input_ref,
 					from = root.virtual_ref,
-					in_out_idx = get_index()
+					in_out_id = input_ref.id
 				})
 
 				if type == 'in':
-					var connection: HenVirtualCNode.ConnectionReturn = root.virtual_ref.get_input_connection(get_index())
+					var connection: HenVirtualCNode.ConnectionReturn = root.virtual_ref.get_input_connection(input_ref.id)
 
 					if connection:
 						HenGlobal.history.create_action('Remove connection line')
@@ -236,10 +236,9 @@ func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.Connectio
 		_from_connector = from_conn
 		_to_connector = to_conn
 
-
 	return _to.root.virtual_ref.create_connection(
-		_to.get_index(),
-		get_index(),
+		_to.input_ref.id,
+		input_ref.id,
 		_root.virtual_ref
 	)
 

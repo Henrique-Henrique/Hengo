@@ -117,8 +117,8 @@ static func load(_path: StringName) -> void:
 		# adding in/out connections
 		for input_data: Dictionary in connection_list:
 			(input_data.from as HenVirtualCNode).add_connection(
-				input_data.idx,
-				input_data.from_idx,
+				input_data.to_id,
+				input_data.from_id,
 				(loaded_virtual_cnode_list[int(input_data.from_vc_id)] as HenVirtualCNode)
 			)
 
