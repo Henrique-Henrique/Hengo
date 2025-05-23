@@ -458,7 +458,6 @@ class ConnectionReturn:
 
 	func add(_update: bool = true) -> void:
 		# removing old inputs
-		old_inputs_connections.clear()
 		var remove_connection: Array = []
 		
 		for connection: InputConnectionData in to.input_connections:
@@ -468,6 +467,9 @@ class ConnectionReturn:
 			if connection.line_ref:
 				connection.line_ref.visible = false
 				connection.line_ref = null
+			
+			if connection.from_ref.line_ref:
+				connection.from_ref.line_ref.visible = false
 				connection.from_ref.line_ref = null
 			
 			remove_connection.append(connection)
@@ -485,24 +487,22 @@ class ConnectionReturn:
 			to.update()
 
 	func remove() -> void:
-		prints(to.input_connections, input_connection, old_inputs_connections)
-		# TODO BUG WHEN REMOVE
-
 		from.output_connections.erase(output_connection)
 		to.input_connections.erase(input_connection)
 
 		if input_connection.line_ref:
 			input_connection.line_ref.visible = false
 			input_connection.line_ref = null
+		
+		if output_connection.line_ref:
+			output_connection.line_ref.visible = false
 			output_connection.line_ref = null
-
 
 		for connection: InputConnectionData in old_inputs_connections:
 			to.input_connections.append(connection)
 			connection.from.output_connections.append(connection.from_ref)
 
 		old_inputs_connections.clear()
-
 		input_connection.input_ref.reset_input_value()
 
 		from.update()
@@ -724,6 +724,8 @@ func show() -> void:
 			for connection: InputConnectionData in input_connections:
 				if connection.from_ref.line_ref is HenConnectionLine:
 					connection.line_ref = connection.from_ref.line_ref
+				elif connection.line_ref is HenConnectionLine:
+					connection.from_ref.line_ref = connection.line_ref
 				else:
 					connection.line_ref = HenPool.get_line_from_pool(
 						connection.from.cnode_ref if connection.from.cnode_ref else null,
@@ -735,7 +737,6 @@ func show() -> void:
 					if not connection.line_ref:
 						continue
 				
-				
 				connection.line_ref.from_virtual_pos = connection.from_old_pos
 
 				
@@ -743,7 +744,6 @@ func show() -> void:
 				connection.line_ref.to_cnode = cnode_ref
 				connection.line_ref.output = input.get_node('%Connector')
 				connection.line_ref.to_pool_visible = true
-				connection.line_ref.visible = true
 
 				input.remove_in_prop()
 
@@ -757,6 +757,8 @@ func show() -> void:
 			for connection: OutputConnectionData in output_connections:
 				if connection.to_ref.line_ref is HenConnectionLine:
 					connection.line_ref = connection.to_ref.line_ref
+				elif connection.line_ref is HenConnectionLine:
+					connection.to_ref.line_ref = connection.line_ref
 				else:
 					connection.line_ref = HenPool.get_line_from_pool(
 						null,
@@ -775,8 +777,6 @@ func show() -> void:
 				connection.line_ref.from_cnode = cnode_ref
 				connection.line_ref.input = output.get_node('%Connector')
 				connection.line_ref.from_pool_visible = true
-				connection.line_ref.visible = true
-
 
 				connection.line_ref.conn_size = (output.get_node('%Connector') as TextureRect).size / 2
 				connection.line_ref.update_colors(connection.type, connection.to_type)

@@ -168,6 +168,11 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode == KEY_F8:
 				# just for test
 				HenRouter.change_route(HenGlobal.BASE_ROUTE)
+			elif event.keycode == KEY_F10:
+				for line: HenConnectionLine in HenGlobal.connection_line_pool:
+					if line.visible:
+						prints(line, line.visible, line.position, line.points.size())
+						line.visible = true
 			elif event.keycode == KEY_F9:
 				var old: HenVirtualCNode
 				for i in range(5000):
