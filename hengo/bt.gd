@@ -39,6 +39,7 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
-	pass
+	func enter() -> void:
+		print(null)
 
 

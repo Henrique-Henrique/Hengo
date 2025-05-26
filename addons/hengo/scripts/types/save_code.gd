@@ -1,6 +1,11 @@
 @tool
 class_name HenSaveCodeType
 
+const ERROR_TOKEN: Dictionary = {
+	type = HenVirtualCNode.SubType.INVALID,
+	use_self = false
+}
+
 
 class Variable:
 	var name: String
@@ -240,6 +245,12 @@ class CNode:
 				return output
 		return null
 
+	func input_has_connection(_id: int) -> bool:
+		for input_connection: InputConnection in input_connections:
+			if input_connection.to_id == _id:
+				return true
+
+		return false
 
 	func get_input_token(_id: int) -> Dictionary:
 		var connection: InputConnection
@@ -285,7 +296,7 @@ class CNode:
 				type = HenVirtualCNode.SubType.IN_PROP,
 				prop_name = input.name,
 				value = input.code_value,
-				use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF
+				use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF,
 			}
 
 			if HenGlobal.USE_MACRO_REF:
@@ -424,8 +435,13 @@ class CNode:
 					name = (ref as SignalData).name.to_snake_case()
 				})
 			HenVirtualCNode.SubType.GET_FROM_PROP:
+				if not input_has_connection(inputs[0].id):
+					HenCodeGeneration.flow_errors.append({})
+					return ERROR_TOKEN
+				
 				token.merge({
-					name = outputs[0].code_value.to_snake_case(),
+					ref = get_input_token(inputs[0].id),
+					name = outputs[0].name.to_snake_case(),
 				})
 
 		return token

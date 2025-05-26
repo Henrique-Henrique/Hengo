@@ -62,7 +62,8 @@ enum SubType {
 	MACRO_INPUT = 43,
 	MACRO_OUTPUT = 44,
 	OVERRIDE_VIRTUAL = 45,
-	FUNC_FROM = 46
+	FUNC_FROM = 46,
+	INVALID = 47,
 }
 
 var name: String

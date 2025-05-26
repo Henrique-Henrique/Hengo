@@ -6,6 +6,7 @@ static var _debug_counter: float = 1.
 static var _debug_symbols: Dictionary = {}
 static var flow_id: int = 0
 static var flows_refs: Dictionary = {}
+static var flow_errors: Array[Dictionary] = []
 
 static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 	if _params.size() > 0:
@@ -48,6 +49,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 
 	match _token.type as HenVirtualCNode.SubType:
+		HenVirtualCNode.SubType.INVALID:
+			return indent + 'HengoState.ERROR_PLACEHOLDER'
 		HenVirtualCNode.SubType.VAR:
 			return indent + prefix + _token.name
 		HenVirtualCNode.SubType.SET_VAR:
@@ -270,8 +273,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.MACRO:
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level)))
 		HenVirtualCNode.SubType.GET_FROM_PROP:
-			# TODO
-			return indent + '"{0}"'.format([_token.name])
+			return indent + parse_token_by_type(_token.ref) + '.' + _token.name
 		_:
 			return ''
 
@@ -280,6 +282,8 @@ static func get_code(_data: HenScriptData) -> String:
 	print(JSON.stringify(_data.get_save()))
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var code: String = ''
+
+	HenCodeGeneration.flow_errors.clear()
 
 	# generating macro references
 	for macro_data: Dictionary in _data.side_bar_list.macro_list:
@@ -930,7 +934,7 @@ static func regenerate() -> void:
 			if not FileAccess.file_exists(path):
 				push_warning('Error: resource not found to re-generate: ', str(id))
 				continue
-
+			
 			var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
 
 			refs.counter = res.node_counter
@@ -954,6 +958,7 @@ static func regenerate() -> void:
 
 				res.node_counter = refs.counter
 				var res_error: int = ResourceSaver.save(res)
+				
 				if res_error == OK:
 					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
 
@@ -980,23 +985,20 @@ static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 			_parse_vc_list(cnode.virtual_cnode_list, _refs)
 
 
-static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> bool:
-	var need_reload: bool = false
+static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void:
 	var output: Dictionary = _dict.outputs[0]
 	
 	var var_data: HenSideBar.VarData
 
 	for _var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
-		if _var_data.id == output.from_side_bar_id:
+		if _var_data.id == _dict.from_side_bar_id:
 			var_data = _var_data
 			break
 
 	if var_data:
-		if var_data.name != output.value or var_data.type != output.type:
-			output.code_value = var_data.name
-			output.value = var_data.name
+		if var_data.name != output.name or var_data.type != output.type:
+			output.name = var_data.name
 
-			# TODO - CHANGE TYPE
 			if output.type != var_data.type:
 				output.type = var_data.type
 
@@ -1005,12 +1007,10 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> bool
 					output_id = output.id,
 				})
 
-			need_reload = true
+			_refs.reload = true
 	else:
 		# TODO - deleted
 		pass
-	
-	return need_reload
 
 
 static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> void:

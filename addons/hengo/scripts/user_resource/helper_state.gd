@@ -5,6 +5,8 @@ var _ref
 var _transitions: Dictionary
 var _d_counter: float
 
+static var ERROR_PLACEHOLDER: Variant
+
 func _init(_p, _trans: Dictionary = {}) -> void:
 	_ref = _p
 	_transitions = _trans

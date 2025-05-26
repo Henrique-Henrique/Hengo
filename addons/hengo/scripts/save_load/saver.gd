@@ -66,6 +66,8 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName) -> void:
 	var code: String = HenCodeGeneration.get_code(_script_data)
 
+	push_warning('erro size: ', HenCodeGeneration.flow_errors)
+
 	var script: GDScript = GDScript.new()
 	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code
 

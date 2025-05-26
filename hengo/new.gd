@@ -10,6 +10,7 @@
 extends Node
 
  # Variables #
+var ataa = bool()
 
 func func_2880016253(a, g):
 

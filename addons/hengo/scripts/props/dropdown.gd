@@ -139,23 +139,6 @@ func _on_pressed() -> void:
 						})
 				
 			options = arr
-		'get_from_name':
-			options = []
-			for script_path: String in DirAccess.get_files_at('res://hengo/save'):
-				var id: int = int(script_path.get_basename())
-				if id == 0:
-					continue
-				
-				options.append({
-					name = ResourceUID.get_id_path(id).get_file().get_basename(),
-					id = id
-				})
-		'get_from':
-			var id: int = get_parent().owner.root.virtual_ref.inputs[0].get_from_id
-			var resource: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
-			options = []
-			for var_data: Dictionary in resource.side_bar_list.var_list:
-				options.append(var_data)
 			
 
 	HenGlobal.DROPDOWN_MENU.position = global_position
@@ -220,14 +203,6 @@ func _selected(_item: Dictionary) -> void:
 		'signal_list':
 			var item: HenSideBar.SignalData = custom_data.signal_ref
 			item.set_signal_params(_item.signal_class, _item.signal_name)
-		'get_from_name':
-			input_ref.get_from_id = _item.id
-			print(_item)
-		'get_from':
-			emit_signal('value_changed', text, _item.type)
-			input_ref.from_side_bar_id = _item.id
-			input_ref.update_changes.emit()
-			return
 
 	value_changed.emit(text)
 

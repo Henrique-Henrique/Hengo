@@ -25,7 +25,8 @@ enum FILTER_TYPE {
 	FUNC,
 	SIGNAL,
 	MACRO,
-	FUNC_FROM
+	FUNC_FROM,
+	VAR_FROM
 }
 
 var class_type: CLASS_TYPE = CLASS_TYPE.SELF
@@ -84,32 +85,6 @@ var native_list: Array = [
 					type = 'Variant',
 					sub_type = '@dropdown',
 					category = 'get_prop',
-				}
-			],
-			route = HenRouter.current_route
-		}
-
-	},
-	{
-		name = 'Get From',
-		data = {
-			name = 'Get From',
-			sub_type = HenVirtualCNode.SubType.GET_FROM_PROP,
-			inputs = [
-				{
-					name = '',
-					code_value = 'Variant',
-					type = 'Variant',
-					sub_type = '@dropdown',
-					category = 'get_from_name',
-				}
-			],
-			outputs = [
-				{
-					name = '',
-					type = 'Variant',
-					sub_type = '@dropdown',
-					category = 'get_from',
 				}
 			],
 			route = HenRouter.current_route
@@ -433,10 +408,40 @@ func _on_class_bt(_class: StringName, _button: Button, _type: CLASS_TYPE) -> voi
 
 				var path: StringName = HenLoader.get_data_path(id)
 				var res: HenScriptData = ResourceLoader.load(path)
+				var res_name: String = ResourceUID.get_id_path(id).get_file().get_basename()
+
+				for var_data: Dictionary in res.side_bar_list.var_list:
+					var dt: Dictionary = {
+						name = '({0}) {1}'.format([res_name, var_data.name]),
+						type = FILTER_TYPE.VAR_FROM,
+						data = {
+							name = 'Get From -> ' + res_name,
+							name_to_code = var_data.name,
+							from_side_bar_id = var_data.id,
+							sub_type = HenVirtualCNode.SubType.GET_FROM_PROP,
+							from_id = id,
+							inputs = [
+								{
+									name = 'from',
+									type = res.type,
+									is_ref = true,
+								}
+							],
+							outputs = [
+								{
+									name = var_data.name,
+									type = var_data.type
+								}
+							],
+							route = HenRouter.current_route,
+						}
+					}
+
+					api_list.append(dt)
 
 				for func_data: Dictionary in res.side_bar_list.func_list:
 					var dt: Dictionary = {
-						name = '({0}) {1}'.format([ResourceUID.get_id_path(id).get_file().get_basename(), func_data.name]),
+						name = '({0}) {1}'.format([res_name, func_data.name]),
 						type = FILTER_TYPE.FUNC_FROM,
 						data = {
 							name = func_data.name,
@@ -447,7 +452,7 @@ func _on_class_bt(_class: StringName, _button: Button, _type: CLASS_TYPE) -> voi
 							inputs = [
 								{
 									name = 'from',
-									type = 'Variant',
+									type = res.type,
 									is_ref = true,
 								}
 							] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
