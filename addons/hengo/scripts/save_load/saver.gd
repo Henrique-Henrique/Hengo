@@ -112,6 +112,7 @@ static func generate_thread(_generate: Callable, _callback: Callable) -> void:
 static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName, _first_time: bool = false) -> SaveData:
 	var code: String = HenCodeGeneration.get_code(_script_data)
 
+	# TODO
 	push_warning('Error List: ', HenCodeGeneration.flow_errors)
 
 	var script: GDScript = GDScript.new()

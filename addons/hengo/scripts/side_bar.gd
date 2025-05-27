@@ -32,6 +32,7 @@ const NAME = {
 	AddType.MACRO: 'Macro'
 }
 
+
 class SideBarList:
 	var type: AddType
 
@@ -63,7 +64,10 @@ class SideBarList:
 				macro_list.append(MacroData.new())
 			AddType.LOCAL_VAR:
 				if HenRouter.current_route.ref.get(&'local_vars') is Array:
-					(HenRouter.current_route.ref.local_vars as Array).append(VarData.new())
+					var var_data: VarData = VarData.new()
+					var_data.local_ref = HenRouter.current_route.ref
+					
+					(HenRouter.current_route.ref.local_vars as Array).append(var_data)
 
 		list_changed.emit()
 
@@ -139,7 +143,7 @@ class SideBarList:
 			var item: MacroData = MacroData.new(false)
 			item.load_save(item_data)
 			macro_list.append(item)
-		
+
 		# loading cnodes
 		for item in HenGlobal.SIDE_BAR_LIST_CACHE.values():
 			if item.get('cnode_list_to_load') is Array:
@@ -147,11 +151,31 @@ class SideBarList:
 
 		list_changed.emit()
 
+class DeleteItemCache:
+	var item: RefCounted
+	var arr: Array
+	var idx: int
+
+	func _init(_item: RefCounted, _arr: Array) -> void:
+		item = _item
+		arr = _arr
+
+	func remove() -> void:
+		idx = arr.find(item)
+		arr.erase(item)
+		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+	
+	func add() -> void:
+		arr.append(item)
+		HenUtils.move_array_item_to_idx(arr, item, idx)
+		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+
 
 class VarData:
 	var id: int = HenGlobal.get_new_node_counter()
 	var name: String = 'var ' + str(Time.get_ticks_usec()): set = on_change_name
 	var type: StringName = &'Variant': set = on_change_type
+	var local_ref: RefCounted
 	var export: bool = false
 
 	# used in inOut virtual cnode
@@ -182,8 +206,25 @@ class VarData:
 
 		HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
 	
+	func delete() -> void:
+		print(local_ref)
+		var item_cache: DeleteItemCache = DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.var_list if not local_ref else local_ref.get(&'local_vars'))
+
+		HenGlobal.history.create_action('Delete Variable')
+		HenGlobal.history.add_do_method(item_cache.remove)
+		HenGlobal.history.add_undo_reference(item_cache)
+		HenGlobal.history.add_undo_method(item_cache.add)
+		HenGlobal.history.commit_action()
+
+		HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+
+
 	func get_inspector_array_list(_is_local: bool = false) -> Array:
 		return [
+			HenInspector.InspectorItem.new({
+				type = &'@controls',
+				ref = self
+			}),
 			HenInspector.InspectorItem.new({
 				name = 'name',
 				type = &'String',
@@ -370,14 +411,30 @@ class FuncData:
 		
 		for item_data: Dictionary in _data.local_vars:
 			var item: VarData = VarData.new()
+			item.local_ref = self
 			item.load_save(item_data)
 			local_vars.append(item)
 
 		cnode_list_to_load = _data.virtual_cnode_list
 		# HenLoader._load_vc(_data.virtual_cnode_list, route)
 
+	func delete() -> void:
+		var item_cache: DeleteItemCache = DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.func_list)
+
+		HenGlobal.history.create_action('Delete Function')
+		HenGlobal.history.add_do_method(item_cache.remove)
+		HenGlobal.history.add_undo_reference(item_cache)
+		HenGlobal.history.add_undo_method(item_cache.add)
+		HenGlobal.history.commit_action()
+
+		HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+
 	func get_inspector_array_list() -> Array:
 		return [
+			HenInspector.InspectorItem.new({
+				type = &'@controls',
+				ref = self
+			}),
 			HenInspector.InspectorItem.new({
 				name = 'name',
 				type = &'String',
@@ -510,8 +567,23 @@ class SignalData:
 	func delete_param(_ref: Param) -> void:
 		_ref.deleted.emit(true)
 
+	func delete() -> void:
+		var item_cache: DeleteItemCache = DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.signal_list)
+
+		HenGlobal.history.create_action('Delete Signal')
+		HenGlobal.history.add_do_method(item_cache.remove)
+		HenGlobal.history.add_undo_reference(item_cache)
+		HenGlobal.history.add_undo_method(item_cache.add)
+		HenGlobal.history.commit_action()
+
+		HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+
 	func get_inspector_array_list() -> Array:
 		return [
+			HenInspector.InspectorItem.new({
+				type = &'@controls',
+				ref = self
+			}),
 			HenInspector.InspectorItem.new({
 				name = 'name',
 				type = &'String',
@@ -581,6 +653,7 @@ class SignalData:
 		
 		for item_data: Dictionary in _data.local_vars:
 			var item: VarData = VarData.new()
+			item.local_ref = self
 			item.load_save(item_data)
 			local_vars.append(item)
 
@@ -728,9 +801,24 @@ class MacroData:
 				ref = self
 		}
 
+	func delete() -> void:
+		var item_cache: DeleteItemCache = DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.macro_list)
+
+		HenGlobal.history.create_action('Delete Macro')
+		HenGlobal.history.add_do_method(item_cache.remove)
+		HenGlobal.history.add_undo_reference(item_cache)
+		HenGlobal.history.add_undo_method(item_cache.add)
+		HenGlobal.history.commit_action()
+
+		HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+
 
 	func get_inspector_array_list() -> Array:
 		return [
+			HenInspector.InspectorItem.new({
+				type = &'@controls',
+				ref = self
+			}),
 			HenInspector.InspectorItem.new({
 				name = 'name',
 				type = &'String',
@@ -811,6 +899,7 @@ class MacroData:
 		
 		for item_data: Dictionary in _data.local_vars:
 			var item: VarData = VarData.new()
+			item.local_ref = self
 			item.load_save(item_data)
 			local_vars.append(item)
 
@@ -959,13 +1048,13 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		item.set_text(0, item_data.name)
 		item.set_metadata(0, item_data)
 		# item.set_custom_bg_color(0, Color((BG_COLOR[_type] as Color), .1))
-		item.set_icon_modulate(0, BG_COLOR[_type])
 		item.set_custom_color(0, Color(1, 1, 1, .6))
 
 		match _type:
-			AddType.VAR:
+			AddType.VAR, AddType.LOCAL_VAR:
 				item.set_icon(0, HenAssets.get_icon_texture(item_data.type))
 			_:
+				item.set_icon_modulate(0, BG_COLOR[_type])
 				item.set_icon(0, ICONS[_type])
 
 

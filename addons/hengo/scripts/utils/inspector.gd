@@ -55,6 +55,11 @@ class InspectorItem:
 			max_size = _data.max_size
 		
 
+static func _on_delete(_ref: RefCounted) -> void:
+	if _ref.has_method('delete'):
+		_ref.delete()
+
+
 static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector:
 	var inspector: HenInspector = preload('res://addons/hengo/scenes/utils/inspector.tscn').instantiate() if not _inspector else _inspector
 	var container: VBoxContainer = inspector.get_node('%InspectorContainer')
@@ -81,6 +86,12 @@ static func start(_list: Array, _inspector: HenInspector = null) -> HenInspector
 			(array_container.get_node('%Delete') as Button).pressed.connect(item_data.prop_array_ref.on_item_delete.bind(item_data.ref))
 
 		match item_data.type:
+			'@controls':
+				var delete_button = Button.new()
+				delete_button.text = 'Delete'
+				delete_button.pressed.connect(_on_delete.bind(item_data.ref))
+
+				container.add_child(delete_button)
 			'String':
 				prop = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
 			'int':
