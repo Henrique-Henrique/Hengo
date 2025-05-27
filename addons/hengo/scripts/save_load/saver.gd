@@ -1,6 +1,44 @@
 @tool
 class_name HenSaver extends Node
 
+class SaveData:
+	var script_ref: GDScript
+	var path: StringName
+	var valid: bool = false
+	var saves: Array
+
+	func _init(_script: GDScript, _path: StringName, _valid: bool, _save_dep: Array = []) -> void:
+		script_ref = _script
+		path = _path
+		valid = _valid
+		saves = _save_dep
+	
+
+	func save_script() -> void:
+		if valid:
+			var err: int = ResourceSaver.save(script_ref, path)
+
+			if err == OK:
+				for save: SaveDependency in saves:
+					save.save()
+				
+				print('SAVED HENGO SCRIPT')
+
+
+class SaveDependency:
+	var data: HenScriptData
+	var script_data: SaveData
+
+	func _init(_data: HenScriptData, _script_data: SaveData) -> void:
+		data = _data
+		script_data = _script_data
+
+	func save() -> void:
+		var res_error: int = ResourceSaver.save(data)
+		
+		if res_error == OK:
+			script_data.save_script()
+
 
 static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
 	# check if save dierctory exists
@@ -49,24 +87,32 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 		printerr('Error saving script data.')
 		return
 
-
 	if not HenGlobal.FROM_REFERENCES.references.is_empty():
 		ResourceSaver.save(HenGlobal.FROM_REFERENCES)
 
 	# ---------------------------------------------------------------------------- #
 	if _generate_code:
-		generate(script_data, data_path, ResourceUID.get_id_path(HenGlobal.script_config.id))
+		var thread: Thread = Thread.new()
+		thread.start(generate_thread.bind(
+			generate.bind(script_data, data_path, ResourceUID.get_id_path(HenGlobal.script_config.id), true),
+			code_generated.bind(thread)
+		))
 
-		var start: int = Time.get_ticks_usec()
-		HenCodeGeneration.regenerate()
-		var end: int = Time.get_ticks_usec()
-		print('REGENERATE IN: ', (end - start) / 1000.)
+
+static func code_generated(_save_data: SaveData, _thread: Thread) -> void:
+	_save_data.save_script()
+	_thread.wait_to_finish.call_deferred()
+	print('FINISHED')
 
 
-static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName) -> void:
+static func generate_thread(_generate: Callable, _callback: Callable) -> void:
+	_callback.call_deferred(_generate.call())
+
+
+static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName, _first_time: bool = false) -> SaveData:
 	var code: String = HenCodeGeneration.get_code(_script_data)
 
-	push_warning('erro size: ', HenCodeGeneration.flow_errors)
+	push_warning('Error List: ', HenCodeGeneration.flow_errors)
 
 	var script: GDScript = GDScript.new()
 	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code
@@ -74,8 +120,11 @@ static func generate(_script_data: HenScriptData, _data_path: String, _path: Str
 	var reload_err: int = script.reload()
 
 	if reload_err == OK:
-		print('vii ', ResourceUID.get_id_path(HenGlobal.script_config.id))
-		var err: int = ResourceSaver.save(script, _path)
-
-		if err == OK:
-			print('SAVED HENGO SCRIPT')
+		return SaveData.new(
+			script,
+			_path,
+			true,
+			HenCodeGeneration.regenerate() if _first_time else []
+		)
+	
+	return SaveData.new(script, _path, false)

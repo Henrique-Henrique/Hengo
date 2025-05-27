@@ -924,7 +924,9 @@ class RegenerateRefs:
 		reload = _can
 
 
-static func regenerate() -> void:
+static func regenerate() -> Array:
+	var saves: Array = []
+
 	# generation dependencies
 	if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
 		for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
@@ -957,13 +959,14 @@ static func regenerate() -> void:
 						cnode.input_connections.erase(connection)
 
 				res.node_counter = refs.counter
-				var res_error: int = ResourceSaver.save(res)
-				
-				if res_error == OK:
-					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
 
-			print('vuu ', refs)
-			print('vu2 ', JSON.stringify(res.get_save()))
+				saves.append(HenSaver.SaveDependency.new(
+					res,
+					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
+				))
+
+	
+	return saves
 
 
 static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
