@@ -103,7 +103,8 @@ static var DROPDOWN_STATES: Array = []
 const TOOLTIP_TEXT = {
     MOUSE_ICON = '[img]res://addons/hengo/assets/icons/mouse.svg[/img]',
     RIGHT_MOUSE_INSPECT = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Right Click to Inspect[/i]',
-    DOUBLE_CLICK = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Double Click to Enter[/i]'
+    DOUBLE_CLICK = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Double Click to Enter[/i]',
+    CNODE_INVALID = "[color=#f55][b]Invalid CNode[/b][/color]\nThis node references a deleted or missing object\n[i]It will be ignored during code generation[/i]"
 }
 
 

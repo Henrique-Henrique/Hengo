@@ -47,10 +47,9 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 	if _token.use_self == true or (_token.has('category') and _token.get('category') == 'native'):
 		prefix = ''
 
-
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
-			return indent + 'HengoState.ERROR_PLACEHOLDER'
+			return indent + 'HengoState.INVALID_PLACEHOLDER'
 		HenVirtualCNode.SubType.VAR:
 			return indent + prefix + _token.name
 		HenVirtualCNode.SubType.SET_VAR:
@@ -429,8 +428,11 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 	cn.name = _cnode.name
 	cn.sub_type = _cnode.sub_type
 	cn.type = _cnode.type
-	
+
 	_refs.cnode_ref[cn.id] = cn
+
+	if _cnode.has('invalid'):
+		cn.invalid = _cnode.invalid
 
 	if _cnode.has(&'ref_id'):
 		cn.ref = _refs.side_bar_item_ref[_cnode.ref_id]
@@ -1012,8 +1014,9 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void
 
 			_refs.reload = true
 	else:
-		# TODO - deleted
-		pass
+		if not _dict.has('invalid') or _dict.has('invalid') and not _dict.invalid:
+			_dict.invalid = true
+			_refs.reload = true
 
 
 static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> void:
@@ -1034,8 +1037,9 @@ static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> voi
 		_check_func_inouts(false, func_data, _dict, output_size, real_output_size, _refs)
 
 	else:
-		#TODO - deleted
-		pass
+		if not _dict.has('invalid') or _dict.has('invalid') and not _dict.invalid:
+			_dict.invalid = true
+			_refs.reload = true
 
 
 static func _reset_inout_dict_value(_dict: Dictionary) -> void:
@@ -1175,5 +1179,3 @@ static func _check_func_inouts(
 		
 		for inout: Dictionary in remove:
 			arr.erase(inout)
-	
-	print('vvv NEW -> ', arr)

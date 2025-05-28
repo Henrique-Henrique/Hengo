@@ -73,7 +73,6 @@ class SideBarList:
 
 	func change(_type: AddType) -> void:
 		type = _type
-		# list_changed.emit()
 
 	func get_list_to_draw() -> Array:
 		match type:
@@ -163,11 +162,13 @@ class DeleteItemCache:
 	func remove() -> void:
 		idx = arr.find(item)
 		arr.erase(item)
+		item.emit_signal('deleted', true)
 		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
 	
 	func add() -> void:
 		arr.append(item)
 		HenUtils.move_array_item_to_idx(arr, item, idx)
+		item.emit_signal('deleted', false)
 		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
 
 
@@ -180,6 +181,7 @@ class VarData:
 
 	# used in inOut virtual cnode
 	signal data_changed(_property: String, _value)
+	signal deleted(_deleted: bool)
 
 	func on_change_type(_type: StringName) -> void:
 		type = _type
@@ -302,6 +304,7 @@ class Param:
 class FuncData:
 	signal name_changed
 	signal in_out_added(_is_input: bool, _data: Dictionary)
+	signal deleted(_deleted: bool)
 
 	var id: int = HenGlobal.get_new_node_counter()
 	var name: String = 'func ' + str(Time.get_ticks_usec()): set = on_change_name
@@ -468,6 +471,7 @@ class SignalData:
 	signal name_changed
 	signal in_out_added(_is_input: bool, _data: Dictionary)
 	signal in_out_reseted(_new_inputs: Array[Dictionary])
+	signal deleted(_deleted: bool)
 
 	var id: int = HenGlobal.get_new_node_counter()
 	var name: String = 'signal ' + str(Time.get_ticks_usec())
@@ -665,6 +669,7 @@ class MacroData:
 	signal name_changed
 	signal flow_added(_is_input: bool, _data: Dictionary)
 	signal in_out_added(_is_input: bool, _data: Dictionary)
+	signal deleted(_deleted: bool)
 
 	var id: int = HenGlobal.get_new_node_counter()
 	var name: String = 'macro ' + str(Time.get_ticks_usec()): set = on_change_name

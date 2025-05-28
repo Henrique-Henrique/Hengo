@@ -160,11 +160,14 @@ func _on_gui(_event: InputEvent) -> void:
 			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 				i.moving = false
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
-		match virtual_ref.type:
-			HenVirtualCNode.Type.STATE:
-				HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
-			_:
-				HenGlobal.TOOLTIP.close()
+		if virtual_ref.invalid:
+			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
+		else:
+			match virtual_ref.type:
+				HenVirtualCNode.Type.STATE:
+					HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
+				_:
+					HenGlobal.TOOLTIP.close()
 
 
 func _on_state_inspector(_name: String, _value: Variant, _ref: Object) -> void:

@@ -1,7 +1,7 @@
 @tool
 class_name HenSaveCodeType
 
-const ERROR_TOKEN: Dictionary = {
+const INVALID_TOKEN: Dictionary = {
 	type = HenVirtualCNode.SubType.INVALID,
 	use_self = false
 }
@@ -122,7 +122,7 @@ class CNode:
 	var input_connections: Array[InputConnection]
 	var route_type: HenRouter.ROUTE_TYPE
 	var ref: Variant
-
+	var invalid: bool = false
 
 	func get_flow_tokens(_input_idx: int, _token_list: Array = []) -> Array:
 		var stack: Array = []
@@ -349,6 +349,9 @@ class CNode:
 		if category:
 			token.category = category
 
+		if invalid:
+			return INVALID_TOKEN
+
 		match sub_type:
 			HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 				token.merge({
@@ -437,7 +440,7 @@ class CNode:
 			HenVirtualCNode.SubType.GET_FROM_PROP:
 				if not input_has_connection(inputs[0].id):
 					HenCodeGeneration.flow_errors.append({})
-					return ERROR_TOKEN
+					return INVALID_TOKEN
 				
 				token.merge({
 					ref = get_input_token(inputs[0].id),

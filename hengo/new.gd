@@ -12,11 +12,6 @@ extends Node
  # Variables #
 var gt_5 = String()
 
-func func_2880016253(a, g):
-
-	return null
-
-
 
 var _STATE_CONTROLLER = HengoStateController.new()
 

@@ -87,6 +87,7 @@ var ref: Object
 var is_deleted: bool = false
 var from_side_bar_id: int = -1
 var from_id: int = -1
+var invalid: bool = false
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -903,7 +904,10 @@ func show() -> void:
 			cnode.pivot_offset = cnode.size / 2
 			size = cnode.size
 
-			cnode.modulate = Color.WHITE
+			if invalid:
+				cnode.modulate = Color(1, 1, 1, .3)
+			else:
+				cnode.modulate = Color.WHITE
 
 			# drawing the connections	
 			await RenderingServer.frame_post_draw
@@ -925,7 +929,6 @@ func show() -> void:
 					for from_connection: FlowConnectionData in connection.from_connections:
 						if from_connection.line_ref:
 							from_connection.line_ref.update_line()
-			
 
 			break
 
@@ -1033,6 +1036,9 @@ func get_save() -> Dictionary:
 		output_connections = [],
 		flow_connections = []
 	}
+
+	if invalid:
+		data.invalid = invalid
 
 	if ref_id > 0:
 		data.ref_id = ref_id
@@ -1275,6 +1281,11 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 	return in_out
 
 
+func _on_side_bar_deleted(_deleted: bool) -> void:
+	invalid = _deleted
+	update()
+
+
 func _on_in_out_data_changed() -> void:
 	update()
 
@@ -1410,6 +1421,9 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	if _config.has('ref_id'):
 		_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
 
+	if _config.has('invalid'):
+		v_cnode.invalid = _config.invalid
+
 	if _config.has('ref'):
 		# ref is required to have id to save and load work
 		v_cnode.ref = _config.ref
@@ -1420,6 +1434,11 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 		if _config.ref.has_signal('in_out_added'):
 			_config.ref.in_out_added.connect(v_cnode._on_in_out_added)
+	
+
+		if _config.ref.has_signal('deleted'):
+			_config.ref.deleted.connect(v_cnode._on_side_bar_deleted)
+
 
 		if _config.ref.has_signal('in_out_reseted'):
 			_config.ref.in_out_reseted.connect(v_cnode._on_in_out_reset)
