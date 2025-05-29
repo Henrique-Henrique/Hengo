@@ -382,7 +382,7 @@ static func get_code(_data: HenScriptData) -> String:
 
 	# generatin flow connection references
 	for connection: HenSaveCodeType.FlowConnection in refs.flow_connections:
-		var cnode: HenSaveCodeType.CNode = refs.cnode_ref[connection.to_id]
+		var cnode: HenSaveCodeType.CNode = refs.cnode_ref[connection.to_vc_id]
 		connection.to = cnode
 		connection.from.flow_connections.append(connection)
 
@@ -448,9 +448,12 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 			var fc: HenSaveCodeType.FlowConnection = HenSaveCodeType.FlowConnection.new()
 
 			fc.from = cn
-			fc.idx = connection.idx
-			fc.to_idx = connection.to_idx
+
+			fc.id = connection.id
+			fc.from_id = connection.from_id
 			fc.to_id = connection.to_id
+			fc.to_vc_id = connection.to_vc_id
+
 
 			_refs.flow_connections.append(fc)
 
@@ -817,7 +820,7 @@ static func _parse_functions(_refs: HenSaveCodeType.References) -> String:
 
 		if not func_data.input_ref.flow_connections.is_empty() and func_data.input_ref.flow_connections[0].to:
 			var func_tokens: Array = func_data.input_ref.flow_connections[0].to.get_flow_tokens(
-				func_data.input_ref.flow_connections[0].to_idx
+				func_data.input_ref.flow_connections[0].to_id
 			)
 			var func_block: Array = []
 
@@ -868,7 +871,7 @@ static func _parse_signals(_refs: HenSaveCodeType.References) -> String:
 
 		if not signal_item.signal_enter.flow_connections.is_empty() and signal_item.signal_enter.flow_connections[0].to:
 			var signal_tokens: Array = signal_item.signal_enter.flow_connections[0].to.get_flow_tokens(
-				signal_item.signal_enter.flow_connections[0].to_idx
+				signal_item.signal_enter.flow_connections[0].to_id
 			)
 			var signal_block: Array = []
 
@@ -893,7 +896,7 @@ static func _parse_virtual_cnode(_cnode_list: Array[HenSaveCodeType.CNode]) -> D
 		var from_flow: HenSaveCodeType.FlowConnection = cnode.flow_connections[0]
 
 		if from_flow.to:
-			var token_list = from_flow.to.get_flow_tokens(from_flow.to_idx)
+			var token_list = from_flow.to.get_flow_tokens(from_flow.to_id)
 
 			data[cnode_name] = {
 				tokens = token_list,

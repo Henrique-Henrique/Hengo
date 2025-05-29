@@ -4,7 +4,7 @@ class_name HenFlowConnector extends TextureRect
 @export var root: HenCnode
 @export var type: String = 'cnode'
 
-var idx: int = 0
+var id: int = 0
 var connections_lines: Array = []
 var is_connected: bool = false
 
@@ -45,7 +45,7 @@ func _on_gui(_event: InputEvent) -> void:
 		else:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				if HenGlobal.can_make_flow_connection and HenGlobal.flow_connection_to_data.is_empty():
-					var connection: HenVirtualCNode.FlowConnectionReturn = root.virtual_ref.get_flow_connection(idx)
+					var connection: HenVirtualCNode.FlowConnectionReturn = root.virtual_ref.get_flow_connection(id)
 
 					if connection:
 						HenGlobal.history.create_action('Remove Flow Connection')
@@ -68,17 +68,6 @@ func _on_gui(_event: InputEvent) -> void:
 						HenGlobal.history.add_undo_method(connection.remove)
 						HenGlobal.history.commit_action()
 
-				# region effects
-				# if not HenGlobal.flow_connection_to_data.is_empty():
-				# 	HenGlobal.flow_connection_to_data.to_cnode.scale = Vector2.ONE
-				# 	HenGlobal.flow_connection_to_data.to_cnode.modulate = Color.WHITE
-				# 	HenGlobal.flow_connection_to_data.to_cnode.get_node('%Border').visible = false
-
-
-				# root.scale = Vector2.ONE
-				# root.modulate = Color.WHITE
-				# root.get_node('%Border').visible = false
-				# endregion
 
 				HenGlobal.flow_connection_to_data = {}
 				HenGlobal.can_make_flow_connection = false
@@ -90,8 +79,8 @@ func _on_gui(_event: InputEvent) -> void:
 
 func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.FlowConnectionReturn:
 	return root.virtual_ref.add_flow_connection(
-		idx,
-		_config.to_idx,
+		id,
+		_config.to_id,
 		_config.to_cnode.virtual_ref
 	)
 

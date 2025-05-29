@@ -72,11 +72,12 @@ class Inout:
 
 
 class FlowConnection:
-	var idx: int
-	var to_idx: int
+	var id: int
+	var from_id: int
 	var to_id: int
 	var from: CNode
 	var to: CNode
+	var to_vc_id: int
 
 
 class InputConnection:
@@ -124,16 +125,16 @@ class CNode:
 	var ref: Variant
 	var invalid: bool = false
 
-	func get_flow_tokens(_input_idx: int, _token_list: Array = []) -> Array:
+	func get_flow_tokens(_input_id: int, _token_list: Array = []) -> Array:
 		var stack: Array = []
 		var token_list: Array = _token_list
 
-		stack.append({node = self, idx = _input_idx})
+		stack.append({node = self, id = _input_id})
 
 		while not stack.is_empty():
 			var current: Dictionary = stack.pop_back()
 			var vc: CNode = current.node
-			var idx: int = current.idx
+			var _id: int = current.id
 
 			if current.has('flow_id'):
 				token_list = HenCodeGeneration.flows_refs[current.flow_id]
@@ -144,34 +145,43 @@ class CNode:
 				HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 					token_list.append(vc.get_for_token(stack))
 				HenVirtualCNode.SubType.MACRO:
-					token_list.append(vc.get_macro_token(idx))
+					token_list.append(vc.get_macro_token(_id))
 				HenVirtualCNode.SubType.MACRO_OUTPUT:
 					if HenGlobal.USE_MACRO_REF:
-						var flow: FlowConnection = HenGlobal.MACRO_REF.flow_connections[idx] if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
+						var flow: FlowConnection = HenGlobal.MACRO_REF.get_flow(_id) if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
 
 						if flow and flow.to:
-							stack.append({node = flow.to, idx = flow.to_idx})
+							stack.append({node = flow.to, id = flow.to_id})
 						
 						HenGlobal.USE_MACRO_REF = false
 				_:
 					token_list.append(vc.get_token())
 
 					if not vc.flow_connections.is_empty() and vc.flow_connections[0].to:
-						stack.append({node = vc.flow_connections[0].to, idx = vc.flow_connections[0].to_idx})
+						stack.append({node = vc.flow_connections[0].to, id = vc.flow_connections[0].to_id})
 
 		return _token_list
-	
 
-	func get_macro_token(_input_idx: int) -> Dictionary:
+	func get_flow(_id: int) -> FlowConnection:
+		for flow: FlowConnection in flow_connections:
+			if flow.id == _id:
+				return flow
+		
+		return null
+
+
+	func get_macro_token(_flow_id: int) -> Dictionary:
 		var flow_tokens: Array
-		var input_flow: FlowConnection = ref.input_ref.flow_connections[_input_idx]
+		var input_flow: FlowConnection = ref.input_ref.get_flow(_flow_id)
 
-		if input_flow.to:
+		prints('ddd ', ref.input_ref.flow_connections.map(func(x): return x.id))
+
+		if input_flow and input_flow.to:
 			HenGlobal.USE_MACRO_REF = true
 			HenGlobal.MACRO_REF = self
 			HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
 			HenGlobal.USE_MACRO_USE_SELF = true
-			flow_tokens = input_flow.to.get_flow_tokens(input_flow.to_idx)
+			flow_tokens = input_flow.to.get_flow_tokens(input_flow.to_id)
 			HenGlobal.USE_MACRO_USE_SELF = false
 
 		return {
@@ -189,13 +199,13 @@ class CNode:
 		HenCodeGeneration.flows_refs[false_flow_id] = []
 
 		# this causing stack overflow when using a lot of if cnodes
-		if not flow_connections.is_empty() and flow_connections[0].to:
+		if not flow_connections.is_empty():
 			var flow: FlowConnection = flow_connections[0]
-			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = true_flow_id})
+			_stack.append({node = flow.to, id = flow.to_id, flow_id = true_flow_id})
 			
-		if not flow_connections.is_empty() and flow_connections[1].to:
+		if flow_connections.size() == 2:
 			var flow: FlowConnection = flow_connections[1]
-			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = false_flow_id})
+			_stack.append({node = flow.to, id = flow.to_id, flow_id = false_flow_id})
 
 		return {
 			type = HenVirtualCNode.SubType.IF,
@@ -213,13 +223,13 @@ class CNode:
 		HenCodeGeneration.flows_refs[body_flow_id] = []
 		HenCodeGeneration.flows_refs[then_flow_id] = []
 
-		if not flow_connections.is_empty() and flow_connections[0].to:
+		if not flow_connections.is_empty():
 			var flow: FlowConnection = flow_connections[0]
-			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = body_flow_id})
+			_stack.append({node = flow.to, id = flow.to_id, flow_id = body_flow_id})
 			
-		if not flow_connections.is_empty() and flow_connections[1].to:
+		if flow_connections.size() == 2:
 			var flow: FlowConnection = flow_connections[1]
-			_stack.append({node = flow.to, idx = flow.to_idx, flow_id = then_flow_id})
+			_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
 
 		return {
 			type = sub_type,

@@ -49,13 +49,13 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		print(virtual_ref.input_connections)
+		print(virtual_ref.flow_connections)
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection:
 		HenGlobal.flow_connection_to_data = {
 			to_cnode = self,
-			to_idx = 0
+			to_id = virtual_ref.from_flow_connections[0].id
 		}
 	
 	# animations

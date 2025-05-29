@@ -124,7 +124,10 @@ static func load(_path: StringName) -> void:
 
 		# adding flow connection
 		for flow_data: Dictionary in flow_connection_list:
-			(flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.idx, flow_data.to_idx, loaded_virtual_cnode_list[int(flow_data.to_id)]).add()
+			var connection = (flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.from_id, flow_data.to_id, loaded_virtual_cnode_list[int(flow_data.to_vc_id)])
+		
+			if connection:
+				connection.add()
 	else:
 		# setting script type
 		var script: GDScript = load(_path)
@@ -198,7 +201,7 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
 		if _config.has('from_vc_id'):
 			from_flow_list.append({
 				from = vc,
-				to_idx = int(_config.from_vc_id)
+				to_id = _config.from_vc_id
 			})
 
 		if _config.has('input_connections'):
@@ -210,10 +213,10 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
 			var idx: int = 0
 			for flow_connection: Dictionary in _config.flow_connections:
 				flow_connection_list.append({
-					idx = flow_connection.idx,
 					from = vc,
-					to_id = int(flow_connection.to_id),
-					to_idx = flow_connection.to_idx
+					from_id = flow_connection.from_id,
+					to_id = flow_connection.to_id,
+					to_vc_id = flow_connection.to_vc_id
 				})
 				idx += 1
 		

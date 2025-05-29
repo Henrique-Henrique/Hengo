@@ -696,7 +696,7 @@ class MacroData:
 			data_changed.emit('name', _name)
 
 		func get_data() -> Dictionary:
-			return {name = name, ref = self}
+			return {id = id, name = name, ref = self}
 		
 		func get_save() -> Dictionary:
 			return {

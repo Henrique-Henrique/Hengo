@@ -555,7 +555,7 @@ func _on_select() -> void:
 	if cnode_config.has('from_flow_connector'):
 		var connector: HenFlowConnector = cnode_config.from_flow_connector
 
-		connector.root.virtual_ref.add_flow_connection(cnode_config.from_flow_connector.idx, 0, vc_return.v_cnode).add()
+		connector.root.virtual_ref.add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.from_flow_connections[0].id, vc_return.v_cnode).add()
 
 	HenGlobal.history.commit_action()
 	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()

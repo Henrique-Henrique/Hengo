@@ -40,6 +40,6 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print("okok")
+		_ref.set_centered(false)
 
 
