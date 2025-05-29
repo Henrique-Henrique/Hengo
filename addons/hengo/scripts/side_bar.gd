@@ -209,7 +209,6 @@ class VarData:
 		HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
 	
 	func delete() -> void:
-		print(local_ref)
 		var item_cache: DeleteItemCache = DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.var_list if not local_ref else local_ref.get(&'local_vars'))
 
 		HenGlobal.history.create_action('Delete Variable')
@@ -1017,8 +1016,6 @@ func _on_list_changed() -> void:
 
 	if not HenRouter.current_route.is_empty() and HenRouter.current_route.ref.get(&'local_vars') is Array:
 		_add_categories(root, 'Local Variables', AddType.LOCAL_VAR)
-
-	print(list.get_scroll())
 
 
 func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:

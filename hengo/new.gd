@@ -10,7 +10,6 @@
 extends Node
 
  # Variables #
-var gt_5 = String()
 
 
 var _STATE_CONTROLLER = HengoStateController.new()

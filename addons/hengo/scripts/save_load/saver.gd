@@ -1,6 +1,9 @@
 @tool
 class_name HenSaver extends Node
 
+const LOAD_ICON = preload('res://addons/hengo/assets/icons/loader-circle.svg')
+const BUILD_ICON = preload('res://addons/hengo/assets/icons/menu/compile.svg')
+
 class SaveData:
 	var script_ref: GDScript
 	var path: StringName
@@ -41,6 +44,9 @@ class SaveDependency:
 
 
 static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
+	start_load()
+	show_msg()
+
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
@@ -98,11 +104,55 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 			code_generated.bind(thread)
 		))
 
+static func show_msg() -> void:
+	var msg: RichTextLabel = (HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg') as RichTextLabel)
+
+	msg.text = ''
+
+	if msg.has_meta(&'tween'):
+		(msg.get_meta(&'tween') as Tween).kill()
+	
+	msg.modulate = Color.WHITE
+	msg.visible = true
+
+
+static func hide_msg() -> void:
+	var tween: Tween = HenGlobal.CAM.get_tree().create_tween()
+	var msg: RichTextLabel = HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg')
+
+	msg.set_meta(&'tween', tween)
+	tween.tween_property(msg, 'modulate', Color.TRANSPARENT, 10.)
+	tween.finished.connect(func(): msg.visible = false)
+
 
 static func code_generated(_save_data: SaveData, _thread: Thread) -> void:
 	_save_data.save_script()
 	_thread.wait_to_finish.call_deferred()
-	print('FINISHED')
+	hide_msg()
+	generate_msgs.call_deferred('Generated')
+	reset_load()
+
+
+static func start_load() -> void:
+	var container: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
+	
+	container.icon.texture = LOAD_ICON
+	container.icon.pivot_offset = container.icon.size / 2
+	container.set_process(true)
+	container.icon.modulate = Color.SKY_BLUE
+
+
+static func reset_load() -> void:
+	var container: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
+	
+	container.icon.texture = BUILD_ICON
+	container.set_process(false)
+	container.icon.rotation = 0
+	container.icon.modulate = Color.WHITE
+
+
+static func generate_msgs(_text: String) -> void:
+	(HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg') as RichTextLabel).text += _text + '\n'
 
 
 static func generate_thread(_generate: Callable, _callback: Callable) -> void:
@@ -110,10 +160,13 @@ static func generate_thread(_generate: Callable, _callback: Callable) -> void:
 
 
 static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName, _first_time: bool = false) -> SaveData:
+	generate_msgs.call_deferred('Generating [b]{0}[/b]'.format([_path]))
 	var code: String = HenCodeGeneration.get_code(_script_data)
 
 	# TODO
-	push_warning('Error List: ', HenCodeGeneration.flow_errors)
+	if HenCodeGeneration.flow_errors.size() > 0:
+		# TODO errors msg
+		generate_msgs.call_deferred('[b][color=#c91a1a]Errors found: {0}[/color][/b]'.format([HenCodeGeneration.flow_errors.size()]))
 
 	var script: GDScript = GDScript.new()
 	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code

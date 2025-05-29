@@ -11,15 +11,6 @@ extends Sprite2D
 
  # Variables #
 
-func func_84991789953():
-
-	pass
-
-
-func _on_signal_85158631925_signal_():
-
-	pass
-
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -49,8 +40,6 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print("caca")
-		HengoState.INVALID_PLACEHOLDER
-		_ref.func_84991789953()
+		print("okok")
 
 

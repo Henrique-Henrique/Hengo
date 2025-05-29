@@ -160,6 +160,9 @@ static func load(_path: StringName) -> void:
 
 	var end: int = Time.get_ticks_usec()
 
+	# hide msg
+	(HenGlobal.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible = false
+
 	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
 
 

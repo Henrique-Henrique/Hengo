@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=48 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://bngwf5vpsmtgo" path="res://addons/hengo/assets/images/grid_cnode_out.png" id="12_7rfh3"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
 [ext_resource type="Texture2D" uid="uid://ctlaqfkdcnini" path="res://addons/hengo/assets/images/grid_cnode.png" id="13_w5ssd"]
+[ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
@@ -50,7 +51,7 @@ content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0.431373, 0.564706, 0.905882, 0.2)
+bg_color = Color(0, 0, 0, 0.290196)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -71,11 +72,19 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ny40n"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ji2ve"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8emys"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w813u"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hg3xi"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 1973)
-shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1152, 648)
+shader_parameter/offset = Vector2(1204.7, 382.362)
+shader_parameter/zoom_factor = 0.200013
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
@@ -89,6 +98,17 @@ bg_color = Color(1, 1, 1, 0.0862745)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
 content_margin_right = 8.0
 content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xresw"]
+bg_color = Color(0.123256, 0.126406, 0.129557, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x5h56"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xresw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vu20g"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r5155"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
 content_margin_left = 4.0
@@ -140,6 +160,7 @@ size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI"]
+z_index = 100
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -178,6 +199,7 @@ layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
 
 [node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
@@ -198,6 +220,40 @@ layout_mode = 2
 texture = ExtResource("11_xut0q")
 expand_mode = 2
 stretch_mode = 3
+
+[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+
+[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/MarginContainer/Control"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 15.0
+offset_bottom = 95.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_fonts/normal_font = ExtResource("20_y63ss")
+theme_override_fonts/italics_font = ExtResource("16_xresw")
+theme_override_fonts/bold_font = ExtResource("23_tlngq")
+theme_override_font_sizes/normal_font_size = 16
+theme_override_styles/fill = SubResource("StyleBoxEmpty_ji2ve")
+theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
+bbcode_enabled = true
+fit_content = true
+autowrap_mode = 0
+shortcut_keys_enabled = false
+horizontal_alignment = 2
+justification_flags = 0
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
 
 [node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]
 process_mode = 4
@@ -303,6 +359,49 @@ grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
+
+[node name="ScriptMsgContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI"]
+unique_name_in_owner = true
+process_mode = 4
+z_index = 99
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_xresw")
+
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/CNodeUI/ScriptMsgContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ScriptMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/ScriptMsgContainer/CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("20_y63ss")
+theme_override_fonts/italics_font = ExtResource("16_xresw")
+theme_override_fonts/bold_font = ExtResource("23_tlngq")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_x5h56")
+theme_override_styles/background = SubResource("StyleBoxEmpty_xresw")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_vu20g")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_r5155")
+bbcode_enabled = true
+text = "[center]
+[font_size=24][b]Hengo Visual Script[/b][/font_size]
+[font_size=16][color=#cccccc]
+Please open the script to begin editing.
+[/color][/font_size]
+[font_size=13][i][color=#888888]Tip: You can open the script using the button at the top right to access the FileSystem,  
+or via \"Select Resource\" (Ctrl + P), or directly from Scene dock.[/color][/i][/font_size]
+[/center]"
+fit_content = true
+autowrap_mode = 0
+shortcut_keys_enabled = false
+justification_flags = 0
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
 
 [node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
 visible = false
