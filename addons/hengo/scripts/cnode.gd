@@ -142,6 +142,7 @@ func _on_gui(_event: InputEvent) -> void:
 										max_size = 5,
 										value = virtual_ref.flow_connections,
 										item_creation_callback = virtual_ref.create_flow_connection,
+										item_delete_callback = virtual_ref._on_delete_flow,
 										field = {name = 'name', type = 'String'}
 									}),
 								])

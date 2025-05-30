@@ -307,7 +307,7 @@ class FlowConnection extends Object:
 		moved.emit(self is FromFlowConnection, _pos, self)
 
 	func _on_delete() -> void:
-		deleted.emit(self is FromFlowConnection, self)
+		deleted.emit(self is FlowConnectionData, self)
 	
 	func on_data_changed(_name: String, _value) -> void:
 		set(_name, _value)
@@ -1418,18 +1418,43 @@ func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: FlowConnection) -> vo
 
 func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
 	if _is_input:
-		from_flow_connections.erase(_flow_ref)
+		var flow: FlowConnectionData = _flow_ref as FlowConnectionData
+		flow_connections.erase(flow)
+
+		if flow.line_ref:
+			flow.line_ref.visible = false
+
+		flow.line_ref = null
+		flow.to_from_ref.from_connections.erase(flow)
 	else:
-		flow_connections.erase(_flow_ref)
+		var flow: FromFlowConnection = _flow_ref as FromFlowConnection
+		
+		for connection: FlowConnectionData in flow.from_connections:
+			if connection.line_ref:
+				connection.line_ref.visible = false
+			
+			connection.line_ref = null
+			connection.from.flow_connections.erase(connection)
+		
+		from_flow_connections.erase(flow)
+
+	update()
+
+
+func _on_delete_flow(_ref: FlowConnectionData) -> void:
+	remove_flow_connection(_ref)
 	
 	update()
 
 
-func remove_flow_connection(_flow_ref: FlowConnection) -> void:
-	var flow_remove: Array = []
-	var from_flow_remove: Array = []
+func remove_flow_connection(_flow_ref: FlowConnectionData) -> void:
+	flow_connections.erase(_flow_ref)
 
-	# TODO
+	if _flow_ref.line_ref:
+		_flow_ref.line_ref.visible = false
+
+	_flow_ref.line_ref = null
+	_flow_ref.to_from_ref.from_connections.erase(_flow_ref)
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
