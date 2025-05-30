@@ -174,8 +174,6 @@ class CNode:
 		var flow_tokens: Array
 		var input_flow: FlowConnection = ref.input_ref.get_flow(_flow_id)
 
-		prints('ddd ', ref.input_ref.flow_connections.map(func(x): return x.id))
-
 		if input_flow and input_flow.to:
 			HenGlobal.USE_MACRO_REF = true
 			HenGlobal.MACRO_REF = self
@@ -198,14 +196,12 @@ class CNode:
 		HenCodeGeneration.flows_refs[true_flow_id] = []
 		HenCodeGeneration.flows_refs[false_flow_id] = []
 
-		# this causing stack overflow when using a lot of if cnodes
-		if not flow_connections.is_empty():
-			var flow: FlowConnection = flow_connections[0]
-			_stack.append({node = flow.to, id = flow.to_id, flow_id = true_flow_id})
-			
-		if flow_connections.size() == 2:
-			var flow: FlowConnection = flow_connections[1]
-			_stack.append({node = flow.to, id = flow.to_id, flow_id = false_flow_id})
+		for flow: FlowConnection in flow_connections:
+			match flow.id:
+				0:
+					_stack.append({node = flow.to, id = flow.to_id, flow_id = true_flow_id})
+				1:
+					_stack.append({node = flow.to, id = flow.to_id, flow_id = false_flow_id})
 
 		return {
 			type = HenVirtualCNode.SubType.IF,
@@ -223,13 +219,12 @@ class CNode:
 		HenCodeGeneration.flows_refs[body_flow_id] = []
 		HenCodeGeneration.flows_refs[then_flow_id] = []
 
-		if not flow_connections.is_empty():
-			var flow: FlowConnection = flow_connections[0]
-			_stack.append({node = flow.to, id = flow.to_id, flow_id = body_flow_id})
-			
-		if flow_connections.size() == 2:
-			var flow: FlowConnection = flow_connections[1]
-			_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
+		for flow: FlowConnection in flow_connections:
+			match flow.id:
+				0:
+					_stack.append({node = flow.to, id = flow.to_id, flow_id = body_flow_id})
+				1:
+					_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
 
 		return {
 			type = sub_type,
