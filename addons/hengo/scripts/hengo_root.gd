@@ -17,6 +17,10 @@ var can_select: bool = false
 func _ready() -> void:
 	if EditorInterface.get_edited_scene_root() == self:
 		set_process(false)
+		set_physics_process(false)
+		set_process_input(false)
+		set_process_unhandled_input(false)
+		set_process_unhandled_key_input(false)
 		return
 
 	set_process(true)
@@ -176,21 +180,7 @@ func _input(event: InputEvent) -> void:
 						line.visible = true
 			elif event.keycode == KEY_F9:
 				var old: HenVirtualCNode
-				for i in range(5000):
-					var cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
-						name = 'IF',
-						type = HenVirtualCNode.Type.IF,
-						sub_type = HenVirtualCNode.SubType.IF,
-						route = HenRouter.current_route,
-						inputs = [
-							{
-								name = 'condition',
-								type = 'bool'
-							},
-						],
-						position = Vector2(100, 600 * i)
-					})
-
+				for i in range(1000):
 					var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
 						name = 'print',
 						sub_type = HenVirtualCNode.SubType.VOID,
@@ -204,13 +194,40 @@ func _input(event: InputEvent) -> void:
 						route = HenRouter.current_route,
 						position = Vector2(0, 500 * i + 1)
 					})
+					# var cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
+					# 	name = 'IF',
+					# 	type = HenVirtualCNode.Type.IF,
+					# 	sub_type = HenVirtualCNode.SubType.IF,
+					# 	route = HenRouter.current_route,
+					# 	inputs = [
+					# 		{
+					# 			name = 'condition',
+					# 			type = 'bool'
+					# 		},
+					# 	],
+					# 	position = Vector2(100, 600 * i)
+					# })
 
-					cnode.add_flow_connection(1, 0, cnode2).add()
+					# var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
+					# 	name = 'print',
+					# 	sub_type = HenVirtualCNode.SubType.VOID,
+					# 	category = 'native',
+					# 	inputs = [
+					# 		{
+					# 			name = 'content',
+					# 			type = 'String'
+					# 		}
+					# 	],
+					# 	route = HenRouter.current_route,
+					# 	position = Vector2(0, 500 * i + 1)
+					# })
 
-					if i > 0:
-						old.add_flow_connection(0, 0, cnode).add()
+					# cnode.add_flow_connection(1, 0, cnode2).add()
 
-					old = cnode2
+					# if i > 0:
+					# 	old.add_flow_connection(0, 0, cnode).add()
+
+					# old = cnode2
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:

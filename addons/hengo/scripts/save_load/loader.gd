@@ -98,9 +98,12 @@ static func load(_path: StringName) -> void:
 
 	# loading hengo script data
 	if is_resource or FileAccess.file_exists(get_data_path(resource_id)):
+		var star = Time.get_ticks_usec()
 		var data: HenScriptData = ResourceLoader.load(get_data_path(resource_id) if not is_resource else _path, '', ResourceLoader.CACHE_MODE_IGNORE)
+		var end = Time.get_ticks_usec()
+		print('vv ', (end - start) / 1000., 'ms')
 
-		print(JSON.stringify(data.get_save()))
+		# print(JSON.stringify(data.get_save()))
 
 		# setting script configs
 		HenGlobal.script_config.type = data.type

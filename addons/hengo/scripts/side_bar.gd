@@ -922,6 +922,14 @@ class MacroData:
 
 
 func _ready() -> void:
+	if EditorInterface.get_edited_scene_root() == self or EditorInterface.get_edited_scene_root() == owner:
+		set_process(false)
+		set_physics_process(false)
+		set_process_input(false)
+		set_process_unhandled_input(false)
+		set_process_unhandled_key_input(false)
+		return
+
 	list = get_node('%List')
 	list.auto_tooltip = false
 	list.button_clicked.connect(_on_list_button_clicked)

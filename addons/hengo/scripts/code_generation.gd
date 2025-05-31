@@ -278,7 +278,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 
 static func get_code(_data: HenScriptData) -> String:
-	print(JSON.stringify(_data.get_save()))
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var code: String = ''
 
