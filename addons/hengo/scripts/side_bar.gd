@@ -334,7 +334,8 @@ class FuncData:
 				outputs = outputs.map(func(x: Param) -> Dictionary: return x.get_data()),
 				route = route,
 				position = Vector2.ZERO,
-				ref = self
+				ref = self,
+				can_delete = false
 			})
 
 			HenVirtualCNode.instantiate_virtual_cnode({
@@ -343,7 +344,8 @@ class FuncData:
 				route = route,
 				inputs = inputs.map(func(x: Param) -> Dictionary: return x.get_data()),
 				position = Vector2(400, 0),
-				ref = self
+				ref = self,
+				can_delete = false
 			})
 
 	func on_change_name(_name: String) -> void:
@@ -502,7 +504,8 @@ class SignalData:
 				sub_type = HenVirtualCNode.SubType.SIGNAL_ENTER,
 				route = route,
 				position = Vector2.ZERO,
-				ref = self
+				ref = self,
+				can_delete = false
 			})
 		
 	func set_signal_params(_class: StringName, _signal: StringName) -> void:
@@ -728,7 +731,8 @@ class MacroData:
 				sub_type = HenVirtualCNode.SubType.MACRO_INPUT,
 				route = route,
 				position = Vector2.ZERO,
-				ref = self
+				ref = self,
+				can_delete = false
 			})
 
 			HenVirtualCNode.instantiate_virtual_cnode({
@@ -737,7 +741,8 @@ class MacroData:
 				sub_type = HenVirtualCNode.SubType.MACRO_OUTPUT,
 				route = route,
 				position = Vector2(400, 0),
-				ref = self
+				ref = self,
+				can_delete = false
 			})
 
 	func on_change_name(_name: String) -> void:

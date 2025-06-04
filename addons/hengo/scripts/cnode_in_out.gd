@@ -90,11 +90,17 @@ func _on_gui(_event: InputEvent) -> void:
 				# call mehotd list on in_out type
 				print('type:: ', connection_type)
 				var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
-				method_list.start(connection_type, get_global_mouse_position(), false, type, {
-					from_in_out = input_ref,
+				var data: Dictionary = {
 					from = root.virtual_ref,
-					in_out_id = input_ref.id
-				})
+					in_out_id = input_ref.id,
+				}
+
+				if type == 'in':
+					data.to_virtual_ref = input_ref
+				else:
+					data.from_virtual_ref = input_ref
+
+				method_list.start(connection_type, get_global_mouse_position(), false, type, data)
 
 				if type == 'in':
 					var connection: HenVirtualCNode.ConnectionReturn = root.virtual_ref.get_input_connection(input_ref.id)

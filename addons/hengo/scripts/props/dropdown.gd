@@ -34,6 +34,9 @@ func _on_pressed() -> void:
 			options = HenGlobal.SCRIPTS_STATES[custom_data] if HenGlobal.SCRIPTS_STATES.has(custom_data) else []
 		'all_classes':
 			options = HenEnums.DROPDOWN_ALL_CLASSES
+		'all_classes_self':
+			options = [ {name = 'SELF'}]
+			options.append_array(HenEnums.DROPDOWN_ALL_CLASSES)
 		'enum_list':
 			var enum_reference: Dictionary = {}
 

@@ -13,12 +13,20 @@ static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 		var first: Dictionary = _params[0]
 
 		if first.has('is_ref'):
+			var new_prefix: StringName = parse_token_by_type(first)
 			return [
 				_params.slice(1),
-				parse_token_by_type(first)
+				get_prefix_with_dot(new_prefix)
 			]
 	
-	return [_params, _prefix]
+	return [_params, get_prefix_with_dot(_prefix)]
+
+
+static func get_prefix_with_dot(_prefix: StringName) -> StringName:
+	if _prefix != '' and not _prefix.ends_with('.'):
+		return _prefix + '.'
+
+	return _prefix
 
 
 static func _get_signal_call_name(_name: String) -> String:
@@ -46,6 +54,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 	if _token.use_self == true or (_token.has('category') and _token.get('category') == 'native'):
 		prefix = ''
+
 
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
@@ -103,6 +112,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			var params: Array = values[0]
 			
 			prefix = values[1]
+
+			prints('ddd', values)
 
 			if _token.type == HenVirtualCNode.SubType.SINGLETON:
 				prefix = ''
@@ -202,10 +213,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			})
 		HenVirtualCNode.SubType.DEBUG:
 			return indent + HenGlobal.DEBUG_TOKEN + HenGlobal.DEBUG_VAR_NAME + ' += ' + str(_token.counter)
-		# HenVirtualCNode.SubType.DEBUG_PUSH:
-		# 	return indent + get_debug_push_str()
-		# HenVirtualCNode.SubType.DEBUG_FLOW_START:
-		# 	return indent + get_debug_var_start()
 		HenVirtualCNode.SubType.DEBUG_STATE:
 			return indent + HenGlobal.DEBUG_TOKEN + "EngineDebugger.send_message('hengo:debug_state', [" + str(_token.id) + "])"
 		HenVirtualCNode.SubType.START_DEBUG_STATE:
@@ -239,8 +246,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
 			var my_prefix = values[1]
-
-			# print('yyyy ', params)
 
 			if not params.is_empty():
 				return indent + '{ref}connect("{signal_name}", {call_ref}{callable}.bind({params}))'.format({
@@ -379,17 +384,8 @@ static func get_code(_data: HenScriptData) -> String:
 			for cnode_chd: Dictionary in cnode.virtual_cnode_list:
 				cn.virtual_cnode_list.append(_get_cnode_from_dict(cnode_chd, refs, cn))
 
-	# generatin flow connection references
-	for connection: HenSaveCodeType.FlowConnection in refs.flow_connections:
-		var cnode: HenSaveCodeType.CNode = refs.cnode_ref[connection.to_vc_id]
-		connection.to = cnode
-		connection.from.flow_connections.append(connection)
 
-	# generating input connection references
-	for connection: HenSaveCodeType.InputConnection in refs.input_connections:
-		connection.from = refs.cnode_ref[connection.from_vc_id]
-		connection.to.input_connections.append(connection)
-
+	_parse_connections(refs)
 
 	code += _get_start(_data)
 	code += _parse_variables(refs)
@@ -397,9 +393,22 @@ static func get_code(_data: HenScriptData) -> String:
 	code += _parse_signals(refs)
 	code += _set_base_cnodes(refs)
 
-	# print(code)
+	print(code)
 
 	return code
+
+
+static func _parse_connections(_refs: HenSaveCodeType.References) -> void:
+	# generatin flow connection references
+	for connection: HenSaveCodeType.FlowConnection in _refs.flow_connections:
+		var cnode: HenSaveCodeType.CNode = _refs.cnode_ref[connection.to_vc_id]
+		connection.to = cnode
+		connection.from.flow_connections.append(connection)
+
+	# generating input connection references
+	for connection: HenSaveCodeType.InputConnection in _refs.input_connections:
+		connection.from = _refs.cnode_ref[connection.from_vc_id]
+		connection.to.input_connections.append(connection)
 
 
 static func _get_variable_from_dict(_data: Dictionary) -> HenSaveCodeType.Variable:

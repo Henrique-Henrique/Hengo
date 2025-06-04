@@ -148,7 +148,8 @@ static func load(_path: StringName) -> void:
 			type = HenVirtualCNode.Type.STATE_START,
 			sub_type = HenVirtualCNode.SubType.STATE_START,
 			route = base_route,
-			position = Vector2(0, 0)
+			position = Vector2(0, 0),
+			can_delete = false
 		})
 
 		HenRouter.current_route = base_route

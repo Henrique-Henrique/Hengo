@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://ds1l212xog53y"]
+[gd_scene load_steps=6 format=3 uid="uid://ds1l212xog53y"]
 
 [ext_resource type="Script" uid="uid://c7sfsj0bnw26x" path="res://addons/hengo/scripts/method_picker.gd" id="1_8ff1r"]
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_kmwsi"]
-[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="2_mxkhq"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="3_hid57"]
+[ext_resource type="Texture2D" uid="uid://dibqfnkm4yg4k" path="res://addons/hengo/assets/icons/menu/loading.svg" id="3_kmwsi"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mxkhq"]
 
@@ -15,24 +16,27 @@ theme = ExtResource("1_kmwsi")
 theme_override_constants/separation = 8
 script = ExtResource("1_8ff1r")
 
-[node name="Search" type="LineEdit" parent="."]
-unique_name_in_owner = true
-layout_mode = 2
-placeholder_text = "Type to search..."
-
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
+alignment = 2
 
-[node name="SelfBt" type="Button" parent="HBoxContainer"]
+[node name="Type" parent="HBoxContainer" instance=ExtResource("3_hid57")]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Self"
+text = "SELF"
+type = "all_classes_self"
 
-[node name="ClassBt" parent="HBoxContainer" instance=ExtResource("2_mxkhq")]
+[node name="Search" type="LineEdit" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Other Type"
-type = "all_classes"
+size_flags_horizontal = 3
+placeholder_text = "Type to search..."
+
+[node name="LoadingBt" type="TextureRect" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("3_kmwsi")
+stretch_mode = 3
 
 [node name="FilterList" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
@@ -65,7 +69,6 @@ text = "macros"
 
 [node name="List" type="Tree" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 403.6)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_mxkhq")

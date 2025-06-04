@@ -84,6 +84,7 @@ var virtual_cnode_list: Array = []
 var virtual_sub_type_vc_list: Array = []
 var ref_id: int = -1
 var ref: Object
+var can_delete: bool = true
 var is_deleted: bool = false
 var from_side_bar_id: int = -1
 var from_id: int = -1
@@ -238,7 +239,7 @@ class InOutData extends Object:
 		category = &'default_value'
 		is_prop = false
 
-		if HenGlobal.script_config.type == type:
+		if HenGlobal.script_config and HenGlobal.script_config.type == type:
 			code_value = '_ref.'
 			is_ref = true
 			return
@@ -528,6 +529,9 @@ class VCNodeReturn:
 
 
 	func add() -> void:
+		if v_cnode.is_deleted and not v_cnode.can_delete:
+			return
+		
 		if not v_cnode.route_ref.ref.virtual_cnode_list.has(v_cnode):
 			v_cnode.route_ref.ref.virtual_cnode_list.append(v_cnode)
 
@@ -565,6 +569,9 @@ class VCNodeReturn:
 	
 
 	func remove() -> void:
+		if not v_cnode.can_delete:
+			return
+
 		v_cnode.route_ref.ref.virtual_cnode_list.erase(v_cnode)
 
 		old_inputs_connections.append_array(v_cnode.input_connections)
@@ -1090,15 +1097,14 @@ func get_save() -> Dictionary:
 	
 	# these types don't need to save the flow connections, are hengo's native
 	match type:
-		Type.IF, Type.FOR, Type.DEFAULT:
-			if not flow_connections.is_empty():
-				var flows: Array = []
+		Type.DEFAULT:
+			var flows: Array = []
 
-				for flow_connection: FlowConnectionData in flow_connections:
-					if flow_connection.name:
-						flows.append({name = flow_connection.name})
-				
-				if not flows.is_empty(): data.to_flow = flows
+			for flow_connection: FlowConnectionData in flow_connections:
+				if flow_connection.name:
+					flows.append({id = flow_connection.id, name = flow_connection.name})
+			
+			if not flows.is_empty(): data.to_flow = flows
 		Type.STATE:
 			data.to_flow = []
 			for flow_connection: FlowConnectionData in flow_connections:
@@ -1504,6 +1510,9 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.MACRO_OUTPUT:
 					_ref.output_ref = v_cnode
 
+	if _config.has('can_delete'):
+		v_cnode.can_delete = _config.can_delete
+
 	if _config.has('from_side_bar_id'):
 		v_cnode.from_side_bar_id = _config.from_side_bar_id
 
@@ -1582,7 +1591,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					name = 'enter',
 					sub_type = HenVirtualCNode.SubType.VIRTUAL,
 					route = v_cnode.route,
-					position = Vector2.ZERO
+					position = Vector2.ZERO,
+					can_delete = false
 				})
 
 				HenVirtualCNode.instantiate_virtual_cnode({
@@ -1593,7 +1603,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 						type = 'float'
 					}],
 					route = v_cnode.route,
-					position = Vector2(400, 0)
+					position = Vector2(400, 0),
+					can_delete = false
 				})
 
 			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))

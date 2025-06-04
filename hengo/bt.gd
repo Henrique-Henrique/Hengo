@@ -11,6 +11,10 @@ extends Sprite2D
 
  # Variables #
 
+func func_20260678881():
+
+	print("dsa")
+
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -39,6 +43,9 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
-	pass
+	func enter() -> void:
+		_ref.add_child(Node.new(), false, 0)
+		_ref.get_region_rect()
+		_ref.get_angle_to(Vector2(0, 0))
 
 

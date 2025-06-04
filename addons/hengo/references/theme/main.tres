@@ -1,5 +1,6 @@
-[gd_resource type="Theme" load_steps=6 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://xxj7abqbehjg"]
 
+[ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
 [ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="2_nhkyk"]
 
@@ -18,10 +19,13 @@ shadow_offset = Vector2(0, 2)
 
 [resource]
 default_font = ExtResource("1_revyj")
+Button/fonts/font = ExtResource("1_ghilx")
 Button/styles/normal = SubResource("StyleBoxFlat_nhkyk")
+ItemList/fonts/font = ExtResource("1_revyj")
+Label/fonts/font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
-LineEdit/fonts/font = ExtResource("1_revyj")
+LineEdit/fonts/font = ExtResource("1_ghilx")
 LineEdit/styles/normal = ExtResource("2_nhkyk")
 SpinBox/colors/down_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)
 SpinBox/colors/down_hover_icon_modulate = Color(0.95, 0.95, 0.95, 0)
@@ -43,3 +47,4 @@ SpinBox/icons/up_disabled = null
 SpinBox/icons/up_hover = null
 SpinBox/icons/up_pressed = null
 SpinBox/icons/updown = SubResource("ImageTexture_6gb4l")
+Tree/fonts/font = ExtResource("1_revyj")
