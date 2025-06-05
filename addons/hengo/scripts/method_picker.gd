@@ -24,6 +24,7 @@ enum CLASS_TYPE {
 	CUSTOM
 }
 enum FILTER_TYPE {
+	SELF,
 	ALL,
 	NATIVE,
 	FUNC,
@@ -34,7 +35,7 @@ enum FILTER_TYPE {
 }
 
 var class_type: CLASS_TYPE = CLASS_TYPE.SELF
-var select_type: FILTER_TYPE = FILTER_TYPE.ALL
+var select_type: FILTER_TYPE = FILTER_TYPE.SELF
 var selected_class: StringName
 var name_to_search: String = ''
 
@@ -44,6 +45,7 @@ var first_time: bool = true
 
 
 const BG_COLOR = {
+	FILTER_TYPE.SELF: Color('#212121'),
 	FILTER_TYPE.FUNC: Color('#432F2F'),
 	FILTER_TYPE.SIGNAL: Color('#2F4335'),
 	FILTER_TYPE.MACRO: Color('#332F43'),
@@ -52,6 +54,7 @@ const BG_COLOR = {
 }
 
 const FILTER_ICONS = {
+	FILTER_TYPE.SELF: preload('res://addons/hengo/assets/icons/menu/void.svg'),
 	FILTER_TYPE.FUNC: preload('res://addons/hengo/assets/icons/menu/void.svg'),
 	FILTER_TYPE.SIGNAL: preload('res://addons/hengo/assets/icons/menu/wifi.svg'),
 	FILTER_TYPE.MACRO: preload('res://addons/hengo/assets/icons/menu/text.svg'),
@@ -315,30 +318,25 @@ var native_list: Array = [
 
 func _ready() -> void:
 	set_process(false)
+
+	if not HenGlobal.script_config:
+		return
+
 	var _type: StringName = HenGlobal.script_config.type
 
 	tree.item_activated.connect(_on_select)
 	(%Search as LineEdit).text_changed.connect(_on_search)
 	(%Search as LineEdit).grab_focus()
 
-	%Type.value_changed.connect(_on_type_change)
-
 	# filter buttons
 	for chd: Button in (%FilterList as HBoxContainer).get_children():
 		chd.pressed.connect(_filter_change.bind(chd.name))
 
-	build_list()
-
-
-func _on_type_change(_type: StringName) -> void:
-	if _type == 'SELF':
-		_build_api_list(HenGlobal.script_config.type)
-	else:
-		_build_api_list(_type)
-
 
 func _filter_change(_name: StringName) -> void:
 	match _name:
+		&'Self':
+			select_type = FILTER_TYPE.SELF
 		&'All':
 			select_type = FILTER_TYPE.ALL
 		&'Native':
@@ -350,7 +348,7 @@ func _filter_change(_name: StringName) -> void:
 		&'Macro':
 			select_type = FILTER_TYPE.MACRO
 	
-	build_list()
+	_build_api_list(selected_class)
 
 
 func _on_search(_text: String) -> void:
@@ -385,142 +383,67 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 
 	match current_class_type:
 		CLASS_TYPE.SELF:
-			if self != null:
-				for data: Dictionary in native_list:
-					data.type = FILTER_TYPE.NATIVE
-					local_api.append(data)
-			
-			for dict in ClassDB.class_get_method_list(selected_class):
-				local_api.append(_get_class_obj(dict, selected_class))
-								
-			# functions
-			for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
-				var dt: Dictionary = {
-					name = func_data.name,
-					type = FILTER_TYPE.FUNC,
-					data = func_data.get_cnode_data()
-				}
-
-				local_api.append(dt)
-			
-			# signals
-			for signal_data: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
-				var connect_dt: Dictionary = {
-					name = signal_data.name,
-					type = FILTER_TYPE.SIGNAL,
-					data = signal_data.get_connect_cnode_data()
-				}
-
-				var disconnect_dt: Dictionary = {
-					name = signal_data.name,
-					type = FILTER_TYPE.SIGNAL,
-					data = signal_data.get_diconnect_cnode_data()
-				}
-
-				local_api.append(connect_dt)
-				local_api.append(disconnect_dt)
-			
-
-			# macro
-			for macro_data: HenSideBar.MacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
-				var dt: Dictionary = {
-					name = macro_data.name,
-					type = FILTER_TYPE.MACRO,
-					data = macro_data.get_cnode_data()
-				}
-
-				local_api.append(dt)
-			
-			
-			# from funcs
-			# for script_path: String in DirAccess.get_files_at('res://hengo/save'):
-			# 	var id: int = int(script_path.get_basename())
-
-			# 	if id == 0:
-			# 		continue
-
-			# 	var path: StringName = HenLoader.get_data_path(id)
-			# 	var res: HenScriptData = ResourceLoader.load(path)
-			# 	var res_name: String = ResourceUID.get_id_path(id).get_file().get_basename()
-
-			# 	for var_data: Dictionary in res.side_bar_list.var_list:
-			# 		var dt: Dictionary = {
-			# 			name = '({0}) {1}'.format([res_name, var_data.name]),
-			# 			type = FILTER_TYPE.VAR_FROM,
-			# 			data = {
-			# 				name = 'Get From -> ' + res_name,
-			# 				name_to_code = var_data.name,
-			# 				from_side_bar_id = var_data.id,
-			# 				sub_type = HenVirtualCNode.SubType.GET_FROM_PROP,
-			# 				from_id = id,
-			# 				inputs = [
-			# 					{
-			# 						name = 'from',
-			# 						type = res.type,
-			# 						is_ref = true,
-			# 					}
-			# 				],
-			# 				outputs = [
-			# 					{
-			# 						name = var_data.name,
-			# 						type = var_data.type
-			# 					}
-			# 				],
-			# 				route = HenRouter.current_route,
-			# 			}
-			# 		}
-
-			# 		local_api.append(dt)
-
-			# 	for func_data: Dictionary in res.side_bar_list.func_list:
-			# 		var dt: Dictionary = {
-			# 			name = '({0}) {1}'.format([res_name, func_data.name]),
-			# 			type = FILTER_TYPE.FUNC_FROM,
-			# 			data = {
-			# 				name = func_data.name,
-			# 				from_side_bar_id = func_data.id,
-			# 				from_id = id,
-			# 				sub_type = HenVirtualCNode.SubType.FUNC_FROM,
-			# 				name_to_code = func_data.name,
-			# 				inputs = [
-			# 					{
-			# 						name = 'from',
-			# 						type = res.type,
-			# 						is_ref = true,
-			# 					}
-			# 				] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
-			# 				outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
-			# 				route = HenRouter.current_route,
-			# 			}
-			# 		}
-
-			# 		local_api.append(dt)
+			match select_type:
+				FILTER_TYPE.SELF:
+					for dict in ClassDB.class_get_method_list(selected_class):
+						local_api.append(_get_class_obj(dict, selected_class))
+				FILTER_TYPE.ALL:
+					local_api.append_array(get_native_list())
+					local_api.append_array(get_function_list())
+					local_api.append_array(get_hengo_signal_list())
+					local_api.append_array(get_macro_list())
+					local_api.append_array(get_others_classes_list())
+					local_api.append_array(get_from_list())
+				FILTER_TYPE.NATIVE:
+					local_api.append_array(get_native_list())
+				FILTER_TYPE.FUNC:
+					local_api.append_array(get_function_list())
+				FILTER_TYPE.SIGNAL:
+					local_api.append_array(get_hengo_signal_list())
+				FILTER_TYPE.MACRO:
+					local_api.append_array(get_macro_list())
 		CLASS_TYPE.TO:
-			for dict in ClassDB.class_get_method_list(selected_class):
-				local_api.append(_get_class_obj(dict, selected_class))
+			for dict in ClassDB.class_get_method_list(to_type):
+				local_api.append(_get_class_obj(dict, to_type))
 
-			if HenEnums.NATIVE_API_LIST.has(selected_class):
-				for dict: Dictionary in HenEnums.NATIVE_API_LIST.get(selected_class):
+			if HenEnums.NATIVE_API_LIST.has(to_type):
+				for dict: Dictionary in HenEnums.NATIVE_API_LIST.get(to_type):
 					var dt: Dictionary = dict.duplicate()
-					dt.name = '({0}) -> {1}'.format([selected_class, dict.name])
+					dt.name = '({0}) -> {1}'.format([to_type, dict.name])
 					dt.icon_type = &'void'
 					dt.data.route = HenRouter.current_route
 					local_api.append(dt)
 		CLASS_TYPE.FROM:
 			var idx: int = 0
 
-			# methods
-			for dict in ClassDB.class_get_method_list(selected_class):
-				var dt: Dictionary = _get_class_obj(dict, selected_class)
-				
-				if dt.data.has(&'outputs'):
-					idx = 0
-					for output: Dictionary in dt.data.outputs:
-						if HenUtils.is_type_relation_valid(output.type, to_type):
-							dt.data.idx_to_connect = idx
-							local_api.append(dt)
+			match select_type:
+				FILTER_TYPE.SELF:
+					print(selected_class)
+					for class_method in ClassDB.class_get_method_list(selected_class):
+						var dt: Dictionary = _get_class_obj(class_method, selected_class)
+						
+						if dt.data.has(&'outputs'):
+							idx = 0
+							for output: Dictionary in dt.data.outputs:
+								if HenUtils.is_type_relation_valid(output.type, to_type):
+									dt.data.idx_to_connect = idx
+									local_api.append(dt)
 
-						idx += 1
+								idx += 1
+				FILTER_TYPE.ALL:
+					# methods
+					for class_n in ClassDB.get_class_list():
+						for class_method in ClassDB.class_get_method_list(class_n, true):
+							var dt: Dictionary = _get_class_obj(class_method, class_n, true)
+							
+							if dt.data.has(&'outputs'):
+								idx = 0
+								for output: Dictionary in dt.data.outputs:
+									if HenUtils.is_type_relation_valid(output.type, to_type):
+										dt.data.idx_to_connect = idx
+										local_api.append(dt)
+
+									idx += 1
 				
 
 			if HenEnums.NATIVE_API_LIST.has(selected_class):
@@ -550,57 +473,53 @@ func build_list() -> void:
 	tree.clear()
 
 	var root: TreeItem = tree.create_item()
-	var item_count: int = 0
+	var tree_items: Array[Dictionary] = []
+	const item_size_limit: int = 1000
+
+	match current_class_type:
+		CLASS_TYPE.SELF:
+			%Native.visible = true
+		CLASS_TYPE.TO:
+			%Native.visible = false
+		CLASS_TYPE.FROM:
+			%Native.visible = false
 
 
-	if class_type == CLASS_TYPE.SELF:
-		match select_type:
-			FILTER_TYPE.ALL:
-				for data: Dictionary in api_list:
-					if not name_to_search or (data.name as String).contains(name_to_search):
-						var item: TreeItem = root.create_child()
-						item.set_text(0, data.name)
-						item.set_metadata(0, data.data)
-					
-						if data.has('type'):
-							if FILTER_ICONS.has(data.type):
-								item.set_icon(0, FILTER_ICONS[data.type])
-								item.set_custom_bg_color(0, BG_COLOR[data.type])
-						elif data.has('icon_type'):
-							if data.icon_type == 'void':
-								item.set_icon(0, FILTER_ICONS[FILTER_TYPE.FUNC])
-								item.set_custom_bg_color(0, Color(1, 1, 1, .03))
-							else:
-								item.set_icon(0, HenAssets.get_icon_texture(data.icon_type))
+	for data: Dictionary in api_list:
+		if tree_items.size() >= item_size_limit:
+			continue
 
-						item_count += 1
-			FILTER_TYPE.NATIVE:
-				for data: Dictionary in native_list:
-					if not name_to_search or (data.name as String).contains(name_to_search):
-						var item: TreeItem = root.create_child()
-						item.set_text(0, data.name)
-						item.set_metadata(0, data.data)
-						item.set_icon(0, FILTER_ICONS[select_type])
-						item.set_custom_bg_color(0, BG_COLOR[data.type])
-					
-						item_count += 1
-			FILTER_TYPE.FUNC, FILTER_TYPE.SIGNAL, FILTER_TYPE.MACRO:
-				for data: Dictionary in api_list:
-					if not data.has('type'): continue
-					if data.type != select_type: continue
+		if not name_to_search or search_name(data.name, name_to_search):
+			var dt: Dictionary = {
+				name = data.name,
+				data = data.data
+			}
+		
+			if data.has('type'):
+				if FILTER_ICONS.has(data.type):
+					dt.icon = FILTER_ICONS[data.type]
+					dt.bg_color = BG_COLOR[data.type]
+			elif data.has('icon_type'):
+				if data.icon_type == 'void':
+					dt.icon = FILTER_ICONS[FILTER_TYPE.FUNC]
+					dt.bg_color = Color(1, 1, 1, .03)
+				else:
+					dt.icon = HenAssets.get_icon_texture(data.icon_type)
 
-					if not name_to_search or (data.name as String).contains(name_to_search):
-						var item: TreeItem = root.create_child()
-						item.set_text(0, data.name)
-						item.set_metadata(0, data.data)
-						item.set_icon(0, FILTER_ICONS[select_type])
-						item.set_custom_bg_color(0, BG_COLOR[data.type])
-					
-						item_count += 1
+			tree_items.append(dt)
+
+	for item_data: Dictionary in tree_items:
+		var item: TreeItem = root.create_child()
+
+		item.set_text(0, item_data.name)
+		item.set_metadata(0, item_data.data)
+		item.set_icon(0, item_data.icon)
+		
+		if item_data.has('bg_color'): item.set_custom_bg_color(0, item_data.bg_color)
 
 	if root.get_child_count() > 0:
 		var item_size: Vector2 = tree.get_item_area_rect(root.get_child(0)).size
-		tree.custom_minimum_size.y = item_size.y * item_count
+		tree.custom_minimum_size.y = item_size.y * tree_items.size()
 
 		var rect: Rect2 = HenGlobal.CAM.get_viewport_rect()
 		if tree.custom_minimum_size.y > rect.size.y:
@@ -609,6 +528,157 @@ func build_list() -> void:
 		tree.custom_minimum_size.y = 0
 		
 	HenGlobal.GENERAL_POPUP.get_parent().reset_size()
+
+
+func get_from_list() -> Array:
+	var local_api: Array = []
+
+	for script_path: String in DirAccess.get_files_at('res://hengo/save'):
+		var id: int = int(script_path.get_basename())
+
+		if id == 0:
+			continue
+
+		var path: StringName = HenLoader.get_data_path(id)
+		var res: HenScriptData = ResourceLoader.load(path)
+		var res_name: String = ResourceUID.get_id_path(id).get_file().get_basename()
+
+		for var_data: Dictionary in res.side_bar_list.var_list:
+			var dt: Dictionary = {
+				name = '({0}) {1}'.format([res_name, var_data.name]),
+				type = FILTER_TYPE.VAR_FROM,
+				data = {
+					name = 'Get From -> ' + res_name,
+					name_to_code = var_data.name,
+					from_side_bar_id = var_data.id,
+					sub_type = HenVirtualCNode.SubType.GET_FROM_PROP,
+					from_id = id,
+					inputs = [
+						{
+							name = 'from',
+							type = res.type,
+							is_ref = true,
+						}
+					],
+					outputs = [
+						{
+							name = var_data.name,
+							type = var_data.type
+						}
+					],
+					route = HenRouter.current_route,
+				}
+			}
+
+			local_api.append(dt)
+
+		for func_data: Dictionary in res.side_bar_list.func_list:
+			var dt: Dictionary = {
+				name = '({0}) {1}'.format([res_name, func_data.name]),
+				type = FILTER_TYPE.FUNC_FROM,
+				data = {
+					name = func_data.name,
+					from_side_bar_id = func_data.id,
+					from_id = id,
+					sub_type = HenVirtualCNode.SubType.FUNC_FROM,
+					name_to_code = func_data.name,
+					inputs = [
+						{
+							name = 'from',
+							type = res.type,
+							is_ref = true,
+						}
+					] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
+					outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
+					route = HenRouter.current_route,
+				}
+			}
+
+			local_api.append(dt)
+		
+	return local_api
+
+
+func get_native_list() -> Array:
+	var local_api: Array = []
+	for data: Dictionary in native_list:
+		data.type = FILTER_TYPE.NATIVE
+		local_api.append(data)
+	
+	return local_api
+
+
+func get_function_list() -> Array:
+	var local_api: Array = []
+	for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+		var dt: Dictionary = {
+			name = func_data.name,
+			type = FILTER_TYPE.FUNC,
+			data = func_data.get_cnode_data()
+		}
+
+		local_api.append(dt)
+	
+	return local_api
+
+
+func get_others_classes_list() -> Array:
+	var local_api: Array = []
+
+	for class_n in ClassDB.get_class_list():
+		for class_method in ClassDB.class_get_method_list(class_n, true):
+			local_api.append(_get_class_obj(class_method, class_n, true))
+
+	return local_api
+
+
+func get_hengo_signal_list() -> Array:
+	var local_api: Array = []
+
+	for signal_data: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
+		var connect_dt: Dictionary = {
+			name = signal_data.name,
+			type = FILTER_TYPE.SIGNAL,
+			data = signal_data.get_connect_cnode_data()
+		}
+
+		var disconnect_dt: Dictionary = {
+			name = signal_data.name,
+			type = FILTER_TYPE.SIGNAL,
+			data = signal_data.get_diconnect_cnode_data()
+		}
+
+		local_api.append(connect_dt)
+		local_api.append(disconnect_dt)
+
+	return local_api
+
+
+func get_macro_list() -> Array:
+	var local_api: Array = []
+
+	for macro_data: HenSideBar.MacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+		var dt: Dictionary = {
+			name = macro_data.name,
+			type = FILTER_TYPE.MACRO,
+			data = macro_data.get_cnode_data()
+		}
+
+		local_api.append(dt)
+
+	return local_api
+
+
+func search_name(_name: String, _name_to_search: String) -> bool:
+	# var reg: RegEx = RegEx.new()
+	# reg.compile('[()\\->.\\s]')
+	# var clean_name: String = reg.sub(_name.to_lower(), "", true)
+	# var clean_name_to_search: String = reg.sub(_name_to_search.to_lower(), "", true)
+	# return clean_name.containsn(clean_name_to_search)
+	var clean_name: String = _name.to_lower().replace('_', '')
+	var clean_name_to_search: String = _name_to_search.to_lower().replace('_', '')
+	
+	return clean_name.containsn(clean_name_to_search)
 
 
 func _on_select() -> void:
@@ -671,12 +741,11 @@ func _get_typeny_arg(_arg: Dictionary) -> StringName:
 	return type_string(_arg.type)
 
 
-func _get_class_obj(_dict: Dictionary, _class_name: StringName) -> Dictionary:
+func _get_class_obj(_dict: Dictionary, _class_name: StringName, _use_class_name: bool = false) -> Dictionary:
 	var _obj_type: StringName = _get_typeny_arg(_dict.return )
 
-
 	var obj: Dictionary = {
-		name = _dict.name,
+		name = _dict.name if not _use_class_name else '({0}) -> {1}'.format([_class_name, _dict.name]),
 		icon_type = _obj_type if _obj_type != StringName('Nil') else StringName('void'),
 		data = {
 			name = _dict.name,
@@ -750,6 +819,7 @@ func start(_type: StringName, _pos: Vector2, _show_native: bool = true, _came_fr
 			to_type = _cnode_config.to_virtual_ref.type
 		elif _cnode_config.has('from_virtual_ref'):
 			current_class_type = CLASS_TYPE.TO
+			to_type = _cnode_config.from_virtual_ref.type
 		elif _cnode_config.has('from_flow_connector'):
 			current_class_type = CLASS_TYPE.SELF
 	else:

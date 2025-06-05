@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://ds1l212xog53y"]
+[gd_scene load_steps=5 format=3 uid="uid://ds1l212xog53y"]
 
 [ext_resource type="Script" uid="uid://c7sfsj0bnw26x" path="res://addons/hengo/scripts/method_picker.gd" id="1_8ff1r"]
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_kmwsi"]
-[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="3_hid57"]
 [ext_resource type="Texture2D" uid="uid://dibqfnkm4yg4k" path="res://addons/hengo/assets/icons/menu/loading.svg" id="3_kmwsi"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mxkhq"]
@@ -20,12 +19,6 @@ script = ExtResource("1_8ff1r")
 layout_mode = 2
 alignment = 2
 
-[node name="Type" parent="HBoxContainer" instance=ExtResource("3_hid57")]
-unique_name_in_owner = true
-layout_mode = 2
-text = "SELF"
-type = "all_classes_self"
-
 [node name="Search" type="LineEdit" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -41,6 +34,11 @@ stretch_mode = 3
 [node name="FilterList" type="HBoxContainer" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="Self" type="Button" parent="FilterList"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Self"
 
 [node name="All" type="Button" parent="FilterList"]
 unique_name_in_owner = true
