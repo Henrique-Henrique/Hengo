@@ -37,7 +37,6 @@ enum SubType {
 	FOR_ITEM = 18,
 	FUNC_OUTPUT = 19,
 	CONST = 20,
-	SINGLETON = 21,
 	GO_TO_VOID = 22,
 	IMG = 23,
 	EXPRESSION = 24,
@@ -89,6 +88,7 @@ var is_deleted: bool = false
 var from_side_bar_id: int = -1
 var from_id: int = -1
 var invalid: bool = false
+var singleton_class: String
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -1055,6 +1055,12 @@ func get_save() -> Dictionary:
 		flow_connections = []
 	}
 
+	if name_to_code:
+		data.name_to_code = name_to_code
+
+	if singleton_class:
+		data.singleton_class = singleton_class
+
 	if invalid:
 		data.invalid = invalid
 
@@ -1475,7 +1481,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	
 	if _config.has('name_to_code'): v_cnode.name_to_code = _config.name_to_code
 
-
 	match _config.route.type:
 		HenRouter.ROUTE_TYPE.BASE:
 			(_config.route.ref as HenLoader.BaseRouteRef).virtual_cnode_list.append(v_cnode)
@@ -1509,6 +1514,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					_ref.input_ref = v_cnode
 				SubType.MACRO_OUTPUT:
 					_ref.output_ref = v_cnode
+
+	if _config.has('singleton_class'):
+		v_cnode.singleton_class = _config.singleton_class
+		print(v_cnode.singleton_class)
 
 	if _config.has('can_delete'):
 		v_cnode.can_delete = _config.can_delete

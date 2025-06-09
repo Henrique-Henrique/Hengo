@@ -124,6 +124,7 @@ class CNode:
 	var route_type: HenRouter.ROUTE_TYPE
 	var ref: Variant
 	var invalid: bool = false
+	var singleton_class: String
 
 	func get_flow_tokens(_input_id: int, _token_list: Array = []) -> Array:
 		var stack: Array = []
@@ -271,7 +272,6 @@ class CNode:
 				connection = input_connection
 				break
 
-
 		if connection and connection.from:
 			match connection.from.sub_type:
 				HenVirtualCNode.SubType.MACRO_INPUT:
@@ -325,8 +325,8 @@ class CNode:
 						data.value = '&"{0}"'.format([data.value.to_snake_case()])
 
 			return data
-		
-		return {type = HenVirtualCNode.SubType.NOT_CONNECTED, input_type = input.type, use_self = true}
+
+		return {type = HenVirtualCNode.SubType.NOT_CONNECTED, input_type = input.type, use_self = true, prop_name = input.name}
 
 
 	func get_input_token_list(_get_name: bool = false) -> Array:
@@ -361,13 +361,15 @@ class CNode:
 			HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 				token.merge({
 					name = name.to_snake_case() if not name_to_code else name_to_code,
-					params = get_input_token_list()
+					params = get_input_token_list(),
+					singleton_class = singleton_class
 				})
 			HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
 				token.merge({
 					name = name.to_snake_case() if not name_to_code else name_to_code,
 					params = get_input_token_list(),
 					id = _id if outputs.size() > 1 else -1,
+					singleton_class = singleton_class
 				})
 			HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.LOCAL_VAR:
 				token.merge({
@@ -398,11 +400,10 @@ class CNode:
 				token.merge({
 					code = get_input_token_list()[0],
 				})
-			HenVirtualCNode.SubType.SINGLETON:
+			HenVirtualCNode.SubType.CONST:
 				token.merge({
-					name = name,
-					params = get_input_token_list(),
-					id = _id if outputs.size() > 1 else -1,
+					singleton_class = name,
+					name = name_to_code
 				})
 			HenVirtualCNode.SubType.GET_PROP:
 				var dt: Dictionary = {
@@ -426,6 +427,11 @@ class CNode:
 
 				token.merge(dt)
 			HenVirtualCNode.SubType.EXPRESSION:
+				# check inputs
+				for input: Inout in inputs.slice(1):
+					if not input_has_connection(input.id):
+						HenCodeGeneration.flow_errors.append({})
+
 				token.merge({
 					params = get_input_token_list(true),
 					exp = inputs[0].value

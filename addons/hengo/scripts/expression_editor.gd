@@ -85,20 +85,15 @@ func _on_save() -> void:
 	# cleaning inputs
 	v_cnode.inputs[0].value = code_edit.text
 
-
-	for input: Dictionary in v_cnode.inputs.slice(1):
-		v_cnode.inputs.erase(input)
-		# TODO: remove connections
-
+	for input: HenVirtualCNode.InOutData in v_cnode.inputs.slice(1):
+		v_cnode._on_in_out_deleted(true, input)
 
 	for word in word_list:
-		# if not word in prevent_list:
-		v_cnode.inputs.append({
+		v_cnode._on_in_out_added(true, {
 			name = word,
 			type = 'Variant'
 		})
-	
-	
+		
 	HenGlobal.GENERAL_POPUP.get_parent().hide()
 	v_cnode.update()
 

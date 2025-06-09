@@ -34,7 +34,7 @@ project/assembly_name="Hengo"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gut/plugin.cfg", "res://addons/hengo/plugin.cfg")
+enabled=PackedStringArray("res://addons/hengo/plugin.cfg")
 
 [file_customization]
 

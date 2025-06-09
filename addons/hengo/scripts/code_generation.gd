@@ -100,6 +100,9 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			if _token.type == HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 				selfInput = 'self, '
 
+			if _token.singleton_class:
+				prefix = _token.singleton_class + '.'
+
 			return indent + prefix + '{name}({params})'.format({
 				name = _token.name,
 				params = selfInput + ', '.join(params.map(
@@ -107,20 +110,19 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 						return parse_token_by_type(x)
 			))
 			})
-		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.SINGLETON, HenVirtualCNode.SubType.FUNC_FROM:
+		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
 			
 			prefix = values[1]
 
-			prints('ddd', values)
-
-			if _token.type == HenVirtualCNode.SubType.SINGLETON:
-				prefix = ''
-			elif _token.type == HenVirtualCNode.SubType.FUNC_FROM:
+			if _token.type == HenVirtualCNode.SubType.FUNC_FROM:
 				if prefix == '_ref.':
 					# TODO
 					return indent + 'Vector2.ZERO'
+
+			if _token.singleton_class:
+				prefix = _token.singleton_class + '.'
 
 			return indent + prefix + '{name}({params}){id}'.format({
 				name = _token.name,
@@ -161,6 +163,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return '\n' + indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
 			return 'null'
+		HenVirtualCNode.SubType.CONST:
+			return indent + _token.singleton_class + '.' + _token.name
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			var base: String = ''
 			var code_list: Array = []
@@ -223,8 +227,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + 'pass'
 		HenVirtualCNode.SubType.RAW_CODE:
 			return _token.code.value.trim_prefix('"').trim_suffix('"')
-		HenVirtualCNode.SubType.SINGLETON:
-			return indent + _token.name
 		HenVirtualCNode.SubType.GET_PROP:
 			if not _token.has('data'): return indent + prefix + _token.value
 			return indent + parse_token_by_type(_token.data) + '.' + _token.value
@@ -438,8 +440,11 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 	cn.type = _cnode.type
 
 	_refs.cnode_ref[cn.id] = cn
+	
+	if _cnode.has(&'singleton_class'):
+		cn.singleton_class = _cnode.singleton_class
 
-	if _cnode.has('invalid'):
+	if _cnode.has(&'invalid'):
 		cn.invalid = _cnode.invalid
 
 	if _cnode.has(&'ref_id'):

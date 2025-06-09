@@ -44,8 +44,6 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		_ref.add_child(Node.new(), false, 0)
-		_ref.get_region_rect()
-		_ref.get_angle_to(Vector2(0, 0))
+		print()
 
 

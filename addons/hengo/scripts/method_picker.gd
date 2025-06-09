@@ -394,6 +394,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 					local_api.append_array(get_macro_list())
 					local_api.append_array(get_others_classes_list())
 					local_api.append_array(get_from_list())
+					local_api.append_array(get_global_const_list())
 				FILTER_TYPE.NATIVE:
 					local_api.append_array(get_native_list())
 				FILTER_TYPE.FUNC:
@@ -468,6 +469,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 		hide_loading_bt.call_deferred()
 	
 	_thread.wait_to_finish.call_deferred()
+
 
 func build_list() -> void:
 	tree.clear()
@@ -596,6 +598,37 @@ func get_from_list() -> Array:
 
 			local_api.append(dt)
 		
+	return local_api
+
+
+func get_global_const_list() -> Array:
+	var local_api: Array = []
+
+	for key: StringName in HenEnums.CONST_API_LIST.keys():
+		var items: Array = HenEnums.CONST_API_LIST[key]
+
+		for data: Dictionary in items:
+			var custom_name: String = '({0}) {1}'.format([key, data.name])
+			
+			var dt: Dictionary = {
+				name = custom_name,
+				type = FILTER_TYPE.NATIVE,
+				data = {
+					name = key,
+					name_to_code = data.name,
+					sub_type = HenVirtualCNode.SubType.CONST,
+					outputs = [
+						{
+							name = data.name,
+							type = data.type
+						}
+					],
+					route = HenRouter.current_route,
+				}
+			}
+
+			local_api.append(dt)
+
 	return local_api
 
 
@@ -773,11 +806,18 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _use_class_name:
 					}
 				)
 	else:
-		obj.data.inputs = [ {
-			name = _class_name,
-			type = _class_name,
-			is_ref = true
-		}] + (_dict.args as Array).map(
+		obj.data.inputs = []
+		
+		if Engine.has_singleton(_class_name):
+			obj.data.singleton_class = _class_name
+		else:
+			obj.data.inputs.append({
+				name = _class_name,
+				type = _class_name,
+				is_ref = true
+			})
+
+		obj.data.inputs += (_dict.args as Array).map(
 			func(arg) -> Dictionary:
 				match arg.usage:
 					65542:
@@ -794,7 +834,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _use_class_name:
 						type = _get_typeny_arg(arg)
 					}
 				)
-
+			
 
 	# it's a void or return a variant
 	if _dict.return.type != TYPE_NIL or (_dict.return.type == TYPE_NIL and _dict.return.usage == 131078):
