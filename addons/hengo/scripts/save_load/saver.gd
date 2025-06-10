@@ -53,6 +53,7 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 
 	if not DirAccess.dir_exists_absolute('res://hengo/save'):
 		DirAccess.make_dir_absolute('res://hengo/save')
+		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 	
 	if not FileAccess.file_exists('res://hengo/save/references.res'):
 		ResourceSaver.save(HenSideBarReferences.new(), 'res://hengo/save/references.res')

@@ -1,9 +1,32 @@
 @tool
 class_name HenApiGenerator
 
+const EXTENSION_API_PATH = 'res://extension_api.json'
 
-static func _generate_native_api() -> void:
-	var file: FileAccess = FileAccess.open('res://extension_api.json', FileAccess.READ)
+static func generate_native_api() -> void:
+	var thread: Thread = Thread.new()
+	thread.start(start_generation.bind(thread))
+
+
+static func start_generation(_thread: Thread) -> void:
+	print('Generating Godot Native Api...')
+	print('Dumping Godot Extension Api...')
+	var output: Array = []
+	OS.execute(OS.get_executable_path(), ['-q', '--headless', '--dump-extension-api'], output)
+
+	if FileAccess.file_exists(EXTENSION_API_PATH):
+		generate(_thread)
+	else:
+		print('Not Found extension_api.json. Try to restart Hengo.')
+		finish.call_deferred()
+	
+
+static func finish(_thread: Thread) -> void:
+	_thread.wait_to_finish()
+
+
+static func generate(_thread: Thread) -> void:
+	var file: FileAccess = FileAccess.open(EXTENSION_API_PATH, FileAccess.READ)
 	var data: Dictionary = JSON.parse_string(file.get_as_text())
 
 	var native_api: Dictionary = {}
@@ -30,27 +53,31 @@ static func _generate_native_api() -> void:
 					# static
 					if method.is_static:
 						var dt: Dictionary = {
-							name = '',
-							sub_type = HenVirtualCNode.SubType.SINGLETON,
+							name = dict.name,
+							singleton_class = dict.name,
+							name_to_code = method.name,
+							sub_type = HenVirtualCNode.SubType.VOID,
 						}
 
 						if method.has('arguments'):
 							dt.inputs = _parse_arguments(method)
 						
 						if method.has('return_type'):
+							dt.sub_type = HenVirtualCNode.SubType.FUNC
+							
 							dt['outputs'] = [ {
-								name = '',
+								name = method.name,
 								type = _parse_enum_return(method.return_type)
 							}]
 
 						singleton_api.append({
-							name = dict.name + '.' + method.name,
+							name = dict.name + ' -> ' + method.name,
 							data = dt
 						})
 					else:
 						var dt: Dictionary = {
 							name = method.name,
-							sub_type = HenVirtualCNode.SubType.FUNC,
+							sub_type = HenVirtualCNode.SubType.VOID,
 							inputs = [ {
 								name = dict.name,
 								type = dict.name,
@@ -62,6 +89,8 @@ static func _generate_native_api() -> void:
 							dt.inputs += _parse_arguments(method)
 						
 						if method.has('return_type'):
+							dt.sub_type = HenVirtualCNode.SubType.FUNC
+
 							dt['outputs'] = [ {
 								name = '',
 								type = _parse_enum_return(method.return_type)
@@ -103,7 +132,7 @@ static func _generate_native_api() -> void:
 					var dt: Dictionary = {
 						name = dict.name + '.' + method.name,
 						fantasy_name = dict.name + ' -> ' + method.name,
-						sub_type = HenVirtualCNode.SubType.SINGLETON,
+						sub_type = HenVirtualCNode.SubType.VOID,
 					}
 
 					if method.has('arguments'):
@@ -114,12 +143,6 @@ static func _generate_native_api() -> void:
 							name = '',
 							type = _parse_enum_return(method.return_value.type)
 						}]
-
-					# if dict.name.contains('is_action_pressed'):
-					print({
-						name = dict.name + ' -> ' + method.name,
-						data = dt
-					})
 
 					singleton_api.append({
 						name = dict.name + ' -> ' + method.name,
@@ -148,8 +171,13 @@ static func _generate_native_api() -> void:
 	)
 
 	file_json.close()
+	
+	# cleaning extension api
+	if FileAccess.file_exists(EXTENSION_API_PATH):
+		DirAccess.remove_absolute(EXTENSION_API_PATH)
 
-	print('HENGO NATIVE API GENERATED!!')
+	print('HENGO GODOT NATIVE API GENERATED.')
+	finish.call_deferred(_thread)
 
 
 static func _parse_enum_return(_type: String) -> String:

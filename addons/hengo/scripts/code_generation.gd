@@ -74,13 +74,13 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 		HenVirtualCNode.SubType.LOCAL_VAR:
 			return indent + _token.name
 		HenVirtualCNode.SubType.IN_PROP:
-			if _token.has('is_ref'):
-				if _token.use_self: return indent
-				else: return indent + prefix
-				
 			if _token.has('use_value'):
-				if _token.use_self: return indent + _token.value
-				else: return indent + prefix + _token.value
+				if _token.has('ref_value'):
+					if _token.use_self: return indent
+					else: return indent + _token.ref_value
+				else:
+					if _token.use_self: return indent + _token.value
+					else: return indent + prefix + _token.value
 
 			if _token.has('use_prefix'):
 				return indent + prefix + _token.value

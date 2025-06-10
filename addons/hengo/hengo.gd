@@ -2,7 +2,6 @@
 class_name HenHengo extends EditorPlugin
 
 const PLUGIN_NAME = 'Hengo'
-const MENU_NATIVE_API_NAME = "Hengo Generate Native Api"
 
 var main_scene
 var gd_previewer: CodeEdit
@@ -22,6 +21,9 @@ class DockConfig:
 func _enter_tree():
 	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
 	add_debugger_plugin(debug_plugin)
+
+	if not FileAccess.file_exists(HenEnums.NATIVE_API_PATH):
+		HenApiGenerator.generate_native_api()
 
 	# getting native api like String, float... methods.
 	var native_api_file: FileAccess = FileAccess.open(HenEnums.NATIVE_API_PATH, FileAccess.READ)
@@ -59,8 +61,6 @@ func _enter_tree():
 	HenAssets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
 	HenAssets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')
 
-	print('setted')
-
 	main_scene = HenAssets.HengoRootScene.instantiate()
 
 	HenGlobal.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
@@ -88,9 +88,6 @@ func _enter_tree():
 			var parent: TabContainer = c.get_parent()
 			HenGlobal.DOCKS[dock] = DockConfig.new(dock, parent)
 			parent.remove_child(c)
-
-	
-	add_tool_menu_item(MENU_NATIVE_API_NAME, HenApiGenerator._generate_native_api)
 
 	main_screen_changed.connect(_on_change_main_screen)
 	set_docks()
@@ -147,7 +144,6 @@ func _exit_tree():
 	HenGlobal.can_instantiate_pool = false
 	
 	remove_debugger_plugin(debug_plugin)
-	remove_tool_menu_item(MENU_NATIVE_API_NAME)
 	remove_control_from_bottom_panel(gd_previewer)
 
 	if main_scene:
@@ -156,6 +152,7 @@ func _exit_tree():
 	remove_autoload_singleton('HengoDebugger')
 	HenGlobal.HENGO_EDITOR_PLUGIN = null
 	print('Done')
+
 
 func _make_visible(_visible: bool):
 	if main_scene:

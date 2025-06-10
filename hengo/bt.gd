@@ -44,6 +44,7 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print()
+		print(_ref.get_offset().x)
+		print(WeakRef.new().get_ref())
 
 

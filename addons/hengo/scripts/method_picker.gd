@@ -395,6 +395,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 					local_api.append_array(get_others_classes_list())
 					local_api.append_array(get_from_list())
 					local_api.append_array(get_global_const_list())
+					local_api.append_array(get_native_singleton_list())
 				FILTER_TYPE.NATIVE:
 					local_api.append_array(get_native_list())
 				FILTER_TYPE.FUNC:
@@ -414,6 +415,24 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 					dt.icon_type = &'void'
 					dt.data.route = HenRouter.current_route
 					local_api.append(dt)
+			
+			if HenEnums.NATIVE_PROPS_LIST.has(to_type):
+				for dict: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(to_type):
+					var dt: Dictionary = dict.duplicate()
+					var name: String = 'Get {0} property'.format([dt.name])
+
+					local_api.append({
+						name = name,
+						icon_type = 'void',
+						data = {
+							name = name,
+							sub_type = HenVirtualCNode.SubType.GET_PROP,
+							inputs = [ {name = to_type, type = to_type, is_ref = true}],
+							outputs = [dt.merged({code_value = dt.name, })],
+							route = HenRouter.current_route
+						}
+					})
+
 		CLASS_TYPE.FROM:
 			var idx: int = 0
 
@@ -598,6 +617,17 @@ func get_from_list() -> Array:
 
 			local_api.append(dt)
 		
+	return local_api
+
+
+func get_native_singleton_list() -> Array:
+	var local_api: Array = []
+
+	for data: Dictionary in HenEnums.SINGLETON_API_LIST:
+		data.type = FILTER_TYPE.NATIVE
+		data.data.route = HenRouter.current_route
+		local_api.append(data)
+
 	return local_api
 
 

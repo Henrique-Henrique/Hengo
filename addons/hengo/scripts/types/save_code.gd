@@ -310,6 +310,7 @@ class CNode:
 
 			if input.is_ref:
 				data.is_ref = input.is_ref
+				data.ref_value = input.code_value
 
 			if input.category:
 				match input.category:
@@ -360,13 +361,13 @@ class CNode:
 		match sub_type:
 			HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 				token.merge({
-					name = name.to_snake_case() if not name_to_code else name_to_code,
+					name = name.to_snake_case() if not name_to_code else name_to_code.to_snake_case(),
 					params = get_input_token_list(),
 					singleton_class = singleton_class
 				})
 			HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
 				token.merge({
-					name = name.to_snake_case() if not name_to_code else name_to_code,
+					name = name.to_snake_case() if not name_to_code else name_to_code.to_snake_case(),
 					params = get_input_token_list(),
 					id = _id if outputs.size() > 1 else -1,
 					singleton_class = singleton_class
@@ -410,7 +411,7 @@ class CNode:
 					value = outputs[0].code_value.to_snake_case()
 				}
 
-				if outputs[0].data:
+				if outputs[0].data or inputs.size() > 0:
 					dt.data = get_input_token(inputs[0].id)
 
 				token.merge(dt)
