@@ -474,6 +474,7 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 		for connection: Dictionary in _cnode.input_connections:
 			var input_connection: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new()
 
+			input_connection.from_id = connection.from_id
 			input_connection.to_id = connection.to_id
 			input_connection.to = cn
 			input_connection.from_vc_id = connection.from_vc_id
@@ -514,10 +515,9 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 
 	match cn.type:
 		HenVirtualCNode.Type.STATE:
-			cn.route_type = HenRouter.ROUTE_TYPE.STATE
+			cn.route_type = HenRouter.ROUTE_TYPE.BASE
 			_refs.states.append(cn)
 		HenVirtualCNode.Type.MACRO:
-			cn.route_type = HenRouter.ROUTE_TYPE.MACRO
 			(cn.ref as HenSaveCodeType.Macro).macro_ref_list.append(cn)
 	
 	match cn.sub_type:

@@ -146,7 +146,7 @@ class CNode:
 				HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 					token_list.append(vc.get_for_token(stack))
 				HenVirtualCNode.SubType.MACRO:
-					token_list.append(vc.get_macro_token(_id))
+					token_list.append(vc.get_macro_token(_id, vc))
 				HenVirtualCNode.SubType.MACRO_OUTPUT:
 					if HenGlobal.USE_MACRO_REF:
 						var flow: FlowConnection = HenGlobal.MACRO_REF.get_flow(_id) if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
@@ -157,7 +157,7 @@ class CNode:
 						HenGlobal.USE_MACRO_REF = false
 				_:
 					token_list.append(vc.get_token())
-
+					
 					if not vc.flow_connections.is_empty() and vc.flow_connections[0].to:
 						stack.append({node = vc.flow_connections[0].to, id = vc.flow_connections[0].to_id})
 
@@ -171,14 +171,15 @@ class CNode:
 		return null
 
 
-	func get_macro_token(_flow_id: int) -> Dictionary:
+	func get_macro_token(_flow_id: int, _macro_ref: CNode) -> Dictionary:
 		var flow_tokens: Array
 		var input_flow: FlowConnection = ref.input_ref.get_flow(_flow_id)
 
 		if input_flow and input_flow.to:
+			prints('xxx -> ', _macro_ref.route_type)
 			HenGlobal.USE_MACRO_REF = true
 			HenGlobal.MACRO_REF = self
-			HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
+			HenGlobal.MACRO_USE_SELF = _macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 			HenGlobal.USE_MACRO_USE_SELF = true
 			flow_tokens = input_flow.to.get_flow_tokens(input_flow.to_id)
 			HenGlobal.USE_MACRO_USE_SELF = false
@@ -262,9 +263,8 @@ class CNode:
 		var connection: InputConnection
 		var input: Inout = get_input(_id)
 
-
 		if not input:
-			push_warning('Not found input token to generate: id -> ', _id)
+			push_error('Not found input token to generate: id -> ', _id)
 			return {}
 
 		for input_connection: InputConnection in input_connections:
@@ -276,7 +276,7 @@ class CNode:
 			match connection.from.sub_type:
 				HenVirtualCNode.SubType.MACRO_INPUT:
 					if HenGlobal.USE_MACRO_REF:
-						var data: Dictionary = HenGlobal.MACRO_REF.get_input_token(connection.to_id)
+						var data: Dictionary = HenGlobal.MACRO_REF.get_input_token(connection.from_id)
 						return data
 				HenVirtualCNode.SubType.MACRO:
 					HenGlobal.USE_MACRO_USE_SELF = true
@@ -294,7 +294,7 @@ class CNode:
 
 					if input.is_ref:
 						data.is_ref = input.is_ref
-						
+					
 					return data
 		elif input.code_value:
 			var data: Dictionary = {
@@ -322,7 +322,6 @@ class CNode:
 					'class_props':
 						data.use_value = true
 					'state_transition':
-						print('t=>', data)
 						data.value = '&"{0}"'.format([data.value.to_snake_case()])
 
 			return data

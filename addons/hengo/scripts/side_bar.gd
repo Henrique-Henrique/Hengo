@@ -268,9 +268,14 @@ class Param:
 		data_changed.emit('type', _type)
 		type = _type
 
+
 	func get_data() -> Dictionary:
 		return {name = name, type = type, ref = self}
-	
+		
+	func get_data_with_id() -> Dictionary:
+		return {id = id, name = name, type = type, ref = self}
+
+
 	func get_save() -> Dictionary:
 		return {
 			name = name,
@@ -769,10 +774,10 @@ class MacroData:
 		match _type:
 			ParamType.INPUT:
 				inputs_value.append(in_out)
-				in_out_added.emit(true, in_out.get_data())
+				in_out_added.emit(true, in_out.get_data_with_id())
 			ParamType.OUTPUT:
 				outputs_value.append(in_out)
-				in_out_added.emit(false, in_out.get_data())
+				in_out_added.emit(false, in_out.get_data_with_id())
 		
 
 	func move_param(_ref: Param, _type: ParamType) -> void:
@@ -804,8 +809,8 @@ class MacroData:
 				name = name,
 				type = HenVirtualCNode.Type.MACRO,
 				sub_type = HenVirtualCNode.SubType.MACRO,
-				inputs = inputs_value.map(func(x: Param) -> Dictionary: return x.get_data()),
-				outputs = outputs_value.map(func(x: Param) -> Dictionary: return x.get_data()),
+				inputs = inputs_value.map(func(x: Param) -> Dictionary: return x.get_data_with_id()),
+				outputs = outputs_value.map(func(x: Param) -> Dictionary: return x.get_data_with_id()),
 				route = HenRouter.current_route,
 				ref = self
 		}

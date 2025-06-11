@@ -1,0 +1,32 @@
+{
+ "background_color": "262626ff",
+ "compact_mode": false,
+ "configured_dirs": [
+  "res://addons/hengo/tests/unit"
+ ],
+ "dirs": [
+  "res://addons/hengo/tests/unit"
+ ],
+ "disable_colors": false,
+ "double_strategy": 1,
+ "errors_do_not_cause_failure": true,
+ "font_color": "ccccccff",
+ "font_name": "CourierPrime",
+ "font_size": 16.0,
+ "gut_on_top": true,
+ "hide_orphans": false,
+ "ignore_pause": false,
+ "include_subdirs": true,
+ "junit_xml_file": "",
+ "junit_xml_timestamp": false,
+ "log_level": 1.0,
+ "opacity": 100.0,
+ "paint_after": 0.1,
+ "post_run_script": "",
+ "pre_run_script": "",
+ "prefix": "test_",
+ "should_exit": false,
+ "should_exit_on_success": true,
+ "should_maximize": false,
+ "suffix": ".gd"
+}
