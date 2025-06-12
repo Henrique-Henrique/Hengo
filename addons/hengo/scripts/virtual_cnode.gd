@@ -1446,7 +1446,7 @@ func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
 			flow.line_ref.visible = false
 
 		flow.line_ref = null
-		flow.to_from_ref.from_connections.erase(flow)
+		if flow.to_from_ref: flow.to_from_ref.from_connections.erase(flow)
 	else:
 		var flow: FromFlowConnection = _flow_ref as FromFlowConnection
 		
@@ -1462,20 +1462,8 @@ func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
 	update()
 
 
-func _on_delete_flow(_ref: FlowConnectionData) -> void:
-	remove_flow_connection(_ref)
-	
-	update()
-
-
-func remove_flow_connection(_flow_ref: FlowConnectionData) -> void:
-	flow_connections.erase(_flow_ref)
-
-	if _flow_ref.line_ref:
-		_flow_ref.line_ref.visible = false
-
-	_flow_ref.line_ref = null
-	_flow_ref.to_from_ref.from_connections.erase(_flow_ref)
+func _on_delete_flow_state(_ref: FlowConnectionData) -> void:
+	_on_flow_deleted(true, _ref)
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
