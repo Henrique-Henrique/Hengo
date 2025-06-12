@@ -26,11 +26,10 @@ static var FROM_REFERENCES: HenSideBarReferences
 
 # cnodes
 static var can_make_connection: bool = false
-static var connection_to_data: Dictionary = {} # type, from, from_cn
+static var connection_to_data: HenCnodeInOut.CNodeInOutConnectionData
 static var can_make_flow_connection: bool = false
 static var flow_connection_to_data: Dictionary = {}
 static var flow_cnode_from: PanelContainer = null
-static var connection_first_data: Dictionary = {}
 
 # cam
 static var mouse_on_cnode_ui: bool = false
@@ -63,7 +62,6 @@ class ScriptData:
 # save load
 static var current_script_path: StringName = ''
 static var script_config: ScriptData
-static var reparent_data: Dictionary = {}
 
 # parser
 static var SCRIPTS_INFO: Dictionary = {}

@@ -160,8 +160,6 @@ func _input(event: InputEvent) -> void:
 				HenGlobal.history.create_action('Delete Node')
 
 				for cnode: HenCnode in all_nodes:
-					# if not cnode.virtual_ref or cnode.sub_type == HenVirtualCNode.SubType.VIRTUAL:
-					# 	continue
 					var v_cnode: HenVirtualCNode.VCNodeReturn = cnode.virtual_ref.get_history_obj()
 
 					HenGlobal.history.add_do_method(v_cnode.remove)
@@ -194,40 +192,6 @@ func _input(event: InputEvent) -> void:
 						route = HenRouter.current_route,
 						position = Vector2(0, 500 * i + 1)
 					})
-					# var cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
-					# 	name = 'IF',
-					# 	type = HenVirtualCNode.Type.IF,
-					# 	sub_type = HenVirtualCNode.SubType.IF,
-					# 	route = HenRouter.current_route,
-					# 	inputs = [
-					# 		{
-					# 			name = 'condition',
-					# 			type = 'bool'
-					# 		},
-					# 	],
-					# 	position = Vector2(100, 600 * i)
-					# })
-
-					# var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
-					# 	name = 'print',
-					# 	sub_type = HenVirtualCNode.SubType.VOID,
-					# 	category = 'native',
-					# 	inputs = [
-					# 		{
-					# 			name = 'content',
-					# 			type = 'String'
-					# 		}
-					# 	],
-					# 	route = HenRouter.current_route,
-					# 	position = Vector2(0, 500 * i + 1)
-					# })
-
-					# cnode.add_flow_connection(1, 0, cnode2).add()
-
-					# if i > 0:
-					# 	old.add_flow_connection(0, 0, cnode).add()
-
-					# old = cnode2
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:

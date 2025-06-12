@@ -49,7 +49,12 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		print(virtual_ref.name_to_code)
+		for input in virtual_ref.inputs:
+			print(input.get_save())
+
+		for input in virtual_ref.outputs:
+			print(input.get_save())
+		# print(virtual_ref.name_to_code)
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection:

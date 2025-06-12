@@ -571,7 +571,7 @@ class VCNodeReturn:
 	func remove() -> void:
 		if not v_cnode.can_delete:
 			return
-
+		
 		v_cnode.route_ref.ref.virtual_cnode_list.erase(v_cnode)
 
 		old_inputs_connections.append_array(v_cnode.input_connections)
@@ -672,17 +672,12 @@ func show() -> void:
 				input.visible = false
 
 				if idx < inputs.size():
-					input.reset()
 					input.visible = true
 					
 					var input_data: InOutData = inputs[idx]
 
 					input.change_name(input_data.name)
-
 					input.input_ref = input_data
-					input.custom_data = input_data.data
-					input.category = input_data.category
-					input.sub_type = input_data.sub_type
 					
 					if input_data.type:
 						if input_data.is_prop:
@@ -720,9 +715,6 @@ func show() -> void:
 					var output_data: InOutData = outputs[idx]
 					
 					output.input_ref = output_data
-					output.custom_data = output_data.data
-					output.category = output_data.category
-					output.sub_type = output_data.sub_type
 
 					output.change_name(output_data.name)
 					output.change_type(
@@ -1055,6 +1047,9 @@ func get_save() -> Dictionary:
 		flow_connections = []
 	}
 
+	if not can_delete:
+		data.can_delete = false
+
 	if name_to_code:
 		data.name_to_code = name_to_code
 
@@ -1182,6 +1177,12 @@ func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> Conne
 
 	var input: InOutData = get_input(_id)
 	var output: InOutData = _from.get_output(_from_id)
+
+	if not input or not output:
+		return
+	
+	if not HenUtils.is_type_relation_valid(output.type, input.type):
+		return
 
 	# output
 	output_connection.type = output.type
@@ -1318,6 +1319,14 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 func _on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: InOutData) -> void:
 	if HenUtils.is_type_relation_valid(_old_type, _type):
 		remove_inout_connection(_ref)
+
+
+func input_has_connection(_id: int) -> bool:
+	for input_connection: InputConnectionData in input_connections:
+		if input_connection.to_id == _id:
+			return true
+
+	return false
 
 
 func remove_inout_connection(_ref: InOutData) -> void:

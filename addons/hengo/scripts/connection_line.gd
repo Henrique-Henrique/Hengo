@@ -141,7 +141,7 @@ func show_debug() -> void:
 		width = 13
 		texture = debug_texture
 
-		match input.owner.connection_type:
+		match input.owner.input_ref.connection_type:
 			'Variant':
 				material.set('shader_parameter/color', Color('#72788a'))
 			_:

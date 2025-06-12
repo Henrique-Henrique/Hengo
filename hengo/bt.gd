@@ -11,10 +11,6 @@ extends Sprite2D
 
  # Variables #
 
-func func_11018674441():
-
-	get_offset()
-
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -44,6 +40,6 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		_ref.get_offset()
+		print("ohayo")
 
 
