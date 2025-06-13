@@ -194,9 +194,11 @@ class CNode:
 	func get_if_token(_stack: Array) -> Dictionary:
 		var true_flow_id: int = HenCodeGeneration.get_flow_id()
 		var false_flow_id: int = HenCodeGeneration.get_flow_id()
+		var then_flow_id: int = HenCodeGeneration.get_flow_id()
 
 		HenCodeGeneration.flows_refs[true_flow_id] = []
 		HenCodeGeneration.flows_refs[false_flow_id] = []
+		HenCodeGeneration.flows_refs[then_flow_id] = []
 
 		for flow: FlowConnection in flow_connections:
 			match flow.id:
@@ -204,11 +206,14 @@ class CNode:
 					_stack.append({node = flow.to, id = flow.to_id, flow_id = true_flow_id})
 				1:
 					_stack.append({node = flow.to, id = flow.to_id, flow_id = false_flow_id})
+				2:
+					_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
 
 		return {
 			type = HenVirtualCNode.SubType.IF,
 			true_flow_id = true_flow_id,
 			false_flow_id = false_flow_id,
+			then_flow_id = then_flow_id,
 			condition = get_input_token(inputs[0].id),
 			use_self = false
 		}

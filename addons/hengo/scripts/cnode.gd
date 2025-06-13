@@ -49,11 +49,8 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		for input in virtual_ref.inputs:
-			print(input.get_save())
+		print(JSON.stringify(virtual_ref.get_save()))
 
-		for input in virtual_ref.outputs:
-			print(input.get_save())
 		# print(virtual_ref.name_to_code)
 	_is_mouse_enter = true
 

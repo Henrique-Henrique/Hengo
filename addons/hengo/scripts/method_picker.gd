@@ -240,13 +240,15 @@ var native_list: Array = [
 				},
 				{
 					name = 'step',
-					type = 'int'
+					type = 'int',
+					value = 1,
+                	code_value = '1'
 				}
 			],
 			outputs = [
 				{
 					name = 'index',
-					type = 'int'
+					type = 'int',
 				}
 			],
 			route = HenRouter.current_route

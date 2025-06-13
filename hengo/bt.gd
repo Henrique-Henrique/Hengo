@@ -40,6 +40,7 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print("ohayo")
+		for index_80 in range(0, 0, 1):
+			print(index_80)
 
 

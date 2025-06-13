@@ -1577,6 +1577,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		Type.IF:
 			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'True', id = 0}))
 			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'False', id = 1}))
+			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Then', id = 2}))
 			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))
 		Type.FOR:
 			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Body', id = 0}))
