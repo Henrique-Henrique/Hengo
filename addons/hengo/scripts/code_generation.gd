@@ -59,10 +59,17 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
 			return indent + 'HengoState.INVALID_PLACEHOLDER'
-		HenVirtualCNode.SubType.VAR:
+		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.DEEP_PROP:
+			if _token.has('ref'):
+				return indent + get_prefix_with_dot(parse_token_by_type(_token.ref)) + _token.name
 			return indent + prefix + _token.name
 		HenVirtualCNode.SubType.SET_VAR:
 			return indent + prefix + '{name} = {value}'.format({
+				name = _token.name,
+				value = parse_token_by_type(_token.value)
+			})
+		HenVirtualCNode.SubType.SET_DEEP_PROP:
+			return indent + get_prefix_with_dot(parse_token_by_type(_token.ref)) + '{name} = {value}'.format({
 				name = _token.name,
 				value = parse_token_by_type(_token.value)
 			})
@@ -123,6 +130,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 			if _token.singleton_class:
 				prefix = _token.singleton_class + '.'
+
+			print(_token)
 
 			return indent + prefix + '{name}({params}){id}'.format({
 				name = _token.name,
@@ -246,13 +255,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return indent + 'pass'
 		HenVirtualCNode.SubType.RAW_CODE:
 			return _token.code.value.trim_prefix('"').trim_suffix('"')
-		HenVirtualCNode.SubType.GET_PROP:
-			if not _token.has('data'): return indent + prefix + _token.value
-			return indent + parse_token_by_type(_token.data) + '.' + _token.value
-		HenVirtualCNode.SubType.SET_PROP:
-			# print('== ', _token)
-			if not _token.has('data'): return indent + prefix + _token.name + ' = ' + parse_token_by_type(_token.value)
-			return indent + parse_token_by_type(_token.data) + '.' + _token.name + ' = ' + parse_token_by_type(_token.value)
 		HenVirtualCNode.SubType.EXPRESSION:
 			var new_exp: String = _token.exp
 			var reg: RegEx = RegEx.new()
@@ -342,6 +344,18 @@ static func get_code(_data: HenScriptData) -> String:
 
 	# generating variables references
 	for variable_data: Dictionary in _data.side_bar_list.var_list:
+		if variable_data.has('invalid') and not variable_data.invalid:
+			continue
+
+		var variable: HenSideBar.VarData = HenSideBar.VarData.new()
+		
+		variable.id = variable_data.id
+		variable.name = variable_data.name
+		variable.type = variable_data.type
+		variable.export = variable_data.export
+
+		refs.side_bar_item_ref[variable.id] = variable
+
 		refs.variables.append(_get_variable_from_dict(variable_data))
 
 	# generating function references
@@ -467,7 +481,8 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 		cn.invalid = _cnode.invalid
 
 	if _cnode.has(&'ref_id'):
-		cn.ref = _refs.side_bar_item_ref[_cnode.ref_id]
+		if not cn.invalid:
+			cn.ref = _refs.side_bar_item_ref[_cnode.ref_id]
 
 	if _cnode.has(&'category'):
 		cn.category = _cnode.category

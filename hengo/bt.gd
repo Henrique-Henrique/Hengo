@@ -10,6 +10,7 @@
 extends Sprite2D
 
  # Variables #
+var ata = String()
 
 
 var _STATE_CONTROLLER = HengoStateController.new()
@@ -40,7 +41,7 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		for index_80 in range(0, 0, 1):
-			print(index_80)
+		print(_ref.get_rect().position)
+		_ref.get_rect().position.x = _ref.self_modulate.g_8
 
 

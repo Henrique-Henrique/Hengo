@@ -95,15 +95,11 @@ func _on_pressed() -> void:
 			var arr: Array = []
 			
 			# local variables
-			match HenRouter.current_route.type:
-				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-					if HenRouter.current_route.ref.get(&'local_vars') is Array:
-						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
-							arr.append({name = var_data.name, type = var_data.type, ref = var_data})
+			# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-			# variables
-			for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
-				arr.append({name = var_data.name, type = var_data.type, ref = var_data})
+			# # variables
+			# for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+			# 	arr.append({name = var_data.name, type = var_data.type, ref = var_data})
 
 			# properties
 			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type if not custom_data else custom_data):

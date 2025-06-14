@@ -23,8 +23,6 @@ enum SubType {
 	DEBUG_VALUE = 4,
 	USER_FUNC = 5,
 	SET_VAR = 6,
-	SET_PROP = 7,
-	GET_PROP = 8,
 	GET_FROM_PROP = 9,
 	VIRTUAL = 10,
 	FUNC_INPUT = 11,
@@ -63,6 +61,8 @@ enum SubType {
 	OVERRIDE_VIRTUAL = 45,
 	FUNC_FROM = 46,
 	INVALID = 47,
+	DEEP_PROP = 48,
+	SET_DEEP_PROP = 49
 }
 
 var name: String
@@ -81,7 +81,6 @@ var route_ref: Dictionary
 var category: StringName
 var virtual_cnode_list: Array = []
 var virtual_sub_type_vc_list: Array = []
-var ref_id: int = -1
 var ref: Object
 var can_delete: bool = true
 var is_deleted: bool = false
@@ -108,7 +107,6 @@ class InOutData extends Object:
 	var data: Variant
 	var is_prop: bool
 	var is_static: bool
-	var ref_id: int = -1
 	var ref: Object
 	var ref_change_rule: RefChangeRule
 	var from_id: int = -1
@@ -149,8 +147,6 @@ class InOutData extends Object:
 
 	func set_ref(_ref, _ref_change_rule: RefChangeRule = RefChangeRule.NONE) -> void:
 		ref = _ref
-		# ref is required to have id to save and load work
-		ref_id = _ref.id
 		ref_change_rule = _ref_change_rule
 
 		# when param is moved
@@ -158,7 +154,8 @@ class InOutData extends Object:
 			ref.moved.connect(_on_move)
 
 		if ref.has_signal('deleted') and not ref.is_connected('deleted', _on_delete):
-			ref.deleted.connect(_on_delete)
+			if not ref is HenSideBar.VarData:
+				ref.deleted.connect(_on_delete)
 
 		if _ref.has_signal('data_changed') and not ref.is_connected('data_changed', on_data_changed):
 			_ref.data_changed.connect(on_data_changed)
@@ -172,8 +169,6 @@ class InOutData extends Object:
 		deleted.emit(_is_input, self)
 
 	func remove_ref() -> void:
-		ref_id = -1
-
 		if ref:
 			for signal_connetion: Dictionary in ref.get_signal_connection_list('data_changed'):
 				signal_connetion.signal.disconnect(signal_connetion.callable)
@@ -202,7 +197,6 @@ class InOutData extends Object:
 					if not ['value', 'code_value'].has(_name):
 						return
 
-
 		set(_name, _value)
 
 		if sub_type != '@dropdown':
@@ -229,7 +223,7 @@ class InOutData extends Object:
 		if data: dt.data = data
 		if is_prop: dt.is_prop = is_prop
 		if is_static: dt.is_static = is_static
-		if ref_id > 0: dt.ref_id = ref_id
+		if ref: dt.ref_id = ref.id
 		if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
 
 		return dt
@@ -1059,8 +1053,8 @@ func get_save() -> Dictionary:
 	if invalid:
 		data.invalid = invalid
 
-	if ref_id > 0:
-		data.ref_id = ref_id
+	if ref:
+		data.ref_id = ref.id
 
 	if from_side_bar_id > -1:
 		data.from_side_bar_id = from_side_bar_id
@@ -1297,9 +1291,13 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 				_is_input = false
 
 	if _data.has('ref_id'):
-		_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
+		if not invalid:
+			_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
 
 	var in_out: InOutData = InOutData.new(_data)
+
+	if _data.has('ref'):
+		in_out.set_ref(_data.ref, )
 
 	in_out.moved.connect(_on_in_out_moved)
 	in_out.deleted.connect(_on_in_out_deleted)
@@ -1525,16 +1523,16 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	if _config.has('from_id'):
 		v_cnode.from_id = _config.from_id
 
-	if _config.has('ref_id'):
-		_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
-
 	if _config.has('invalid'):
 		v_cnode.invalid = _config.invalid
+
+	if _config.has('ref_id'):
+		if not v_cnode.invalid:
+			_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
 
 	if _config.has('ref'):
 		# ref is required to have id to save and load work
 		v_cnode.ref = _config.ref
-		v_cnode.ref_id = _config.ref.id
 
 		if _config.ref.has_signal('name_changed'):
 			_config.ref.name_changed.connect(v_cnode._on_change_name)

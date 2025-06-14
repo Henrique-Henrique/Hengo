@@ -1,0 +1,1 @@
+godot --headless -d -s addons/gut/gut_cmdln.gd -gexit -glog=1 -gdir=res://addons/hengo/tests/unit

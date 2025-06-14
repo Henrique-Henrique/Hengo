@@ -264,6 +264,17 @@ class CNode:
 
 		return false
 
+	func get_output_index(_id: int) -> int:
+		var idx: int = 0
+
+		for output: Inout in outputs:
+			if output.id == _id:
+				return idx
+
+			idx += 1
+
+		return 0
+
 	func get_input_token(_id: int) -> Dictionary:
 		var connection: InputConnection
 		var input: Inout = get_input(_id)
@@ -290,8 +301,10 @@ class CNode:
 					HenGlobal.USE_MACRO_USE_SELF = false
 					return data
 				_:
-					var data: Dictionary = connection.from.get_token(connection.to_id)
-					data.prop_name = input.name
+					var data: Dictionary = connection.from.get_token(connection.from.get_output_index(connection.from_id))
+					
+					if not data.type == HenVirtualCNode.SubType.INVALID:
+						data.prop_name = input.name
 
 					if HenGlobal.USE_MACRO_REF:
 						if data.has('value'):
@@ -380,6 +393,22 @@ class CNode:
 				token.merge({
 					name = outputs[0].name.to_snake_case(),
 				})
+			HenVirtualCNode.SubType.DEEP_PROP:
+				if inputs.is_empty():
+					token.merge({
+						name = name_to_code.to_snake_case()
+					})
+				else:
+					token.merge({
+						ref = get_input_token(0),
+						name = name_to_code.to_snake_case()
+					})
+			HenVirtualCNode.SubType.SET_DEEP_PROP:
+				token.merge({
+					name = name_to_code.to_snake_case(),
+					ref = get_input_token(0),
+					value = get_input_token(1)
+				})
 			HenVirtualCNode.SubType.SET_VAR, HenVirtualCNode.SubType.SET_LOCAL_VAR:
 				token.merge({
 					name = inputs[0].name.to_snake_case(),
@@ -410,27 +439,6 @@ class CNode:
 					singleton_class = name,
 					name = name_to_code
 				})
-			HenVirtualCNode.SubType.GET_PROP:
-				var dt: Dictionary = {
-					value = outputs[0].code_value.to_snake_case()
-				}
-
-				if outputs[0].data or inputs.size() > 0:
-					dt.data = get_input_token(inputs[0].id)
-
-				token.merge(dt)
-			HenVirtualCNode.SubType.SET_PROP:
-				var dt: Dictionary = {}
-
-				if inputs[0].is_ref:
-					dt.data = get_input_token(inputs[0].id)
-					dt.name = get_input_token(inputs[1].id).value
-					dt.value = get_input_token(inputs[2].id)
-				else:
-					dt.name = inputs[0].code_value.to_snake_case()
-					dt.value = get_input_token(inputs[1].id)
-
-				token.merge(dt)
 			HenVirtualCNode.SubType.EXPRESSION:
 				# check inputs
 				for input: Inout in inputs.slice(1):

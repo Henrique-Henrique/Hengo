@@ -82,45 +82,6 @@ var native_list: Array = [
 		}
 	},
 	{
-		name = 'Get',
-		data = {
-			name = 'Get',
-			sub_type = HenVirtualCNode.SubType.GET_PROP,
-			outputs = [
-				{
-					name = '',
-					type = 'Variant',
-					sub_type = '@dropdown',
-					category = 'get_prop',
-				}
-			],
-			route = HenRouter.current_route
-		}
-
-	},
-	{
-		name = 'Set',
-		data = {
-			name = 'Set',
-			sub_type = HenVirtualCNode.SubType.SET_PROP,
-			inputs = [
-				{
-					name = '',
-					type = 'Variant',
-					sub_type = '@dropdown',
-					category = 'set_prop',
-					code_value = '__a',
-					is_static = true
-				},
-				{
-					name = 'value',
-					type = 'Variant',
-				},
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
 		name = 'Expression',
 		data = {
 			name = 'Expression',
@@ -389,6 +350,9 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 				FILTER_TYPE.SELF:
 					for dict in ClassDB.class_get_method_list(selected_class):
 						local_api.append(_get_class_obj(dict, selected_class))
+					local_api.append_array(get_var_list())
+					local_api.append_array(get_local_var_list())
+					local_api.append_array(get_prop_list(HenGlobal.script_config.type))
 				FILTER_TYPE.ALL:
 					local_api.append_array(get_native_list())
 					local_api.append_array(get_function_list())
@@ -398,6 +362,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 					local_api.append_array(get_from_list())
 					local_api.append_array(get_global_const_list())
 					local_api.append_array(get_native_singleton_list())
+					local_api.append_array(get_var_list())
 				FILTER_TYPE.NATIVE:
 					local_api.append_array(get_native_list())
 				FILTER_TYPE.FUNC:
@@ -417,23 +382,15 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 					dt.icon_type = &'void'
 					dt.data.route = HenRouter.current_route
 					local_api.append(dt)
+			else:
+				local_api.append_array(get_prop_list(to_type))
 			
 			if HenEnums.NATIVE_PROPS_LIST.has(to_type):
 				for dict: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(to_type):
 					var dt: Dictionary = dict.duplicate()
-					var name: String = 'Get {0} property'.format([dt.name])
 
-					local_api.append({
-						name = name,
-						icon_type = 'void',
-						data = {
-							name = name,
-							sub_type = HenVirtualCNode.SubType.GET_PROP,
-							inputs = [ {name = to_type, type = to_type, is_ref = true}],
-							outputs = [dt.merged({code_value = dt.name, })],
-							route = HenRouter.current_route
-						}
-					})
+					get_deep_prop_data(local_api, dt.name, to_type, dt.type, true)
+					get_deep_prop(local_api, to_type, dt.name, dt.type, true)
 
 		CLASS_TYPE.FROM:
 			var idx: int = 0
@@ -622,6 +579,216 @@ func get_from_list() -> Array:
 	return local_api
 
 
+func get_deep_prop_data(_local_api: Array, _name: String, _class: StringName, _type: StringName, _create_get_input: bool = false) -> void:
+	var get_dt: Dictionary = {
+		name = 'Get -> ' + _name,
+		type = FILTER_TYPE.SELF,
+		data = {
+			name = 'Get Property',
+			name_to_code = _name.replacen(' -> ', '.'),
+			sub_type = HenVirtualCNode.SubType.DEEP_PROP,
+			route = HenRouter.current_route,
+			outputs = [
+				{
+					name = _name,
+					type = _type,
+				}
+			]
+		}
+	}
+
+	if _create_get_input:
+		get_dt.data.inputs = [ {
+			id = 0,
+			name = _class,
+			type = _class,
+			is_ref = true
+		}]
+
+	_local_api.append(get_dt)
+
+	_local_api.append({
+		name = 'Set -> ' + _name,
+		type = FILTER_TYPE.SELF,
+		data = {
+			name = 'Set Property',
+			sub_type = HenVirtualCNode.SubType.SET_DEEP_PROP,
+			name_to_code = _name.replacen(' -> ', '.'),
+			route = HenRouter.current_route,
+			inputs = [
+				{
+					id = 0,
+					name = _class,
+					type = _class,
+					is_ref = true
+				},
+				{
+					id = 1,
+					name = _name,
+					type = _type,
+				}
+			]
+		}
+	})
+
+func get_deep_prop(_local_api: Array, _type: StringName, _name: String, _prop_type: StringName, _create_get_input: bool = false) -> void:
+	if HenEnums.NATIVE_PROPS_LIST.has(_prop_type):
+		for prop: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(_prop_type):
+			var my_name: String = _name + ' -> ' + prop.name
+			
+			get_deep_prop_data(_local_api, my_name, _type, prop.type, _create_get_input)
+			get_deep_prop(_local_api, _type, my_name, prop.type)
+
+
+func get_prop_list(_class: StringName) -> Array:
+	var local_api: Array = []
+
+	for prop: Dictionary in ClassDB.class_get_property_list(_class):
+		var prop_type: StringName = type_string(prop.type)
+
+		if prop.type != TYPE_NIL:
+			local_api.append({
+				name = 'Get -> ' + prop.name,
+				type = FILTER_TYPE.SELF,
+				data = {
+					name = 'Get Property',
+					sub_type = HenVirtualCNode.SubType.VAR,
+					route = HenRouter.current_route,
+					outputs = [
+						{
+							name = prop.name,
+							type = type_string(prop.type),
+						}
+					]
+				}
+			})
+
+			local_api.append({
+				name = 'Set -> ' + prop.name,
+				type = FILTER_TYPE.SELF,
+				data = {
+					name = 'Set Property',
+					sub_type = HenVirtualCNode.SubType.SET_DEEP_PROP,
+					name_to_code = prop.name,
+					route = HenRouter.current_route,
+					inputs = [
+						{
+							id = 0,
+							name = _class,
+							type = _class,
+							is_ref = true
+						},
+						{
+							id = 1,
+							name = prop.name,
+							type = type_string(prop.type),
+						}
+					]
+				}
+			})
+		
+		get_deep_prop(local_api, _class, prop.name, prop_type)
+
+	return local_api
+
+
+func get_local_var_list() -> Array:
+	var local_api: Array = []
+
+	match HenRouter.current_route.type:
+		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
+			if HenRouter.current_route.ref.get(&'local_vars') is Array:
+				for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
+					var get_data: Dictionary = {
+						name = 'Local var -> ' + var_data.name,
+						type = FILTER_TYPE.SELF,
+						data = {
+							name = 'Get Variable',
+							sub_type = HenVirtualCNode.SubType.VAR,
+							route = HenRouter.current_route,
+							ref = var_data,
+							outputs = [
+								{
+									name = var_data.name,
+									type = var_data.type,
+									ref = var_data
+								}
+							]
+						}
+					}
+
+					var set_data: Dictionary = {
+						name = 'Local var -> Set -> ' + var_data.name,
+						type = FILTER_TYPE.SELF,
+						data = {
+							name = 'Set Variable',
+							sub_type = HenVirtualCNode.SubType.SET_VAR,
+							route = HenRouter.current_route,
+							ref = var_data,
+							inputs = [
+								{
+									name = var_data.name,
+									type = var_data.type,
+									ref = var_data
+								}
+							]
+						}
+					}
+
+
+					local_api.append(get_data)
+					local_api.append(set_data)
+
+	return local_api
+
+
+func get_var_list() -> Array:
+	var local_api: Array = []
+
+	for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+		var get_data: Dictionary = {
+			name = 'Self -> ' + var_data.name,
+			type = FILTER_TYPE.SELF,
+			data = {
+				name = 'Get Variable',
+				sub_type = HenVirtualCNode.SubType.VAR,
+				route = HenRouter.current_route,
+				ref = var_data,
+				outputs = [
+					{
+						name = var_data.name,
+						type = var_data.type,
+						ref = var_data
+					}
+				]
+			}
+		}
+
+		var set_data: Dictionary = {
+			name = 'Self -> Set -> ' + var_data.name,
+			type = FILTER_TYPE.SELF,
+			data = {
+				name = 'Set Variable',
+				sub_type = HenVirtualCNode.SubType.SET_VAR,
+				route = HenRouter.current_route,
+				ref = var_data,
+				inputs = [
+					{
+						name = var_data.name,
+						type = var_data.type,
+						ref = var_data
+					}
+				]
+			}
+		}
+
+
+		local_api.append(get_data)
+		local_api.append(set_data)
+
+	return local_api
+
+
 func get_native_singleton_list() -> Array:
 	var local_api: Array = []
 
@@ -735,11 +902,6 @@ func get_macro_list() -> Array:
 
 
 func search_name(_name: String, _name_to_search: String) -> bool:
-	# var reg: RegEx = RegEx.new()
-	# reg.compile('[()\\->.\\s]')
-	# var clean_name: String = reg.sub(_name.to_lower(), "", true)
-	# var clean_name_to_search: String = reg.sub(_name_to_search.to_lower(), "", true)
-	# return clean_name.containsn(clean_name_to_search)
 	var clean_name: String = _name.to_lower().replace('_', '')
 	var clean_name_to_search: String = _name_to_search.to_lower().replace('_', '')
 	
@@ -762,11 +924,12 @@ func _on_select() -> void:
 
 	# make connection
 	if cnode_config.has('from_virtual_ref'):
-		vc_return.v_cnode.create_connection(
+		var connection: HenVirtualCNode.ConnectionReturn = vc_return.v_cnode.create_connection(
 			vc_return.v_cnode.inputs[0].id,
 			cnode_config.in_out_id,
 			cnode_config.from,
-		).add()
+		)
+		if connection: connection.add()
 	elif cnode_config.has('to_virtual_ref'):
 		cnode_config.from.create_connection(
 			cnode_config.to_virtual_ref.id,

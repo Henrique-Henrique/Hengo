@@ -189,8 +189,7 @@ class VarData:
 
 	func on_change_name(_name: String) -> void:
 		name = _name
-		data_changed.emit('value', _name)
-		data_changed.emit('code_value', _name.to_snake_case())
+		data_changed.emit('name', _name)
 
 	func get_save() -> Dictionary:
 		return {

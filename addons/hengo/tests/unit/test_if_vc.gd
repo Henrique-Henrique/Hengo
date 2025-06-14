@@ -2,7 +2,6 @@ extends GutTest
 
 func test_if_code() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
-
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'IF',
 		type = HenVirtualCNode.Type.IF,
