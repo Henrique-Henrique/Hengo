@@ -1,12 +1,13 @@
 {
-    "files.exclude": {
-        "**/.gitignore": false,
-        "**/*.tscn": true,
-        "**/*.svg": true,
-        "**/*.*.import": true,
-        "**/*.godot": true,
-        "**/*.png": true,
-        "**/*.cfg": true,
-        "**/*.uid": true,
-    }
+  "files.exclude": {
+    "**/.gitignore": false,
+    "**/*.tscn": true,
+    "**/*.svg": true,
+    "**/*.*.import": true,
+    "**/*.godot": true,
+    "**/*.png": true,
+    "**/*.cfg": true,
+    "**/*.uid": true
+  },
+  "godotTools.editorPath.godot4": "c:\\Users\\pedro.oliveira\\Desktop\\Gd\\godot.exe"
 }

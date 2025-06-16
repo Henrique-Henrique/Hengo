@@ -131,8 +131,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			if _token.singleton_class:
 				prefix = _token.singleton_class + '.'
 
-			print(_token)
-
 			return indent + prefix + '{name}({params}){id}'.format({
 				name = _token.name,
 				id = '[{0}]'.format([_token.id]) if _token.id >= 0 else '',
@@ -265,7 +263,6 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			
 			return new_exp
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
-			print('uu ', _token)
 			var values: Array = _provide_params_ref(_token.params, prefix)
 			var params: Array = values[0]
 			var my_prefix = values[1]
@@ -427,8 +424,6 @@ static func get_code(_data: HenScriptData) -> String:
 	code += _parse_functions(refs)
 	code += _parse_signals(refs)
 	code += _set_base_cnodes(refs)
-
-	print(code)
 
 	return code
 
@@ -644,11 +639,10 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 		match cnode.sub_type:
 			# getting start state cnode
 			HenVirtualCNode.SubType.STATE_START:
-				start_state = cnode.flow_connections[0].to
+				if not cnode.flow_connections.is_empty():
+					start_state = cnode.flow_connections[0].to
 			HenVirtualCNode.SubType.STATE:
 				var transitions: Array = []
-
-				print(cnode.sub_type)
 
 				# getting transition
 				for flow_connection: HenSaveCodeType.FlowConnection in cnode.flow_connections:
@@ -678,7 +672,6 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 
 					override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_token_list(0))
 	
-	print(_refs.states_data)
 
 	# search for override virtual inside macros
 	for macro: HenSaveCodeType.Macro in _refs.macros:
@@ -738,7 +731,6 @@ func _init() -> void:
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("{start_state_name}")
-	
 {_ready}
 
 func trigger_event(_event: String) -> void:
@@ -752,8 +744,7 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 {_physics_process}
-{states}
-""".format({
+{states}""".format({
 		events = ' { \n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
 			return '{event_name}="{to_state_name}"'.format({
@@ -805,7 +796,7 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 		})
 
 		if item.virtual_tokens.is_empty():
-			base += '\tpass\n\n'
+			base += '\tpass'
 			code += base
 			continue
 
@@ -831,7 +822,7 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 					parse_token_by_type(token, 2)
 				)
 			
-			func_base += '\n'.join(func_codes) + '\n\n'
+			func_base += '\n'.join(func_codes)
 			base += func_base
 
 		code += base

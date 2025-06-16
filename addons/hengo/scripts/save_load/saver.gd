@@ -43,6 +43,32 @@ class SaveDependency:
 			script_data.save_script()
 
 
+static func generate_script_data() -> HenScriptData:
+	var script_data: HenScriptData = HenScriptData.new()
+
+	script_data.path = HenGlobal.script_config.path
+	script_data.type = HenGlobal.script_config.type
+	script_data.node_counter = HenGlobal.node_counter
+	script_data.prop_counter = HenGlobal.prop_counter
+
+	# ---------------------------------------------------------------------------- #
+	# Side Bar List
+	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save()
+
+	# ---------------------------------------------------------------------------- #
+	var v_cnode_list: Array[Dictionary] = []
+
+	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
+		v_cnode_list.append(v_cnode.get_save())
+
+		if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
+			script_data.state_event_list.append(v_cnode.name)
+			
+	script_data.virtual_cnode_list = v_cnode_list
+
+	return script_data
+
+
 static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
 	start_load()
 	show_msg()
@@ -62,31 +88,8 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 
 	HenGlobal.FROM_REFERENCES = side_bar_refs
 
-	var script_data: HenScriptData = HenScriptData.new()
-
-	script_data.path = HenGlobal.script_config.path
-	script_data.type = HenGlobal.script_config.type
-	script_data.node_counter = HenGlobal.node_counter
-	script_data.prop_counter = HenGlobal.prop_counter
-	script_data.debug_symbols = _debug_symbols
-
-	# ---------------------------------------------------------------------------- #
-	# Side Bar List
-	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save()
-
-	# ---------------------------------------------------------------------------- #
-	var v_cnode_list: Array[Dictionary] = []
-
-	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
-		v_cnode_list.append(v_cnode.get_save())
-
-		if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
-			script_data.state_event_list.append(v_cnode.name)
-			
-	script_data.virtual_cnode_list = v_cnode_list
-
+	var script_data: HenScriptData = generate_script_data()
 	var data_path: StringName = 'res://hengo/save/' + str(HenGlobal.script_config.id) + '.res'
-
 	# saving data
 	var error: int = ResourceSaver.save(script_data, data_path)
 

@@ -1512,7 +1512,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('singleton_class'):
 		v_cnode.singleton_class = _config.singleton_class
-		print(v_cnode.singleton_class)
 
 	if _config.has('can_delete'):
 		v_cnode.can_delete = _config.can_delete

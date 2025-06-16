@@ -144,7 +144,7 @@ static func load(_path: StringName) -> void:
 		HenGlobal.node_counter = 0
 
 		HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'State',
+			name = 'Stat State',
 			type = HenVirtualCNode.Type.STATE_START,
 			sub_type = HenVirtualCNode.SubType.STATE_START,
 			route = base_route,

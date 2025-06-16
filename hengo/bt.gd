@@ -43,5 +43,3 @@ class State1 extends HengoState:
 	func enter() -> void:
 		print(_ref.get_rect().position)
 		_ref.get_rect().position.x = _ref.self_modulate.g_8
-
-
