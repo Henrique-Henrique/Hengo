@@ -600,12 +600,12 @@ static func _get_start(_data: HenScriptData) -> String:
 # ***************************************************************\n\nextends {0}\n\n'.format([_data.type])
 
 static func _parse_variables(_refs: HenSaveCodeType.References) -> String:
-	var var_code: String =' # Variables #\n'
+	var var_code: String =''
 
 	for var_data: HenSaveCodeType.Variable in _refs.variables:
 		var_code += _generate_var_code(var_data)
 
-	return var_code + '\n'
+	return var_code + ' \n' if var_code else ''
 
 
 static func _generate_var_code(_var_data: HenSaveCodeType.Variable, _custom_name: String = '') -> String:
@@ -719,9 +719,9 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 					if _code: physics_process_code.append(_code)
 
 
-	return code + """\nvar _STATE_CONTROLLER = HengoStateController.new()
+	return code + """var _STATE_CONTROLLER = HengoStateController.new()
 
-const _EVENTS ={events}
+const _EVENTS = {events}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
@@ -732,7 +732,6 @@ func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("{start_state_name}")
 {_ready}
-
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
 		_STATE_CONTROLLER.change_state(_EVENTS[_event])
@@ -740,7 +739,6 @@ func trigger_event(_event: String) -> void:
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
 {_process}
-
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 {_physics_process}
@@ -842,13 +840,10 @@ static func _parse_functions(_refs: HenSaveCodeType.References) -> String:
 					return x.name.to_snake_case()
 		))
 		})
-
-		# debug
-		# func_code += '\t' + get_debug_var_start()
 		
 		# local variable
 		func_code += '\n'.join(func_data.local_vars.map(func(x: HenSaveCodeType.Variable):
-			return '\t' + _generate_var_code(x))) + '\n'
+			return '\t' + _generate_var_code(x)))
 
 		# func output (return)
 		var output_code: Array = []
@@ -865,7 +860,7 @@ static func _parse_functions(_refs: HenSaveCodeType.References) -> String:
 			for token in func_tokens:
 				func_block.append(parse_token_by_type(token, 1))
 
-			func_code += '\n'.join(func_block) + '\n'
+			func_code += '\n'.join(func_block)
 		else:
 			func_code += '\tpass\n\n' if func_data.local_vars.is_empty() and output_code.is_empty() else ''
 		
@@ -1212,9 +1207,6 @@ static func _check_func_inouts(
 					
 					if _is_inputs: _reset_inout_dict_value(new_inout)
 					
-				prints('vvv DD ', _refs.disconnect_list)
-				# _refs.reload = true
-
 			new_inout.from_id = inout_ref.id
 			idx += 1
 		

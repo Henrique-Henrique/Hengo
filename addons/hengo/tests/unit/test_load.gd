@@ -2,4 +2,4 @@ extends GutTest
 
 
 func test_load() -> void:
-	pass
+	assert_true(true, 'TODO')

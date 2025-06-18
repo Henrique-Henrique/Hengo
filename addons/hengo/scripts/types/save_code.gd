@@ -176,7 +176,6 @@ class CNode:
 		var input_flow: FlowConnection = ref.input_ref.get_flow(_flow_id)
 
 		if input_flow and input_flow.to:
-			prints('xxx -> ', _macro_ref.route_type)
 			HenGlobal.USE_MACRO_REF = true
 			HenGlobal.MACRO_REF = self
 			HenGlobal.MACRO_USE_SELF = _macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE

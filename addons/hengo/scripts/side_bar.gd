@@ -753,8 +753,11 @@ class MacroData:
 		name = _name
 		name_changed.emit(_name)
 
-	func crate_flow(_type: ParamType) -> void:
+	func create_flow(_type: ParamType, _custom_id: int = -1) -> MacroInOut:
 		var flow: MacroInOut = MacroInOut.new()
+
+		if _custom_id >= 0:
+			flow.id = _custom_id
 
 		match _type:
 			ParamType.INPUT:
@@ -765,9 +768,11 @@ class MacroData:
 				flow.name = 'Flow ' + str(outputs.size())
 				outputs.append(flow)
 				flow_added.emit(false, flow.get_data())
+		
+		return flow
 
 	
-	func create_param(_type: ParamType) -> void:
+	func create_param(_type: ParamType) -> Param:
 		var in_out: Param = Param.new()
 
 		match _type:
@@ -777,6 +782,8 @@ class MacroData:
 			ParamType.OUTPUT:
 				outputs_value.append(in_out)
 				in_out_added.emit(false, in_out.get_data_with_id())
+			
+		return in_out
 		
 
 	func move_param(_ref: Param, _type: ParamType) -> void:
@@ -843,7 +850,7 @@ class MacroData:
 				type = &'Array',
 				value = inputs,
 				max_size = 5,
-				item_creation_callback = crate_flow.bind(ParamType.INPUT),
+				item_creation_callback = create_flow.bind(ParamType.INPUT),
 				item_move_callback = move_flow.bind(ParamType.INPUT),
 				item_delete_callback = delete_flow.bind(ParamType.INPUT),
 				field = {name = 'name', type = 'String'}
@@ -853,7 +860,7 @@ class MacroData:
 				type = &'Array',
 				value = outputs,
 				max_size = 5,
-				item_creation_callback = crate_flow.bind(ParamType.OUTPUT),
+				item_creation_callback = create_flow.bind(ParamType.OUTPUT),
 				item_move_callback = move_flow.bind(ParamType.OUTPUT),
 				item_delete_callback = delete_flow.bind(ParamType.OUTPUT),
 				field = {name = 'name', type = 'String'}

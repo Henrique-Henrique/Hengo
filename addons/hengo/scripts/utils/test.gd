@@ -32,8 +32,33 @@ static func get_base_route() -> Dictionary:
 	}
 
 
+static func set_global_config() -> void:
+	# setting global
+	var global_script_data := HenGlobal.ScriptData.new()
+
+	global_script_data.id = 0
+	global_script_data.path = 'res://hengo/test.gd'
+	global_script_data.type = 'Sprite2D'
+
+	HenGlobal.script_config = global_script_data
+	HenGlobal.SIDE_BAR_LIST = HenSideBar.SideBarList.new()
+	HenGlobal.BASE_ROUTE = {
+		name = 'Base',
+		type = HenRouter.ROUTE_TYPE.BASE,
+		id = '0',
+		ref = HenLoader.BaseRouteRef.new()
+	}
+
+
 static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.References) -> CNodeDataCode:
-	var data: HenSaveCodeType.CNode = HenCodeGeneration._get_cnode_from_dict(_vc.get_save(), _refs)
+	var ref
+
+	if _vc.route_ref.ref is HenVirtualCNode:
+		ref = HenCodeGeneration._get_cnode_from_dict(_vc.route_ref.ref.get_save(), _refs)
+	else:
+		ref = _vc.route_ref.ref
+
+	var data: HenSaveCodeType.CNode = HenCodeGeneration._get_cnode_from_dict(_vc.get_save(), _refs, ref)
 	var token: Dictionary
 
 	match data.sub_type:
@@ -73,13 +98,12 @@ static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs:
 	return code
 
 
-static func get_void() -> HenVirtualCNode:
+static func get_void(_route: Dictionary = {}) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
-		category = 'native',
 		inputs = [],
-		route = HenTest.get_base_route()
+		route = HenTest.get_base_route() if _route.is_empty() else _route
 	})
 
 
