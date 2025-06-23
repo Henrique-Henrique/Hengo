@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=51 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -10,6 +10,8 @@
 [ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="9_si04b"]
 [ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
+[ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
+[ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
@@ -80,17 +82,19 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hg3xi"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1152, 648)
-shader_parameter/offset = Vector2(476.449, 236.011)
-shader_parameter/zoom_factor = 0.649442
+shader_parameter/screen_size = Vector2(3824, 1485)
+shader_parameter/offset = Vector2(2117.5, -306.116)
+shader_parameter/zoom_factor = 0.999972
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.764706, 0.407843, 0.929412, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.988235, 0.498039, 0.498039, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -254,6 +258,31 @@ horizontal_alignment = 2
 justification_flags = 0
 deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
+
+[node name="CodePreviewContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -400.0
+offset_bottom = 589.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_lxtpw")
+script = ExtResource("10_r5155")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/Control/CodePreviewContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="VBoxContainer/CNodeUI/MarginContainer/Control/CodePreviewContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="CodePreview" parent="VBoxContainer/CNodeUI/MarginContainer/Control/CodePreviewContainer/VBoxContainer" instance=ExtResource("10_vu20g")]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "a + 322"
+code_completion_enabled = false
 
 [node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]
 process_mode = 4

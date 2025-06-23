@@ -110,7 +110,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			if _token.singleton_class:
 				prefix = _token.singleton_class + '.'
 
-			return indent + prefix + '{name}({params})'.format({
+			return indent + prefix + '{name}({params}){id}'.format({
+				id = '#ID:' + str(_token.vc_id),
 				name = _token.name,
 				params = selfInput + ', '.join(params.map(
 					func(x: Dictionary) -> String:
@@ -146,14 +147,15 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			var false_flow = HenCodeGeneration.flows_refs[_token.false_flow_id]
 			var then_flow = HenCodeGeneration.flows_refs[_token.then_flow_id]
 			var code_list: Array = []
-			var if_code: String = 'if {condition}:\n'
 			var only_false: bool = true_flow.is_empty() and not false_flow.is_empty()
+			var if_code: String = 'if {condition}:{id}\n'
 
 			if only_false:
-				if_code = 'if not({condition}):\n'
+				if_code = 'if not({condition}):{id}\n'
 
 			var base: String = if_code.format({
-				condition = parse_token_by_type(_token.condition)
+				condition = parse_token_by_type(_token.condition),
+				id = '#ID:' + str(_token.vc_id)
 			})
 
 			if true_flow.is_empty():
@@ -186,6 +188,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 					base += indent + '\tpass'
 			else:
 				base += '\n'.join(code_list)
+			
+			# base += '#IFEND:' + str(_token.vc_id) + '#'
 			return indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
 			return 'null'

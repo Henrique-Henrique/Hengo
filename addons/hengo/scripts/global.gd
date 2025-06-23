@@ -23,6 +23,7 @@ static var TOOLTIP: HenTooltip
 static var DOCKS: Dictionary = {}
 static var ACTION_BAR: HenCNodeActionBar
 static var FROM_REFERENCES: HenSideBarReferences
+static var CODE_PREVIEWER: HenCodePreview
 
 # cnodes
 static var can_make_connection: bool = false

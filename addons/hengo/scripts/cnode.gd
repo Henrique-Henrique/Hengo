@@ -49,9 +49,9 @@ func _ready():
 
 func _on_enter() -> void:
 	if virtual_ref:
-		print(JSON.stringify(virtual_ref.get_save()))
+		print(virtual_ref.id)
 
-		# print(virtual_ref.name_to_code)
+
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection:
@@ -214,6 +214,13 @@ func select() -> void:
 	selected = true
 	hover_animation()
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
+
+	if virtual_ref:
+		var script_data: HenScriptData = HenSaver.generate_script_data()
+		var code: String = HenCodeGeneration.get_code(script_data)
+		
+		HenGlobal.CODE_PREVIEWER.set_code(code)
+		HenGlobal.CODE_PREVIEWER.show_vc_line_reference(virtual_ref.id)
 
 
 func unselect() -> void:

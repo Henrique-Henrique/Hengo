@@ -73,11 +73,9 @@ func _ready() -> void:
 	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	HenGlobal.HENGO_ROOT = self
 	HenGlobal.TOOLTIP = get_node('%Tooltip')
+	HenGlobal.CODE_PREVIEWER = get_node('%CodePreviewContainer')
 
 	cnode_stat_label = get_node('%CNodeStatLabel')
-
-	# loading script list data
-	# get_script_list()
 
 
 func _on_cnode_gui_input(_event: InputEvent) -> void:
@@ -95,6 +93,8 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 				MOUSE_BUTTON_LEFT:
 					for cnode in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 						cnode.unselect()
+					
+					HenGlobal.CODE_PREVIEWER.clear()
 					
 					get_viewport().gui_release_focus()
 

@@ -15,7 +15,7 @@ layout_mode = 2
 [node name="CodeEdit" parent="List" instance=ExtResource("2_rtepi")]
 unique_name_in_owner = true
 layout_mode = 2
-delimiter_strings = Array[String](["' '", "\" \""])
+delimiter_strings = Array[String](["\" \"", "' '"])
 
 [node name="Label" type="Label" parent="List"]
 unique_name_in_owner = true

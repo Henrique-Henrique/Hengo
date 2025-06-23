@@ -209,6 +209,7 @@ class CNode:
 					_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
 
 		return {
+			vc_id = id,
 			type = HenVirtualCNode.SubType.IF,
 			true_flow_id = true_flow_id,
 			false_flow_id = false_flow_id,
@@ -364,6 +365,7 @@ class CNode:
 
 	func get_token(_id: int = 0) -> Dictionary:
 		var token: Dictionary = {
+			vc_id = id,
 			type = sub_type,
 			use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF,
 		}

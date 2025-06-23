@@ -9,13 +9,11 @@
 
 extends Sprite2D
 
- # Variables #
 var ata = String()
-
-
+ 
 var _STATE_CONTROLLER = HengoStateController.new()
 
-const _EVENTS ={}
+const _EVENTS = {}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
@@ -25,8 +23,6 @@ func _init() -> void:
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
-	
-
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -35,11 +31,16 @@ func trigger_event(_event: String) -> void:
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
 
-
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_rect().position)
-		_ref.get_rect().position.x = _ref.self_modulate.g_8
+		print("ata")#ID:171
+		if not(false):#ID:175
+			_ref.set_centered(false)#ID:177
+			if false:#ID:183
+				_ref.get_offset()
+				_ref.set_flip_v(false)#ID:201
+		_ref.set_owner(Node.new())#ID:197
+		_ref.set_flip_v(false)#ID:205
