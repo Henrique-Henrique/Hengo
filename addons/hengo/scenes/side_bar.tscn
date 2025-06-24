@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://c4qu2ti8efl61"]
 
 [ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
-[ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="2_k7ch5"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_k7ch5"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k7ch5"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -43,6 +43,8 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/v_separation = 8
+theme_override_constants/item_margin = 0
+theme_override_constants/draw_guides = 0
 theme_override_fonts/font = ExtResource("2_k7ch5")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_axb3u")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_k7ch5")

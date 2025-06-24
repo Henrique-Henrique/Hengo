@@ -217,10 +217,10 @@ func select() -> void:
 
 	if virtual_ref:
 		var script_data: HenScriptData = HenSaver.generate_script_data()
-		var code: String = HenCodeGeneration.get_code(script_data)
+		var code: String = HenCodeGeneration.get_code(script_data, true)
 		
 		HenGlobal.CODE_PREVIEWER.set_code(code)
-		HenGlobal.CODE_PREVIEWER.show_vc_line_reference(virtual_ref.id)
+		HenGlobal.CODE_PREVIEWER.show_vc_line_reference()
 
 
 func unselect() -> void:

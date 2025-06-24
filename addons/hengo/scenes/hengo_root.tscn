@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=52 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -84,17 +84,33 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8emys"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1222, 0.1261, 0.13, 0.760784)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.224304, 0.224304, 0.224303, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 1485)
-shader_parameter/offset = Vector2(2117.5, -306.116)
-shader_parameter/zoom_factor = 0.999972
+shader_parameter/screen_size = Vector2(3824, 1973)
+shader_parameter/offset = Vector2(1460.35, 515.55)
+shader_parameter/zoom_factor = 0.550016
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.988235, 0.498039, 0.498039, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -163,54 +179,56 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI"]
 z_index = 100
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -134.0
-offset_bottom = 40.0
+anchor_bottom = 1.0
 grow_horizontal = 0
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/MarginContainer"]
+[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/VBoxContainer"]
 unique_name_in_owner = true
+z_index = 110
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_x5h56")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
+[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
 layout_mode = 2
 alignment = 2
 script = ExtResource("7_sagw0")
 dashboard = NodePath("DashBoard")
 
-[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar"]
+[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 tooltip_text = "Dashboard"
 icon = ExtResource("11_rvhdl")
 
-[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar"]
+[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
 
-[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer"]
+[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
+[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("23_tlngq")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
@@ -219,28 +237,16 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
 disabled = true
 text = "Compile"
 
-[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/MarginContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
+[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
 layout_mode = 2
 texture = ExtResource("11_xut0q")
 expand_mode = 2
 stretch_mode = 3
 
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 8
-
-[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/MarginContainer/Control"]
+[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 4
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -160.0
-offset_top = 15.0
-offset_bottom = 95.0
-grow_horizontal = 0
+layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = ExtResource("20_y63ss")
 theme_override_fonts/italics_font = ExtResource("16_xresw")
@@ -259,29 +265,31 @@ justification_flags = 0
 deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
 
-[node name="CodePreviewContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/MarginContainer/Control"]
+[node name="CodePreviewContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/VBoxContainer"]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -400.0
-offset_bottom = 589.0
-grow_horizontal = 0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_lxtpw")
+layout_mode = 2
+size_flags_vertical = 3
 script = ExtResource("10_r5155")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/MarginContainer/Control/CodePreviewContainer"]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="Label" type="Label" parent="VBoxContainer/CNodeUI/MarginContainer/Control/CodePreviewContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="CodePreview" parent="VBoxContainer/CNodeUI/MarginContainer/Control/CodePreviewContainer/VBoxContainer" instance=ExtResource("10_vu20g")]
+[node name="PreviewCheck" type="CheckButton" parent="VBoxContainer/CNodeUI/VBoxContainer/CodePreviewContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-placeholder_text = "a + 322"
+theme_override_fonts/font = ExtResource("12_wtrk7")
+text = "Code Preview"
+
+[node name="CodePreview" parent="VBoxContainer/CNodeUI/VBoxContainer/CodePreviewContainer" instance=ExtResource("10_vu20g")]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(500, 100)
+layout_mode = 2
+theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_lxtpw")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_8emys")
+placeholder_text = "# Code Preview"
+editable = false
+scroll_smooth = true
+caret_move_on_right_click = false
+caret_multiple = false
 code_completion_enabled = false
 
 [node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]

@@ -111,7 +111,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				prefix = _token.singleton_class + '.'
 
 			return indent + prefix + '{name}({params}){id}'.format({
-				id = '#ID:' + str(_token.vc_id),
+				id = '#ID:' + str(_token.vc_id) if HenGlobal.GENERATE_PREVIEW_CODE else '',
 				name = _token.name,
 				params = selfInput + ', '.join(params.map(
 					func(x: Dictionary) -> String:
@@ -132,7 +132,8 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			if _token.singleton_class:
 				prefix = _token.singleton_class + '.'
 
-			return indent + prefix + '{name}({params}){id}'.format({
+			return indent + prefix + '{name}({params}){id}{id_preview}'.format({
+				id_preview = '#ID:' + str(_token.vc_id) if HenGlobal.GENERATE_PREVIEW_CODE else '',
 				name = _token.name,
 				id = '[{0}]'.format([_token.id]) if _token.id >= 0 else '',
 				params = ', '.join(params.map(
@@ -155,7 +156,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 			var base: String = if_code.format({
 				condition = parse_token_by_type(_token.condition),
-				id = '#ID:' + str(_token.vc_id)
+				id = '#ID:' + str(_token.vc_id) if HenGlobal.GENERATE_PREVIEW_CODE else ''
 			})
 
 			if true_flow.is_empty():
@@ -165,7 +166,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 							parse_token_by_type(token, _level + 1)
 						)
 				else:
-					base += indent + '\tpass'
+					base += indent + '\tpass\n'
 			else:
 				for token in true_flow:
 					code_list.append(
@@ -188,8 +189,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 					base += indent + '\tpass'
 			else:
 				base += '\n'.join(code_list)
-			
-			# base += '#IFEND:' + str(_token.vc_id) + '#'
+
 			return indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
 			return 'null'
@@ -306,11 +306,13 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			return ''
 
 
-static func get_code(_data: HenScriptData) -> String:
+static func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var code: String = ''
 
+	HenGlobal.GENERATE_PREVIEW_CODE = _build_preview
 	HenCodeGeneration.flow_errors.clear()
+
 
 	# generating macro references
 	for macro_data: Dictionary in _data.side_bar_list.macro_list:

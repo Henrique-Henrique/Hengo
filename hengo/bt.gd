@@ -36,11 +36,11 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print("ata")#ID:171
-		if not(false):#ID:175
-			_ref.set_centered(false)#ID:177
-			if false:#ID:183
+		print("ata")
+		if false:
+			_ref.set_centered(false)
+			if false:
 				_ref.get_offset()
-				_ref.set_flip_v(false)#ID:201
-		_ref.set_owner(Node.new())#ID:197
-		_ref.set_flip_v(false)#ID:205
+				_ref.set_flip_v(false)
+		_ref.set_owner(Node.new())
+		_ref.set_flip_v(false)

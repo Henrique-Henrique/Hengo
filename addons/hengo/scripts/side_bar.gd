@@ -2,18 +2,20 @@
 class_name HenSideBar extends PanelContainer
 
 var list: Tree
-# @onready var name_label: Label = %Name
-# @onready var local_var_bt: Button = %LocalVar
+
+
+const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
+const CATEGORY_FONT = preload('res://addons/hengo/assets/fonts/Inter-Bold.ttf')
 
 enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
 
 const BG_COLOR = {
-	AddType.VAR: Color.WHITE,
-	AddType.FUNC: Color.RED,
-	AddType.SIGNAL: Color.GREEN,
-	AddType.MACRO: Color.MEDIUM_PURPLE,
-	AddType.LOCAL_VAR: Color.ORANGE
+	AddType.VAR: Color('#509fa6'),
+	AddType.FUNC: Color('#b05353'),
+	AddType.SIGNAL: Color('#51a650'),
+	AddType.MACRO: Color('#9f50a6'),
+	AddType.LOCAL_VAR: Color('#a69150')
 }
 
 const ICONS = {
@@ -1046,13 +1048,13 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	# variables
 	var category: TreeItem = _root.create_child()
 	category.set_text(0, _name)
-	category.add_button(0, preload('res://addons/hengo/assets/icons/menu/square-plus.svg'))
+	category.add_button(0, ADD_ICON)
 	category.set_metadata(0, _type)
 	category.set_selectable(0, false)
 	category.set_icon_modulate(0, BG_COLOR[_type])
-	category.set_custom_color(0, BG_COLOR[_type])
-	category.set_button_color(0, 0, (BG_COLOR[_type] as Color).lightened(0.6))
-	category.set_icon(0, ICONS[_type])
+	category.set_custom_color(0, Color(BG_COLOR[_type], .8))
+	category.set_custom_font(0, CATEGORY_FONT)
+	category.set_button_color(0, 0, Color('#616161'))
 
 	var arr: Array
 
@@ -1074,7 +1076,7 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		item.set_text(0, item_data.name)
 		item.set_metadata(0, item_data)
 		# item.set_custom_bg_color(0, Color((BG_COLOR[_type] as Color), .1))
-		item.set_custom_color(0, Color(1, 1, 1, .6))
+		item.set_custom_color(0, Color('#868686'))
 
 		match _type:
 			AddType.VAR, AddType.LOCAL_VAR:
@@ -1089,20 +1091,3 @@ func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_but
 
 	HenGlobal.SIDE_BAR_LIST.change(_type)
 	HenGlobal.SIDE_BAR_LIST.add()
-
-
-	# _on_change_list(AddType.VAR)
-
-	# local_var_bt.visible = false
-	# local_var_bt.pressed.connect(_on_change_list.bind(AddType.LOCAL_VAR))
-
-	# (get_node('%Add') as Button).pressed.connect(_on_add)
-
-	# # change list
-	# (get_node('%Var') as Button).pressed.connect(_on_change_list.bind(AddType.VAR))
-	# (get_node('%Func') as Button).pressed.connect(_on_change_list.bind(AddType.FUNC))
-	# (get_node('%Signal') as Button).pressed.connect(_on_change_list.bind(AddType.SIGNAL))
-	# (get_node('%Macro') as Button).pressed.connect(_on_change_list.bind(AddType.MACRO))
-
-	# list.item_activated.connect(_on_enter)
-	# list.item_clicked.connect(_on_click)

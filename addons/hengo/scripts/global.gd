@@ -24,6 +24,7 @@ static var DOCKS: Dictionary = {}
 static var ACTION_BAR: HenCNodeActionBar
 static var FROM_REFERENCES: HenSideBarReferences
 static var CODE_PREVIEWER: HenCodePreview
+static var GENERATE_PREVIEW_CODE: bool = false
 
 # cnodes
 static var can_make_connection: bool = false

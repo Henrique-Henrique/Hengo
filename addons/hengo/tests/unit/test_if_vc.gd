@@ -19,7 +19,7 @@ func test_if_code() -> void:
 	# test IF default
 	assert_eq(
 		HenTest.get_virtual_cnode_code(vc, refs).code,
-		'if false:\n\tpass'
+		'if false:\n\tpass\n'
 	)
 
 	var value: HenVirtualCNode = HenTest.get_const()
@@ -29,7 +29,7 @@ func test_if_code() -> void:
 		HenTest.get_virtual_cnode_with_connections(vc, refs, [
 			HenTest.CNodeConnection.new(vc, value),
 		]),
-		'if Test.CONST:\n\tpass'
+		'if Test.CONST:\n\tpass\n'
 	)
 
 	var vc_flow_1: HenVirtualCNode = HenTest.get_void()
