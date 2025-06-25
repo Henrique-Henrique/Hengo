@@ -123,10 +123,6 @@ func _on_gui(_event: InputEvent) -> void:
 							i.unselect()
 						
 						select()
-
-						# generate gd_preview
-						# var code: String = parse_token_and_value()
-						# HenGlobal.GD_PREVIEWER.text = '# Hengo Code Preview\n# CNode -> ' + get_fantasy_name() + '\n' + code
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
 					# showing state config on doubleclick
 					if virtual_ref:

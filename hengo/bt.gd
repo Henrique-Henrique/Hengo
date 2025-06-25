@@ -42,5 +42,15 @@ class State1 extends HengoState:
 			if false:
 				_ref.get_offset()
 				_ref.set_flip_v(false)
+			else:
+				_ref.set_texture(Texture2D.new())
+				_ref.set_offset(Vector2(5, 0))
+				_ref.set_flip_h(false)
 		_ref.set_owner(Node.new())
 		_ref.set_flip_v(false)
+		for index_3732 in range(0, 0, 1):
+			_ref.set_centered(false)
+			_ref.set_offset(Vector2(5, 0))
+			_ref.set_flip_h(false)
+		_ref.set_offset(Vector2(5, 0))
+		_ref.set_flip_h(false)

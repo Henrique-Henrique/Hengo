@@ -48,9 +48,18 @@ static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 
 
 # parse to code
-static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
+static func parse_token_by_type(_token: Dictionary, _level: int = 0, _parent_id: String = '') -> String:
 	var indent: StringName = '\t'.repeat(_level)
 	var prefix: StringName = '_ref.'
+	var preview_id: String = ''
+
+	if HenGlobal.GENERATE_PREVIEW_CODE:
+		if _token.has('vc_id'):
+			preview_id += '#ID:' + str(_token.vc_id)
+		
+		if _parent_id:
+			preview_id += '#ID:' + _parent_id
+
 
 	if _token.use_self == true or (_token.has('category') and _token.get('category') == 'native'):
 		prefix = ''
@@ -111,7 +120,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				prefix = _token.singleton_class + '.'
 
 			return indent + prefix + '{name}({params}){id}'.format({
-				id = '#ID:' + str(_token.vc_id) if HenGlobal.GENERATE_PREVIEW_CODE else '',
+				id = preview_id,
 				name = _token.name,
 				params = selfInput + ', '.join(params.map(
 					func(x: Dictionary) -> String:
@@ -133,7 +142,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				prefix = _token.singleton_class + '.'
 
 			return indent + prefix + '{name}({params}){id}{id_preview}'.format({
-				id_preview = '#ID:' + str(_token.vc_id) if HenGlobal.GENERATE_PREVIEW_CODE else '',
+				id_preview = preview_id,
 				name = _token.name,
 				id = '[{0}]'.format([_token.id]) if _token.id >= 0 else '',
 				params = ', '.join(params.map(
@@ -156,7 +165,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 
 			var base: String = if_code.format({
 				condition = parse_token_by_type(_token.condition),
-				id = '#ID:' + str(_token.vc_id) if HenGlobal.GENERATE_PREVIEW_CODE else ''
+				id = preview_id
 			})
 
 			if true_flow.is_empty():
@@ -170,14 +179,14 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			else:
 				for token in true_flow:
 					code_list.append(
-						parse_token_by_type(token, _level + 1)
+						parse_token_by_type(token, _level + 1, preview_id)
 					)
 				
 				if not false_flow.is_empty():
 					code_list.append(indent + 'else:')
 					for token in false_flow:
 						code_list.append(
-							parse_token_by_type(token, _level + 1)
+							parse_token_by_type(token, _level + 1, preview_id)
 						)
 
 			for token in then_flow:
@@ -203,24 +212,26 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 			var loop_item: String = _token.index_name + '_' + str(_token.id)
 
 			if _token.type == HenVirtualCNode.SubType.FOR:
-				base = 'for {item_name} in range({params}):\n'.format({
+				base = 'for {item_name} in range({params}):{id}\n'.format({
 					item_name = loop_item,
 					params = ', '.join(_token.params.map(
 						func(x: Dictionary) -> String:
 							return parse_token_by_type(x)
-				))
+				)),
+					id = preview_id
 				})
 			else:
-				base = 'for {item_name} in {arr}:\n'.format({
+				base = 'for {item_name} in {arr}:{id}\n'.format({
 					item_name = loop_item,
-					arr = parse_token_by_type(_token.params[0])
+					arr = parse_token_by_type(_token.params[0]),
+					id = preview_id
 				})
 			
 			if body_flow.is_empty():
 				base += indent + '\tpass'
 			else:
 				for token: Dictionary in body_flow:
-					code_list.append(parse_token_by_type(token, _level + 1))
+					code_list.append(parse_token_by_type(token, _level + 1, preview_id))
 			
 			for token: Dictionary in then_flow:
 				code_list.append(parse_token_by_type(token, _level))
@@ -299,7 +310,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0) -> String:
 				callable = _get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.MACRO:
-			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level)))
+			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return parse_token_by_type(x, _level, preview_id)))
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			return indent + parse_token_by_type(_token.ref) + '.' + _token.name
 		_:
@@ -614,7 +625,7 @@ static func _parse_variables(_refs: HenSaveCodeType.References) -> String:
 	return var_code + ' \n' if var_code else ''
 
 
-static func _generate_var_code(_var_data: HenSaveCodeType.Variable, _custom_name: String = '') -> String:
+static func _generate_var_code(_var_data: HenSaveCodeType.Variable, _custom_name: String = '', _preview_id: String = '') -> String:
 	var var_code: String = ''
 	var type_value: String = 'null'
 
@@ -626,10 +637,11 @@ static func _generate_var_code(_var_data: HenSaveCodeType.Variable, _custom_name
 	elif ClassDB.can_instantiate(_var_data.type):
 		type_value = _var_data.type + '.new()'
 
-	var_code += '{export_var}var {name} = {value}\n'.format({
+	var_code += '{export_var}var {name} = {value}{id}\n'.format({
 		name = _var_data.name.to_snake_case() if not _custom_name else _custom_name,
 		value = type_value,
-		export_var = '@export ' if _var_data.export_var else ''
+		export_var = '@export ' if _var_data.export_var else '',
+		id = '#ID:' + _preview_id if _preview_id else ''
 	})
 
 	return var_code
@@ -677,14 +689,14 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 						}
 
 					override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_token_list(0))
-	
+
 
 	# search for override virtual inside macros
 	for macro: HenSaveCodeType.Macro in _refs.macros:
 		# macro variables
 		for macro_var: HenSaveCodeType.Variable in macro.local_vars:
 			for macro_ref: HenSaveCodeType.CNode in macro.macro_ref_list:
-				code += _generate_var_code(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}))
+				code += _generate_var_code(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}), str(macro_ref.id))
 
 		# macro override virtuals
 		for v_cnode: HenSaveCodeType.CNode in macro.virtual_cnode_list:
@@ -694,6 +706,7 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 					HenGlobal.MACRO_REF = macro_ref
 					HenGlobal.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 					HenGlobal.USE_MACRO_USE_SELF = true
+
 					if v_cnode.flow_connections[0].to:
 						if not override_virtual_data.has(v_cnode.name):
 							override_virtual_data[v_cnode.name] = {
@@ -701,7 +714,10 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 								tokens = []
 							}
 
-						override_virtual_data[v_cnode.name].tokens.append_array(v_cnode.flow_connections[0].to.get_flow_tokens(0))
+						for token: Dictionary in v_cnode.flow_connections[0].to.get_flow_tokens(0):
+							token.vc_id = macro_ref.id
+							override_virtual_data[v_cnode.name].tokens.append(token)
+
 					HenGlobal.USE_MACRO_REF = false
 
 
@@ -710,17 +726,19 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 	var physics_process_code: Array = []
 
 	for key: StringName in override_virtual_data.keys():
+		var item = override_virtual_data.get(key)
+
 		match key:
 			&'_ready':
-				for token: Dictionary in override_virtual_data.get(key).tokens:
+				for token: Dictionary in item.tokens:
 					var _code: String = parse_token_by_type(token, 1)
 					if _code: ready_code.append(_code)
 			&'_process':
-				for token: Dictionary in override_virtual_data.get(key).tokens:
+				for token: Dictionary in item.tokens:
 					var _code: String = parse_token_by_type(token, 1)
 					if _code: process_code.append(_code)
 			&'_physics_process':
-				for token: Dictionary in override_virtual_data.get(key).tokens:
+				for token: Dictionary in item.tokens:
 					var _code: String = parse_token_by_type(token, 1)
 					if _code: physics_process_code.append(_code)
 

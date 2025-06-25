@@ -184,6 +184,7 @@ class CNode:
 			HenGlobal.USE_MACRO_USE_SELF = false
 
 		return {
+			vc_id = id,
 			type = HenVirtualCNode.SubType.MACRO,
 			flow_tokens = flow_tokens,
 			use_self = false
@@ -234,8 +235,9 @@ class CNode:
 					_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
 
 		return {
-			type = sub_type,
 			id = id,
+			vc_id = id,
+			type = sub_type,
 			body_flow_id = body_flow_id,
 			then_flow_id = then_flow_id,
 			params = get_input_token_list(),

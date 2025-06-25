@@ -13,7 +13,6 @@ static var DOCS_TOOLTIP: HenDocsToolTip
 static var ERROR_BT: HenErrorBt
 static var CONNECTION_GUIDE: HenConnectionGuide
 static var HENGO_ROOT: HenHengoRoot
-static var GD_PREVIEWER: CodeEdit
 static var DASHBOARD: HenDashboard
 static var BASE_ROUTE: Dictionary
 static var SIDE_BAR_LIST: HenSideBar.SideBarList

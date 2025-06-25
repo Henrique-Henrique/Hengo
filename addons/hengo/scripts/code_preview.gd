@@ -3,6 +3,8 @@ class_name HenCodePreview extends VBoxContainer
 
 @onready var code_preview: CodeEdit = %CodePreview
 
+const final_text: String = '\n\n\n\n\n\n\n\n\n'
+
 var text_cache: String = ''
 var id_list: Array[int] = []
 var can_show_preview: bool = false
@@ -27,8 +29,8 @@ func set_code(_code: String) -> void:
         return
     
     text_cache = _code
-    code_preview.text = reg.sub(_code, '', true)
-    # code_preview.text = text_cache
+    # code_preview.text = reg.sub(_code, '', true) + final_text
+    code_preview.text = text_cache + final_text
 
 
 func show_vc_line_reference() -> void:
@@ -48,14 +50,15 @@ func show_vc_line_reference() -> void:
         for line: String in text_cache.split('\n'):
             for id in id_list:
                 if line.contains('#ID:%d' % id):
-                    code_preview.set_line_background_color(idx, Color(Color('#a1fff6'), 0.05))
+                    code_preview.set_line_background_color(idx, Color(Color('#63c1ff'), 0.1))
                     last_line = idx
 
             idx += 1
     
-    code_preview.set_caret_line(last_line)
+    code_preview.set_caret_line(last_line + 3)
     
 
 func clear() -> void:
     text_cache = ''
     code_preview.text = ''
+    id_list.clear()

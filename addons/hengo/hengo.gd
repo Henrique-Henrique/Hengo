@@ -104,26 +104,6 @@ func _enter_tree():
 	# creating cnode pool
 	HenCnode.instantiate_and_add_pool()
 
-	# adding gdscript editor
-	gd_previewer = (preload('res://addons/hengo/scenes/gd_editor.tscn') as PackedScene).instantiate()
-	gd_previewer.code_completion_enabled = false
-	gd_previewer.editable = false
-
-	var highlighter: CodeHighlighter = gd_previewer.syntax_highlighter
-	highlighter.clear_color_regions()
-	highlighter.add_color_region('\"', '\"', Color('#9ece6a'))
-	highlighter.add_color_region('#', '', Color('#565f89'), true)
-	for kw in [
-		"and", "as", "assert", "break", "class", "class_name", "continue", "extends",
-		"elif", "else", "enum", "export", "for", "func", "if", "in", "is", "match",
-		"not", "onready", "or", "pass", "return", "setget", "signal", "static", "tool",
-		"var", "while", "yield"
-	]:
-		highlighter.add_keyword_color(kw, Color('#bb9af7'))
-
-	add_control_to_bottom_panel(gd_previewer, 'Hengo Code')
-	HenGlobal.GD_PREVIEWER = gd_previewer
-
 
 func _get_window_layout(_configuration: ConfigFile) -> void:
 	if main_scene.visible:

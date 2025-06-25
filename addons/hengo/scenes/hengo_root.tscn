@@ -102,15 +102,15 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 1973)
-shader_parameter/offset = Vector2(1460.35, 515.55)
-shader_parameter/zoom_factor = 0.550016
+shader_parameter/screen_size = Vector2(1152, 648)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -279,7 +279,6 @@ text = "Code Preview"
 
 [node name="CodePreview" parent="VBoxContainer/CNodeUI/VBoxContainer/CodePreviewContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
-visible = false
 custom_minimum_size = Vector2(500, 100)
 layout_mode = 2
 theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
@@ -290,6 +289,7 @@ editable = false
 scroll_smooth = true
 caret_move_on_right_click = false
 caret_multiple = false
+gutters_draw_line_numbers = true
 code_completion_enabled = false
 
 [node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]
