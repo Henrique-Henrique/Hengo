@@ -361,7 +361,7 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 		if variable_data.has('invalid') and not variable_data.invalid:
 			continue
 
-		var variable: HenSideBar.VarData = HenSideBar.VarData.new()
+		var variable: HenVarData = HenVarData.new()
 		
 		variable.id = variable_data.id
 		variable.name = variable_data.name
@@ -564,7 +564,8 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 			cn.route_type = HenRouter.ROUTE_TYPE.BASE
 			_refs.states.append(cn)
 		HenVirtualCNode.Type.MACRO:
-			(cn.ref as HenSaveCodeType.Macro).macro_ref_list.append(cn)
+			if not cn.invalid:
+				(cn.ref as HenSaveCodeType.Macro).macro_ref_list.append(cn)
 	
 	match cn.sub_type:
 		HenVirtualCNode.SubType.VIRTUAL:
@@ -1053,9 +1054,9 @@ static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void:
 	var output: Dictionary = _dict.outputs[0]
 	
-	var var_data: HenSideBar.VarData
+	var var_data: HenVarData
 
-	for _var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+	for _var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
 		if _var_data.id == _dict.from_side_bar_id:
 			var_data = _var_data
 			break
@@ -1080,9 +1081,9 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void
 
 
 static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> void:
-	var func_data: HenSideBar.FuncData
+	var func_data: HenFuncData
 
-	for _func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+	for _func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
 		if _func_data.id == _dict.from_side_bar_id:
 			func_data = _func_data
 			break
@@ -1131,7 +1132,7 @@ static func _reset_inout_dict_value(_dict: Dictionary) -> void:
 
 static func _check_func_inouts(
 	_is_inputs: bool,
-	_func_data: HenSideBar.FuncData,
+	_func_data: HenFuncData,
 	_dict: Dictionary,
 	_output_size: int,
 	_real_output_size: int,
@@ -1171,7 +1172,7 @@ static func _check_func_inouts(
 	
 
 	if arr.is_empty():
-		for new_inout: HenSideBar.Param in func_arr:
+		for new_inout: HenParamData in func_arr:
 			arr.append({
 				id = _refs.get_new_node_counter(),
 				name = new_inout.name,
@@ -1208,7 +1209,7 @@ static func _check_func_inouts(
 				# _refs.reload = true
 				continue
 
-			var inout_ref: HenSideBar.Param = func_arr[idx]
+			var inout_ref: HenParamData = func_arr[idx]
 			new_inout.merge(inout_ref.get_save_without_id(), true)
 			
 			if old_map.has(new_inout.from_id):

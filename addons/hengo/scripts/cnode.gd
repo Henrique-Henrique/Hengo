@@ -107,9 +107,11 @@ func _on_gui(_event: InputEvent) -> void:
 				else:
 					select()
 			elif _event.double_click:
-				if virtual_ref and not virtual_ref.route.is_empty():
-					HenRouter.change_route(virtual_ref.route)
-				
+				if virtual_ref:
+					if not virtual_ref.route.is_empty():
+						HenRouter.change_route(virtual_ref.route)
+					elif virtual_ref.ref and virtual_ref.ref.get('route'):
+						HenRouter.change_route(virtual_ref.ref.get('route'))
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:

@@ -698,7 +698,7 @@ func get_local_var_list() -> Array:
 	match HenRouter.current_route.type:
 		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
 			if HenRouter.current_route.ref.get(&'local_vars') is Array:
-				for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
+				for var_data: HenVarData in (HenRouter.current_route.ref.local_vars as Array):
 					var get_data: Dictionary = {
 						name = 'Local var -> ' + var_data.name,
 						type = FILTER_TYPE.SELF,
@@ -745,7 +745,7 @@ func get_local_var_list() -> Array:
 func get_var_list() -> Array:
 	var local_api: Array = []
 
-	for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+	for var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
 		var get_data: Dictionary = {
 			name = 'Self -> ' + var_data.name,
 			type = FILTER_TYPE.SELF,
@@ -842,7 +842,7 @@ func get_native_list() -> Array:
 
 func get_function_list() -> Array:
 	var local_api: Array = []
-	for func_data: HenSideBar.FuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+	for func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
 		var dt: Dictionary = {
 			name = func_data.name,
 			type = FILTER_TYPE.FUNC,
@@ -867,7 +867,7 @@ func get_others_classes_list() -> Array:
 func get_hengo_signal_list() -> Array:
 	var local_api: Array = []
 
-	for signal_data: HenSideBar.SignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
+	for signal_data: HenSignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
 		var connect_dt: Dictionary = {
 			name = signal_data.name,
 			type = FILTER_TYPE.SIGNAL,
@@ -889,7 +889,7 @@ func get_hengo_signal_list() -> Array:
 func get_macro_list() -> Array:
 	var local_api: Array = []
 
-	for macro_data: HenSideBar.MacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+	for macro_data: HenMacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
 		var dt: Dictionary = {
 			name = macro_data.name,
 			type = FILTER_TYPE.MACRO,

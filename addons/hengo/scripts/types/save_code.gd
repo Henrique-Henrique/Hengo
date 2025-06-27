@@ -172,6 +172,9 @@ class CNode:
 
 
 	func get_macro_token(_flow_id: int, _macro_ref: CNode) -> Dictionary:
+		if invalid:
+			return INVALID_TOKEN
+
 		var flow_tokens: Array
 		var input_flow: FlowConnection = ref.input_ref.get_flow(_flow_id)
 
@@ -299,7 +302,7 @@ class CNode:
 				HenVirtualCNode.SubType.MACRO:
 					HenGlobal.USE_MACRO_USE_SELF = true
 					HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
-					var data: Dictionary = (connection.from.ref as HenSideBar.MacroData).output_ref.get_input_token(connection.to_id)
+					var data: Dictionary = (connection.from.ref as HenMacroData).output_ref.get_input_token(connection.to_id)
 					HenGlobal.USE_MACRO_USE_SELF = false
 					return data
 				_:

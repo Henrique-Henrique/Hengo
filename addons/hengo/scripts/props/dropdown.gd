@@ -51,7 +51,7 @@ func _on_pressed() -> void:
 			match HenRouter.current_route.type:
 				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
 					if HenRouter.current_route.ref.get(&'local_vars') is Array:
-						for var_data: HenSideBar.VarData in (HenRouter.current_route.ref.local_vars as Array):
+						for var_data: HenVarData in (HenRouter.current_route.ref.local_vars as Array):
 							if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 								arr.append({
 									name = var_data.name,
@@ -60,7 +60,7 @@ func _on_pressed() -> void:
 								})
 
 			# variables
-			for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+			for var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 					arr.append({
 						name = var_data.name,
@@ -98,7 +98,7 @@ func _on_pressed() -> void:
 			# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 			# # variables
-			# for var_data: HenSideBar.VarData in HenGlobal.SIDE_BAR_LIST.var_list:
+			# for var_data:HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
 			# 	arr.append({name = var_data.name, type = var_data.type, ref = var_data})
 
 			# properties
@@ -200,7 +200,7 @@ func _selected(_item: Dictionary) -> void:
 				second_input.input_ref.update_changes.emit()
 			return
 		'signal_list':
-			var item: HenSideBar.SignalData = custom_data.signal_ref
+			var item: HenSignalData = custom_data.signal_ref
 			item.set_signal_params(_item.signal_class, _item.signal_name)
 
 	value_changed.emit(text)

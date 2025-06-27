@@ -11,6 +11,9 @@ extends Sprite2D
 
 var ata = String()
  
+var my_var_3912 = String()#ID:3912
+var my_var_4138 = String()#ID:4138
+var my_var_4199 = String()#ID:4199
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}

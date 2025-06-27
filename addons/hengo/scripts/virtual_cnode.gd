@@ -154,7 +154,7 @@ class InOutData extends Object:
 			ref.moved.connect(_on_move)
 
 		if ref.has_signal('deleted') and not ref.is_connected('deleted', _on_delete):
-			if not ref is HenSideBar.VarData:
+			if not ref is HenVarData:
 				ref.deleted.connect(_on_delete)
 
 		if _ref.has_signal('data_changed') and not ref.is_connected('data_changed', on_data_changed):
@@ -1482,7 +1482,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		HenRouter.ROUTE_TYPE.STATE:
 			(_config.route.ref as HenVirtualCNode).virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.FUNC:
-			var _ref: HenSideBar.FuncData = _config.route.ref
+			var _ref: HenFuncData = _config.route.ref
 			
 			_ref.virtual_cnode_list.append(v_cnode)
 
@@ -1492,7 +1492,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.FUNC_OUTPUT:
 					_ref.output_ref = v_cnode
 		HenRouter.ROUTE_TYPE.SIGNAL:
-			var _ref: HenSideBar.SignalData = _config.route.ref
+			var _ref: HenSignalData = _config.route.ref
 			
 			_ref.virtual_cnode_list.append(v_cnode)
 
@@ -1500,7 +1500,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.SIGNAL_ENTER:
 					_ref.signal_enter = v_cnode
 		HenRouter.ROUTE_TYPE.MACRO:
-			var _ref: HenSideBar.MacroData = _config.route.ref
+			var _ref: HenMacroData = _config.route.ref
 			
 			_ref.virtual_cnode_list.append(v_cnode)
 
@@ -1561,10 +1561,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		SubType.VIRTUAL:
 			_config.route.ref.virtual_sub_type_vc_list.append(v_cnode)
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
-			var _ref: HenSideBar.MacroData = _config.ref
+			var _ref: HenMacroData = _config.ref
 
-			_config.from_flow = _ref.inputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
-			_config.to_flow = _ref.outputs.map(func(x: HenSideBar.MacroData.MacroInOut) -> Dictionary: return x.get_data())
+			_config.from_flow = _ref.inputs.map(func(x: HenMacroData.MacroInOut) -> Dictionary: return x.get_data())
+			_config.to_flow = _ref.outputs.map(func(x: HenMacroData.MacroInOut) -> Dictionary: return x.get_data())
 
 
 	match v_cnode.type:

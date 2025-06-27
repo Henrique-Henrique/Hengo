@@ -113,6 +113,7 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 		(get_parent() as Panel).size / _zoom
 	)
 
+
 	if HenRouter.current_route:
 		for v_cnode: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
 			v_cnode.check_visibility(rect)

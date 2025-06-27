@@ -7,7 +7,7 @@ func test_func() -> void:
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.FUNC
 	HenGlobal.SIDE_BAR_LIST.add()
 
-	var func_data: HenSideBar.FuncData = HenGlobal.SIDE_BAR_LIST.func_list[0]
+	var func_data: HenFuncData = HenGlobal.SIDE_BAR_LIST.func_list[0]
 	func_data.name = 'my func'
 
 	var script_data: HenScriptData = HenSaver.generate_script_data()
@@ -39,7 +39,7 @@ func test_func() -> void:
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.MACRO
 	HenGlobal.SIDE_BAR_LIST.add()
 
-	var macro_data: HenSideBar.MacroData = HenGlobal.SIDE_BAR_LIST.macro_list[0]
+	var macro_data: HenMacroData = HenGlobal.SIDE_BAR_LIST.macro_list[0]
 	macro_data.name = 'my macro'
 	macro_data.create_flow(HenSideBar.ParamType.INPUT, 0)
 

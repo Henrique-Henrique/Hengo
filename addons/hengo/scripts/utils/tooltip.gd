@@ -7,7 +7,7 @@ func go_to(_pos: Vector2, _content: String) -> void:
         scale = Vector2.ZERO
 
         var tween: Tween = get_tree().create_tween()
-        tween.tween_property(self, 'scale', Vector2.ONE, .2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+        tween.tween_property(self, 'scale', Vector2.ONE, .1).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 
     if text == _content:
         global_position = _pos

@@ -44,7 +44,7 @@ func test_save() -> void:
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.MACRO
 	HenGlobal.SIDE_BAR_LIST.add()
 
-	var macro_data: HenSideBar.MacroData = HenGlobal.SIDE_BAR_LIST.macro_list[0]
+	var macro_data: HenMacroData = HenGlobal.SIDE_BAR_LIST.macro_list[0]
 	macro_data.name = 'my macro'
 	macro_data.create_flow(HenSideBar.ParamType.INPUT, 0)
 

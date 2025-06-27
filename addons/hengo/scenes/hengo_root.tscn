@@ -102,15 +102,15 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1152, 648)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(3824, 1651)
+shader_parameter/offset = Vector2(1135.12, -355.469)
+shader_parameter/zoom_factor = 0.999997
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 0.745098, 0.745098, 0.745098, 1)
+colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -179,53 +179,72 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI"]
-z_index = 100
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/CNodeUI"]
 layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-grow_horizontal = 0
+grow_horizontal = 2
 grow_vertical = 2
+split_offset = 1500
+dragging_enabled = false
+dragger_visibility = 1
+
+[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+process_mode = 4
+layout_mode = 2
 mouse_filter = 2
 
-[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/VBoxContainer"]
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+layout_mode = 2
+split_offset = 1575
+
+[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer"]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer"]
+z_index = 100
+layout_mode = 2
+mouse_filter = 2
+
+[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer"]
 unique_name_in_owner = true
 z_index = 110
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_x5h56")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
+[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
 layout_mode = 2
 alignment = 2
 script = ExtResource("7_sagw0")
 dashboard = NodePath("DashBoard")
 
-[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 tooltip_text = "Dashboard"
 icon = ExtResource("11_rvhdl")
 
-[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
 
-[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer"]
+[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
+[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -237,13 +256,13 @@ theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
 disabled = true
 text = "Compile"
 
-[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
+[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
 layout_mode = 2
 texture = ExtResource("11_xut0q")
 expand_mode = 2
 stretch_mode = 3
 
-[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/VBoxContainer"]
+[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
@@ -265,20 +284,21 @@ justification_flags = 0
 deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
 
-[node name="CodePreviewContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/VBoxContainer"]
+[node name="CodePreviewContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("10_r5155")
 
-[node name="PreviewCheck" type="CheckButton" parent="VBoxContainer/CNodeUI/VBoxContainer/CodePreviewContainer"]
+[node name="PreviewCheck" type="CheckButton" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/CodePreviewContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/font = ExtResource("12_wtrk7")
 text = "Code Preview"
 
-[node name="CodePreview" parent="VBoxContainer/CNodeUI/VBoxContainer/CodePreviewContainer" instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/VBoxContainer/CodePreviewContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(500, 100)
 layout_mode = 2
 theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
