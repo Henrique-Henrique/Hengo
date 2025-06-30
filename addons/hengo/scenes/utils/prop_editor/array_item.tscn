@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://5tg1h6dye42s"]
+
+[ext_resource type="Texture2D" uid="uid://tngv2yjljh1h" path="res://addons/hengo/assets/icons/cnode/raw.svg" id="1_bsiqg"]
+
+[node name="ArrayItem" type="HBoxContainer"]
+
+[node name="Name" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Name"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("1_bsiqg")
+icon_alignment = 1

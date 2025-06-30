@@ -92,23 +92,40 @@ class SideBarList:
 			
 		return []
 	
-	func on_click(_item) -> void:
-		var inspector_item_arr: Array
-		var name: String = ''
+	func on_click(_item, _mouse_pos: Vector2) -> void:
+		var pos: Vector2 = HenGlobal.SIDE_BAR.global_position
 
-		inspector_item_arr = _item.get_inspector_array_list()
-
-		name = _item.name
-
-		var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
-
-		state_inspector.item_changed.connect(_on_config_changed)
+		pos.x += HenGlobal.SIDE_BAR.size.x
+		pos.y += _mouse_pos.y
 
 		HenGlobal.GENERAL_POPUP.get_parent().show_content(
-			state_inspector,
-			name,
-			HenGlobal.CNODE_CONTAINER.get_global_mouse_position()
+			HenPropEditor.mount([
+				HenPropEditor.Prop.new('My Name', HenPropEditor.Prop.Type.STRING),
+				HenPropEditor.Prop.new('My List', HenPropEditor.Prop.Type.ARRAY, [
+					HenPropEditor.Prop.new('Second Name', HenPropEditor.Prop.Type.STRING),
+				]),
+			]),
+			'Testing',
+			pos,
+			0
 		)
+
+		# var inspector_item_arr: Array
+		# var name: String = ''
+
+		# inspector_item_arr = _item.get_inspector_array_list()
+
+		# name = _item.name
+
+		# var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
+
+		# state_inspector.item_changed.connect(_on_config_changed)
+
+		# HenGlobal.GENERAL_POPUP.get_parent().show_content(
+		# 	state_inspector,
+		# 	name,
+		# 	HenGlobal.CNODE_CONTAINER.get_global_mouse_position()
+		# )
 
 	func _on_config_changed(_name: StringName, _ref, _inspector: HenInspector) -> void:
 		if _ref is HenSignalData and _name == 'signal_name':
@@ -262,7 +279,7 @@ func _on_select() -> void:
 func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> void:
 	match _mouse_button_index:
 		2:
-			HenGlobal.SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0))
+			HenGlobal.SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0), _mouse_position)
 
 
 func _on_list_changed() -> void:

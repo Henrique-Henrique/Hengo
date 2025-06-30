@@ -19,7 +19,7 @@ func clean() -> void:
         node.queue_free()
 
 # public
-func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) -> void:
+func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 0.8) -> void:
     var gp = get_node('%GeneralPopUp')
     var container = gp.get_child(0)
 
@@ -35,7 +35,15 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
         gp.position = _pos
     
     gp.reset_size()
+
     HenUtils.reposition_control_inside(gp)
+
+    if _lod > 0:
+        (get_node('%Background') as Panel).modulate = Color.WHITE
+        ((get_node('%Background') as Panel).material as ShaderMaterial).set_shader_parameter('lod', _lod)
+    else:
+        (get_node('%Background') as Panel).modulate = Color.TRANSPARENT
+
     show()
 
     # animations
@@ -43,7 +51,6 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF) ->
 
     gp.scale = Vector2(.95, .95)
     tween.tween_property(gp, 'scale', Vector2.ONE, .5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-
     HenGlobal.CAM.can_scroll = false
 
 

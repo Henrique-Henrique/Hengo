@@ -1,0 +1,35 @@
+[gd_scene load_steps=4 format=3 uid="uid://fw614nu57fni"]
+
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_p2mjy"]
+[ext_resource type="Texture2D" uid="uid://cokwia3wb2nlx" path="res://addons/hengo/assets/icons/trash.svg" id="2_3yona"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_73rgf"]
+bg_color = Color(0.139045, 0.128971, 0.119587, 1)
+
+[node name="PropArrayItem" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_73rgf")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="VBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("1_p2mjy")
+text = "Name"
+
+[node name="Delete" type="Button" parent="VBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("2_3yona")
+icon_alignment = 1
+
+[node name="Container" type="VBoxContainer" parent="VBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2

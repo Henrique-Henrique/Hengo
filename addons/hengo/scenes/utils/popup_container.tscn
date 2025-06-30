@@ -5,13 +5,15 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7pkyu"]
 shader = ExtResource("2_lrxjm")
-shader_parameter/lod = 0.8
+shader_parameter/lod = 1.2
+shader_parameter/color = Color(0, 0, 0, 1)
 
 [node name="PopupContainer" type="CanvasLayer"]
 layer = 100
 script = ExtResource("1_b3884")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Background" type="Panel" parent="."]
+unique_name_in_owner = true
 material = SubResource("ShaderMaterial_7pkyu")
 anchors_preset = 15
 anchor_right = 1.0

@@ -9,7 +9,7 @@
 
 extends Sprite2D
 
-var ata = String()
+@export var ata = Array()
  
 var my_var_3912 = String()#ID:3912
 var my_var_4138 = String()#ID:4138
