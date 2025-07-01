@@ -48,7 +48,6 @@ func on_change_name(_name: String) -> void:
 
 
 func on_change_signal_name(_name: String) -> void:
-	print('dddd')
 	signal_name = _name
 
 
@@ -106,10 +105,11 @@ func get_diconnect_cnode_data() -> Dictionary:
 			ref = self
 	}
 
-func create_param() -> void:
+func create_param() -> HenParamData:
 	var in_out: HenParamData = HenParamData.new()
 	bind_params.append(in_out)
 	in_out_added.emit(true, in_out.get_data())
+	return in_out
 	
 
 func move_param(_direction: HenPropArray.ArrayMove, _ref: HenParamData) -> void:

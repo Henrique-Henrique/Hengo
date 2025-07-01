@@ -928,7 +928,7 @@ static func _parse_signals(_refs: HenSaveCodeType.References) -> String:
 
 		# local variable
 		signal_code += '\n'.join(signal_item.local_vars.map(func(x: HenSaveCodeType.Variable):
-			return '\t' + _generate_var_code(x))) + '\n'
+			return '\t' + _generate_var_code(x)))
 
 		if not signal_item.signal_enter.flow_connections.is_empty() and signal_item.signal_enter.flow_connections[0].to:
 			var signal_tokens: Array = signal_item.signal_enter.flow_connections[0].to.get_flow_tokens(
@@ -939,7 +939,7 @@ static func _parse_signals(_refs: HenSaveCodeType.References) -> String:
 			for token in signal_tokens:
 				signal_block.append(parse_token_by_type(token, 1))
 			
-			signal_code += '\n'.join(signal_block) + '\n\n'
+			signal_code += '\n'.join(signal_block)
 		else:
 			signal_code += '\tpass\n\n'
 	
