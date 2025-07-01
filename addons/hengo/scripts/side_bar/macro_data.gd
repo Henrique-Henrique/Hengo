@@ -82,6 +82,8 @@ func _init(_load_vc: bool = true) -> void:
 func on_change_name(_name: String) -> void:
     name = _name
     name_changed.emit(_name)
+    HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+
 
 func create_flow(_type: HenSideBar.ParamType, _custom_id: int = -1) -> MacroInOut:
     var flow: MacroInOut = MacroInOut.new()
@@ -185,7 +187,7 @@ func get_inspector_array_list() -> Array[HenPropEditor.Prop]:
             name = 'name',
             type = HenPropEditor.Prop.Type.STRING,
             default_value = name,
-            on_value_changed = HenSignalBus.get_singleton().on_side_bar_item_name_changed.bind(self)
+            on_value_changed = on_change_name
         }),
         HenPropEditor.Prop.new({
             name = 'inputs',
