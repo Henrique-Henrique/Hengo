@@ -1,8 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://5tg1h6dye42s"]
+[gd_scene load_steps=6 format=3 uid="uid://5tg1h6dye42s"]
 
-[ext_resource type="Texture2D" uid="uid://tngv2yjljh1h" path="res://addons/hengo/assets/icons/cnode/raw.svg" id="1_bsiqg"]
+[ext_resource type="Script" uid="uid://c72dwq7bqc348" path="res://addons/hengo/scripts/utils/prop_editor/array_item.gd" id="1_4v55m"]
+[ext_resource type="Texture2D" uid="uid://8fywhf3bbpo3" path="res://addons/hengo/assets/icons/greater.svg" id="2_282i6"]
+[ext_resource type="Texture2D" uid="uid://wa5iq8y6kwy1" path="res://addons/hengo/assets/icons/menu/up.svg" id="3_282i6"]
+[ext_resource type="Texture2D" uid="uid://dftdn32fq4u86" path="res://addons/hengo/assets/icons/menu/down.svg" id="4_7g6iy"]
+[ext_resource type="Texture2D" uid="uid://4q0n23nhoajo" path="res://addons/hengo/assets/icons/menu/x.svg" id="5_282i6"]
 
 [node name="ArrayItem" type="HBoxContainer"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+script = ExtResource("1_4v55m")
 
 [node name="Name" type="Label" parent="."]
 unique_name_in_owner = true
@@ -10,9 +17,20 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Name"
 
-[node name="Button" type="Button" parent="."]
+[node name="Options" type="MenuButton" parent="."]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("1_bsiqg")
+icon = ExtResource("2_282i6")
 icon_alignment = 1
+item_count = 3
+popup/item_0/text = "Move Up"
+popup/item_0/icon = ExtResource("3_282i6")
+popup/item_0/id = 1
+popup/item_1/text = "Move Down"
+popup/item_1/icon = ExtResource("4_7g6iy")
+popup/item_1/id = 2
+popup/item_2/text = "Delete"
+popup/item_2/icon = ExtResource("5_282i6")
+popup/item_2/id = 0

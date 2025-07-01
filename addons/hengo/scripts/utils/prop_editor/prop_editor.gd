@@ -6,6 +6,22 @@ const PROP_ITEM = preload('res://addons/hengo/scenes/utils/prop_editor/prop_item
 const PROP_ARRAY_ITEM = preload('res://addons/hengo/scenes/utils/prop_editor/prop_array_item.tscn')
 const ARRAY_ITEM = preload('res://addons/hengo/scenes/utils/prop_editor/array_item.tscn')
 
+
+static var editor_ref: HenPropEditor
+
+#
+#
+#
+#
+#
+#
+var get_prop_callback: Callable
+#
+#
+#
+#
+#
+#
 class Prop:
     enum Type {
         ARRAY,
@@ -14,35 +30,78 @@ class Prop:
 
     var name: String
     var type: Type
-    var prop_list: Array[Prop]
+    var prop_list: Array
+    var default_value: Variant
+    var on_value_changed: Callable
+    var on_item_create: Callable
+    var on_item_delete: Callable
+    var on_item_move: Callable
 
-    func _init(_name: String, _type: Type, _prop_list: Array[Prop] = []) -> void:
-        name = _name
-        type = _type
-        prop_list = _prop_list
-    
+    func _init(_data: Dictionary) -> void:
+        name = _data.name
+        type = _data.type
+
+        if _data.has('prop_list'):
+            prop_list = _data.prop_list
+        
+        if _data.has('default_value'):
+            default_value = _data.default_value
+
+        if _data.has('on_value_changed'):
+            on_value_changed = _data.on_value_changed
+        
+        if _data.has('on_item_create'):
+            on_item_create = _data.on_item_create
+
+        if _data.has('on_item_delete'):
+            on_item_delete = _data.on_item_delete
+
+        if _data.has('on_item_move'):
+            on_item_move = _data.on_item_move
+        
+        
     func get_field() -> Control:
         match type:
             Type.STRING:
-                return preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
+                var item = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
+
+                if default_value:
+                    item.set_default(default_value)
+
+                if on_value_changed:
+                    item.connect('value_changed', on_value_changed)
+
+                return item
             
         return null
 
-
-func start(_props: Array[Prop]) -> void:
+#
+#
+#
+#
+#
+#
+func start() -> void:
     var item_container: VBoxContainer = get_node('%ItemContainer')
-    
-    for prop: Prop in _props:
+    var props: Array[Prop] = get_prop_callback.call()
+
+    for item in item_container.get_children():
+        item_container.remove_child(item)
+        item.queue_free()
+
+    for prop: Prop in props:
         match prop.type:
             Prop.Type.ARRAY:
-                var arr_item = PROP_ARRAY_ITEM.instantiate()
+                var arr_item: HenPropArrayItem = PROP_ARRAY_ITEM.instantiate()
+                arr_item.start(prop)
                 (arr_item.get_node('%Name') as Label).text = prop.name
 
                 # create array items
                 for item_prop: Prop in prop.prop_list:
-                    var item = ARRAY_ITEM.instantiate()
+                    var item: HenArrayItem = ARRAY_ITEM.instantiate()
                     var field: Control = item_prop.get_field()
 
+                    item.start(item_prop)
                     (item.get_node('%Name') as Label).text = item_prop.name
 
                     item.add_child(field)
@@ -59,8 +118,14 @@ func start(_props: Array[Prop]) -> void:
                 item_container.add_child(item)
 
 
-static func mount(_props: Array[Prop]) -> HenPropEditor:
-    var editor: HenPropEditor = PROP_EDITOR.instantiate()
-    editor.start(_props)
+static func mount(_get_props: Callable) -> HenPropEditor:
+    var editor: HenPropEditor = PROP_EDITOR.instantiate() as HenPropEditor
+    editor.get_prop_callback = _get_props
+    editor_ref = editor
 
+    editor.start()
     return editor
+
+
+static func get_singleton() -> HenPropEditor:
+    return editor_ref

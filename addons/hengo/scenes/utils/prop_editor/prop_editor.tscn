@@ -1,14 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://b0f6txo5lk540"]
+[gd_scene load_steps=5 format=3 uid="uid://b0f6txo5lk540"]
 
 [ext_resource type="Script" uid="uid://dfd1pxylo0r3i" path="res://addons/hengo/scripts/utils/prop_editor/prop_editor.gd" id="1_ejtv3"]
+[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_xyutk"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_54uq2"]
 [ext_resource type="Texture2D" uid="uid://cokwia3wb2nlx" path="res://addons/hengo/assets/icons/trash.svg" id="3_wucxt"]
 
 [node name="MarginContainer" type="MarginContainer"]
-custom_minimum_size = Vector2(450, 0)
+custom_minimum_size = Vector2(300, 0)
 offset_right = 400.0
 offset_bottom = 160.0
 size_flags_vertical = 3
+theme = ExtResource("1_xyutk")
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
@@ -32,6 +34,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 icon = ExtResource("3_wucxt")
+flat = true
 icon_alignment = 1
 
 [node name="ItemContainer" type="VBoxContainer" parent="VBoxContainer"]

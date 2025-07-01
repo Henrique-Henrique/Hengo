@@ -2,7 +2,7 @@
 class_name HenPropArray extends VBoxContainer
 
 
-enum ArrayMove {UP, DOWN, DELETE}
+enum ArrayMove {UP, DOWN}
 
 signal value_changed
 

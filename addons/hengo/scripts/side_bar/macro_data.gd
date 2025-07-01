@@ -45,6 +45,7 @@ class MacroInOut:
         
         HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
 
+
 func _init(_load_vc: bool = true) -> void:
     route = {
         name = name,
@@ -76,6 +77,7 @@ func _init(_load_vc: bool = true) -> void:
             ref = self,
             can_delete = false
         })
+
 
 func on_change_name(_name: String) -> void:
     name = _name
@@ -126,15 +128,30 @@ func delete_param(_ref: HenParamData, _type: HenSideBar.ParamType) -> void:
     _ref.deleted.emit(_type == HenSideBar.ParamType.INPUT)
 
 
-func move_flow(_ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
+func move_flow(_direction: HenPropArray.ArrayMove, _ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
+    var can_move: bool = false
+    var arr: Array
+
     match _type:
         HenSideBar.ParamType.INPUT:
-            _ref.moved.emit(inputs.find(_ref))
+            arr = inputs
         HenSideBar.ParamType.OUTPUT:
-            _ref.moved.emit(outputs.find(_ref))
+            arr = outputs
+
+    match _direction:
+        HenPropArray.ArrayMove.UP:
+            can_move = HenUtils.move_array_item(arr, _ref, 1)
+        HenPropArray.ArrayMove.DOWN:
+            can_move = HenUtils.move_array_item(arr, _ref, -1)
+
+    if can_move: _ref.moved.emit(arr.find(_ref))
 
 
 func delete_flow(_ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
+    match _type:
+        HenSideBar.ParamType.INPUT:
+            inputs.erase(_ref)
+
     _ref.deleted.emit()
 
 
@@ -162,60 +179,80 @@ func delete() -> void:
     HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
 
 
-func get_inspector_array_list() -> Array:
+func get_inspector_array_list() -> Array[HenPropEditor.Prop]:
     return [
-        HenInspector.InspectorItem.new({
-            type = &'@controls',
-            ref = self
-        }),
-        HenInspector.InspectorItem.new({
+        HenPropEditor.Prop.new({
             name = 'name',
-            type = &'String',
-            value = name,
-            ref = self
+            type = HenPropEditor.Prop.Type.STRING,
+            default_value = name,
+            on_value_changed = HenSignalBus.get_singleton().on_side_bar_item_name_changed.bind(self)
         }),
-        HenInspector.InspectorItem.new({
+        HenPropEditor.Prop.new({
             name = 'inputs',
-            type = &'Array',
-            value = inputs,
-            max_size = 5,
-            item_creation_callback = create_flow.bind(HenSideBar.ParamType.INPUT),
-            item_move_callback = move_flow.bind(HenSideBar.ParamType.INPUT),
-            item_delete_callback = delete_flow.bind(HenSideBar.ParamType.INPUT),
-            field = {name = 'name', type = 'String'}
+            type = HenPropEditor.Prop.Type.ARRAY,
+            on_value_changed = on_change_name,
+            on_item_create = create_flow.bind(HenSideBar.ParamType.INPUT),
+            prop_list = inputs.map(func(x: MacroInOut) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+                name = 'name',
+                type = HenPropEditor.Prop.Type.STRING,
+                default_value = x.name,
+                on_value_changed = x.on_change_name,
+                on_item_delete = delete_flow.bind(x, HenSideBar.ParamType.INPUT),
+                on_item_move = move_flow.bind(x, HenSideBar.ParamType.INPUT),
+            })) as Array[HenPropEditor.Prop],
         }),
-        HenInspector.InspectorItem.new({
-            name = 'outputs',
-            type = &'Array',
-            value = outputs,
-            max_size = 5,
-            item_creation_callback = create_flow.bind(HenSideBar.ParamType.OUTPUT),
-            item_move_callback = move_flow.bind(HenSideBar.ParamType.OUTPUT),
-            item_delete_callback = delete_flow.bind(HenSideBar.ParamType.OUTPUT),
-            field = {name = 'name', type = 'String'}
-        }),
+        # HenInspector.InspectorItem.new({
+        #     type = &'@controls',
+        #     ref = self
+        # }),
+        # HenInspector.InspectorItem.new({
+        #     name = 'name',
+        #     type = &'String',
+        #     value = name,
+        #     ref = self
+        # }),
+        # HenInspector.InspectorItem.new({
+        #     name = 'inputs',
+        #     type = &'Array',
+        #     value = inputs,
+        #     max_size = 5,
+        #     item_creation_callback = create_flow.bind(HenSideBar.ParamType.INPUT),
+        #     item_move_callback = move_flow.bind(HenSideBar.ParamType.INPUT),
+        #     item_delete_callback = delete_flow.bind(HenSideBar.ParamType.INPUT),
+        #     field = {name = 'name', type = 'String'}
+        # }),
+        # HenInspector.InspectorItem.new({
+        #     name = 'outputs',
+        #     type = &'Array',
+        #     value = outputs,
+        #     max_size = 5,
+        #     item_creation_callback = create_flow.bind(HenSideBar.ParamType.OUTPUT),
+        #     item_move_callback = move_flow.bind(HenSideBar.ParamType.OUTPUT),
+        #     item_delete_callback = delete_flow.bind(HenSideBar.ParamType.OUTPUT),
+        #     field = {name = 'name', type = 'String'}
+        # }),
         
-        HenInspector.InspectorItem.new({
-            name = 'inputs_value',
-            type = &'Array',
-            value = inputs_value,
-            max_size = 5,
-            item_creation_callback = create_param.bind(HenSideBar.ParamType.INPUT),
-            item_move_callback = move_param.bind(HenSideBar.ParamType.INPUT),
-            item_delete_callback = delete_param.bind(HenSideBar.ParamType.INPUT),
-            field = {name = '', type = '@Param'}
-        }),
-        HenInspector.InspectorItem.new({
-            name = 'outputs_value',
-            type = &'Array',
-            value = outputs_value,
-            max_size = 5,
-            item_creation_callback = create_param.bind(HenSideBar.ParamType.OUTPUT),
-            item_move_callback = move_param.bind(HenSideBar.ParamType.OUTPUT),
-            item_delete_callback = delete_param.bind(HenSideBar.ParamType.OUTPUT),
-            field = {name = '', type = '@Param'}
-        })
-    ]
+        # HenInspector.InspectorItem.new({
+        #     name = 'inputs_value',
+        #     type = &'Array',
+        #     value = inputs_value,
+        #     max_size = 5,
+        #     item_creation_callback = create_param.bind(HenSideBar.ParamType.INPUT),
+        #     item_move_callback = move_param.bind(HenSideBar.ParamType.INPUT),
+        #     item_delete_callback = delete_param.bind(HenSideBar.ParamType.INPUT),
+        #     field = {name = '', type = '@Param'}
+        # }),
+        # HenInspector.InspectorItem.new({
+        #     name = 'outputs_value',
+        #     type = &'Array',
+        #     value = outputs_value,
+        #     max_size = 5,
+        #     item_creation_callback = create_param.bind(HenSideBar.ParamType.OUTPUT),
+        #     item_move_callback = move_param.bind(HenSideBar.ParamType.OUTPUT),
+        #     item_delete_callback = delete_param.bind(HenSideBar.ParamType.OUTPUT),
+        #     field = {name = '', type = '@Param'}
+        # })
+    ] as Array[HenPropEditor.Prop]
 
     
 func get_save() -> Dictionary:

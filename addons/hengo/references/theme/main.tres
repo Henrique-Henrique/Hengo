@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=7 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=8 format=3 uid="uid://xxj7abqbehjg"]
 
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
@@ -15,6 +15,22 @@ shadow_offset = Vector2(0, 2)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghilx"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.140412, 0.144739, 0.149066, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2484, 0.2484, 0.2484, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="ImageTexture" id="ImageTexture_6gb4l"]
 
 [resource]
@@ -27,6 +43,7 @@ Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
 LineEdit/fonts/font = ExtResource("1_ghilx")
 LineEdit/styles/normal = ExtResource("2_nhkyk")
+PopupMenu/styles/panel = SubResource("StyleBoxFlat_ghilx")
 SpinBox/colors/down_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)
 SpinBox/colors/down_hover_icon_modulate = Color(0.95, 0.95, 0.95, 0)
 SpinBox/colors/down_icon_modulate = Color(0.88, 0.88, 0.88, 0)

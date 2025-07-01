@@ -1,13 +1,28 @@
-[gd_scene load_steps=4 format=3 uid="uid://fw614nu57fni"]
+[gd_scene load_steps=5 format=3 uid="uid://fw614nu57fni"]
 
+[ext_resource type="Script" uid="uid://bobl7w3f5fstw" path="res://addons/hengo/scripts/utils/prop_editor/prop_array_item.gd" id="1_3yona"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_p2mjy"]
-[ext_resource type="Texture2D" uid="uid://cokwia3wb2nlx" path="res://addons/hengo/assets/icons/trash.svg" id="2_3yona"]
+[ext_resource type="Texture2D" uid="uid://dguwkk3raakpa" path="res://addons/hengo/assets/icons/menu/plus.svg" id="2_5nhsi"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_73rgf"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
 bg_color = Color(0.139045, 0.128971, 0.119587, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.270222, 0.270222, 0.270222, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="PropArrayItem" type="PanelContainer"]
 theme_override_styles/panel = SubResource("StyleBoxFlat_73rgf")
+script = ExtResource("1_3yona")
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -22,12 +37,13 @@ size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("1_p2mjy")
 text = "Name"
 
-[node name="Delete" type="Button" parent="VBoxContainer2/HBoxContainer"]
+[node name="Add" type="Button" parent="VBoxContainer2/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-icon = ExtResource("2_3yona")
+icon = ExtResource("2_5nhsi")
+flat = true
 icon_alignment = 1
 
 [node name="Container" type="VBoxContainer" parent="VBoxContainer2"]

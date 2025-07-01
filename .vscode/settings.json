@@ -9,5 +9,4 @@
     "**/*.cfg": true,
     "**/*.uid": true
   },
-  "godotTools.editorPath.godot4": "c:\\Users\\pedro.oliveira\\Desktop\\Gd\\godot.exe"
 }

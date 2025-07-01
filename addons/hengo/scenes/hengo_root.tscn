@@ -104,7 +104,7 @@ corner_radius_bottom_left = 8
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1152, 648)
-shader_parameter/offset = Vector2(8.42499e-06, 7.09804e-13)
+shader_parameter/offset = Vector2(100, 8.42499e-06)
 shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
@@ -487,6 +487,7 @@ visible = false
 
 [node name="DropDownMenu" parent="PopupContainer" instance=ExtResource("9_xwbyp")]
 unique_name_in_owner = true
+theme = ExtResource("1_2muha")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 100
@@ -496,6 +497,7 @@ unique_name_in_owner = true
 visible = false
 offset_right = 305.0
 offset_bottom = 133.0
+theme = ExtResource("1_2muha")
 theme_override_styles/panel = ExtResource("36_dyro1")
 script = ExtResource("36_alymh")
 rich_text_label = NodePath("VBoxContainer/Text")
@@ -547,6 +549,7 @@ mouse_filter = 2
 [node name="Tooltip" parent="TooltipCanvas" instance=ExtResource("23_x5h56")]
 unique_name_in_owner = true
 visible = false
+theme = ExtResource("1_2muha")
 
 [node name="SignalBus" type="Node" parent="."]
 unique_name_in_owner = true

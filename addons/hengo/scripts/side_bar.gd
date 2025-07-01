@@ -99,33 +99,11 @@ class SideBarList:
 		pos.y += _mouse_pos.y
 
 		HenGlobal.GENERAL_POPUP.get_parent().show_content(
-			HenPropEditor.mount([
-				HenPropEditor.Prop.new('My Name', HenPropEditor.Prop.Type.STRING),
-				HenPropEditor.Prop.new('My List', HenPropEditor.Prop.Type.ARRAY, [
-					HenPropEditor.Prop.new('Second Name', HenPropEditor.Prop.Type.STRING),
-				]),
-			]),
+			HenPropEditor.mount(_item.get_inspector_array_list),
 			'Testing',
 			pos,
 			0
 		)
-
-		# var inspector_item_arr: Array
-		# var name: String = ''
-
-		# inspector_item_arr = _item.get_inspector_array_list()
-
-		# name = _item.name
-
-		# var state_inspector: HenInspector = HenInspector.start(inspector_item_arr)
-
-		# state_inspector.item_changed.connect(_on_config_changed)
-
-		# HenGlobal.GENERAL_POPUP.get_parent().show_content(
-		# 	state_inspector,
-		# 	name,
-		# 	HenGlobal.CNODE_CONTAINER.get_global_mouse_position()
-		# )
 
 	func _on_config_changed(_name: StringName, _ref, _inspector: HenInspector) -> void:
 		if _ref is HenSignalData and _name == 'signal_name':

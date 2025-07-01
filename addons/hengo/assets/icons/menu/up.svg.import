@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8fywhf3bbpo3"
-path="res://.godot/imported/greater.svg-0b69c5ec524af6a6ccd816ee730e3ad6.ctex"
+uid="uid://wa5iq8y6kwy1"
+path="res://.godot/imported/up.svg-e2d9c4308853db6a426c06e7d754bc56.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/icons/greater.svg"
-dest_files=["res://.godot/imported/greater.svg-0b69c5ec524af6a6ccd816ee730e3ad6.ctex"]
+source_file="res://addons/hengo/assets/icons/menu/up.svg"
+dest_files=["res://.godot/imported/up.svg-e2d9c4308853db6a426c06e7d754bc56.ctex"]
 
 [params]
 
@@ -32,6 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=0.8
+svg/scale=1.0
 editor/scale_with_editor_scale=false
 editor/convert_colors_with_editor_theme=false
