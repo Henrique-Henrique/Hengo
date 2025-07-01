@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://xg0nsq20dlya"]
+[gd_scene load_steps=5 format=3 uid="uid://xg0nsq20dlya"]
 
 [ext_resource type="Script" uid="uid://e77fkqwrtpaw" path="res://addons/hengo/scripts/utils/tooltip.gd" id="1_6luta"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_f5gqd"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_5j0lf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60crp"]
 content_margin_left = 12.0
@@ -24,6 +26,8 @@ offset_right = 56.0
 offset_bottom = 23.0
 mouse_filter = 2
 theme_override_colors/default_color = Color(1, 1, 1, 1)
+theme_override_fonts/normal_font = ExtResource("1_f5gqd")
+theme_override_fonts/bold_font = ExtResource("2_5j0lf")
 theme_override_styles/normal = SubResource("StyleBoxFlat_60crp")
 bbcode_enabled = true
 text = "dsadsa"

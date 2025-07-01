@@ -18,6 +18,9 @@ func on_change_name(_name: String) -> void:
     name = _name
     data_changed.emit('name', _name)
 
+func on_change_export(_export: bool) -> void:
+    export = _export
+
 func get_save() -> Dictionary:
     return {
         id = id,
@@ -47,29 +50,25 @@ func delete() -> void:
 
 
 func get_inspector_array_list(_is_local: bool = false) -> Array:
-    return [
-        HenInspector.InspectorItem.new({
-            type = &'@controls',
-            ref = self
-        }),
-        HenInspector.InspectorItem.new({
+    return ([
+        HenPropEditor.Prop.new({
             name = 'name',
-            type = &'String',
-            value = name,
-            ref = self
+            type = HenPropEditor.Prop.Type.STRING,
+            default_value = name,
+            on_value_changed = on_change_name
         }),
-        HenInspector.InspectorItem.new({
+        HenPropEditor.Prop.new({
             name = 'type',
-            type = &'@dropdown',
-            value = type,
-            category = 'all_classes',
-            ref = self
-        })
-    ] + ([
-        HenInspector.InspectorItem.new({
+            type = HenPropEditor.Prop.Type.DROPDOWN,
+            default_value = type,
+            on_value_changed = on_change_type,
+            category = 'all_classes'
+        }),
+    ] + [
+        HenPropEditor.Prop.new({
             name = 'export',
-            type = &'bool',
-            value = export ,
-            ref = self
+            type = HenPropEditor.Prop.Type.BOOL,
+            default_value = export ,
+            on_value_changed = on_change_export,
         }),
     ] if not _is_local else [])

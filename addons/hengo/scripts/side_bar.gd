@@ -42,6 +42,7 @@ class SideBarList:
 	var func_list: Array
 	var signal_list: Array
 	var macro_list: Array
+	var inspecting: bool = false
 
 	signal list_changed
 
@@ -98,12 +99,19 @@ class SideBarList:
 		pos.x += HenGlobal.SIDE_BAR.size.x
 		pos.y += _mouse_pos.y
 
-		HenGlobal.GENERAL_POPUP.get_parent().show_content(
+		var popup: HenPopupContainer = HenGlobal.GENERAL_POPUP.get_parent().show_content(
 			HenPropEditor.mount(_item.get_inspector_array_list),
 			'Testing',
-			pos,
-			0
+			pos
 		)
+
+		if not popup.closed.is_connected(_on_inspector_close): popup.closed.connect(_on_inspector_close)
+		inspecting = true
+
+	
+	func _on_inspector_close() -> void:
+		inspecting = false
+	
 
 	func _on_config_changed(_name: StringName, _ref, _inspector: HenInspector) -> void:
 		if _ref is HenSignalData and _name == 'signal_name':
@@ -184,7 +192,6 @@ func _ready() -> void:
 	list.auto_tooltip = false
 	list.button_clicked.connect(_on_list_button_clicked)
 	list.item_mouse_selected.connect(_on_item_selected)
-	list.item_selected.connect(_on_select)
 	list.gui_input.connect(_on_gui)
 	list.mouse_exited.connect(_on_exit)
 
@@ -206,56 +213,44 @@ func _on_gui(_event: InputEvent) -> void:
 			HenGlobal.TOOLTIP.close()
 			return
 
-		if item:
-			var data = item.get_metadata(0)
-			var pos: Vector2 = (_event as InputEventMouseMotion).global_position + Vector2(20, 20)
+		if HenGlobal.SIDE_BAR_LIST.inspecting:
+			HenGlobal.TOOLTIP.close()
+			return
 
-			if not data is int:
-				if data is HenVarData:
-					HenGlobal.TOOLTIP.go_to(pos, '[b]{type}[/b]\n{name}\n\n{inspect}'.format({
-						name = data.name,
-						type = data.type,
-						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT
-					}))
-				elif data is HenFuncData:
-					HenGlobal.TOOLTIP.go_to(pos, '{name}\n\n[b]Input size: [/b]{in_size}\n\n[b]Output size: [/b]{out_size}\n\n{inspect}\n{enter}'.format({
-						name = data.name,
-						in_size = data.inputs.size(),
-						out_size = data.outputs.size(),
-						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT,
-						enter = HenEnums.TOOLTIP_TEXT.DOUBLE_CLICK
-					}))
-				elif data is HenSignalData:
-					HenGlobal.TOOLTIP.go_to(pos, '{name}\n\n[b]Signal: [/b] {s_name}\n\n{inspect}\n{enter}'.format({
-						name = data.name,
-						s_name = data.signal_name if data.signal_name else 'Not Selected',
-						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT,
-						enter = HenEnums.TOOLTIP_TEXT.DOUBLE_CLICK
-					}))
-				elif data is HenMacroData:
-					HenGlobal.TOOLTIP.go_to(pos, '{name}\n\n[b]Flow Input Size: [/b] {fi_size}\n[b]Flow Output Size: [/b] {fo_size}\n\n[b]Input Size: [/b] {i_size}\n[b]Output Size: [/b] {o_size}\n\n{inspect}\n{enter}'.format({
-						name = data.name,
-						fi_size = data.inputs.size(),
-						fo_size = data.outputs.size(),
-						i_size = data.inputs_value.size(),
-						o_size = data.outputs_value.size(),
-						inspect = HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT,
-						enter = HenEnums.TOOLTIP_TEXT.DOUBLE_CLICK
-					}))
+		if item:
+			var _side_bar_item = item.get_metadata(0)
+			
+			if _side_bar_item is not int and _side_bar_item is RefCounted:
+				var pos: Vector2 = (_event as InputEventMouseMotion).global_position
+				var text: String = ''
+
+				pos.x = HenGlobal.SIDE_BAR.position.x + HenGlobal.SIDE_BAR.size.x
+
+				if _side_bar_item is HenVarData:
+					text = '[b]Variable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				elif _side_bar_item is HenFuncData:
+					text = '[b]Function[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				elif _side_bar_item is HenSignalData:
+					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				elif _side_bar_item is HenMacroData:
+					text = '[b]Macro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+
+				HenGlobal.TOOLTIP.go_to(pos, text)
 			else:
 				HenGlobal.TOOLTIP.close()
-		
+		else:
+			HenGlobal.TOOLTIP.close()
 
-func _on_select() -> void:
-	var obj = list.get_selected().get_metadata(0)
-
-	await RenderingServer.frame_post_draw
-	
-	if obj.get('route'):
-		HenRouter.change_route(obj.get('route'))
 
 func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> void:
 	match _mouse_button_index:
+		1:
+			var obj = list.get_selected().get_metadata(0)
+
+			await RenderingServer.frame_post_draw
+			
+			if obj.get('route'):
+				HenRouter.change_route(obj.get('route'))
 		2:
 			HenGlobal.SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0), _mouse_position)
 

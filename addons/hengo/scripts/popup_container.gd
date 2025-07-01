@@ -1,6 +1,7 @@
 @tool
 class_name HenPopupContainer extends CanvasLayer
 
+signal closed
 
 func _ready() -> void:
     get_child(0).gui_input.connect(_on_gui)
@@ -19,7 +20,7 @@ func clean() -> void:
         node.queue_free()
 
 # public
-func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 0.8) -> void:
+func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
     var gp = get_node('%GeneralPopUp')
     var container = gp.get_child(0)
 
@@ -53,6 +54,8 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _l
     tween.tween_property(gp, 'scale', Vector2.ONE, .5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
     HenGlobal.CAM.can_scroll = false
 
+    return self
+
 
 func reset_size() -> void:
     var gp = get_node('%GeneralPopUp')
@@ -67,3 +70,4 @@ func show_container() -> void:
 func hide_popup() -> void:
     HenGlobal.CAM.can_scroll = true
     hide()
+    closed.emit()

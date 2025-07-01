@@ -7,6 +7,6 @@ void fragment(){
     COLOR = mix(
 		textureLod(screen_texture, SCREEN_UV, lod),
 		color,
-		.5
+		.3
 	);
 }

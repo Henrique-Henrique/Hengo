@@ -411,6 +411,9 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 		for param: Dictionary in signal_data.params:
 			signal_item.params.append(_get_param_from_dict(param))
+
+		for param: Dictionary in signal_data.bind_params:
+			signal_item.bind_params.append(_get_param_from_dict(param))
 	
 		if signal_data.has(&'local_vars'):
 			for local_var: Dictionary in signal_data.local_vars:

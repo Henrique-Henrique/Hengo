@@ -869,13 +869,13 @@ func get_hengo_signal_list() -> Array:
 
 	for signal_data: HenSignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
 		var connect_dt: Dictionary = {
-			name = signal_data.name,
+			name = 'Connect ' + signal_data.name,
 			type = FILTER_TYPE.SIGNAL,
 			data = signal_data.get_connect_cnode_data()
 		}
 
 		var disconnect_dt: Dictionary = {
-			name = signal_data.name,
+			name = 'Disconnect ' + signal_data.name,
 			type = FILTER_TYPE.SIGNAL,
 			data = signal_data.get_diconnect_cnode_data()
 		}
@@ -938,7 +938,7 @@ func _on_select() -> void:
 		).add()
 
 	# add connection when dragging from connector
-	if cnode_config.has('from_flow_connector'):
+	if cnode_config.has('from_flow_connector') and not vc_return.v_cnode.from_flow_connections.is_empty():
 		var connector: HenFlowConnector = cnode_config.from_flow_connector
 
 		connector.root.virtual_ref.add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.from_flow_connections[0].id, vc_return.v_cnode).add()
