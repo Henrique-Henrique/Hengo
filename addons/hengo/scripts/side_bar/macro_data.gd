@@ -194,7 +194,6 @@ func delete() -> void:
 
     HenGlobal.history.create_action('Delete Macro')
     HenGlobal.history.add_do_method(item_cache.remove)
-    HenGlobal.history.add_do_method(item_cache.remove)
     HenGlobal.history.add_undo_reference(item_cache)
     HenGlobal.history.add_undo_method(item_cache.add)
     HenGlobal.history.commit_action()

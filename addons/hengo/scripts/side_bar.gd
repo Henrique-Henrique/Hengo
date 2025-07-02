@@ -100,7 +100,7 @@ class SideBarList:
 		pos.y += _mouse_pos.y
 
 		var popup: HenPopupContainer = HenGlobal.GENERAL_POPUP.get_parent().show_content(
-			HenPropEditor.mount(_item.get_inspector_array_list),
+			HenPropEditor.mount(_item),
 			'Testing',
 			pos
 		)
@@ -119,6 +119,7 @@ class SideBarList:
 
 		list_changed.emit()
 	
+
 	func get_save() -> Dictionary:
 		return {
 			var_list = var_list.map(func(x: HenVarData): return x.get_save()),
@@ -168,14 +169,12 @@ class DeleteItemCache:
 		idx = arr.find(item)
 		arr.erase(item)
 		item.emit_signal('deleted', true)
-		item.invalid = true
 		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
 	
 	func add() -> void:
 		arr.append(item)
 		HenUtils.move_array_item_to_idx(arr, item, idx)
 		item.emit_signal('deleted', false)
-		item.invalid = false
 		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
 
 

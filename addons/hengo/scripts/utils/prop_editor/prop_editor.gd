@@ -16,6 +16,7 @@ static var editor_ref: HenPropEditor
 #
 #
 var get_prop_callback: Callable
+var instance_ref
 #
 #
 #
@@ -103,6 +104,23 @@ class Prop:
 #
 #
 #
+func _ready() -> void:
+	(%Delete as Button).pressed.connect(_on_delete)
+
+#
+#
+#
+#
+#
+#
+func _on_delete() -> void:
+	instance_ref.delete()
+#
+#
+#
+#
+#
+#
 func start() -> void:
 	var item_container: VBoxContainer = get_node('%ItemContainer')
 	var props: Array = get_prop_callback.call()
@@ -140,9 +158,10 @@ func start() -> void:
 				item_container.add_child(item)
 
 
-static func mount(_get_props: Callable) -> HenPropEditor:
+static func mount(_ref: RefCounted) -> HenPropEditor:
 	var editor: HenPropEditor = PROP_EDITOR.instantiate() as HenPropEditor
-	editor.get_prop_callback = _get_props
+	editor.get_prop_callback = (_ref as Variant).get_inspector_array_list
+	editor.instance_ref = _ref
 	editor_ref = editor
 
 	editor.start()

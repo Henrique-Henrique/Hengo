@@ -11,9 +11,9 @@ extends Sprite2D
 
 @export var ata = Array()
  
-var my_var_3912 = String()#ID:3912
-var my_var_4138 = String()#ID:4138
-var my_var_4199 = String()#ID:4199
+func _on_ata_signal_():
+	pass
+
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}
@@ -40,20 +40,3 @@ func _physics_process(delta: float) -> void:
 class State1 extends HengoState:
 	func enter() -> void:
 		print("ata")
-		if false:
-			_ref.set_centered(false)
-			if false:
-				_ref.get_offset()
-				_ref.set_flip_v(false)
-			else:
-				_ref.set_texture(Texture2D.new())
-				_ref.set_offset(Vector2(5, 0))
-				_ref.set_flip_h(false)
-		_ref.set_owner(Node.new())
-		_ref.set_flip_v(false)
-		for index_3732 in range(0, 0, 1):
-			_ref.set_centered(false)
-			_ref.set_offset(Vector2(5, 0))
-			_ref.set_flip_h(false)
-		_ref.set_offset(Vector2(5, 0))
-		_ref.set_flip_h(false)

@@ -54,7 +54,7 @@ func test_connection_code() -> void:
 	var dt: Dictionary = signal_data.get_connect_cnode_data()
 	
 	dt.route = HenTest.get_base_route()
-	refs.side_bar_item_ref[signal_data.id] = signal_data
+	HenCodeGeneration._parse_signal_dict(signal_data.get_save(), refs)
 
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	
@@ -71,19 +71,19 @@ func test_connection_code() -> void:
 		'connect("toggled", _on_my_signal_signal_.bind(null))'
 	)
 
-#
-#
-#
-#
-#
-#
+# #
+# #
+# #
+# #
+# #
+# #
 func test_disconnection_code() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
 	var dt: Dictionary = signal_data.get_diconnect_cnode_data()
 	
 	dt.route = HenTest.get_base_route()
-	refs.side_bar_item_ref[signal_data.id] = signal_data
+	HenCodeGeneration._parse_signal_dict(signal_data.get_save(), refs)
 
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	

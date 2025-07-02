@@ -1,13 +1,19 @@
 @tool
 class_name HenCodeGeneration extends Node
 
-# debug
+
 static var _debug_counter: float = 1.
 static var _debug_symbols: Dictionary = {}
 static var flow_id: int = 0
 static var flows_refs: Dictionary = {}
 static var flow_errors: Array[Dictionary] = []
 
+#
+#
+#
+#
+#
+#
 static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 	if _params.size() > 0:
 		var first: Dictionary = _params[0]
@@ -21,21 +27,40 @@ static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 	
 	return [_params, get_prefix_with_dot(_prefix)]
 
-
+#
+#
+#
+#
+#
+#
 static func get_prefix_with_dot(_prefix: StringName) -> StringName:
 	if _prefix != '' and not _prefix.ends_with('.'):
 		return _prefix + '.'
 
 	return _prefix
 
-
+#
+#
+#
+#
+#
+#
 static func _get_signal_call_name(_name: String) -> String:
 	return '_on_' + _name.to_snake_case() + '_signal_'
 
+#
+#
+#
+#
+#
+#
 static func get_flow_id() -> int:
 	flow_id += 1
 	return flow_id
 
+#
+#
+#
 #
 #
 #
@@ -47,7 +72,12 @@ static func generate_and_save(_compile_ref: HBoxContainer) -> void:
 	HenGlobal.current_script_debug_symbols = _debug_symbols
 
 
-# parse to code
+#
+#
+#
+#
+#
+#
 static func parse_token_by_type(_token: Dictionary, _level: int = 0, _parent_id: String = '') -> String:
 	var indent: StringName = '\t'.repeat(_level)
 	var prefix: StringName = '_ref.'
@@ -316,7 +346,12 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0, _parent_id:
 		_:
 			return ''
 
-
+#
+#
+#
+#
+#
+#
 static func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var code: String = ''
@@ -369,61 +404,15 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 		variable.export = variable_data.export
 
 		refs.side_bar_item_ref[variable.id] = variable
-
 		refs.variables.append(_get_variable_from_dict(variable_data))
 
 	# generating function references
 	for func_data: Dictionary in _data.side_bar_list.func_list:
-		var function: HenSaveCodeType.Func = HenSaveCodeType.Func.new()
-
-		function.id = func_data.id
-		function.name = func_data.name
-
-		refs.side_bar_item_ref[function.id] = function
-
-		for input: Dictionary in func_data.inputs:
-			function.inputs.append(_get_param_from_dict(input))
-
-		for output: Dictionary in func_data.outputs:
-			function.outputs.append(_get_param_from_dict(output))
-
-		if func_data.has(&'local_vars'):
-			for local_var: Dictionary in func_data.local_vars:
-				function.local_vars.append(_get_variable_from_dict(local_var))
-
-		if func_data.has(&'virtual_cnode_list'):
-			for cnode: Dictionary in func_data.virtual_cnode_list:
-				function.virtual_cnode_list.append(_get_cnode_from_dict(cnode, refs, function))
-
-		refs.functions.append(function)
+		_parse_function_dict(func_data, refs)
 
 	# generating macro references
 	for signal_data: Dictionary in _data.side_bar_list.signal_list:
-		var signal_item: HenSaveCodeType.SignalData = HenSaveCodeType.SignalData.new()
-
-		signal_item.id = signal_data.id
-		signal_item.name = signal_data.name
-		signal_item.type = signal_data.type
-		signal_item.signal_name = signal_data.signal_name
-		signal_item.signal_name_to_code = signal_data.signal_name_to_code
-
-		refs.side_bar_item_ref[signal_item.id] = signal_item
-
-		for param: Dictionary in signal_data.params:
-			signal_item.params.append(_get_param_from_dict(param))
-
-		for param: Dictionary in signal_data.bind_params:
-			signal_item.bind_params.append(_get_param_from_dict(param))
-	
-		if signal_data.has(&'local_vars'):
-			for local_var: Dictionary in signal_data.local_vars:
-				signal_item.local_vars.append(_get_variable_from_dict(local_var))
-
-		if signal_data.has(&'virtual_cnode_list'):
-			for cnode: Dictionary in signal_data.virtual_cnode_list:
-				signal_item.virtual_cnode_list.append(_get_cnode_from_dict(cnode, refs, signal_item))
-
-		refs.signals.append(signal_item)
+		_parse_signal_dict(signal_data, refs)
 
 
 	# generating cnode references
@@ -447,7 +436,79 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 	return code
 
+#
+#
+#
+#
+#
+#
+static func _parse_function_dict(_func_data: Dictionary, _refs: HenSaveCodeType.References) -> HenSaveCodeType.Func:
+	var function: HenSaveCodeType.Func = HenSaveCodeType.Func.new()
 
+	function.id = _func_data.id
+	function.name = _func_data.name
+
+	_refs.side_bar_item_ref[function.id] = function
+
+	for input: Dictionary in _func_data.inputs:
+		function.inputs.append(_get_param_from_dict(input))
+
+	for output: Dictionary in _func_data.outputs:
+		function.outputs.append(_get_param_from_dict(output))
+
+	if _func_data.has(&'local_vars'):
+		for local_var: Dictionary in _func_data.local_vars:
+			function.local_vars.append(_get_variable_from_dict(local_var))
+
+	if _func_data.has(&'virtual_cnode_list'):
+		for cnode: Dictionary in _func_data.virtual_cnode_list:
+			function.virtual_cnode_list.append(_get_cnode_from_dict(cnode, _refs, function))
+	
+	_refs.functions.append(function)
+
+	return function
+
+#
+#
+#
+#
+#
+#
+static func _parse_signal_dict(_signal_data: Dictionary, _refs: HenSaveCodeType.References) -> HenSaveCodeType.SignalData:
+	var signal_item: HenSaveCodeType.SignalData = HenSaveCodeType.SignalData.new()
+
+	signal_item.id = _signal_data.id
+	signal_item.name = _signal_data.name
+	signal_item.type = _signal_data.type
+	signal_item.signal_name = _signal_data.signal_name
+	signal_item.signal_name_to_code = _signal_data.signal_name_to_code
+
+	_refs.side_bar_item_ref[signal_item.id] = signal_item
+
+	for param: Dictionary in _signal_data.params:
+		signal_item.params.append(_get_param_from_dict(param))
+
+	for param: Dictionary in _signal_data.bind_params:
+		signal_item.bind_params.append(_get_param_from_dict(param))
+
+	if _signal_data.has(&'local_vars'):
+		for local_var: Dictionary in _signal_data.local_vars:
+			signal_item.local_vars.append(_get_variable_from_dict(local_var))
+
+	if _signal_data.has(&'virtual_cnode_list'):
+		for cnode: Dictionary in _signal_data.virtual_cnode_list:
+			signal_item.virtual_cnode_list.append(_get_cnode_from_dict(cnode, _refs, signal_item))
+
+	_refs.signals.append(signal_item)
+
+	return signal_item
+
+#
+#
+#
+#
+#
+#
 static func _parse_connections(_refs: HenSaveCodeType.References) -> void:
 	# generatin flow connection references
 	for connection: HenSaveCodeType.FlowConnection in _refs.flow_connections:
@@ -460,7 +521,12 @@ static func _parse_connections(_refs: HenSaveCodeType.References) -> void:
 		connection.from = _refs.cnode_ref[connection.from_vc_id]
 		connection.to.input_connections.append(connection)
 
-
+#
+#
+#
+#
+#
+#
 static func _get_variable_from_dict(_data: Dictionary) -> HenSaveCodeType.Variable:
 	var variable: HenSaveCodeType.Variable = HenSaveCodeType.Variable.new()
 		
@@ -470,6 +536,12 @@ static func _get_variable_from_dict(_data: Dictionary) -> HenSaveCodeType.Variab
 
 	return variable
 
+#
+#
+#
+#
+#
+#
 static func _get_param_from_dict(_data: Dictionary) -> HenSaveCodeType.Param:
 	var param: HenSaveCodeType.Param = HenSaveCodeType.Param.new()
 
@@ -478,7 +550,12 @@ static func _get_param_from_dict(_data: Dictionary) -> HenSaveCodeType.Param:
 
 	return param
 
-
+#
+#
+#
+#
+#
+#
 static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.References, _parent_ref = null) -> HenSaveCodeType.CNode:
 	var cn: HenSaveCodeType.CNode = HenSaveCodeType.CNode.new()
 
@@ -577,7 +654,12 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 
 	return cn
 
-
+#
+#
+#
+#
+#
+#
 static func _get_inout_from_dict(_inout: Dictionary) -> HenSaveCodeType.Inout:
 	var input: HenSaveCodeType.Inout = HenSaveCodeType.Inout.new()
 
@@ -608,6 +690,13 @@ static func _get_inout_from_dict(_inout: Dictionary) -> HenSaveCodeType.Inout:
 # GENERATE
 # GENERATE
 # GENERATE
+
+#
+#
+#
+#
+#
+#
 static func _get_start(_data: HenScriptData) -> String:
 	# reseting macro use self condition
 	HenGlobal.USE_MACRO_USE_SELF = false
@@ -620,6 +709,12 @@ static func _get_start(_data: HenScriptData) -> String:
 # *       Edit only if you are confident in your changes.       *
 # ***************************************************************\n\nextends {0}\n\n'.format([_data.type])
 
+#
+#
+#
+#
+#
+#
 static func _parse_variables(_refs: HenSaveCodeType.References) -> String:
 	var var_code: String =''
 
@@ -628,7 +723,12 @@ static func _parse_variables(_refs: HenSaveCodeType.References) -> String:
 
 	return var_code + ' \n' if var_code else ''
 
-
+#
+#
+#
+#
+#
+#
 static func _generate_var_code(_var_data: HenSaveCodeType.Variable, _custom_name: String = '', _preview_id: String = '') -> String:
 	var var_code: String = ''
 	var type_value: String = 'null'
@@ -650,6 +750,12 @@ static func _generate_var_code(_var_data: HenSaveCodeType.Variable, _custom_name
 
 	return var_code
 
+#
+#
+#
+#
+#
+#
 static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 	var code: String = ''
 	var start_state: HenSaveCodeType.CNode
@@ -786,7 +892,12 @@ func _physics_process(delta: float) -> void:
 		states = _parse_states(_refs)
 	})
 
-
+#
+#
+#
+#
+#
+#
 static func _parse_states_dict(_refs: HenSaveCodeType.References) -> String:
 	var code: String = ''
 
@@ -809,7 +920,12 @@ static func _parse_states_dict(_refs: HenSaveCodeType.References) -> String:
 	
 	return code
 
-
+#
+#
+#
+#
+#
+#
 static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 	var code: String = ''
 
@@ -855,7 +971,12 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 
 	return code
 
-
+#
+#
+#
+#
+#
+#
 static func _parse_functions(_refs: HenSaveCodeType.References) -> String:
 	var func_code: String = ''
 
@@ -907,7 +1028,12 @@ static func _parse_functions(_refs: HenSaveCodeType.References) -> String:
 	
 	return func_code
 
-
+#
+#
+#
+#
+#
+#
 static func _parse_signals(_refs: HenSaveCodeType.References) -> String:
 	var signal_code: String = ''
 
@@ -945,7 +1071,12 @@ static func _parse_signals(_refs: HenSaveCodeType.References) -> String:
 	
 	return signal_code
 
-
+#
+#
+#
+#
+#
+#
 static func _parse_virtual_cnode(_cnode_list: Array[HenSaveCodeType.CNode]) -> Dictionary:
 	var data: Dictionary = {}
 
@@ -972,7 +1103,12 @@ static func _parse_virtual_cnode(_cnode_list: Array[HenSaveCodeType.CNode]) -> D
 
 	return data
 
-
+#
+#
+#
+#
+#
+#
 class RegenerateRefs:
 	var reload: bool = false: set = can_reload
 	var cnode_list: Dictionary = {}
@@ -989,7 +1125,12 @@ class RegenerateRefs:
 		
 		reload = _can
 
-
+#
+#
+#
+#
+#
+#
 static func regenerate() -> Array:
 	var saves: Array = []
 
@@ -1034,7 +1175,12 @@ static func regenerate() -> Array:
 	
 	return saves
 
-
+#
+#
+#
+#
+#
+#
 static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 	for cnode: Dictionary in _cnode_list:
 		_refs.cnode_list[cnode.id] = cnode
@@ -1053,7 +1199,12 @@ static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 		if cnode.has(&'virtual_cnode_list'):
 			_parse_vc_list(cnode.virtual_cnode_list, _refs)
 
-
+#
+#
+#
+#
+#
+#
 static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void:
 	var output: Dictionary = _dict.outputs[0]
 	
@@ -1082,7 +1233,12 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void
 			_dict.invalid = true
 			_refs.reload = true
 
-
+#
+#
+#
+#
+#
+#
 static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> void:
 	var func_data: HenFuncData
 
@@ -1105,7 +1261,12 @@ static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> voi
 			_dict.invalid = true
 			_refs.reload = true
 
-
+#
+#
+#
+#
+#
+#
 static func _reset_inout_dict_value(_dict: Dictionary) -> void:
 	match _dict.type:
 		'String', 'NodePath', 'StringName':
@@ -1132,7 +1293,12 @@ static func _reset_inout_dict_value(_dict: Dictionary) -> void:
 		_:
 			_dict.value = _dict.code_value
 	
-
+#
+#
+#
+#
+#
+#
 static func _check_func_inouts(
 	_is_inputs: bool,
 	_func_data: HenFuncData,

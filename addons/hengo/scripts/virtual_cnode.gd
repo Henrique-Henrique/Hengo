@@ -196,7 +196,7 @@ class InOutData extends Object:
 					
 					if not ['value', 'code_value'].has(_name):
 						return
-
+		
 		set(_name, _value)
 
 		if sub_type != '@dropdown':
@@ -1376,12 +1376,10 @@ func _on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Arra
 		SubType.SIGNAL_ENTER:
 			if _is_input: is_input = false
 			else: return
-	
+
 	# filtering sub_types
-	if not _subtype_filter.is_empty():
-		if not _subtype_filter.has(sub_type):
-			return
-	
+	if not _subtype_filter.is_empty() and not _subtype_filter.has(sub_type):
+		return
 
 	clear_in_out(is_input)
 
@@ -1389,7 +1387,7 @@ func _on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Arra
 		var in_out: InOutData = _on_in_out_added(is_input, input_data)
 
 		match sub_type:
-			SubType.SIGNAL_CONNECTION:
+			SubType.SIGNAL_CONNECTION, SubType.SIGNAL_DISCONNECTION:
 				in_out.reset_input_value()
 
 	update()

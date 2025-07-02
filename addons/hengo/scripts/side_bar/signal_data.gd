@@ -171,42 +171,6 @@ func get_inspector_array_list() -> Array:
 				on_item_move = move_param.bind(x),
 			})),
 		}),
-		# HenInspector.InspectorItem.new({
-		#     type = &'@controls',
-		#     ref = self
-		# }),
-		# HenInspector.InspectorItem.new({
-		#     name = 'name',
-		#     type = &'String',
-		#     value = name,
-		#     ref = self
-		# }),
-		# HenInspector.InspectorItem.new({
-		#     name = 'type',
-		#     type = &'Label',
-		#     value = type,
-		#     ref = self
-		# }),
-		# HenInspector.InspectorItem.new({
-		#     name = 'signal_name',
-		#     type = &'@dropdown',
-		#     value = signal_name,
-		#     category = 'signal_list',
-		#     data = {
-		#         signal_ref = self
-		#     },
-		#     ref = self
-		# }),
-		# HenInspector.InspectorItem.new({
-		# 	name = 'bind_params',
-		# 	type = &'Array',
-		# 	value = bind_params,
-		# 	max_size = 5,
-		# 	item_creation_callback = create_param,
-		# 	item_move_callback = move_param,
-		# 	item_delete_callback = delete_param,
-		# 	field = {name = '', type = '@Param'}
-		# }),
 	]
 
 func get_save() -> Dictionary:
