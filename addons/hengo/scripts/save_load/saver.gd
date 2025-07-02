@@ -108,6 +108,7 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 			code_generated.bind(thread)
 		))
 
+
 static func show_msg() -> void:
 	var msg: RichTextLabel = (HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg') as RichTextLabel)
 
