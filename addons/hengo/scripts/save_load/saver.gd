@@ -171,6 +171,7 @@ static func generate(_script_data: HenScriptData, _data_path: String, _path: Str
 	if HenCodeGeneration.flow_errors.size() > 0:
 		# TODO errors msg
 		generate_msgs.call_deferred('[b][color=#c91a1a]Errors found: {0}[/color][/b]'.format([HenCodeGeneration.flow_errors.size()]))
+		return SaveData.new(null, '', false)
 
 	var script: GDScript = GDScript.new()
 	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code
