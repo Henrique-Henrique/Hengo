@@ -942,6 +942,8 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 			code += base
 			continue
 
+		var idx: int = 0
+
 		for virtual_name in item.virtual_tokens.keys():
 			var func_tokens = item.virtual_tokens[virtual_name].tokens
 			var func_params = item.virtual_tokens[virtual_name].params
@@ -949,11 +951,13 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 			if func_tokens.is_empty():
 				continue
 
-			var func_base: String = '\tfunc {name}({params}) -> void:\n'.format({
+			var func_base: String = '{new_line}\tfunc {name}({params}) -> void:\n'.format({
 				name = virtual_name,
+				new_line = '\n\n' if idx > 0 else '',
 				params = ', '.join(func_params.map(
 					func(x: Dictionary) -> String:
 						return x.name
+				
 			))
 			})
 
@@ -963,9 +967,10 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 				func_codes.append(
 					parse_token_by_type(token, 2)
 				)
-			
+		
 			func_base += '\n'.join(func_codes)
 			base += func_base
+			idx += 1
 
 		code += base
 

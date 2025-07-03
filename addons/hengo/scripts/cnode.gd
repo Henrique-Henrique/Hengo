@@ -206,6 +206,7 @@ func move(_pos: Vector2) -> void:
 
 	emit_signal('on_move')
 
+
 func select() -> void:
 	selected = true
 	hover_animation()

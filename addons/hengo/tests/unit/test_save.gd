@@ -40,6 +40,16 @@ func test_save() -> void:
 
 	assert_true(new_code.contains('\nclass State1 extends HengoState:\n\tfunc enter() -> void:\n\t\t_ref.test_void()'), 'Testing enter function in state class with void call')
 
+	var update_vc: HenVirtualCNode = state.virtual_cnode_list[1]
+	var vc_flow_2: HenVirtualCNode = HenTest.get_void(state.route)
+
+	update_vc.add_flow_connection(0, 0, vc_flow_2).add()
+
+	var update_script_data: HenScriptData = HenSaver.generate_script_data()
+	var update_code: String = HenCodeGeneration.get_code(update_script_data)
+
+	assert_true(update_code.contains('\nclass State1 extends HengoState:\n\tfunc enter() -> void:\n\t\t_ref.test_void()\n\n\tfunc update(delta) -> void:\n\t\t_ref.test_void()'), 'Testing enter and update functions in state class with void call')
+
 	# test macro
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.MACRO
 	HenGlobal.SIDE_BAR_LIST.add()
