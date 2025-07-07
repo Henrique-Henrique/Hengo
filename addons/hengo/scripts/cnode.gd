@@ -53,7 +53,8 @@ func _on_enter() -> void:
 	# print(get_local_mouse_position())
 	_is_mouse_enter = true
 
-	if HenGlobal.can_make_flow_connection and not virtual_ref.flow_connections.is_empty():
+
+	if HenGlobal.can_make_flow_connection and not virtual_ref.from_flow_connections.is_empty():
 		HenGlobal.flow_connection_to_data = {
 			to_cnode = self,
 			to_id = virtual_ref.from_flow_connections[0].id
