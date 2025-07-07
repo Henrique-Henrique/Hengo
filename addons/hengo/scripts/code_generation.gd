@@ -928,13 +928,14 @@ static func _parse_states_dict(_refs: HenSaveCodeType.References) -> String:
 #
 static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 	var code: String = ''
-
+	var idx: int = 0
 	# generating classes implementation
 	for state_name in _refs.states_data.keys():
 		var item = _refs.states_data[state_name]
 
-		var base = 'class {name} extends HengoState:\n'.format({
-			name = state_name.to_pascal_case()
+		var base = '{new_line}class {name} extends HengoState:\n'.format({
+			name = state_name.to_pascal_case(),
+			new_line = '\n\n' if idx > 0 else ''
 		})
 
 		if item.virtual_tokens.is_empty():
@@ -942,7 +943,7 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 			code += base
 			continue
 
-		var idx: int = 0
+		var idx_1: int = 0
 
 		for virtual_name in item.virtual_tokens.keys():
 			var func_tokens = item.virtual_tokens[virtual_name].tokens
@@ -953,7 +954,7 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 
 			var func_base: String = '{new_line}\tfunc {name}({params}) -> void:\n'.format({
 				name = virtual_name,
-				new_line = '\n\n' if idx > 0 else '',
+				new_line = '\n\n' if idx_1 > 0 else '',
 				params = ', '.join(func_params.map(
 					func(x: Dictionary) -> String:
 						return x.name
@@ -970,9 +971,10 @@ static func _parse_states(_refs: HenSaveCodeType.References) -> String:
 		
 			func_base += '\n'.join(func_codes)
 			base += func_base
-			idx += 1
+			idx_1 += 1
 
 		code += base
+		idx += 1
 
 	return code
 
