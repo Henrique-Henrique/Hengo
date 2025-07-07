@@ -24,10 +24,12 @@ func add() -> void:
     # inputs
     for input_connection: HenVCConnectionData.InputConnectionData in old_inputs_connections:
         input_connection.from.output_connections.append(input_connection.from_ref)
+        input_connection.from.update()
 
     # outputs
-    for input_connection: HenVCConnectionData.OutputConnectionData in old_outputs_connections:
-        input_connection.to.input_connections.append(input_connection.to_ref)
+    for output_connection: HenVCConnectionData.OutputConnectionData in old_outputs_connections:
+        output_connection.to.input_connections.append(output_connection.to_ref)
+        output_connection.to.update()
 
     # flow connection
     for flow_connection: HenVCFlowConnectionData in old_flow_connections:
@@ -72,17 +74,21 @@ func remove() -> void:
             # remove the line reference from both inputs
             input_connection.line_ref = null
             input_connection.from_ref.line_ref = null
+        
+        input_connection.from.update()
 
     # outputs
-    for input_connection: HenVCConnectionData.OutputConnectionData in v_cnode.output_connections:
-        input_connection.to.input_connections.erase(input_connection.to_ref)
+    for output_connection: HenVCConnectionData.OutputConnectionData in v_cnode.output_connections:
+        output_connection.to.input_connections.erase(output_connection.to_ref)
 
-        if input_connection.line_ref:
-            input_connection.line_ref.visible = false
+        if output_connection.line_ref:
+            output_connection.line_ref.visible = false
 
             # remove the line reference from both inputs
-            input_connection.line_ref = null
-            input_connection.to_ref.line_ref = null
+            output_connection.line_ref = null
+            output_connection.to_ref.line_ref = null
+        
+        output_connection.to.update()
 
     # flow connections
     for flow_connection: HenVCFlowConnectionData in v_cnode.flow_connections:
@@ -93,6 +99,8 @@ func remove() -> void:
         if flow_connection.to:
             flow_connection.to_from_ref.from_connections.erase(flow_connection)
 
+            flow_connection.to.update()
+
     # from flow connections
     for from_flow_connection: HenVCFromFlowConnection in v_cnode.from_flow_connections:
         for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
@@ -101,6 +109,8 @@ func remove() -> void:
                 from_connection.line_ref = null
 
             from_connection.to = null
+
+            from_connection.from.update()
 
     v_cnode.input_connections.clear()
     v_cnode.output_connections.clear()

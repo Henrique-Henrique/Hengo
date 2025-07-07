@@ -40,12 +40,12 @@ func _on_ui_size_changed() -> void:
 func _input(event: InputEvent) -> void:
 	if HenGlobal.CAM == self:
 		if event is InputEventMouseMotion:
+			check_vc_action_menu()
+
 			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE:
 				transform.origin += (event as InputEventMouseMotion).relative
-
 				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
-
 				_check_virtual_cnodes()
 		
 		elif event is InputEventMouseButton:
@@ -140,3 +140,20 @@ func go_to_center(_pos: Vector2) -> void:
 	pos = (_pos * (-transform.x.x)) + (get_parent().size / 2)
 	ignore_process = true
 	set_physics_process(true)
+
+
+func check_vc_action_menu() -> void:
+	if HenRouter.current_route:
+		for vc: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
+			if not vc.is_showing:
+				continue
+
+			var mouse_inside: bool = vc.check_mouse_inside()
+
+			if vc.showing_action_menu and mouse_inside:
+				continue
+
+			vc.showing_action_menu = mouse_inside
+
+			if vc.showing_action_menu:
+				print(vc.name)

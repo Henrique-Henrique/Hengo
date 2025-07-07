@@ -88,6 +88,7 @@ var from_side_bar_id: int = -1
 var from_id: int = -1
 var invalid: bool = false
 var singleton_class: String
+var showing_action_menu: bool = false
 
 var input_connections: Array = []
 var output_connections: Array = []
@@ -96,17 +97,22 @@ var from_flow_connections: Array = []
 
 
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
-	is_showing = _rect.intersects(
-		Rect2(
-			position,
-			size
-		)
-	)
+	is_showing = _rect.intersects(Rect2(
+		position,
+		size
+	))
 
 	if is_showing and cnode_ref == null:
 		show()
 	elif not is_showing:
 		hide()
+
+
+func check_mouse_inside() -> bool:
+	return Rect2(
+		position,
+		size
+	).has_point(HenGlobal.CAM.get_local_mouse_position())
 
 
 func get_input(_id: int) -> HenVCInOutData:
@@ -774,7 +780,7 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 	var in_out: HenVCInOutData = HenVCInOutData.new(_data)
 
 	if _data.has('ref'):
-		in_out.set_ref(_data.ref, )
+		in_out.set_ref(_data.ref)
 
 	in_out.moved.connect(_on_in_out_moved)
 	in_out.deleted.connect(_on_in_out_deleted)

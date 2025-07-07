@@ -50,6 +50,7 @@ func _ready():
 func _on_enter() -> void:
 	# if virtual_ref:
 	# 	print(JSON.stringify(virtual_ref.get_save()))
+	# print(get_local_mouse_position())
 	_is_mouse_enter = true
 
 	if HenGlobal.can_make_flow_connection and not virtual_ref.flow_connections.is_empty():
