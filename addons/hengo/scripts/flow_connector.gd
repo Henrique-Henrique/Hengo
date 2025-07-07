@@ -45,7 +45,7 @@ func _on_gui(_event: InputEvent) -> void:
 		else:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				if HenGlobal.can_make_flow_connection and HenGlobal.flow_connection_to_data.is_empty():
-					var connection: HenVirtualCNode.FlowConnectionReturn = root.virtual_ref.get_flow_connection(id)
+					var connection: HenVCFlowConnectionReturn = root.virtual_ref.get_flow_connection(id)
 
 					if connection:
 						HenGlobal.history.create_action('Remove Flow Connection')
@@ -59,7 +59,7 @@ func _on_gui(_event: InputEvent) -> void:
 					})
 					HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 				elif HenGlobal.can_make_flow_connection and not HenGlobal.flow_connection_to_data.is_empty():
-					var connection: HenVirtualCNode.FlowConnectionReturn = create_virtual_connection(HenGlobal.flow_connection_to_data)
+					var connection: HenVCFlowConnectionReturn = create_virtual_connection(HenGlobal.flow_connection_to_data)
 					
 					if connection:
 						HenGlobal.history.create_action('Add Connection')
@@ -77,7 +77,7 @@ func _on_gui(_event: InputEvent) -> void:
 	elif _event is InputEventMouseMotion:
 		HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), '{0} {1}'.format([HenEnums.TOOLTIP_TEXT.MOUSE_ICON, 'Left Click And Drag to Connect']))
 
-func create_virtual_connection(_config: Dictionary) -> HenVirtualCNode.FlowConnectionReturn:
+func create_virtual_connection(_config: Dictionary) -> HenVCFlowConnectionReturn:
 	return root.virtual_ref.add_flow_connection(
 		id,
 		_config.to_id,

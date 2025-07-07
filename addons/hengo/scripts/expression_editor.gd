@@ -85,7 +85,7 @@ func _on_save() -> void:
 	# cleaning inputs
 	v_cnode.inputs[0].value = code_edit.text
 
-	for input: HenVirtualCNode.InOutData in v_cnode.inputs.slice(1):
+	for input: HenVCInOutData in v_cnode.inputs.slice(1):
 		v_cnode._on_in_out_deleted(true, input)
 
 	for word in word_list:

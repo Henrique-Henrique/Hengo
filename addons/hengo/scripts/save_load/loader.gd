@@ -50,19 +50,19 @@ static func load(_path: StringName) -> void:
 			if v_cnode.get('virtual_cnode_list'):
 				for vc: HenVirtualCNode in v_cnode.virtual_cnode_list:
 					# inputs
-					for in_out: HenVirtualCNode.InOutData in vc.inputs:
+					for in_out: HenVCInOutData in vc.inputs:
 						in_out.free()
 
 					# outputs
-					for in_out: HenVirtualCNode.InOutData in vc.outputs:
+					for in_out: HenVCInOutData in vc.outputs:
 						in_out.free()
 					
 					# flows
-					for flow_connection: HenVirtualCNode.FlowConnection in vc.flow_connections:
+					for flow_connection: HenVCFlowConnection in vc.flow_connections:
 						flow_connection.free()
 
 					# from flow
-					for flow_connection: HenVirtualCNode.FlowConnection in vc.from_flow_connections:
+					for flow_connection: HenVCFlowConnection in vc.from_flow_connections:
 						flow_connection.free()
 					
 					vc.free()

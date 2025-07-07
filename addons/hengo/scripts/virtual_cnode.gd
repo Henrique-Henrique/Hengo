@@ -71,8 +71,8 @@ var id: int
 var position: Vector2
 var is_showing: bool = false
 var cnode_ref: HenCnode
-var inputs: Array[InOutData]
-var outputs: Array[InOutData]
+var inputs: Array[HenVCInOutData]
+var outputs: Array[HenVCInOutData]
 var size: Vector2
 var type: Type
 var sub_type: SubType
@@ -95,530 +95,6 @@ var flow_connections: Array = []
 var from_flow_connections: Array = []
 
 
-class InOutData extends Object:
-	var id: int = HenGlobal.get_new_node_counter()
-	var name: String
-	var type: StringName: set = _on_change_type
-	var sub_type: StringName
-	var category: StringName
-	var is_ref: bool
-	var code_value: String
-	var value: Variant
-	var data: Variant
-	var is_prop: bool
-	var is_static: bool
-	var ref: Object
-	var ref_change_rule: RefChangeRule
-	var from_id: int = -1
-
-	signal update_changes
-	signal moved
-	signal deleted
-	signal type_changed
-
-	enum RefChangeRule {
-		NONE = 0,
-		TYPE_CHANGE = 1,
-		VALUE_CODE_VALUE_CHANGE = 2,
-		IS_PROP = 3
-	}
-
-	func _init(_data: Dictionary) -> void:
-		name = _data.name
-		type = _data.type
-
-		if _data.has('from_id'): from_id = _data.from_id
-		if _data.has('id'): id = _data.id
-		if _data.has('sub_type'): sub_type = _data.sub_type
-		if _data.has('category'): category = _data.category
-		if _data.has('is_ref'): is_ref = _data.is_ref
-		if _data.has('code_value'): code_value = _data.code_value
-		if _data.has('value'): value = _data.value
-		if _data.has('data'): data = _data.data
-		if _data.has('is_prop'): is_prop = _data.is_prop
-		if _data.has('is_static'): is_static = _data.is_static
-		if _data.has('ref'): set_ref(_data.ref, _data.ref_change_rule if _data.has('ref_change_rule') else RefChangeRule.NONE)
-
-	
-	func _on_change_type(_type: StringName) -> void:
-		type_changed.emit(type, _type, self)
-		type = _type
-
-
-	func set_ref(_ref, _ref_change_rule: RefChangeRule = RefChangeRule.NONE) -> void:
-		ref = _ref
-		ref_change_rule = _ref_change_rule
-
-		# when param is moved
-		if ref.has_signal('moved') and not ref.is_connected('moved', _on_move):
-			ref.moved.connect(_on_move)
-
-		if ref.has_signal('deleted') and not ref.is_connected('deleted', _on_delete):
-			if not ref is HenVarData:
-				ref.deleted.connect(_on_delete)
-
-		if _ref.has_signal('data_changed') and not ref.is_connected('data_changed', on_data_changed):
-			_ref.data_changed.connect(on_data_changed)
-		
-		update_changes.emit()
-	
-	func _on_move(_is_input: bool, _pos: int) -> void:
-		moved.emit(_is_input, _pos, self)
-
-	func _on_delete(_is_input: bool) -> void:
-		deleted.emit(_is_input, self)
-
-	func remove_ref() -> void:
-		if ref:
-			for signal_connetion: Dictionary in ref.get_signal_connection_list('data_changed'):
-				signal_connetion.signal.disconnect(signal_connetion.callable)
-		
-		ref_change_rule = RefChangeRule.NONE
-		update_changes.emit()
-
-	func on_data_changed(_name: String, _value) -> void:
-		if ref_change_rule != RefChangeRule.NONE:
-			match ref_change_rule:
-				RefChangeRule.TYPE_CHANGE:
-					if _name != 'type':
-						return
-				RefChangeRule.VALUE_CODE_VALUE_CHANGE:
-					if not ['value', 'code_value'].has(_name):
-						return
-				RefChangeRule.IS_PROP:
-					if _name == 'type':
-						# if new type is diffent, reset input
-						if not HenUtils.is_type_relation_valid(_value, type):
-						# if _value != 'Variant' and type != 'Variant' and _value != type:
-							reset_input_value()
-							remove_ref()
-							return
-					
-					if not ['value', 'code_value'].has(_name):
-						return
-		
-		set(_name, _value)
-
-		if sub_type != '@dropdown':
-			match _name:
-				'type':
-					reset_input_value()
-
-		update_changes.emit()
-
-
-	func get_save() -> Dictionary:
-		var dt: Dictionary = {
-			id = id,
-			name = name,
-			type = type
-		}
-
-		if from_id > -1: dt.from_id = from_id
-		if sub_type: dt.sub_type = sub_type
-		if category: dt.category = category
-		if is_ref: dt.is_ref = is_ref
-		if code_value: dt.code_value = code_value
-		if value: dt.value = value
-		if data: dt.data = data
-		if is_prop: dt.is_prop = is_prop
-		if is_static: dt.is_static = is_static
-		if ref: dt.ref_id = ref.id
-		if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
-
-		return dt
-	
-
-	func reset_input_value() -> void:
-		category = &'default_value'
-		is_prop = false
-
-		if HenGlobal.script_config and HenGlobal.script_config.type == type:
-			code_value = '_ref.'
-			is_ref = true
-			return
-		
-		match type:
-			'String', 'NodePath', 'StringName':
-				code_value = '""'
-			'int':
-				code_value = '0'
-			'float':
-				code_value = '0.'
-			'Vector2':
-				code_value = 'Vector2(0, 0)'
-			'bool':
-				code_value = 'false'
-			'Variant':
-				code_value = 'null'
-			_:
-				if HenEnums.VARIANT_TYPES.has(type):
-					code_value = type + '()'
-				elif ClassDB.can_instantiate(type):
-					code_value = type + '.new()'
-
-		match type:
-			'String', 'NodePath', 'StringName':
-				value = ''
-			_:
-				value = code_value
-
-
-class FlowConnection extends Object:
-	var name: String: set = _on_change_name
-	var id: int = -1
-	var ref: Object
-	
-	signal update_changes
-	signal data_changed
-	signal moved
-	signal deleted
-
-	func _on_change_name(_name: String) -> void:
-		name = _name
-		data_changed.emit('value', _name)
-		data_changed.emit('code_value', _name)
-
-	func _init(_data: Dictionary = {}) -> void:
-		name = _data.name if _data.has('name') else ''
-		id = _data.id if _data.has('id') else HenGlobal.get_new_node_counter()
-
-		if _data.has('ref'): set_ref(_data.ref)
-
-	func set_ref(_ref) -> void:
-		ref = _ref
-		# when param is moved
-		if ref.has_signal('moved'):
-			ref.moved.connect(_on_move)
-
-		if ref.has_signal('deleted'):
-			ref.deleted.connect(_on_delete)
-		
-		if _ref.has_signal('data_changed'):
-			_ref.data_changed.connect(on_data_changed)
-	
-
-	func _on_move(_pos: int) -> void:
-		moved.emit(self is FromFlowConnection, _pos, self)
-
-	func _on_delete() -> void:
-		deleted.emit(self is FlowConnectionData, self)
-	
-	func on_data_changed(_name: String, _value) -> void:
-		set(_name, _value)
-		update_changes.emit()
-
-
-class FlowConnectionData extends FlowConnection:
-	var line_ref: HenFlowConnectionLine
-	var from_id: int
-	var to_id: int
-	var from_pos: Vector2
-	var to_pos: Vector2
-	var from: HenVirtualCNode
-	var to: HenVirtualCNode
-	var to_from_ref: FromFlowConnection
-
-	func get_save() -> Dictionary:
-		return {
-			id = id,
-			from_id = from_id,
-			to_id = to_id,
-			to_vc_id = to.id
-		}
-		
-
-class FromFlowConnection extends FlowConnection:
-	var from_connections: Array[FlowConnectionData]
-
-
-class ConnectionData extends Object:
-	# var idx: int
-	var from_id: int
-	var to_id: int
-	var line_ref: HenConnectionLine
-	var type: StringName
-
-
-class InputConnectionData extends ConnectionData:
-	var from: HenVirtualCNode
-	# var from_idx: int
-	var from_ref: OutputConnectionData
-	var from_old_pos: Vector2
-	var from_type: StringName
-	var input_ref: InOutData
-
-
-	func get_save() -> Dictionary:
-		return {
-			from_id = from_id,
-			to_id = to_id,
-			from_vc_id = from.id,
-		}
-
-
-class OutputConnectionData extends ConnectionData:
-	var to: HenVirtualCNode
-	# var to_idx: int
-	var to_ref: InputConnectionData
-	var to_old_pos: Vector2
-	var to_type: StringName
-	var output_ref: InOutData
-
-
-class FlowConnectionReturn:
-	var flow_connection: FlowConnectionData
-	
-	var to: HenVirtualCNode
-	var to_id: int
-	var from_id: int
-	var from: HenVirtualCNode
-	var to_from_ref: FromFlowConnection
-
-	# old
-	var old_to: HenVirtualCNode
-	var old_to_id: int
-	var old_from_id: int
-	var old_from: HenVirtualCNode
-	var old_to_from_ref: FromFlowConnection
-
-	func _init(_flow: FlowConnectionData, _from_id: int, _to: HenVirtualCNode, _to_id: int, _from: HenVirtualCNode, _to_from_ref: FromFlowConnection) -> void:
-		from_id = _from_id
-		flow_connection = _flow
-		to = _to
-		to_id = _to_id
-		from = _from
-		to_from_ref = _to_from_ref
-
-	func add() -> void:
-		# remove other flow connection
-		if flow_connection.to:
-			flow_connection.to_from_ref.from_connections.erase(flow_connection)
-
-			if flow_connection.line_ref:
-				flow_connection.line_ref.visible = false
-				flow_connection.line_ref = null
-			
-			old_to = flow_connection.to
-			old_from_id = flow_connection.from_id
-			old_to_id = flow_connection.to_id
-			old_from = flow_connection.from
-			old_to_from_ref = flow_connection.to_from_ref
-
-		flow_connection.from_id = from_id
-		flow_connection.to = to
-		flow_connection.to_id = to_id
-		flow_connection.from = from
-		flow_connection.to_from_ref = to_from_ref
-		flow_connection.line_ref = null
-
-		flow_connection.to_from_ref.from_connections.append(flow_connection)
-
-		flow_connection.from.update()
-		flow_connection.to.update()
-
-	func remove() -> void:
-		flow_connection.to = null
-		flow_connection.to_from_ref.from_connections.erase(flow_connection)
-
-		if flow_connection.line_ref:
-			flow_connection.line_ref.visible = false
-		
-		flow_connection.line_ref = null
-
-		# adding old flow connection
-		if old_to:
-			flow_connection.from_id = old_from_id
-			flow_connection.to = old_to
-			flow_connection.to_id = old_to_id
-			flow_connection.from = old_from
-			flow_connection.to_from_ref = old_to_from_ref
-
-			old_to_from_ref.from_connections.append(flow_connection)
-			old_to.update()
-
-		old_to = null
-
-		flow_connection.from.update()
-
-		
-class ConnectionReturn:
-	var input_connection: InputConnectionData
-	var output_connection: OutputConnectionData
-	var from: HenVirtualCNode
-	var to: HenVirtualCNode
-	var to_id: int
-
-	var old_inputs_connections: Array
-
-	func _init(_in: InputConnectionData, _out: OutputConnectionData, _from: HenVirtualCNode, _to: HenVirtualCNode, _to_id = -1) -> void:
-		input_connection = _in
-		output_connection = _out
-		from = _from
-		to = _to
-		to_id = _to_id
-	
-
-	func add(_update: bool = true) -> void:
-		# removing old inputs
-		var remove_connection: Array = []
-		
-		for connection: InputConnectionData in to.input_connections:
-			if connection.to_id != to_id:
-				continue
-
-			if connection.line_ref:
-				connection.line_ref.visible = false
-				connection.line_ref = null
-			
-			if connection.from_ref.line_ref:
-				connection.from_ref.line_ref.visible = false
-				connection.from_ref.line_ref = null
-			
-			remove_connection.append(connection)
-
-		for connection in remove_connection:
-			to.input_connections.erase(connection)
-			connection.from.output_connections.erase(connection.from_ref)
-			old_inputs_connections.append(connection)
-
-		from.output_connections.append(output_connection)
-		to.input_connections.append(input_connection)
-
-		if _update:
-			from.update()
-			to.update()
-
-	func remove() -> void:
-		from.output_connections.erase(output_connection)
-		to.input_connections.erase(input_connection)
-
-		if input_connection.line_ref:
-			input_connection.line_ref.visible = false
-			input_connection.line_ref = null
-		
-		if output_connection.line_ref:
-			output_connection.line_ref.visible = false
-			output_connection.line_ref = null
-
-		for connection: InputConnectionData in old_inputs_connections:
-			to.input_connections.append(connection)
-			connection.from.output_connections.append(connection.from_ref)
-
-		old_inputs_connections.clear()
-		input_connection.input_ref.reset_input_value()
-
-		from.update()
-		to.update()
-
-class VCNodeReturn:
-	var v_cnode: HenVirtualCNode
-	var old_inputs_connections: Array
-	var old_outputs_connections: Array
-	var old_flow_connections: Array
-	var old_from_flow_connections: Array
-
-	func _init(_v_cnode: HenVirtualCNode) -> void:
-		v_cnode = _v_cnode
-
-
-	func add() -> void:
-		if v_cnode.is_deleted and not v_cnode.can_delete:
-			return
-		
-		if not v_cnode.route_ref.ref.virtual_cnode_list.has(v_cnode):
-			v_cnode.route_ref.ref.virtual_cnode_list.append(v_cnode)
-
-		v_cnode.input_connections.append_array(old_inputs_connections)
-		v_cnode.output_connections.append_array(old_outputs_connections)
-
-		# inputs
-		for input_connection: InputConnectionData in old_inputs_connections:
-			input_connection.from.output_connections.append(input_connection.from_ref)
-
-		# outputs
-		for input_connection: OutputConnectionData in old_outputs_connections:
-			input_connection.to.input_connections.append(input_connection.to_ref)
-
-		# flow connection
-		for flow_connection: FlowConnectionData in old_flow_connections:
-			if flow_connection.to:
-				flow_connection.to_from_ref.from_connections.append(flow_connection)
-				flow_connection.to.update()
-
-
-		# from flow connections
-		for from_flow_connection: FromFlowConnection in old_from_flow_connections:
-			for flow_connection: FlowConnectionData in from_flow_connection.from_connections:
-				flow_connection.to = v_cnode
-				flow_connection.from.update()
-
-		old_inputs_connections.clear()
-		old_outputs_connections.clear()
-		old_from_flow_connections.clear()
-		old_flow_connections.clear()
-
-		v_cnode.is_deleted = false
-		v_cnode.update()
-	
-
-	func remove() -> void:
-		if not v_cnode.can_delete:
-			return
-		
-		v_cnode.route_ref.ref.virtual_cnode_list.erase(v_cnode)
-
-		old_inputs_connections.append_array(v_cnode.input_connections)
-		old_outputs_connections.append_array(v_cnode.output_connections)
-		old_flow_connections.append_array(v_cnode.flow_connections)
-		old_from_flow_connections.append_array(v_cnode.from_flow_connections)
-
-		# inputs
-		for input_connection: InputConnectionData in v_cnode.input_connections:
-			input_connection.from.output_connections.erase(input_connection.from_ref)
-
-			if input_connection.line_ref:
-				input_connection.line_ref.visible = false
-
-				# remove the line reference from both inputs
-				input_connection.line_ref = null
-				input_connection.from_ref.line_ref = null
-
-		# outputs
-		for input_connection: OutputConnectionData in v_cnode.output_connections:
-			input_connection.to.input_connections.erase(input_connection.to_ref)
-
-			if input_connection.line_ref:
-				input_connection.line_ref.visible = false
-
-				# remove the line reference from both inputs
-				input_connection.line_ref = null
-				input_connection.to_ref.line_ref = null
-
-		# flow connections
-		for flow_connection: FlowConnectionData in v_cnode.flow_connections:
-			if flow_connection.line_ref:
-				flow_connection.line_ref.visible = false
-				flow_connection.line_ref = null
-			
-			if flow_connection.to:
-				flow_connection.to_from_ref.from_connections.erase(flow_connection)
-
-		# from flow connections
-		for from_flow_connection: FromFlowConnection in v_cnode.from_flow_connections:
-			for from_connection: FlowConnectionData in from_flow_connection.from_connections:
-				if from_connection.line_ref:
-					from_connection.line_ref.visible = false
-					from_connection.line_ref = null
-
-				from_connection.to = null
-
-		v_cnode.input_connections.clear()
-		v_cnode.output_connections.clear()
-		v_cnode.hide()
-		v_cnode.is_deleted = true
-
-
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 	is_showing = _rect.intersects(
 		Rect2(
@@ -633,15 +109,15 @@ func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 		hide()
 
 
-func get_input(_id: int) -> InOutData:
-	for input: InOutData in inputs:
+func get_input(_id: int) -> HenVCInOutData:
+	for input: HenVCInOutData in inputs:
 		if input.id == _id:
 			return input
 	return null
 
 
-func get_output(_id: int) -> InOutData:
-	for output: InOutData in outputs:
+func get_output(_id: int) -> HenVCInOutData:
+	for output: HenVCInOutData in outputs:
 		if output.id == _id:
 			return output
 	return null
@@ -668,7 +144,7 @@ func show() -> void:
 				if idx < inputs.size():
 					input.visible = true
 					
-					var input_data: InOutData = inputs[idx]
+					var input_data: HenVCInOutData = inputs[idx]
 
 					input.change_name(input_data.name)
 					input.input_ref = input_data
@@ -706,7 +182,7 @@ func show() -> void:
 				if idx < outputs.size():
 					output.visible = true
 					
-					var output_data: InOutData = outputs[idx]
+					var output_data: HenVCInOutData = outputs[idx]
 					
 					output.input_ref = output_data
 
@@ -722,7 +198,7 @@ func show() -> void:
 			cnode_ref = cnode
 
 
-			for connection: InputConnectionData in input_connections:
+			for connection: HenVCConnectionData.InputConnectionData in input_connections:
 				if connection.from_ref.line_ref is HenConnectionLine:
 					connection.line_ref = connection.from_ref.line_ref
 				elif connection.line_ref is HenConnectionLine:
@@ -755,7 +231,7 @@ func show() -> void:
 					cnode_ref.connect('on_move', connection.line_ref.update_line)
 
 
-			for connection: OutputConnectionData in output_connections:
+			for connection: HenVCConnectionData.OutputConnectionData in output_connections:
 				if connection.to_ref.line_ref is HenConnectionLine:
 					connection.line_ref = connection.to_ref.line_ref
 				elif connection.line_ref is HenConnectionLine:
@@ -821,7 +297,7 @@ func show() -> void:
 					
 			idx = 0
 
-			for from_flow_connection: FromFlowConnection in from_flow_connections:
+			for from_flow_connection: HenVCFromFlowConnection in from_flow_connections:
 				# showing from flow connections
 				var my_from_flow_container = from_flow_container.get_child(idx)
 				var label: Label = my_from_flow_container.get_node('%Label')
@@ -839,7 +315,7 @@ func show() -> void:
 					idx += 1
 					continue
 
-				for from_connection: FlowConnectionData in from_flow_connection.from_connections:
+				for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
 					var line: HenFlowConnectionLine
 
 					if from_connection.line_ref:
@@ -864,7 +340,7 @@ func show() -> void:
 			idx = 0
 
 
-			for flow_connection: FlowConnectionData in flow_connections:
+			for flow_connection: HenVCFlowConnectionData in flow_connections:
 				# showing flow connections
 				var my_flow_container = flow_container.get_child(idx)
 				var connector: HenFlowConnector = my_flow_container.get_node('FlowSlot/Control/Connector')
@@ -916,21 +392,21 @@ func show() -> void:
 			# drawing the connections	
 			await RenderingServer.frame_post_draw
 
-			for connection: InputConnectionData in input_connections:
+			for connection: HenVCConnectionData.InputConnectionData in input_connections:
 				if not connection.line_ref: continue
 				connection.line_ref.update_line()
 			
-			for connection: OutputConnectionData in output_connections:
+			for connection: HenVCConnectionData.OutputConnectionData in output_connections:
 				if not connection.line_ref: continue
 				connection.line_ref.update_line()
 
-			for connection: FlowConnectionData in flow_connections:
+			for connection: HenVCFlowConnectionData in flow_connections:
 				if not connection.line_ref: continue
 				connection.line_ref.update_line()
 
-			for connection: FromFlowConnection in from_flow_connections:
+			for connection: HenVCFromFlowConnection in from_flow_connections:
 				if not connection.from_connections.is_empty():
-					for from_connection: FlowConnectionData in connection.from_connections:
+					for from_connection: HenVCFlowConnectionData in connection.from_connections:
 						if from_connection.line_ref:
 							from_connection.line_ref.update_line()
 
@@ -944,7 +420,7 @@ func hide() -> void:
 		for signal_data: Dictionary in cnode_ref.get_signal_connection_list('on_move'):
 			cnode_ref.disconnect('on_move', signal_data.callable)
 		
-		for line_data: InputConnectionData in input_connections:
+		for line_data: HenVCConnectionData.InputConnectionData in input_connections:
 			if not line_data.line_ref:
 				continue
 			
@@ -964,7 +440,7 @@ func hide() -> void:
 			line_data.line_ref = null
 
 
-		for line_data: OutputConnectionData in output_connections:
+		for line_data: HenVCConnectionData.OutputConnectionData in output_connections:
 			if not line_data.line_ref:
 				continue
 			
@@ -980,7 +456,7 @@ func hide() -> void:
 			line_data.line_ref = null
 
 
-		for flow_connection: FlowConnectionData in flow_connections:
+		for flow_connection: HenVCFlowConnectionData in flow_connections:
 			if flow_connection.line_ref:
 				flow_connection.line_ref.from_pool_visible = false
 			
@@ -995,8 +471,8 @@ func hide() -> void:
 		var idx: int = 0
 		var from_flow_container: HBoxContainer = cnode_ref.get_node('%FromFlowContainer')
 
-		for from_flow_connection: FromFlowConnection in from_flow_connections:
-			for from_connection: FlowConnectionData in from_flow_connection.from_connections:
+		for from_flow_connection: HenVCFromFlowConnection in from_flow_connections:
+			for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
 				if from_connection.line_ref:
 					var line: HenFlowConnectionLine = from_connection.line_ref
 
@@ -1054,6 +530,7 @@ func get_save() -> Dictionary:
 		data.invalid = invalid
 
 	if ref:
+		@warning_ignore("UNSAFE_PROPERTY_ACCESS")
 		data.ref_id = ref.id
 
 	if from_side_bar_id > -1:
@@ -1065,23 +542,23 @@ func get_save() -> Dictionary:
 	if not inputs.is_empty():
 		data.inputs = []
 
-		for input: InOutData in inputs:
+		for input: HenVCInOutData in inputs:
 			data.inputs.append(input.get_save())
 	
 	if not outputs.is_empty():
 		data.outputs = []
 
-		for output: InOutData in outputs:
+		for output: HenVCInOutData in outputs:
 			data.outputs.append(output.get_save())
 
 	if category:
 		data.category = category
 
-	for flow_connection: FlowConnectionData in flow_connections:
+	for flow_connection: HenVCFlowConnectionData in flow_connections:
 		if not flow_connection.to: continue
 		data.flow_connections.append(flow_connection.get_save())
 
-	for input: InputConnectionData in input_connections:
+	for input: HenVCConnectionData.InputConnectionData in input_connections:
 		data.input_connections.append(input.get_save())
 
 	if not virtual_cnode_list.is_empty():
@@ -1095,14 +572,14 @@ func get_save() -> Dictionary:
 		Type.DEFAULT:
 			var flows: Array = []
 
-			for flow_connection: FlowConnectionData in flow_connections:
+			for flow_connection: HenVCFlowConnectionData in flow_connections:
 				if flow_connection.name:
 					flows.append({id = flow_connection.id, name = flow_connection.name})
 			
 			if not flows.is_empty(): data.to_flow = flows
 		Type.STATE:
 			data.to_flow = []
-			for flow_connection: FlowConnectionData in flow_connections:
+			for flow_connection: HenVCFlowConnectionData in flow_connections:
 					if flow_connection.name:
 						data.to_flow.append({name = flow_connection.name, id = flow_connection.id})
 
@@ -1120,57 +597,57 @@ func get_save() -> Dictionary:
 	return data
 
 
-func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> FlowConnectionReturn:
-	var flow_connection: FlowConnectionData = get_flow(_id)
-	var flow_from_connection: FromFlowConnection = _to.get_from_flow(_to_id)
+func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
+	var flow_connection: HenVCFlowConnectionData = get_flow(_id)
+	var flow_from_connection: HenVCFromFlowConnection = _to.get_from_flow(_to_id)
 
 	if not flow_connection or not flow_from_connection:
 		push_warning(flow_connections.map(func(x): return x.id))
 		push_warning('Not Found Flow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
 		return null
 
-	return FlowConnectionReturn.new(flow_connection, _id, _to, _to_id, self, flow_from_connection)
+	return HenVCFlowConnectionReturn.new(flow_connection, _id, _to, _to_id, self, flow_from_connection)
 
 
-func get_flow(_id: int) -> FlowConnection:
-	for flow: FlowConnection in flow_connections:
+func get_flow(_id: int) -> HenVCFlowConnection:
+	for flow: HenVCFlowConnection in flow_connections:
 		if flow.id == _id:
 			return flow
 	
 	return null
 
 
-func get_from_flow(_id: int) -> FlowConnection:
-	for flow: FlowConnection in from_flow_connections:
+func get_from_flow(_id: int) -> HenVCFlowConnection:
+	for flow: HenVCFlowConnection in from_flow_connections:
 		if flow.id == _id:
 			return flow
 	
 	return null
 
 
-func get_flow_connection(_id: int) -> FlowConnectionReturn:
-	var flow_connection: FlowConnectionData = get_flow(_id)
+func get_flow_connection(_id: int) -> HenVCFlowConnectionReturn:
+	var flow_connection: HenVCFlowConnectionData = get_flow(_id)
 
 	if not flow_connection or not flow_connection.to:
 		return null
 
-	return FlowConnectionReturn.new(flow_connection, _id, flow_connection.to, flow_connection.to_id, self, flow_connection.to_from_ref)
+	return HenVCFlowConnectionReturn.new(flow_connection, _id, flow_connection.to, flow_connection.to_id, self, flow_connection.to_from_ref)
 
 
-func get_input_connection(_id: int) -> ConnectionReturn:
-	for connection: InputConnectionData in input_connections:
+func get_input_connection(_id: int) -> HenVCConnectionReturn:
+	for connection: HenVCConnectionData.InputConnectionData in input_connections:
 		if connection.to_id == _id:
-			return ConnectionReturn.new(connection, connection.from_ref, connection.from, self)
+			return HenVCConnectionReturn.new(connection, connection.from_ref, connection.from, self)
 
 	return null
 
 
-func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> ConnectionReturn:
-	var input_connection: InputConnectionData = InputConnectionData.new()
-	var output_connection: OutputConnectionData = OutputConnectionData.new()
+func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
+	var input_connection: HenVCConnectionData.InputConnectionData = HenVCConnectionData.InputConnectionData.new()
+	var output_connection: HenVCConnectionData.OutputConnectionData = HenVCConnectionData.OutputConnectionData.new()
 
-	var input: InOutData = get_input(_id)
-	var output: InOutData = _from.get_output(_from_id)
+	var input: HenVCInOutData = get_input(_id)
+	var output: HenVCInOutData = _from.get_output(_from_id)
 
 	if not input or not output:
 		return
@@ -1198,19 +675,19 @@ func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> Conne
 	input_connection.from_type = output.type
 	input_connection.input_ref = input
 
-	return ConnectionReturn.new(input_connection, output_connection, _from, self, _id)
+	return HenVCConnectionReturn.new(input_connection, output_connection, _from, self, _id)
 
 
 func add_connection(_idx: int, _from_id: int, _from: HenVirtualCNode) -> void:
 	create_connection(_idx, _from_id, _from).add(false)
 
 
-func get_history_obj() -> VCNodeReturn:
-	return VCNodeReturn.new(self)
+func get_history_obj() -> HenVCNodeReturn:
+	return HenVCNodeReturn.new(self)
 
 
 func create_flow_connection() -> void:
-	flow_connections.append(FlowConnectionData.new({name = 'Flow ' + str(flow_connections.size())}))
+	flow_connections.append(HenVCFlowConnectionData.new({name = 'Flow ' + str(flow_connections.size())}))
 
 
 func clear_in_out(_is_input: bool) -> void:
@@ -1231,7 +708,7 @@ func _on_change_name(_name: String) -> void:
 	update()
 
 
-func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: InOutData) -> void:
+func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: HenVCInOutData) -> void:
 	var is_input: bool = _is_input
 	var index_slice: int = 0
 
@@ -1256,7 +733,7 @@ func _on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: InOutData) -> void
 	update()
 
 
-func _on_in_out_deleted(_is_input: bool, _in_ou_ref: InOutData) -> void:
+func _on_in_out_deleted(_is_input: bool, _in_ou_ref: HenVCInOutData) -> void:
 	var is_input: bool = _is_input
 
 	match sub_type:
@@ -1277,7 +754,7 @@ func _on_in_out_deleted(_is_input: bool, _in_ou_ref: InOutData) -> void:
 	update()
 
 
-func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> InOutData:
+func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
 	# restrict creation by sub_type
 	if _check_types:
 		match sub_type:
@@ -1294,7 +771,7 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 		if not invalid:
 			_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
 
-	var in_out: InOutData = InOutData.new(_data)
+	var in_out: HenVCInOutData = HenVCInOutData.new(_data)
 
 	if _data.has('ref'):
 		in_out.set_ref(_data.ref, )
@@ -1314,32 +791,32 @@ func _on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = t
 	return in_out
 
 
-func _on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: InOutData) -> void:
+func _on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenVCInOutData) -> void:
 	if HenUtils.is_type_relation_valid(_old_type, _type):
 		remove_inout_connection(_ref)
 
 
 func input_has_connection(_id: int) -> bool:
-	for input_connection: InputConnectionData in input_connections:
+	for input_connection: HenVCConnectionData.InputConnectionData in input_connections:
 		if input_connection.to_id == _id:
 			return true
 
 	return false
 
 
-func remove_inout_connection(_ref: InOutData) -> void:
+func remove_inout_connection(_ref: HenVCInOutData) -> void:
 	var input_remove: Array = []
 	var output_remove: Array = []
 
-	for connection: InputConnectionData in input_connections:
+	for connection: HenVCConnectionData.InputConnectionData in input_connections:
 		if _ref.id == connection.to_id:
 			input_remove.append(connection)
 		
-	for connection: OutputConnectionData in output_connections:
+	for connection: HenVCConnectionData.OutputConnectionData in output_connections:
 		if _ref.id == connection.from_id:
 			output_remove.append(connection)
 
-	for connection: InputConnectionData in input_remove:
+	for connection: HenVCConnectionData.InputConnectionData in input_remove:
 		connection.from.output_connections.erase(connection.from_ref)
 		input_connections.erase(connection)
 
@@ -1348,7 +825,7 @@ func remove_inout_connection(_ref: InOutData) -> void:
 
 		connection.from.update()
 	
-	for connection: OutputConnectionData in output_remove:
+	for connection: HenVCConnectionData.OutputConnectionData in output_remove:
 		connection.to.input_connections.erase(connection.to_ref)
 		output_connections.erase(connection)
 
@@ -1384,7 +861,7 @@ func _on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Arra
 	clear_in_out(is_input)
 
 	for input_data: Dictionary in _new_inputs:
-		var in_out: InOutData = _on_in_out_added(is_input, input_data)
+		var in_out: HenVCInOutData = _on_in_out_added(is_input, input_data)
 
 		match sub_type:
 			SubType.SIGNAL_CONNECTION, SubType.SIGNAL_DISCONNECTION:
@@ -1403,13 +880,13 @@ func _on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 			if _is_input: return
 			_is_input = not _is_input
 
-	var flow: FlowConnection
+	var flow: HenVCFlowConnection
 
 	if _is_input:
-		flow = FromFlowConnection.new(_data)
+		flow = HenVCFromFlowConnection.new(_data)
 		from_flow_connections.append(flow)
 	else:
-		flow = FlowConnectionData.new(_data)
+		flow = HenVCFlowConnectionData.new(_data)
 		flow_connections.append(flow)
 	
 	
@@ -1422,7 +899,7 @@ func _on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 
 	update()
 
-func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: FlowConnection) -> void:
+func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: HenVCFlowConnection) -> void:
 	var index_slice: int = 0
 
 	if _is_input:
@@ -1433,9 +910,9 @@ func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: FlowConnection) -> vo
 	update()
 
 
-func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
+func _on_flow_deleted(_is_input: bool, _flow_ref: HenVCFlowConnection) -> void:
 	if _is_input:
-		var flow: FlowConnectionData = _flow_ref as FlowConnectionData
+		var flow: HenVCFlowConnectionData = _flow_ref as HenVCFlowConnectionData
 		flow_connections.erase(flow)
 
 		if flow.line_ref:
@@ -1444,9 +921,9 @@ func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
 		flow.line_ref = null
 		if flow.to_from_ref: flow.to_from_ref.from_connections.erase(flow)
 	else:
-		var flow: FromFlowConnection = _flow_ref as FromFlowConnection
+		var flow: HenVCFromFlowConnection = _flow_ref as HenVCFromFlowConnection
 		
-		for connection: FlowConnectionData in flow.from_connections:
+		for connection: HenVCFlowConnectionData in flow.from_connections:
 			if connection.line_ref:
 				connection.line_ref.visible = false
 			
@@ -1458,7 +935,7 @@ func _on_flow_deleted(_is_input: bool, _flow_ref: FlowConnection) -> void:
 	update()
 
 
-func _on_delete_flow_state(_ref: FlowConnectionData) -> void:
+func _on_delete_flow_state(_ref: HenVCFlowConnectionData) -> void:
 	_on_flow_deleted(true, _ref)
 
 
@@ -1567,17 +1044,17 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match v_cnode.type:
 		Type.DEFAULT:
-			if not _config.has('to_flow'): v_cnode.flow_connections.append(FlowConnectionData.new({id = 0}))
-			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))
+			if not _config.has('to_flow'): v_cnode.flow_connections.append(HenVCFlowConnectionData.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
 		Type.IF:
-			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'True', id = 0}))
-			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'False', id = 1}))
-			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Then', id = 2}))
-			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'True', id = 0}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'False', id = 1}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'Then', id = 2}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
 		Type.FOR:
-			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Body', id = 0}))
-			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'Then', id = 1}))
-			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'Body', id = 0}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'Then', id = 1}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
 		Type.STATE:
 			v_cnode.route = {
 				name = v_cnode.name,
@@ -1609,16 +1086,16 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					can_delete = false
 				})
 
-			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
 
 			if _config.has('to_flow'):
 				for flow: Dictionary in _config.to_flow:
 					v_cnode._on_flow_added(false, flow)
 		Type.STATE_START:
-			v_cnode.flow_connections.append(FlowConnectionData.new({name = 'On Start', id = 0}))
-			v_cnode.from_flow_connections.append(FromFlowConnection.new({id = 0}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'On Start', id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
 		Type.STATE_EVENT:
-			v_cnode.flow_connections.append(FlowConnectionData.new({id = 0}))
+			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({id = 0}))
 		_:
 			if _config.has('to_flow'):
 				for flow: Dictionary in _config.to_flow:
@@ -1631,7 +1108,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('inputs'):
 		for input_data: Dictionary in _config.inputs:
-			var input: InOutData = v_cnode._on_in_out_added(true, input_data, false)
+			var input: HenVCInOutData = v_cnode._on_in_out_added(true, input_data, false)
 
 			if not input_data.has('code_value'):
 				input.reset_input_value()
@@ -1650,6 +1127,6 @@ static func instantiate_virtual_cnode_and_add(_config: Dictionary) -> HenVirtual
 	return v_cnode
 
 
-static func instantiate(_config: Dictionary) -> VCNodeReturn:
+static func instantiate(_config: Dictionary) -> HenVCNodeReturn:
 	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config)
-	return VCNodeReturn.new(v_cnode)
+	return HenVCNodeReturn.new(v_cnode)

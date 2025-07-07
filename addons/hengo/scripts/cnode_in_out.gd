@@ -5,13 +5,13 @@ class_name HenCnodeInOut extends PanelContainer
 @export var root: HenCnode
 @export_enum('in', 'out') var type: String
 
-var input_ref: HenVirtualCNode.InOutData
+var input_ref: HenVCInOutData
 
 class CNodeInOutConnectionData:
 	var vc: HenVirtualCNode
-	var in_out: HenVirtualCNode.InOutData
+	var in_out: HenVCInOutData
 
-	func _init(_vc: HenVirtualCNode, _in_out: HenVirtualCNode.InOutData) -> void:
+	func _init(_vc: HenVirtualCNode, _in_out: HenVCInOutData) -> void:
 		vc = _vc
 		in_out = _in_out
 
@@ -53,7 +53,7 @@ func _on_gui(_event: InputEvent) -> void:
 
 			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data:
 				# try connection
-				var connection: HenVirtualCNode.ConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
+				var connection: HenVCConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
 
 				if connection:
 					HenGlobal.history.create_action('Add Connection')
@@ -104,7 +104,7 @@ func _on_exit() -> void:
 		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
 
 
-func create_virtual_connection(_data: CNodeInOutConnectionData) -> HenVirtualCNode.ConnectionReturn:
+func create_virtual_connection(_data: CNodeInOutConnectionData) -> HenVCConnectionReturn:
 	if type == 'in':
 		return root.virtual_ref.create_connection(
 			input_ref.id,

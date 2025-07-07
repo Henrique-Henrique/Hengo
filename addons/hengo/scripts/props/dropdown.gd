@@ -5,7 +5,7 @@ var options: Array = []
 @export var type: String = ''
 var custom_data
 var custom_value: String = ''
-var input_ref: HenVirtualCNode.InOutData
+var input_ref: HenVCInOutData
 
 signal value_changed
 
@@ -155,7 +155,7 @@ func _selected(_item: Dictionary) -> void:
 			text = (_item.name as String).to_snake_case()
 		'state_transition':
 			emit_signal('value_changed', text)
-			input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+			input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
 			return
 		'enum_list':
 			text = _item.name
@@ -171,7 +171,7 @@ func _selected(_item: Dictionary) -> void:
 			input_ref.category = 'class_props'
 
 			if _item.has('ref'):
-				input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.IS_PROP)
+				input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.IS_PROP)
 			else:
 				input_ref.remove_ref()
 			return
@@ -191,8 +191,8 @@ func _selected(_item: Dictionary) -> void:
 			if _item.has('ref'):
 				second_input.input_ref.type = _item.ref.type
 				second_input.input_ref.reset_input_value()
-				second_input.input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.TYPE_CHANGE)
-				input_ref.set_ref(_item.ref, HenVirtualCNode.InOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+				second_input.input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.TYPE_CHANGE)
+				input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
 			else:
 				second_input.input_ref.remove_ref()
 				second_input.input_ref.type = _item.type

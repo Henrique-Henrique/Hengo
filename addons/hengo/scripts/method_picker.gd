@@ -915,7 +915,7 @@ func _on_select() -> void:
 
 	data.position = HenGlobal.CAM.get_relative_vec2(start_pos)
 
-	var vc_return: HenVirtualCNode.VCNodeReturn = HenVirtualCNode.instantiate(data)
+	var vc_return: HenVCNodeReturn = HenVirtualCNode.instantiate(data)
 
 	HenGlobal.history.create_action('Add CNode')
 	HenGlobal.history.add_do_method(vc_return.add)
@@ -924,7 +924,7 @@ func _on_select() -> void:
 
 	# make connection
 	if cnode_config.has('from_virtual_ref'):
-		var connection: HenVirtualCNode.ConnectionReturn = vc_return.v_cnode.create_connection(
+		var connection: HenVCConnectionReturn = vc_return.v_cnode.create_connection(
 			vc_return.v_cnode.inputs[0].id,
 			cnode_config.in_out_id,
 			cnode_config.from,

@@ -1,0 +1,4 @@
+@tool
+class_name HenVCFromFlowConnection extends HenVCFlowConnection
+
+var from_connections: Array[HenVCFlowConnectionData]
