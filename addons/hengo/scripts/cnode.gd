@@ -129,29 +129,9 @@ func _on_gui(_event: InputEvent) -> void:
 					# showing state config on doubleclick
 					if virtual_ref:
 						if virtual_ref.type == HenVirtualCNode.Type.STATE:
-							var state_inspector: HenInspector = HenInspector.start([
-									HenInspector.InspectorItem.new({
-										name = 'name',
-										type = &'String',
-										value = virtual_ref.name,
-										ref = virtual_ref
-									}),
-									HenInspector.InspectorItem.new({
-										name = 'outputs',
-										type = &'Array',
-										max_size = 5,
-										value = virtual_ref.flow_connections,
-										item_creation_callback = virtual_ref.create_flow_connection,
-										item_delete_callback = virtual_ref._on_delete_flow_state,
-										field = {name = 'name', type = 'String'}
-									}),
-								])
-							
-							state_inspector.item_changed.connect(_on_state_inspector)
-
 							HenGlobal.GENERAL_POPUP.get_parent().show_content(
-								state_inspector,
-								'State Config',
+								HenPropEditor.mount(virtual_ref),
+								'Testing',
 								get_global_mouse_position()
 							)
 					

@@ -1,6 +1,8 @@
 @tool
 class_name HenArrayItem extends HBoxContainer
 
+enum ArrayMove {UP, DOWN}
+
 var prop: HenPropEditor.Prop
 
 func _ready() -> void:
@@ -16,11 +18,11 @@ func _on_item_config_select(_id: int) -> void:
         # up
         1:
             if prop.on_item_move:
-                prop.on_item_move.call(HenPropArray.ArrayMove.UP)
+                prop.on_item_move.call(HenArrayItem.ArrayMove.UP)
         # down
         2:
             if prop.on_item_move:
-                prop.on_item_move.call(HenPropArray.ArrayMove.DOWN)
+                prop.on_item_move.call(HenArrayItem.ArrayMove.DOWN)
     
     HenPropEditor.get_singleton().start()
 

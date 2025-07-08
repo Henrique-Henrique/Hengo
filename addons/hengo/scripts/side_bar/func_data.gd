@@ -66,7 +66,7 @@ func create_param(_type: HenSideBar.ParamType) -> void:
 			in_out_added.emit(false, in_out.get_data())
 	
 
-func move_param(_direction: HenPropArray.ArrayMove, _ref: HenParamData, _type: HenSideBar.ParamType) -> void:
+func move_param(_direction: HenArrayItem.ArrayMove, _ref: HenParamData, _type: HenSideBar.ParamType) -> void:
 	var can_move: bool = false
 	var arr: Array
 
@@ -77,9 +77,9 @@ func move_param(_direction: HenPropArray.ArrayMove, _ref: HenParamData, _type: H
 			arr = outputs
 
 	match _direction:
-		HenPropArray.ArrayMove.UP:
+		HenArrayItem.ArrayMove.UP:
 			can_move = HenUtils.move_array_item(arr, _ref, 1)
-		HenPropArray.ArrayMove.DOWN:
+		HenArrayItem.ArrayMove.DOWN:
 			can_move = HenUtils.move_array_item(arr, _ref, -1)
 
 	if can_move: _ref.moved.emit(_type == HenSideBar.ParamType.INPUT, arr.find(_ref))

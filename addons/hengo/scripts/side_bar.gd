@@ -113,13 +113,6 @@ class SideBarList:
 		inspecting = false
 	
 
-	func _on_config_changed(_name: StringName, _ref, _inspector: HenInspector) -> void:
-		if _ref is HenSignalData and _name == 'signal_name':
-			HenInspector.start(_ref.get_inspector_array_list(), _inspector)
-
-		list_changed.emit()
-	
-
 	func get_save() -> Dictionary:
 		return {
 			var_list = var_list.map(func(x: HenVarData): return x.get_save()),

@@ -694,6 +694,7 @@ func get_history_obj() -> HenVCNodeReturn:
 
 func create_flow_connection() -> void:
 	flow_connections.append(HenVCFlowConnectionData.new({name = 'Flow ' + str(flow_connections.size())}))
+	update()
 
 
 func clear_in_out(_is_input: bool) -> void:
@@ -905,6 +906,7 @@ func _on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 
 	update()
 
+
 func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: HenVCFlowConnection) -> void:
 	var index_slice: int = 0
 
@@ -913,6 +915,23 @@ func _on_flow_moved(_is_input: bool, _pos: int, _flow_ref: HenVCFlowConnection) 
 	else:
 		HenUtils.move_array_item_to_idx(flow_connections, _flow_ref, _pos + index_slice)
 	
+	update()
+
+
+func move_flow(_direction: HenArrayItem.ArrayMove, _ref: HenVCFlowConnectionData, _is_input: bool) -> void:
+	var arr: Array
+
+	if _is_input:
+		arr = from_flow_connections
+	else:
+		arr = flow_connections
+
+	match _direction:
+		HenArrayItem.ArrayMove.UP:
+			HenUtils.move_array_item(arr, _ref, 1)
+		HenArrayItem.ArrayMove.DOWN:
+			HenUtils.move_array_item(arr, _ref, -1)
+
 	update()
 
 
@@ -943,6 +962,39 @@ func _on_flow_deleted(_is_input: bool, _flow_ref: HenVCFlowConnection) -> void:
 
 func _on_delete_flow_state(_ref: HenVCFlowConnectionData) -> void:
 	_on_flow_deleted(true, _ref)
+
+
+func _change_flow_name(_name: String, _ref: HenVCFlowConnectionData, ) -> void:
+	_ref.name = _name
+	update()
+
+
+func get_inspector_array_list() -> Array:
+	match sub_type:
+		SubType.STATE:
+			return [
+				HenPropEditor.Prop.new({
+					name = 'Name',
+					type = HenPropEditor.Prop.Type.STRING,
+					default_value = name,
+					on_value_changed = _on_change_name
+				}),
+				HenPropEditor.Prop.new({
+					name = 'Outputs',
+					type = HenPropEditor.Prop.Type.ARRAY,
+					on_item_create = create_flow_connection,
+					prop_list = flow_connections.map(func(x: HenVCFlowConnectionData) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+						name = 'name',
+						type = HenPropEditor.Prop.Type.STRING,
+						default_value = x.name,
+						on_value_changed = _change_flow_name.bind(x),
+						on_item_delete = _on_delete_flow_state.bind(x),
+						on_item_move = move_flow.bind(x, false),
+					})),
+				}),
+			]
+		
+	return []
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:

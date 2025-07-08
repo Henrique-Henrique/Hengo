@@ -120,7 +120,7 @@ func create_param(_type: HenSideBar.ParamType) -> HenParamData:
     return in_out
     
 
-func move_param(_direction: HenPropArray.ArrayMove, _ref: HenParamData, _type: HenSideBar.ParamType) -> void:
+func move_param(_direction: HenArrayItem.ArrayMove, _ref: HenParamData, _type: HenSideBar.ParamType) -> void:
     var can_move: bool = false
     var arr: Array
 
@@ -131,9 +131,9 @@ func move_param(_direction: HenPropArray.ArrayMove, _ref: HenParamData, _type: H
             arr = outputs_value
 
     match _direction:
-        HenPropArray.ArrayMove.UP:
+        HenArrayItem.ArrayMove.UP:
             can_move = HenUtils.move_array_item(arr, _ref, 1)
-        HenPropArray.ArrayMove.DOWN:
+        HenArrayItem.ArrayMove.DOWN:
             can_move = HenUtils.move_array_item(arr, _ref, -1)
 
     if can_move: _ref.moved.emit(_type == HenSideBar.ParamType.INPUT, arr.find(_ref))
@@ -149,7 +149,7 @@ func delete_param(_ref: HenParamData, _type: HenSideBar.ParamType) -> void:
     _ref.deleted.emit(_type == HenSideBar.ParamType.INPUT)
 
 
-func move_flow(_direction: HenPropArray.ArrayMove, _ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
+func move_flow(_direction: HenArrayItem.ArrayMove, _ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
     var can_move: bool = false
     var arr: Array
 
@@ -160,9 +160,9 @@ func move_flow(_direction: HenPropArray.ArrayMove, _ref: MacroInOut, _type: HenS
             arr = outputs
 
     match _direction:
-        HenPropArray.ArrayMove.UP:
+        HenArrayItem.ArrayMove.UP:
             can_move = HenUtils.move_array_item(arr, _ref, 1)
-        HenPropArray.ArrayMove.DOWN:
+        HenArrayItem.ArrayMove.DOWN:
             can_move = HenUtils.move_array_item(arr, _ref, -1)
 
     if can_move: _ref.moved.emit(arr.find(_ref))

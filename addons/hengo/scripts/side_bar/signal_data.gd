@@ -112,13 +112,13 @@ func create_param() -> HenParamData:
 	return in_out
 	
 
-func move_param(_direction: HenPropArray.ArrayMove, _ref: HenParamData) -> void:
+func move_param(_direction: HenArrayItem.ArrayMove, _ref: HenParamData) -> void:
 	var can_move: bool = false
 
 	match _direction:
-		HenPropArray.ArrayMove.UP:
+		HenArrayItem.ArrayMove.UP:
 			can_move = HenUtils.move_array_item(bind_params, _ref, 1)
-		HenPropArray.ArrayMove.DOWN:
+		HenArrayItem.ArrayMove.DOWN:
 			can_move = HenUtils.move_array_item(bind_params, _ref, -1)
 
 	if can_move: _ref.moved.emit(true, bind_params.find(_ref))
