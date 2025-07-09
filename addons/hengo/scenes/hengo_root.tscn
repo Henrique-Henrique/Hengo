@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=54 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -24,6 +24,7 @@
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
+[ext_resource type="Script" uid="uid://bn7gg8rslv0gn" path="res://addons/hengo/scripts/utils/vc_action_buttons.gd" id="28_w813u"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
@@ -103,15 +104,15 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1152, 648)
-shader_parameter/offset = Vector2(100, 8.42499e-06)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(3824, 1651)
+shader_parameter/offset = Vector2(1282.63, 123.613)
+shader_parameter/zoom_factor = 0.999997
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.745098, 0.745098, 0.745098, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.764706, 0.407843, 0.929412, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -397,6 +398,68 @@ position = Vector2(0, 3000)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
+[node name="VCActionButtons" type="Control" parent="VBoxContainer/CNodeUI/Cam"]
+unique_name_in_owner = true
+visible = false
+z_index = 100
+layout_mode = 3
+anchors_preset = 0
+offset_left = -100.0
+offset_right = -60.0
+offset_bottom = 40.0
+mouse_filter = 2
+script = ExtResource("28_w813u")
+
+[node name="Button" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button2" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button3" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button4" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button5" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button6" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button7" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button8" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button9" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
+[node name="Button10" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+layout_mode = 0
+offset_right = 35.0
+offset_bottom = 32.0
+
 [node name="Center2" type="Marker2D" parent="VBoxContainer/CNodeUI"]
 visible = false
 position = Vector2(-580, 0)
@@ -421,6 +484,7 @@ horizontal_alignment = 2
 [node name="ScriptMsgContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI"]
 unique_name_in_owner = true
 process_mode = 4
+visible = false
 z_index = 99
 layout_mode = 1
 anchors_preset = 15

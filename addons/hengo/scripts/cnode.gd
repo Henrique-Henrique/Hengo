@@ -97,6 +97,7 @@ func _scale_and_update_line(_scale: Vector2) -> void:
 				if connetion.line_ref:
 					connetion.line_ref.update_line()
 
+
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
 		if _event.pressed:
@@ -137,9 +138,12 @@ func _on_gui(_event: InputEvent) -> void:
 					
 		else:
 			moving = false
+			HenVCActionButtons.get_singleton().show_action(self)
+
 			# group moving false
 			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 				i.moving = false
+			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
 		if virtual_ref.invalid:
 			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
@@ -186,6 +190,7 @@ func move(_pos: Vector2) -> void:
 	if virtual_ref:
 		virtual_ref.position = position
 
+	HenVCActionButtons.get_singleton().hide_action()
 	emit_signal('on_move')
 
 

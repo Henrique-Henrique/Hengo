@@ -156,4 +156,4 @@ func check_vc_action_menu() -> void:
 			vc.showing_action_menu = mouse_inside
 
 			if vc.showing_action_menu:
-				print(vc.name)
+				HenVCActionButtons.get_singleton().show_action(vc.cnode_ref)

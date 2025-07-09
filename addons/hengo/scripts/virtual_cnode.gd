@@ -95,6 +95,8 @@ var output_connections: Array = []
 var flow_connections: Array = []
 var from_flow_connections: Array = []
 
+const MOUSE_INSIDE_THRESHOLD = Vector2(40, 40)
+
 
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 	is_showing = _rect.intersects(Rect2(
@@ -110,8 +112,8 @@ func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 
 func check_mouse_inside() -> bool:
 	return Rect2(
-		position,
-		size
+		position - MOUSE_INSIDE_THRESHOLD,
+		size + MOUSE_INSIDE_THRESHOLD * 2
 	).has_point(HenGlobal.CAM.get_local_mouse_position())
 
 
@@ -339,7 +341,7 @@ func show() -> void:
 					line.from_virtual_pos = from_connection.from_pos
 					line.to_pool_visible = true
 
-				(cnode_ref.get_node('%FromFlowContainer').get_child(idx).get_node('%Arrow') as TextureRect).visible = true
+				(from_flow_container.get_child(idx).get_node('%Arrow') as TextureRect).visible = true
 
 				idx += 1
 
@@ -806,6 +808,14 @@ func _on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: Hen
 func input_has_connection(_id: int) -> bool:
 	for input_connection: HenVCConnectionData.InputConnectionData in input_connections:
 		if input_connection.to_id == _id:
+			return true
+
+	return false
+
+
+func output_has_connection(_id: int) -> bool:
+	for output_connection: HenVCConnectionData.OutputConnectionData in output_connections:
+		if output_connection.from_id == _id:
 			return true
 
 	return false
