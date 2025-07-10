@@ -3,8 +3,7 @@
 [ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_k7ch5"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k7ch5"]
-bg_color = Color(0.6, 0.6, 0.6, 0)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4nava"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_axb3u"]
 
@@ -14,10 +13,10 @@ bg_color = Color(0.6, 0.6, 0.6, 0)
 bg_color = Color(1, 1, 1, 0.0901961)
 
 [node name="SideBar" type="PanelContainer"]
-offset_right = 295.0
-offset_bottom = 379.0
+offset_right = 42.0
+offset_bottom = 42.0
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_k7ch5")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_4nava")
 script = ExtResource("1_y1kkq")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]

@@ -40,6 +40,11 @@ func _physics_process(delta: float) -> void:
 class State1 extends HengoState:
 	func enter() -> void:
 		print("ata")
+		if false:
+			print(_ref.is_flipped_h())
+		else:
+			_ref.get_offset()
+		_ref.set_centered(false)
 
 	func update(delta) -> void:
 		_ref.set_offset(Vector2(0, 0))

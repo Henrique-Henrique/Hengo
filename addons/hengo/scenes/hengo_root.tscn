@@ -31,7 +31,7 @@
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
+bg_color = Color(0.111197, 0.111197, 0.111197, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x5h56"]
 content_margin_left = 4.0
@@ -105,15 +105,15 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 902)
-shader_parameter/offset = Vector2(604.865, -162.577)
-shader_parameter/zoom_factor = 0.999987
+shader_parameter/screen_size = Vector2(3824, 1514)
+shader_parameter/offset = Vector2(1206.8, 70.8916)
+shader_parameter/zoom_factor = 0.999977
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.352941, 0.733333, 0.937255, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.764706, 0.407843, 0.929412, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
