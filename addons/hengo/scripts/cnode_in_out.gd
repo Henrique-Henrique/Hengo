@@ -75,8 +75,7 @@ func _on_gui(_event: InputEvent) -> void:
 
 func _on_enter() -> void:
 	if not HenGlobal.can_make_connection:
-		if type == 'out':
-			get('theme_override_styles/panel/').set('border_color', Color.LIGHT_CORAL)
+		get('theme_override_styles/panel/').set('border_color', Color(1., 1., 1., .7))
 		return
 
 	get('theme_override_styles/panel/').set('border_color', Color.RED)

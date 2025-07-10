@@ -74,14 +74,13 @@ func _on_exit() -> void:
 func hover_animation() -> void:
 	var tween: Tween = get_tree().create_tween()
 
-	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .03)
-	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2(1.03, 1.03), .03).set_delay(0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
+	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .2)
+
 
 func exit_animation() -> void:
 	var tween: Tween = get_tree().create_tween()
 
-	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .03)
-	tween.parallel().tween_method(_scale_and_update_line, scale, Vector2.ONE, .03).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_EXPO)
+	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .2)
 
 
 func _scale_and_update_line(_scale: Vector2) -> void:

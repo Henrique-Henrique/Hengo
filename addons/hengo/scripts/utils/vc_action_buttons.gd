@@ -1,9 +1,6 @@
 @tool
 class_name HenVCActionButtons extends Control
 
-const ADD_ICON = preload('res://addons/hengo/assets/icons/menu/plus.svg')
-const REMOVE_ICON = preload('res://addons/hengo/assets/icons/menu/x.svg')
-
 enum Type {
 	INPUT,
 	OUTPUT,
@@ -45,9 +42,9 @@ func show_action(_vc: HenCnode) -> void:
 			Type.INPUT,
 			ActionType.DISCONNECT if _vc.virtual_ref.input_has_connection(input.input_ref.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
-			input.global_position.x - 50,
-			input.global_position.y + input.size.y / 4
-		))
+			input.global_position.x,
+			input.global_position.y
+		) + Vector2(-50, input.size.y / 4) * HenGlobal.CAM.transform.x.x)
 
 		idx += 1
 
@@ -60,9 +57,9 @@ func show_action(_vc: HenCnode) -> void:
 			Type.OUTPUT,
 			ActionType.DISCONNECT if _vc.virtual_ref.output_has_connection(output.input_ref.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
-			output.global_position.x + output.size.x + 15,
-			output.global_position.y + output.size.y / 4
-		))
+			output.global_position.x,
+			output.global_position.y
+		) + Vector2(output.size.x + 20, output.size.y / 4) * HenGlobal.CAM.transform.x.x)
 
 		idx += 1
 
@@ -78,9 +75,9 @@ func show_action(_vc: HenCnode) -> void:
 			Type.FROM_FLOW,
 			ActionType.CONNECT
 		), get_child(idx), Vector2(
-			arrow.global_position.x - arrow.texture.get_size().x,
-			arrow.global_position.y - 30
-		))
+			arrow.global_position.x,
+			arrow.global_position.y
+		) + Vector2(-arrow.texture.get_size().x / 1.2, -30) * HenGlobal.CAM.transform.x.x)
 
 		idx += 1
 
@@ -96,9 +93,9 @@ func show_action(_vc: HenCnode) -> void:
 			Type.FLOW,
 			ActionType.CONNECT
 		), get_child(idx), Vector2(
-			connector.global_position.x + connector.size.x / 4,
-			connector.global_position.y + 50
-		))
+			connector.global_position.x,
+			connector.global_position.y
+		) + Vector2(connector.size.x / 6, 50) * HenGlobal.CAM.transform.x.x)
 
 		idx += 1
 
@@ -107,15 +104,11 @@ func hide_action() -> void:
 	visible = false
 
 
-func set_bt_config(_action: ActionInfo, _bt: Button, _pos: Vector2) -> void:
+func set_bt_config(_action: ActionInfo, _bt: HenActionButton, _pos: Vector2) -> void:
 	_bt.visible = true
+	_bt.action = _action
 	_bt.global_position = _pos
-
-	match _action.action_type:
-		ActionType.CONNECT:
-			_bt.icon = ADD_ICON
-		ActionType.DISCONNECT:
-			_bt.icon = REMOVE_ICON
+	_bt.set_icon()
 
 
 static func get_singleton() -> HenVCActionButtons:

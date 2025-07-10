@@ -95,7 +95,7 @@ var output_connections: Array = []
 var flow_connections: Array = []
 var from_flow_connections: Array = []
 
-const MOUSE_INSIDE_THRESHOLD = Vector2(40, 40)
+const MOUSE_INSIDE_THRESHOLD = Vector2(25, 25)
 
 
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:

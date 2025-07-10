@@ -17,6 +17,7 @@ func _ready() -> void:
 	HenGlobal.ACTION_BAR = self
 	dashboard.pressed.connect(_on_dashboard)
 
+
 func filesystem_dock(_hide_docks: bool = false) -> void:
 	if filesystem_parent:
 		var filesystem: FileSystemDock = EditorInterface.get_file_system_dock()

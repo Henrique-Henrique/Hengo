@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=55 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://ctlaqfkdcnini" path="res://addons/hengo/assets/images/grid_cnode.png" id="13_w5ssd"]
 [ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
+[ext_resource type="PackedScene" uid="uid://ccwo8yeg80spo" path="res://addons/hengo/scenes/utils/action_button.tscn" id="21_w813u"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
@@ -30,7 +31,7 @@
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.0980392, 0.105882, 0.113725, 1)
+bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x5h56"]
 content_margin_left = 4.0
@@ -104,15 +105,15 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 1651)
-shader_parameter/offset = Vector2(1282.63, 123.613)
-shader_parameter/zoom_factor = 0.999997
+shader_parameter/screen_size = Vector2(1904, 902)
+shader_parameter/offset = Vector2(604.865, -162.577)
+shader_parameter/zoom_factor = 0.999987
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.764706, 0.407843, 0.929412, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.352941, 0.733333, 0.937255, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -410,55 +411,50 @@ offset_bottom = 40.0
 mouse_filter = 2
 script = ExtResource("28_w813u")
 
-[node name="Button" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button2" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button2" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button3" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button3" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button4" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button4" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button5" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button5" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button6" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button6" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button7" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button7" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button8" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button8" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button9" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button9" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
 
-[node name="Button10" type="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons"]
+[node name="Button10" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
 layout_mode = 0
-offset_right = 35.0
-offset_bottom = 32.0
+
+[node name="Button11" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
+layout_mode = 0
+
+[node name="Button12" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
+layout_mode = 0
+
+[node name="Button13" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
+layout_mode = 0
+
+[node name="Button14" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
+layout_mode = 0
+
+[node name="Button15" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
+layout_mode = 0
 
 [node name="Center2" type="Marker2D" parent="VBoxContainer/CNodeUI"]
 visible = false

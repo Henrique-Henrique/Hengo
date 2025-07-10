@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://ccwo8yeg80spo"]
+
+[ext_resource type="Script" uid="uid://bmcut3wny2v7t" path="res://addons/hengo/scripts/utils/action_button.gd" id="1_yoyhw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yoyhw"]
+bg_color = Color(0.129558, 0.129559, 0.129558, 0.713726)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.362829, 0.362829, 0.362829, 0.32549)
+border_blend = true
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Button" type="Button"]
+custom_minimum_size = Vector2(30, 30)
+offset_right = 30.0
+offset_bottom = 30.0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_yoyhw")
+script = ExtResource("1_yoyhw")

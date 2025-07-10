@@ -86,6 +86,8 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 
 	if _event is InputEventMouseButton:
 		if _event.pressed:
+			HenVCActionButtons.get_singleton().hide_action()
+
 			match _event.button_index:
 				MOUSE_BUTTON_RIGHT:
 					if not (HenGlobal.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible:
