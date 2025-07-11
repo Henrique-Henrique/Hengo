@@ -1,5 +1,5 @@
 @tool
-class_name HenMethodPicker extends VBoxContainer
+class_name HenMethodPicker extends MarginContainer
 
 enum Type {
 	COMMENT

@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=56 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -24,6 +24,7 @@
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
+[ext_resource type="Texture2D" uid="uid://k4vqsiuhja06" path="res://addons/hengo/assets/icons/cnode/enum.svg" id="24_hg3xi"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
 [ext_resource type="Script" uid="uid://bn7gg8rslv0gn" path="res://addons/hengo/scripts/utils/vc_action_buttons.gd" id="28_w813u"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
@@ -31,7 +32,7 @@
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.111197, 0.111197, 0.111197, 1)
+bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x5h56"]
 content_margin_left = 4.0
@@ -105,15 +106,15 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 1514)
-shader_parameter/offset = Vector2(1206.8, 70.8916)
-shader_parameter/zoom_factor = 0.999977
+shader_parameter/screen_size = Vector2(1904, 902)
+shader_parameter/offset = Vector2(1193.41, 67.6313)
+shader_parameter/zoom_factor = 0.649961
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("12_7rfh3")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.764706, 0.407843, 0.929412, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.988235, 0.498039, 0.498039, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -536,10 +537,18 @@ theme_override_styles/panel = ExtResource("33_n637n")
 [node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="GeneralPopUp/GeneralPopUp/VBoxContainer"]
+[node name="Button" type="Button" parent="GeneralPopUp/GeneralPopUp/VBoxContainer"]
+process_mode = 4
 layout_mode = 2
-text = "Pop Up"
-horizontal_alignment = 1
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+disabled = true
+text = "Name"
+icon = ExtResource("24_hg3xi")
+flat = true
+alignment = 0
 
 [node name="PopupContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true

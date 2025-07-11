@@ -1,19 +1,58 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=11 format=3 uid="uid://xxj7abqbehjg"]
 
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
 [ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="2_nhkyk"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvxym"]
+bg_color = Color(1, 1, 1, 0.0901961)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.384314)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_el3g6"]
+bg_color = Color(1, 1, 1, 0.0901961)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.384314)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nhkyk"]
-bg_color = Color(0.168627, 0.172549, 0.176471, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_size = 1
-shadow_offset = Vector2(0, 2)
+bg_color = Color(1, 1, 1, 0.0901961)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.207843)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xbr4r"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.8, 0.8, 0.592157)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghilx"]
 content_margin_left = 4.0
@@ -36,12 +75,15 @@ corner_radius_bottom_left = 4
 [resource]
 default_font = ExtResource("1_revyj")
 Button/fonts/font = ExtResource("1_ghilx")
+Button/styles/focus = SubResource("StyleBoxFlat_yvxym")
+Button/styles/hover = SubResource("StyleBoxFlat_el3g6")
 Button/styles/normal = SubResource("StyleBoxFlat_nhkyk")
 ItemList/fonts/font = ExtResource("1_revyj")
 Label/fonts/font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
 LineEdit/fonts/font = ExtResource("1_ghilx")
+LineEdit/styles/focus = SubResource("StyleBoxFlat_xbr4r")
 LineEdit/styles/normal = ExtResource("2_nhkyk")
 PopupMenu/styles/panel = SubResource("StyleBoxFlat_ghilx")
 SpinBox/colors/down_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)

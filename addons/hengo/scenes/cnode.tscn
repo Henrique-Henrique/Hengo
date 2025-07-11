@@ -12,13 +12,13 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_b2gmx"]
 shader = ExtResource("1_u05js")
 shader_parameter/lod = 1.5
-shader_parameter/color = Color(0.471375, 0.471375, 0.471375, 1)
+shader_parameter/color = Color(0.329158, 0.329158, 0.329158, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b2gmx"]
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pj3so"]
 bg_color = Color(0, 0, 0, 0)
@@ -27,12 +27,12 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(1, 1, 1, 0.156863)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-shadow_color = Color(0, 0, 0, 0.203922)
-shadow_size = 10
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.101961)
+shadow_size = 15
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x0qsl"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -47,10 +47,8 @@ content_margin_bottom = 12.0
 bg_color = Color(0.33, 0.33, 0.33, 0.270588)
 border_width_bottom = 1
 border_color = Color(1, 1, 1, 0.121569)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+corner_radius_top_left = 12
+corner_radius_top_right = 12
 shadow_color = Color(0, 0, 0, 0.14902)
 shadow_size = 5
 
@@ -91,10 +89,10 @@ corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
-expand_margin_left = 8.0
-expand_margin_top = 8.0
-expand_margin_right = 8.0
-expand_margin_bottom = 8.0
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
 
 [node name="Cnode" type="PanelContainer"]
 material = SubResource("ShaderMaterial_b2gmx")

@@ -4,70 +4,98 @@
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_kmwsi"]
 [ext_resource type="Texture2D" uid="uid://dibqfnkm4yg4k" path="res://addons/hengo/assets/icons/menu/loading.svg" id="3_kmwsi"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mxkhq"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kmwsi"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0, 0, 0, 0.423529)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.133333)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
-[node name="MethodPicker" type="VBoxContainer"]
-custom_minimum_size = Vector2(400, 0)
-offset_right = 350.0
+[node name="MethodPicker" type="MarginContainer"]
+offset_top = 122.0
+offset_right = 400.0
 offset_bottom = 122.0
-size_flags_vertical = 3
-theme = ExtResource("1_kmwsi")
-theme_override_constants/separation = 8
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 script = ExtResource("1_8ff1r")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="MethodPicker" type="VBoxContainer" parent="."]
+custom_minimum_size = Vector2(400, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme = ExtResource("1_kmwsi")
+theme_override_constants/separation = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MethodPicker"]
 layout_mode = 2
 alignment = 2
 
-[node name="Search" type="LineEdit" parent="HBoxContainer"]
+[node name="Search" type="LineEdit" parent="MethodPicker/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Type to search..."
 
-[node name="LoadingBt" type="TextureRect" parent="HBoxContainer"]
+[node name="LoadingBt" type="TextureRect" parent="MethodPicker/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 texture = ExtResource("3_kmwsi")
 stretch_mode = 3
 
-[node name="FilterList" type="HBoxContainer" parent="."]
+[node name="FilterList" type="HBoxContainer" parent="MethodPicker"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Self" type="Button" parent="FilterList"]
+[node name="Self" type="Button" parent="MethodPicker/FilterList"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "Self"
 
-[node name="All" type="Button" parent="FilterList"]
+[node name="All" type="Button" parent="MethodPicker/FilterList"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "All"
 
-[node name="Native" type="Button" parent="FilterList"]
+[node name="Native" type="Button" parent="MethodPicker/FilterList"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "Native"
 
-[node name="Func" type="Button" parent="FilterList"]
+[node name="Func" type="Button" parent="MethodPicker/FilterList"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "Func"
 
-[node name="Signal" type="Button" parent="FilterList"]
+[node name="Signal" type="Button" parent="MethodPicker/FilterList"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "signals"
 
-[node name="Macro" type="Button" parent="FilterList"]
+[node name="Macro" type="Button" parent="MethodPicker/FilterList"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "macros"
 
-[node name="List" type="Tree" parent="."]
+[node name="List" type="Tree" parent="MethodPicker"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_mxkhq")
+theme_override_styles/panel = SubResource("StyleBoxFlat_kmwsi")
 hide_root = true

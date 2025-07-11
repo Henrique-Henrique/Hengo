@@ -102,7 +102,8 @@ class SideBarList:
 		var popup: HenPopupContainer = HenGlobal.GENERAL_POPUP.get_parent().show_content(
 			HenPropEditor.mount(_item),
 			'Testing',
-			pos
+			pos,
+			1.5
 		)
 
 		if not popup.closed.is_connected(_on_inspector_close): popup.closed.connect(_on_inspector_close)
