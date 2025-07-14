@@ -73,7 +73,7 @@ func show_action(_vc: HenCnode) -> void:
 
 		set_bt_config(ActionInfo.new(
 			Type.FROM_FLOW,
-			ActionType.CONNECT
+			ActionType.DISCONNECT if _vc.virtual_ref.from_flow_has_connection(from_flow.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
 			arrow.global_position.x,
 			arrow.global_position.y
@@ -91,7 +91,7 @@ func show_action(_vc: HenCnode) -> void:
 
 		set_bt_config(ActionInfo.new(
 			Type.FLOW,
-			ActionType.CONNECT
+			ActionType.DISCONNECT if _vc.virtual_ref.flow_has_connection(connector.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
 			connector.global_position.x,
 			connector.global_position.y

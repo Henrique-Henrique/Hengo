@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=55 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -15,18 +15,17 @@
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
-[ext_resource type="Texture2D" uid="uid://bngwf5vpsmtgo" path="res://addons/hengo/assets/images/grid_cnode_out.png" id="12_7rfh3"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
-[ext_resource type="Texture2D" uid="uid://ctlaqfkdcnini" path="res://addons/hengo/assets/images/grid_cnode.png" id="13_w5ssd"]
+[ext_resource type="Texture2D" uid="uid://lbtan5ojs7w8" path="res://addons/hengo/assets/images/grid_2.png" id="14_8emys"]
+[ext_resource type="Texture2D" uid="uid://b0m53nlcuqhhw" path="res://addons/hengo/assets/images/grid_1.png" id="15_w813u"]
 [ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
+[ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
-[ext_resource type="PackedScene" uid="uid://ccwo8yeg80spo" path="res://addons/hengo/scenes/utils/action_button.tscn" id="21_w813u"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
 [ext_resource type="Texture2D" uid="uid://k4vqsiuhja06" path="res://addons/hengo/assets/icons/cnode/enum.svg" id="24_hg3xi"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
-[ext_resource type="Script" uid="uid://bn7gg8rslv0gn" path="res://addons/hengo/scripts/utils/vc_action_buttons.gd" id="28_w813u"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
@@ -106,11 +105,11 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 902)
-shader_parameter/offset = Vector2(1193.41, 67.6313)
-shader_parameter/zoom_factor = 0.649961
+shader_parameter/screen_size = Vector2(3824, 1973)
+shader_parameter/offset = Vector2(2151.92, 402.008)
+shader_parameter/zoom_factor = 0.826941
 shader_parameter/alpha = 0.2
-shader_parameter/text = ExtResource("12_7rfh3")
+shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
@@ -328,7 +327,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("13_w5ssd")
+texture = ExtResource("15_w813u")
 
 [node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI" node_paths=PackedStringArray("grid")]
 position = Vector2(100, 8.42499e-06)
@@ -400,62 +399,8 @@ position = Vector2(0, 3000)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
-[node name="VCActionButtons" type="Control" parent="VBoxContainer/CNodeUI/Cam"]
+[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/Cam" instance=ExtResource("20_w813u")]
 unique_name_in_owner = true
-visible = false
-z_index = 100
-layout_mode = 3
-anchors_preset = 0
-offset_left = -100.0
-offset_right = -60.0
-offset_bottom = 40.0
-mouse_filter = 2
-script = ExtResource("28_w813u")
-
-[node name="Button" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button2" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button3" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button4" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button5" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button6" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button7" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button8" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button9" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button10" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button11" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button12" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button13" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button14" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
-
-[node name="Button15" parent="VBoxContainer/CNodeUI/Cam/VCActionButtons" instance=ExtResource("21_w813u")]
-layout_mode = 0
 
 [node name="Center2" type="Marker2D" parent="VBoxContainer/CNodeUI"]
 visible = false

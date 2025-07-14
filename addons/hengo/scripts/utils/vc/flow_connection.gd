@@ -35,7 +35,7 @@ func set_ref(_ref) -> void:
 
 
 func _on_move(_pos: int) -> void:
-    moved.emit(self is HenVCFromFlowConnection, _pos, self)
+    moved.emit(self is HenVCFromFlowConnectionData, _pos, self)
 
 func _on_delete() -> void:
     deleted.emit(self is HenVCFlowConnectionData, self)

@@ -305,7 +305,7 @@ func show() -> void:
 					
 			idx = 0
 
-			for from_flow_connection: HenVCFromFlowConnection in from_flow_connections:
+			for from_flow_connection: HenVCFromFlowConnectionData in from_flow_connections:
 				# showing from flow connections
 				var my_from_flow_container = from_flow_container.get_child(idx)
 				var label: Label = my_from_flow_container.get_node('%Label')
@@ -412,7 +412,7 @@ func show() -> void:
 				if not connection.line_ref: continue
 				connection.line_ref.update_line()
 
-			for connection: HenVCFromFlowConnection in from_flow_connections:
+			for connection: HenVCFromFlowConnectionData in from_flow_connections:
 				if not connection.from_connections.is_empty():
 					for from_connection: HenVCFlowConnectionData in connection.from_connections:
 						if from_connection.line_ref:
@@ -479,7 +479,7 @@ func hide() -> void:
 		var idx: int = 0
 		var from_flow_container: HBoxContainer = cnode_ref.get_node('%FromFlowContainer')
 
-		for from_flow_connection: HenVCFromFlowConnection in from_flow_connections:
+		for from_flow_connection: HenVCFromFlowConnectionData in from_flow_connections:
 			for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
 				if from_connection.line_ref:
 					var line: HenFlowConnectionLine = from_connection.line_ref
@@ -607,7 +607,7 @@ func get_save() -> Dictionary:
 
 func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
 	var flow_connection: HenVCFlowConnectionData = get_flow(_id)
-	var flow_from_connection: HenVCFromFlowConnection = _to.get_from_flow(_to_id)
+	var flow_from_connection: HenVCFromFlowConnectionData = _to.get_from_flow(_to_id)
 
 	if not flow_connection or not flow_from_connection:
 		push_warning(flow_connections.map(func(x): return x.id))
@@ -821,6 +821,22 @@ func output_has_connection(_id: int) -> bool:
 	return false
 
 
+func from_flow_has_connection(_id: int) -> bool:
+	for from_flow: HenVCFromFlowConnectionData in from_flow_connections:
+		if from_flow.id == _id:
+			return not from_flow.from_connections.is_empty()
+
+	return false
+
+
+func flow_has_connection(_id: int) -> bool:
+	for flow: HenVCFlowConnectionData in flow_connections:
+		if flow.id == _id:
+			return flow.to != null
+
+	return false
+
+
 func remove_inout_connection(_ref: HenVCInOutData) -> void:
 	var input_remove: Array = []
 	var output_remove: Array = []
@@ -900,7 +916,7 @@ func _on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 	var flow: HenVCFlowConnection
 
 	if _is_input:
-		flow = HenVCFromFlowConnection.new(_data)
+		flow = HenVCFromFlowConnectionData.new(_data)
 		from_flow_connections.append(flow)
 	else:
 		flow = HenVCFlowConnectionData.new(_data)
@@ -956,7 +972,7 @@ func _on_flow_deleted(_is_input: bool, _flow_ref: HenVCFlowConnection) -> void:
 		flow.line_ref = null
 		if flow.to_from_ref: flow.to_from_ref.from_connections.erase(flow)
 	else:
-		var flow: HenVCFromFlowConnection = _flow_ref as HenVCFromFlowConnection
+		var flow: HenVCFromFlowConnectionData = _flow_ref as HenVCFromFlowConnectionData
 		
 		for connection: HenVCFlowConnectionData in flow.from_connections:
 			if connection.line_ref:
@@ -1113,16 +1129,16 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	match v_cnode.type:
 		Type.DEFAULT:
 			if not _config.has('to_flow'): v_cnode.flow_connections.append(HenVCFlowConnectionData.new({id = 0}))
-			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnectionData.new({id = 0}))
 		Type.IF:
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'True', id = 0}))
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'False', id = 1}))
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'Then', id = 2}))
-			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnectionData.new({id = 0}))
 		Type.FOR:
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'Body', id = 0}))
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'Then', id = 1}))
-			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnectionData.new({id = 0}))
 		Type.STATE:
 			v_cnode.route = {
 				name = v_cnode.name,
@@ -1154,14 +1170,14 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					can_delete = false
 				})
 
-			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnectionData.new({id = 0}))
 
 			if _config.has('to_flow'):
 				for flow: Dictionary in _config.to_flow:
 					v_cnode._on_flow_added(false, flow)
 		Type.STATE_START:
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({name = 'On Start', id = 0}))
-			v_cnode.from_flow_connections.append(HenVCFromFlowConnection.new({id = 0}))
+			v_cnode.from_flow_connections.append(HenVCFromFlowConnectionData.new({id = 0}))
 		Type.STATE_EVENT:
 			v_cnode.flow_connections.append(HenVCFlowConnectionData.new({id = 0}))
 		_:

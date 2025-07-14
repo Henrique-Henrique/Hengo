@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bxajxich16tmm"
-path="res://.godot/imported/grid_state.png-e8eeedc19ddae858055a82dea513334f.ctex"
+uid="uid://b0m53nlcuqhhw"
+path="res://.godot/imported/grid_1.png-df24a232e76127883de3122f5b7b452c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/images/grid_state.png"
-dest_files=["res://.godot/imported/grid_state.png-e8eeedc19ddae858055a82dea513334f.ctex"]
+source_file="res://addons/hengo/assets/images/grid_1.png"
+dest_files=["res://.godot/imported/grid_1.png-df24a232e76127883de3122f5b7b452c.ctex"]
 
 [params]
 

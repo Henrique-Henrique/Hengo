@@ -1,4 +1,4 @@
 @tool
-class_name HenVCFromFlowConnection extends HenVCFlowConnection
+class_name HenVCFromFlowConnectionData extends HenVCFlowConnection
 
 var from_connections: Array[HenVCFlowConnectionData]

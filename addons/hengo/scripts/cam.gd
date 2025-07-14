@@ -6,7 +6,7 @@ class_name HenCam extends Node2D
 var target_zoom: float = 1.
 
 const MIN_ZOOM: float = .2
-const MAX_ZOOM: float = 1.
+const MAX_ZOOM: float = 1.5
 const ZOOM_INCREMENT: float = .15
 const ZOOM_RATE: float = 12.
 

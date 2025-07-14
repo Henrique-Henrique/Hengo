@@ -7,16 +7,16 @@ var to: HenVirtualCNode
 var to_id: int
 var from_id: int
 var from: HenVirtualCNode
-var to_from_ref: HenVCFromFlowConnection
+var to_from_ref: HenVCFromFlowConnectionData
 
 # old
 var old_to: HenVirtualCNode
 var old_to_id: int
 var old_from_id: int
 var old_from: HenVirtualCNode
-var old_to_from_ref: HenVCFromFlowConnection
+var old_to_from_ref: HenVCFromFlowConnectionData
 
-func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: HenVirtualCNode, _to_id: int, _from: HenVirtualCNode, _to_from_ref: HenVCFromFlowConnection) -> void:
+func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: HenVirtualCNode, _to_id: int, _from: HenVirtualCNode, _to_from_ref: HenVCFromFlowConnectionData) -> void:
     from_id = _from_id
     flow_connection = _flow
     to = _to

@@ -39,7 +39,7 @@ func add() -> void:
 
 
     # from flow connections
-    for from_flow_connection: HenVCFromFlowConnection in old_from_flow_connections:
+    for from_flow_connection: HenVCFromFlowConnectionData in old_from_flow_connections:
         for flow_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
             flow_connection.to = v_cnode
             flow_connection.from.update()
@@ -102,7 +102,7 @@ func remove() -> void:
             flow_connection.to.update()
 
     # from flow connections
-    for from_flow_connection: HenVCFromFlowConnection in v_cnode.from_flow_connections:
+    for from_flow_connection: HenVCFromFlowConnectionData in v_cnode.from_flow_connections:
         for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
             if from_connection.line_ref:
                 from_connection.line_ref.visible = false

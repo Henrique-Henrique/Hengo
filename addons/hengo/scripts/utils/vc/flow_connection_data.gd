@@ -8,7 +8,7 @@ var from_pos: Vector2
 var to_pos: Vector2
 var from: HenVirtualCNode
 var to: HenVirtualCNode
-var to_from_ref: HenVCFromFlowConnection
+var to_from_ref: HenVCFromFlowConnectionData
 
 
 func get_save() -> Dictionary:

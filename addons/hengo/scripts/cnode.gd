@@ -87,7 +87,7 @@ func _scale_and_update_line(_scale: Vector2) -> void:
 	scale = _scale
 
 	if virtual_ref:
-		for from_connection: HenVCFromFlowConnection in virtual_ref.from_flow_connections:
+		for from_connection: HenVCFromFlowConnectionData in virtual_ref.from_flow_connections:
 			for connetion: HenVCFlowConnectionData in from_connection.from_connections:
 				if connetion.line_ref:
 					connetion.line_ref.update_line()

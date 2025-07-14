@@ -1,0 +1,72 @@
+[gd_scene load_steps=4 format=3 uid="uid://cxi2fc0kvcl6b"]
+
+[ext_resource type="Script" uid="uid://bn7gg8rslv0gn" path="res://addons/hengo/scripts/utils/vc_action_buttons.gd" id="1_a5k3c"]
+[ext_resource type="PackedScene" uid="uid://ccwo8yeg80spo" path="res://addons/hengo/scenes/utils/action_button.tscn" id="2_4t4gi"]
+[ext_resource type="StyleBox" uid="uid://bh8kyn2d1x8po" path="res://addons/hengo/resources/style_box/action_button.tres" id="4_ftwkh"]
+
+[node name="VCActionButtons" type="Control"]
+z_index = 100
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("1_a5k3c")
+
+[node name="Button" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button2" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button3" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button4" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button5" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button6" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button7" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button8" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button9" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button10" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button11" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button12" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button13" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button14" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
+
+[node name="Button15" parent="." instance=ExtResource("2_4t4gi")]
+layout_mode = 0
+theme_override_styles/normal = ExtResource("4_ftwkh")
