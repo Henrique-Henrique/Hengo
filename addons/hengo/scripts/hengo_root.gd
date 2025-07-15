@@ -11,6 +11,7 @@ var cnode_stat_label: Label
 var cnode_selecting_rect: bool = false
 var start_select_pos: Vector2 = Vector2.ZERO
 var can_select: bool = false
+var toggle_bottom_panel: bool = true
 
 # private
 #
@@ -73,7 +74,8 @@ func _ready() -> void:
 	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	HenGlobal.HENGO_ROOT = self
 	HenGlobal.TOOLTIP = get_node('%Tooltip')
-	HenGlobal.CODE_PREVIEWER = get_node('%CodePreviewContainer')
+	HenGlobal.CODE_PREVIEWER = get_node('%CodePreview')
+	HenGlobal.SIDE_PANEL = get_node('%SidePanel')
 
 	cnode_stat_label = get_node('%CNodeStatLabel')
 	
@@ -98,7 +100,7 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 					for cnode in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
 						cnode.unselect()
 					
-					HenGlobal.CODE_PREVIEWER.clear()
+					HenGlobal.CODE_PREVIEWER.clear_code()
 					
 					get_viewport().gui_release_focus()
 
@@ -205,7 +207,10 @@ func _input(event: InputEvent) -> void:
 					HenGlobal.history.redo()
 				elif event.keycode == KEY_C:
 					HenGlobal.history.clear_history()
-
+				elif event.keycode == KEY_SPACE:
+					HenGlobal.HENGO_EDITOR_PLUGIN.bottom_panel_visibility(toggle_bottom_panel)
+					toggle_bottom_panel = not toggle_bottom_panel
+			
 
 func get_script_list() -> void:
 	var dir_files: PackedStringArray = DirAccess.get_files_at('res://hengo/save') if DirAccess.dir_exists_absolute('res://hengo/save') else PackedStringArray()

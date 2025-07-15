@@ -198,7 +198,7 @@ func select() -> void:
 	hover_animation()
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 
-	if virtual_ref:
+	if virtual_ref and HenGlobal.CODE_PREVIEWER.visible:
 		var script_data: HenScriptData = HenSaver.generate_script_data()
 		var code: String = HenCodeGeneration.get_code(script_data, true)
 		

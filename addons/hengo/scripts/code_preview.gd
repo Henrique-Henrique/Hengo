@@ -1,5 +1,5 @@
 @tool
-class_name HenCodePreview extends VBoxContainer
+class_name HenCodePreview extends CodeEdit
 
 @onready var code_preview: CodeEdit = %CodePreview
 
@@ -7,36 +7,24 @@ const final_text: String = '\n\n\n\n\n\n\n\n\n'
 
 var text_cache: String = ''
 var id_list: Array[int] = []
-var can_show_preview: bool = false
 var reg: RegEx
 
 func _ready() -> void:
     reg = RegEx.new()
     reg.compile('#ID:[0-9]*')
-    (%PreviewCheck as CheckButton).toggled.connect(_preview_check)
-    code_preview.visible = false
-
-
-func _preview_check(_toggle: bool) -> void:
-    (%CodePreview as CodeEdit).visible = _toggle
-    can_show_preview = _toggle
 
 
 func set_code(_code: String) -> void:
     var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.virtual_ref.id)
 
-    if not can_show_preview or id_list == new_id_list:
+    if id_list == new_id_list:
         return
     
     text_cache = _code
-    # code_preview.text = reg.sub(_code, '', true) + final_text
-    code_preview.text = text_cache + final_text
+    code_preview.text = reg.sub(_code, '', true) + final_text
 
 
 func show_vc_line_reference() -> void:
-    if not can_show_preview:
-        return
-    
     var idx: int = 0
     var last_line: int = 0
     var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.virtual_ref.id)
@@ -58,7 +46,7 @@ func show_vc_line_reference() -> void:
     code_preview.set_caret_line(last_line + 3)
     
 
-func clear() -> void:
+func clear_code() -> void:
     text_cache = ''
     code_preview.text = ''
     id_list.clear()

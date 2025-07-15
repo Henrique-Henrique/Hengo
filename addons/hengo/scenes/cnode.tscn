@@ -1,7 +1,7 @@
 [gd_scene load_steps=18 format=3 uid="uid://bxh18qk6jrul6"]
 
 [ext_resource type="Script" uid="uid://c1reshk0q8buo" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
-[ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/popup.gdshader" id="1_u05js"]
+[ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="1_u05js"]
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="3_8vu1l"]
 [ext_resource type="PackedScene" uid="uid://1s3a6exjgyym" path="res://addons/hengo/scenes/from_flow.tscn" id="3_348vq"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="4_nvxjk"]
@@ -13,6 +13,7 @@
 shader = ExtResource("1_u05js")
 shader_parameter/lod = 1.5
 shader_parameter/color = Color(0.329158, 0.329158, 0.329158, 1)
+shader_parameter/transparency = 0.3
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b2gmx"]
 corner_radius_top_left = 12

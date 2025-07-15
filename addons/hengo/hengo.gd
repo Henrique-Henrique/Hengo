@@ -170,17 +170,20 @@ func set_docks() -> void:
 
 func hide_docks() -> void:
 	tab_visibility(false)
+	bottom_panel_visibility(false)
 
 	for dock: DockConfig in HenGlobal.DOCKS.values():
 		dock.ref.visible = false
 
 func show_docks() -> void:
 	tab_visibility(true)
+	bottom_panel_visibility(true)
 	
 	for dock: DockConfig in HenGlobal.DOCKS.values():
 		if dock.tab_control:
 			dock.ref.visible = true
 			dock.tab_control.visible = true
+
 
 func tab_visibility(_show: bool) -> void:
 	var tabs_container = EditorInterface.get_editor_main_screen().get_node_or_null('../..')
@@ -189,3 +192,10 @@ func tab_visibility(_show: bool) -> void:
 		var tab = tabs_container.get_child(0) if tabs_container.get_child_count() > 0 else null
 
 		if tab: tab.visible = _show
+
+
+func bottom_panel_visibility(_show: bool) -> void:
+	var bottom_panel = get_tree().root.find_child('*EditorBottomPanel*', true, false)
+
+	if bottom_panel:
+		bottom_panel.visible = _show

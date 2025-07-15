@@ -45,6 +45,7 @@ class State1 extends HengoState:
 		else:
 			_ref.get_offset()
 		_ref.set_centered(false)
+		Skeleton3D.new().connect("bone_list_changed", _ref._on_ata_signal_)
 
 	func update(delta) -> void:
 		_ref.set_offset(Vector2(0, 0))

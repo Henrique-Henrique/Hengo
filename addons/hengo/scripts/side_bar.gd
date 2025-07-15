@@ -95,8 +95,8 @@ class SideBarList:
 	
 	func on_click(_item, _mouse_pos: Vector2) -> void:
 		var pos: Vector2 = HenGlobal.SIDE_BAR.global_position
-
-		pos.x += HenGlobal.SIDE_BAR.size.x
+		
+		pos.x = HenGlobal.SIDE_PANEL.global_position.x
 		pos.y += _mouse_pos.y
 
 		var popup: HenPopupContainer = HenGlobal.GENERAL_POPUP.get_parent().show_content(
@@ -217,8 +217,6 @@ func _on_gui(_event: InputEvent) -> void:
 				var pos: Vector2 = (_event as InputEventMouseMotion).global_position
 				var text: String = ''
 
-				pos.x = HenGlobal.SIDE_BAR.position.x + HenGlobal.SIDE_BAR.size.x
-
 				if _side_bar_item is HenVarData:
 					text = '[b]Variable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenFuncData:
@@ -228,7 +226,9 @@ func _on_gui(_event: InputEvent) -> void:
 				elif _side_bar_item is HenMacroData:
 					text = '[b]Macro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 
-				HenGlobal.TOOLTIP.go_to(pos, text)
+				pos.x = HenGlobal.SIDE_PANEL.global_position.x
+
+				HenGlobal.TOOLTIP.go_to(pos, text, Vector2(-1, 0))
 			else:
 				HenGlobal.TOOLTIP.close()
 		else:
