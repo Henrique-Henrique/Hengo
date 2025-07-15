@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=59 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -37,8 +37,8 @@ bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1904, 947)
-shader_parameter/offset = Vector2(989.723, 103.243)
-shader_parameter/zoom_factor = 0.402836
+shader_parameter/offset = Vector2(470.914, 970.115)
+shader_parameter/zoom_factor = 1.39949
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
@@ -106,6 +106,15 @@ corner_radius_bottom_left = 8
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ny40n"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_74kfo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yt1h"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.230315, 0.230315, 0.230315, 0.458824)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
 
@@ -406,17 +415,18 @@ stretch_mode = 3
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_74kfo")
-current_tab = 1
+theme_override_styles/tab_selected = SubResource("StyleBoxFlat_5yt1h")
+current_tab = 0
 script = ExtResource("18_hg3xi")
 
 [node name="SideBar" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
-visible = false
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 
 [node name="CodePreview" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(0, 0)
 layout_mode = 2
 theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
