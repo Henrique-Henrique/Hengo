@@ -383,7 +383,7 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 		if macro_data.has(&'local_vars'):
 			for local_var: Dictionary in macro_data.local_vars:
-				macro.local_vars.append(_get_variable_from_dict(local_var))
+				macro.local_vars.append(_get_variable_from_dict(local_var, refs))
 
 		if macro_data.has(&'virtual_cnode_list'):
 			for cnode: Dictionary in macro_data.virtual_cnode_list:
@@ -396,15 +396,7 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 		if variable_data.has('invalid') and not variable_data.invalid:
 			continue
 
-		var variable: HenVarData = HenVarData.new()
-		
-		variable.id = variable_data.id
-		variable.name = variable_data.name
-		variable.type = variable_data.type
-		variable.export = variable_data.export
-
-		refs.side_bar_item_ref[variable.id] = variable
-		refs.variables.append(_get_variable_from_dict(variable_data))
+		refs.variables.append(_get_variable_from_dict(variable_data, refs))
 
 	# generating function references
 	for func_data: Dictionary in _data.side_bar_list.func_list:
@@ -458,7 +450,7 @@ static func _parse_function_dict(_func_data: Dictionary, _refs: HenSaveCodeType.
 
 	if _func_data.has(&'local_vars'):
 		for local_var: Dictionary in _func_data.local_vars:
-			function.local_vars.append(_get_variable_from_dict(local_var))
+			function.local_vars.append(_get_variable_from_dict(local_var, _refs))
 
 	if _func_data.has(&'virtual_cnode_list'):
 		for cnode: Dictionary in _func_data.virtual_cnode_list:
@@ -493,7 +485,7 @@ static func _parse_signal_dict(_signal_data: Dictionary, _refs: HenSaveCodeType.
 
 	if _signal_data.has(&'local_vars'):
 		for local_var: Dictionary in _signal_data.local_vars:
-			signal_item.local_vars.append(_get_variable_from_dict(local_var))
+			signal_item.local_vars.append(_get_variable_from_dict(local_var, _refs))
 
 	if _signal_data.has(&'virtual_cnode_list'):
 		for cnode: Dictionary in _signal_data.virtual_cnode_list:
@@ -502,6 +494,25 @@ static func _parse_signal_dict(_signal_data: Dictionary, _refs: HenSaveCodeType.
 	_refs.signals.append(signal_item)
 
 	return signal_item
+
+
+#
+#
+#
+#
+#
+#
+static func _get_variable_from_dict(_data: Dictionary, _refs: HenSaveCodeType.References) -> HenSaveCodeType.Variable:
+	var variable: HenSaveCodeType.Variable = HenSaveCodeType.Variable.new()
+	
+	variable.id = _data.id
+	variable.name = _data.name
+	variable.type = _data.type
+	variable.export_var = _data.export
+
+	_refs.side_bar_item_ref[variable.id] = variable
+
+	return variable
 
 #
 #
@@ -520,21 +531,6 @@ static func _parse_connections(_refs: HenSaveCodeType.References) -> void:
 	for connection: HenSaveCodeType.InputConnection in _refs.input_connections:
 		connection.from = _refs.cnode_ref[connection.from_vc_id]
 		connection.to.input_connections.append(connection)
-
-#
-#
-#
-#
-#
-#
-static func _get_variable_from_dict(_data: Dictionary) -> HenSaveCodeType.Variable:
-	var variable: HenSaveCodeType.Variable = HenSaveCodeType.Variable.new()
-		
-	variable.name = _data.name
-	variable.type = _data.type
-	variable.export_var = _data.export
-
-	return variable
 
 #
 #
@@ -1148,7 +1144,7 @@ static func regenerate() -> Array:
 			var path: StringName = HenLoader.get_data_path(id)
 
 			if not FileAccess.file_exists(path):
-				push_warning('Error: resource not found to re-generate: ', str(id))
+				push_error('Error: resource not found to re-generate: ', str(id))
 				continue
 			
 			var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
@@ -1178,7 +1174,6 @@ static func regenerate() -> Array:
 					res,
 					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
 				))
-
 	
 	return saves
 
@@ -1191,6 +1186,9 @@ static func regenerate() -> Array:
 static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 	for cnode: Dictionary in _cnode_list:
 		_refs.cnode_list[cnode.id] = cnode
+
+		
+		print(cnode.sub_type)
 
 		if not cnode.has('from_id'):
 			if cnode.has(&'virtual_cnode_list'):

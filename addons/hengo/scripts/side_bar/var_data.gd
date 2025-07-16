@@ -17,6 +17,7 @@ func on_change_type(_type: StringName) -> void:
 func on_change_name(_name: String) -> void:
     name = _name
     data_changed.emit('name', _name)
+    HenGlobal.SIDE_BAR_LIST.list_changed.emit()
 
 func on_change_export(_export: bool) -> void:
     export = _export

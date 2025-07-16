@@ -8,6 +8,7 @@ const INVALID_TOKEN: Dictionary = {
 
 
 class Variable:
+	var id: int
 	var name: String
 	var type: StringName
 	var export_var: bool

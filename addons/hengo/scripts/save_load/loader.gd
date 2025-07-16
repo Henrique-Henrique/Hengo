@@ -137,7 +137,7 @@ static func load(_path: StringName) -> void:
 		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
 
 		if type.begins_with('res://hengo/save'):
-			push_warning("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type)
+			push_error("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type)
 			return
 
 		HenGlobal.script_config.type = type

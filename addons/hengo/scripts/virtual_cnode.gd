@@ -610,8 +610,8 @@ func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFl
 	var flow_from_connection: HenVCFromFlowConnectionData = _to.get_from_flow(_to_id)
 
 	if not flow_connection or not flow_from_connection:
-		push_warning(flow_connections.map(func(x): return x.id))
-		push_warning('Not Found Flow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
+		push_error(flow_connections.map(func(x): return x.id))
+		push_error('Not Found Flow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
 		return null
 
 	return HenVCFlowConnectionReturn.new(flow_connection, _id, _to, _to_id, self, flow_from_connection)

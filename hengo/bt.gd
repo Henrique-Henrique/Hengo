@@ -11,6 +11,8 @@ extends Sprite2D
 
 @export var ata = Array()
  
+func func_3289488324():
+	HengoState.INVALID_PLACEHOLDER
 func _on_ata_signal_():
 	pass
 
@@ -45,7 +47,6 @@ class State1 extends HengoState:
 		else:
 			_ref.get_offset()
 		_ref.set_centered(false)
-		Skeleton3D.new().connect("bone_list_changed", _ref._on_ata_signal_)
 
 	func update(delta) -> void:
 		_ref.set_offset(Vector2(0, 0))

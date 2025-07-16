@@ -9,12 +9,14 @@
 
 extends Node
 
- # Variables #
-
+var holy_2 = null
+ 
+func func_():
+	var var_name = null
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
-const _EVENTS ={}
+const _EVENTS = {}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
@@ -24,8 +26,6 @@ func _init() -> void:
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
-	
-
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -34,11 +34,8 @@ func trigger_event(_event: String) -> void:
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
 
-
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
 	pass
-
-
