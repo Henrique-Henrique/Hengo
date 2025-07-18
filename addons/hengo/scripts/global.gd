@@ -22,7 +22,6 @@ static var SIDE_BAR_LIST_CACHE: Dictionary = {}
 static var TOOLTIP: HenTooltip
 static var DOCKS: Dictionary = {}
 static var ACTION_BAR: HenCNodeActionBar
-static var FROM_REFERENCES: HenSideBarReferences
 static var CODE_PREVIEWER: HenCodePreview
 static var GENERATE_PREVIEW_CODE: bool = false
 

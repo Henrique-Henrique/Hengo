@@ -390,6 +390,11 @@ class CNode:
 					singleton_class = singleton_class
 				})
 			HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
+				if sub_type == HenVirtualCNode.SubType.FUNC_FROM:
+					if not input_has_connection(inputs[0].id):
+						HenCodeGeneration.flow_errors.append({})
+						return INVALID_TOKEN
+
 				token.merge({
 					name = name.to_snake_case() if not name_to_code else name_to_code.to_snake_case(),
 					params = get_input_token_list(),

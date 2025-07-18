@@ -80,13 +80,6 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 	if not DirAccess.dir_exists_absolute('res://hengo/save'):
 		DirAccess.make_dir_absolute('res://hengo/save')
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
-	
-	if not FileAccess.file_exists('res://hengo/save/references.res'):
-		ResourceSaver.save(HenSideBarReferences.new(), 'res://hengo/save/references.res')
-
-	var side_bar_refs: HenSideBarReferences = ResourceLoader.load('res://hengo/save/references.res')
-
-	HenGlobal.FROM_REFERENCES = side_bar_refs
 
 	var script_data: HenScriptData = generate_script_data()
 	var data_path: StringName = 'res://hengo/save/' + str(HenGlobal.script_config.id) + '.res'
@@ -96,10 +89,7 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 	if error != OK:
 		printerr('Error saving script data.')
 		return
-
-	if not HenGlobal.FROM_REFERENCES.references.is_empty():
-		ResourceSaver.save(HenGlobal.FROM_REFERENCES)
-
+	
 	# ---------------------------------------------------------------------------- #
 	if _generate_code:
 		var thread: Thread = Thread.new()

@@ -1138,8 +1138,8 @@ static func regenerate() -> Array:
 	var saves: Array = []
 
 	# generation dependencies
-	if HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id) is Array:
-		for id: int in HenGlobal.FROM_REFERENCES.references.get(HenGlobal.script_config.id):
+	if ProjectSettings.has_setting(HenEnums.SCRIPT_REF_CACHE + str(HenGlobal.script_config.id)):
+		for id: int in ProjectSettings.get(HenEnums.SCRIPT_REF_CACHE + str(HenGlobal.script_config.id)):
 			var refs: RegenerateRefs = RegenerateRefs.new()
 			var path: StringName = HenLoader.get_data_path(id)
 
@@ -1253,6 +1253,10 @@ static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> voi
 			break
 	
 	if func_data:
+		if func_data.name != _dict.name:
+			_dict.name = func_data.name
+			_refs.reload = true
+
 		var real_output_size: int = func_data.outputs.size()
 		var real_input_size: int = func_data.inputs.size()
 		var output_size: int = _dict.outputs.size() if _dict.has('outputs') else 0
@@ -1332,7 +1336,6 @@ static func _check_func_inouts(
 		else:
 			return
 
-
 	var old_map: Dictionary = {}
 	
 	for inout: Dictionary in arr:
@@ -1343,7 +1346,6 @@ static func _check_func_inouts(
 			id = inout.id,
 			type = inout.type
 		}
-	
 
 	if arr.is_empty():
 		for new_inout: HenParamData in func_arr:
@@ -1354,7 +1356,7 @@ static func _check_func_inouts(
 				from_id = new_inout.id
 			})
 		
-			# _refs.reload = true
+			_refs.reload = true
 	else:
 		var idx: int = 0
 		var remove: Array = []
@@ -1367,7 +1369,7 @@ static func _check_func_inouts(
 				data.id = _refs.get_new_node_counter()
 				arr.append(data)
 			
-			# _refs.reload = true
+			_refs.reload = true
 
 		# change current inouts
 		for new_inout: Dictionary in arr:
@@ -1380,7 +1382,7 @@ static func _check_func_inouts(
 					id = _dict.id,
 					output_id = new_inout.id
 				})
-				# _refs.reload = true
+				_refs.reload = true
 				continue
 
 			var inout_ref: HenParamData = func_arr[idx]

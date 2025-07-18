@@ -9,10 +9,12 @@
 
 extends Sprite2D
 
-@export var ata = Array()
+@export var ata_32 = Array()
  
 func func_3289488324():
-	HengoState.INVALID_PLACEHOLDER
+	pass
+
+
 func _on_ata_signal_():
 	pass
 
@@ -40,14 +42,4 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
-	func enter() -> void:
-		print("ata")
-		if false:
-			print(_ref.is_flipped_h())
-		else:
-			_ref.get_offset()
-		_ref.set_centered(false)
-
-	func update(delta) -> void:
-		_ref.set_offset(Vector2(0, 0))
-		_ref.set_flip_h(true)
+	pass

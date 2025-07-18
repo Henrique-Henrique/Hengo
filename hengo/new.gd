@@ -9,10 +9,11 @@
 
 extends Node
 
-var holy_2 = null
+var okok = null
  
-func func_():
-	var var_name = null
+func change_something():
+	pass
+
 
 var _STATE_CONTROLLER = HengoStateController.new()
 

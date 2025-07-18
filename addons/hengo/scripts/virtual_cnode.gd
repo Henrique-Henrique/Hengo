@@ -593,14 +593,7 @@ func get_save() -> Dictionary:
 
 
 	if from_id > -1:
-		if not HenGlobal.FROM_REFERENCES.references.has(from_id):
-			HenGlobal.FROM_REFERENCES.references[from_id] = []
-
-		var arr: Array = HenGlobal.FROM_REFERENCES.references[from_id]
-		
-		if not arr.has(HenGlobal.script_config.id):
-			arr.append(HenGlobal.script_config.id)
-
+		HenEnums.add_script_ref_cache(from_id, HenGlobal.script_config.id)
 
 	return data
 

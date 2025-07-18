@@ -1,6 +1,27 @@
 @tool
 class_name HenEnums extends MainLoop
 
+# config paths
+const CONFIG_PATH: StringName = &'Hengo/'
+const SCRIPT_REF_CACHE: StringName = CONFIG_PATH + &'script_references/'
+
+static func add_script_ref_cache(_script_id: int, _id: int) -> void:
+    var config_path: StringName = SCRIPT_REF_CACHE + str(_script_id)
+
+    if not ProjectSettings.has_setting(config_path):
+        ProjectSettings.set(config_path, [] as Array[int])
+    
+    var arr: Array[int] = ProjectSettings.get(config_path)
+
+    if arr.has(_id): return
+
+    arr.append(_id)
+    ProjectSettings.set(config_path, arr)
+    # backup with same value
+    ProjectSettings.set_initial_value(config_path, arr)
+    ProjectSettings.set_as_internal(config_path, true)
+
+
 const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
 const STATE_SELECTED_GROUP: String = 'hen_state_selected'
 const NATIVE_API_PATH: String = 'res://addons/hengo/api/native_api.json'
