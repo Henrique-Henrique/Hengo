@@ -84,12 +84,19 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 	var script_data: HenScriptData = generate_script_data()
 	var data_path: StringName = 'res://hengo/save/' + str(HenGlobal.script_config.id) + '.res'
 	# saving data
+
+	# TODO run on thread
 	var error: int = ResourceSaver.save(script_data, data_path)
 
 	if error != OK:
 		printerr('Error saving script data.')
 		return
-	
+
+	# TODO run on thread
+	var ref_file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.WRITE)
+	ref_file.store_string(JSON.stringify(HenGlobal.SCRIPT_REF_CACHE))
+	ref_file.close()
+
 	# ---------------------------------------------------------------------------- #
 	if _generate_code:
 		var thread: Thread = Thread.new()

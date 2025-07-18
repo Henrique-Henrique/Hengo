@@ -104,7 +104,15 @@ func _enter_tree():
 	# creating cnode pool
 	HenCnode.instantiate_and_add_pool()
 
+	# creates referencs types
+	if FileAccess.file_exists(HenEnums.SCRIPT_REF_PATH):
+		var file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.READ)
+		var data_str = file.get_as_text()
+		file.close()
+		var data = JSON.parse_string(data_str)
+		if data and typeof(data) == TYPE_DICTIONARY: HenGlobal.SCRIPT_REF_CACHE = data
 
+	
 func _get_window_layout(_configuration: ConfigFile) -> void:
 	if main_scene.visible:
 		if HenGlobal.ACTION_BAR.filesystem_parent:

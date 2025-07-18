@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/3567223492641660476.res
+#[hengo] res://hengo/save/6143492320953670987.res
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -7,13 +7,7 @@
 # *       Edit only if you are confident in your changes.       *
 # ***************************************************************
 
-extends Node
-
-var other_name_8 = null
- 
-func change_something():
-	pass
-
+extends Sprite2D
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -39,4 +33,5 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
-	pass
+	func enter() -> void:
+		print(_ref.get_node("another").other_name_8)

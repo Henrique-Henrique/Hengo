@@ -1138,42 +1138,42 @@ static func regenerate() -> Array:
 	var saves: Array = []
 
 	# generation dependencies
-	if ProjectSettings.has_setting(HenEnums.SCRIPT_REF_CACHE + str(HenGlobal.script_config.id)):
-		for id: int in ProjectSettings.get(HenEnums.SCRIPT_REF_CACHE + str(HenGlobal.script_config.id)):
-			var refs: RegenerateRefs = RegenerateRefs.new()
-			var path: StringName = HenLoader.get_data_path(id)
+	for id_str in HenEnums.get_script_cache_refs(HenGlobal.script_config.id):
+		var id: int = int(id_str)
+		var refs: RegenerateRefs = RegenerateRefs.new()
+		var path: StringName = HenLoader.get_data_path(id)
 
-			if not FileAccess.file_exists(path):
-				push_error('Error: resource not found to re-generate: ', str(id))
-				continue
-			
-			var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
+		if not FileAccess.file_exists(path):
+			push_error('Error: resource not found to re-generate: ', str(id))
+			continue
+		
+		var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
 
-			refs.counter = res.node_counter
+		refs.counter = res.node_counter
 
-			_parse_vc_list(res.virtual_cnode_list, refs)
+		_parse_vc_list(res.virtual_cnode_list, refs)
 
-			if refs.reload:
-				# cleaning connections that dont using
-				for cnode: Dictionary in refs.cnode_list.values():
-					var remove_connections: Array = []
+		if refs.reload:
+			# cleaning connections that dont using
+			for cnode: Dictionary in refs.cnode_list.values():
+				var remove_connections: Array = []
 
-					if not cnode.input_connections.is_empty():
-						for connection: Dictionary in cnode.input_connections:
-							for ref: Dictionary in refs.disconnect_list:
-								if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
-									remove_connections.append(connection)
-									break
+				if not cnode.input_connections.is_empty():
+					for connection: Dictionary in cnode.input_connections:
+						for ref: Dictionary in refs.disconnect_list:
+							if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
+								remove_connections.append(connection)
+								break
 
-					for connection: Dictionary in remove_connections:
-						cnode.input_connections.erase(connection)
+				for connection: Dictionary in remove_connections:
+					cnode.input_connections.erase(connection)
 
-				res.node_counter = refs.counter
+			res.node_counter = refs.counter
 
-				saves.append(HenSaver.SaveDependency.new(
-					res,
-					HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
-				))
+			saves.append(HenSaver.SaveDependency.new(
+				res,
+				HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
+			))
 	
 	return saves
 

@@ -82,6 +82,7 @@ func _ready() -> void:
 	# show msg
 	(get_node('%ScriptMsgContainer') as PanelContainer).visible = true
 
+
 func _on_cnode_gui_input(_event: InputEvent) -> void:
 	if _event is InputEventMouseMotion and can_select:
 		_select_cnode()

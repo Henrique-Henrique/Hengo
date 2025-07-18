@@ -1,25 +1,26 @@
 @tool
 class_name HenEnums extends MainLoop
 
-# config paths
-const CONFIG_PATH: StringName = &'Hengo/'
-const SCRIPT_REF_CACHE: StringName = CONFIG_PATH + &'script_references/'
+const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
 
 static func add_script_ref_cache(_script_id: int, _id: int) -> void:
-    var config_path: StringName = SCRIPT_REF_CACHE + str(_script_id)
+    var script_id: StringName = str(_script_id)
+    var id: StringName = str(_id)
 
-    if not ProjectSettings.has_setting(config_path):
-        ProjectSettings.set(config_path, [] as Array[int])
-    
-    var arr: Array[int] = ProjectSettings.get(config_path)
+    if HenGlobal.SCRIPT_REF_CACHE.has(script_id):
+        if HenGlobal.SCRIPT_REF_CACHE.get(script_id).has(id):
+            return
 
-    if arr.has(_id): return
+        HenGlobal.SCRIPT_REF_CACHE.get(script_id).append(id)
+    else:
+        HenGlobal.SCRIPT_REF_CACHE.set(script_id, [id])
 
-    arr.append(_id)
-    ProjectSettings.set(config_path, arr)
-    # backup with same value
-    ProjectSettings.set_initial_value(config_path, arr)
-    ProjectSettings.set_as_internal(config_path, true)
+
+static func get_script_cache_refs(_script_id: int) -> Array:
+    if HenGlobal.SCRIPT_REF_CACHE.has(str(_script_id)):
+        return HenGlobal.SCRIPT_REF_CACHE.get(str(_script_id))
+
+    return []
 
 
 const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
