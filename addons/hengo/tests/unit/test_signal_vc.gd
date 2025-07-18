@@ -42,6 +42,30 @@ func test_signal_code() -> void:
 		'Testing signal with vc connection'
 	)
 
+	var vc_input: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'test_void',
+		sub_type = HenVirtualCNode.SubType.FUNC,
+		inputs = [
+			{
+				id = 0,
+				name = 'content',
+				type = 'Variant'
+			}
+		],
+		route = signal_data.route
+	})
+	
+	signal_data.signal_enter.add_flow_connection(0, 0, vc_input).add()
+	vc_input.add_input_connection(0, signal_data.signal_enter.outputs[0].id, signal_data.signal_enter)
+
+	var script_input_data: HenScriptData = HenSaver.generate_script_data()
+	var code_input: String = HenCodeGeneration.get_code(script_input_data)
+
+	assert_true(
+		code_input.contains('\nfunc _on_my_signal_signal_(toggled_on):\n\ttest_void(toggled_on)'),
+		'Testing signal with vc connection and param connection'
+	)
+
 #
 #
 #

@@ -643,7 +643,7 @@ func get_input_connection(_id: int) -> HenVCConnectionReturn:
 	return null
 
 
-func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
+func create_input_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
 	var input_connection: HenVCConnectionData.InputConnectionData = HenVCConnectionData.InputConnectionData.new()
 	var output_connection: HenVCConnectionData.OutputConnectionData = HenVCConnectionData.OutputConnectionData.new()
 
@@ -679,8 +679,9 @@ func create_connection(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVC
 	return HenVCConnectionReturn.new(input_connection, output_connection, _from, self, _id)
 
 
-func add_connection(_idx: int, _from_id: int, _from: HenVirtualCNode) -> void:
-	create_connection(_idx, _from_id, _from).add(false)
+func add_input_connection(_idx: int, _from_id: int, _from: HenVirtualCNode) -> void:
+	var connection: HenVCConnectionReturn = create_input_connection(_idx, _from_id, _from)
+	if connection: connection.add(false)
 
 
 func get_history_obj() -> HenVCNodeReturn:

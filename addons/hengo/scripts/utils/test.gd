@@ -77,7 +77,7 @@ static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.
 static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs: HenSaveCodeType.References, _input_connections: Array[CNodeConnection] = [], _connections: Array[CNodeConnection] = []) -> String:
 	# input connections
 	for connection in _input_connections:
-		connection.from.create_connection(connection.from_id, connection.to_id, connection.to).add()
+		connection.from.create_input_connection(connection.from_id, connection.to_id, connection.to).add()
 
 	# add connections
 	for connection in _connections:

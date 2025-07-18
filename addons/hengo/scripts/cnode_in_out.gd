@@ -105,13 +105,13 @@ func _on_exit() -> void:
 
 func create_virtual_connection(_data: CNodeInOutConnectionData) -> HenVCConnectionReturn:
 	if type == 'in':
-		return root.virtual_ref.create_connection(
+		return root.virtual_ref.create_input_connection(
 			input_ref.id,
 			_data.in_out.id,
 			_data.vc
 		)
 
-	return _data.vc.create_connection(
+	return _data.vc.create_input_connection(
 		_data.in_out.id,
 		input_ref.id,
 		root.virtual_ref

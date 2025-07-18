@@ -180,7 +180,7 @@ static func parse_token_by_type(_token: Dictionary, _level: int = 0, _parent_id:
 						return parse_token_by_type(x)
 			))
 			})
-		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
+		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL, HenVirtualCNode.SubType.SIGNAL_ENTER:
 			return _token.param
 		HenVirtualCNode.SubType.IF:
 			var true_flow = HenCodeGeneration.flows_refs[_token.true_flow_id]
@@ -1012,7 +1012,7 @@ static func _parse_functions(_refs: HenSaveCodeType.References) -> String:
 			for token in func_tokens:
 				func_block.append(parse_token_by_type(token, 1))
 
-			func_code += '\n'.join(func_block)
+			func_code += '\n'.join(func_block) + '\n' if func_block.size() > 0 else ''
 		else:
 			func_code += '\tpass\n\n' if func_data.local_vars.is_empty() and output_code.is_empty() else ''
 		
@@ -1068,7 +1068,7 @@ static func _parse_signals(_refs: HenSaveCodeType.References) -> String:
 			for token in signal_tokens:
 				signal_block.append(parse_token_by_type(token, 1))
 			
-			signal_code += '\n'.join(signal_block)
+			signal_code += '\n'.join(signal_block) + '\n\n' if signal_block.size() > 0 else ''
 		else:
 			signal_code += '\tpass\n\n'
 	

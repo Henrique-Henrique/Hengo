@@ -426,7 +426,7 @@ class CNode:
 					name = inputs[0].name.to_snake_case(),
 					value = get_input_token_list()[0],
 				})
-			HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
+			HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL, HenVirtualCNode.SubType.SIGNAL_ENTER:
 				token.merge({
 					param = outputs[_id].name.to_snake_case(),
 				})

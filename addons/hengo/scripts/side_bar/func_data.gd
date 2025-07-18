@@ -52,7 +52,7 @@ func on_change_name(_name: String) -> void:
 	name_changed.emit(_name)
 	HenGlobal.SIDE_BAR_LIST.list_changed.emit()
 
-func create_param(_type: HenSideBar.ParamType) -> void:
+func create_param(_type: HenSideBar.ParamType) -> HenParamData:
 	var in_out: HenParamData = HenParamData.new()
 
 	match _type:
@@ -64,6 +64,8 @@ func create_param(_type: HenSideBar.ParamType) -> void:
 			in_out.name = 'name ' + str(outputs.size())
 			outputs.append(in_out)
 			in_out_added.emit(false, in_out.get_data())
+		
+	return in_out
 	
 
 func move_param(_direction: HenArrayItem.ArrayMove, _ref: HenParamData, _type: HenSideBar.ParamType) -> void:
