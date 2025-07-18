@@ -9,7 +9,7 @@
 
 extends Node
 
-var other_name_8 = null
+var other_name_9 = null
  
 func change_something():
 	pass

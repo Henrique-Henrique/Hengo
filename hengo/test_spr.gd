@@ -34,4 +34,4 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_node("another").other_name_8)
+		print(_ref.get_node("another").other_name_9)

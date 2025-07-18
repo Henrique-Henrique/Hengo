@@ -11,15 +11,15 @@ extends Sprite2D
 
 @export var other_name = Array()
  
-func func_3289488324():
-	pass
+func func_3289488324(name_0):
+	set_centered(name_0)
 
-
-func _on_ata_signal_():
+func _on_ata_signal_(toggled_on):
 	pass
 
 func _on_signal_139157682_signal_():
-	pass
+	var var_122865253 = null
+	print("ata")
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -46,4 +46,4 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_node("Any").other_name_8)
+		print(_ref.get_node("Any").other_name_9)

@@ -199,6 +199,10 @@ func select() -> void:
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 
 	if virtual_ref and HenGlobal.CODE_PREVIEWER.visible:
+		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.virtual_ref.id)
+		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
+			return
+
 		var script_data: HenScriptData = HenSaver.generate_script_data()
 		var code: String = HenCodeGeneration.get_code(script_data, true)
 		
