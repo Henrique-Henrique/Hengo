@@ -97,7 +97,7 @@ static func _on_script_generated(_path: StringName) -> void:
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()
 
-	# var script: GDScript = ResourceLoader.load(_path, '', ResourceLoader.CACHE_MODE_IGNORE)
+	
 	var base_route: Dictionary = {
 		name = 'Base',
 		type = HenRouter.ROUTE_TYPE.BASE,
@@ -108,32 +108,26 @@ static func _on_script_generated(_path: StringName) -> void:
 	HenGlobal.BASE_ROUTE = base_route
 
 	var resource_id: int = ResourceLoader.get_resource_uid(_path)
-	var is_resource: bool = _path.begins_with('res://hengo/save/') and _path.get_extension() == 'res'
+	var is_resource: bool = _path.begins_with('res://hengo/save/') and _path.get_extension() == 'hengo'
+	var path: StringName = get_data_path(resource_id) if not is_resource else _path
 
 	HenGlobal.script_config.path = _path
 	HenGlobal.script_config.id = resource_id
 
+
 	# loading hengo script data
 	if script_to_open_reload_script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
 		var data: HenScriptData
-		var path: StringName = get_data_path(resource_id) if not is_resource else _path
 		
 		if script_to_open_reload_script_data:
 			data = script_to_open_reload_script_data
-
-			# verify
-			# auto resave is slowing down the loading
-			# HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_to_open_reload_script_data, path)))
-			# HenSaver.generate(script_to_open_reload_script_data, script_to_open_reload_script_data.resource_path, ResourceUID.get_id_path(resource_id), resource_id)
 		else:
-			data = ResourceLoader.load(path, '', ResourceLoader.CACHE_MODE_IGNORE)
-
+			data = HenScriptData.load_from_file(path)
 
 		# setting script configs
 		HenGlobal.script_config.type = data.type
 		HenGlobal.node_counter = data.node_counter
 		HenGlobal.prop_counter = data.prop_counter
-		# HenGlobal.current_script_debug_symbols = data.debug_symbols
 
 		# loading side bar list
 		HenGlobal.SIDE_BAR_LIST.load_save(data.side_bar_list)
@@ -155,10 +149,20 @@ static func _on_script_generated(_path: StringName) -> void:
 		
 			if connection:
 				connection.add()
+			
+
+		# auto re-save
+		if script_to_open_reload_script_data:
+			HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_to_open_reload_script_data, path)))
+			HenSaver.generate(script_to_open_reload_script_data, path, ResourceUID.get_id_path(resource_id), resource_id)
 	else:
+		var reg: RegEx = RegEx.new()
+		reg.compile("extends ([a-zA-Z0-9]+)[\\s]*")
+
 		# setting script type
 		var script: GDScript = load(_path)
-		var type: String = script.source_code.split('\n').slice(0, 1)[0].split(' ')[1]
+		var type: String = reg.search(script.source_code).get_string(1)
+
 
 		if type.begins_with('res://hengo/save'):
 			push_error("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type)
@@ -258,4 +262,4 @@ static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
 
 
 static func get_data_path(_id: int) -> StringName:
-	return 'res://hengo/save/' + str(_id) + '.res'
+	return 'res://hengo/save/' + str(_id) + HenScriptData.HENGO_EXT

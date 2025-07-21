@@ -190,7 +190,6 @@ func _input(event: InputEvent) -> void:
 			elif event.keycode == KEY_F10:
 				for line: HenConnectionLine in HenGlobal.connection_line_pool:
 					if line.visible:
-						prints(line, line.visible, line.position, line.points.size())
 						line.visible = true
 			elif event.keycode == KEY_F9:
 				var old: HenVirtualCNode
@@ -220,19 +219,3 @@ func _input(event: InputEvent) -> void:
 				elif event.keycode == KEY_SPACE:
 					HenGlobal.HENGO_EDITOR_PLUGIN.bottom_panel_visibility(toggle_bottom_panel)
 					toggle_bottom_panel = not toggle_bottom_panel
-			
-
-func get_script_list() -> void:
-	var dir_files: PackedStringArray = DirAccess.get_files_at('res://hengo/save') if DirAccess.dir_exists_absolute('res://hengo/save') else PackedStringArray()
-
-	for file_path: StringName in dir_files:
-		var path: StringName = 'res://hengo/save/' + file_path
-		var data: HenScriptData = ResourceLoader.load(path)
-		
-		var dict_data: Dictionary = {
-			name = file_path.get_basename(),
-			path = data.path,
-			type = data.type,
-			data_path = path,
-			side_bar_list = data.side_bar_list
-		}

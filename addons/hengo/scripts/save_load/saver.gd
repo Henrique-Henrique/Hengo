@@ -6,56 +6,6 @@ const BUILD_ICON = preload('res://addons/hengo/assets/icons/menu/compile.svg')
 
 static var task_id_list: Array[int] = []
 
-class SaveData:
-	var script_ref: GDScript
-	var path: StringName
-	var valid: bool = false
-	var saves: Array
-
-	func _init(_script: GDScript, _path: StringName, _valid: bool, _save_dep: Array = []) -> void:
-		script_ref = _script
-		path = _path
-		valid = _valid
-		saves = _save_dep
-	
-
-	func save_script() -> void:
-		if valid:
-			var err: int = ResourceSaver.save(script_ref, path)
-
-			if err == OK:
-				for save: SaveDependency in saves:
-					save.save()
-				
-				print('SAVED HENGO SCRIPT')
-
-
-class SaveDependency:
-	var data: HenScriptData
-	var script_data: SaveData
-
-	func _init(_data: HenScriptData, _script_data: SaveData) -> void:
-		data = _data
-		script_data = _script_data
-
-	func save() -> void:
-		var res_error: int = ResourceSaver.save(data)
-		
-		if res_error == OK:
-			script_data.save_script()
-
-
-class Task:
-	var task_id: int
-	var callback: Callable
-
-	signal finished
-
-	func _init(_callback: Callable) -> void:
-		task_id = WorkerThreadPool.add_task(_callback)
-
-	func wait_for_completion() -> void:
-		WorkerThreadPool.wait_for_task_completion(task_id)
 
 
 static func generate_script_data() -> HenScriptData:
@@ -87,7 +37,7 @@ static func generate_script_data() -> HenScriptData:
 static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
 	var script_data: HenScriptData = generate_script_data()
 	var script_id: int = HenGlobal.script_config.id
-	var data_path: StringName = 'res://hengo/save/' + str(script_id) + '.res'
+	var data_path: StringName = 'res://hengo/save/' + str(script_id) + HenScriptData.HENGO_EXT
 
 	start_load()
 	show_msg()
@@ -127,15 +77,14 @@ static func hide_msg() -> void:
 
 
 static func save_data_files(_script_data: HenScriptData, _data_path: String) -> void:
-	ResourceSaver.save(_script_data, _data_path)
+	HenScriptData.save(_script_data, _data_path)
 	
-	# var ref_file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.WRITE)
-	# ref_file.store_string(JSON.stringify(HenGlobal.SCRIPT_REF_CACHE))
-	# ref_file.close()
+	var ref_file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.WRITE)
+	ref_file.store_string(JSON.stringify(HenGlobal.SCRIPT_REF_CACHE))
+	ref_file.close()
 
 
-static func code_generated(_save_data: SaveData) -> void:
-	_save_data.save_script()
+static func code_generated() -> void:
 	# _thread.wait_to_finish.call_deferred()
 	hide_msg()
 	generate_msgs.call_deferred('Generated')

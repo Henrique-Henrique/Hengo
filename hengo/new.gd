@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/3567223492641660476.res
+#[hengo] res://hengo/save/3567223492641660476.hengo
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -9,12 +9,8 @@
 
 extends Node
 
-var other_name_44 = null
+var my_name_8 = bool()
  
-func change_something():
-	pass
-
-
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}

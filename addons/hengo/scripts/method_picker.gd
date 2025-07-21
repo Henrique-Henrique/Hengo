@@ -520,7 +520,7 @@ func get_from_list() -> Array:
 			continue
 
 		var path: StringName = HenLoader.get_data_path(id)
-		var res: HenScriptData = ResourceLoader.load(path)
+		var res: HenScriptData = HenScriptData.load_from_file(path)
 		var res_name: String = ResourceUID.get_id_path(id).get_file().get_basename()
 
 		for var_data: Dictionary in res.side_bar_list.var_list:

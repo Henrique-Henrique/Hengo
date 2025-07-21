@@ -555,10 +555,10 @@ static func _get_param_from_dict(_data: Dictionary) -> HenSaveCodeType.Param:
 static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.References, _parent_ref = null) -> HenSaveCodeType.CNode:
 	var cn: HenSaveCodeType.CNode = HenSaveCodeType.CNode.new()
 
-	cn.id = _cnode.id
+	cn.id = int(_cnode.id)
 	cn.name = _cnode.name
-	cn.sub_type = _cnode.sub_type
-	cn.type = _cnode.type
+	cn.sub_type = int(_cnode.sub_type) as HenVirtualCNode.SubType
+	cn.type = int(_cnode.type) as HenVirtualCNode.Type
 
 	_refs.cnode_ref[cn.id] = cn
 	
@@ -584,10 +584,10 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 
 			fc.from = cn
 
-			fc.id = connection.id
-			fc.from_id = connection.from_id
-			fc.to_id = connection.to_id
-			fc.to_vc_id = connection.to_vc_id
+			fc.id = int(connection.id)
+			fc.from_id = int(connection.from_id)
+			fc.to_id = int(connection.to_id)
+			fc.to_vc_id = int(connection.to_vc_id)
 
 
 			_refs.flow_connections.append(fc)
@@ -596,10 +596,10 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 		for connection: Dictionary in _cnode.input_connections:
 			var input_connection: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new()
 
-			input_connection.from_id = connection.from_id
-			input_connection.to_id = connection.to_id
+			input_connection.from_id = int(connection.from_id)
+			input_connection.to_id = int(connection.to_id)
 			input_connection.to = cn
-			input_connection.from_vc_id = connection.from_vc_id
+			input_connection.from_vc_id = int(connection.from_vc_id)
 
 			_refs.input_connections.append(input_connection)
 
@@ -659,7 +659,7 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 static func _get_inout_from_dict(_inout: Dictionary) -> HenSaveCodeType.Inout:
 	var input: HenSaveCodeType.Inout = HenSaveCodeType.Inout.new()
 
-	input.id = _inout.id
+	input.id = int(_inout.id)
 	input.name = _inout.name
 	input.type = _inout.type
 
@@ -1146,10 +1146,10 @@ static func regenerate(_script_id: int, _side_bar_list: Dictionary) -> Array:
 		var script_data: HenScriptData = get_updated_script_data(int(id_str), _side_bar_list)
 
 		if script_data:
-			var res_path: StringName = 'res://hengo/save/' + id_str + '.res'
+			var res_path: StringName = 'res://hengo/save/' + id_str + HenScriptData.HENGO_EXT
 
 			HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_data, res_path)))
-			HenSaver.generate(script_data, script_data.resource_path, ResourceUID.get_id_path(int(id_str)), int(id_str))
+			HenSaver.generate(script_data, res_path, ResourceUID.get_id_path(int(id_str)), int(id_str))
 
 	return saves
 
@@ -1167,8 +1167,8 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> Hen
 		push_error('Error: resource not found to re-generate: ', str(_id))
 		return null
 	
-	var res_path: StringName = 'res://hengo/save/' + str(_id) + '.res'
-	var res: HenScriptData = ResourceLoader.load(res_path)
+	var res_path: StringName = 'res://hengo/save/' + str(_id) + HenScriptData.HENGO_EXT
+	var res: HenScriptData = HenScriptData.load_from_file(res_path)
 
 	refs.counter = res.node_counter
 	refs.side_bar_list = _side_bar_list
@@ -1210,7 +1210,7 @@ static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 				_parse_vc_list(cnode.virtual_cnode_list, _refs)
 			continue
 
-		match cnode.sub_type:
+		match cnode.sub_type as HenVirtualCNode.SubType:
 			HenVirtualCNode.SubType.GET_FROM_PROP:
 				_check_changes_var(cnode, _refs)
 			HenVirtualCNode.SubType.FUNC_FROM:
@@ -1229,14 +1229,11 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void
 	var output: Dictionary = _dict.outputs[0]
 	var var_data: Dictionary
 
-	prints(_refs.side_bar_list.var_list, JSON.stringify(_dict))
-
 	for _var_data: Dictionary in _refs.side_bar_list.var_list:
 		if _var_data.id == _dict.from_side_bar_id:
 			var_data = _var_data
 			break
 
-	print('var _data', var_data)
 
 	if var_data:
 		if var_data.name != output.name or var_data.type != output.type:
