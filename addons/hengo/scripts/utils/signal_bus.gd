@@ -1,6 +1,11 @@
 @tool
 class_name HenSignalBus extends Node
 
+
+signal script_generated
+signal save_parse_finished
+signal save_data_files_finished
+
 #
 #
 #

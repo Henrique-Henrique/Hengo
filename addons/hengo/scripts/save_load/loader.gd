@@ -6,14 +6,33 @@ static var loaded_virtual_cnode_list: Dictionary = {}
 static var connection_list: Array = []
 static var flow_connection_list: Array = []
 static var from_flow_list: Array = []
-
+static var script_to_open_id: int = -1
+static var script_to_open_reload_script_data: HenScriptData
 
 class BaseRouteRef extends Object:
 	signal loaded_new_project
 
 	var virtual_cnode_list: Array = []
 
+
 static func load(_path: StringName) -> void:
+	script_to_open_id = ResourceLoader.get_resource_uid(_path)
+
+	if HenGlobal.script_config:
+		HenCodeGeneration.generate_and_save()
+
+		if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
+			script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
+		else:
+			script_to_open_reload_script_data = null
+		
+		_on_script_generated(_path)
+		return
+	
+	_on_script_generated(_path)
+
+
+static func _on_script_generated(_path: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
 
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
@@ -24,10 +43,8 @@ static func load(_path: StringName) -> void:
 	flow_connection_list.clear()
 	from_flow_list.clear()
 
-	HenGlobal.vs_list.clear()
 	HenGlobal.SIDE_BAR_LIST.clear()
 	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
-
 	HenGlobal.script_config = HenGlobal.ScriptData.new()
 
 	# hide all virtuals
@@ -97,13 +114,20 @@ static func load(_path: StringName) -> void:
 	HenGlobal.script_config.id = resource_id
 
 	# loading hengo script data
-	if is_resource or FileAccess.file_exists(get_data_path(resource_id)):
-		var star = Time.get_ticks_usec()
-		var data: HenScriptData = ResourceLoader.load(get_data_path(resource_id) if not is_resource else _path, '', ResourceLoader.CACHE_MODE_IGNORE)
-		var end = Time.get_ticks_usec()
-		print('vv ', (end - start) / 1000., 'ms')
+	if script_to_open_reload_script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
+		var data: HenScriptData
+		var path: StringName = get_data_path(resource_id) if not is_resource else _path
+		
+		if script_to_open_reload_script_data:
+			data = script_to_open_reload_script_data
 
-		# print(JSON.stringify(data.get_save()))
+			# verify
+			# auto resave is slowing down the loading
+			# HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_to_open_reload_script_data, path)))
+			# HenSaver.generate(script_to_open_reload_script_data, script_to_open_reload_script_data.resource_path, ResourceUID.get_id_path(resource_id), resource_id)
+		else:
+			data = ResourceLoader.load(path, '', ResourceLoader.CACHE_MODE_IGNORE)
+
 
 		# setting script configs
 		HenGlobal.script_config.type = data.type

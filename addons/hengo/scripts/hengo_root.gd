@@ -76,6 +76,8 @@ func _ready() -> void:
 	HenGlobal.TOOLTIP = get_node('%Tooltip')
 	HenGlobal.CODE_PREVIEWER = get_node('%CodePreview')
 	HenGlobal.SIDE_PANEL = get_node('%SidePanel')
+	HenGlobal.TABS = get_node('%Tabs')
+	HenGlobal.SIGNAL_BUS = HenGlobal.HENGO_ROOT.get_node('%SignalBus')
 
 	cnode_stat_label = get_node('%CNodeStatLabel')
 	
@@ -154,6 +156,13 @@ func _process(_delta: float) -> void:
 		else:
 			can_select = false
 			HenGlobal.CAM.get_node('SelectionRect').visible = false
+
+
+	# task id
+	for id in HenSaver.task_id_list:
+		if WorkerThreadPool.is_task_completed(id):
+			WorkerThreadPool.wait_for_task_completion(id)
+			HenSaver.task_id_list.erase(id)
 
 
 func _input(event: InputEvent) -> void:

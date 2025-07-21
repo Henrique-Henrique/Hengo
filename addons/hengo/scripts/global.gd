@@ -25,6 +25,8 @@ static var ACTION_BAR: HenCNodeActionBar
 static var CODE_PREVIEWER: HenCodePreview
 static var GENERATE_PREVIEW_CODE: bool = false
 static var SCRIPT_REF_CACHE: Dictionary = {}
+static var TABS: TabBar
+static var SIGNAL_BUS: HenSignalBus
 
 # cnodes
 static var can_make_connection: bool = false

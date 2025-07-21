@@ -58,13 +58,14 @@ static func get_flow_id() -> int:
 	flow_id += 1
 	return flow_id
 
+
 #
 #
 #
 #
 #
 #
-static func generate_and_save(_compile_ref: HBoxContainer) -> void:
+static func generate_and_save() -> void:
 	var start: float = Time.get_ticks_usec()
 	HenSaver.save(_debug_symbols, true)
 	var end: float = Time.get_ticks_usec()
@@ -358,7 +359,6 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 	HenGlobal.GENERATE_PREVIEW_CODE = _build_preview
 	HenCodeGeneration.flow_errors.clear()
-
 
 	# generating macro references
 	for macro_data: Dictionary in _data.side_bar_list.macro_list:
@@ -1117,6 +1117,7 @@ class RegenerateRefs:
 	var cnode_list: Dictionary = {}
 	var disconnect_list: Array = []
 	var counter: int
+	var side_bar_list: Dictionary
 
 	func get_new_node_counter() -> int:
 		counter += 1
@@ -1134,48 +1135,65 @@ class RegenerateRefs:
 #
 #
 #
-static func regenerate() -> Array:
+static func regenerate(_script_id: int, _side_bar_list: Dictionary) -> Array:
 	var saves: Array = []
 
 	# generation dependencies
-	for id_str in HenEnums.get_script_cache_refs(HenGlobal.script_config.id):
-		var id: int = int(id_str)
-		var refs: RegenerateRefs = RegenerateRefs.new()
-		var path: StringName = HenLoader.get_data_path(id)
-
-		if not FileAccess.file_exists(path):
-			push_error('Error: resource not found to re-generate: ', str(id))
+	for id_str in HenEnums.get_script_cache_refs(_script_id):
+		if HenLoader.script_to_open_id == int(id_str):
 			continue
 		
-		var res: HenScriptData = ResourceLoader.load('res://hengo/save/' + str(id) + '.res')
+		var script_data: HenScriptData = get_updated_script_data(int(id_str), _side_bar_list)
 
-		refs.counter = res.node_counter
+		if script_data:
+			var res_path: StringName = 'res://hengo/save/' + id_str + '.res'
 
-		_parse_vc_list(res.virtual_cnode_list, refs)
+			HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_data, res_path)))
+			HenSaver.generate(script_data, script_data.resource_path, ResourceUID.get_id_path(int(id_str)), int(id_str))
 
-		if refs.reload:
-			# cleaning connections that dont using
-			for cnode: Dictionary in refs.cnode_list.values():
-				var remove_connections: Array = []
-
-				if not cnode.input_connections.is_empty():
-					for connection: Dictionary in cnode.input_connections:
-						for ref: Dictionary in refs.disconnect_list:
-							if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
-								remove_connections.append(connection)
-								break
-
-				for connection: Dictionary in remove_connections:
-					cnode.input_connections.erase(connection)
-
-			res.node_counter = refs.counter
-
-			saves.append(HenSaver.SaveDependency.new(
-				res,
-				HenSaver.generate(res, res.resource_path, ResourceUID.get_id_path(id))
-			))
-	
 	return saves
+
+#
+#
+#
+#
+#
+#
+static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> HenScriptData:
+	var refs: RegenerateRefs = RegenerateRefs.new()
+	var path: StringName = HenLoader.get_data_path(_id)
+
+	if not FileAccess.file_exists(path):
+		push_error('Error: resource not found to re-generate: ', str(_id))
+		return null
+	
+	var res_path: StringName = 'res://hengo/save/' + str(_id) + '.res'
+	var res: HenScriptData = ResourceLoader.load(res_path)
+
+	refs.counter = res.node_counter
+	refs.side_bar_list = _side_bar_list
+
+	_parse_vc_list(res.virtual_cnode_list, refs)
+
+	if refs.reload:
+		# cleaning connections that dont using
+		for cnode: Dictionary in refs.cnode_list.values():
+			var remove_connections: Array = []
+
+			if not cnode.input_connections.is_empty():
+				for connection: Dictionary in cnode.input_connections:
+					for ref: Dictionary in refs.disconnect_list:
+						if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
+							remove_connections.append(connection)
+							break
+
+			for connection: Dictionary in remove_connections:
+				cnode.input_connections.erase(connection)
+		
+		print('RELOAD -> ', ResourceUID.get_id_path(_id))
+		return res
+
+	return null
 
 #
 #
@@ -1186,9 +1204,6 @@ static func regenerate() -> Array:
 static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 	for cnode: Dictionary in _cnode_list:
 		_refs.cnode_list[cnode.id] = cnode
-
-		
-		print(cnode.sub_type)
 
 		if not cnode.has('from_id'):
 			if cnode.has(&'virtual_cnode_list'):
@@ -1212,13 +1227,16 @@ static func _parse_vc_list(_cnode_list: Array, _refs: RegenerateRefs) -> void:
 #
 static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void:
 	var output: Dictionary = _dict.outputs[0]
-	
-	var var_data: HenVarData
+	var var_data: Dictionary
 
-	for _var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
+	prints(_refs.side_bar_list.var_list, JSON.stringify(_dict))
+
+	for _var_data: Dictionary in _refs.side_bar_list.var_list:
 		if _var_data.id == _dict.from_side_bar_id:
 			var_data = _var_data
 			break
+
+	print('var _data', var_data)
 
 	if var_data:
 		if var_data.name != output.name or var_data.type != output.type:
@@ -1245,9 +1263,9 @@ static func _check_changes_var(_dict: Dictionary, _refs: RegenerateRefs) -> void
 #
 #
 static func _check_changes_func(_dict: Dictionary, _refs: RegenerateRefs) -> void:
-	var func_data: HenFuncData
+	var func_data: Dictionary
 
-	for _func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+	for _func_data: Dictionary in _refs.side_bar_list.func_list:
 		if _func_data.id == _dict.from_side_bar_id:
 			func_data = _func_data
 			break
@@ -1310,7 +1328,7 @@ static func _reset_inout_dict_value(_dict: Dictionary) -> void:
 #
 static func _check_func_inouts(
 	_is_inputs: bool,
-	_func_data: HenFuncData,
+	_func_data: Dictionary,
 	_dict: Dictionary,
 	_output_size: int,
 	_real_output_size: int,

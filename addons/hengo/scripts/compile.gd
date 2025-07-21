@@ -11,7 +11,7 @@ func _ready() -> void:
 
 
 func _on_compile_press() -> void:
-	HenCodeGeneration.generate_and_save(self)
+	HenCodeGeneration.generate_and_save()
 
 
 func _process(_delta: float) -> void:

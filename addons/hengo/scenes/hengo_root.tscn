@@ -36,9 +36,9 @@ bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 947)
-shader_parameter/offset = Vector2(470.914, 970.115)
-shader_parameter/zoom_factor = 1.39949
+shader_parameter/screen_size = Vector2(1904, 519)
+shader_parameter/offset = Vector2(692.77, 123.146)
+shader_parameter/zoom_factor = 0.399205
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
@@ -300,35 +300,31 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer"]
-process_mode = 4
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 4.0
 mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 32.0
+grow_horizontal = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+layout_mode = 2
+
+[node name="Tabs" type="TabBar" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-mouse_filter = 0
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+tab_alignment = 2
 
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-
-[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/Control"]
+[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 unique_name_in_owner = true
 process_mode = 4
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -10.0
-offset_right = -10.0
-grow_horizontal = 0
+layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = ExtResource("20_y63ss")
 theme_override_fonts/italics_font = ExtResource("16_xresw")
@@ -346,6 +342,19 @@ horizontal_alignment = 2
 justification_flags = 0
 deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 0
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
 
 [node name="SidePanel" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
 unique_name_in_owner = true
@@ -423,6 +432,7 @@ script = ExtResource("18_hg3xi")
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
+metadata/_tab_name = "Props"
 
 [node name="CodePreview" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
@@ -442,6 +452,7 @@ gutters_draw_line_numbers = true
 code_completion_enabled = false
 script = ExtResource("10_r5155")
 metadata/_tab_index = 1
+metadata/_tab_name = "Code Preview"
 
 [node name="ScriptMsgContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI"]
 unique_name_in_owner = true

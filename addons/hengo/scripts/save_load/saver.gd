@@ -4,6 +4,8 @@ class_name HenSaver extends Node
 const LOAD_ICON = preload('res://addons/hengo/assets/icons/loader-circle.svg')
 const BUILD_ICON = preload('res://addons/hengo/assets/icons/menu/compile.svg')
 
+static var task_id_list: Array[int] = []
+
 class SaveData:
 	var script_ref: GDScript
 	var path: StringName
@@ -43,6 +45,19 @@ class SaveDependency:
 			script_data.save_script()
 
 
+class Task:
+	var task_id: int
+	var callback: Callable
+
+	signal finished
+
+	func _init(_callback: Callable) -> void:
+		task_id = WorkerThreadPool.add_task(_callback)
+
+	func wait_for_completion() -> void:
+		WorkerThreadPool.wait_for_task_completion(task_id)
+
+
 static func generate_script_data() -> HenScriptData:
 	var script_data: HenScriptData = HenScriptData.new()
 
@@ -70,6 +85,10 @@ static func generate_script_data() -> HenScriptData:
 
 
 static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
+	var script_data: HenScriptData = generate_script_data()
+	var script_id: int = HenGlobal.script_config.id
+	var data_path: StringName = 'res://hengo/save/' + str(script_id) + '.res'
+
 	start_load()
 	show_msg()
 
@@ -81,29 +100,9 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 		DirAccess.make_dir_absolute('res://hengo/save')
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 
-	var script_data: HenScriptData = generate_script_data()
-	var data_path: StringName = 'res://hengo/save/' + str(HenGlobal.script_config.id) + '.res'
-	# saving data
 
-	# TODO run on thread
-	var error: int = ResourceSaver.save(script_data, data_path)
-
-	if error != OK:
-		printerr('Error saving script data.')
-		return
-
-	# TODO run on thread
-	var ref_file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.WRITE)
-	ref_file.store_string(JSON.stringify(HenGlobal.SCRIPT_REF_CACHE))
-	ref_file.close()
-
-	# ---------------------------------------------------------------------------- #
-	if _generate_code:
-		var thread: Thread = Thread.new()
-		thread.start(generate_thread.bind(
-			generate.bind(script_data, data_path, ResourceUID.get_id_path(HenGlobal.script_config.id), true),
-			code_generated.bind(thread)
-		))
+	HenSaver.task_id_list.append(WorkerThreadPool.add_task(save_data_files.bind(script_data, data_path)))
+	HenSaver.task_id_list.append(WorkerThreadPool.add_task(generate.bind(script_data, data_path, ResourceUID.get_id_path(script_id), script_id)))
 
 
 static func show_msg() -> void:
@@ -127,11 +126,20 @@ static func hide_msg() -> void:
 	tween.finished.connect(func(): msg.visible = false)
 
 
-static func code_generated(_save_data: SaveData, _thread: Thread) -> void:
+static func save_data_files(_script_data: HenScriptData, _data_path: String) -> void:
+	ResourceSaver.save(_script_data, _data_path)
+	
+	# var ref_file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.WRITE)
+	# ref_file.store_string(JSON.stringify(HenGlobal.SCRIPT_REF_CACHE))
+	# ref_file.close()
+
+
+static func code_generated(_save_data: SaveData) -> void:
 	_save_data.save_script()
-	_thread.wait_to_finish.call_deferred()
+	# _thread.wait_to_finish.call_deferred()
 	hide_msg()
 	generate_msgs.call_deferred('Generated')
+	HenGlobal.SIGNAL_BUS.script_generated.emit()
 	reset_load()
 
 
@@ -161,27 +169,23 @@ static func generate_thread(_generate: Callable, _callback: Callable) -> void:
 	_callback.call_deferred(_generate.call())
 
 
-static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName, _first_time: bool = false) -> SaveData:
-	generate_msgs.call_deferred('Generating [b]{0}[/b]'.format([_path]))
+static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName, _script_id: int) -> void:
+	# generate_msgs.call_deferred('Generating [b]{0}[/b]'.format([_path]))
 	var code: String = HenCodeGeneration.get_code(_script_data)
 
 	# TODO
-	if HenCodeGeneration.flow_errors.size() > 0:
-		# TODO errors msg
-		generate_msgs.call_deferred('[b][color=#c91a1a]Errors found: {0}[/color][/b]'.format([HenCodeGeneration.flow_errors.size()]))
-		return SaveData.new(null, '', false)
+	# if HenCodeGeneration.flow_errors.size() > 0:
+	# 	# TODO errors msg
+	# 	generate_msgs.call_deferred('[b][color=#c91a1a]Errors found: {0}[/color][/b]'.format([HenCodeGeneration.flow_errors.size()]))
+	# 	return SaveData.new(null, '', false)
 
 	var script: GDScript = GDScript.new()
 	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code
-
 	var reload_err: int = script.reload()
 
 	if reload_err == OK:
-		return SaveData.new(
-			script,
-			_path,
-			true,
-			HenCodeGeneration.regenerate() if _first_time else []
-		)
+		var ref_file: FileAccess = FileAccess.open(_path, FileAccess.WRITE)
+		ref_file.store_string(script.source_code)
+		ref_file.close()
 	
-	return SaveData.new(script, _path, false)
+	HenCodeGeneration.regenerate(_script_id, _script_data.side_bar_list)
