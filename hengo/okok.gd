@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/3567223492641660476.hengo
+#[hengo] res://hengo/save/7552240213291941285.hengo
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -9,20 +9,18 @@
 
 extends Node
 
-var my_name_18 = String()
- 
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_1=State1.new(self)
+		this_is_my_state=ThisIsMyState.new(self)
 	})
 
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
-		_STATE_CONTROLLER.change_state("state_1")
+		_STATE_CONTROLLER.change_state("this_is_my_state")
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -34,5 +32,6 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
-class State1 extends HengoState:
-	pass
+class ThisIsMyState extends HengoState:
+	func enter() -> void:
+		HengoState.INVALID_PLACEHOLDER
