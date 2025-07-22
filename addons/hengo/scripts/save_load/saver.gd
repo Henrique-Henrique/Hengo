@@ -80,19 +80,20 @@ static func save_data_files(_script_data: HenScriptData, _data_path: String) -> 
 	if not DirAccess.dir_exists_absolute(HenEnums.SCRIPT_CACHE_PATH):
 		DirAccess.make_dir_absolute(HenEnums.SCRIPT_CACHE_PATH)
 
-	var cache_file_list :PackedStringArray= DirAccess.get_files_at(HenEnums.SCRIPT_CACHE_PATH)
-	
-	# max item cache files
-	if cache_file_list.size() > 300:
-		cache_file_list.sort()
-		DirAccess.remove_absolute(HenEnums.SCRIPT_CACHE_PATH + cache_file_list.get(0))
+	if FileAccess.file_exists(_data_path):
+		var cache_file_list :PackedStringArray= DirAccess.get_files_at(HenEnums.SCRIPT_CACHE_PATH)
+		
+		# max item cache files
+		if cache_file_list.size() > 300:
+			cache_file_list.sort()
+			DirAccess.remove_absolute(HenEnums.SCRIPT_CACHE_PATH + cache_file_list.get(0))
 
-	# create cache file before save new
-	DirAccess.copy_absolute(
-		_data_path,
-		HenEnums.SCRIPT_CACHE_PATH + \
-		_data_path.get_file().replace(HenScriptData.HENGO_EXT, '') + str(Time.get_ticks_usec()) + HenScriptData.HENGO_EXT
-	)
+		# create cache file before save new
+		DirAccess.copy_absolute(
+			_data_path,
+			HenEnums.SCRIPT_CACHE_PATH + \
+			_data_path.get_file().replace(HenScriptData.HENGO_EXT, '') + str(Time.get_ticks_usec()) + HenScriptData.HENGO_EXT
+		)
 
 	HenScriptData.save(_script_data, _data_path)
 	
