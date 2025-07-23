@@ -2,7 +2,7 @@
 class_name HenEnums extends MainLoop
 
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
-const SCRIPT_CACHE_PATH: StringName = 'res://.godot/hengo/'
+
 
 static func add_script_ref_cache(_script_id: int, _id: int) -> void:
     var script_id: StringName = str(_script_id)

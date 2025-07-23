@@ -15,13 +15,14 @@ var toggle_bottom_panel: bool = true
 
 # private
 #
+func _init() -> void:
+	if HenUtils.disable_scene(self):
+		return
+	
+	HenGlobal.HENGO_ROOT = self
+
 func _ready() -> void:
-	if EditorInterface.get_edited_scene_root() == self:
-		set_process(false)
-		set_physics_process(false)
-		set_process_input(false)
-		set_process_unhandled_input(false)
-		set_process_unhandled_key_input(false)
+	if HenUtils.disable_scene(self):
 		return
 
 	set_process(true)
@@ -64,6 +65,7 @@ func _ready() -> void:
 	cnode_ui.mouse_exited.connect(func(): HenGlobal.mouse_on_cnode_ui = false)
 	cnode_ui.gui_input.connect(_on_cnode_gui_input)
 
+
 	# setting globals
 	HenGlobal.CAM = cnode_cam
 	HenGlobal.CNODE_CONTAINER = get_node('%CnodeContainer')
@@ -72,12 +74,13 @@ func _ready() -> void:
 	HenGlobal.POPUP_CONTAINER = get_node('%PopupContainer')
 	HenGlobal.DOCS_TOOLTIP = get_node('%DocsToolTip')
 	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
-	HenGlobal.HENGO_ROOT = self
 	HenGlobal.TOOLTIP = get_node('%Tooltip')
 	HenGlobal.CODE_PREVIEWER = get_node('%CodePreview')
 	HenGlobal.SIDE_PANEL = get_node('%SidePanel')
 	HenGlobal.TABS = get_node('%Tabs')
-	HenGlobal.SIGNAL_BUS = HenGlobal.HENGO_ROOT.get_node('%SignalBus')
+	HenGlobal.script_config = null
+
+	print(HenGlobal.CNODE_CONTAINER)
 
 	cnode_stat_label = get_node('%CNodeStatLabel')
 	
@@ -159,10 +162,11 @@ func _process(_delta: float) -> void:
 
 
 	# task id
-	for id in HenSaver.task_id_list:
-		if WorkerThreadPool.is_task_completed(id):
-			WorkerThreadPool.wait_for_task_completion(id)
-			HenSaver.task_id_list.erase(id)
+	if HenGlobal.HENGO_SAVER:
+		for id in HenGlobal.HENGO_SAVER.task_id_list:
+			if WorkerThreadPool.is_task_completed(id):
+				WorkerThreadPool.wait_for_task_completion(id)
+				HenGlobal.HENGO_SAVER.task_id_list.erase(id)
 
 
 func _input(event: InputEvent) -> void:

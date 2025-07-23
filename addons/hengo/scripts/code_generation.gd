@@ -65,20 +65,6 @@ static func get_flow_id() -> int:
 #
 #
 #
-static func generate_and_save() -> void:
-	var start: float = Time.get_ticks_usec()
-	HenSaver.save(_debug_symbols, true)
-	var end: float = Time.get_ticks_usec()
-	print('GENERATED AND SAVED HENGO SCRIPT IN -> ', (end - start) / 1000, 'ms.')
-	HenGlobal.current_script_debug_symbols = _debug_symbols
-
-
-#
-#
-#
-#
-#
-#
 static func parse_token_by_type(_token: Dictionary, _level: int = 0, _parent_id: String = '') -> String:
 	var indent: StringName = '\t'.repeat(_level)
 	var prefix: StringName = '_ref.'
@@ -1135,7 +1121,7 @@ class RegenerateRefs:
 #
 #
 #
-static func regenerate(_script_id: int, _side_bar_list: Dictionary) -> Array:
+static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> Array:
 	var saves: Array = []
 
 	# generation dependencies
@@ -1143,13 +1129,14 @@ static func regenerate(_script_id: int, _side_bar_list: Dictionary) -> Array:
 		if HenLoader.script_to_open_id == int(id_str):
 			continue
 		
+		prints('re -> ', id_str, 'open -> ', HenLoader.script_to_open_id)
+
 		var script_data: HenScriptData = get_updated_script_data(int(id_str), _side_bar_list)
 
 		if script_data:
-			var res_path: StringName = 'res://hengo/save/' + id_str + HenScriptData.HENGO_EXT
-
-			HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_data, res_path)))
-			HenSaver.generate(script_data, res_path, ResourceUID.get_id_path(int(id_str)), int(id_str))
+			_save_config.add_script(
+				HenSaver.SaveData.new(int(id_str), script_data)
+			)
 
 	return saves
 
@@ -1168,7 +1155,10 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> Hen
 		return null
 	
 	var res_path: StringName = 'res://hengo/save/' + str(_id) + HenScriptData.HENGO_EXT
+	
+	prints('up -> ', res_path, 'open -> ', HenLoader.script_to_open_id)
 	var res: HenScriptData = HenScriptData.load_from_file(res_path)
+
 
 	refs.counter = res.node_counter
 	refs.side_bar_list = _side_bar_list
@@ -1190,7 +1180,6 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> Hen
 			for connection: Dictionary in remove_connections:
 				cnode.input_connections.erase(connection)
 		
-		print('RELOAD -> ', ResourceUID.get_id_path(_id))
 		return res
 
 	return null

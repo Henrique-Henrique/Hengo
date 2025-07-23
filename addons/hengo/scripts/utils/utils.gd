@@ -68,3 +68,28 @@ static func reposition_control_inside(_control: Control) -> void:
 		_control.position.y = rect.size.y - _control.size.y - 8
 	elif _control.position.y < rect.position.y:
 		_control.position.y = rect.position.y + _control.size.y + 8
+	
+
+static func disable_scene_with_owner(_ref: Node) -> bool:
+	var can_disable: bool = EditorInterface.get_edited_scene_root() == _ref or EditorInterface.get_edited_scene_root() == _ref.owner
+
+	if can_disable:
+		_ref.set_process(false)
+		_ref.set_physics_process(false)
+		_ref.set_process_input(false)
+		_ref.set_process_unhandled_input(false)
+		_ref.set_process_unhandled_key_input(false)
+	
+	return can_disable
+
+static func disable_scene(_ref: Node) -> bool:
+	var can_disable: bool = EditorInterface.get_edited_scene_root() == _ref
+
+	if can_disable:
+		_ref.set_process(false)
+		_ref.set_physics_process(false)
+		_ref.set_process_input(false)
+		_ref.set_process_unhandled_input(false)
+		_ref.set_process_unhandled_key_input(false)
+	
+	return can_disable

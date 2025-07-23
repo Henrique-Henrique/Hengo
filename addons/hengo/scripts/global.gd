@@ -27,6 +27,7 @@ static var GENERATE_PREVIEW_CODE: bool = false
 static var SCRIPT_REF_CACHE: Dictionary = {}
 static var TABS: TabBar
 static var SIGNAL_BUS: HenSignalBus
+static var HENGO_SAVER: HenSaver.Saver
 
 # cnodes
 static var can_make_connection: bool = false

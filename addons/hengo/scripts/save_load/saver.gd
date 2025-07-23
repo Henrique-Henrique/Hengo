@@ -1,11 +1,28 @@
 @tool
 class_name HenSaver extends Node
 
-const LOAD_ICON = preload('res://addons/hengo/assets/icons/loader-circle.svg')
-const BUILD_ICON = preload('res://addons/hengo/assets/icons/menu/compile.svg')
+const TEMP_EXT: String = '.tmp'
+const BACKUP_EXT: String = '.bkp'
 
-static var task_id_list: Array[int] = []
 
+class Saver:
+	var task_id_list: Array[int] = []
+
+
+class SaveData:
+	var id: int
+	var script_data: HenScriptData
+
+	func _init(_id: int, _script_data: HenScriptData):
+		id = _id
+		script_data = _script_data
+
+
+class SaveConfig:
+	var script_list: Array[SaveData] = []
+
+	func add_script(_save_data: SaveData) -> void:
+		script_list.append(_save_data)
 
 
 static func generate_script_data() -> HenScriptData:
@@ -34,13 +51,12 @@ static func generate_script_data() -> HenScriptData:
 	return script_data
 
 
-static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> void:
+static func save() -> void:
+	HenGlobal.HENGO_SAVER = Saver.new()
+	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
+
 	var script_data: HenScriptData = generate_script_data()
 	var script_id: int = HenGlobal.script_config.id
-	var data_path: StringName = 'res://hengo/save/' + str(script_id) + HenScriptData.HENGO_EXT
-
-	start_load()
-	show_msg()
 
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
@@ -50,110 +66,95 @@ static func save(_debug_symbols: Dictionary, _generate_code: bool = false) -> vo
 		DirAccess.make_dir_absolute('res://hengo/save')
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 
-
-	HenSaver.task_id_list.append(WorkerThreadPool.add_task(save_data_files.bind(script_data, data_path)))
-	HenSaver.task_id_list.append(WorkerThreadPool.add_task(generate.bind(script_data, data_path, ResourceUID.get_id_path(script_id), script_id)))
+	HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(generate.bind(script_data, script_id, true)))
 
 
-static func show_msg() -> void:
-	var msg: RichTextLabel = (HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg') as RichTextLabel)
+static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> void:
+	var script_data: SaveData = SaveData.new(_script_id, _script_data)
+	var save_config: SaveConfig = SaveConfig.new()
+	save_config.add_script(script_data)
 
-	msg.text = ''
+	if _regenerate:
+		HenCodeGeneration.regenerate(save_config, _script_id, _script_data.side_bar_list)
 
-	if msg.has_meta(&'tween'):
-		(msg.get_meta(&'tween') as Tween).kill()
-	
-	msg.modulate = Color.WHITE
-	msg.visible = true
-
-
-static func hide_msg() -> void:
-	var tween: Tween = HenGlobal.CAM.get_tree().create_tween()
-	var msg: RichTextLabel = HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg')
-
-	msg.set_meta(&'tween', tween)
-	tween.tween_property(msg, 'modulate', Color.TRANSPARENT, 10.)
-	tween.finished.connect(func(): msg.visible = false)
+	save_data(save_config)
 
 
-static func save_data_files(_script_data: HenScriptData, _data_path: String) -> void:
-	if not DirAccess.dir_exists_absolute(HenEnums.SCRIPT_CACHE_PATH):
-		DirAccess.make_dir_absolute(HenEnums.SCRIPT_CACHE_PATH)
+static func save_data(_save_config: SaveConfig) -> void:
+	# creating backup files
+	for config in _save_config.script_list:
+		var res_path: StringName = HenLoader.get_data_path(config.id)
+		var result: int = OK
 
-	if FileAccess.file_exists(_data_path):
-		var cache_file_list :PackedStringArray= DirAccess.get_files_at(HenEnums.SCRIPT_CACHE_PATH)
+		if FileAccess.file_exists(res_path):
+			result = DirAccess.rename_absolute(res_path, res_path + BACKUP_EXT)
+		else:
+			var file: FileAccess = FileAccess.open(res_path + BACKUP_EXT, FileAccess.WRITE)
+			
+			if file: file.close()
+			else: result = false
+
+		if result != OK:
+			rollback(_save_config)
+			return
+
+	# saving temp files
+	for config in _save_config.script_list:
+		var valid: bool = HenScriptData.save(config.script_data, HenLoader.get_data_path(config.id) + TEMP_EXT)
 		
-		# max item cache files
-		if cache_file_list.size() > 300:
-			cache_file_list.sort()
-			DirAccess.remove_absolute(HenEnums.SCRIPT_CACHE_PATH + cache_file_list.get(0))
+		if not valid:
+			rollback(_save_config)
+			return
 
-		# create cache file before save new
-		DirAccess.copy_absolute(
-			_data_path,
-			HenEnums.SCRIPT_CACHE_PATH + \
-			_data_path.get_file().replace(HenScriptData.HENGO_EXT, '') + str(Time.get_ticks_usec()) + HenScriptData.HENGO_EXT
+	# checking if all temp files are created
+	for config in _save_config.script_list:
+		if not FileAccess.file_exists(HenLoader.get_data_path(config.id) + TEMP_EXT):
+			rollback(_save_config)
+			return
+
+	# renaming temp files to original files
+	for config in _save_config.script_list:
+		var result: int = DirAccess.rename_absolute(
+			HenLoader.get_data_path(config.id) + TEMP_EXT,
+			HenLoader.get_data_path(config.id)
 		)
 
-	HenScriptData.save(_script_data, _data_path)
-	
-	# save references
-	var ref_file: FileAccess = FileAccess.open(HenEnums.SCRIPT_REF_PATH, FileAccess.WRITE)
-	ref_file.store_string(JSON.stringify(HenGlobal.SCRIPT_REF_CACHE))
-	ref_file.close()
+		print('saving -> ', HenLoader.get_data_path(config.id))
+
+		if result != OK:
+			rollback(_save_config)
+			return
+
+	# removing backup files
+	for config in _save_config.script_list:
+		var path: StringName = HenLoader.get_data_path(config.id)
+
+		if FileAccess.file_exists(path + BACKUP_EXT):
+			DirAccess.remove_absolute(path + BACKUP_EXT)
 
 
-static func code_generated() -> void:
-	# _thread.wait_to_finish.call_deferred()
-	hide_msg()
-	generate_msgs.call_deferred('Generated')
-	HenGlobal.SIGNAL_BUS.script_generated.emit()
-	reset_load()
+	# saving gdscript files
+	for config in _save_config.script_list:
+		HenScriptData.save_code(config.script_data, config.id)
+
+	print('Successfully saved')
+	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred()
 
 
-static func start_load() -> void:
-	var container: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
-	
-	container.icon.texture = LOAD_ICON
-	container.icon.pivot_offset = container.icon.size / 2
-	container.set_process(true)
-	container.icon.modulate = Color.SKY_BLUE
+static func rollback(_save_config: SaveConfig) -> void:
+	for config in _save_config.script_list:
+		var path: StringName = HenLoader.get_data_path(config.id)
 
+		# renaming backup files to original files
+		if FileAccess.file_exists(path + BACKUP_EXT):
+			var result: int = DirAccess.rename_absolute(
+				path + BACKUP_EXT,
+				path
+			)
 
-static func reset_load() -> void:
-	var container: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
-	
-	container.icon.texture = BUILD_ICON
-	container.set_process(false)
-	container.icon.rotation = 0
-	container.icon.modulate = Color.WHITE
-
-
-static func generate_msgs(_text: String) -> void:
-	(HenGlobal.HENGO_ROOT.get_node('%ScriptInfoMsg') as RichTextLabel).text += _text + '\n'
-
-
-static func generate_thread(_generate: Callable, _callback: Callable) -> void:
-	_callback.call_deferred(_generate.call())
-
-
-static func generate(_script_data: HenScriptData, _data_path: String, _path: StringName, _script_id: int) -> void:
-	# generate_msgs.call_deferred('Generating [b]{0}[/b]'.format([_path]))
-	var code: String = HenCodeGeneration.get_code(_script_data)
-
-	# TODO
-	# if HenCodeGeneration.flow_errors.size() > 0:
-	# 	# TODO errors msg
-	# 	generate_msgs.call_deferred('[b][color=#c91a1a]Errors found: {0}[/color][/b]'.format([HenCodeGeneration.flow_errors.size()]))
-	# 	return SaveData.new(null, '', false)
-
-	var script: GDScript = GDScript.new()
-	script.source_code = '#[hengo] ' + _data_path + '\n\n' + code
-	var reload_err: int = script.reload()
-
-	if reload_err == OK:
-		var ref_file: FileAccess = FileAccess.open(_path, FileAccess.WRITE)
-		ref_file.store_string(script.source_code)
-		ref_file.close()
-	
-	HenCodeGeneration.regenerate(_script_id, _script_data.side_bar_list)
+			if result != OK:
+				push_error('Rollback failed -> ', path)
+			
+		# removing temp files
+		if FileAccess.file_exists(path + TEMP_EXT):
+			DirAccess.remove_absolute(path + TEMP_EXT)

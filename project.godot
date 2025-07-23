@@ -28,10 +28,6 @@ gdscript/warnings/unsafe_property_access=1
 
 window/size/always_on_top=true
 
-[dotnet]
-
-project/assembly_name="Hengo"
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/hengo/plugin.cfg")

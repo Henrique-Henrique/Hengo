@@ -9,6 +9,7 @@ static var from_flow_list: Array = []
 static var script_to_open_id: int = -1
 static var script_to_open_reload_script_data: HenScriptData
 
+
 class BaseRouteRef extends Object:
 	signal loaded_new_project
 
@@ -17,22 +18,31 @@ class BaseRouteRef extends Object:
 
 static func load(_path: StringName) -> void:
 	script_to_open_id = ResourceLoader.get_resource_uid(_path)
+	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
+	
 
 	if HenGlobal.script_config:
-		HenCodeGeneration.generate_and_save()
+		if HenGlobal.script_config.id == script_to_open_id:
+			HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit()
+			return
+		
+		HenSaver.save()
+
+		print('saving -> ', HenGlobal.script_config.id)
 
 		if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
 			script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
 		else:
 			script_to_open_reload_script_data = null
 		
-		_on_script_generated(_path)
+		print('start load -> ', HenGlobal.script_config.id)
+		load_data(_path)
 		return
 	
-	_on_script_generated(_path)
+	load_data(_path)
 
 
-static func _on_script_generated(_path: StringName) -> void:
+static func load_data(_path: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
 
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
@@ -150,11 +160,12 @@ static func _on_script_generated(_path: StringName) -> void:
 			if connection:
 				connection.add()
 			
-
 		# auto re-save
 		if script_to_open_reload_script_data:
-			HenSaver.task_id_list.append(WorkerThreadPool.add_task(HenSaver.save_data_files.bind(script_to_open_reload_script_data, path)))
-			HenSaver.generate(script_to_open_reload_script_data, path, ResourceUID.get_id_path(resource_id), resource_id)
+			if HenGlobal.HENGO_SAVER:
+				HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(HenSaver.generate.bind(script_to_open_reload_script_data, resource_id)))
+			else:
+				push_error('Error: HENGO_SAVER is not set')
 	else:
 		var reg: RegEx = RegEx.new()
 		reg.compile("extends ([a-zA-Z0-9]+)[\\s]*")

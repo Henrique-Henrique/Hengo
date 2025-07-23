@@ -100,6 +100,7 @@ func _enter_tree():
 	HenGlobal.connection_line_pool.clear()
 	HenGlobal.flow_connection_line_pool.clear()
 	HenGlobal.state_connection_line_pool.clear()
+	HenGlobal.script_config = null
 
 	# creating cnode pool
 	HenCnode.instantiate_and_add_pool()
@@ -130,6 +131,7 @@ func _on_change_main_screen(_name: String) -> void:
 
 func _exit_tree():
 	HenGlobal.can_instantiate_pool = false
+	HenGlobal.script_config = null
 	
 	remove_debugger_plugin(debug_plugin)
 	remove_control_from_bottom_panel(gd_previewer)

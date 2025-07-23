@@ -6,12 +6,7 @@ class_name HenCNodeActionBar extends HBoxContainer
 var filesystem_parent: Control
 
 func _ready() -> void:
-	if EditorInterface.get_edited_scene_root() == self or EditorInterface.get_edited_scene_root() == owner:
-		set_process(false)
-		set_physics_process(false)
-		set_process_input(false)
-		set_process_unhandled_input(false)
-		set_process_unhandled_key_input(false)
+	if HenUtils.disable_scene_with_owner(self):
 		return
 	
 	HenGlobal.ACTION_BAR = self
