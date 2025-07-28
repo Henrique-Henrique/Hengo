@@ -13,35 +13,26 @@ func _init() -> void:
 
 
 func _on_change_script(_message: String, _data: Array = []) -> bool:
-	match _message:
-		'start_script':
-			var script_name: StringName = _data[0]
-
-			if script_name:
-				var script: GDScript = load(script_name as String)
-
-				old_script_name = script_name
-				old_source_code = script.source_code
-
-				script.source_code = script.source_code.replace(_data[1] as String, '')
-				script.reload(true)
-		'reload_script':
-			var script_name: StringName = _data[0]
-
-			if script_name:
-				# old
-				var old_script: GDScript = load(old_script_name as String)
-				old_script.source_code = old_source_code
-				old_script.reload(true)
-
-				# new
-				var script: GDScript = load(script_name as String)
-
-				old_script_name = script_name
-				old_source_code = script.source_code
-				
-				script.source_code = script.source_code.replace(_data[1] as String, '')
-
-				script.reload(true)
-
+	# match _message:
+	# 	'start_script':
+	# 		var script_name: StringName = _data[0]
+	# 		if script_name:
+	# 			var script: GDScript = load(script_name as String)
+	# 			old_script_name = script_name
+	# 			old_source_code = script.source_code
+	# 			script.source_code = script.source_code.replace(_data[1] as String, '')
+	# 			script.reload(true)
+	# 	'reload_script':
+	# 		var script_name: StringName = _data[0]
+	# 		if script_name:
+	# 			# old
+	# 			var old_script: GDScript = load(old_script_name as String)
+	# 			old_script.source_code = old_source_code
+	# 			old_script.reload(true)
+	# 			# new
+	# 			var script: GDScript = load(script_name as String)
+	# 			old_script_name = script_name
+	# 			old_source_code = script.source_code
+	# 			script.source_code = script.source_code.replace(_data[1] as String, '')
+	# 			script.reload(true)
 	return true

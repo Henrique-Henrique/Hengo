@@ -82,6 +82,7 @@ static func disable_scene_with_owner(_ref: Node) -> bool:
 	
 	return can_disable
 
+
 static func disable_scene(_ref: Node) -> bool:
 	var can_disable: bool = EditorInterface.get_edited_scene_root() == _ref
 

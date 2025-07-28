@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=5 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 [ext_resource type="Script" uid="uid://cmr0k13rd5jaw" path="res://hengo/bt.gd" id="2_m0rpm"]
+[ext_resource type="Script" uid="uid://bq28wddu48c57" path="res://hengo/new.gd" id="3_c6xj6"]
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="3_m0rpm"]
 
 [node name="Node" type="Node"]
@@ -17,6 +18,9 @@ offset_top = 264.0
 offset_right = 190.0
 offset_bottom = 422.0
 text = "CLICK TO TEST"
+
+[node name="Node" type="Node" parent="Icon"]
+script = ExtResource("3_c6xj6")
 
 [node name="Icon2" type="Sprite2D" parent="."]
 modulate = Color(0.898675, 0.199437, 7.70092e-07, 1)

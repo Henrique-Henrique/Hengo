@@ -2,7 +2,7 @@
 class_name HenSignalBus extends Node
 
 
-signal scripts_generation_finished
+signal scripts_generation_finished(_script_list: PackedStringArray)
 signal scripts_generation_started
 
 #

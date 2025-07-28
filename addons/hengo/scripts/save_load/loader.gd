@@ -19,11 +19,10 @@ class BaseRouteRef extends Object:
 static func load(_path: StringName) -> void:
 	script_to_open_id = ResourceLoader.get_resource_uid(_path)
 	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
-	
 
 	if HenGlobal.script_config:
 		if HenGlobal.script_config.id == script_to_open_id:
-			HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit()
+			HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit([])
 			return
 		
 		HenSaver.save()
@@ -35,7 +34,6 @@ static func load(_path: StringName) -> void:
 		else:
 			script_to_open_reload_script_data = null
 		
-		print('start load -> ', HenGlobal.script_config.id)
 		load_data(_path)
 		return
 	

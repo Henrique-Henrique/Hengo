@@ -780,7 +780,7 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 							tokens = []
 						}
 
-					override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_token_list(0))
+					override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_tokens(0))
 
 
 	# search for override virtual inside macros

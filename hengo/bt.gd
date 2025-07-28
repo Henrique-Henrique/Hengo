@@ -21,7 +21,8 @@ func _init() -> void:
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
-
+	print("one!") 
+	print("cxd")
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
 		_STATE_CONTROLLER.change_state(_EVENTS[_event])
@@ -34,4 +35,4 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_node("dd").my_variable_1244)
+		print(_ref.get_node("Node").my_variable_99)

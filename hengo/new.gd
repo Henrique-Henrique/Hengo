@@ -9,7 +9,7 @@
 
 extends Node
 
-var my_variable_1244 = String()
+var my_variable_99 = String()
  
 var _STATE_CONTROLLER = HengoStateController.new()
 

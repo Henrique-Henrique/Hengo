@@ -125,20 +125,24 @@ static func save_data(_save_config: SaveConfig) -> void:
 			rollback(_save_config)
 			return
 
+	var script_list: PackedStringArray = []
+
 	# removing backup files
 	for config in _save_config.script_list:
 		var path: StringName = HenLoader.get_data_path(config.id)
 
+		# remove backup
 		if FileAccess.file_exists(path + BACKUP_EXT):
 			DirAccess.remove_absolute(path + BACKUP_EXT)
 
+		script_list.append(ResourceUID.get_id_path(config.id))
 
 	# saving gdscript files
 	for config in _save_config.script_list:
 		HenScriptData.save_code(config.script_data, config.id)
 
 	print('Successfully saved')
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred()
+	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
 
 
 static func rollback(_save_config: SaveConfig) -> void:
