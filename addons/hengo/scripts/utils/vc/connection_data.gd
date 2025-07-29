@@ -14,7 +14,6 @@ class InputConnectionData extends HenVCConnectionData:
 	var from_type: StringName
 	var input_ref: HenVCInOutData
 
-
 	func get_save() -> Dictionary:
 		return {
 			from_id = from_id,

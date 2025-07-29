@@ -24,6 +24,18 @@ class Func:
 	var input_ref: CNode
 	var output_ref: CNode
 
+	func clean() -> void:
+		for cnode: CNode in virtual_cnode_list:
+			cnode.clean()
+		
+		local_vars.clear()
+		virtual_cnode_list.clear()
+		inputs.clear()
+		outputs.clear()
+
+		input_ref = null
+		output_ref = null
+
 
 class SignalData:
 	var id: int
@@ -37,6 +49,17 @@ class SignalData:
 	var local_vars: Array[Variable]
 	var signal_enter: CNode
 
+	func clean() -> void:
+		for cnode: CNode in virtual_cnode_list:
+			cnode.clean()
+		
+		params.clear()
+		bind_params.clear()
+		virtual_cnode_list.clear()
+		local_vars.clear()
+
+		signal_enter = null
+
 
 class Macro:
 	var id: int
@@ -48,6 +71,17 @@ class Macro:
 	var local_vars: Array[Variable]
 	var macro_ref_list: Array[CNode]
 
+	func clean() -> void:
+		for cnode: CNode in virtual_cnode_list:
+			cnode.clean()
+		
+		flow_inputs.clear()
+		flow_outputs.clear()
+		local_vars.clear()
+		virtual_cnode_list.clear()
+		macro_ref_list.clear()
+		
+		input_ref = null
 
 class Flow:
 	var id: int
@@ -80,6 +114,10 @@ class FlowConnection:
 	var to: CNode
 	var to_vc_id: int
 
+	func clean() -> void:
+		from = null
+		to = null
+
 
 class InputConnection:
 	var from: CNode
@@ -87,6 +125,10 @@ class InputConnection:
 	var from_id: int
 	var to_id: int
 	var from_vc_id: int
+
+	func clean() -> void:
+		from = null
+		to = null
 
 
 class References:
@@ -102,6 +144,35 @@ class References:
 	var macros: Array[Macro]
 	var side_bar_item_ref: Dictionary = {}
 
+	func clean() -> void:
+		for flow: FlowConnection in flow_connections:
+			flow.clean()
+		
+		for input: InputConnection in input_connections:
+			input.clean()
+		
+		for cnode: CNode in base_route_cnode_list:
+			cnode.clean()
+		
+		for func_data: Func in functions:
+			func_data.clean()
+		
+		for signal_data: SignalData in signals:
+			signal_data.clean()
+		
+		for macro_data: Macro in macros:
+			macro_data.clean()
+		
+		side_bar_item_ref.clear()
+		variables.clear()
+		functions.clear()
+		signals.clear()
+		macros.clear()
+		base_route_cnode_list.clear()
+		cnode_ref.clear()
+		states_data.clear()
+		flow_connections.clear()
+		input_connections.clear()
 
 #
 #
@@ -126,6 +197,26 @@ class CNode:
 	var ref: Variant
 	var invalid: bool = false
 	var singleton_class: String
+	
+	func clean() -> void:
+		ref = null
+
+		for cnode: CNode in virtual_cnode_list:
+			cnode.clean()
+		
+		for flow: FlowConnection in flow_connections:
+			flow.clean()
+		
+		for input: InputConnection in input_connections:
+			input.clean()
+
+		for cnode: CNode in virtual_sub_type_vc_list:
+			cnode.clean()
+
+		virtual_cnode_list.clear()
+		flow_connections.clear()
+		input_connections.clear()
+		virtual_sub_type_vc_list.clear()
 
 	func get_flow_tokens(_input_id: int, _token_list: Array = []) -> Array:
 		var stack: Array = []

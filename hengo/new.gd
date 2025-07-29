@@ -12,8 +12,10 @@ extends Node
 var my_variable_99 = String()
  
 func my_func():
-	pass
+	get_path()
 
+func _on_signal_2787664825_signal_():
+	print("cx")
 
 var _STATE_CONTROLLER = HengoStateController.new()
 

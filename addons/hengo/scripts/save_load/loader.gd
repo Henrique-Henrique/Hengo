@@ -12,12 +12,7 @@ static var script_to_open_reload_script_data: HenScriptData
 
 class BaseRouteRef extends RefCounted:
 	signal loaded_new_project
-
 	var virtual_cnode_list: Array = []
-
-	func _notification(what: int) -> void:
-		if what == NOTIFICATION_PREDELETE:
-			print('base route ref deleted')
 
 
 static func load(_path: StringName) -> void:
@@ -42,6 +37,70 @@ static func load(_path: StringName) -> void:
 	load_data(_path)
 
 
+static func clean() -> void:
+	# cleaning instances
+	if HenGlobal.BASE_ROUTE.has('ref'):
+		# cleaning vcnodes
+		for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
+			v_cnode.clean()
+		
+		HenGlobal.BASE_ROUTE.ref.virtual_cnode_list.clear()
+
+		# cleaning side bar items refs
+		for func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+			if func_data.input_ref: func_data.input_ref.clean()
+			if func_data.output_ref: func_data.output_ref.clean()
+
+			for v_cnode: HenVirtualCNode in func_data.virtual_cnode_list:
+				v_cnode.clean()
+
+			func_data.input_ref = null
+			func_data.output_ref = null
+			func_data.local_vars.clear()
+			func_data.cnode_list_to_load.clear()
+			func_data.virtual_cnode_list.clear()
+			func_data.route.ref = null
+
+		# cleaning signal data
+		for signal_data: HenSignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
+			if signal_data.signal_enter: signal_data.signal_enter.clean()
+			
+			for v_cnode: HenVirtualCNode in signal_data.virtual_cnode_list:
+				v_cnode.clean()
+
+			signal_data.signal_enter = null
+			signal_data.local_vars.clear()
+			signal_data.cnode_list_to_load.clear()
+			signal_data.virtual_cnode_list.clear()
+
+		# cleaning macro data
+		for macro_data: HenMacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+			if macro_data.input_ref: macro_data.input_ref.clean()
+			if macro_data.output_ref: macro_data.output_ref.clean()
+			
+			for v_cnode: HenVirtualCNode in macro_data.virtual_cnode_list:
+				v_cnode.clean()
+
+			macro_data.input_ref = null
+			macro_data.output_ref = null
+			macro_data.local_vars.clear()
+			macro_data.cnode_list_to_load.clear()
+			macro_data.virtual_cnode_list.clear()
+
+		# cleaning cnodes refs
+		for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
+			if cnode.virtual_ref:
+				cnode.virtual_ref.clean()
+				cnode.virtual_ref = null
+
+		HenGlobal.BASE_ROUTE.ref = null
+ 
+	HenGlobal.SIDE_BAR_LIST.clear()
+	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
+
+	HenGlobal.script_config = HenGlobal.ScriptData.new()
+
+
 static func load_data(_path: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
@@ -55,9 +114,6 @@ static func load_data(_path: StringName) -> void:
 	flow_connection_list.clear()
 	from_flow_list.clear()
 
-	HenGlobal.SIDE_BAR_LIST.clear()
-	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
-	HenGlobal.script_config = HenGlobal.ScriptData.new()
 
 	# hide all virtuals
 	for cnode: HenCnode in HenGlobal.cnode_pool:
@@ -72,27 +128,8 @@ static func load_data(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
-	var _ref
-	# cleaning instances
-	if HenGlobal.BASE_ROUTE.has('ref'):
-		for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
-			v_cnode.clean()
+	clean()
 
-			# TODO: get from clean
-		
-		HenGlobal.BASE_ROUTE.ref.virtual_cnode_list.clear()
-
-
-		for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
-			if cnode.virtual_ref:
-				cnode.virtual_ref.clean()
-				cnode.virtual_ref = null
-
-
-		# TODO: SIDE BAR clean
-
-		HenGlobal.BASE_ROUTE.ref = null
- 
 	# ---------------------------------------------------------------------------- #
 
 	# confirming queue free before check errors
@@ -104,7 +141,6 @@ static func load_data(_path: StringName) -> void:
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()
 
-	
 	var base_route: Dictionary = {
 		name = 'Base',
 		type = HenRouter.ROUTE_TYPE.BASE,

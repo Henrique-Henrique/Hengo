@@ -22,7 +22,10 @@ func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
 	print("one!") 
-	print("cxd")
+	print("cxd") 
+	is_centered() 
+	is_flipped_h() 
+	is_flipped_v()
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
 		_STATE_CONTROLLER.change_state(_EVENTS[_event])

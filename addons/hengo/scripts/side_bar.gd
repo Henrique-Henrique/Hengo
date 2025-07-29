@@ -258,7 +258,7 @@ func _on_list_changed() -> void:
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Macros', AddType.MACRO)
 
-	if not HenRouter.current_route.is_empty() and HenRouter.current_route.ref.get(&'local_vars') is Array:
+	if not HenRouter.current_route.is_empty() and HenRouter.current_route.ref and HenRouter.current_route.ref.get(&'local_vars') is Array:
 		_add_categories(root, 'Local Variables', AddType.LOCAL_VAR)
 
 

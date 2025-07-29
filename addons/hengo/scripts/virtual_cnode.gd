@@ -1210,13 +1210,13 @@ static func instantiate(_config: Dictionary) -> HenVCNodeReturn:
 	return HenVCNodeReturn.new(v_cnode)
 
 
-func _notification(what: int) -> void:
-	match what:
-		NOTIFICATION_PREDELETE:
-			print('DELETED -> ', name, '   :::  ', self)
-
-
 func clean() -> void:
+	for chd in virtual_cnode_list:
+		chd.clean()
+
+	for chd in virtual_sub_type_vc_list:
+		chd.clean()
+
 	if route and route.has('ref'):
 		route.ref = null
 
@@ -1247,25 +1247,41 @@ func clean() -> void:
 
 	if is_instance_valid(ref):
 		if ref.has_signal('name_changed'):
-			(ref as Variant).name_changed.disconnect(_on_change_name)
-		if ref.has_signal('in_out_added'):
-			(ref as Variant).in_out_added.disconnect(_on_in_out_added)
-		if ref.has_signal('deleted'):
-			(ref as Variant).deleted.disconnect(_on_side_bar_deleted)
-		if ref.has_signal('in_out_reseted'):
-			(ref as Variant).in_out_reseted.disconnect(_on_in_out_reset)
-		if ref.has_signal('flow_added'):
-			(ref as Variant).flow_added.disconnect(_on_flow_added)
-	
-	for chd in virtual_cnode_list:
-		chd.clean()
+			for connection_data: Dictionary in ref.get_signal_connection_list('name_changed'):
+				(ref as Variant).name_changed.disconnect(connection_data.callable)
 
-	for chd in virtual_sub_type_vc_list:
-		chd.clean()
+		if ref.has_signal('in_out_added'):
+			for connection_data: Dictionary in ref.get_signal_connection_list('in_out_added'):
+				(ref as Variant).in_out_added.disconnect(connection_data.callable)
+
+		if ref.has_signal('deleted'):
+			for connection_data: Dictionary in ref.get_signal_connection_list('deleted'):
+				(ref as Variant).deleted.disconnect(connection_data.callable)
+
+		if ref.has_signal('in_out_reseted'):
+			for connection_data: Dictionary in ref.get_signal_connection_list('in_out_reseted'):
+				(ref as Variant).in_out_reseted.disconnect(connection_data.callable)
+
+		if ref.has_signal('flow_added'):
+			for connection_data: Dictionary in ref.get_signal_connection_list('flow_added'):
+				(ref as Variant).flow_added.disconnect(connection_data.callable)
+
+
+	for input: HenVCConnectionData.InputConnectionData in input_connections:
+		input.from = null
+		input.from_ref = null
+		input.input_ref = null
+
+	for output: HenVCConnectionData.OutputConnectionData in output_connections:
+		output.to = null
+		output.to_ref = null
+		output.output_ref = null
 
 	inputs.clear()
 	outputs.clear()
 	flow_connections.clear()
 	from_flow_connections.clear()
+	input_connections.clear()
+	output_connections.clear()
 	virtual_cnode_list.clear()
 	virtual_sub_type_vc_list.clear()

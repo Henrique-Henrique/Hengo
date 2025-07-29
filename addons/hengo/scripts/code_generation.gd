@@ -412,6 +412,9 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 	code += _parse_signals(refs)
 	code += _set_base_cnodes(refs)
 
+	# cleaning refs
+	refs.clean()
+
 	return code
 
 #

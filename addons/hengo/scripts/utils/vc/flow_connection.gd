@@ -21,7 +21,6 @@ func _init(_data: Dictionary = {}) -> void:
 
     if _data.has('ref'): set_ref(_data.ref)
 
-
 func set_ref(_ref) -> void:
     ref = _ref
     # when param is moved

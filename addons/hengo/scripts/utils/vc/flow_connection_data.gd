@@ -10,7 +10,6 @@ var from: HenVirtualCNode
 var to: HenVirtualCNode
 var to_from_ref: HenVCFromFlowConnectionData
 
-
 func get_save() -> Dictionary:
 	return {
 		id = id,
