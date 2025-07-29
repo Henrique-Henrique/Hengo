@@ -1,5 +1,5 @@
 @tool
-class_name HenVirtualCNode extends Object
+class_name HenVirtualCNode extends RefCounted
 
 enum Type {
 	DEFAULT = 0,
@@ -81,7 +81,7 @@ var route_ref: Dictionary
 var category: StringName
 var virtual_cnode_list: Array = []
 var virtual_sub_type_vc_list: Array = []
-var ref: Object
+var ref: RefCounted
 var can_delete: bool = true
 var is_deleted: bool = false
 var from_side_bar_id: int = -1
@@ -1020,7 +1020,7 @@ func get_inspector_array_list() -> Array:
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
-
+	
 	v_cnode.name = _config.name
 	v_cnode.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.sub_type = _config.sub_type
@@ -1063,6 +1063,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.MACRO_OUTPUT:
 					_ref.output_ref = v_cnode
 
+	
 	if _config.has('singleton_class'):
 		v_cnode.singleton_class = _config.singleton_class
 
@@ -1182,7 +1183,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			if _config.has('from_flow'):
 				for flow: Dictionary in _config.from_flow:
 					v_cnode._on_flow_added(true, flow)
-			
 
 	if _config.has('inputs'):
 		for input_data: Dictionary in _config.inputs:
@@ -1208,3 +1208,64 @@ static func instantiate_virtual_cnode_and_add(_config: Dictionary) -> HenVirtual
 static func instantiate(_config: Dictionary) -> HenVCNodeReturn:
 	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config)
 	return HenVCNodeReturn.new(v_cnode)
+
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_PREDELETE:
+			print('DELETED -> ', name, '   :::  ', self)
+
+
+func clean() -> void:
+	if route and route.has('ref'):
+		route.ref = null
+
+	for input: HenVCInOutData in inputs:
+		if input.ref: input.ref.clean()
+		input.ref = null
+
+	for output: HenVCInOutData in outputs:
+		if output.ref: output.ref.clean()
+		output.ref = null
+
+	for flow: HenVCFlowConnectionData in flow_connections:
+		flow.from = null
+		flow.to = null
+		flow.to_from_ref = null
+		flow.ref = null
+
+	for flow: HenVCFromFlowConnectionData in from_flow_connections:
+		flow.ref = null
+
+		for connection: HenVCFlowConnectionData in flow.from_connections:
+			connection.from = null
+			connection.to = null
+			connection.to_from_ref = null
+			connection.ref = null
+
+		flow.from_connections.clear()
+
+	if is_instance_valid(ref):
+		if ref.has_signal('name_changed'):
+			(ref as Variant).name_changed.disconnect(_on_change_name)
+		if ref.has_signal('in_out_added'):
+			(ref as Variant).in_out_added.disconnect(_on_in_out_added)
+		if ref.has_signal('deleted'):
+			(ref as Variant).deleted.disconnect(_on_side_bar_deleted)
+		if ref.has_signal('in_out_reseted'):
+			(ref as Variant).in_out_reseted.disconnect(_on_in_out_reset)
+		if ref.has_signal('flow_added'):
+			(ref as Variant).flow_added.disconnect(_on_flow_added)
+	
+	for chd in virtual_cnode_list:
+		chd.clean()
+
+	for chd in virtual_sub_type_vc_list:
+		chd.clean()
+
+	inputs.clear()
+	outputs.clear()
+	flow_connections.clear()
+	from_flow_connections.clear()
+	virtual_cnode_list.clear()
+	virtual_sub_type_vc_list.clear()

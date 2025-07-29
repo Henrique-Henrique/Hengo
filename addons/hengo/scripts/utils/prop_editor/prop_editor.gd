@@ -158,7 +158,7 @@ func start() -> void:
 				item_container.add_child(item)
 
 
-static func mount(_ref: Object) -> HenPropEditor:
+static func mount(_ref: RefCounted) -> HenPropEditor:
 	var editor: HenPropEditor = PROP_EDITOR.instantiate() as HenPropEditor
 	editor.get_prop_callback = (_ref as Variant).get_inspector_array_list
 	editor.instance_ref = _ref

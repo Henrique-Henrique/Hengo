@@ -2,8 +2,6 @@
 class_name HenHengoRoot extends Control
 
 var target_zoom: float = .8
-var cnode_ui: Panel
-var cnode_cam: HenCam
 
 var cnode_stat_label: Label
 
@@ -13,13 +11,6 @@ var start_select_pos: Vector2 = Vector2.ZERO
 var can_select: bool = false
 var toggle_bottom_panel: bool = true
 
-# private
-#
-func _init() -> void:
-	if HenUtils.disable_scene(self):
-		return
-	
-	HenGlobal.HENGO_ROOT = self
 
 func _ready() -> void:
 	if HenUtils.disable_scene(self):
@@ -31,7 +22,7 @@ func _ready() -> void:
 	HenRouter.current_route = {}
 	HenRouter.line_route_reference = {}
 	HenRouter.comment_reference = {}
-	HenGlobal.history = UndoRedo.new()
+	# HenGlobal.history = UndoRedo.new()
 	HenEnums.DROPDOWN_STATES = []
 
 	# defining types
@@ -57,31 +48,8 @@ func _ready() -> void:
 			}
 	)
 
-	# Global.CAM = cam
-	cnode_ui = get_node('%CNodeUI') as Panel
-	cnode_cam = cnode_ui.get_node('Cam')
-
-	cnode_ui.mouse_entered.connect(func(): HenGlobal.mouse_on_cnode_ui = true)
-	cnode_ui.mouse_exited.connect(func(): HenGlobal.mouse_on_cnode_ui = false)
+	var cnode_ui = get_node('%CNodeUI') as Panel
 	cnode_ui.gui_input.connect(_on_cnode_gui_input)
-
-
-	# setting globals
-	HenGlobal.CAM = cnode_cam
-	HenGlobal.CNODE_CONTAINER = get_node('%CnodeContainer')
-	HenGlobal.COMMENT_CONTAINER = get_node('%CommentContainer')
-	HenGlobal.DROPDOWN_MENU = get_node('%DropDownMenu')
-	HenGlobal.POPUP_CONTAINER = get_node('%PopupContainer')
-	HenGlobal.DOCS_TOOLTIP = get_node('%DocsToolTip')
-	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
-	HenGlobal.TOOLTIP = get_node('%Tooltip')
-	HenGlobal.CODE_PREVIEWER = get_node('%CodePreview')
-	HenGlobal.SIDE_PANEL = get_node('%SidePanel')
-	HenGlobal.TABS = get_node('%Tabs')
-	HenGlobal.script_config = null
-
-	print(HenGlobal.CNODE_CONTAINER)
-
 	cnode_stat_label = get_node('%CNodeStatLabel')
 	
 	# show msg
@@ -170,7 +138,7 @@ func _process(_delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not HenGlobal.HENGO_ROOT.visible:
+	if HenGlobal.HENGO_ROOT and not HenGlobal.HENGO_ROOT.visible:
 		return
 	
 	if event is InputEventKey:

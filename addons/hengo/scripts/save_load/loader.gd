@@ -10,10 +10,14 @@ static var script_to_open_id: int = -1
 static var script_to_open_reload_script_data: HenScriptData
 
 
-class BaseRouteRef extends Object:
+class BaseRouteRef extends RefCounted:
 	signal loaded_new_project
 
 	var virtual_cnode_list: Array = []
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_PREDELETE:
+			print('base route ref deleted')
 
 
 static func load(_path: StringName) -> void:
@@ -26,8 +30,6 @@ static func load(_path: StringName) -> void:
 			return
 		
 		HenSaver.save()
-
-		print('saving -> ', HenGlobal.script_config.id)
 
 		if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
 			script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
@@ -42,8 +44,10 @@ static func load(_path: StringName) -> void:
 
 static func load_data(_path: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
-
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
+
+	HenGlobal.TABS.add_script_tab(_path)
+
 	compile_bt.disabled = false
 	# ---------------------------------------------------------------------------- #
 	loaded_virtual_cnode_list.clear()
@@ -68,31 +72,26 @@ static func load_data(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
-
+	var _ref
 	# cleaning instances
 	if HenGlobal.BASE_ROUTE.has('ref'):
 		for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
-			if v_cnode.get('virtual_cnode_list'):
-				for vc: HenVirtualCNode in v_cnode.virtual_cnode_list:
-					# inputs
-					for in_out: HenVCInOutData in vc.inputs:
-						in_out.free()
+			v_cnode.clean()
 
-					# outputs
-					for in_out: HenVCInOutData in vc.outputs:
-						in_out.free()
-					
-					# flows
-					for flow_connection: HenVCFlowConnection in vc.flow_connections:
-						flow_connection.free()
+			# TODO: get from clean
+		
+		HenGlobal.BASE_ROUTE.ref.virtual_cnode_list.clear()
 
-					# from flow
-					for flow_connection: HenVCFlowConnection in vc.from_flow_connections:
-						flow_connection.free()
-					
-					vc.free()
 
-			v_cnode.free()
+		for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
+			if cnode.virtual_ref:
+				cnode.virtual_ref.clean()
+				cnode.virtual_ref = null
+
+
+		# TODO: SIDE BAR clean
+
+		HenGlobal.BASE_ROUTE.ref = null
  
 	# ---------------------------------------------------------------------------- #
 

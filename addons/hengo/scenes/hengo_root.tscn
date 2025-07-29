@@ -1,4 +1,4 @@
-[gd_scene load_steps=59 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=60 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
 [ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
+[ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
@@ -36,9 +37,9 @@ bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 519)
-shader_parameter/offset = Vector2(692.77, 123.146)
-shader_parameter/zoom_factor = 0.399205
+shader_parameter/screen_size = Vector2(1904, 667)
+shader_parameter/offset = Vector2(774.351, 136.988)
+shader_parameter/zoom_factor = 0.849982
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
@@ -84,7 +85,7 @@ content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0.431373, 0.564706, 0.905882, 0.2)
+bg_color = Color(0, 0, 0, 0.290196)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -320,6 +321,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tab_alignment = 2
+script = ExtResource("11_lxtpw")
 
 [node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 unique_name_in_owner = true
@@ -410,11 +412,9 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
-disabled = true
 text = "Compile"
 
 [node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
-modulate = Color(1, 1, 1, 0.419608)
 layout_mode = 2
 texture = ExtResource("11_xut0q")
 expand_mode = 2

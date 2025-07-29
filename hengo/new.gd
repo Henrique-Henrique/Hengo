@@ -11,6 +11,10 @@ extends Node
 
 var my_variable_99 = String()
  
+func my_func():
+	pass
+
+
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}

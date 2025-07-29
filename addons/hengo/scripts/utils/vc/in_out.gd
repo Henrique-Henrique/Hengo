@@ -1,5 +1,5 @@
 @tool
-class_name HenVCInOutData extends Object
+class_name HenVCInOutData extends RefCounted
 
 var id: int = HenGlobal.get_new_node_counter()
 var name: String
@@ -12,7 +12,7 @@ var value: Variant
 var data: Variant
 var is_prop: bool
 var is_static: bool
-var ref: Object
+var ref: RefCounted
 var ref_change_rule: RefChangeRule
 var from_id: int = -1
 

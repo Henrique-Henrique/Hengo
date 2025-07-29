@@ -25,7 +25,7 @@ static var ACTION_BAR: HenCNodeActionBar
 static var CODE_PREVIEWER: HenCodePreview
 static var GENERATE_PREVIEW_CODE: bool = false
 static var SCRIPT_REF_CACHE: Dictionary = {}
-static var TABS: TabBar
+static var TABS: HenTabs
 static var SIGNAL_BUS: HenSignalBus
 static var HENGO_SAVER: HenSaver.Saver
 

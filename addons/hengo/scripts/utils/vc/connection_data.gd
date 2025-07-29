@@ -1,5 +1,5 @@
 @tool
-class_name HenVCConnectionData extends Object
+class_name HenVCConnectionData extends RefCounted
 
 var from_id: int
 var to_id: int

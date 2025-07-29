@@ -1,9 +1,9 @@
 @tool
-class_name HenVCFlowConnection extends Object
+class_name HenVCFlowConnection extends RefCounted
 
 var name: String: set = _on_change_name
 var id: int = -1
-var ref: Object
+var ref: RefCounted
 
 signal update_changes
 signal data_changed
@@ -20,6 +20,7 @@ func _init(_data: Dictionary = {}) -> void:
     id = _data.id if _data.has('id') else HenGlobal.get_new_node_counter()
 
     if _data.has('ref'): set_ref(_data.ref)
+
 
 func set_ref(_ref) -> void:
     ref = _ref

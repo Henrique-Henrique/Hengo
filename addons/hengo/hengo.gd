@@ -63,6 +63,23 @@ func _enter_tree():
 
 	main_scene = HenAssets.HengoRootScene.instantiate()
 
+	# setting globals
+	var cnode_ui = main_scene.get_node('%CNodeUI') as Panel
+
+	HenGlobal.history = UndoRedo.new()
+	HenGlobal.HENGO_ROOT = main_scene
+	HenGlobal.CAM = cnode_ui.get_node('Cam')
+	HenGlobal.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
+	HenGlobal.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
+	HenGlobal.DROPDOWN_MENU = main_scene.get_node('%DropDownMenu')
+	HenGlobal.POPUP_CONTAINER = main_scene.get_node('%PopupContainer')
+	HenGlobal.DOCS_TOOLTIP = main_scene.get_node('%DocsToolTip')
+	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
+	HenGlobal.TOOLTIP = main_scene.get_node('%Tooltip')
+	HenGlobal.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
+	HenGlobal.SIDE_PANEL = main_scene.get_node('%SidePanel')
+	HenGlobal.TABS = main_scene.get_node('%Tabs')
+	HenGlobal.script_config = null
 	HenGlobal.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)

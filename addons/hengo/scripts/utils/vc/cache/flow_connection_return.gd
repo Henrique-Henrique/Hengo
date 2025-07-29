@@ -24,6 +24,7 @@ func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: HenVirtualCNode, 
     from = _from
     to_from_ref = _to_from_ref
 
+
 func add() -> void:
     # remove other flow connection
     if flow_connection.to:

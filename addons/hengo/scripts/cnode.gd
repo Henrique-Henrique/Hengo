@@ -154,10 +154,6 @@ func _on_gui(_event: InputEvent) -> void:
 					HenGlobal.TOOLTIP.close()
 
 
-func _on_state_inspector(_name: String, _value: Variant, _ref: Object) -> void:
-	if virtual_ref: virtual_ref.update()
-
-
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
