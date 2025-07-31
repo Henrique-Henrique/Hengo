@@ -16,16 +16,13 @@ var old_from_id: int
 var old_from: WeakRef
 var old_to_from_ref: HenVCFromFlowConnectionData
 
-func _notification(what: int) -> void:
-    if what == NOTIFICATION_PREDELETE:
-        print('DELETED 333 -> ', flow_connection.name)
 
-func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: HenVirtualCNode, _to_id: int, _from: HenVirtualCNode, _to_from_ref: HenVCFromFlowConnectionData) -> void:
+func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: WeakRef, _to_id: int, _from: WeakRef, _to_from_ref: HenVCFromFlowConnectionData) -> void:
     from_id = _from_id
     flow_connection = _flow
-    to = weakref(_to)
+    to = _to
     to_id = _to_id
-    from = weakref(_from)
+    from = _from
     to_from_ref = _to_from_ref
 
 

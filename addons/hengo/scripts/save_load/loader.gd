@@ -178,7 +178,7 @@ static func load_data(_path: StringName) -> void:
 
 		# adding flow connection
 		for flow_data: Dictionary in flow_connection_list:
-			var connection = (flow_data.from as HenVirtualCNode).flow.add_flow_connection(flow_data.from_id, flow_data.to_id, loaded_virtual_cnode_list[int(flow_data.to_vc_id)])
+			var connection = (flow_data.from as HenVirtualCNode).flow.add_flow_connection(flow_data.from_id, flow_data.to_id, weakref(loaded_virtual_cnode_list[int(flow_data.to_vc_id)]))
 		
 			if connection:
 				connection.add()

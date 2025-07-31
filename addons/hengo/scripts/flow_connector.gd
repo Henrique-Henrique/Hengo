@@ -45,14 +45,6 @@ func _on_gui(_event: InputEvent) -> void:
 		else:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				if HenGlobal.can_make_flow_connection and HenGlobal.flow_connection_to_data.is_empty():
-					var connection: HenVCFlowConnectionReturn = (root.virtual_ref.get_ref() as HenVirtualCNode).flow.get_flow_connection(id)
-
-					if connection:
-						HenGlobal.history.create_action('Remove Flow Connection')
-						HenGlobal.history.add_do_method(connection.remove)
-						HenGlobal.history.add_undo_method(connection.add)
-						HenGlobal.history.commit_action()
-
 					var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 					method_list.start(HenGlobal.script_config.type, get_global_mouse_position(), true, 'out', {
 						from_flow_connector = self

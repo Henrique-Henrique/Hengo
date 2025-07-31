@@ -25,38 +25,28 @@ func get_from_flow(_id: int) -> HenVCFlowConnection:
 	return null
 
 
-func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
-	var virtual_cnode: HenVirtualCNode = vc.get_ref()
-    
-	if not virtual_cnode:
+func add_flow_connection(_id: int, _to_id: int, _to: WeakRef) -> HenVCFlowConnectionReturn:
+	if not _to or not _to.get_ref():
+		push_error('Not Found To: Id -> ', _to_id)
 		return null
 
 	var flow_connection: HenVCFlowConnectionData = get_flow(_id)
-	var flow_from_connection: HenVCFromFlowConnectionData = _to.flow.get_from_flow(_to_id)
+	var flow_from_connection: HenVCFromFlowConnectionData = (_to.get_ref() as HenVirtualCNode).flow.get_from_flow(_to_id)
 
 	if not flow_connection or not flow_from_connection:
 		push_error('Not Found Flow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
 		return null
 
-	return HenVCFlowConnectionReturn.new(flow_connection, _id, _to, _to_id, virtual_cnode, flow_from_connection)
+	return HenVCFlowConnectionReturn.new(flow_connection, _id, _to, _to_id, vc, flow_from_connection)
 
 
 func get_flow_connection(_id: int) -> HenVCFlowConnectionReturn:
-	var virtual_cnode: HenVirtualCNode = vc.get_ref()
-
-	if not virtual_cnode:
-		return null
-
 	var flow_connection: HenVCFlowConnectionData = get_flow(_id)
-
-	print('s =-> ', (not flow_connection or (flow_connection.to and not flow_connection.to.get_ref())))
 
 	if not flow_connection or (not flow_connection or (flow_connection.to and not flow_connection.to.get_ref())):
 		return null
 
-	print(flow_connection.to_from_ref)
-
-	return HenVCFlowConnectionReturn.new(flow_connection, _id, (flow_connection.to.get_ref() as HenVirtualCNode) if flow_connection.to else null, flow_connection.to_id, virtual_cnode, flow_connection.to_from_ref)
+	return HenVCFlowConnectionReturn.new(flow_connection, _id, flow_connection.to, flow_connection.to_id, vc, flow_connection.to_from_ref)
 
 
 func create_flow_connection() -> void:
