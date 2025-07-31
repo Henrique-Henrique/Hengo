@@ -43,8 +43,8 @@ static func generate_script_data() -> HenScriptData:
 	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
 		v_cnode_list.append(v_cnode.get_save())
 
-		if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
-			script_data.state_event_list.append(v_cnode.name)
+		if v_cnode.identity.type == HenVirtualCNode.Type.STATE_EVENT:
+			script_data.state_event_list.append(v_cnode.identity.name)
 			
 	script_data.virtual_cnode_list = v_cnode_list
 

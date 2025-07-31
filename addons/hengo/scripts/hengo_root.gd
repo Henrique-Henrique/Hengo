@@ -97,11 +97,11 @@ func _select_cnode() -> void:
 	var selection_rect: ReferenceRect = HenGlobal.CAM.get_node('SelectionRect')
 
 	for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
-		if v_cnode.cnode_ref:
-			if selection_rect.get_global_rect().has_point(v_cnode.cnode_ref.global_position):
-				v_cnode.cnode_ref.select()
+		if v_cnode.references.cnode_ref:
+			if selection_rect.get_global_rect().has_point(v_cnode.references.cnode_ref.global_position):
+				v_cnode.references.cnode_ref.select()
 			else:
-				v_cnode.cnode_ref.unselect()
+				v_cnode.references.cnode_ref.unselect()
 
 
 func _process(_delta: float) -> void:

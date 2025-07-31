@@ -23,7 +23,9 @@ class ActionInfo:
 
 
 func show_action(_vc: HenCnode) -> void:
-	if not _vc or not _vc.virtual_ref:
+	var vc: HenVirtualCNode = _vc.virtual_ref.get_ref()
+
+	if not _vc or not vc:
 		return
 	
 	visible = true
@@ -40,7 +42,7 @@ func show_action(_vc: HenCnode) -> void:
 		
 		set_bt_config(ActionInfo.new(
 			Type.INPUT,
-			ActionType.DISCONNECT if _vc.virtual_ref.input_has_connection(input.input_ref.id) else ActionType.CONNECT
+			ActionType.DISCONNECT if vc.io.input_has_connection(input.input_ref.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
 			input.global_position.x,
 			input.global_position.y
@@ -55,7 +57,7 @@ func show_action(_vc: HenCnode) -> void:
 
 		set_bt_config(ActionInfo.new(
 			Type.OUTPUT,
-			ActionType.DISCONNECT if _vc.virtual_ref.output_has_connection(output.input_ref.id) else ActionType.CONNECT
+			ActionType.DISCONNECT if vc.io.output_has_connection(output.input_ref.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
 			output.global_position.x,
 			output.global_position.y
@@ -73,7 +75,7 @@ func show_action(_vc: HenCnode) -> void:
 
 		set_bt_config(ActionInfo.new(
 			Type.FROM_FLOW,
-			ActionType.DISCONNECT if _vc.virtual_ref.from_flow_has_connection(from_flow.id) else ActionType.CONNECT
+			ActionType.DISCONNECT if vc.flow.from_flow_has_connection(from_flow.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
 			arrow.global_position.x,
 			arrow.global_position.y
@@ -91,7 +93,7 @@ func show_action(_vc: HenCnode) -> void:
 
 		set_bt_config(ActionInfo.new(
 			Type.FLOW,
-			ActionType.DISCONNECT if _vc.virtual_ref.flow_has_connection(connector.id) else ActionType.CONNECT
+			ActionType.DISCONNECT if vc.flow.flow_has_connection(connector.id) else ActionType.CONNECT
 		), get_child(idx), Vector2(
 			connector.global_position.x,
 			connector.global_position.y

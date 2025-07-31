@@ -9,6 +9,10 @@
 
 extends Sprite2D
 
+func my_name():
+	pass
+
+
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}
@@ -22,9 +26,6 @@ func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("state_1")
 	print("one!") 
-	print("cxd") 
-	is_centered() 
-	is_flipped_h() 
 	is_flipped_v()
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -38,4 +39,4 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_node("Node").my_variable_99)
+		print(_ref.find_child("", false, false).my_variable_99)

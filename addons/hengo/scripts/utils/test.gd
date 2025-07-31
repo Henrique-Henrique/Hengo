@@ -53,10 +53,10 @@ static func set_global_config() -> void:
 static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.References) -> CNodeDataCode:
 	var ref
 
-	if _vc.route_ref.ref is HenVirtualCNode:
-		ref = HenCodeGeneration._get_cnode_from_dict(_vc.route_ref.ref.get_save(), _refs)
+	if _vc.route_info.route_ref.ref is HenVirtualCNode:
+		ref = HenCodeGeneration._get_cnode_from_dict(_vc.route_info.route_ref.ref.get_save(), _refs)
 	else:
-		ref = _vc.route_ref.ref
+		ref = _vc.route_info.route_ref.ref
 
 	var data: HenSaveCodeType.CNode = HenCodeGeneration._get_cnode_from_dict(_vc.get_save(), _refs, ref)
 	var token: Dictionary

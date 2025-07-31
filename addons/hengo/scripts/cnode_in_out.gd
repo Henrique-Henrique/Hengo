@@ -38,7 +38,7 @@ func _on_gui(_event: InputEvent) -> void:
 				# call mehotd list on in_out type
 				var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
 				var data: Dictionary = {
-					from = root.virtual_ref,
+					from = root.virtual_ref.get_ref(),
 					in_out_id = input_ref.id,
 				}
 
@@ -81,7 +81,7 @@ func _on_enter() -> void:
 	get('theme_override_styles/panel/').set('border_color', Color.RED)
 
 	HenGlobal.connection_to_data = CNodeInOutConnectionData.new(
-		self.root.virtual_ref,
+		(self.root.virtual_ref.get_ref() as HenVirtualCNode),
 		input_ref,
 	)
 
@@ -105,16 +105,16 @@ func _on_exit() -> void:
 
 func create_virtual_connection(_data: CNodeInOutConnectionData) -> HenVCConnectionReturn:
 	if type == 'in':
-		return root.virtual_ref.create_input_connection(
+		return (root.virtual_ref.get_ref() as HenVirtualCNode).io.create_input_connection(
 			input_ref.id,
 			_data.in_out.id,
 			_data.vc
 		)
 
-	return _data.vc.create_input_connection(
+	return _data.vc.io.create_input_connection(
 		_data.in_out.id,
 		input_ref.id,
-		root.virtual_ref
+		(root.virtual_ref.get_ref() as HenVirtualCNode)
 	)
 
 
@@ -188,7 +188,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 			'expression':
 				var expression_bt: HenExpressionBt = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
 
-				expression_bt.v_cnode = root.virtual_ref
+				expression_bt.v_cnode = (root.virtual_ref.get_ref() as HenVirtualCNode)
 
 				prop_container.add_child(expression_bt)
 				prop = expression_bt

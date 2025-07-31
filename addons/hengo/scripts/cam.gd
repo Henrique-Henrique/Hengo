@@ -118,8 +118,12 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 
 
 	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		for v_cnode: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
-			v_cnode.check_visibility(rect)
+		var list: Array = HenRouter.current_route.ref.children.virtual_cnode_list \
+			if HenRouter.current_route.ref is HenVirtualCNode \
+			else HenRouter.current_route.ref.virtual_cnode_list
+
+		for v_cnode: HenVirtualCNode in list:
+			v_cnode.visual.check_visibility(rect)
 
 
 func get_rect() -> Rect2:
@@ -147,16 +151,21 @@ func go_to_center(_pos: Vector2) -> void:
 
 func check_vc_action_menu() -> void:
 	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		for vc: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
-			if not vc.is_showing:
+		var list: Array = HenRouter.current_route.ref.children.virtual_cnode_list \
+			if HenRouter.current_route.ref is HenVirtualCNode \
+			else HenRouter.current_route.ref.virtual_cnode_list
+
+
+		for vc: HenVirtualCNode in list:
+			if not vc.state.is_showing:
 				continue
 
-			var mouse_inside: bool = vc.check_mouse_inside()
+			var mouse_inside: bool = vc.visual.check_mouse_inside()
 
-			if vc.showing_action_menu and mouse_inside:
+			if vc.state.showing_action_menu and mouse_inside:
 				continue
 
-			vc.showing_action_menu = mouse_inside
+			vc.state.showing_action_menu = mouse_inside
 
-			if vc.showing_action_menu:
-				HenVCActionButtons.get_singleton().show_action(vc.cnode_ref)
+			if vc.state.showing_action_menu:
+				HenVCActionButtons.get_singleton().show_action(vc.references.cnode_ref)

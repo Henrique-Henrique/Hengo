@@ -394,9 +394,10 @@ class CNode:
 				HenVirtualCNode.SubType.MACRO:
 					HenGlobal.USE_MACRO_USE_SELF = true
 					HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
-					var data: Dictionary = (connection.from.ref as HenMacroData).output_ref.get_input_token(connection.to_id)
+					# TODO: fix this
+					# var data: Dictionary = (connection.from.ref as HenMacroData).output_ref.get_ref().get_input_token(connection.to_id)
 					HenGlobal.USE_MACRO_USE_SELF = false
-					return data
+					return {}
 				_:
 					var data: Dictionary = connection.from.get_token(connection.from.get_output_index(connection.from_id))
 					

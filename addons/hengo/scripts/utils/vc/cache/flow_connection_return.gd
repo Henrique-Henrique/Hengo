@@ -3,31 +3,35 @@ class_name HenVCFlowConnectionReturn
 
 var flow_connection: HenVCFlowConnectionData
 
-var to: HenVirtualCNode
+var to: WeakRef
 var to_id: int
 var from_id: int
-var from: HenVirtualCNode
+var from: WeakRef
 var to_from_ref: HenVCFromFlowConnectionData
 
 # old
-var old_to: HenVirtualCNode
+var old_to: WeakRef
 var old_to_id: int
 var old_from_id: int
-var old_from: HenVirtualCNode
+var old_from: WeakRef
 var old_to_from_ref: HenVCFromFlowConnectionData
+
+func _notification(what: int) -> void:
+    if what == NOTIFICATION_PREDELETE:
+        print('DELETED 333 -> ', flow_connection.name)
 
 func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: HenVirtualCNode, _to_id: int, _from: HenVirtualCNode, _to_from_ref: HenVCFromFlowConnectionData) -> void:
     from_id = _from_id
     flow_connection = _flow
-    to = _to
+    to = weakref(_to)
     to_id = _to_id
-    from = _from
+    from = weakref(_from)
     to_from_ref = _to_from_ref
 
 
 func add() -> void:
     # remove other flow connection
-    if flow_connection.to:
+    if flow_connection.to and flow_connection.to.get_ref():
         flow_connection.to_from_ref.from_connections.erase(flow_connection)
 
         if flow_connection.line_ref:
@@ -49,12 +53,12 @@ func add() -> void:
 
     flow_connection.to_from_ref.from_connections.append(flow_connection)
 
-    flow_connection.from.update()
-    flow_connection.to.update()
+    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).renderer.update()
+    if flow_connection.to and flow_connection.to.get_ref(): (flow_connection.to.get_ref() as HenVirtualCNode).renderer.update()
 
 func remove() -> void:
     flow_connection.to = null
-    flow_connection.to_from_ref.from_connections.erase(flow_connection)
+    if flow_connection.to_from_ref: flow_connection.to_from_ref.from_connections.erase(flow_connection)
 
     if flow_connection.line_ref:
         flow_connection.line_ref.visible = false
@@ -62,7 +66,7 @@ func remove() -> void:
     flow_connection.line_ref = null
 
     # adding old flow connection
-    if old_to:
+    if old_to and old_to.get_ref():
         flow_connection.from_id = old_from_id
         flow_connection.to = old_to
         flow_connection.to_id = old_to_id
@@ -70,8 +74,8 @@ func remove() -> void:
         flow_connection.to_from_ref = old_to_from_ref
 
         old_to_from_ref.from_connections.append(flow_connection)
-        old_to.update()
+        if old_to and old_to.get_ref(): (old_to.get_ref() as HenVirtualCNode).renderer.update()
 
     old_to = null
 
-    flow_connection.from.update()
+    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).renderer.update()

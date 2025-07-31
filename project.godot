@@ -23,6 +23,8 @@ HengoDebugger="*res://addons/hengo/scripts/debug/hengo_debugger.gd"
 
 gdscript/warnings/exclude_addons=false
 gdscript/warnings/unsafe_property_access=1
+gdscript/warnings/unsafe_method_access=1
+gdscript/warnings/unsafe_call_argument=1
 
 [display]
 

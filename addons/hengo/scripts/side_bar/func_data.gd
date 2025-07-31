@@ -10,8 +10,8 @@ var inputs: Array
 var outputs: Array
 var route: Dictionary
 var virtual_cnode_list: Array
-var input_ref: HenVirtualCNode
-var output_ref: HenVirtualCNode
+# var input_ref: WeakRef
+# var output_ref: WeakRef
 var local_vars: Array
 var cnode_list_to_load: Array
 

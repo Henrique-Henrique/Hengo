@@ -5,13 +5,6 @@ var flow_to: Dictionary = {}
 var route_ref: Dictionary
 var data: Dictionary = {}
 var category: String
-var raw_name: String
-var hash: int
-var connectors: Dictionary = {}
-var from_lines: Array = []
-var deleted: bool = false
-
-var comment_ref
 
 # behavior
 var moving: bool = false
@@ -22,14 +15,13 @@ var old_state_event_connected: PanelContainer
 
 # tooltip
 var _is_mouse_enter: bool = false
-var _preview_timer: SceneTreeTimer
 
 # formatter
 var can_move_to_format: bool = true
 
 # pool
 var is_pool: bool = false
-var virtual_ref: HenVirtualCNode
+var virtual_ref: WeakRef
 
 
 signal on_move
@@ -48,16 +40,17 @@ func _ready():
 
 
 func _on_enter() -> void:
-	# if virtual_ref:
-	# 	print(JSON.stringify(virtual_ref.get_save()))
-	# print(get_local_mouse_position())
+	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+
+	if not vc:
+		return
+
 	_is_mouse_enter = true
 
-
-	if HenGlobal.can_make_flow_connection and not virtual_ref.from_flow_connections.is_empty():
+	if HenGlobal.can_make_flow_connection and not vc.flow.from_flow_connections.is_empty():
 		HenGlobal.flow_connection_to_data = {
 			to_cnode = self,
-			to_id = virtual_ref.from_flow_connections[0].id
+			to_id = vc.flow.from_flow_connections[0].id
 		}
 	
 	# animations
@@ -84,20 +77,29 @@ func exit_animation() -> void:
 
 
 func _scale_and_update_line(_scale: Vector2) -> void:
+	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+
+	if not vc:
+		return
+
 	scale = _scale
 
-	if virtual_ref:
-		for from_connection: HenVCFromFlowConnectionData in virtual_ref.from_flow_connections:
-			for connetion: HenVCFlowConnectionData in from_connection.from_connections:
-				if connetion.line_ref:
-					connetion.line_ref.update_line()
-				
-		for connetion: HenVCFlowConnectionData in virtual_ref.flow_connections:
-				if connetion.line_ref:
-					connetion.line_ref.update_line()
+	for from_connection: HenVCFromFlowConnectionData in vc.flow.from_flow_connections:
+		for connetion: HenVCFlowConnectionData in from_connection.from_connections:
+			if connetion.line_ref:
+				connetion.line_ref.update_line()
+			
+	for connetion: HenVCFlowConnectionData in vc.flow.flow_connections:
+			if connetion.line_ref:
+				connetion.line_ref.update_line()
 
 
 func _on_gui(_event: InputEvent) -> void:
+	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+
+	if not vc:
+		return
+
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			HenGlobal.DOCS_TOOLTIP.visible = false
@@ -107,11 +109,10 @@ func _on_gui(_event: InputEvent) -> void:
 				else:
 					select()
 			elif _event.double_click:
-				if virtual_ref:
-					if not virtual_ref.route.is_empty():
-						HenRouter.change_route(virtual_ref.route)
-					elif virtual_ref.ref and virtual_ref.ref.get('route'):
-						HenRouter.change_route(virtual_ref.ref.get('route'))
+				if not vc.route_info.route.is_empty():
+					HenRouter.change_route(vc.route_info.route)
+				elif vc.references.ref and vc.references.ref.get('route'):
+					HenRouter.change_route(vc.references.ref.get('route'))
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
@@ -127,10 +128,9 @@ func _on_gui(_event: InputEvent) -> void:
 						select()
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
 					# showing state config on doubleclick
-					if virtual_ref:
-						if virtual_ref.type == HenVirtualCNode.Type.STATE:
-							HenGlobal.GENERAL_POPUP.get_parent().show_content(
-								HenPropEditor.mount(virtual_ref),
+					if vc.identity.type == HenVirtualCNode.Type.STATE:
+						HenGlobal.GENERAL_POPUP.get_parent().show_content(
+							HenPropEditor.mount(vc),
 								'Testing',
 								get_global_mouse_position()
 							)
@@ -144,10 +144,10 @@ func _on_gui(_event: InputEvent) -> void:
 				i.moving = false
 			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
-		if virtual_ref.invalid:
+		if vc.state.invalid:
 			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
 		else:
-			match virtual_ref.type:
+			match vc.identity.type:
 				HenVirtualCNode.Type.STATE:
 					HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
 				_:
@@ -157,7 +157,7 @@ func _on_gui(_event: InputEvent) -> void:
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
-		if moving and not comment_ref:
+		if moving:
 			if HenGlobal.CAM:
 				move(position + _event.relative / HenGlobal.CAM.transform.x.x)
 
@@ -180,10 +180,15 @@ func _on_dropdown_state_pick(_value: Dictionary) -> void:
 # public
 #
 func move(_pos: Vector2) -> void:
+	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+
+	if not vc:
+		return
+
 	position = _pos
 
-	if virtual_ref:
-		virtual_ref.position = position
+	if vc:
+		vc.visual.position = position
 
 	HenVCActionButtons.get_singleton().hide_action()
 	emit_signal('on_move')
@@ -194,8 +199,14 @@ func select() -> void:
 	hover_animation()
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 
-	if virtual_ref and HenGlobal.CODE_PREVIEWER.visible:
-		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.virtual_ref.id)
+	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+
+	if not vc:
+		return
+
+	if HenGlobal.CODE_PREVIEWER.visible:
+		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.virtual_ref.get_ref().identity.id)
+
 		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
 			return
 
@@ -214,14 +225,6 @@ func unselect() -> void:
 func change_name(_name: String) -> void:
 	get_node('%Title').text = _name
 
-
-func change_name_and_raw(_name: String) -> void:
-	get_node('%Title').text = _name
-	raw_name = _name
-
-
-func get_cnode_name() -> String:
-	return raw_name
 
 func get_fantasy_name() -> String:
 	return get_node('%Title').text
@@ -255,56 +258,9 @@ func disable_error() -> void:
 	get_node('%ErrorBorder').visible = false
 
 
-func get_connection_lines_in_flow() -> Dictionary:
-	return {}
-
-
-func get_connector_lines(_connector) -> Array:
-	var flow_lines: Array = []
-	var conn_lines: Array = []
-
-	# next cnode
-	if _connector.connections_lines.size() > 0:
-		var cnode = _connector.connections_lines[0].to_cnode
-		
-		flow_lines += _connector.connections_lines
-
-		if cnode.connectors.keys().size() == 1:
-			var result: Array = cnode.get_connector_lines(cnode.get_connector())
-
-			if not result.is_empty():
-				flow_lines += result[0]
-				conn_lines += cnode.get_input_connection_lines() + result[1]
-
-	return [flow_lines, conn_lines]
-
-
-func get_input_connection_lines() -> Array:
-	var input_container = get_node('%InputContainer')
-	var lines: Array = []
-
-	for input: HenCnodeInOut in input_container.get_children():
-		lines += input.from_connection_lines
-
-		if input.from_connection_lines.size() > 0:
-			lines += input.from_connection_lines[0].from_cnode.get_input_connection_lines()
-		
-	return lines
-
-
-func get_connector(_type: String = 'cnode') -> Variant:
-	if connectors.has(_type): return connectors[_type]
-
-	return null
-
-
 func get_border() -> Panel:
 	return get_node('%Border')
 
-
-func show_debug_value(_value) -> void:
-	var container: VBoxContainer = get_node('%Container')
-	container.get_child(1).show_value(_value)
 
 static func instantiate_and_add_pool() -> void:
 	HenGlobal.can_instantiate_pool = true

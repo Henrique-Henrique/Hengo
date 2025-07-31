@@ -18,7 +18,7 @@ class InputConnectionData extends HenVCConnectionData:
 		return {
 			from_id = from_id,
 			to_id = to_id,
-			from_vc_id = from.id,
+			from_vc_id = from.identity.id,
 		}
 
 

@@ -45,7 +45,7 @@ func _on_gui(_event: InputEvent) -> void:
 		else:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				if HenGlobal.can_make_flow_connection and HenGlobal.flow_connection_to_data.is_empty():
-					var connection: HenVCFlowConnectionReturn = root.virtual_ref.get_flow_connection(id)
+					var connection: HenVCFlowConnectionReturn = (root.virtual_ref.get_ref() as HenVirtualCNode).flow.get_flow_connection(id)
 
 					if connection:
 						HenGlobal.history.create_action('Remove Flow Connection')
@@ -77,49 +77,10 @@ func _on_gui(_event: InputEvent) -> void:
 	elif _event is InputEventMouseMotion:
 		HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), '{0} {1}'.format([HenEnums.TOOLTIP_TEXT.MOUSE_ICON, 'Left Click And Drag to Connect']))
 
+
 func create_virtual_connection(_config: Dictionary) -> HenVCFlowConnectionReturn:
-	return root.virtual_ref.add_flow_connection(
+	return (root.virtual_ref.get_ref() as HenVirtualCNode).flow.add_flow_connection(
 		id,
 		_config.to_id,
 		_config.to_cnode.virtual_ref
 	)
-
-
-func create_connection_line(_config: Dictionary) -> HenFlowConnectionLine:
-	var line: HenFlowConnectionLine = HenAssets.FlowConnectionLineScene.instantiate()
-
-	line.from_connector = self
-	line.to_cnode = _config.from_cnode
-
-	match self.root.type:
-		HenVirtualCNode.Type.IF:
-			self.root.flow_to[type] = _config.from_cnode
-			line.flow_type = type
-		_:
-			self.root.flow_to = {
-				cnode = _config.from_cnode
-			}
-			line.flow_type = 'cnode'
-
-	# signal to update flow connection line
-	root.connect('on_move', line.update_line)
-	_config.from_cnode.connect('on_move', line.update_line)
-
-	root.connect('resized', line.update_line)
-	_config.from_cnode.connect('resized', line.update_line)
-
-	is_connected = true
-
-	return line
-
-
-func create_connection_line_and_instance(_config: Dictionary) -> HenFlowConnectionLine:
-	var line = create_connection_line(_config)
-	line.add_to_scene()
-	return line
-
-
-func remove_connection() -> void:
-	if connections_lines.size() > 0:
-		for line in connections_lines.duplicate():
-			line.remove_from_scene()

@@ -924,24 +924,25 @@ func _on_select() -> void:
 
 	# make connection
 	if cnode_config.has('from_virtual_ref'):
-		var connection: HenVCConnectionReturn = vc_return.v_cnode.create_input_connection(
-			vc_return.v_cnode.inputs[0].id,
+		var connection: HenVCConnectionReturn = vc_return.v_cnode.io.create_input_connection(
+			vc_return.v_cnode.io.inputs[0].id,
 			cnode_config.in_out_id,
 			cnode_config.from,
 		)
 		if connection: connection.add()
 	elif cnode_config.has('to_virtual_ref'):
-		cnode_config.from.create_input_connection(
+		cnode_config.from.io.create_input_connection(
 			cnode_config.to_virtual_ref.id,
-			vc_return.v_cnode.outputs[data.idx_to_connect].id,
+			vc_return.v_cnode.io.outputs[data.idx_to_connect].id,
 			vc_return.v_cnode,
 		).add()
 
 	# add connection when dragging from connector
-	if cnode_config.has('from_flow_connector') and not vc_return.v_cnode.from_flow_connections.is_empty():
+	if cnode_config.has('from_flow_connector') and not vc_return.v_cnode.flow.from_flow_connections.is_empty():
 		var connector: HenFlowConnector = cnode_config.from_flow_connector
 
-		connector.root.virtual_ref.add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.from_flow_connections[0].id, vc_return.v_cnode).add()
+		if connector.root.virtual_ref and connector.root.virtual_ref.get_ref():
+			(connector.root.virtual_ref.get_ref() as HenVirtualCNode).flow.add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.flow.from_flow_connections[0].id, vc_return.v_cnode).add()
 
 	HenGlobal.history.commit_action()
 	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()

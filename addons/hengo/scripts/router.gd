@@ -17,7 +17,9 @@ static var comment_reference: Dictionary = {}
 
 static func get_current_route_v_cnodes() -> Array:
 	if current_route:
-		return current_route.ref.virtual_cnode_list
+		return current_route.ref.children.virtual_cnode_list \
+			if current_route.ref is HenVirtualCNode \
+			else current_route.ref.virtual_cnode_list
 
 	return []
 
@@ -26,8 +28,12 @@ static func change_route(_route: Dictionary) -> void:
 		return
 
 	if current_route:
-		for v_cnode: HenVirtualCNode in current_route.ref.virtual_cnode_list:
-			v_cnode.hide()
+		var list: Array = current_route.ref.children.virtual_cnode_list \
+			if current_route.ref is HenVirtualCNode \
+			else current_route.ref.virtual_cnode_list
+
+		for v_cnode: HenVirtualCNode in list:
+			v_cnode.renderer.hide()
 
 
 	for line: HenConnectionLine in HenGlobal.connection_line_pool:
