@@ -148,7 +148,10 @@ func _input(event: InputEvent) -> void:
 				HenGlobal.history.create_action('Delete Node')
 
 				for cnode: HenCnode in all_nodes:
-					var v_cnode: HenVCNodeReturn = cnode.virtual_ref.get_history_obj()
+					if not cnode.virtual_ref or not cnode.virtual_ref.get_ref():
+						continue
+
+					var v_cnode: HenVCNodeReturn = cnode.virtual_ref.get_ref().get_history_obj()
 
 					HenGlobal.history.add_do_method(v_cnode.remove)
 					HenGlobal.history.add_undo_reference(v_cnode)
