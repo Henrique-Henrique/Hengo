@@ -12,10 +12,7 @@ var singleton_class: String
 var from_side_bar_id: int = -1
 var from_id: int = -1
 
-var vc: WeakRef
-
-func _init(_vc: HenVirtualCNode) -> void:
-	vc = weakref(_vc)
+signal cnode_need_update
 
 
 func on_change_name(_name: String) -> void:
@@ -24,5 +21,4 @@ func on_change_name(_name: String) -> void:
 			return
 
 	name = _name
-	
-	if vc.get_ref(): vc.get_ref().renderer.update()
+	cnode_need_update.emit()

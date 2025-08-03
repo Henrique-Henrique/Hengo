@@ -123,7 +123,7 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 			else HenRouter.current_route.ref.virtual_cnode_list
 
 		for v_cnode: HenVirtualCNode in list:
-			v_cnode.visual.check_visibility(rect)
+			v_cnode.check_visibility(rect)
 
 
 func get_rect() -> Rect2:

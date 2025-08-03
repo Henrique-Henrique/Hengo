@@ -21,10 +21,14 @@ var can_move_to_format: bool = true
 
 # pool
 var is_pool: bool = false
-var virtual_ref: WeakRef
 
 
+signal on_hovering(_mouse_pos: Vector2)
+signal on_double_click
+signal on_mouse_enter
 signal on_move
+signal on_right_click
+signal changed_position(_pos: Vector2)
 
 
 func _ready():
@@ -40,19 +44,9 @@ func _ready():
 
 
 func _on_enter() -> void:
-	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
-
-	if not vc:
-		return
-
 	_is_mouse_enter = true
+	on_mouse_enter.emit()
 
-	if HenGlobal.can_make_flow_connection and not vc.flow.from_flow_connections.is_empty():
-		HenGlobal.flow_connection_to_data = {
-			to_cnode = self,
-			to_id = vc.flow.from_flow_connections[0].id
-		}
-	
 	# animations
 	if not selected: hover_animation()
 
@@ -76,30 +70,10 @@ func exit_animation() -> void:
 	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .2)
 
 
-func _scale_and_update_line(_scale: Vector2) -> void:
-	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
-
-	if not vc:
-		return
-
-	scale = _scale
-
-	for from_connection: HenVCFromFlowConnectionData in vc.flow.from_flow_connections:
-		for connetion: HenVCFlowConnectionData in from_connection.from_connections:
-			if connetion.line_ref:
-				connetion.line_ref.update_line()
-			
-	for connetion: HenVCFlowConnectionData in vc.flow.flow_connections:
-			if connetion.line_ref:
-				connetion.line_ref.update_line()
-
-
 func _on_gui(_event: InputEvent) -> void:
-	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
-
-	if not vc:
-		return
-
+	# var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+	# if not vc:
+	# 	return
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			HenGlobal.DOCS_TOOLTIP.visible = false
@@ -109,10 +83,7 @@ func _on_gui(_event: InputEvent) -> void:
 				else:
 					select()
 			elif _event.double_click:
-				if not vc.route_info.route.is_empty():
-					HenRouter.change_route(vc.route_info.route)
-				elif vc.references.ref and vc.references.ref.get('route'):
-					HenRouter.change_route(vc.references.ref.get('route'))
+				on_double_click.emit()
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
@@ -127,13 +98,7 @@ func _on_gui(_event: InputEvent) -> void:
 						
 						select()
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
-					# showing state config on doubleclick
-					if vc.identity.type == HenVirtualCNode.Type.STATE:
-						HenGlobal.GENERAL_POPUP.get_parent().show_content(
-							HenPropEditor.mount(vc),
-								'Testing',
-								get_global_mouse_position()
-							)
+					on_right_click.emit(get_global_mouse_position())
 					
 		else:
 			moving = false
@@ -144,14 +109,15 @@ func _on_gui(_event: InputEvent) -> void:
 				i.moving = false
 			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
-		if vc.state.invalid:
-			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
-		else:
-			match vc.identity.type:
-				HenVirtualCNode.Type.STATE:
-					HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
-				_:
-					HenGlobal.TOOLTIP.close()
+		on_hovering.emit(get_global_mouse_position())
+	# 	if vc.state.invalid:
+	# 		HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
+	# 	else:
+	# 		match vc.identity.type:
+	# 			HenVirtualCNode.Type.STATE:
+	# 				HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
+	# 			_:
+	# 				HenGlobal.TOOLTIP.close()
 
 
 func _input(_event: InputEvent):
@@ -180,16 +146,8 @@ func _on_dropdown_state_pick(_value: Dictionary) -> void:
 # public
 #
 func move(_pos: Vector2) -> void:
-	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
-
-	if not vc:
-		return
-
 	position = _pos
-
-	if vc:
-		vc.visual.position = position
-
+	changed_position.emit(position)
 	HenVCActionButtons.get_singleton().hide_action()
 	emit_signal('on_move')
 
@@ -199,10 +157,10 @@ func select() -> void:
 	hover_animation()
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 
-	var vc: HenVirtualCNode = self.virtual_ref.get_ref()
+	# var vc: HenVirtualCNode = self.virtual_ref.get_ref()
 
-	if not vc:
-		return
+	# if not vc:
+	# 	return
 
 	if HenGlobal.CODE_PREVIEWER.visible:
 		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.virtual_ref.get_ref().identity.id)

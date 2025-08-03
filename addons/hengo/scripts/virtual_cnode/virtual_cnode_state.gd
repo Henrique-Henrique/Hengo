@@ -7,12 +7,8 @@ var is_deleted: bool = false
 var invalid: bool = false
 var showing_action_menu: bool = false
 
-var vc: WeakRef
-
-func _init(_vc: HenVirtualCNode) -> void:
-	vc = weakref(_vc)
-
+signal cnode_need_update
 
 func on_side_bar_deleted(_deleted: bool) -> void:
 	invalid = _deleted
-	if vc.get_ref(): vc.get_ref().renderer.update()
+	cnode_need_update.emit()

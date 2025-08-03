@@ -75,18 +75,134 @@ var io: HenVirtualCNodeIO
 var flow: HenVirtualCNodeFlow
 var references: HenVirtualCNodeReference
 var renderer: HenVirtualCNodeRenderer
+var pool: HenPool
 
+var cnode_instance: HenCnode
 
 func _init() -> void:
-	state = HenVirtualCNodeState.new(self)
-	identity = HenVirtualCNodeIdentity.new(self)
-	visual = HenVirtualCNodeVisual.new(self)
+	pool = HenPool.new()
+	state = HenVirtualCNodeState.new()
+	identity = HenVirtualCNodeIdentity.new()
+	visual = HenVirtualCNodeVisual.new()
 	route_info = HenVirtualCNodeRoute.new()
 	children = HenVirtualCNodeChildren.new()
-	io = HenVirtualCNodeIO.new(self)
+	io = HenVirtualCNodeIO.new(identity, state)
 	flow = HenVirtualCNodeFlow.new(self)
 	references = HenVirtualCNodeReference.new()
-	renderer = HenVirtualCNodeRenderer.new(self)
+	renderer = HenVirtualCNodeRenderer.new(
+		state,
+		visual,
+		identity,
+		io,
+		flow,
+		pool
+	)
+
+	state.cnode_need_update.connect(update)
+
+
+func show() -> void:
+	var cnode: HenCnode = pool.get_cnode_from_pool()
+
+	if not cnode:
+		return
+
+	cnode_instance = cnode
+	renderer.configure_cnode_to_show(cnode)
+
+	# signals
+	cnode.on_hovering.connect(on_cnode_hovering)
+	cnode.on_double_click.connect(on_cnode_double_click)
+	cnode.on_right_click.connect(on_cnode_right_click)
+	cnode.changed_position.connect(on_cnode_changed_position)
+	cnode.on_mouse_enter.connect(on_cnode_mouse_enter)
+
+
+func hide() -> void:
+	if not cnode_instance:
+		return
+	
+	# signals
+	cnode_instance.on_hovering.disconnect(on_cnode_hovering)
+	cnode_instance.on_double_click.disconnect(on_cnode_double_click)
+	cnode_instance.on_right_click.disconnect(on_cnode_right_click)
+	cnode_instance.changed_position.disconnect(on_cnode_changed_position)
+	cnode_instance.on_mouse_enter.disconnect(on_cnode_mouse_enter)
+
+	renderer.configure_cnode_to_hide(cnode_instance)
+	cnode_instance = null
+
+
+func update() -> void:
+	if not cnode_instance:
+		return
+
+	var should_hide: bool = state.is_deleted or (not route_info.route_ref or not HenRouter.current_route or route_info.route_ref.id != HenRouter.current_route.id)
+
+	hide()
+
+	if not should_hide:
+		check_visibility()
+
+func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
+	state.is_showing = _rect.intersects(Rect2(
+		visual.position,
+		visual.size
+	))
+
+	if state.is_showing and cnode_instance == null:
+		show()
+	elif not state.is_showing:
+		hide()
+
+
+func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
+	return io.create_input_connection(_id, _from_id, self, _from)
+
+
+func on_cnode_mouse_enter() -> void:
+	if not cnode_instance:
+		return
+
+	if HenGlobal.can_make_flow_connection and not flow.from_flow_connections.is_empty():
+		HenGlobal.flow_connection_to_data = {
+			to_cnode = cnode_instance,
+			to_id = flow.from_flow_connections[0].id
+		}
+
+
+func on_cnode_hovering(_mouse_pos: Vector2) -> void:
+	if state.invalid:
+		HenGlobal.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
+	else:
+		match identity.type:
+			HenVirtualCNode.Type.STATE:
+				HenGlobal.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
+			_:
+				HenGlobal.TOOLTIP.close()
+
+
+func on_cnode_double_click() -> void:
+	if not route_info.route.is_empty():
+		HenRouter.change_route(route_info.route)
+	elif references.ref and references.ref.get('route'):
+		@warning_ignore('unsafe_call_argument')
+		HenRouter.change_route(references.ref.get('route'))
+
+
+func on_cnode_right_click(_mouse_pos: Vector2) -> void:
+	# showing state config on doubleclick
+	if identity.type == HenVirtualCNode.Type.STATE:
+		@warning_ignore('unsafe_method_access')
+		HenGlobal.GENERAL_POPUP.get_parent().show_content(
+			HenPropEditor.mount(self),
+			'Testing',
+			_mouse_pos
+		)
+
+
+func on_cnode_changed_position(_pos: Vector2) -> void:
+	visual.position = _pos
 
 
 func get_save() -> Dictionary:
@@ -143,8 +259,8 @@ func get_save() -> Dictionary:
 		if not flow_connection.to or not flow_connection.to.get_ref(): continue
 		data.flow_connections.append(flow_connection.get_save())
 
-	for input: HenVCConnectionData.InputConnectionData in io.input_connections:
-		data.input_connections.append(input.get_save())
+	# for input: HenVCConnectionData in io.connections:
+	# 	data.input_connections.append(input.get_save())
 
 	if not children.virtual_cnode_list.is_empty():
 		data.virtual_cnode_list = []
@@ -407,77 +523,3 @@ func _notification(what: int) -> void:
 
 func clean() -> void:
 	pass
-	# for chd in virtual_cnode_list:
-	# 	chd.clean()
-
-	# for chd in virtual_sub_type_vc_list:
-	# 	chd.clean()
-
-	# if route and route.has('ref'):
-	# 	route.ref = null
-
-	# for input: HenVCInOutData in inputs:
-	# 	if input.ref: input.ref.clean()
-	# 	input.ref = null
-
-	# for output: HenVCInOutData in outputs:
-	# 	if output.ref: output.ref.clean()
-	# 	output.ref = null
-
-	# for flow: HenVCFlowConnectionData in flow_connections:
-	# 	flow.from = null
-	# 	flow.to = null
-	# 	flow.to_from_ref = null
-	# 	flow.ref = null
-
-	# for flow: HenVCFromFlowConnectionData in from_flow_connections:
-	# 	flow.ref = null
-
-	# 	for connection: HenVCFlowConnectionData in flow.from_connections:
-	# 		connection.from = null
-	# 		connection.to = null
-	# 		connection.to_from_ref = null
-	# 		connection.ref = null
-
-	# 	flow.from_connections.clear()
-
-	# if is_instance_valid(ref):
-	# 	if ref.has_signal('name_changed'):
-	# 		for connection_data: Dictionary in ref.get_signal_connection_list('name_changed'):
-	# 			(ref as Variant).name_changed.disconnect(connection_data.callable)
-
-	# 	if ref.has_signal('in_out_added'):
-	# 		for connection_data: Dictionary in ref.get_signal_connection_list('in_out_added'):
-	# 			(ref as Variant).in_out_added.disconnect(connection_data.callable)
-
-	# 	if ref.has_signal('deleted'):
-	# 		for connection_data: Dictionary in ref.get_signal_connection_list('deleted'):
-	# 			(ref as Variant).deleted.disconnect(connection_data.callable)
-
-	# 	if ref.has_signal('in_out_reseted'):
-	# 		for connection_data: Dictionary in ref.get_signal_connection_list('in_out_reseted'):
-	# 			(ref as Variant).in_out_reseted.disconnect(connection_data.callable)
-
-	# 	if ref.has_signal('flow_added'):
-	# 		for connection_data: Dictionary in ref.get_signal_connection_list('flow_added'):
-	# 			(ref as Variant).flow_added.disconnect(connection_data.callable)
-
-
-	# for input: HenVCConnectionData.InputConnectionData in input_connections:
-	# 	input.from = null
-	# 	input.from_ref = null
-	# 	input.input_ref = null
-
-	# for output: HenVCConnectionData.OutputConnectionData in output_connections:
-	# 	output.to = null
-	# 	output.to_ref = null
-	# 	output.output_ref = null
-
-	# inputs.clear()
-	# outputs.clear()
-	# flow_connections.clear()
-	# from_flow_connections.clear()
-	# input_connections.clear()
-	# output_connections.clear()
-	# virtual_cnode_list.clear()
-	# virtual_sub_type_vc_list.clear()

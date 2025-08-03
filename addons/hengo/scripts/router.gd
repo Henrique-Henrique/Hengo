@@ -33,7 +33,7 @@ static func change_route(_route: Dictionary) -> void:
 			else current_route.ref.virtual_cnode_list
 
 		for v_cnode: HenVirtualCNode in list:
-			v_cnode.renderer.hide()
+			v_cnode.hide()
 
 
 	for line: HenConnectionLine in HenGlobal.connection_line_pool:

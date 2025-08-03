@@ -4,9 +4,9 @@ class_name HenVCFlowConnectionReturn
 var flow_connection: HenVCFlowConnectionData
 
 var to: WeakRef
+var from: WeakRef
 var to_id: int
 var from_id: int
-var from: WeakRef
 var to_from_ref: HenVCFromFlowConnectionData
 
 # old
@@ -50,8 +50,8 @@ func add() -> void:
 
     flow_connection.to_from_ref.from_connections.append(flow_connection)
 
-    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).renderer.update()
-    if flow_connection.to and flow_connection.to.get_ref(): (flow_connection.to.get_ref() as HenVirtualCNode).renderer.update()
+    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).update()
+    if flow_connection.to and flow_connection.to.get_ref(): (flow_connection.to.get_ref() as HenVirtualCNode).update()
 
 func remove() -> void:
     flow_connection.to = null
@@ -71,8 +71,8 @@ func remove() -> void:
         flow_connection.to_from_ref = old_to_from_ref
 
         old_to_from_ref.from_connections.append(flow_connection)
-        if old_to and old_to.get_ref(): (old_to.get_ref() as HenVirtualCNode).renderer.update()
+        if old_to and old_to.get_ref(): (old_to.get_ref() as HenVirtualCNode).update()
 
     old_to = null
 
-    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).renderer.update()
+    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).update()

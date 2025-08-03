@@ -170,11 +170,14 @@ static func load_data(_path: StringName) -> void:
 
 		# adding in/out connections
 		for input_data: Dictionary in connection_list:
-			(input_data.from as HenVirtualCNode).io.add_input_connection(
+			var connection: HenVCConnectionReturn = (input_data.from as HenVirtualCNode).get_new_input_connection_command(
 				input_data.to_id,
 				input_data.from_id,
 				(loaded_virtual_cnode_list[int(input_data.from_vc_id)] as HenVirtualCNode)
 			)
+
+			if connection:
+				connection.add()
 
 		# adding flow connection
 		for flow_data: Dictionary in flow_connection_list:

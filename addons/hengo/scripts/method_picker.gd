@@ -924,7 +924,7 @@ func _on_select() -> void:
 
 	# make connection
 	if cnode_config.has('from_virtual_ref'):
-		var connection: HenVCConnectionReturn = vc_return.v_cnode.io.create_input_connection(
+		var connection: HenVCConnectionReturn = vc_return.v_cnode.get_new_input_connection_command(
 			vc_return.v_cnode.io.inputs[0].id,
 			cnode_config.in_out_id,
 			cnode_config.from,

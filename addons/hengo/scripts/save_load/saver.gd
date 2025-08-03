@@ -77,7 +77,8 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	if _regenerate:
 		HenCodeGeneration.regenerate(save_config, _script_id, _script_data.side_bar_list)
 
-	save_data(save_config)
+	# save_data(save_config)
+	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
 
 
 static func save_data(_save_config: SaveConfig) -> void:
