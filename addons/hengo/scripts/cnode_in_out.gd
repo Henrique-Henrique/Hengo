@@ -1,20 +1,20 @@
 @tool
 class_name HenCnodeInOut extends PanelContainer
 
-
 @export var root: HenCnode
 @export_enum('in', 'out') var type: String
 
-var input_ref: HenVCInOutData
 
-class CNodeInOutConnectionData:
-	var vc: HenVirtualCNode
-	var in_out: HenVCInOutData
+var io_type: StringName
+var sub_type: StringName
 
-	func _init(_vc: HenVirtualCNode, _in_out: HenVCInOutData) -> void:
-		vc = _vc
-		in_out = _in_out
-
+signal request_method_picker
+signal on_mouse_enter
+signal request_create_connection
+signal on_value_change
+signal on_outprop_value_change
+signal outprop_config_request
+signal inprop_config_request
 
 func _ready():
 	mouse_entered.connect(_on_enter)
@@ -35,32 +35,9 @@ func _on_gui(_event: InputEvent) -> void:
 				HenGlobal.CONNECTION_GUIDE.start(pos + connector.size / 2, self)
 		else:
 			if HenGlobal.can_make_connection and not HenGlobal.connection_to_data:
-				# call mehotd list on in_out type
-				var method_list = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
-				var data: Dictionary = {
-					from = root.virtual_ref.get_ref(),
-					in_out_id = input_ref.id,
-				}
-
-				if type == 'in':
-					data.to_virtual_ref = input_ref
-				else:
-					data.from_virtual_ref = input_ref
-
-				method_list.start(input_ref.type, get_global_mouse_position(), false, type, data)
-
-				HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
-
+				request_method_picker.emit(type, get_global_mouse_position())
 			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data:
-				# try connection
-				var connection: HenVCConnectionReturn = create_virtual_connection(HenGlobal.connection_to_data)
-
-				if connection:
-					HenGlobal.history.create_action('Add Connection')
-					HenGlobal.history.add_do_method(connection.add)
-					HenGlobal.history.add_do_reference(connection)
-					HenGlobal.history.add_undo_method(connection.remove)
-					HenGlobal.history.commit_action()
+				request_create_connection.emit(type)
 
 			HenGlobal.CONNECTION_GUIDE.end()
 
@@ -80,17 +57,8 @@ func _on_enter() -> void:
 
 	get('theme_override_styles/panel/').set('border_color', Color.RED)
 
-	HenGlobal.connection_to_data = CNodeInOutConnectionData.new(
-		(self.root.virtual_ref.get_ref() as HenVirtualCNode),
-		input_ref,
-	)
+	on_mouse_enter.emit(get_node('%Connector'))
 
-	if HenGlobal.CONNECTION_GUIDE.is_in_out:
-		var connector: TextureRect = get_node('%Connector')
-		var pos = HenGlobal.CAM.get_relative_vec2(get_node('%Connector').global_position)
-
-		HenGlobal.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
-		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = get_type_color(input_ref.type)
 
 func _on_exit() -> void:
 	get('theme_override_styles/panel/').set('border_color', Color.TRANSPARENT)
@@ -101,24 +69,6 @@ func _on_exit() -> void:
 	if HenGlobal.CONNECTION_GUIDE.is_in_out:
 		HenGlobal.CONNECTION_GUIDE.hover_pos = null
 		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
-
-
-func create_virtual_connection(_data: CNodeInOutConnectionData) -> HenVCConnectionReturn:
-	return null
-
-	if type == 'in':
-		return
-		# return (root.virtual_ref.get_ref() as HenVirtualCNode).io.create_input_connection(
-		# 	input_ref.id,
-		# 	_data.in_out.id,
-		# 	_data.vc
-		# )
-
-	return _data.vc.get_new_input_connection_command(
-		_data.in_out.id,
-		input_ref.id,
-		(root.virtual_ref.get_ref() as HenVirtualCNode)
-	)
 
 
 func change_name(_text: String) -> void:
@@ -135,9 +85,7 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 			'@dropdown':
 				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 
-				dropdown.type = input_ref.category
-				dropdown.custom_data = input_ref.data
-				dropdown.input_ref = input_ref
+				outprop_config_request.emit(dropdown)
 
 				if not _default_value:
 					dropdown.set_default('Node')
@@ -155,10 +103,7 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 
 
 func _on_out_value(_value, _type, _prop) -> void:
-	if input_ref:
-		input_ref.value = _value
-		input_ref.type = _type
-		input_ref.code_value = _prop.get_generated_code()
+	on_outprop_value_change.emit(_value, _type, _prop.get_generated_code())
 
 
 func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
@@ -169,23 +114,11 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 		if prop_container.get_child_count() > 4:
 			return
 
-		match input_ref.sub_type:
+		match sub_type:
 			'@dropdown':
 				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
 
-				dropdown.type = input_ref.category
-				dropdown.custom_data = input_ref.data
-				dropdown.input_ref = input_ref
-
-				match input_ref.category:
-					'enum_list':
-						dropdown.text = ClassDB.class_get_enum_constants(input_ref.data[0], input_ref.data[1])[0]
-						dropdown.custom_value = '.'.join(input_ref.data) + '.' + dropdown.text
-					'get_prop', 'set_prop':
-						dropdown.alignment = HORIZONTAL_ALIGNMENT_LEFT
-						dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-				
+				inprop_config_request.emit(dropdown)
 				prop_container.add_child(dropdown)
 				prop = dropdown
 			'expression':
@@ -197,7 +130,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 				prop = expression_bt
 
 			_:
-				match input_ref.type:
+				match io_type:
 					'String', 'NodePath', 'StringName':
 						var _str = preload('res://addons/hengo/scenes/props/string.tscn').instantiate()
 						prop_container.add_child(_str)
@@ -226,7 +159,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						var l: Label = HenAssets.CNodeInputLabel.instantiate()
 
 						if prop_container.get_child_count() < 3:
-							l.text = input_ref.code_value
+							# l.text = input_ref.code_value
 							if l.text == '_ref.':
 								l.text = 'self'
 							
@@ -244,37 +177,37 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 
 
 func _on_value(_value, _prop) -> void:
-	if input_ref:
-		input_ref.value = _value
-		input_ref.code_value = _prop.get_generated_code()
+	on_value_change.emit(_value, _prop.get_generated_code())
 
 
 func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	# props ref
 	var input_container = get_node('%CNameInput')
 	var prop_ref_bt = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
-	prop_ref_bt.text = ''
-	prop_ref_bt.icon = preload('res://addons/hengo/assets/icons/circle-dot.svg')
-	prop_ref_bt.type = 'all_props'
-	prop_ref_bt.tooltip_text = 'Bind prop value'
+
+	# prop_ref_bt.text = ''
+	# prop_ref_bt.icon = preload('res://addons/hengo/assets/icons/circle-dot.svg')
+	# prop_ref_bt.type = 'all_props'
+	# prop_ref_bt.tooltip_text = 'Bind prop value'
 	
-	prop_ref_bt.add_theme_stylebox_override('normal', StyleBoxEmpty.new())
-	prop_ref_bt.input_ref = input_ref
+	# prop_ref_bt.add_theme_stylebox_override('normal', StyleBoxEmpty.new())
+	# prop_ref_bt.input_ref = input_ref
 
-	if _default:
-		prop_ref_bt.set_default(_default)
+	# if _default:
+	# 	prop_ref_bt.set_default(_default)
 
-	input_container.add_child(prop_ref_bt)
+	# input_container.add_child(prop_ref_bt)
 
-	prop_ref_bt.value_changed.connect(_on_prop_value_changed)
+	# prop_ref_bt.value_changed.connect(_on_prop_value_changed)
 
 	return prop_ref_bt
 
 
 func _on_prop_value_changed(_value, _code_value) -> void:
-	input_ref.value = _value
-	input_ref.code_value = _code_value
-	input_ref.is_prop = true
+	pass
+	# input_ref.value = _value
+	# input_ref.code_value = _code_value
+	# input_ref.is_prop = true
 
 
 func reset_in_props(_jump_first: bool = false) -> void:
@@ -360,28 +293,24 @@ func change_type(_type: String, _default_value = null, _sub_type: String = '', _
 	root.reset_size()
 
 
-func get_type_color(_type: String) -> Color:
-	match _type:
-		'String':
-			return Color('#8eef97')
-		'float':
-			return Color('#FFDD65')
-		'int':
-			return Color('#5ABBEF')
-		'bool':
-			return Color('#FC7F7F')
-		'Vector2', 'Vector3':
-			return Color('#c368ed')
-		'Variant':
-			return Color('#72788a')
-		_:
-			if ClassDB.is_parent_class(_type, 'Control'):
-				return Color('#8eef97')
-			elif ClassDB.is_parent_class(_type, 'Node2D'):
-				return Color('#5ABBEF')
-			elif ClassDB.is_parent_class(_type, 'Node3D'):
-				return Color('#FC7F7F')
-			elif ClassDB.is_parent_class(_type, 'AnimationMixer'):
-				return Color('#c368ed')
+func reset_signals(_inout: HenVCInOutData):
+	for signal_name: StringName in [
+		'request_method_picker',
+		'on_mouse_enter',
+		'request_create_connection',
+		'on_value_change',
+		'on_outprop_value_change',
+		'outprop_config_request',
+		'inprop_config_request',
+	]:
+		for connection: Dictionary in get_signal_connection_list(signal_name):
+			@warning_ignore('unsafe_method_access')
+			connection.signal.disconnect(connection.callable)
 
-			return Color.WHITE
+	request_method_picker.connect(_inout.on_method_picker_request)
+	on_mouse_enter.connect(_inout.on_io_mouse_enter)
+	request_create_connection.connect(_inout.on_create_connection_request)
+	on_value_change.connect(_inout.on_value_change)
+	on_outprop_value_change.connect(_inout.on_outprop_value_change)
+	outprop_config_request.connect(_inout.on_outprop_config_request)
+	inprop_config_request.connect(_inout.on_inprop_config_request)

@@ -98,6 +98,9 @@ func _init() -> void:
 		pool
 	)
 
+	identity.cnode_need_update.connect(update)
+	io.cnode_need_update.connect(update)
+	flow.cnode_need_update.connect(update)
 	state.cnode_need_update.connect(update)
 
 
@@ -302,6 +305,14 @@ func add_flow_connection(_id: int, _to_id: int, _to: WeakRef) -> HenVCFlowConnec
 	return flow.add_flow_connection(_id, _to_id, weakref(self), _to)
 
 
+func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
+	return io.on_in_out_added(get_vc, _is_input, _data, _check_types)
+
+
+func get_vc() -> HenVirtualCNode:
+	return self
+
+
 func get_history_obj() -> HenVCNodeReturn:
 	return HenVCNodeReturn.new(self)
 
@@ -400,7 +411,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 
 		if _config.ref.has_signal('in_out_reseted'):
-			_config.ref.in_out_reseted.connect(v_cnode.io.on_in_out_reset)
+			_config.ref.in_out_reseted.connect(v_cnode.io.on_in_out_reset.bind(v_cnode.get_vc))
 
 		if _config.ref.has_signal('flow_added'):
 			_config.ref.flow_added.connect(v_cnode.flow.on_flow_added)
@@ -487,7 +498,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('inputs'):
 		for input_data: Dictionary in _config.inputs:
-			var input: HenVCInOutData = v_cnode.io.on_in_out_added(true, input_data, false)
+			var input: HenVCInOutData = v_cnode.add_io(true, input_data, false)
 
 			if not input_data.has('code_value'):
 				input.reset_input_value()
@@ -495,7 +506,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('outputs'):
 		for output_data: Dictionary in _config.outputs:
-			v_cnode.io.on_in_out_added(false, output_data, false)
+			v_cnode.add_io(false, output_data, false)
 
 	return v_cnode
 

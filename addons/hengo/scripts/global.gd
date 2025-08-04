@@ -32,7 +32,7 @@ static var BASE_ROUTE_REF: HenLoader.BaseRouteRef
 
 # cnodes
 static var can_make_connection: bool = false
-static var connection_to_data: HenCnodeInOut.CNodeInOutConnectionData
+static var connection_to_data: HenVCInOutData.CNodeInOutConnectionData
 static var can_make_flow_connection: bool = false
 static var flow_connection_to_data: Dictionary = {}
 static var flow_cnode_from: PanelContainer = null

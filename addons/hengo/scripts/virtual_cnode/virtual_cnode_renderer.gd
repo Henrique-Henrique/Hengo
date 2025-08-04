@@ -40,9 +40,9 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			
 			var input_data: HenVCInOutData = io.inputs[idx]
 
+			input.reset_signals(input_data)
 			input.change_name(input_data.name)
-			input.input_ref = input_data
-			
+
 			if input_data.type:
 				if input_data.is_prop:
 					input.reset_in_props()
@@ -78,8 +78,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			
 			var output_data: HenVCInOutData = io.outputs[idx]
 			
-			output.input_ref = output_data
-
+			output.reset_signals(output_data)
+			
 			output.change_name(output_data.name)
 			output.change_type(
 				output_data.type,

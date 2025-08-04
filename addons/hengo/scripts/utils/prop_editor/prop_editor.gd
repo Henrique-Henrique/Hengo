@@ -74,7 +74,7 @@ class Prop:
 				return item
 			Type.DROPDOWN:
 				var item = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
-				item.type = category
+				# item.type = category
 
 				if data:
 					item.custom_data = data

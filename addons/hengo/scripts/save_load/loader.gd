@@ -137,7 +137,7 @@ static func load_data(_path: StringName) -> void:
 		HenGlobal.SIDE_BAR_LIST.load_save(data.side_bar_list)
 
 		# loading v_cnodes
-		_load_vc(data.virtual_cnode_list, base_route)
+		parse_and_get_vc_list_dict(data.virtual_cnode_list, base_route)
 
 		# adding in/out connections
 		for input_data: Dictionary in connection_list:
@@ -229,7 +229,7 @@ static func show_class_name() -> void:
 		sb.bg_color = Color('#0000004a')
 
 
-static func _load_vc(_cnode_list: Array, _route: HenRouteData) -> Array:
+static func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData) -> Array:
 	var vc_list: Array = []
 
 	for _config: Dictionary in _cnode_list:
@@ -260,7 +260,7 @@ static func _load_vc(_cnode_list: Array, _route: HenRouteData) -> Array:
 		
 		# if has sub vcnodes (basically states and etc)
 		if _config.has('virtual_cnode_list'):
-			vc.children.virtual_cnode_list = _load_vc(_config.virtual_cnode_list, vc.route_info.route)
+			vc.children.virtual_cnode_list = parse_and_get_vc_list_dict(_config.virtual_cnode_list, vc.route_info.route)
 
 		vc_list.append(vc)
 

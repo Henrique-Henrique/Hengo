@@ -145,8 +145,9 @@ class SideBarList:
 
 		# loading cnodes
 		for item in HenGlobal.SIDE_BAR_LIST_CACHE.values():
+			@warning_ignore('unsafe_method_access')
 			if item.get('cnode_list_to_load') is Array:
-				HenLoader._load_vc(item.cnode_list_to_load, item.route)
+				HenLoader.parse_and_get_vc_list_dict(item.cnode_list_to_load, item.route)
 
 		list_changed.emit()
 
