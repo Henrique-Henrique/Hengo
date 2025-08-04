@@ -697,8 +697,8 @@ func get_local_var_list() -> Array:
 
 	match HenRouter.current_route.type:
 		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-			if HenRouter.current_route.ref.get(&'local_vars') is Array:
-				for var_data: HenVarData in (HenRouter.current_route.ref.local_vars as Array):
+			if (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
+				for var_data: HenVarData in ((HenRouter.current_route.ref as WeakRef).get_ref().local_vars as Array):
 					var get_data: Dictionary = {
 						name = 'Local var -> ' + var_data.name,
 						type = FILTER_TYPE.SELF,
@@ -942,7 +942,7 @@ func _on_select() -> void:
 		var connector: HenFlowConnector = cnode_config.from_flow_connector
 
 		if connector.root.virtual_ref and connector.root.virtual_ref.get_ref():
-			(connector.root.virtual_ref.get_ref() as HenVirtualCNode).flow.add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.flow.from_flow_connections[0].id, weakref(vc_return.v_cnode)).add()
+			(connector.root.virtual_ref.get_ref() as HenVirtualCNode).add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.flow.from_flow_connections[0].id, weakref(vc_return.v_cnode)).add()
 
 	HenGlobal.history.commit_action()
 	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()

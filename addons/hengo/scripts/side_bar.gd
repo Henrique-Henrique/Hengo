@@ -66,11 +66,11 @@ class SideBarList:
 			AddType.MACRO:
 				macro_list.append(HenMacroData.new())
 			AddType.LOCAL_VAR:
-				if HenRouter.current_route.ref.get(&'local_vars') is Array:
+				if (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
 					var var_data: HenVarData = HenVarData.new()
-					var_data.local_ref = HenRouter.current_route.ref
+					var_data.local_ref = (HenRouter.current_route.ref as WeakRef).get_ref()
 					
-					(HenRouter.current_route.ref.local_vars as Array).append(var_data)
+					((HenRouter.current_route.ref as WeakRef).get_ref().local_vars as Array).append(var_data)
 
 		list_changed.emit()
 
@@ -88,8 +88,8 @@ class SideBarList:
 			AddType.MACRO:
 				return macro_list.map(func(x: HenMacroData): return {name = x.name})
 			AddType.LOCAL_VAR:
-				if HenRouter.current_route.ref.get(&'local_vars') is Array:
-					return (HenRouter.current_route.ref.local_vars as Array).map(func(x: HenVarData): return {name = x.name})
+				if (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
+					return ((HenRouter.current_route.ref as WeakRef).get_ref().local_vars as Array).map(func(x: HenVarData): return {name = x.name})
 			
 		return []
 	
@@ -258,7 +258,7 @@ func _on_list_changed() -> void:
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Macros', AddType.MACRO)
 
-	if not HenRouter.current_route.is_empty() and HenRouter.current_route.ref and HenRouter.current_route.ref.get(&'local_vars') is Array:
+	if HenRouter.current_route and (HenRouter.current_route.ref as WeakRef).get_ref() and (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
 		_add_categories(root, 'Local Variables', AddType.LOCAL_VAR)
 
 
@@ -286,8 +286,8 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		AddType.MACRO:
 			arr = HenGlobal.SIDE_BAR_LIST.macro_list
 		AddType.LOCAL_VAR:
-			if HenRouter.current_route.ref.get(&'local_vars') is Array:
-				arr = (HenRouter.current_route.ref.local_vars as Array)
+			if (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
+				arr = ((HenRouter.current_route.ref as WeakRef).get_ref().local_vars as Array)
 
 	for item_data in arr:
 		var item: TreeItem = category.create_child()

@@ -2,7 +2,6 @@
 class_name HenCnode extends PanelContainer
 
 var flow_to: Dictionary = {}
-var route_ref: Dictionary
 var data: Dictionary = {}
 var category: String
 
@@ -71,9 +70,6 @@ func exit_animation() -> void:
 
 
 func _on_gui(_event: InputEvent) -> void:
-	# var vc: HenVirtualCNode = self.virtual_ref.get_ref()
-	# if not vc:
-	# 	return
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			HenGlobal.DOCS_TOOLTIP.visible = false
@@ -110,14 +106,6 @@ func _on_gui(_event: InputEvent) -> void:
 			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
 		on_hovering.emit(get_global_mouse_position())
-	# 	if vc.state.invalid:
-	# 		HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
-	# 	else:
-	# 		match vc.identity.type:
-	# 			HenVirtualCNode.Type.STATE:
-	# 				HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
-	# 			_:
-	# 				HenGlobal.TOOLTIP.close()
 
 
 func _input(_event: InputEvent):
@@ -156,12 +144,7 @@ func select() -> void:
 	selected = true
 	hover_animation()
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
-
-	# var vc: HenVirtualCNode = self.virtual_ref.get_ref()
-
-	# if not vc:
-	# 	return
-
+	
 	if HenGlobal.CODE_PREVIEWER.visible:
 		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.virtual_ref.get_ref().identity.id)
 

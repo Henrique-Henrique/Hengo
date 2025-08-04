@@ -71,7 +71,7 @@ func _on_gui(_event: InputEvent) -> void:
 
 
 func create_virtual_connection(_config: Dictionary) -> HenVCFlowConnectionReturn:
-	return (root.virtual_ref.get_ref() as HenVirtualCNode).flow.add_flow_connection(
+	return (root.virtual_ref.get_ref() as HenVirtualCNode).add_flow_connection(
 		id,
 		_config.to_id,
 		_config.to_cnode.virtual_ref

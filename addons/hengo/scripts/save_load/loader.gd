@@ -39,52 +39,13 @@ static func load(_path: StringName) -> void:
 
 static func clean() -> void:
 	# cleaning instances
-	if HenGlobal.BASE_ROUTE.has('ref'):
+	if HenGlobal.BASE_ROUTE:
 		# cleaning vcnodes
-		for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
+		for v_cnode: HenVirtualCNode in (HenGlobal.BASE_ROUTE.ref as WeakRef).get_ref().virtual_cnode_list:
 			print('refs -> ', v_cnode.identity.name, ' -> ', v_cnode.get_reference_count())
 
-		# 	v_cnode.clean()
-		# HenGlobal.BASE_ROUTE.ref.virtual_cnode_list.clear()
-		# # cleaning side bar items refs
-		# for func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
-		# 	if func_data.input_ref: func_data.input_ref.clean()
-		# 	if func_data.output_ref: func_data.output_ref.clean()
-		# 	for v_cnode: HenVirtualCNode in func_data.virtual_cnode_list:
-		# 		v_cnode.clean()
-		# 	func_data.input_ref = null
-		# 	func_data.output_ref = null
-		# 	func_data.local_vars.clear()
-		# 	func_data.cnode_list_to_load.clear()
-		# 	func_data.virtual_cnode_list.clear()
-		# 	func_data.route.ref = null
-		# # cleaning signal data
-		# for signal_data: HenSignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
-		# 	if signal_data.signal_enter: signal_data.signal_enter.clean()
-		# 	for v_cnode: HenVirtualCNode in signal_data.virtual_cnode_list:
-		# 		v_cnode.clean()
-		# 	signal_data.signal_enter = null
-		# 	signal_data.local_vars.clear()
-		# 	signal_data.cnode_list_to_load.clear()
-		# 	signal_data.virtual_cnode_list.clear()
-		# # cleaning macro data
-		# for macro_data: HenMacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
-		# 	if macro_data.input_ref: macro_data.input_ref.clean()
-		# 	if macro_data.output_ref: macro_data.output_ref.clean()
-		# 	for v_cnode: HenVirtualCNode in macro_data.virtual_cnode_list:
-		# 		v_cnode.clean()
-		# 	macro_data.input_ref = null
-		# 	macro_data.output_ref = null
-		# 	macro_data.local_vars.clear()
-		# 	macro_data.cnode_list_to_load.clear()
-		# 	macro_data.virtual_cnode_list.clear()
-		# # cleaning cnodes refs
-		# for cnode: HenCnode in HenGlobal.CNODE_CONTAINER.get_children():
-		# 	if cnode.virtual_ref:
-		# 		cnode.virtual_ref.clean()
-		# 		cnode.virtual_ref = null
-		HenGlobal.BASE_ROUTE.ref = null
- 
+
+	HenGlobal.BASE_ROUTE_REF = null
 	HenGlobal.SIDE_BAR_LIST.clear()
 	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
 
@@ -118,6 +79,11 @@ static func load_data(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
+	var l: Array = []
+
+	for func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+		l.append(func_data)
+
 	clean()
 
 	# ---------------------------------------------------------------------------- #
@@ -126,17 +92,18 @@ static func load_data(_path: StringName) -> void:
 	await HenGlobal.CAM.get_tree().process_frame
 
 	HenGlobal.current_script_path = _path
-	HenRouter.current_route = {}
+	HenRouter.current_route = null
 	HenRouter.line_route_reference = {}
 	HenRouter.comment_reference = {}
 	HenGlobal.history = UndoRedo.new()
-
-	var base_route: Dictionary = {
-		name = 'Base',
-		type = HenRouter.ROUTE_TYPE.BASE,
-		id = HenUtilsName.get_unique_name(),
-		ref = BaseRouteRef.new()
-	}
+	HenGlobal.BASE_ROUTE_REF = BaseRouteRef.new()
+	
+	var base_route: HenRouteData = HenRouteData.new(
+		'Base',
+		HenRouter.ROUTE_TYPE.BASE,
+		HenUtilsName.get_unique_name(),
+		weakref(HenGlobal.BASE_ROUTE_REF)
+	)
 
 	HenGlobal.BASE_ROUTE = base_route
 
@@ -146,6 +113,10 @@ static func load_data(_path: StringName) -> void:
 
 	HenGlobal.script_config.path = _path
 	HenGlobal.script_config.id = resource_id
+
+	
+	for func_data: HenFuncData in l:
+		print('sidebar refs -> ', func_data.name, ' -> ', func_data.get_reference_count())
 
 
 	# loading hengo script data
@@ -181,7 +152,7 @@ static func load_data(_path: StringName) -> void:
 
 		# adding flow connection
 		for flow_data: Dictionary in flow_connection_list:
-			var connection = (flow_data.from as HenVirtualCNode).flow.add_flow_connection(flow_data.from_id, flow_data.to_id, weakref(loaded_virtual_cnode_list[int(flow_data.to_vc_id)]))
+			var connection = (flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.from_id, flow_data.to_id, weakref(loaded_virtual_cnode_list[int(flow_data.to_vc_id)]))
 		
 			if connection:
 				connection.add()
@@ -258,7 +229,7 @@ static func show_class_name() -> void:
 		sb.bg_color = Color('#0000004a')
 
 
-static func _load_vc(_cnode_list: Array, _route: Dictionary) -> Array:
+static func _load_vc(_cnode_list: Array, _route: HenRouteData) -> Array:
 	var vc_list: Array = []
 
 	for _config: Dictionary in _cnode_list:

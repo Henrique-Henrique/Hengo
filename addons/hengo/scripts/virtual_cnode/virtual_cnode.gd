@@ -87,7 +87,7 @@ func _init() -> void:
 	route_info = HenVirtualCNodeRoute.new()
 	children = HenVirtualCNodeChildren.new()
 	io = HenVirtualCNodeIO.new(identity, state)
-	flow = HenVirtualCNodeFlow.new(self)
+	flow = HenVirtualCNodeFlow.new(identity)
 	references = HenVirtualCNodeReference.new()
 	renderer = HenVirtualCNodeRenderer.new(
 		state,
@@ -100,6 +100,10 @@ func _init() -> void:
 
 	state.cnode_need_update.connect(update)
 
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		print('deleted -> ', identity.name)
 
 func show() -> void:
 	var cnode: HenCnode = pool.get_cnode_from_pool()
@@ -183,7 +187,7 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 
 
 func on_cnode_double_click() -> void:
-	if not route_info.route.is_empty():
+	if route_info.route:
 		HenRouter.change_route(route_info.route)
 	elif references.ref and references.ref.get('route'):
 		@warning_ignore('unsafe_call_argument')
@@ -291,6 +295,10 @@ func get_save() -> Dictionary:
 	return data
 
 
+func add_flow_connection(_id: int, _to_id: int, _to: WeakRef) -> HenVCFlowConnectionReturn:
+	return flow.add_flow_connection(_id, _to_id, weakref(self), _to)
+
+
 func get_history_obj() -> HenVCNodeReturn:
 	return HenVCNodeReturn.new(self)
 
@@ -337,37 +345,22 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match _config.route.type:
 		HenRouter.ROUTE_TYPE.BASE:
-			(_config.route.ref as HenLoader.BaseRouteRef).virtual_cnode_list.append(v_cnode)
+			((_config.route.ref as WeakRef).get_ref() as HenLoader.BaseRouteRef).virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.STATE:
-			(_config.route.ref as HenVirtualCNode).children.virtual_cnode_list.append(v_cnode)
+			((_config.route.ref as WeakRef).get_ref() as HenVirtualCNode).children.virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.FUNC:
-			var _ref: HenFuncData = _config.route.ref
-			
-			_ref.virtual_cnode_list.append(v_cnode)
-
-			# match v_cnode.identity.sub_type:
-			# 	SubType.FUNC_INPUT:
-			# 		_ref.input_ref = weakref(v_cnode)
-			# 	SubType.FUNC_OUTPUT:
-			# 		_ref.output_ref = weakref(v_cnode)
+			var _ref: HenFuncData = (_config.route.ref as WeakRef).get_ref()
+			# _ref.virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.SIGNAL:
-			var _ref: HenSignalData = _config.route.ref
-			
+			var _ref: HenSignalData = (_config.route.ref as WeakRef).get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
-
 			match v_cnode.identity.sub_type:
 				SubType.SIGNAL_ENTER:
 					_ref.signal_enter = v_cnode
 		HenRouter.ROUTE_TYPE.MACRO:
-			var _ref: HenMacroData = _config.route.ref
+			var _ref: HenMacroData = (_config.route.ref as WeakRef).get_ref()
 			
 			_ref.virtual_cnode_list.append(v_cnode)
-
-			# match v_cnode.identity.sub_type:
-			# 	SubType.MACRO_INPUT:
-			# 		_ref.input_ref = weakref(v_cnode)
-			# 	SubType.MACRO_OUTPUT:
-			# 		_ref.output_ref = weakref(v_cnode)
 
 	
 	if _config.has('singleton_class'):
@@ -419,7 +412,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match v_cnode.identity.sub_type:
 		SubType.VIRTUAL:
-			_config.route.ref.children.virtual_sub_type_vc_list.append(v_cnode)
+			((_config.route.ref as WeakRef).get_ref() as HenVirtualCNode).children.virtual_sub_type_vc_list.append(v_cnode)
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
 			var _ref: HenMacroData = _config.ref
 
@@ -441,12 +434,12 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			v_cnode.flow.flow_connections.append(HenVCFlowConnectionData.new({name = 'Then', id = 1}))
 			v_cnode.flow.from_flow_connections.append(HenVCFromFlowConnectionData.new({id = 0}))
 		Type.STATE:
-			v_cnode.route_info.route = {
-				name = v_cnode.identity.name,
-				type = HenRouter.ROUTE_TYPE.STATE,
-				id = HenUtilsName.get_unique_name(),
-				ref = v_cnode
-			}
+			v_cnode.route_info.route = HenRouteData.new(
+				v_cnode.identity.name,
+				HenRouter.ROUTE_TYPE.STATE,
+				HenUtilsName.get_unique_name(),
+				weakref(v_cnode)
+			)
 
 			HenRouter.line_route_reference[v_cnode.route_info.route.id] = []
 			
@@ -515,11 +508,6 @@ static func instantiate(_config: Dictionary) -> HenVCNodeReturn:
 	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config)
 	return HenVCNodeReturn.new(v_cnode)
 
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		print('DELETED -> ', identity.name)
-	
 
 func clean() -> void:
 	pass

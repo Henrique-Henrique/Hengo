@@ -26,7 +26,6 @@ func _init(
 func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	_cnode.position = visual.position
 	_cnode.visible = true
-	_cnode.route_ref = HenRouter.current_route
 	_cnode.change_name(identity.name)
 	_cnode.category = identity.category
 

@@ -8,7 +8,7 @@ var id: int = HenGlobal.get_new_node_counter()
 var name: String = 'func ' + str(Time.get_ticks_usec()): set = on_change_name
 var inputs: Array
 var outputs: Array
-var route: Dictionary
+var route: HenRouteData
 var virtual_cnode_list: Array
 # var input_ref: WeakRef
 # var output_ref: WeakRef
@@ -16,12 +16,12 @@ var local_vars: Array
 var cnode_list_to_load: Array
 
 func _init(_load_vc: bool = true) -> void:
-	route = {
-		name = name,
-		type = HenRouter.ROUTE_TYPE.FUNC,
-		id = HenUtilsName.get_unique_name(),
-		ref = self
-	}
+	route = HenRouteData.new(
+		name,
+		HenRouter.ROUTE_TYPE.FUNC,
+		HenUtilsName.get_unique_name(),
+		weakref(self)
+	)
 
 	HenRouter.line_route_reference[route.id] = []
 	HenRouter.comment_reference[route.id] = []

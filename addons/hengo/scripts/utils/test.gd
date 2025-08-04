@@ -42,18 +42,18 @@ static func set_global_config() -> void:
 
 	HenGlobal.script_config = global_script_data
 	HenGlobal.SIDE_BAR_LIST = HenSideBar.SideBarList.new()
-	HenGlobal.BASE_ROUTE = {
-		name = 'Base',
-		type = HenRouter.ROUTE_TYPE.BASE,
-		id = '0',
-		ref = HenLoader.BaseRouteRef.new()
-	}
+	HenGlobal.BASE_ROUTE = HenRouteData.new(
+		'Base',
+		HenRouter.ROUTE_TYPE.BASE,
+		'0',
+		weakref(HenLoader.BaseRouteRef.new())
+	)
 
 
 static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.References) -> CNodeDataCode:
 	var ref
 
-	if _vc.route_info.route_ref.ref is HenVirtualCNode:
+	if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
 		ref = HenCodeGeneration._get_cnode_from_dict(_vc.route_info.route_ref.ref.get_save(), _refs)
 	else:
 		ref = _vc.route_info.route_ref.ref
@@ -77,11 +77,11 @@ static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.
 static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs: HenSaveCodeType.References, _input_connections: Array[CNodeConnection] = [], _connections: Array[CNodeConnection] = []) -> String:
 	# input connections
 	for connection in _input_connections:
-		connection.from.create_input_connection(connection.from_id, connection.to_id, connection.to).add()
+		connection.create_input_connection(connection.from_id, connection.to_id, connection.to).add()
 
 	# add connections
 	for connection in _connections:
-		connection.from.add_flow_connection(connection.from_id, connection.to_id, connection.to).add()
+		connection.add_flow_connection(connection.from_id, connection.to_id, connection.to).add()
 	
 	# generate connections from dict
 	for connection in _connections + _input_connections:

@@ -1,4 +1,4 @@
 class_name HenVirtualCNodeRoute extends RefCounted
 
-var route: Dictionary
-var route_ref: Dictionary
+var route: HenRouteData
+var route_ref: HenRouteData

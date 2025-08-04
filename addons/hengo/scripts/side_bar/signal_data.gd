@@ -8,7 +8,7 @@ signal deleted(_deleted: bool)
 
 var id: int = HenGlobal.get_new_node_counter()
 var name: String = 'signal ' + str(Time.get_ticks_usec())
-var route: Dictionary
+var route: HenRouteData
 var virtual_cnode_list: Array = []
 var type: StringName = &'Variant'
 var params: Array
@@ -20,12 +20,12 @@ var local_vars: Array
 var cnode_list_to_load: Array
 
 func _init(_load_vc: bool = true) -> void:
-	route = {
-		name = name,
-		type = HenRouter.ROUTE_TYPE.SIGNAL,
-		id = HenUtilsName.get_unique_name(),
-		ref = self
-	}
+	route = HenRouteData.new(
+		name,
+		HenRouter.ROUTE_TYPE.SIGNAL,
+		HenUtilsName.get_unique_name(),
+		weakref(self)
+	)
 
 	HenRouter.line_route_reference[route.id] = []
 	HenRouter.comment_reference[route.id] = []

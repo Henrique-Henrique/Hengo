@@ -14,7 +14,7 @@ static var ERROR_BT: HenErrorBt
 static var CONNECTION_GUIDE: HenConnectionGuide
 static var HENGO_ROOT: HenHengoRoot
 static var DASHBOARD: HenDashboard
-static var BASE_ROUTE: Dictionary
+static var BASE_ROUTE: HenRouteData
 static var SIDE_BAR_LIST: HenSideBar.SideBarList
 static var SIDE_BAR: HenSideBar
 static var SIDE_PANEL: PanelContainer
@@ -28,6 +28,7 @@ static var SCRIPT_REF_CACHE: Dictionary = {}
 static var TABS: HenTabs
 static var SIGNAL_BUS: HenSignalBus
 static var HENGO_SAVER: HenSaver.Saver
+static var BASE_ROUTE_REF: HenLoader.BaseRouteRef
 
 # cnodes
 static var can_make_connection: bool = false

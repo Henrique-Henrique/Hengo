@@ -7,7 +7,7 @@ signal deleted(_deleted: bool)
 
 var id: int = HenGlobal.get_new_node_counter()
 var name: String = 'macro ' + str(Time.get_ticks_usec()): set = on_change_name
-var route: Dictionary
+var route: HenRouteData
 var virtual_cnode_list: Array = []
 var inputs: Array
 var outputs: Array
@@ -47,12 +47,12 @@ class MacroInOut:
 
 
 func _init(_load_vc: bool = true) -> void:
-    route = {
-        name = name,
-        type = HenRouter.ROUTE_TYPE.MACRO,
-        id = HenUtilsName.get_unique_name(),
-        ref = self
-    }
+    route = HenRouteData.new(
+        name,
+        HenRouter.ROUTE_TYPE.MACRO,
+        HenUtilsName.get_unique_name(),
+        weakref(self)
+    )
 
     HenRouter.line_route_reference[route.id] = []
     HenRouter.comment_reference[route.id] = []
