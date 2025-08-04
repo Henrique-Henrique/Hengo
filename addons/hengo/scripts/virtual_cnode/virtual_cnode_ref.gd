@@ -1,4 +1,4 @@
 class_name HenVirtualCNodeReference extends RefCounted
 
-var ref: RefCounted
+var ref: WeakRef
 var cnode_ref: HenCnode

@@ -10,8 +10,6 @@ var inputs: Array
 var outputs: Array
 var route: HenRouteData
 var virtual_cnode_list: Array
-# var input_ref: WeakRef
-# var output_ref: WeakRef
 var local_vars: Array
 var cnode_list_to_load: Array
 
@@ -46,6 +44,7 @@ func _init(_load_vc: bool = true) -> void:
 			ref = self,
 			can_delete = false
 		})
+
 
 func on_change_name(_name: String) -> void:
 	name = _name

@@ -112,8 +112,12 @@ func on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 
 	flow.moved.connect(on_flow_moved)
 	flow.deleted.connect(on_flow_deleted)
-	# flow.update_changes.connect(virtual_cnode.renderer.update)
+	flow.update_changes.connect(on_need_update)
 
+	cnode_need_update.emit()
+
+
+func on_need_update() -> void:
 	cnode_need_update.emit()
 
 

@@ -148,6 +148,7 @@ func update() -> void:
 	if not should_hide:
 		check_visibility()
 
+
 func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
 	state.is_showing = _rect.intersects(Rect2(
 		visual.position,
@@ -189,9 +190,11 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 func on_cnode_double_click() -> void:
 	if route_info.route:
 		HenRouter.change_route(route_info.route)
-	elif references.ref and references.ref.get('route'):
-		@warning_ignore('unsafe_call_argument')
-		HenRouter.change_route(references.ref.get('route'))
+	elif references.ref and references.ref.get_ref():
+		@warning_ignore('unsafe_method_access')
+		if references.ref.get_ref().get('route'):
+			@warning_ignore('unsafe_method_access')
+			HenRouter.change_route(references.ref.get_ref().get('route'))
 
 
 func on_cnode_right_click(_mouse_pos: Vector2) -> void:
@@ -234,9 +237,9 @@ func get_save() -> Dictionary:
 	if state.invalid:
 		data.invalid = state.invalid
 
-	if references.ref:
+	if references.ref and references.ref.get_ref():
 		@warning_ignore("UNSAFE_PROPERTY_ACCESS")
-		data.ref_id = references.ref.id
+		data.ref_id = references.ref.get_ref().id
 
 	if identity.from_side_bar_id > -1:
 		data.from_side_bar_id = identity.from_side_bar_id
@@ -350,7 +353,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			((_config.route.ref as WeakRef).get_ref() as HenVirtualCNode).children.virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.FUNC:
 			var _ref: HenFuncData = (_config.route.ref as WeakRef).get_ref()
-			# _ref.virtual_cnode_list.append(v_cnode)
+			_ref.virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.SIGNAL:
 			var _ref: HenSignalData = (_config.route.ref as WeakRef).get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
@@ -359,7 +362,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					_ref.signal_enter = v_cnode
 		HenRouter.ROUTE_TYPE.MACRO:
 			var _ref: HenMacroData = (_config.route.ref as WeakRef).get_ref()
-			
 			_ref.virtual_cnode_list.append(v_cnode)
 
 	
@@ -384,7 +386,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('ref'):
 		# ref is required to have id to save and load work
-		v_cnode.references.ref = _config.ref
+		v_cnode.references.ref = weakref(_config.ref)
 
 		if _config.ref.has_signal('name_changed'):
 			_config.ref.name_changed.connect(v_cnode.identity.on_change_name)

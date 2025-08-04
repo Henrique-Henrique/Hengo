@@ -264,6 +264,8 @@ static func _load_vc(_cnode_list: Array, _route: HenRouteData) -> Array:
 
 		vc_list.append(vc)
 
+	_cnode_list.clear()
+
 	return vc_list
 
 
