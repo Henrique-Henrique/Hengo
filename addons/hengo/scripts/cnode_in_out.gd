@@ -114,6 +114,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 		if prop_container.get_child_count() > 4:
 			return
 
+
 		match sub_type:
 			'@dropdown':
 				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()

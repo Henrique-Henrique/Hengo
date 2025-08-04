@@ -43,6 +43,9 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			input.reset_signals(input_data)
 			input.change_name(input_data.name)
 
+			input.io_type = input_data.type
+			input.sub_type = input_data.sub_type
+
 			if input_data.type:
 				if input_data.is_prop:
 					input.reset_in_props()
