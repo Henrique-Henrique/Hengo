@@ -1,78 +1,57 @@
 @tool
 class_name HenVCFlowConnectionReturn
 
-var flow_connection: HenVCFlowConnectionData
-
-var to: WeakRef
-var from: WeakRef
 var to_id: int
-var from_id: int
-var to_from_ref: HenVCFromFlowConnectionData
-
-# old
-var old_to: WeakRef
-var old_to_id: int
-var old_from_id: int
-var old_from: WeakRef
-var old_to_from_ref: HenVCFromFlowConnectionData
+var connection: HenVCFlowConnectionData
+var old_connections: Array
 
 
-func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: WeakRef, _to_id: int, _from: WeakRef, _to_from_ref: HenVCFromFlowConnectionData) -> void:
-    from_id = _from_id
-    flow_connection = _flow
-    to = _to
+func _init(_connection: HenVCFlowConnectionData, _to_id = -1) -> void:
+    connection = _connection
     to_id = _to_id
-    from = _from
-    to_from_ref = _to_from_ref
 
 
-func add() -> void:
-    # remove other flow connection
-    if flow_connection.to and flow_connection.to.get_ref():
-        flow_connection.to_from_ref.from_connections.erase(flow_connection)
+func add(_update: bool = true) -> void:
+    # removing old inputs
+    var remove_connection: Array = []
+    
+    for connection_ref: HenVCFlowConnectionData in connection.get_to().flow.flow_connections_2:
+        if connection_ref.to_id != to_id:
+            continue
 
-        if flow_connection.line_ref:
-            flow_connection.line_ref.visible = false
-            flow_connection.line_ref = null
+        if connection_ref.line_ref:
+            connection_ref.line_ref.visible = false
+            connection_ref.line_ref = null
         
-        old_to = flow_connection.to
-        old_from_id = flow_connection.from_id
-        old_to_id = flow_connection.to_id
-        old_from = flow_connection.from
-        old_to_from_ref = flow_connection.to_from_ref
+        remove_connection.append(connection_ref)
 
-    flow_connection.from_id = from_id
-    flow_connection.to = to
-    flow_connection.to_id = to_id
-    flow_connection.from = from
-    flow_connection.to_from_ref = to_from_ref
-    flow_connection.line_ref = null
+    for connection_ref: HenVCFlowConnectionData in remove_connection:
+        connection.get_to().flow.flow_connections_2.erase(connection_ref)
+        connection.get_from().flow.flow_connections_2.erase(connection_ref)
 
-    flow_connection.to_from_ref.from_connections.append(flow_connection)
+        old_connections.append(connection_ref)
 
-    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).update()
-    if flow_connection.to and flow_connection.to.get_ref(): (flow_connection.to.get_ref() as HenVirtualCNode).update()
+    connection.get_from().flow.flow_connections_2.append(connection)
+    connection.get_to().flow.flow_connections_2.append(connection)
+
+    if _update:
+        connection.get_from().update()
+        connection.get_to().update()
+
 
 func remove() -> void:
-    flow_connection.to = null
-    if flow_connection.to_from_ref: flow_connection.to_from_ref.from_connections.erase(flow_connection)
+    connection.get_from().flow.flow_connections_2.erase(connection)
+    connection.get_to().flow.flow_connections_2.erase(connection)
 
-    if flow_connection.line_ref:
-        flow_connection.line_ref.visible = false
-    
-    flow_connection.line_ref = null
+    if connection.line_ref:
+        connection.line_ref.visible = false
+        connection.line_ref = null
 
-    # adding old flow connection
-    if old_to and old_to.get_ref():
-        flow_connection.from_id = old_from_id
-        flow_connection.to = old_to
-        flow_connection.to_id = old_to_id
-        flow_connection.from = old_from
-        flow_connection.to_from_ref = old_to_from_ref
+    for connection_ref: HenVCFlowConnectionData in old_connections:
+        connection.get_from().flow.flow_connections_2.append(connection_ref)
+        connection.get_to().flow.flow_connections_2.append(connection_ref)
 
-        old_to_from_ref.from_connections.append(flow_connection)
-        if old_to and old_to.get_ref(): (old_to.get_ref() as HenVirtualCNode).update()
+    old_connections.clear()
 
-    old_to = null
-
-    if flow_connection.from and flow_connection.from.get_ref(): (flow_connection.from.get_ref() as HenVirtualCNode).update()
+    connection.get_from().update()
+    connection.get_to().update()

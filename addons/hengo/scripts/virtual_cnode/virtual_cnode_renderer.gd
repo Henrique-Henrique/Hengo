@@ -111,12 +111,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 				connection.get_to().io.inputs.find(connection.get_to().io.get_input(connection.to_id))
 			)
 
-			connection.line_ref.to_cnode = connection.get_to().cnode_instance
 			connection.line_ref.output = input.get_node('%Connector')
-
 			input.remove_in_prop()
-
-			# connection.line_ref.conn_size = (input.get_node('%Connector') as TextureRect).size / 2
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
 
 			if not connection.get_to().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
@@ -129,9 +125,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 				connection.get_from().io.outputs.find(connection.get_from().io.get_output(connection.from_id))
 			)
 
-			connection.line_ref.from_cnode = connection.get_from().cnode_instance
 			connection.line_ref.input = output.get_node('%Connector')
-
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
 
 			if not connection.get_from().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
@@ -173,86 +167,75 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			
 	idx = 0
 
-	for from_flow_connection: HenVCFromFlowConnectionData in flow.from_flow_connections:
+	for flow_input: HenVCFlow in flow.flow_inputs:
 		# showing from flow connections
 		var my_from_flow_container = from_flow_container.get_child(idx)
 		var label: Label = my_from_flow_container.get_node('%Label')
 
-		if from_flow_connection.name:
+		if flow_input.name:
 			label.visible = true
-			label.text = from_flow_connection.name
+			label.text = flow_input.name
 		else:
 			label.visible = false
 
-		my_from_flow_container.id = from_flow_connection.id
+		my_from_flow_container.id = flow_input.id
 		my_from_flow_container.visible = true
 
-		if from_flow_connection.from_connections.is_empty():
-			idx += 1
-			continue
-
-		for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
-			var line: HenFlowConnectionLine
-
-			if from_connection.line_ref:
-				line = from_connection.line_ref
-			else:
-				line = pool.get_flow_line_from_pool()
-				from_connection.line_ref = line
-
-			# signal to update flow connection line
-			if not _cnode.is_connected('on_move', line.update_line):
-				_cnode.connect('on_move', line.update_line)
-
-			line.from_flow_idx = idx
-			line.to_cnode = _cnode
-			line.from_virtual_pos = from_connection.from_pos
-			line.to_pool_visible = true
+		# if flow_input.from_connections.is_empty():
+		# 	idx += 1
+		# 	continue
 
 		(from_flow_container.get_child(idx).get_node('%Arrow') as TextureRect).visible = true
-
 		idx += 1
 
 	idx = 0
 
-	for flow_connection: HenVCFlowConnectionData in flow.flow_connections:
+	
+	for flow_output: HenVCFlow in flow.flow_outputs:
 		# showing flow connections
 		var my_flow_container = flow_container.get_child(idx)
 		var connector: HenFlowConnector = my_flow_container.get_node('FlowSlot/Control/Connector')
 
-		connector.id = flow_connection.id
+		connector.id = flow_output.id
 
-		if flow_connection.name:
+		if flow_output.name:
 			var my_flow_label: Label = (my_flow_container.get_node('FlowSlot/Label') as Label)
 			my_flow_label.visible = true
-			my_flow_label.text = flow_connection.name
-		
+			my_flow_label.text = flow_output.name
 		
 		my_flow_container.visible = true
 
-
-		if not flow_connection.to or not flow_connection.to.get_ref():
-			idx += 1
-			continue
-		
-		var line: HenFlowConnectionLine
-
-
-		if flow_connection.line_ref:
-			line = flow_connection.line_ref
-		else:
-			line = pool.get_flow_line_from_pool()
-			flow_connection.line_ref = line
-		
-		# signal to update flow connection line
-		if not _cnode.is_connected('on_move', line.update_line):
-			_cnode.connect('on_move', line.update_line)
-
-		line.from_connector = _cnode.get_node('%FlowContainer').get_child(idx).get_node('FlowSlot/Control/Connector')
-		line.to_virtual_pos = flow_connection.to_pos
-		line.from_pool_visible = true
-
 		idx += 1
+
+
+	for connection: HenVCFlowConnectionData in flow.flow_connections_2:
+		if connection.line_ref is HenFlowConnectionLine:
+			connection.line_ref = connection.line_ref
+		else:
+			connection.line_ref = pool.get_flow_line_from_pool()
+
+			if not connection.line_ref:
+				continue
+
+		connection.line_ref.to_pool_visible = connection.get_to().state.is_showing
+		connection.line_ref.from_pool_visible = connection.get_from().state.is_showing
+
+		# drawing inputs
+		if connection.line_ref.to_pool_visible:
+			var flow_idx = connection.get_to().flow.flow_inputs.find(connection.get_to().flow.get_flow_input(connection.to_id))
+			connection.line_ref.output = connection.get_to().cnode_instance.get_node('%FromFlowContainer').get_child(flow_idx).get_node('%Arrow')
+
+			if not connection.get_to().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
+				connection.get_to().cnode_instance.connect('on_move', connection.line_ref.update_line)
+
+		# drawing outputs
+		if connection.line_ref.from_pool_visible:
+			var flow_idx = connection.get_from().flow.flow_outputs.find(connection.get_from().flow.get_flow_output(connection.from_id))
+			connection.line_ref.input = connection.get_from().cnode_instance.get_node('%FlowContainer').get_child(flow_idx).get_node('FlowSlot/Control/Connector')
+
+			if not connection.get_from().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
+				connection.get_from().cnode_instance.connect('on_move', connection.line_ref.update_line)
+
 
 	_cnode.reset_size()
 	_cnode.pivot_offset = _cnode.size / 2
@@ -270,15 +253,9 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		if not connection.line_ref: continue
 		connection.line_ref.update_line()
 
-	for connection: HenVCFlowConnectionData in flow.flow_connections:
+	for connection: HenVCFlowConnectionData in flow.flow_connections_2:
 		if not connection.line_ref: continue
 		connection.line_ref.update_line()
-
-	for connection: HenVCFromFlowConnectionData in flow.from_flow_connections:
-		if not connection.from_connections.is_empty():
-			for from_connection: HenVCFlowConnectionData in connection.from_connections:
-				if from_connection.line_ref:
-					from_connection.line_ref.update_line()
 
 
 func configure_cnode_to_hide(_cnode: HenCnode) -> void:
@@ -287,6 +264,7 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 	for signal_data: Dictionary in _cnode.get_signal_connection_list('on_move'):
 		_cnode.disconnect('on_move', signal_data.callable as Callable)
 	
+	# io
 	for connection: HenVCConnectionData in io.connections:
 		if not connection.line_ref:
 			continue
@@ -312,38 +290,31 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			connection.line_ref.visible = false
 			connection.line_ref = null
 
+	# flow
+	for connection: HenVCFlowConnectionData in flow.flow_connections_2:
+		if not connection.line_ref:
+			continue
 
-	for flow_connection: HenVCFlowConnectionData in flow.flow_connections:
-		if flow_connection.line_ref:
-			flow_connection.line_ref.from_pool_visible = false
-		
-			if (flow_connection.to.get_ref() as HenVirtualCNode).state.is_showing:
-				var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(flow_connection.line_ref.from_connector.global_position) + flow_connection.line_ref.from_connector.size / 2
-				flow_connection.from_pos = pos
-				flow_connection.line_ref.from_virtual_pos = pos
-			else:
-				flow_connection.line_ref.visible = false
-				flow_connection.line_ref = null
+		connection.line_ref.to_pool_visible = connection.get_to().state.is_showing
+		connection.line_ref.from_pool_visible = connection.get_from().state.is_showing
 
-	var idx: int = 0
-	var from_flow_container: HBoxContainer = _cnode.get_node('%FromFlowContainer')
+		# input positions
+		if connection.get_from().state.is_showing:
+			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
+			connection.to_old_pos = pos
+		else:
+			connection.line_ref.last_from_pos = connection.line_ref.points[0]
 
-	for from_flow_connection: HenVCFromFlowConnectionData in flow.from_flow_connections:
-		for from_connection: HenVCFlowConnectionData in from_flow_connection.from_connections:
-			if from_connection.line_ref:
-				var line: HenFlowConnectionLine = from_connection.line_ref
+		# output positions
+		if connection.get_to().state.is_showing:
+			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
+			connection.from_old_pos = pos
+		else:
+			connection.line_ref.last_to_pos = connection.line_ref.points[-1]
 
-				if line:
-					line.to_pool_visible = false
+		if not connection.get_from().state.is_showing and not connection.get_to().state.is_showing:
+			connection.line_ref.visible = false
+			connection.line_ref = null
 
-					if (from_connection.from.get_ref() as HenVirtualCNode).state.is_showing:
-						var pos: Vector2 = HenGlobal.CAM.get_relative_vec2((from_flow_container.get_child(idx) as HenFromFlow).global_position)
-						from_connection.to_pos = pos
-						line.to_virtual_pos = pos
-					else:
-						line.visible = false
-						from_connection.line_ref = null
-			
-		idx += 1
 
 	_cnode.visible = false

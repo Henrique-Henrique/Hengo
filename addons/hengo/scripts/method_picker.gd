@@ -938,8 +938,8 @@ func _on_select() -> void:
 		).add()
 
 	# add connection when dragging from connector
-	if cnode_config.has('from_flow_connector') and not vc_return.v_cnode.flow.from_flow_connections.is_empty():
-		var connector: HenFlowConnector = cnode_config.from_flow_connector
+	# if cnode_config.has('from_flow_connector') and not vc_return.v_cnode.flow.from_flow_connections.is_empty():
+	# 	var connector: HenFlowConnector = cnode_config.from_flow_connector
 
 		# if connector.root.virtual_ref and connector.root.virtual_ref.get_ref():
 		# 	(connector.root.virtual_ref.get_ref() as HenVirtualCNode).add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.flow.from_flow_connections[0].id, weakref(vc_return.v_cnode)).add()

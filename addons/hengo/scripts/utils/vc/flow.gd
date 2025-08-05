@@ -1,5 +1,6 @@
 @tool
-class_name HenVCFlowConnection extends RefCounted
+# class_name HenVCFlowConnection extends RefCounted
+class_name HenVCFlow extends RefCounted
 
 var name: String: set = _on_change_name
 var id: int = -1
@@ -35,10 +36,10 @@ func set_ref(_ref) -> void:
 
 
 func _on_move(_pos: int) -> void:
-    moved.emit(self is HenVCFromFlowConnectionData, _pos, self)
+    moved.emit(self, _pos, self)
 
 func _on_delete() -> void:
-    deleted.emit(self is HenVCFlowConnectionData, self)
+    deleted.emit(self, self)
 
 func on_data_changed(_name: String, _value) -> void:
     set(_name, _value)
