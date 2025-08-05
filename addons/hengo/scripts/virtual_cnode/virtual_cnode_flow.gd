@@ -54,8 +54,8 @@ func get_flow_input_connection_command(_id: int) -> HenVCFlowConnectionReturn:
 	return null
 
 
-func create_input_flow_connection() -> void:
-	flow_connections_2.append(HenVCFlow.new({name = 'Flow ' + str(flow_connections_2.size())}))
+func create_input_flow_connection(_get_vc_owner: Callable) -> void:
+	flow_outputs.append(HenVCFlow.new(_get_vc_owner, {name = 'Flow ' + str(flow_connections_2.size())}))
 	cnode_need_update.emit()
 
 
@@ -92,7 +92,7 @@ func move_flow(_direction: HenArrayItem.ArrayMove, _ref: HenVCFlowConnectionData
 	cnode_need_update.emit()
 
 
-func on_flow_added(_is_input: bool, _data: Dictionary) -> void:
+func on_flow_added(_is_input: bool, _data: Dictionary, _get_vc_owner: Callable) -> void:
 	# restrict creation by sub_type
 	match identity.sub_type:
 		HenVirtualCNode.SubType.MACRO_INPUT:
@@ -102,7 +102,7 @@ func on_flow_added(_is_input: bool, _data: Dictionary) -> void:
 			if _is_input: return
 			_is_input = not _is_input
 
-	var flow: HenVCFlow = HenVCFlow.new(_data)
+	var flow: HenVCFlow = HenVCFlow.new(_get_vc_owner, _data)
 
 	if _is_input:
 		flow_inputs.append(flow)

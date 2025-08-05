@@ -30,7 +30,7 @@ var last_to_pos: Vector2
 func update_line() -> void:
 	var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) if from_pool_visible and input else last_from_pos
 	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) if to_pool_visible and output else last_to_pos
-	
+
 	var first_point: Vector2 = start_pos + Vector2(0, POINT_WIDTH)
 	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)
 

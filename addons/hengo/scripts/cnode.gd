@@ -29,6 +29,7 @@ signal on_mouse_enter
 signal on_move
 signal on_right_click
 signal changed_position(_pos: Vector2)
+signal create_flow_connection_request
 
 
 func _ready():
@@ -53,7 +54,7 @@ func _on_enter() -> void:
 
 func _on_exit() -> void:
 	_is_mouse_enter = false
-	HenGlobal.flow_connection_to_data = {}
+	HenGlobal.flow_connection_to_data.clear()
 	if not selected: exit_animation()
 	HenGlobal.TOOLTIP.close()
 

@@ -26,8 +26,8 @@ func add(_update: bool = true) -> void:
         remove_connection.append(connection_ref)
 
     for connection_ref: HenVCConnectionData in remove_connection:
-        connection.get_to().io.connections.erase(connection_ref)
-        connection.get_from().io.connections.erase(connection_ref)
+        connection_ref.get_to().io.connections.erase(connection_ref)
+        connection_ref.get_from().io.connections.erase(connection_ref)
 
         old_connections.append(connection_ref)
 
@@ -48,8 +48,8 @@ func remove() -> void:
         connection.line_ref = null
 
     for connection_ref: HenVCConnectionData in old_connections:
-        connection.get_from().io.connections.append(connection_ref)
-        connection.get_to().io.connections.append(connection_ref)
+        connection_ref.get_from().io.connections.append(connection_ref)
+        connection_ref.get_to().io.connections.append(connection_ref)
 
     old_connections.clear()
     connection.input_ref.reset_input_value()

@@ -20,7 +20,10 @@ func get_line_from_pool() -> HenConnectionLine:
             line.points = []
             line.position = Vector2.ZERO
             line.visible = true
-
+            line.from_pool_visible = false
+            line.to_pool_visible = false
+            line.last_from_pos = Vector2.ZERO
+            line.last_to_pos = Vector2.ZERO
             _line = line
             break
     
@@ -33,10 +36,12 @@ func get_flow_line_from_pool() -> HenFlowConnectionLine:
     for line: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
         if not line.visible:
             line.points = []
-            
             line.position = Vector2.ZERO
             line.visible = true
-
+            line.from_pool_visible = false
+            line.to_pool_visible = false
+            line.last_from_pos = Vector2.ZERO
+            line.last_to_pos = Vector2.ZERO
             _line = line
             break
     

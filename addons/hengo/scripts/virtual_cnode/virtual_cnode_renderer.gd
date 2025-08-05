@@ -92,7 +92,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			)
 
 		idx += 1
-	
+
 	for connection: HenVCConnectionData in io.connections:
 		if connection.line_ref is HenConnectionLine:
 			connection.line_ref = connection.line_ref
@@ -143,9 +143,6 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	var flow_container: HBoxContainer = _cnode.get_node('%FlowContainer')
 
 	for flow_c: PanelContainer in flow_container.get_children():
-		var connector: HenFlowConnector = flow_c.get_node('FlowSlot/Control/Connector')
-
-		connector.root = _cnode
 		flow_c.visible = false
 		(flow_c.get_node('FlowSlot/Label') as Label).visible = false
 
@@ -169,8 +166,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 	for flow_input: HenVCFlow in flow.flow_inputs:
 		# showing from flow connections
-		var my_from_flow_container = from_flow_container.get_child(idx)
-		var label: Label = my_from_flow_container.get_node('%Label')
+		var flow_input_instance = from_flow_container.get_child(idx)
+		var label: Label = flow_input_instance.get_node('%Label')
 
 		if flow_input.name:
 			label.visible = true
@@ -178,8 +175,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		else:
 			label.visible = false
 
-		my_from_flow_container.id = flow_input.id
-		my_from_flow_container.visible = true
+		flow_input_instance.id = flow_input.id
+		flow_input_instance.visible = true
 
 		# if flow_input.from_connections.is_empty():
 		# 	idx += 1
@@ -196,6 +193,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		var my_flow_container = flow_container.get_child(idx)
 		var connector: HenFlowConnector = my_flow_container.get_node('FlowSlot/Control/Connector')
 
+		connector.reset_signals(flow_output)
 		connector.id = flow_output.id
 
 		if flow_output.name:
@@ -277,14 +275,14 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2) + connection.line_ref.conn_size
 			connection.to_old_pos = pos
 		else:
-			connection.line_ref.last_from_pos = connection.line_ref.points[0]
+			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		# output positions
 		if connection.get_to().state.is_showing:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2) + connection.line_ref.conn_size
 			connection.from_old_pos = pos
 		else:
-			connection.line_ref.last_to_pos = connection.line_ref.points[-1]
+			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		if not connection.get_from().state.is_showing and not connection.get_to().state.is_showing:
 			connection.line_ref.visible = false
@@ -303,14 +301,14 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
 			connection.to_old_pos = pos
 		else:
-			connection.line_ref.last_from_pos = connection.line_ref.points[0]
+			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		# output positions
 		if connection.get_to().state.is_showing:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
 			connection.from_old_pos = pos
 		else:
-			connection.line_ref.last_to_pos = connection.line_ref.points[-1]
+			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		if not connection.get_from().state.is_showing and not connection.get_to().state.is_showing:
 			connection.line_ref.visible = false

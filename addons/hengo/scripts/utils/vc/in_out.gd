@@ -255,7 +255,7 @@ func on_io_mouse_enter(_connector) -> void:
 	
 
 func on_create_connection_request(_type: StringName) -> void:
-		# try connection
+	# try connection
 	var connection: HenVCConnectionReturn = create_virtual_connection(_type, HenGlobal.connection_to_data)
 
 	if connection:

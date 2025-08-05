@@ -36,6 +36,7 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="Connector" type="TextureRect" parent="FlowSlot/Control"]
+unique_name_in_owner = true
 modulate = Color(0.227451, 0.25098, 0.278431, 1)
 custom_minimum_size = Vector2(20, 50)
 layout_mode = 1
