@@ -17,3 +17,8 @@ func get_save() -> Dictionary:
 		to_id = to_id,
 		to_vc_id = (to.get_ref() as HenVirtualCNode).identity.id
 	}
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		print('FLOW CONNECTION DELETED')

@@ -4,6 +4,7 @@ class_name HenCnode extends PanelContainer
 var flow_to: Dictionary = {}
 var data: Dictionary = {}
 var category: String
+var id: int
 
 # behavior
 var moving: bool = false
@@ -146,7 +147,7 @@ func select() -> void:
 	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 	
 	if HenGlobal.CODE_PREVIEWER.visible:
-		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.virtual_ref.get_ref().identity.id)
+		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.id)
 
 		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
 			return

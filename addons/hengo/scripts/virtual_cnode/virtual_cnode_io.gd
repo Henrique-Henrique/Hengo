@@ -44,8 +44,8 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 	connection.from_type = output.type
 	connection.from_id = output.id
 	connection.output_ref = output
-	connection.from = _from
-	connection.to = _to
+	connection.from = weakref(_from)
+	connection.to = weakref(_to)
 	connection.to_type = input.type
 	connection.to_id = input.id
 	connection.input_ref = input
@@ -92,13 +92,13 @@ func remove_io_connection(_ref: HenVCInOutData) -> void:
 			connection_remove.append(connection)
 
 	for connection: HenVCConnectionData in connection_remove:
-		connection.from.io.connections.erase(connection)
+		connection.get_from().io.connections.erase(connection)
 		connections.erase(connection)
 
 		if connection.line_ref:
 			connection.line_ref.visible = false
 
-		connection.from.io.cnode_need_update.emit()
+		connection.get_from().io.cnode_need_update.emit()
 	
 	cnode_need_update.emit()
 

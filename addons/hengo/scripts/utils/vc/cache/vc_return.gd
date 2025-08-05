@@ -26,11 +26,11 @@ func add() -> void:
 
     # inputs
     for connection: HenVCConnectionData in old_connections:
-        connection.from.io.connections.append(connection)
-        connection.to.io.connections.append(connection)
+        connection.get_from().io.connections.append(connection)
+        connection.get_to().io.connections.append(connection)
     
-        connection.from.update()
-        connection.to.update()
+        connection.get_from().update()
+        connection.get_to().update()
 
 
     # flow connection
@@ -70,14 +70,14 @@ func remove() -> void:
 
     # inputs
     for connection: HenVCConnectionData in v_cnode.io.connections:
-        connection.from.io.connections.erase(connection)
-        connection.to.io.connections.erase(connection)
+        connection.get_from().io.connections.erase(connection)
+        connection.get_to().io.connections.erase(connection)
 
         if connection.line_ref:
             connection.line_ref.visible = false
             connection.line_ref = null
         
-        connection.from.update()
+        connection.get_from().update()
 
 
     # flow connections
