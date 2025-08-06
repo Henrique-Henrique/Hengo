@@ -52,23 +52,23 @@ func delete() -> void:
 
 func get_inspector_array_list(_is_local: bool = false) -> Array:
     return ([
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'name',
-            type = HenPropEditor.Prop.Type.STRING,
+            type = HenProp.Type.STRING,
             default_value = name,
             on_value_changed = on_change_name
         }),
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'type',
-            type = HenPropEditor.Prop.Type.DROPDOWN,
+            type = HenProp.Type.DROPDOWN,
             default_value = type,
             on_value_changed = on_change_type,
             category = 'all_classes'
         }),
     ] + [
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'export',
-            type = HenPropEditor.Prop.Type.BOOL,
+            type = HenProp.Type.BOOL,
             default_value = export ,
             on_value_changed = on_change_export,
         }),

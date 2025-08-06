@@ -21,6 +21,7 @@ func _ready():
 	mouse_exited.connect(_on_exit)
 	gui_input.connect(_on_gui)
 
+const DROPDOWN_SCENE = preload('res://addons/hengo/scenes/props/dropdown.tscn')
 
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
@@ -83,7 +84,7 @@ func set_out_prop(_sub_type: String = '', _default_value = null) -> void:
 
 		match _sub_type:
 			'@dropdown':
-				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+				var dropdown = DROPDOWN_SCENE.instantiate()
 
 				outprop_config_request.emit(dropdown)
 
@@ -117,7 +118,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 
 		match sub_type:
 			'@dropdown':
-				var dropdown = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+				var dropdown = DROPDOWN_SCENE.instantiate()
 
 				inprop_config_request.emit(dropdown)
 				prop_container.add_child(dropdown)
@@ -184,7 +185,7 @@ func _on_value(_value, _prop) -> void:
 func add_prop_ref(_default = null, _prop_idx: int = -1) -> HenDropdown:
 	# props ref
 	var input_container = get_node('%CNameInput')
-	var prop_ref_bt = preload('res://addons/hengo/scenes/props/dropdown.tscn').instantiate()
+	var prop_ref_bt = DROPDOWN_SCENE.instantiate()
 
 	# prop_ref_bt.text = ''
 	# prop_ref_bt.icon = preload('res://addons/hengo/assets/icons/circle-dot.svg')

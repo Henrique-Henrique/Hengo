@@ -321,19 +321,19 @@ func get_inspector_array_list() -> Array:
 	match identity.sub_type:
 		SubType.STATE:
 			return [
-				HenPropEditor.Prop.new({
+				HenProp.new({
 					name = 'Name',
-					type = HenPropEditor.Prop.Type.STRING,
+					type = HenProp.Type.STRING,
 					default_value = identity.name,
 					on_value_changed = identity.on_change_name
 				}),
-				HenPropEditor.Prop.new({
+				HenProp.new({
 					name = 'Outputs',
-					type = HenPropEditor.Prop.Type.ARRAY,
+					type = HenProp.Type.ARRAY,
 					on_item_create = flow.create_input_flow_connection.bind(get_vc),
-					prop_list = flow.flow_outputs.map(func(x: HenVCFlow) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+					prop_list = flow.flow_outputs.map(func(x: HenVCFlow) -> HenProp: return HenProp.new({
 						name = 'name',
-						type = HenPropEditor.Prop.Type.STRING,
+						type = HenProp.Type.STRING,
 						default_value = x.name,
 						on_value_changed = flow.change_flow_name.bind(x),
 						on_item_delete = flow.on_delete_flow_state.bind(x),
@@ -403,7 +403,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			_config.ref.name_changed.connect(v_cnode.identity.on_change_name)
 
 		if _config.ref.has_signal('in_out_added'):
-			_config.ref.in_out_added.connect(v_cnode.io.on_in_out_added)
+			_config.ref.in_out_added.connect(v_cnode.add_io)
 	
 
 		if _config.ref.has_signal('deleted'):
@@ -414,7 +414,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			_config.ref.in_out_reseted.connect(v_cnode.io.on_in_out_reset.bind(v_cnode.get_vc))
 
 		if _config.ref.has_signal('flow_added'):
-			_config.ref.flow_added.connect(v_cnode.flow.on_flow_added)
+			_config.ref.flow_added.connect(v_cnode.flow.on_flow_added.bind(v_cnode.get_vc))
 
 
 	if _config.has('category'):
@@ -490,7 +490,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		_:
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:
-					v_cnode.flow.on_flow_added(false, _flow, v_cnode.get_vc	)
+					v_cnode.flow.on_flow_added(false, _flow, v_cnode.get_vc)
 
 			if _config.has('from_flow'):
 				for _flow: Dictionary in _config.from_flow:

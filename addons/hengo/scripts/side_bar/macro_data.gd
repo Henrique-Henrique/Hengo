@@ -201,67 +201,67 @@ func delete() -> void:
     HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
 
 
-func get_inspector_array_list() -> Array[HenPropEditor.Prop]:
+func get_inspector_array_list() -> Array[HenProp]:
     return [
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'name',
-            type = HenPropEditor.Prop.Type.STRING,
+            type = HenProp.Type.STRING,
             default_value = name,
             on_value_changed = on_change_name
         }),
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'Flow Input',
-            type = HenPropEditor.Prop.Type.ARRAY,
+            type = HenProp.Type.ARRAY,
             on_item_create = create_flow.bind(HenSideBar.ParamType.INPUT),
-            prop_list = inputs.map(func(x: MacroInOut) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+            prop_list = inputs.map(func(x: MacroInOut) -> HenProp: return HenProp.new({
                 name = 'name',
-                type = HenPropEditor.Prop.Type.STRING,
+                type = HenProp.Type.STRING,
                 default_value = x.name,
                 on_value_changed = x.on_change_name,
                 on_item_delete = delete_flow.bind(x, HenSideBar.ParamType.INPUT),
                 on_item_move = move_flow.bind(x, HenSideBar.ParamType.INPUT),
             })),
         }),
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'Flow Output',
-            type = HenPropEditor.Prop.Type.ARRAY,
+            type = HenProp.Type.ARRAY,
             on_item_create = create_flow.bind(HenSideBar.ParamType.OUTPUT),
-            prop_list = outputs.map(func(x: MacroInOut) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+            prop_list = outputs.map(func(x: MacroInOut) -> HenProp: return HenProp.new({
                 name = 'name',
-                type = HenPropEditor.Prop.Type.STRING,
+                type = HenProp.Type.STRING,
                 default_value = x.name,
                 on_value_changed = x.on_change_name,
                 on_item_delete = delete_flow.bind(x, HenSideBar.ParamType.OUTPUT),
                 on_item_move = move_flow.bind(x, HenSideBar.ParamType.OUTPUT),
             })),
         }),
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'Inputs',
-            type = HenPropEditor.Prop.Type.ARRAY,
+            type = HenProp.Type.ARRAY,
             on_item_create = create_param.bind(HenSideBar.ParamType.INPUT),
-            prop_list = inputs_value.map(func(x: HenParamData) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+            prop_list = inputs_value.map(func(x: HenParamData) -> HenProp: return HenProp.new({
                 name = 'name',
-                type = HenPropEditor.Prop.Type.STRING,
+                type = HenProp.Type.STRING,
                 default_value = x.name,
                 on_value_changed = x.on_change_name,
                 on_item_delete = delete_param.bind(x, HenSideBar.ParamType.INPUT),
                 on_item_move = move_param.bind(x, HenSideBar.ParamType.INPUT),
             })),
         }),
-        HenPropEditor.Prop.new({
+        HenProp.new({
             name = 'Outputs',
-            type = HenPropEditor.Prop.Type.ARRAY,
+            type = HenProp.Type.ARRAY,
             on_item_create = create_param.bind(HenSideBar.ParamType.OUTPUT),
-            prop_list = outputs_value.map(func(x: HenParamData) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+            prop_list = outputs_value.map(func(x: HenParamData) -> HenProp: return HenProp.new({
                 name = 'name',
-                type = HenPropEditor.Prop.Type.STRING,
+                type = HenProp.Type.STRING,
                 default_value = x.name,
                 on_value_changed = x.on_change_name,
                 on_item_delete = delete_param.bind(x, HenSideBar.ParamType.OUTPUT),
                 on_item_move = move_param.bind(x, HenSideBar.ParamType.OUTPUT),
             })),
         }),
-    ] as Array[HenPropEditor.Prop]
+    ] as Array[HenProp]
 
     
 func get_save() -> Dictionary:

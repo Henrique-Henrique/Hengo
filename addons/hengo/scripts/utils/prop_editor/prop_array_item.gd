@@ -3,7 +3,7 @@ class_name HenPropArrayItem extends PanelContainer
 
 enum ArrayMove {UP, DOWN}
 
-var prop: HenPropEditor.Prop
+var prop: HenProp
 
 func _ready() -> void:
     %Add.pressed.connect(_on_add)
@@ -15,6 +15,6 @@ func _on_add() -> void:
         HenPropEditor.get_singleton().start()
 
 
-func start(_prop: HenPropEditor.Prop) -> HenPropArrayItem:
+func start(_prop: HenProp) -> HenPropArrayItem:
     prop = _prop
     return self

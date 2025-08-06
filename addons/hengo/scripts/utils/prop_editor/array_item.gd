@@ -3,7 +3,7 @@ class_name HenArrayItem extends HBoxContainer
 
 enum ArrayMove {UP, DOWN}
 
-var prop: HenPropEditor.Prop
+var prop: HenProp
 
 func _ready() -> void:
     (get_node('%Options') as MenuButton).get_popup().id_pressed.connect(_on_item_config_select)
@@ -27,6 +27,6 @@ func _on_item_config_select(_id: int) -> void:
     HenPropEditor.get_singleton().start()
 
 
-func start(_prop: HenPropEditor.Prop) -> HenArrayItem:
+func start(_prop: HenProp) -> HenArrayItem:
     prop = _prop
     return self

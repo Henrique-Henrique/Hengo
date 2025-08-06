@@ -142,15 +142,15 @@ func delete() -> void:
 
 func get_inspector_array_list() -> Array:
 	return [
-   		HenPropEditor.Prop.new({
+   		HenProp.new({
 			name = 'name',
-			type = HenPropEditor.Prop.Type.STRING,
+			type = HenProp.Type.STRING,
 			default_value = name,
 			on_value_changed = on_change_name
 		}),
-   		HenPropEditor.Prop.new({
+   		HenProp.new({
 			name = 'Signal Name',
-			type = HenPropEditor.Prop.Type.DROPDOWN,
+			type = HenProp.Type.DROPDOWN,
 			default_value = signal_name,
 			on_value_changed = on_change_signal_name,
 			category = 'signal_list',
@@ -158,13 +158,13 @@ func get_inspector_array_list() -> Array:
 		        signal_ref = self
 		    },
 		}),
-		HenPropEditor.Prop.new({
+		HenProp.new({
 			name = 'Outputs',
-			type = HenPropEditor.Prop.Type.ARRAY,
+			type = HenProp.Type.ARRAY,
 			on_item_create = create_param,
-			prop_list = bind_params.map(func(x: HenParamData) -> HenPropEditor.Prop: return HenPropEditor.Prop.new({
+			prop_list = bind_params.map(func(x: HenParamData) -> HenProp: return HenProp.new({
 				name = 'name',
-				type = HenPropEditor.Prop.Type.STRING,
+				type = HenProp.Type.STRING,
 				default_value = x.name,
 				on_value_changed = x.on_change_name,
 				on_item_delete = delete_param.bind(x),

@@ -18,7 +18,7 @@ func _on_pressed() -> void:
 		'state_transition':
 			# all transitions
 			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				options = (HenRouter.current_route.ref as WeakRef).get_ref().flow_connections.map(func(x):
+				options = ((HenRouter.current_route.ref as WeakRef).get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
 					return {name = x.name, ref = x})
 		'action':
 			var arr: Array = []
