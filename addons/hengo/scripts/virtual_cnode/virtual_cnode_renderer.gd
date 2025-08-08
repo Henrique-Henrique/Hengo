@@ -166,7 +166,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 	for flow_input: HenVCFlow in flow.flow_inputs:
 		# showing from flow connections
-		var flow_input_instance = from_flow_container.get_child(idx)
+		var flow_input_instance: HenFromFlow = from_flow_container.get_child(idx)
 		var label: Label = flow_input_instance.get_node('%Label')
 
 		if flow_input.name:
@@ -174,7 +174,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			label.text = flow_input.name
 		else:
 			label.visible = false
-
+		
+		flow_input_instance.reset_signals(flow_input)
 		flow_input_instance.id = flow_input.id
 		flow_input_instance.visible = true
 

@@ -224,7 +224,6 @@ func get_save() -> Dictionary:
 		position = var_to_str(visual.position),
 		size = var_to_str(visual.size),
 		input_connections = [],
-		output_connections = [],
 		flow_connections = []
 	}
 
@@ -265,12 +264,17 @@ func get_save() -> Dictionary:
 	if identity.category:
 		data.category = identity.category
 
-	# for flow_connection: HenVCFlowConnectionData in flow.flow_connections:
-	# 	if not flow_connection.to or not flow_connection.to.get_ref(): continue
-	# 	data.flow_connections.append(flow_connection.get_save())
+	for flow_connection: HenVCFlowConnectionData in flow.flow_connections_2:
+		if not flow_connection.get_to(): continue
+		if flow_connection.get_to() == self: continue
 
-	# for input: HenVCConnectionData in io.connections:
-	# 	data.input_connections.append(input.get_save())
+		(data.flow_connections as Array).append(flow_connection.get_save())
+
+	for input: HenVCConnectionData in io.connections:
+		if input.get_to().identity.id != identity.id:
+			continue
+
+		(data.input_connections as Array).append(input.get_save())
 
 	if not children.virtual_cnode_list.is_empty():
 		data.virtual_cnode_list = []
@@ -306,7 +310,7 @@ func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFl
 
 
 func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
-	return io.on_in_out_added(get_vc, _is_input, _data, _check_types)
+	return io.on_in_out_added(self, _is_input, _data, _check_types)
 
 
 func get_vc() -> HenVirtualCNode:
@@ -411,10 +415,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 
 		if _config.ref.has_signal('in_out_reseted'):
-			_config.ref.in_out_reseted.connect(v_cnode.io.on_in_out_reset.bind(v_cnode.get_vc))
+			_config.ref.in_out_reseted.connect(v_cnode.io.on_in_out_reset.bind(v_cnode))
 
 		if _config.ref.has_signal('flow_added'):
-			_config.ref.flow_added.connect(v_cnode.flow.on_flow_added.bind(v_cnode.get_vc))
+			_config.ref.flow_added.connect(v_cnode.flow.on_flow_added.bind(v_cnode))
 
 
 	if _config.has('category'):
@@ -435,17 +439,17 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match v_cnode.identity.type:
 		HenVirtualCNode.Type.DEFAULT:
-			if not _config.has('to_flow'): v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
+			if not _config.has('to_flow'): v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
 		Type.IF:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {name = 'True', id = 0}))
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {name = 'False', id = 1}))
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {name = 'Then', id = 2}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'True', id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'False', id = 1}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'Then', id = 2}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
 		Type.FOR:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {name = 'Body', id = 0}))
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {name = 'Then', id = 1}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'Body', id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'Then', id = 1}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
 		Type.STATE:
 			v_cnode.route_info.route = HenRouteData.new(
 				v_cnode.identity.name,
@@ -477,24 +481,24 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					can_delete = false
 				})
 
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
 
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:
-					v_cnode.flow.on_flow_added(false, _flow, v_cnode.get_vc)
+					v_cnode.flow.on_flow_added(false, _flow, v_cnode)
 		Type.STATE_START:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {name = 'On Start', id = 0}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'On Start', id = 0}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
 		Type.STATE_EVENT:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode.get_vc, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {id = 0}))
 		_:
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:
-					v_cnode.flow.on_flow_added(false, _flow, v_cnode.get_vc)
+					v_cnode.flow.on_flow_added(false, _flow, v_cnode)
 
 			if _config.has('from_flow'):
 				for _flow: Dictionary in _config.from_flow:
-					v_cnode.flow.on_flow_added(true, _flow, v_cnode.get_vc)
+					v_cnode.flow.on_flow_added(true, _flow, v_cnode)
 
 	if _config.has('inputs'):
 		for input_data: Dictionary in _config.inputs:

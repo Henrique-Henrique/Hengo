@@ -573,7 +573,6 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 
 			fc.from = cn
 
-			fc.id = int(connection.id)
 			fc.from_id = int(connection.from_id)
 			fc.to_id = int(connection.to_id)
 			fc.to_vc_id = int(connection.to_vc_id)
@@ -783,7 +782,7 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 							tokens = []
 						}
 
-					override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_tokens(0))
+				override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_tokens(0))
 
 
 	# search for override virtual inside macros
@@ -836,7 +835,6 @@ static func _set_base_cnodes(_refs: HenSaveCodeType.References) -> String:
 				for token: Dictionary in item.tokens:
 					var _code: String = parse_token_by_type(token, 1)
 					if _code: physics_process_code.append(_code)
-
 
 	return code + """var _STATE_CONTROLLER = HengoStateController.new()
 

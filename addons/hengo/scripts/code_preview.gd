@@ -8,6 +8,7 @@ const final_text: String = '\n\n\n\n\n\n\n\n\n'
 var text_cache: String = ''
 var id_list: Array[int] = []
 var reg: RegEx
+var last_line: int = 0
 
 func _ready() -> void:
 	reg = RegEx.new()
@@ -20,7 +21,7 @@ func _on_visibility() -> void:
 	if visible and HenGlobal.script_config:
 		var script_data: HenScriptData = HenSaver.generate_script_data()
 		var code: String = HenCodeGeneration.get_code(script_data, true)
-		
+
 		set_code(code)
 		show_vc_line_reference()
 
@@ -32,7 +33,6 @@ func set_code(_code: String) -> void:
 
 func show_vc_line_reference() -> void:
 	var idx: int = 0
-	var last_line: int = 0
 	var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.id)
 
 	if id_list != new_id_list:
@@ -45,13 +45,13 @@ func show_vc_line_reference() -> void:
 			for id in id_list:
 				if line.contains('#ID:%d' % id):
 					code_preview.set_line_background_color(idx, Color(Color('#63c1ff'), 0.1))
-					last_line = idx
+					last_line = idx + 3
 
 			idx += 1
 	
-	code_preview.set_caret_line(last_line + 3)
-	
+	code_preview.set_caret_line(last_line)
 
+	
 func clear_code() -> void:
 	text_cache = ''
 	code_preview.text = ''

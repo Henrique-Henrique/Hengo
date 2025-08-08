@@ -7,6 +7,7 @@ func get_cnode_from_pool() -> HenCnode:
     for cnode: HenCnode in HenGlobal.cnode_pool:
         if not cnode.visible:
             _cnode = cnode
+            cnode.unselect(0)
             break
 
     return _cnode

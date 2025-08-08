@@ -107,7 +107,6 @@ class Inout:
 
 
 class FlowConnection:
-	var id: int
 	var from_id: int
 	var to_id: int
 	var from: CNode

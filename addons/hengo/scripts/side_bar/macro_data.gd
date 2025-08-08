@@ -175,7 +175,7 @@ func delete_flow(_ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
         HenSideBar.ParamType.OUTPUT:
             outputs.erase(_ref)
 
-    _ref.deleted.emit()
+    _ref.deleted.emit(_type == HenSideBar.ParamType.INPUT)
 
 
 func get_cnode_data() -> Dictionary:

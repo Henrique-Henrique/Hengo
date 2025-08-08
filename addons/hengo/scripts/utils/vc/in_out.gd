@@ -15,7 +15,7 @@ var is_static: bool
 var ref: RefCounted
 var ref_change_rule: RefChangeRule
 var from_id: int = -1
-var get_vc_owner: Callable
+var owner: WeakRef
 
 signal update_changes
 signal moved
@@ -31,8 +31,8 @@ enum RefChangeRule {
 
 const METHOD_PICKER = preload('res://addons/hengo/scenes/utils/method_picker.tscn')
 
-func _init(_data: Dictionary, _get_vc_owner: Callable) -> void:
-	get_vc_owner = _get_vc_owner
+func _init(_data: Dictionary, _owner: HenVirtualCNode) -> void:
+	owner = weakref(_owner)
 
 	name = _data.name
 	type = _data.type
@@ -205,8 +205,15 @@ func get_type_color() -> Color:
 			return Color.WHITE
 
 
+func get_owner() -> HenVirtualCNode:
+	if not owner:
+		return null
+	
+	return owner.get_ref()
+
+
 func create_virtual_connection(_type: StringName, _data: CNodeInOutConnectionData) -> HenVCConnectionReturn:
-	var owner_vc: HenVirtualCNode = get_vc_owner.call()
+	var owner_vc: HenVirtualCNode = get_owner()
 
 	if _type == 'in':
 		return owner_vc.get_new_input_connection_command(
@@ -227,7 +234,7 @@ func on_method_picker_request(_type: StringName, _mouse_pos: Vector2) -> void:
 	var method_list: HenMethodPicker = METHOD_PICKER.instantiate()
 
 	var _data: Dictionary = {
-		from = get_vc_owner.call(),
+		from = get_owner(),
 		in_out_id = id,
 	}
 
@@ -242,7 +249,7 @@ func on_method_picker_request(_type: StringName, _mouse_pos: Vector2) -> void:
 
 func on_io_mouse_enter(_connector) -> void:
 	HenGlobal.connection_to_data = CNodeInOutConnectionData.new(
-		get_vc_owner.call(),
+		get_owner(),
 		self,
 	)
 

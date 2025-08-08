@@ -26,10 +26,9 @@ func get_to() -> HenVirtualCNode:
 
 func get_save() -> Dictionary:
 	return {
-		# id = id,
-		# from_id = from_id,
-		# to_id = to_id,
-		# to_vc_id = (to.get_ref() as HenVirtualCNode).identity.id
+		from_id = from_id,
+		to_id = to_id,
+		to_vc_id = get_to().identity.id
 	}
 
 

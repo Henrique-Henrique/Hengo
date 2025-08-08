@@ -65,10 +65,10 @@ func hover_animation() -> void:
 	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .2)
 
 
-func exit_animation() -> void:
+func exit_animation(_time: float = .2) -> void:
 	var tween: Tween = get_tree().create_tween()
 
-	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .2)
+	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, _time)
 
 
 func _on_gui(_event: InputEvent) -> void:
@@ -149,20 +149,18 @@ func select() -> void:
 	
 	if HenGlobal.CODE_PREVIEWER.visible:
 		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.id)
-
 		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
 			return
 
 		var script_data: HenScriptData = HenSaver.generate_script_data()
 		var code: String = HenCodeGeneration.get_code(script_data, true)
-		
 		HenGlobal.CODE_PREVIEWER.set_code(code)
 		HenGlobal.CODE_PREVIEWER.show_vc_line_reference()
 
 
-func unselect() -> void:
+func unselect(_time: float = .2) -> void:
 	selected = false
-	exit_animation()
+	exit_animation(_time)
 	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
 
 func change_name(_name: String) -> void:

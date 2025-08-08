@@ -149,7 +149,7 @@ func on_in_out_deleted(_is_input: bool, _in_ou_ref: HenVCInOutData) -> void:
 	cnode_need_update.emit()
 
 
-func on_in_out_added(_get_vc_owner: Callable, _is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
+func on_in_out_added(_owner: HenVirtualCNode, _is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
 	# restrict creation by sub_type
 	if _check_types:
 		match identity.sub_type:
@@ -167,7 +167,7 @@ func on_in_out_added(_get_vc_owner: Callable, _is_input: bool, _data: Dictionary
 			@warning_ignore('unsafe_call_argument')
 			_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
 
-	var in_out: HenVCInOutData = HenVCInOutData.new(_data, _get_vc_owner)
+	var in_out: HenVCInOutData = HenVCInOutData.new(_data, _owner)
 
 	if _data.has('ref'):
 		@warning_ignore('unsafe_call_argument')
@@ -196,7 +196,7 @@ func on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenV
 		remove_io_connection(_ref)
 
 
-func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array, _get_vc_owner: Callable) -> void:
+func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array, _owner: HenVirtualCNode) -> void:
 	var is_input: bool = _is_input
 
 	match identity.sub_type:
@@ -211,7 +211,7 @@ func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array
 	clear_in_out(is_input)
 
 	for input_data: Dictionary in _new_inputs:
-		var in_out: HenVCInOutData = on_in_out_added(_get_vc_owner, is_input, input_data)
+		var in_out: HenVCInOutData = on_in_out_added(_owner, is_input, input_data)
 
 		match identity.sub_type:
 			HenVirtualCNode.SubType.SIGNAL_CONNECTION, HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:

@@ -1,14 +1,12 @@
 @tool
 class_name HenVCFlowConnectionReturn
 
-var from_id: int
 var connection: HenVCFlowConnectionData
 var old_connections: Array
 
 
-func _init(_connection: HenVCFlowConnectionData, _from_id = -1) -> void:
+func _init(_connection: HenVCFlowConnectionData) -> void:
     connection = _connection
-    from_id = _from_id
 
 
 func add(_update: bool = true) -> void:
@@ -16,7 +14,7 @@ func add(_update: bool = true) -> void:
     var remove_connection: Array = []
     
     for connection_ref: HenVCFlowConnectionData in connection.get_from().flow.flow_connections_2:
-        if connection_ref.from_id != from_id:
+        if connection_ref.from.get_ref() != connection.from.get_ref():
             continue
 
         if connection_ref.line_ref:
