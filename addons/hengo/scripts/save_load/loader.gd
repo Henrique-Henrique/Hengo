@@ -48,6 +48,7 @@ static func clean() -> void:
 	HenGlobal.BASE_ROUTE_REF = null
 	HenGlobal.SIDE_BAR_LIST.clear()
 	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
+	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
 
 	HenGlobal.script_config = HenGlobal.ScriptData.new()
 

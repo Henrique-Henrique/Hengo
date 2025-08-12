@@ -149,6 +149,7 @@ func _on_change_main_screen(_name: String) -> void:
 func _exit_tree():
 	HenGlobal.can_instantiate_pool = false
 	HenGlobal.script_config = null
+	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
 	
 	remove_debugger_plugin(debug_plugin)
 	remove_control_from_bottom_panel(gd_previewer)

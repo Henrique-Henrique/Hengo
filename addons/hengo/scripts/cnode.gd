@@ -30,6 +30,7 @@ signal on_move
 signal on_right_click
 signal changed_position(_pos: Vector2)
 signal create_flow_connection_request
+signal on_selected
 
 
 func _ready():
@@ -113,9 +114,8 @@ func _on_gui(_event: InputEvent) -> void:
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
 		# moving on click
-		if moving:
-			if HenGlobal.CAM:
-				move(position + _event.relative / HenGlobal.CAM.transform.x.x)
+		if moving and HenGlobal.CAM:
+			move(position + _event.relative / HenGlobal.CAM.transform.x.x)
 
 
 # used when pick state on state signal
@@ -156,12 +156,15 @@ func select() -> void:
 		var code: String = HenCodeGeneration.get_code(script_data, true)
 		HenGlobal.CODE_PREVIEWER.set_code(code)
 		HenGlobal.CODE_PREVIEWER.show_vc_line_reference()
+	
+	on_selected.emit(true)
 
 
 func unselect(_time: float = .2) -> void:
 	selected = false
 	exit_animation(_time)
 	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
+	on_selected.emit(false)
 
 func change_name(_name: String) -> void:
 	get_node('%Title').text = _name

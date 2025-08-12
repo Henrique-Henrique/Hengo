@@ -29,6 +29,7 @@ static var TABS: HenTabs
 static var SIGNAL_BUS: HenSignalBus
 static var HENGO_SAVER: HenSaver.Saver
 static var BASE_ROUTE_REF: HenLoader.BaseRouteRef
+static var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
 
 # cnodes
 static var can_make_connection: bool = false

@@ -65,6 +65,7 @@ class Macro:
 	var id: int
 	var name: String
 	var input_ref: CNode
+	var output_ref: CNode
 	var flow_inputs: Array[Flow]
 	var flow_outputs: Array[Flow]
 	var virtual_cnode_list: Array[CNode]
@@ -240,7 +241,7 @@ class CNode:
 					token_list.append(vc.get_macro_token(_id, vc))
 				HenVirtualCNode.SubType.MACRO_OUTPUT:
 					if HenGlobal.USE_MACRO_REF:
-						var flow: FlowConnection = HenGlobal.MACRO_REF.get_flow(_id) if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
+						var flow: FlowConnection = HenGlobal.MACRO_REF.get_flow_connection(_id) if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
 
 						if flow and flow.to:
 							stack.append({node = flow.to, id = flow.to_id})
@@ -254,9 +255,10 @@ class CNode:
 
 		return _token_list
 
-	func get_flow(_id: int) -> FlowConnection:
+
+	func get_flow_connection(_id: int) -> FlowConnection:
 		for flow: FlowConnection in flow_connections:
-			if flow.id == _id:
+			if flow.from_id == _id:
 				return flow
 		
 		return null
@@ -267,7 +269,7 @@ class CNode:
 			return INVALID_TOKEN
 
 		var flow_tokens: Array
-		var input_flow: FlowConnection = ref.input_ref.get_flow(_flow_id)
+		var input_flow: FlowConnection = (ref.input_ref as CNode).get_flow_connection(_flow_id)
 
 		if input_flow and input_flow.to:
 			HenGlobal.USE_MACRO_REF = true
@@ -295,7 +297,7 @@ class CNode:
 		HenCodeGeneration.flows_refs[then_flow_id] = []
 
 		for flow: FlowConnection in flow_connections:
-			match flow.id:
+			match flow.from_id:
 				0:
 					_stack.append({node = flow.to, id = flow.to_id, flow_id = true_flow_id})
 				1:
@@ -322,7 +324,7 @@ class CNode:
 		HenCodeGeneration.flows_refs[then_flow_id] = []
 
 		for flow: FlowConnection in flow_connections:
-			match flow.id:
+			match flow.from_id:
 				0:
 					_stack.append({node = flow.to, id = flow.to_id, flow_id = body_flow_id})
 				1:
@@ -393,10 +395,9 @@ class CNode:
 				HenVirtualCNode.SubType.MACRO:
 					HenGlobal.USE_MACRO_USE_SELF = true
 					HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
-					# TODO: fix this
-					# var data: Dictionary = (connection.from.ref as HenMacroData).output_ref.get_ref().get_input_token(connection.to_id)
+					var data: Dictionary = (connection.from.ref as Macro).output_ref.get_input_token(connection.to_id)
 					HenGlobal.USE_MACRO_USE_SELF = false
-					return {}
+					return data
 				_:
 					var data: Dictionary = connection.from.get_token(connection.from.get_output_index(connection.from_id))
 					

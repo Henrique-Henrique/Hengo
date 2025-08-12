@@ -65,6 +65,7 @@ func create_virtual_connection(_config: Dictionary) -> HenVCFlowConnectionReturn
 
 
 func on_create_connection_request() -> void:
+	print(HenGlobal.flow_connection_to_data)
 	var connection: HenVCFlowConnectionReturn = create_virtual_connection(HenGlobal.flow_connection_to_data)
 					
 	if connection:

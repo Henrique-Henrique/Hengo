@@ -10,7 +10,8 @@
 extends Sprite2D
 
 func my_name():
-	get_offset()
+	pass
+
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -37,4 +38,4 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_node("Oh my g").my_variable_99)
+		print(HengoState.INVALID_PLACEHOLDER)

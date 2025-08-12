@@ -622,6 +622,9 @@ static func _get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refe
 			if cn.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
 				_parent_ref.input_ref = cn
 
+			if cn.sub_type == HenVirtualCNode.SubType.MACRO_OUTPUT:
+				_parent_ref.output_ref = cn
+
 
 	match cn.type:
 		HenVirtualCNode.Type.STATE:

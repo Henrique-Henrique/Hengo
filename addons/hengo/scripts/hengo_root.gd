@@ -24,6 +24,7 @@ func _ready() -> void:
 	HenRouter.comment_reference = {}
 	# HenGlobal.history = UndoRedo.new()
 	HenEnums.DROPDOWN_STATES = []
+	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
 
 
 	# defining types
@@ -72,7 +73,7 @@ func _on_cnode_gui_input(_event: InputEvent) -> void:
 						method_list.start(HenGlobal.script_config.type, get_global_mouse_position())
 						HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
 				MOUSE_BUTTON_LEFT:
-					for cnode in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
+					for cnode: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
 						cnode.unselect()
 					
 					HenGlobal.CODE_PREVIEWER.clear_code()
@@ -98,11 +99,11 @@ func _select_cnode() -> void:
 	var selection_rect: ReferenceRect = HenGlobal.CAM.get_node('SelectionRect')
 
 	for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
-		if v_cnode.references.cnode_ref:
-			if selection_rect.get_global_rect().has_point(v_cnode.references.cnode_ref.global_position):
-				v_cnode.references.cnode_ref.select()
+		if v_cnode.cnode_instance:
+			if selection_rect.get_global_rect().has_point(v_cnode.cnode_instance.global_position):
+				v_cnode.cnode_instance.select()
 			else:
-				v_cnode.references.cnode_ref.unselect()
+				v_cnode.cnode_instance.unselect()
 
 
 func _process(_delta: float) -> void:
@@ -145,18 +146,19 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		if event.pressed:
 			if event.shift_pressed and event.keycode == KEY_F:
-				var all_nodes = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP)
+				var all_nodes = HenGlobal.SELECTED_VIRTUAL_CNODE
 				HenGlobal.history.create_action('Delete Node')
 
-				for cnode: HenCnode in all_nodes:
-					if not cnode.virtual_ref or not cnode.virtual_ref.get_ref():
+				for v_cnode: HenVirtualCNode in all_nodes:
+					if not v_cnode.cnode_instance:
 						continue
+					
 
-					var v_cnode: HenVCNodeReturn = cnode.virtual_ref.get_ref().get_history_obj()
+					var v_cnode_return: HenVCNodeReturn = v_cnode.get_history_obj()
 
-					HenGlobal.history.add_do_method(v_cnode.remove)
-					HenGlobal.history.add_undo_reference(v_cnode)
-					HenGlobal.history.add_undo_method(v_cnode.add)
+					HenGlobal.history.add_do_method(v_cnode_return.remove)
+					HenGlobal.history.add_undo_reference(v_cnode_return)
+					HenGlobal.history.add_undo_method(v_cnode_return.add)
 
 				HenGlobal.history.commit_action()
 				

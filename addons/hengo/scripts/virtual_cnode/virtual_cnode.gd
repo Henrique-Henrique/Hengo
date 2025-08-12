@@ -123,6 +123,7 @@ func show() -> void:
 	cnode.on_right_click.connect(on_cnode_right_click)
 	cnode.changed_position.connect(on_cnode_changed_position)
 	cnode.on_mouse_enter.connect(on_cnode_mouse_enter)
+	cnode.on_selected.connect(on_cnode_selected)
 
 
 func hide() -> void:
@@ -135,6 +136,7 @@ func hide() -> void:
 	cnode_instance.on_right_click.disconnect(on_cnode_right_click)
 	cnode_instance.changed_position.disconnect(on_cnode_changed_position)
 	cnode_instance.on_mouse_enter.disconnect(on_cnode_mouse_enter)
+	cnode_instance.on_selected.disconnect(on_cnode_selected)
 
 	renderer.configure_cnode_to_hide(cnode_instance)
 	cnode_instance = null
@@ -177,6 +179,21 @@ func on_cnode_mouse_enter() -> void:
 			to_cnode = self,
 			to_id = flow.flow_inputs[0].id
 		}
+
+
+func select() -> void:
+	on_cnode_selected(true)
+
+
+func unselect() -> void:
+	on_cnode_selected(false)
+
+
+func on_cnode_selected(_selected: bool) -> void:
+	if _selected:
+		HenGlobal.SELECTED_VIRTUAL_CNODE.append(self)
+	else:
+		HenGlobal.SELECTED_VIRTUAL_CNODE.erase(self)
 
 
 func on_cnode_hovering(_mouse_pos: Vector2) -> void:
