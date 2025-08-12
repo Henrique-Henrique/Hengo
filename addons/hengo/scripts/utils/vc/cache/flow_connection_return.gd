@@ -14,6 +14,9 @@ func add(_update: bool = true) -> void:
     var remove_connection: Array = []
     
     for connection_ref: HenVCFlowConnectionData in connection.get_from().flow.flow_connections_2:
+        if connection_ref.get_from() != connection.get_from():
+            continue
+
         if connection_ref.from_id != connection.from_id:
             continue
 
