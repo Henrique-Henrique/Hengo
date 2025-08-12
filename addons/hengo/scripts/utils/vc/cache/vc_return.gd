@@ -21,10 +21,8 @@ func add() -> void:
     if not list.has(v_cnode):
         list.append(v_cnode)
 
-    v_cnode.io.connections.append_array(old_connections)
-    v_cnode.flow.flow_connections_2.append_array(old_flow_connections)
 
-    # inputs
+    # io
     for connection: HenVCConnectionData in old_connections:
         connection.get_from().io.connections.append(connection)
         connection.get_to().io.connections.append(connection)
@@ -58,33 +56,42 @@ func remove() -> void:
     
     list.erase(v_cnode)
 
-    old_connections.append_array(v_cnode.io.connections)
-    old_flow_connections.append_array(v_cnode.flow.flow_connections_2)
-
-    # inputs
+    var remove_connections: Array = []
+    var remove_flow_connections: Array = []
+    
+    # io
     for connection: HenVCConnectionData in v_cnode.io.connections:
-        connection.get_from().io.connections.erase(connection)
-        connection.get_to().io.connections.erase(connection)
-
         if connection.line_ref:
             connection.line_ref.visible = false
             connection.line_ref = null
         
-        connection.get_from().update()
-
+        remove_connections.append(connection)
 
     # flows
     for connection: HenVCFlowConnectionData in v_cnode.flow.flow_connections_2:
-        connection.get_from().flow.flow_connections_2.erase(connection)
-        connection.get_to().flow.flow_connections_2.erase(connection)
-
         if connection.line_ref:
             connection.line_ref.visible = false
             connection.line_ref = null
         
-        connection.get_from().update()
+        remove_flow_connections.append(connection)
 
-    v_cnode.io.connections.clear()
-    v_cnode.flow.flow_connections_2.clear()
+
+    # remove io
+    for connection: HenVCConnectionData in remove_connections:
+        connection.get_from().io.connections.erase(connection)
+        connection.get_to().io.connections.erase(connection)
+        connection.get_from().update()
+        connection.get_to().update()
+        old_connections.append(connection)
+
+    # remove flow
+    for flow_connection: HenVCFlowConnectionData in remove_flow_connections:
+        flow_connection.get_from().flow.flow_connections_2.erase(flow_connection)
+        flow_connection.get_to().flow.flow_connections_2.erase(flow_connection)
+        flow_connection.get_from().update()
+        flow_connection.get_to().update()
+        old_flow_connections.append(flow_connection)
+
+
     v_cnode.hide()
     v_cnode.state.is_deleted = true

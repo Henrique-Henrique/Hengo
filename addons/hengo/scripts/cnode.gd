@@ -29,7 +29,6 @@ signal on_mouse_enter
 signal on_move
 signal on_right_click
 signal changed_position(_pos: Vector2)
-signal create_flow_connection_request
 signal on_selected
 
 
@@ -128,8 +127,8 @@ func _on_dropdown_state_pick(_value: Dictionary) -> void:
 		old_state_event_connected = null
 
 	var event = state.add_event({
-		name = 'Connect',
-		type = 'state_signal'
+		name='Connect',
+		type='state_signal'
 	})
 	old_state_event_connected = event
 
@@ -206,6 +205,28 @@ func get_border() -> Panel:
 	return get_node('%Border')
 
 
+func reset_signals(_vc: HenVirtualCNode = null):
+	for signal_name: StringName in [
+		'on_hovering',
+		'on_double_click',
+		'on_right_click',
+		'changed_position',
+		'on_mouse_enter',
+		'on_selected'
+	]:
+		for connection: Dictionary in get_signal_connection_list(signal_name):
+			@warning_ignore('unsafe_method_access')
+			connection.signal.disconnect(connection.callable)
+
+	if _vc:
+		on_hovering.connect(_vc.on_cnode_hovering)
+		on_double_click.connect(_vc.on_cnode_double_click)
+		on_right_click.connect(_vc.on_cnode_right_click)
+		changed_position.connect(_vc.on_cnode_changed_position)
+		on_mouse_enter.connect(_vc.on_cnode_mouse_enter)
+		on_selected.connect(_vc.on_cnode_selected)
+
+
 static func instantiate_and_add_pool() -> void:
 	HenGlobal.can_instantiate_pool = true
 
@@ -219,10 +240,10 @@ static func instantiate_and_add_pool() -> void:
 			var instance: HenCnode = HenAssets.CNodeScene.instantiate()
 
 			for input_idx in range(5): # input pool size
-				instance.add_input({name = "", type = "Variant"}, false)
+				instance.add_input({name="", type="Variant"}, false)
 
 			for output_idx in range(5): # output pool size
-				instance.add_output({name = "", type = "Variant"})
+				instance.add_output({name="", type="Variant"})
 			
 			instance.position = Vector2(50000, 50000)
 			instance.is_pool = true
