@@ -80,11 +80,6 @@ static func load_data(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
-	var l: Array = []
-
-	for func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
-		l.append(func_data)
-
 	clean()
 
 	# ---------------------------------------------------------------------------- #
@@ -114,11 +109,6 @@ static func load_data(_path: StringName) -> void:
 
 	HenGlobal.script_config.path = _path
 	HenGlobal.script_config.id = resource_id
-
-	
-	for func_data: HenFuncData in l:
-		print('sidebar refs -> ', func_data.name, ' -> ', func_data.get_reference_count())
-
 
 	# loading hengo script data
 	if script_to_open_reload_script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):

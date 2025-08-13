@@ -52,7 +52,7 @@ func test_func_code() -> void:
 		'test_void(test_func()[0])'
 	)
 
-	void_vc.remove_inout_connection(void_vc.inputs[0])
+	void_vc.io.remove_io_connection(void_vc.io.inputs[0])
 
 	# input 2 value
 	assert_eq(

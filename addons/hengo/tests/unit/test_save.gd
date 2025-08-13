@@ -30,8 +30,8 @@ func test_save() -> void:
 	assert_true(code.contains('\nfunc _ready() -> void:\n\tif not _STATE_CONTROLLER.current_state:\n\t\t_STATE_CONTROLLER.change_state("state_1")'), 'Testing ready function with start state name')
 	assert_true(code.contains('\nclass State1 extends HengoState:\n\tpass'), 'Testing class creation')
 
-	var enter_vc: HenVirtualCNode = state.virtual_cnode_list[0]
-	var vc_flow_1: HenVirtualCNode = HenTest.get_void(state.route)
+	var enter_vc: HenVirtualCNode = state.children.virtual_cnode_list[0]
+	var vc_flow_1: HenVirtualCNode = HenTest.get_void(state.route_info.route)
 
 	enter_vc.add_flow_connection(0, 0, vc_flow_1).add()
 
@@ -40,8 +40,8 @@ func test_save() -> void:
 
 	assert_true(new_code.contains('\nclass State1 extends HengoState:\n\tfunc enter() -> void:\n\t\t_ref.test_void()'), 'Testing enter function in state class with void call')
 
-	var update_vc: HenVirtualCNode = state.virtual_cnode_list[1]
-	var vc_flow_2: HenVirtualCNode = HenTest.get_void(state.route)
+	var update_vc: HenVirtualCNode = state.children.virtual_cnode_list[1]
+	var vc_flow_2: HenVirtualCNode = HenTest.get_void(state.route_info.route)
 
 	update_vc.add_flow_connection(0, 0, vc_flow_2).add()
 
@@ -59,7 +59,7 @@ func test_save() -> void:
 	macro_data.create_flow(HenSideBar.ParamType.INPUT, 0)
 
 	var macro_conf: Dictionary = macro_data.get_cnode_data()
-	macro_conf.route = state.route
+	macro_conf.route = state.route_info.route
 
 	var macro_inst: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_conf)
 	var macro_flow: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
@@ -69,7 +69,7 @@ func test_save() -> void:
 		route = macro_data.route
 	})
 
-	macro_data.input_ref.add_flow_connection(0, 0, macro_flow).add()
+	(macro_data.input_ref.get_ref() as HenVirtualCNode).add_flow_connection(0, 0, macro_flow).add()
 	vc_flow_1.add_flow_connection(0, 0, macro_inst).add()
 
 	var script_data_2: HenScriptData = HenSaver.generate_script_data()

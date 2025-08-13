@@ -56,7 +56,7 @@ func test_signal_code() -> void:
 	})
 	
 	signal_data.signal_enter.add_flow_connection(0, 0, vc_input).add()
-	vc_input.add_input_connection(0, signal_data.signal_enter.outputs[0].id, signal_data.signal_enter)
+	vc_input.get_new_input_connection_command(0, signal_data.signal_enter.io.outputs[0].id, signal_data.signal_enter).add()
 
 	var script_input_data: HenScriptData = HenSaver.generate_script_data()
 	var code_input: String = HenCodeGeneration.get_code(script_input_data)

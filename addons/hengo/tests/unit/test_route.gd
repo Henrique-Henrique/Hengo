@@ -21,7 +21,7 @@ func test_route() -> void:
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
 		inputs = [],
-		route = state_vc.route
+		route = state_vc.route_info.route
 	})
 
 	assert_eq(

@@ -60,8 +60,8 @@ func test_if_code() -> void:
 		'if Test.CONST:\n\ttest_void()\nelse:\n\ttest_void()\ntest_void()'
 	)
 
-	vc.get_flow_connection(0).remove()
-	vc.get_flow_connection(2).remove()
+	vc.get_flow_output_connection(0).remove()
+	vc.get_flow_output_connection(2).remove()
 
 	# test false flow without true flow
 	assert_eq(

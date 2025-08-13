@@ -25,7 +25,7 @@ func test_func() -> void:
 		route = func_data.route
 	})
 	
-	func_data.input_ref.add_flow_connection(0, 0, vc).add()
+	(func_data.input_ref.get_ref() as HenVirtualCNode).add_flow_connection(0, 0, vc).add()
 
 	var script_data_2: HenScriptData = HenSaver.generate_script_data()
 	var code_2: String = HenCodeGeneration.get_code(script_data_2)
@@ -52,8 +52,8 @@ func test_func() -> void:
 		route = func_data.route
 	})
 	
-	func_data.input_ref.add_flow_connection(0, 0, vc_input).add()
-	vc_input.add_input_connection(0, func_data.input_ref.outputs[0].id, func_data.input_ref)
+	(func_data.input_ref.get_ref() as HenVirtualCNode).add_flow_connection(0, 0, vc_input).add()
+	vc_input.get_new_input_connection_command(0, (func_data.input_ref.get_ref() as HenVirtualCNode).io.outputs[0].id, func_data.input_ref.get_ref() as HenVirtualCNode).add()
 
 	var script_input_data: HenScriptData = HenSaver.generate_script_data()
 	var code_input: String = HenCodeGeneration.get_code(script_input_data)
@@ -82,8 +82,8 @@ func test_func() -> void:
 		route = macro_data.route
 	})
 
-	macro_data.input_ref.add_flow_connection(0, 0, macro_flow).add()
-	func_data.input_ref.add_flow_connection(0, 0, vc).add()
+	(macro_data.input_ref.get_ref() as HenVirtualCNode).add_flow_connection(0, 0, macro_flow).add()
+	(func_data.input_ref.get_ref() as HenVirtualCNode).add_flow_connection(0, 0, vc).add()
 	vc.add_flow_connection(0, 0, macro_inst).add()
 
 	var script_data_3: HenScriptData = HenSaver.generate_script_data()

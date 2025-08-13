@@ -53,6 +53,13 @@ func get_flow_input_connection_command(_id: int) -> HenVCFlowConnectionReturn:
 
 	return null
 
+func get_flow_output_connection_command(_id: int) -> HenVCFlowConnectionReturn:
+	for connection: HenVCFlowConnectionData in flow_connections_2:
+		if connection.from_id == _id:
+			return HenVCFlowConnectionReturn.new(connection)
+
+	return null
+
 
 func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
 	flow_outputs.append(HenVCFlow.new(_owner, {name = 'Flow ' + str(flow_connections_2.size())}))

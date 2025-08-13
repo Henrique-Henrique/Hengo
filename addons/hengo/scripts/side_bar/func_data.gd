@@ -12,6 +12,8 @@ var route: HenRouteData
 var virtual_cnode_list: Array
 var local_vars: Array
 var cnode_list_to_load: Array
+var input_ref: WeakRef
+var output_ref: WeakRef
 
 func _init(_load_vc: bool = true) -> void:
 	route = HenRouteData.new(

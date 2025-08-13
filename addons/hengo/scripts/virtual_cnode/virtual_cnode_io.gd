@@ -38,7 +38,7 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 	
 	if not HenUtils.is_type_relation_valid(output.type, input.type):
 		return
-	
+
 	var connection: HenVCConnectionData = HenVCConnectionData.new()
 
 	connection.from_type = output.type

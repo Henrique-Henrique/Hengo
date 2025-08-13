@@ -46,7 +46,7 @@ func test_for_range_code() -> void:
 		'for index_3 in range(0, 0, 1):\n\ttest_void(index_3)'
 	)
 
-	for_vc.get_flow_connection(0).remove()
+	for_vc.get_flow_output_connection(0).remove()
 
 	# test base
 	assert_eq(
