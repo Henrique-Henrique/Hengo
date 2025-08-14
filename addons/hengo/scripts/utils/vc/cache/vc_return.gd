@@ -49,7 +49,7 @@ func add() -> void:
 func remove() -> void:
     if not v_cnode.state.can_delete:
         return
-    
+
     var list: Array = ((v_cnode.route_info.route_ref.ref as WeakRef).get_ref() as HenVirtualCNode).children.virtual_cnode_list \
         if (v_cnode.route_info.route_ref.ref as WeakRef).get_ref() is HenVirtualCNode \
         else (v_cnode.route_info.route_ref.ref as WeakRef).get_ref().virtual_cnode_list

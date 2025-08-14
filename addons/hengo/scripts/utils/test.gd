@@ -24,8 +24,9 @@ class CNodeConnection:
 
 
 static func get_base_route() -> HenRouteData:
-	HenGlobal.BASE_ROUTE_REF = HenLoader.BaseRouteRef.new()
-
+	if not HenGlobal.BASE_ROUTE_REF:
+		HenGlobal.BASE_ROUTE_REF = HenLoader.BaseRouteRef.new()
+	
 	return HenRouteData.new(
 		'Base',
 		HenRouter.ROUTE_TYPE.BASE,
@@ -57,11 +58,11 @@ static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.
 	var ref
 
 	if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
-		ref = HenCodeGeneration._get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(), _refs)
+		ref = HenFactoryCNode.get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(), _refs)
 	else:
 		ref = _vc.route_info.route_ref.ref
 
-	var data: HenSaveCodeType.CNode = HenCodeGeneration._get_cnode_from_dict(_vc.get_save(), _refs, ref)
+	var data: HenSaveCodeType.CNode = HenFactoryCNode.get_cnode_from_dict(_vc.get_save(), _refs, ref)
 	var token: Dictionary
 
 	match data.sub_type:
@@ -74,10 +75,10 @@ static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.
 		_:
 			token = data.get_token()
 
-	return CNodeDataCode.new(data, HenCodeGeneration.parse_token_by_type(token))
+	return CNodeDataCode.new(data, HenGeneratorByToken.get_code_by_token(token))
 
 
-static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs: HenSaveCodeType.References, _input_connections: Array[CNodeConnection] = [], _connections: Array[CNodeConnection] = []) -> String:
+static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs: HenSaveCodeType.References, _input_connections: Array[CNodeConnection]=[], _connections: Array[CNodeConnection]=[]) -> String:
 	# input connections
 	for connection in _input_connections:
 		connection.from.get_new_input_connection_command(connection.from_id, connection.to_id, connection.to).add()
@@ -93,51 +94,51 @@ static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs:
 	var data: CNodeDataCode = get_virtual_cnode_code(_base_vc, _refs)
 	var code: String = ''
 
-	HenCodeGeneration._parse_connections(_refs)
+	HenFactoryCNode.parse_connections(_refs)
 
 	for token in data.data.get_flow_tokens(0):
-		code += HenCodeGeneration.parse_token_by_type(token)
+		code += HenGeneratorByToken.get_code_by_token(token)
 
 	return code
 
 
 static func get_void(_route: HenRouteData = null) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'test_void',
-		sub_type = HenVirtualCNode.SubType.VOID,
-		inputs = [],
-		route = HenTest.get_base_route() if not _route else _route
+		name='test_void',
+		sub_type=HenVirtualCNode.SubType.VOID,
+		inputs=[],
+		route=HenTest.get_base_route() if not _route else _route
 	})
 
 
 static func get_void_with_input() -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'test_void',
-		sub_type = HenVirtualCNode.SubType.VOID,
-		category = 'native',
-		inputs = [
+		name='test_void',
+		sub_type=HenVirtualCNode.SubType.VOID,
+		category='native',
+		inputs=[
 			{
-				id = 0,
-				name = 'content',
-				type = 'Variant'
+				id=0,
+				name='content',
+				type='Variant'
 			}
 		],
-		route = HenTest.get_base_route()
+		route=HenTest.get_base_route()
 	})
 
 
-static func get_const() -> HenVirtualCNode:
+static func get_const(_id: int = -1) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'Test',
-		name_to_code = 'CONST',
-		outputs = [
+		name='Test',
+		name_to_code='CONST',
+		outputs=[
 			{
-				id = 0,
-				name = 'CONST',
-				type = 'Variant'
+				id=0,
+				name='CONST',
+				type='Variant'
 			}
 		],
-		sub_type = HenVirtualCNode.SubType.CONST,
-		type = 0,
-		route = HenTest.get_base_route()
+		sub_type=HenVirtualCNode.SubType.CONST,
+		type=0,
+		route=HenTest.get_base_route()
 	})

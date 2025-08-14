@@ -3,39 +3,39 @@ extends GutTest
 func test_expression_code() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		type = HenVirtualCNode.Type.EXPRESSION,
-		sub_type = HenVirtualCNode.SubType.EXPRESSION,
-		name = 'Expression',
-		inputs = [
+		type=HenVirtualCNode.Type.EXPRESSION,
+		sub_type=HenVirtualCNode.SubType.EXPRESSION,
+		name='Expression',
+		inputs=[
 			{
-				name = '',
-				type = 'Variant',
-				sub_type = 'expression',
-				category = 'default_value',
-				code_value = 'null',
-				value = 'a + b',
-				is_static = true
+				name='',
+				type='Variant',
+				sub_type='expression',
+				category='default_value',
+				code_value='null',
+				value='a + b',
+				is_static=true
 			},
 			{
-				id = 0,
-				name = 'a',
-				type = 'Variant'
+				id=0,
+				name='a',
+				type='Variant'
 			},
 			{
-				id = 1,
-				name = 'b',
-				type = 'Variant'
+				id=1,
+				name='b',
+				type='Variant'
 			}
 		],
-		outputs = [
+		outputs=[
 			{
-				id = 0,
-				name = 'result',
-				type = 'Variant'
+				id=0,
+				name='result',
+				type='Variant'
 			}
 		],
-		category = 'native',
-		route = HenTest.get_base_route()
+		category='native',
+		route=HenTest.get_base_route()
 	})
 
    	# test expression

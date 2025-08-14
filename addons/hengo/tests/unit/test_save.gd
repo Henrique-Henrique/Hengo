@@ -5,30 +5,31 @@ func test_save() -> void:
 	HenTest.set_global_config()
 
 	var start_state: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'Start State',
-		type = HenVirtualCNode.Type.STATE_START,
-		sub_type = HenVirtualCNode.SubType.STATE_START,
-		position = Vector2(0, 0),
-		can_delete = false,
-		route = HenGlobal.BASE_ROUTE
+		name='Start State',
+		type=HenVirtualCNode.Type.STATE_START,
+		sub_type=HenVirtualCNode.SubType.STATE_START,
+		position=Vector2(0, 0),
+		can_delete=false,
+		route=HenGlobal.BASE_ROUTE
 	})
 
 	var state: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'State 1',
-		type = HenVirtualCNode.Type.STATE,
-		sub_type = HenVirtualCNode.SubType.STATE,
-		route = HenGlobal.BASE_ROUTE
+		name='State 1',
+		type=HenVirtualCNode.Type.STATE,
+		sub_type=HenVirtualCNode.SubType.STATE,
+		route=HenGlobal.BASE_ROUTE
 	})
 
 	start_state.add_flow_connection(0, 0, state).add()
 
 	var script_data: HenScriptData = HenSaver.generate_script_data()
-	var code: String = HenCodeGeneration.get_code(script_data)
+	var code: String = HenCodeGeneration.get_code(script_data).replacen('\r\n', '\n')
 
 	assert_true(code.contains('\nconst _EVENTS = {}'), 'Testing events constant declaration')
 	assert_true(code.contains('\nfunc _init() -> void:\n\t_STATE_CONTROLLER.set_states({\n\t\tstate_1=State1.new(self)\n\t})'), 'Testing init function with state controller setup')
 	assert_true(code.contains('\nfunc _ready() -> void:\n\tif not _STATE_CONTROLLER.current_state:\n\t\t_STATE_CONTROLLER.change_state("state_1")'), 'Testing ready function with start state name')
 	assert_true(code.contains('\nclass State1 extends HengoState:\n\tpass'), 'Testing class creation')
+
 
 	var enter_vc: HenVirtualCNode = state.children.virtual_cnode_list[0]
 	var vc_flow_1: HenVirtualCNode = HenTest.get_void(state.route_info.route)
@@ -63,10 +64,10 @@ func test_save() -> void:
 
 	var macro_inst: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_conf)
 	var macro_flow: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'test_void_2',
-		sub_type = HenVirtualCNode.SubType.VOID,
-		inputs = [],
-		route = macro_data.route
+		name='test_void_2',
+		sub_type=HenVirtualCNode.SubType.VOID,
+		inputs=[],
+		route=macro_data.route
 	})
 
 	(macro_data.input_ref.get_ref() as HenVirtualCNode).add_flow_connection(0, 0, macro_flow).add()

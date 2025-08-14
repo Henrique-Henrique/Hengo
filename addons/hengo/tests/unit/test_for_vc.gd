@@ -4,34 +4,34 @@ extends GutTest
 func test_for_range_code() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var for_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		id = 3,
-		name = 'For -> Range',
-		type = HenVirtualCNode.Type.FOR,
-		sub_type = HenVirtualCNode.SubType.FOR,
-		inputs = [
+		id=3,
+		name='For -> Range',
+		type=HenVirtualCNode.Type.FOR,
+		sub_type=HenVirtualCNode.SubType.FOR,
+		inputs=[
 			{
-				name = 'start',
-				type = 'int'
+				name='start',
+				type='int'
 			},
 			{
-				name = 'end',
-				type = 'int',
+				name='end',
+				type='int',
 			},
 			{
-				name = 'step',
-				type = 'int',
-				value = 1,
-				code_value = '1'
+				name='step',
+				type='int',
+				value=1,
+				code_value='1'
 			}
 		],
-		outputs = [
+		outputs=[
 			{
-				id = 0,
-				name = 'index',
-				type = 'int'
+				id=0,
+				name='index',
+				type='int'
 			}
 		],
-		route = HenTest.get_base_route()
+		route=HenTest.get_base_route()
 	})
 
 	var vc_flow_void: HenVirtualCNode = HenTest.get_void_with_input()
