@@ -35,13 +35,13 @@ static func generate_script_data() -> HenScriptData:
 
 	# ---------------------------------------------------------------------------- #
 	# Side Bar List
-	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save()
+	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save(script_data)
 
 	# ---------------------------------------------------------------------------- #
 	var v_cnode_list: Array[Dictionary] = []
 
 	for v_cnode: HenVirtualCNode in (HenGlobal.BASE_ROUTE.ref as WeakRef).get_ref().virtual_cnode_list:
-		v_cnode_list.append(v_cnode.get_save())
+		v_cnode_list.append(v_cnode.get_save(script_data))
 
 		if v_cnode.identity.type == HenVirtualCNode.Type.STATE_EVENT:
 			script_data.state_event_list.append(v_cnode.identity.name)
@@ -77,8 +77,8 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	if _regenerate:
 		HenCodeGeneration.regenerate(save_config, _script_id, _script_data.side_bar_list)
 
-	# save_data(save_config)
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
+	save_data(save_config)
+	# HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
 
 
 static func save_data(_save_config: SaveConfig) -> void:

@@ -14,7 +14,7 @@ static func get_flow_id() -> int:
 
 
 static func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new(_data)
 	var code: String = ''
 
 	HenGlobal.GENERATE_PREVIEW_CODE = _build_preview
@@ -76,7 +76,6 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 		if cnode.has(&'virtual_cnode_list'):
 			for cnode_chd: Dictionary in cnode.virtual_cnode_list:
 				cn.virtual_cnode_list.append(HenFactoryCNode.get_cnode_from_dict(cnode_chd, refs, cn))
-
 
 	HenFactoryCNode.parse_connections(refs)
 
@@ -151,9 +150,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> Hen
 	
 	var res_path: StringName = 'res: / / hengo / save / ' + str(_id) + HenScriptData.HENGO_EXT
 	
-	prints('up -> ', res_path, 'open -> ', HenLoader.script_to_open_id)
 	var res: HenScriptData = HenScriptData.load_from_file(res_path)
-
 
 	refs.counter = res.node_counter
 	refs.side_bar_list = _side_bar_list

@@ -264,7 +264,7 @@ func get_inspector_array_list() -> Array[HenProp]:
     ] as Array[HenProp]
 
     
-func get_save() -> Dictionary:
+func get_save(_script_data: HenScriptData) -> Dictionary:
     return {
         id = id,
         name = name,
@@ -272,7 +272,7 @@ func get_save() -> Dictionary:
         outputs = outputs.map(func(x: MacroInOut) -> Dictionary: return x.get_save()),
         inputs_value = inputs_value.map(func(x: HenParamData) -> Dictionary: return x.get_save()),
         outputs_value = outputs_value.map(func(x: HenParamData) -> Dictionary: return x.get_save()),
-        virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
+        virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save(_script_data)),
         local_vars = local_vars.map(func(x: HenVarData) -> Dictionary: return x.get_save()),
     }
 

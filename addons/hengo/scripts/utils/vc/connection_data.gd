@@ -33,4 +33,5 @@ func get_save() -> Dictionary:
 		from_id = from_id,
 		to_id = to_id,
 		from_vc_id = get_from().identity.id,
+		to_vc_id = get_to().identity.id,
 	}

@@ -1,7 +1,7 @@
 class_name HenFactoryCNode extends RefCounted
 
 
-static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.References, _parent_ref=null) -> HenSaveCodeType.CNode:
+static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.References, _parent_ref = null) -> HenSaveCodeType.CNode:
 	var cn: HenSaveCodeType.CNode = HenSaveCodeType.CNode.new()
 
 	cn.id = int(_cnode.id)
@@ -26,30 +26,6 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 	
 	if _cnode.has(&'name_to_code'):
 		cn.name_to_code = _cnode.name_to_code
-	
-	if _cnode.has('flow_connections'):
-		for connection: Dictionary in _cnode.flow_connections:
-			var fc: HenSaveCodeType.FlowConnection = HenSaveCodeType.FlowConnection.new()
-
-			fc.from = cn
-
-			fc.from_id = int(connection.from_id)
-			fc.to_id = int(connection.to_id)
-			fc.to_vc_id = int(connection.to_vc_id)
-
-
-			_refs.flow_connections.append(fc)
-
-	if _cnode.has('input_connections'):
-		for connection: Dictionary in _cnode.input_connections:
-			var input_connection: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new()
-
-			input_connection.from_id = int(connection.from_id)
-			input_connection.to_id = int(connection.to_id)
-			input_connection.to = cn
-			input_connection.from_vc_id = int(connection.from_vc_id)
-
-			_refs.input_connections.append(input_connection)
 
 	if _cnode.has('inputs'):
 		for input_data: Dictionary in _cnode.inputs:
@@ -110,12 +86,15 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 #
 static func parse_connections(_refs: HenSaveCodeType.References) -> void:
 	# generatin flow connection references
-	for connection: HenSaveCodeType.FlowConnection in _refs.flow_connections:
-		var cnode: HenSaveCodeType.CNode = _refs.cnode_ref[connection.to_vc_id]
-		connection.to = cnode
-		connection.from.flow_connections.append(connection)
+	for flow_connection_data: Dictionary in _refs.script_data.flow_connections:
+		var flow_connection: HenSaveCodeType.FlowConnection = HenSaveCodeType.FlowConnection.new(flow_connection_data, _refs)
+		flow_connection.from.flow_connections.append(flow_connection)
+
 
 	# generating input connection references
-	for connection: HenSaveCodeType.InputConnection in _refs.input_connections:
-		connection.from = _refs.cnode_ref[connection.from_vc_id]
-		connection.to.input_connections.append(connection)
+	for connection: Dictionary in _refs.script_data.connections:
+		var input: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new(connection, _refs)
+		input.to.input_connections.append(input)
+	
+	_refs.script_data.connections.clear()
+	_refs.script_data.flow_connections.clear()

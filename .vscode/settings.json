@@ -9,4 +9,5 @@
     "**/*.cfg": true,
     "**/*.uid": true
   },
+  "kiroAgent.configureMCP": "Disabled",
 }

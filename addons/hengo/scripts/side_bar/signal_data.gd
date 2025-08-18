@@ -173,7 +173,7 @@ func get_inspector_array_list() -> Array:
 		}),
 	]
 
-func get_save() -> Dictionary:
+func get_save(_script_data: HenScriptData) -> Dictionary:
 	return {
 		id = id,
 		name = name,
@@ -182,7 +182,7 @@ func get_save() -> Dictionary:
 		signal_name_to_code = signal_name_to_code,
 		params = params.map(func(x: HenParamData) -> Dictionary: return x.get_save()),
 		bind_params = bind_params.map(func(x: HenParamData) -> Dictionary: return x.get_save()),
-		virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
+		virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save(_script_data)),
 		local_vars = local_vars.map(func(x: HenVarData) -> Dictionary: return x.get_save()),
 	}
 

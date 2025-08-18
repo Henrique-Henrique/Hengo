@@ -227,7 +227,7 @@ func on_cnode_changed_position(_pos: Vector2) -> void:
 	visual.position = _pos
 
 
-func get_save() -> Dictionary:
+func get_save(_script_data: HenScriptData) -> Dictionary:
 	var data: Dictionary = {
 		id = identity.id,
 		type = identity.type,
@@ -235,8 +235,6 @@ func get_save() -> Dictionary:
 		name = identity.name,
 		position = var_to_str(visual.position),
 		size = var_to_str(visual.size),
-		input_connections = [],
-		flow_connections = []
 	}
 
 	if not state.can_delete:
@@ -276,24 +274,21 @@ func get_save() -> Dictionary:
 	if identity.category:
 		data.category = identity.category
 
+
 	for flow_connection: HenVCFlowConnectionData in flow.flow_connections_2:
 		if not flow_connection.get_to(): continue
 		if flow_connection.get_to() == self: continue
 
-		(data.flow_connections as Array).append(flow_connection.get_save())
+		_script_data.flow_connections.append(flow_connection.get_save())
+
 
 	for input: HenVCConnectionData in io.connections:
 		if input.get_to().identity.id != identity.id:
 			continue
 
-		(data.input_connections as Array).append(input.get_save())
+		_script_data.connections.append(input.get_save())
 
-	if not children.virtual_cnode_list.is_empty():
-		data.virtual_cnode_list = []
 
-		for v_cnode: HenVirtualCNode in children.virtual_cnode_list:
-			data.virtual_cnode_list.append(v_cnode.get_save())
-	
 	# these types don't need to save the flow connections, are hengo's native
 	match identity.type:
 		HenVirtualCNode.Type.DEFAULT:
@@ -313,6 +308,14 @@ func get_save() -> Dictionary:
 
 	if identity.from_id > -1:
 		HenEnums.add_script_ref_cache(identity.from_id, HenGlobal.script_config.id)
+
+
+	if not children.virtual_cnode_list.is_empty():
+		data.virtual_cnode_list = []
+
+		for v_cnode: HenVirtualCNode in children.virtual_cnode_list:
+			data.virtual_cnode_list.append(v_cnode.get_save(_script_data))
+
 
 	return data
 

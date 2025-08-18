@@ -114,12 +114,12 @@ class SideBarList:
 		inspecting = false
 	
 
-	func get_save() -> Dictionary:
+	func get_save(_script_data: HenScriptData) -> Dictionary:
 		return {
 			var_list = var_list.map(func(x: HenVarData): return x.get_save()),
-			func_list = func_list.map(func(x: HenFuncData): return x.get_save()),
-			signal_list = signal_list.map(func(x: HenSignalData): return x.get_save()),
-			macro_list = macro_list.map(func(x: HenMacroData): return x.get_save())
+			func_list = func_list.map(func(x: HenFuncData): return x.get_save(_script_data)),
+			signal_list = signal_list.map(func(x: HenSignalData): return x.get_save(_script_data)),
+			macro_list = macro_list.map(func(x: HenMacroData): return x.get_save(_script_data))
 		}
 	
 	func load_save(_data: Dictionary) -> void:

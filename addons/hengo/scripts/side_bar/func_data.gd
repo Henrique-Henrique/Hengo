@@ -109,13 +109,13 @@ func get_cnode_data() -> Dictionary:
 			ref = self
 	}
 
-func get_save() -> Dictionary:
+func get_save(_script_data: HenScriptData) -> Dictionary:
 	return {
 		id = id,
 		name = name,
 		inputs = inputs.map(func(x: HenParamData) -> Dictionary: return x.get_save()),
 		outputs = outputs.map(func(x: HenParamData) -> Dictionary: return x.get_save()),
-		virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save()),
+		virtual_cnode_list = virtual_cnode_list.map(func(x: HenVirtualCNode) -> Dictionary: return x.get_save(_script_data)),
 		local_vars = local_vars.map(func(x: HenVarData) -> Dictionary: return x.get_save()),
 	}
 

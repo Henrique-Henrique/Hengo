@@ -48,18 +48,18 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 			return indent + prefix + _token.name
 		HenVirtualCNode.SubType.SET_VAR:
 			return indent + prefix + '{name} = {value}'.format({
-				name=_token.name,
-				value=get_code_by_token(_token.value)
+				name = _token.name,
+				value = get_code_by_token(_token.value)
 			})
 		HenVirtualCNode.SubType.SET_DEEP_PROP:
 			return indent + get_prefix_with_dot(get_code_by_token(_token.ref)) + '{name} = {value}'.format({
-				name=_token.name,
-				value=get_code_by_token(_token.value)
+				name = _token.name,
+				value = get_code_by_token(_token.value)
 			})
 		HenVirtualCNode.SubType.SET_LOCAL_VAR:
 			return indent + '{name} = {value}'.format({
-				name=_token.name,
-				value=get_code_by_token(_token.value)
+				name = _token.name,
+				value = get_code_by_token(_token.value)
 			})
 		HenVirtualCNode.SubType.LOCAL_VAR:
 			return indent + _token.name
@@ -94,9 +94,9 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				prefix = _token.singleton_class + '.'
 
 			return indent + prefix + '{name}({params}){id}'.format({
-				id=preview_id,
-				name=_token.name,
-				params=selfInput + ', '.join(params.map(
+				id = preview_id,
+				name = _token.name,
+				params = selfInput + ', '.join(params.map(
 					func(x: Dictionary) -> String:
 						return get_code_by_token(x)
 			))
@@ -116,10 +116,10 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				prefix = _token.singleton_class + '.'
 
 			return indent + prefix + '{name}({params}){id}{id_preview}'.format({
-				id_preview=preview_id,
-				name=_token.name,
-				id='[{0}]'.format([_token.id]) if _token.id >= 0 else '',
-				params=', '.join(params.map(
+				id_preview = preview_id,
+				name = _token.name,
+				id = '[{0}]'.format([_token.id]) if _token.id >= 0 else '',
+				params = ', '.join(params.map(
 					func(x: Dictionary) -> String:
 						return get_code_by_token(x)
 			))
@@ -138,8 +138,8 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				if_code = 'if not({condition}):{id}\n'
 
 			var base: String = if_code.format({
-				condition=get_code_by_token(_token.condition),
-				id=preview_id
+				condition = get_code_by_token(_token.condition),
+				id = preview_id
 			})
 
 			if true_flow.is_empty():
@@ -187,18 +187,18 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 
 			if _token.type == HenVirtualCNode.SubType.FOR:
 				base = 'for {item_name} in range({params}):{id}\n'.format({
-					item_name=loop_item,
-					params=', '.join(_token.params.map(
+					item_name = loop_item,
+					params = ', '.join(_token.params.map(
 						func(x: Dictionary) -> String:
 							return get_code_by_token(x)
 				)),
-					id=preview_id
+					id = preview_id
 				})
 			else:
 				base = 'for {item_name} in {arr}:{id}\n'.format({
-					item_name=loop_item,
-					arr=get_code_by_token(_token.params[0]),
-					id=preview_id
+					item_name = loop_item,
+					arr = get_code_by_token(_token.params[0]),
+					id = preview_id
 				})
 			
 			if body_flow.is_empty():
@@ -226,9 +226,9 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 			return indent + 'continue'
 		HenVirtualCNode.SubType.IMG:
 			return '{a} {op} {b}'.format({
-				a=get_code_by_token(_token.params[0]),
-				op=_token.name,
-				b=get_code_by_token(_token.params[1])
+				a = get_code_by_token(_token.params[0]),
+				op = _token.name,
+				b = get_code_by_token(_token.params[1])
 			})
 		HenVirtualCNode.SubType.DEBUG:
 			return indent + HenGlobal.DEBUG_TOKEN + HenGlobal.DEBUG_VAR_NAME + ' += ' + str(_token.counter)
@@ -258,19 +258,19 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 
 			if not params.is_empty():
 				return indent + '{ref}connect("{signal_name}", {call_ref}{callable}.bind({params}))'.format({
-					ref=my_prefix,
-					params=', '.join(params.map(func(x: Dictionary) -> String:
+					ref = my_prefix,
+					params = ', '.join(params.map(func(x: Dictionary) -> String:
 						return get_code_by_token(x))),
-					signal_name=_token.signal_name,
-					call_ref=prefix,
-					callable=HenGeneratorSignal.get_signal_call_name(_token.name)
+					signal_name = _token.signal_name,
+					call_ref = prefix,
+					callable = HenGeneratorSignal.get_signal_call_name(_token.name)
 				})
 
 			return indent + '{ref}connect("{signal_name}", {call_ref}{callable})'.format({
-				ref=my_prefix,
-				signal_name=_token.signal_name,
-				call_ref=prefix,
-				callable=HenGeneratorSignal.get_signal_call_name(_token.name)
+				ref = my_prefix,
+				signal_name = _token.signal_name,
+				call_ref = prefix,
+				callable = HenGeneratorSignal.get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 			var values: Array = _provide_params_ref(_token.params, prefix)
@@ -278,10 +278,10 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 			var my_prefix = values[1]
 
 			return indent + '{ref}disconnect("{signal_name}", {call_ref}{callable})'.format({
-				ref=my_prefix,
-				signal_name=_token.signal_name,
-				call_ref=prefix,
-				callable=HenGeneratorSignal.get_signal_call_name(_token.name)
+				ref = my_prefix,
+				signal_name = _token.signal_name,
+				call_ref = prefix,
+				callable = HenGeneratorSignal.get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.MACRO:
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return get_code_by_token(x, _level, preview_id)))

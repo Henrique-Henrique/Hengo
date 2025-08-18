@@ -3,8 +3,6 @@ class_name HenLoader extends Node
 
 
 static var loaded_virtual_cnode_list: Dictionary = {}
-static var connection_list: Array = []
-static var flow_connection_list: Array = []
 static var from_flow_list: Array = []
 static var script_to_open_id: int = -1
 static var script_to_open_reload_script_data: HenScriptData
@@ -19,20 +17,20 @@ static func load(_path: StringName) -> void:
 	script_to_open_id = ResourceLoader.get_resource_uid(_path)
 	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
 
-	if HenGlobal.script_config:
-		if HenGlobal.script_config.id == script_to_open_id:
-			HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit([])
-			return
+	# if HenGlobal.script_config:
+	# 	if HenGlobal.script_config.id == script_to_open_id:
+	# 		HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit([])
+	# 		return
 		
-		HenSaver.save()
+	# 	HenSaver.save()
 
-		if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
-			script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
-		else:
-			script_to_open_reload_script_data = null
+	# 	# if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
+	# 	# 	script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
+	# 	# else:
+	# 	# 	script_to_open_reload_script_data = null
 		
-		load_data(_path)
-		return
+	# 	load_data(_path)
+	# 	return
 	
 	load_data(_path)
 
@@ -62,8 +60,6 @@ static func load_data(_path: StringName) -> void:
 	compile_bt.disabled = false
 	# ---------------------------------------------------------------------------- #
 	loaded_virtual_cnode_list.clear()
-	connection_list.clear()
-	flow_connection_list.clear()
 	from_flow_list.clear()
 
 
@@ -131,8 +127,9 @@ static func load_data(_path: StringName) -> void:
 		parse_and_get_vc_list_dict(data.virtual_cnode_list, base_route)
 
 		# adding in/out connections
-		for input_data: Dictionary in connection_list:
-			var connection: HenVCConnectionReturn = (input_data.from as HenVirtualCNode).get_new_input_connection_command(
+		for input_data: Dictionary in data.connections:
+			var to: HenVirtualCNode = loaded_virtual_cnode_list[int(input_data.to_vc_id)]
+			var connection: HenVCConnectionReturn = to.get_new_input_connection_command(
 				input_data.to_id,
 				input_data.from_id,
 				(loaded_virtual_cnode_list[int(input_data.from_vc_id)] as HenVirtualCNode)
@@ -142,8 +139,9 @@ static func load_data(_path: StringName) -> void:
 				connection.add()
 
 		# adding flow connection
-		for flow_data: Dictionary in flow_connection_list:
-			var connection = (flow_data.from as HenVirtualCNode).add_flow_connection(flow_data.from_id, flow_data.to_id, loaded_virtual_cnode_list[int(flow_data.to_vc_id)])
+		for flow_data: Dictionary in data.flow_connections:
+			var from: HenVirtualCNode = loaded_virtual_cnode_list[int(flow_data.from_vc_id)]
+			var connection = from.add_flow_connection(flow_data.from_id, flow_data.to_id, loaded_virtual_cnode_list[int(flow_data.to_vc_id)])
 		
 			if connection:
 				connection.add()
@@ -234,20 +232,6 @@ static func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData)
 				from = vc,
 				to_id = _config.from_vc_id
 			})
-
-		if _config.has('input_connections'):
-			for input: Dictionary in _config.input_connections:
-				input.from = vc
-				connection_list.append(input)
-		
-		if _config.has('flow_connections'):
-			for flow_connection: Dictionary in _config.flow_connections:
-				flow_connection_list.append({
-					from = vc,
-					from_id = flow_connection.from_id,
-					to_id = flow_connection.to_id,
-					to_vc_id = flow_connection.to_vc_id
-				})
 		
 		# if has sub vcnodes (basically states and etc)
 		if _config.has('virtual_cnode_list'):

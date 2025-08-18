@@ -26,10 +26,10 @@ func test_signal_code() -> void:
 	)
 
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name='test_void',
-		sub_type=HenVirtualCNode.SubType.VOID,
-		inputs=[],
-		route=signal_data.route
+		name = 'test_void',
+		sub_type = HenVirtualCNode.SubType.VOID,
+		inputs = [],
+		route = signal_data.route
 	})
 	
 	signal_data.signal_enter.add_flow_connection(0, 0, vc).add()
@@ -43,16 +43,16 @@ func test_signal_code() -> void:
 	)
 
 	var vc_input: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name='test_void',
-		sub_type=HenVirtualCNode.SubType.FUNC,
-		inputs=[
+		name = 'test_void',
+		sub_type = HenVirtualCNode.SubType.FUNC,
+		inputs = [
 			{
-				id=0,
-				name='content',
-				type='Variant'
+				id = 0,
+				name = 'content',
+				type = 'Variant'
 			}
 		],
-		route=signal_data.route
+		route = signal_data.route
 	})
 	
 	signal_data.signal_enter.add_flow_connection(0, 0, vc_input).add()
@@ -76,9 +76,10 @@ func test_connection_code() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
 	var dt: Dictionary = signal_data.get_connect_cnode_data()
-	
+	var script_data: HenScriptData = HenScriptData.new()
+
 	dt.route = HenTest.get_base_route()
-	HenFactorySignal.get_signal_from_dict(signal_data.get_save(), refs)
+	HenFactorySignal.get_signal_from_dict(signal_data.get_save(script_data), refs)
 
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	
@@ -105,9 +106,10 @@ func test_disconnection_code() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
 	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
 	var dt: Dictionary = signal_data.get_diconnect_cnode_data()
+	var script_data: HenScriptData = HenScriptData.new()
 	
 	dt.route = HenTest.get_base_route()
-	HenFactorySignal.get_signal_from_dict(signal_data.get_save(), refs)
+	HenFactorySignal.get_signal_from_dict(signal_data.get_save(script_data), refs)
 
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	
