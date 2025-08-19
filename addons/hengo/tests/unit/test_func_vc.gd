@@ -40,24 +40,23 @@ func test_func_code() -> void:
 
 	# base func
 	assert_eq(
-		HenTest.get_virtual_cnode_code(func_vc_single_output, refs).code,
+		HenTest.construct_and_get_code(func_vc_single_output, [], refs),
 		'test_func()'
 	)
 
+	void_vc.get_new_input_connection_command(0, 0, func_vc).add()
+
 	# input 1 value
 	assert_eq(
-		HenTest.get_virtual_cnode_with_connections(void_vc, refs, [
-			HenTest.CNodeConnection.new(void_vc, func_vc)
-		]),
+		HenTest.construct_and_get_code(void_vc, [func_vc], refs),
 		'test_void(test_func()[0])'
 	)
 
 	void_vc.io.remove_io_connection(void_vc.io.inputs[0])
+	void_vc.get_new_input_connection_command(0, 1, func_vc).add()
 
 	# input 2 value
 	assert_eq(
-		HenTest.get_virtual_cnode_with_connections(void_vc, refs, [
-			HenTest.CNodeConnection.new(void_vc, func_vc, 0, 1)
-		]),
+		HenTest.construct_and_get_code(void_vc, [func_vc], refs),
 		'test_void(test_func()[1])'
 	)

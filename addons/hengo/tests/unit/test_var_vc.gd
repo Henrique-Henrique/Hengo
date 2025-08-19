@@ -16,7 +16,7 @@ func test_get_var_code() -> void:
     })
 
     assert_eq(
-        HenTest.get_virtual_cnode_code(var_vc, refs).code,
+        HenTest.construct_and_get_code(var_vc, [], refs),
         'var_name'
     )
 
@@ -36,7 +36,7 @@ func test_set_var_code() -> void:
     })
 
     assert_eq(
-        HenTest.get_virtual_cnode_code(var_vc, refs).code,
+        HenTest.construct_and_get_code(var_vc, [], refs),
         'var_name = Vector2(0, 0)'
     )
 
@@ -57,7 +57,7 @@ func test_deep_prop_code() -> void:
     })
 
     assert_eq(
-        HenTest.get_virtual_cnode_code(vc, refs).code,
+        HenTest.construct_and_get_code(vc, [], refs),
         'position.x'
     )
 
@@ -85,6 +85,6 @@ func test_set_deep_prop_code() -> void:
     })
 
     assert_eq(
-        HenTest.get_virtual_cnode_code(vc, refs).code,
+        HenTest.construct_and_get_code(vc, [], refs),
         'position.x = 0.'
     )

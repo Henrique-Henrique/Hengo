@@ -6,6 +6,6 @@ func test_void_code() -> void:
     var vc: HenVirtualCNode = HenTest.get_void()
 
     assert_eq(
-        HenTest.get_virtual_cnode_code(vc, refs).code,
+        HenTest.construct_and_get_code(vc, [], refs),
         'test_void()'
     )

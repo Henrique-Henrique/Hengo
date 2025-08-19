@@ -141,7 +141,6 @@ class InputConnection:
 		to_id = int(_data.to_id)
 		from_vc_id = int(_data.from_vc_id)
 
-		prints('555555 ', from_id, to_id)
 
 	func clean() -> void:
 		from = null
@@ -410,7 +409,6 @@ class CNode:
 					HenGlobal.USE_MACRO_USE_SELF = false
 					return data
 				_:
-					prints('> ', connection.from_id, connection.to_id)
 					var data: Dictionary = connection.from.get_token(connection.from.get_output_index(connection.from_id))
 					
 					if not data.type == HenVirtualCNode.SubType.INVALID:

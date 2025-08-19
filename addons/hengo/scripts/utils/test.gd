@@ -54,52 +54,27 @@ static func set_global_config() -> void:
 	)
 
 
-static func get_virtual_cnode_code(_vc: HenVirtualCNode, _refs: HenSaveCodeType.References) -> CNodeDataCode:
-	var ref
+static func get_parent_ref(_vc: HenVirtualCNode, _refs: HenSaveCodeType.References) -> RefCounted:
+	var parent_ref
 
 	if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
-		ref = HenFactoryCNode.get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(_refs.script_data), _refs)
+		parent_ref = HenFactoryCNode.get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(_refs.script_data), _refs)
 	else:
-		ref = _vc.route_info.route_ref.ref
-
-	var data: HenSaveCodeType.CNode = HenFactoryCNode.get_cnode_from_dict(_vc.get_save(_refs.script_data), _refs, ref)
-	var token: Dictionary
-
-	match data.sub_type:
-		HenVirtualCNode.SubType.IF:
-			token = data.get_if_token([])
-		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
-			token = data.get_for_token([])
-		HenVirtualCNode.SubType.MACRO:
-			token = data.get_macro_token(0, data)
-		_:
-			token = data.get_token()
-
-	return CNodeDataCode.new(data, HenGeneratorByToken.get_code_by_token(token))
+		parent_ref = _vc.route_info.route_ref.ref
+	
+	return parent_ref
 
 
-static func get_virtual_cnode_with_connections(_base_vc: HenVirtualCNode, _refs: HenSaveCodeType.References, _input_connections: Array[CNodeConnection] = [], _connections: Array[CNodeConnection] = []) -> String:
-	# input connections
-	for connection in _input_connections:
-		connection.from.get_new_input_connection_command(connection.from_id, connection.to_id, connection.to).add()
+static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenSaveCodeType.References) -> String:
+	for vc: HenVirtualCNode in _vc_dependencies:
+		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.script_data), _refs, get_parent_ref(vc, _refs))
 
-	# add connections
-	for connection in _connections:
-		connection.from.add_flow_connection(connection.from_id, connection.to_id, connection.to).add()
-
-	# generate connections from dict
-	for connection in _connections + _input_connections:
-		get_virtual_cnode_code(connection.to, _refs)
-
-	var data: CNodeDataCode = get_virtual_cnode_code(_base_vc, _refs)
+	var vc: HenSaveCodeType.CNode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.script_data), _refs, get_parent_ref(_base_vc, _refs))
 	var code: String = ''
 
 	HenFactoryCNode.parse_connections(_refs)
 
-	for conn in _base_vc.io.connections:
-		prints(conn.from_id, conn.to_id)
-
-	for token in data.data.get_flow_tokens(0):
+	for token in vc.get_flow_tokens(0):
 		code += HenGeneratorByToken.get_code_by_token(token)
 
 	return code
@@ -109,13 +84,13 @@ static func get_void(_route: HenRouteData = null) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
-		inputs = [],
 		route = HenTest.get_base_route() if not _route else _route
 	})
 
 
-static func get_void_with_input() -> HenVirtualCNode:
+static func get_void_with_input(_id: int = -1) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
+		id = _id if _id >= 0 else HenGlobal.get_new_node_counter(),
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
 		category = 'native',
@@ -132,6 +107,7 @@ static func get_void_with_input() -> HenVirtualCNode:
 
 static func get_const(_id: int = -1) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
+		id = _id if _id >= 0 else HenGlobal.get_new_node_counter(),
 		name = 'Test',
 		name_to_code = 'CONST',
 		outputs = [

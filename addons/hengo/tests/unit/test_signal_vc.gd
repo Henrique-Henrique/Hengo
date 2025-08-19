@@ -84,7 +84,7 @@ func test_connection_code() -> void:
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	
 	assert_eq(
-		HenTest.get_virtual_cnode_code(vc, refs).code,
+		HenTest.construct_and_get_code(vc, [], refs),
 		'connect("toggled", _on_my_signal_signal_)'
 	)
 
@@ -92,7 +92,7 @@ func test_connection_code() -> void:
 	param.name = 'a'
 
 	assert_eq(
-		HenTest.get_virtual_cnode_code(vc, refs).code,
+		HenTest.construct_and_get_code(vc, [], refs),
 		'connect("toggled", _on_my_signal_signal_.bind(null))'
 	)
 
@@ -114,6 +114,6 @@ func test_disconnection_code() -> void:
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	
 	assert_eq(
-		HenTest.get_virtual_cnode_code(vc, refs).code,
+		HenTest.construct_and_get_code(vc, [], refs),
 		'disconnect("toggled", _on_my_signal_signal_)'
 	)
