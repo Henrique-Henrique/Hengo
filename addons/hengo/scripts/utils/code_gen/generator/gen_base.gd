@@ -38,7 +38,7 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 			# getting start state cnode
 			HenVirtualCNode.SubType.STATE_START:
 				if not cnode.flow_connections.is_empty():
-					start_state = cnode.flow_connections[0].to
+					start_state = cnode.flow_connections[0].get_to()
 			HenVirtualCNode.SubType.STATE:
 				var transitions: Array = []
 
@@ -46,8 +46,8 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 				for flow_connection: HenSaveCodeType.FlowConnection in cnode.flow_connections:
 					if flow_connection.to:
 						transitions.append({
-							name='flow_connection.name',
-							to_state_name=flow_connection.to.name
+							name = 'flow_connection.name',
+							to_state_name = flow_connection.get_to().name
 						})
 
 				_refs.states_data[cnode.name.to_snake_case()] = {
@@ -57,8 +57,8 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 			HenVirtualCNode.SubType.STATE_EVENT:
 				if not cnode.flow_connections.is_empty() and cnode.flow_connections[0].to:
 					events.append({
-						name=cnode.name,
-						to_state_name=cnode.flow_connections[0].to.name
+						name = cnode.name,
+						to_state_name = cnode.flow_connections[0].get_to().name
 					})
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				if not cnode.flow_connections.is_empty() and cnode.flow_connections[0].to:
@@ -68,7 +68,7 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 							tokens = []
 						}
 
-				override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].to.get_flow_tokens(0))
+				override_virtual_data[cnode.name].tokens.append_array(cnode.flow_connections[0].get_to().get_flow_tokens(0))
 
 
 	# search for override virtual inside macros
@@ -76,7 +76,7 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 		# macro variables
 		for macro_var: HenSaveCodeType.Variable in macro.local_vars:
 			for macro_ref: HenSaveCodeType.CNode in macro.macro_ref_list:
-				code += HenGeneratorVariable.get_var_code(macro_var, '{name}_{id}'.format({name=macro_var.name.to_snake_case(), id=macro_ref.id}), str(macro_ref.id))
+				code += HenGeneratorVariable.get_var_code(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}), str(macro_ref.id))
 
 		# macro override virtuals
 		for v_cnode: HenSaveCodeType.CNode in macro.virtual_cnode_list:
@@ -94,7 +94,7 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 								tokens = []
 							}
 
-						for token: Dictionary in v_cnode.flow_connections[0].to.get_flow_tokens(0):
+						for token: Dictionary in v_cnode.flow_connections[0].get_to().get_flow_tokens(0):
 							token.vc_id = macro_ref.id
 							override_virtual_data[v_cnode.name].tokens.append(token)
 
@@ -123,19 +123,19 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 					if _code: physics_process_code.append(_code)
 
 	return code + TEXT_BASE.format({
-		events=' { \n\t' + ',\n\t'.join(events.map(
+		events = ' { \n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
 			return '{event_name}="{to_state_name}"'.format({
-				event_name=ev.name.to_snake_case(),
-				to_state_name=ev.to_state_name.to_snake_case()
+				event_name = ev.name.to_snake_case(),
+				to_state_name = ev.to_state_name.to_snake_case()
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
-		start_state_name=start_state.name.to_snake_case() if start_state else '',
-		_ready=' \n'.join(ready_code),
-		_process='\n'.join(process_code),
-		_physics_process='\n'.join(physics_process_code),
-		states_dict=HenGeneratorState.get_states_start_code(_refs),
-		states=HenGeneratorState.get_states_code(_refs)
+		start_state_name = start_state.name.to_snake_case() if start_state else '',
+		_ready = ' \n'.join(ready_code),
+		_process = '\n'.join(process_code),
+		_physics_process = '\n'.join(physics_process_code),
+		states_dict = HenGeneratorState.get_states_start_code(_refs),
+		states = HenGeneratorState.get_states_code(_refs)
 	})
 
 
@@ -156,7 +156,7 @@ static func _parse_virtual_cnode(_cnode_list: Array[HenSaveCodeType.CNode]) -> D
 		var from_flow: HenSaveCodeType.FlowConnection = cnode.flow_connections[0]
 
 		if from_flow.to:
-			var token_list = from_flow.to.get_flow_tokens(from_flow.to_id)
+			var token_list = from_flow.get_to().get_flow_tokens(from_flow.to_id)
 
 			data[cnode_name] = {
 				tokens = token_list,

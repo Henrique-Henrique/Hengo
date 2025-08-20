@@ -12,8 +12,8 @@ static func get_signals_code(_refs: HenSaveCodeType.References) -> String:
 		var signal_name = get_signal_call_name(signal_item.name)
 
 		signal_code += 'func {name}({params}):\n'.format({
-			name=signal_name,
-			params=', '.join(signal_item.params.map( # parsing raw inputs from signal
+			name = signal_name,
+			params = ', '.join(signal_item.params.map( # parsing raw inputs from signal
 			func(x: HenSaveCodeType.Param) -> String:
 				return x.name.to_snake_case()
 		# parsing custom inputs
@@ -28,7 +28,7 @@ static func get_signals_code(_refs: HenSaveCodeType.References) -> String:
 			return '\t' + HenGeneratorVariable.get_var_code(x)))
 
 		if not signal_item.signal_enter.flow_connections.is_empty() and signal_item.signal_enter.flow_connections[0].to:
-			var signal_tokens: Array = signal_item.signal_enter.flow_connections[0].to.get_flow_tokens(
+			var signal_tokens: Array = signal_item.signal_enter.flow_connections[0].get_to().get_flow_tokens(
 				signal_item.signal_enter.flow_connections[0].to_id
 			)
 			var signal_block: Array = []

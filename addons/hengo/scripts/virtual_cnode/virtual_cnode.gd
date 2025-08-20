@@ -104,10 +104,6 @@ func _init() -> void:
 	state.cnode_need_update.connect(update)
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		print('deleted -> ', identity.name)
-
 func show() -> void:
 	var cnode: HenCnode = pool.get_cnode_from_pool()
 

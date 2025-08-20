@@ -19,7 +19,7 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 
 	if _cnode.has(&'ref_id'):
 		if not cn.invalid:
-			cn.ref = _refs.side_bar_item_ref[_cnode.ref_id]
+			cn.ref = weakref(_refs.side_bar_item_ref[_cnode.ref_id])
 
 	if _cnode.has(&'category'):
 		cn.category = _cnode.category
@@ -68,7 +68,7 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 			_refs.states.append(cn)
 		HenVirtualCNode.Type.MACRO:
 			if not cn.invalid:
-				(cn.ref as HenSaveCodeType.Macro).macro_ref_list.append(cn)
+				(cn.ref.get_ref() as HenSaveCodeType.Macro).macro_ref_list.append(cn)
 	
 	match cn.sub_type:
 		HenVirtualCNode.SubType.VIRTUAL:
@@ -88,13 +88,13 @@ static func parse_connections(_refs: HenSaveCodeType.References) -> void:
 	# generatin flow connection references
 	for flow_connection_data: Dictionary in _refs.script_data.flow_connections:
 		var flow_connection: HenSaveCodeType.FlowConnection = HenSaveCodeType.FlowConnection.new(flow_connection_data, _refs)
-		flow_connection.from.flow_connections.append(flow_connection)
+		flow_connection.get_from().flow_connections.append(flow_connection)
 
 
 	# generating input connection references
 	for connection: Dictionary in _refs.script_data.connections:
 		var input: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new(connection, _refs)
-		input.to.input_connections.append(input)
+		input.get_to().input_connections.append(input)
 	
 	_refs.script_data.connections.clear()
 	_refs.script_data.flow_connections.clear()

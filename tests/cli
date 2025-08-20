@@ -1,1 +1,1 @@
-godot --headless -d -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests" --ignoreHeadlessMode
+godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests" --ignoreHeadlessMode

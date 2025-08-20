@@ -70,15 +70,16 @@ static func save() -> void:
 
 
 static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> void:
-	var script_data: SaveData = SaveData.new(_script_id, _script_data)
-	var save_config: SaveConfig = SaveConfig.new()
-	save_config.add_script(script_data)
+	var _save_data: SaveData = SaveData.new(_script_id, _script_data)
+	var _save_config: SaveConfig = SaveConfig.new()
+	_save_config.add_script(_save_data)
 
-	if _regenerate:
-		HenCodeGeneration.regenerate(save_config, _script_id, _script_data.side_bar_list)
+	# if _regenerate:
+	# 	HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list)
 
-	save_data(save_config)
-	# HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
+	HenCodeGeneration.get_code(_script_data)
+	# save_data(save_config)
+	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
 
 
 static func save_data(_save_config: SaveConfig) -> void:

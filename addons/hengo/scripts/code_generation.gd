@@ -17,6 +17,7 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new(_data)
 	var code: String = ''
 
+
 	HenGlobal.GENERATE_PREVIEW_CODE = _build_preview
 	HenCodeGeneration.flow_errors.clear()
 
@@ -84,9 +85,6 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 	code += HenGeneratorFunc.get_functions_code(refs)
 	code += HenGeneratorSignal.get_signals_code(refs)
 	code += HenGeneratorBase.get_base_script_code(refs)
-
-	# cleaning refs
-	refs.clean()
 
 	return code
 

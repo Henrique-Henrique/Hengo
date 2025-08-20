@@ -24,18 +24,6 @@ class Func:
 	var input_ref: CNode
 	var output_ref: CNode
 
-	func clean() -> void:
-		for cnode: CNode in virtual_cnode_list:
-			cnode.clean()
-		
-		local_vars.clear()
-		virtual_cnode_list.clear()
-		inputs.clear()
-		outputs.clear()
-
-		input_ref = null
-		output_ref = null
-
 
 class SignalData:
 	var id: int
@@ -49,17 +37,6 @@ class SignalData:
 	var local_vars: Array[Variable]
 	var signal_enter: CNode
 
-	func clean() -> void:
-		for cnode: CNode in virtual_cnode_list:
-			cnode.clean()
-		
-		params.clear()
-		bind_params.clear()
-		virtual_cnode_list.clear()
-		local_vars.clear()
-
-		signal_enter = null
-
 
 class Macro:
 	var id: int
@@ -72,18 +49,7 @@ class Macro:
 	var local_vars: Array[Variable]
 	var macro_ref_list: Array[CNode]
 
-	func clean() -> void:
-		for cnode: CNode in virtual_cnode_list:
-			cnode.clean()
-		
-		flow_inputs.clear()
-		flow_outputs.clear()
-		local_vars.clear()
-		virtual_cnode_list.clear()
-		macro_ref_list.clear()
-		
-		input_ref = null
-
+	
 class Flow:
 	var id: int
 	var name: String
@@ -92,6 +58,7 @@ class Param:
 	var id: int
 	var name: String
 	var type: StringName
+
 
 class Inout:
 	var id: int
@@ -110,41 +77,53 @@ class Inout:
 class FlowConnection:
 	var from_id: int
 	var to_id: int
-	var from: CNode
-	var to: CNode
+	var from: WeakRef
+	var to: WeakRef
 	var to_vc_id: int
 
 	func _init(_data: Dictionary, _refs: References) -> void:
-		from = _refs.cnode_ref[int(_data.from_vc_id)]
-		to = _refs.cnode_ref[int(_data.to_vc_id)]
+		from = weakref(_refs.cnode_ref[int(_data.from_vc_id)])
+		to = weakref(_refs.cnode_ref[int(_data.to_vc_id)])
 		from_id = int(_data.from_id)
 		to_id = int(_data.to_id)
 		to_vc_id = int(_data.to_vc_id)
 
 
-	func clean() -> void:
-		from = null
-		to = null
+	func get_from() -> CNode:
+		if not from:
+			return null
+		return from.get_ref()
+
+	func get_to() -> CNode:
+		if not to:
+			return null
+		return to.get_ref()
 
 
 class InputConnection:
-	var from: CNode
-	var to: CNode
+	var from: WeakRef
+	var to: WeakRef
 	var from_id: int
 	var to_id: int
 	var from_vc_id: int
 
 	func _init(_data: Dictionary, _refs: References) -> void:
-		from = _refs.cnode_ref[int(_data.from_vc_id)]
-		to = _refs.cnode_ref[int(_data.to_vc_id)]
+		from = weakref(_refs.cnode_ref[int(_data.from_vc_id)])
+		to = weakref(_refs.cnode_ref[int(_data.to_vc_id)])
 		from_id = int(_data.from_id)
 		to_id = int(_data.to_id)
 		from_vc_id = int(_data.from_vc_id)
 
 
-	func clean() -> void:
-		from = null
-		to = null
+	func get_from() -> CNode:
+		if not from:
+			return null
+		return from.get_ref()
+
+	func get_to() -> CNode:
+		if not to:
+			return null
+		return to.get_ref()
 
 
 class References:
@@ -161,28 +140,6 @@ class References:
 
 	func _init(_script_data: HenScriptData = null) -> void:
 		script_data = HenScriptData.new() if not _script_data else _script_data
-
-	func clean() -> void:
-		for cnode: CNode in base_route_cnode_list:
-			cnode.clean()
-		
-		for func_data: Func in functions:
-			func_data.clean()
-		
-		for signal_data: SignalData in signals:
-			signal_data.clean()
-		
-		for macro_data: Macro in macros:
-			macro_data.clean()
-		
-		side_bar_item_ref.clear()
-		variables.clear()
-		functions.clear()
-		signals.clear()
-		macros.clear()
-		base_route_cnode_list.clear()
-		cnode_ref.clear()
-		states_data.clear()
 
 #
 #
@@ -204,29 +161,10 @@ class CNode:
 	var virtual_sub_type_vc_list: Array[CNode]
 	var input_connections: Array[InputConnection]
 	var route_type: HenRouter.ROUTE_TYPE
-	var ref: Variant
+	var ref: WeakRef
 	var invalid: bool = false
 	var singleton_class: String
-	
-	func clean() -> void:
-		ref = null
 
-		for cnode: CNode in virtual_cnode_list:
-			cnode.clean()
-		
-		for flow: FlowConnection in flow_connections:
-			flow.clean()
-		
-		for input: InputConnection in input_connections:
-			input.clean()
-
-		for cnode: CNode in virtual_sub_type_vc_list:
-			cnode.clean()
-
-		virtual_cnode_list.clear()
-		flow_connections.clear()
-		input_connections.clear()
-		virtual_sub_type_vc_list.clear()
 
 	func get_flow_tokens(_input_id: int, _token_list: Array = []) -> Array:
 		var stack: Array = []
@@ -253,15 +191,15 @@ class CNode:
 					if HenGlobal.USE_MACRO_REF:
 						var flow: FlowConnection = HenGlobal.MACRO_REF.get_flow_connection(_id) if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
 
-						if flow and flow.to:
-							stack.append({node = flow.to, id = flow.to_id})
+						if flow and flow.get_to():
+							stack.append({node = flow.get_to(), id = flow.to_id})
 						
 						HenGlobal.USE_MACRO_REF = false
 				_:
 					token_list.append(vc.get_token())
 					
-					if not vc.flow_connections.is_empty() and vc.flow_connections[0].to:
-						stack.append({node = vc.flow_connections[0].to, id = vc.flow_connections[0].to_id})
+					if not vc.flow_connections.is_empty() and vc.flow_connections[0].get_to():
+						stack.append({node = vc.flow_connections[0].get_to(), id = vc.flow_connections[0].to_id})
 
 		return _token_list
 
@@ -279,14 +217,14 @@ class CNode:
 			return INVALID_TOKEN
 
 		var flow_tokens: Array
-		var input_flow: FlowConnection = (ref.input_ref as CNode).get_flow_connection(_flow_id)
+		var input_flow: FlowConnection = (ref.get_ref().input_ref as CNode).get_flow_connection(_flow_id)
 
 		if input_flow and input_flow.to:
 			HenGlobal.USE_MACRO_REF = true
 			HenGlobal.MACRO_REF = self
 			HenGlobal.MACRO_USE_SELF = _macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 			HenGlobal.USE_MACRO_USE_SELF = true
-			flow_tokens = input_flow.to.get_flow_tokens(input_flow.to_id)
+			flow_tokens = input_flow.get_to().get_flow_tokens(input_flow.to_id)
 			HenGlobal.USE_MACRO_USE_SELF = false
 
 		return {
@@ -309,11 +247,11 @@ class CNode:
 		for flow: FlowConnection in flow_connections:
 			match flow.from_id:
 				0:
-					_stack.append({node = flow.to, id = flow.to_id, flow_id = true_flow_id})
+					_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = true_flow_id})
 				1:
-					_stack.append({node = flow.to, id = flow.to_id, flow_id = false_flow_id})
+					_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = false_flow_id})
 				2:
-					_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
+					_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = then_flow_id})
 
 		return {
 			vc_id = id,
@@ -336,9 +274,9 @@ class CNode:
 		for flow: FlowConnection in flow_connections:
 			match flow.from_id:
 				0:
-					_stack.append({node = flow.to, id = flow.to_id, flow_id = body_flow_id})
+					_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = body_flow_id})
 				1:
-					_stack.append({node = flow.to, id = flow.to_id, flow_id = then_flow_id})
+					_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = then_flow_id})
 
 		return {
 			id = id,
@@ -397,7 +335,7 @@ class CNode:
 				break
 
 		if connection and connection.from:
-			match connection.from.sub_type:
+			match connection.get_from().sub_type:
 				HenVirtualCNode.SubType.MACRO_INPUT:
 					if HenGlobal.USE_MACRO_REF:
 						var data: Dictionary = HenGlobal.MACRO_REF.get_input_token(connection.from_id)
@@ -405,11 +343,11 @@ class CNode:
 				HenVirtualCNode.SubType.MACRO:
 					HenGlobal.USE_MACRO_USE_SELF = true
 					HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
-					var data: Dictionary = (connection.from.ref as Macro).output_ref.get_input_token(connection.to_id)
+					var data: Dictionary = (connection.get_from().ref.get_ref() as Macro).output_ref.get_input_token(connection.to_id)
 					HenGlobal.USE_MACRO_USE_SELF = false
 					return data
 				_:
-					var data: Dictionary = connection.from.get_token(connection.from.get_output_index(connection.from_id))
+					var data: Dictionary = connection.get_from().get_token(connection.get_from().get_output_index(connection.from_id))
 					
 					if not data.type == HenVirtualCNode.SubType.INVALID:
 						data.prop_name = input.name
@@ -448,7 +386,7 @@ class CNode:
 					'class_props':
 						data.use_value = true
 					'state_transition':
-						data.value = '&"{0}"'.format([data.value.to_snake_case()])
+						data.value = '&"{0}"'.format([(data.value as String).to_snake_case()])
 
 			return data
 
@@ -566,14 +504,14 @@ class CNode:
 			HenVirtualCNode.SubType.SIGNAL_CONNECTION:
 				token.merge({
 					params = get_input_token_list(true),
-					signal_name = (ref as SignalData).signal_name_to_code,
-					name = (ref as SignalData).name
+					signal_name = (ref.get_ref() as SignalData).signal_name_to_code,
+					name = (ref.get_ref() as SignalData).name
 				})
 			HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 				token.merge({
 					params = get_input_token_list(true),
-					signal_name = (ref as SignalData).signal_name_to_code,
-					name = (ref as SignalData).name.to_snake_case()
+					signal_name = (ref.get_ref() as SignalData).signal_name_to_code,
+					name = (ref.get_ref() as SignalData).name.to_snake_case()
 				})
 			HenVirtualCNode.SubType.GET_FROM_PROP:
 				if not input_has_connection(inputs[0].id):

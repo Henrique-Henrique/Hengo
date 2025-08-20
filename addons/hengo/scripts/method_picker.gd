@@ -946,6 +946,7 @@ func _on_select() -> void:
 
 	HenGlobal.history.commit_action()
 	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+	api_list.clear()
 
 
 func _get_sub_type(_type: Variant.Type, _usage: int) -> HenVirtualCNode.SubType:

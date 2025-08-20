@@ -6,8 +6,8 @@ static func get_functions_code(_refs: HenSaveCodeType.References) -> String:
 	for func_data: HenSaveCodeType.Func in _refs.functions:
 		# generating function
 		func_code += 'func {name}({params}):\n'.format({
-			name=func_data.name.to_snake_case(),
-			params=', '.join(func_data.inputs.map(
+			name = func_data.name.to_snake_case(),
+			params = ', '.join(func_data.inputs.map(
 				func(x: HenSaveCodeType.Param) -> String:
 					return x.name.to_snake_case()
 		))
@@ -24,7 +24,7 @@ static func get_functions_code(_refs: HenSaveCodeType.References) -> String:
 			output_code.append(HenGeneratorByToken.get_code_by_token(token))
 
 		if not func_data.input_ref.flow_connections.is_empty() and func_data.input_ref.flow_connections[0].to:
-			var func_tokens: Array = func_data.input_ref.flow_connections[0].to.get_flow_tokens(
+			var func_tokens: Array = func_data.input_ref.flow_connections[0].get_to().get_flow_tokens(
 				func_data.input_ref.flow_connections[0].to_id
 			)
 			var func_block: Array = []
@@ -39,11 +39,11 @@ static func get_functions_code(_refs: HenSaveCodeType.References) -> String:
 	# 	#TODO output when not connected return empty field, make a default values for all types
 		if output_code.size() == 1:
 			func_code += '\treturn {output}\n\n'.format({
-				output=', '.join(output_code)
+				output = ', '.join(output_code)
 			})
 		elif not output_code.is_empty():
 			func_code += '\treturn [{outputs}]\n\n'.format({
-				outputs=', '.join(output_code)
+				outputs = ', '.join(output_code)
 			})
 		
 		func_code += '\n'

@@ -21,8 +21,7 @@ static func load(_path: StringName) -> void:
 	# 	if HenGlobal.script_config.id == script_to_open_id:
 	# 		HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit([])
 	# 		return
-		
-	# 	HenSaver.save()
+		# HenSaver.save()
 
 	# 	# if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
 	# 	# 	script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
