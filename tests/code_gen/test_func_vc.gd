@@ -1,4 +1,4 @@
-extends GutTest
+extends GdUnitTestSuite
 
 
 func test_func_code() -> void:
@@ -39,24 +39,15 @@ func test_func_code() -> void:
 	var void_vc: HenVirtualCNode = HenTest.get_void_with_input()
 
 	# base func
-	assert_eq(
-		HenTest.construct_and_get_code(func_vc_single_output, [], refs),
-		'test_func()'
-	)
+	assert_str(HenTest.construct_and_get_code(func_vc_single_output, [], refs)).is_equal('test_func()')
 
 	void_vc.get_new_input_connection_command(0, 0, func_vc).add()
 
 	# input 1 value
-	assert_eq(
-		HenTest.construct_and_get_code(void_vc, [func_vc], refs),
-		'test_void(test_func()[0])'
-	)
+	assert_str(HenTest.construct_and_get_code(void_vc, [func_vc], refs)).is_equal('test_void(test_func()[0])')
 
 	void_vc.io.remove_io_connection(void_vc.io.inputs[0])
 	void_vc.get_new_input_connection_command(0, 1, func_vc).add()
 
 	# input 2 value
-	assert_eq(
-		HenTest.construct_and_get_code(void_vc, [func_vc], refs),
-		'test_void(test_func()[1])'
-	)
+	assert_str(HenTest.construct_and_get_code(void_vc, [func_vc], refs)).is_equal('test_void(test_func()[1])')

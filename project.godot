@@ -31,7 +31,7 @@ window/size/always_on_top=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/hengo/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg", "res://addons/hengo/plugin.cfg")
 
 [file_customization]
 
@@ -42,6 +42,29 @@ folder_colors={
 "res://addons/hengo/scenes/": "red",
 "res://addons/hengo/scripts/": "blue"
 }
+
+[gdunit4]
+
+settings/test/test_lookup_folder="tests"
+templates/testsuite/CSharpScript="// GdUnit generated TestSuite
+
+using Godot;
+using GdUnit4;
+
+namespace ${name_space}
+{
+	using static Assertions;
+	using static Utils;
+
+	[TestSuite]
+	public class ${suite_class_name}
+	{
+		// TestSuite generated from
+		private const string sourceClazzPath = \"${source_resource_path}\";
+
+	}
+}
+"
 
 [input]
 

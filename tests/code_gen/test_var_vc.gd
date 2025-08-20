@@ -1,4 +1,4 @@
-extends GutTest
+extends GdUnitTestSuite
 
 
 func test_get_var_code() -> void:
@@ -15,10 +15,7 @@ func test_get_var_code() -> void:
         route = HenTest.get_base_route()
     })
 
-    assert_eq(
-        HenTest.construct_and_get_code(var_vc, [], refs),
-        'var_name'
-    )
+    assert_str(HenTest.construct_and_get_code(var_vc, [], refs)).is_equal('var_name')
 
 
 func test_set_var_code() -> void:
@@ -35,10 +32,7 @@ func test_set_var_code() -> void:
         route = HenTest.get_base_route()
     })
 
-    assert_eq(
-        HenTest.construct_and_get_code(var_vc, [], refs),
-        'var_name = Vector2(0, 0)'
-    )
+    assert_str(HenTest.construct_and_get_code(var_vc, [], refs)).is_equal('var_name = Vector2(0, 0)')
 
 
 func test_deep_prop_code() -> void:
@@ -56,10 +50,7 @@ func test_deep_prop_code() -> void:
         route = HenTest.get_base_route()
     })
 
-    assert_eq(
-        HenTest.construct_and_get_code(vc, [], refs),
-        'position.x'
-    )
+    assert_str(HenTest.construct_and_get_code(vc, [], refs)).is_equal('position.x')
 
 
 func test_set_deep_prop_code() -> void:
@@ -84,7 +75,4 @@ func test_set_deep_prop_code() -> void:
         route = HenTest.get_base_route(),
     })
 
-    assert_eq(
-        HenTest.construct_and_get_code(vc, [], refs),
-        'position.x = 0.'
-    )
+    assert_str(HenTest.construct_and_get_code(vc, [], refs)).is_equal('position.x = 0.')
