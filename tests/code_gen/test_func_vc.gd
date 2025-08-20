@@ -1,53 +1,55 @@
 extends GdUnitTestSuite
 
 
-func test_func_code() -> void:
+# helper to make func nodes with any number of outputs
+func _create_func_node(outputs: Array) -> HenVirtualCNode:
+	return HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'test func',
+		outputs = outputs,
+		sub_type = HenVirtualCNode.SubType.FUNC,
+		type = 0,
+		route = HenTest.get_base_route()
+	})
+
+
+# a single output func should be a direct call, no index needed
+func test_single_output_function_call() -> void:
 	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
-	var func_vc_single_output: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'test func',
-		outputs = [
-			{
-				id = 0,
-				name = 'input 1',
-				type = 'Variant'
-			}
-		],
-		sub_type = HenVirtualCNode.SubType.FUNC,
-		type = 0,
-		route = HenTest.get_base_route()
-	})
+	var func_node: HenVirtualCNode = _create_func_node([
+		{id = 0, name = 'output', type = 'Variant'}
+	])
 
-	var func_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'test func',
-		outputs = [
-			{
-				id = 0,
-				name = 'input 1',
-				type = 'Variant'
-			},
-			{
-				id = 1,
-				name = 'input 2',
-				type = 'Variant'
-			},
-		],
-		sub_type = HenVirtualCNode.SubType.FUNC,
-		type = 0,
-		route = HenTest.get_base_route()
-	})
+	var code = HenTest.construct_and_get_code(func_node, [], refs)
+	assert_str(code).is_equal('test_func()')
 
-	var void_vc: HenVirtualCNode = HenTest.get_void_with_input()
 
-	# base func
-	assert_str(HenTest.construct_and_get_code(func_vc_single_output, [], refs)).is_equal('test_func()')
+# using the first output from a multi-return func should add a [0]
+func test_multi_output_function_first_return_as_input() -> void:
+	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var func_node: HenVirtualCNode = _create_func_node([
+		{id = 0, name = 'return_1', type = 'Variant'},
+		{id = 1, name = 'return_2', type = 'Variant'}
+	])
+	var void_node: HenVirtualCNode = HenTest.get_void_with_input()
 
-	void_vc.get_new_input_connection_command(0, 0, func_vc).add()
+	# connect the func's first output to the void's input
+	void_node.get_new_input_connection_command(0, 0, func_node).add()
 
-	# input 1 value
-	assert_str(HenTest.construct_and_get_code(void_vc, [func_vc], refs)).is_equal('test_void(test_func()[0])')
+	var code = HenTest.construct_and_get_code(void_node, [func_node], refs)
+	assert_str(code).is_equal('test_void(test_func()[0])')
 
-	void_vc.io.remove_io_connection(void_vc.io.inputs[0])
-	void_vc.get_new_input_connection_command(0, 1, func_vc).add()
 
-	# input 2 value
-	assert_str(HenTest.construct_and_get_code(void_vc, [func_vc], refs)).is_equal('test_void(test_func()[1])')
+# using the second output from a multi-return func should add a [1]
+func test_multi_output_function_second_return_as_input() -> void:
+	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var func_node: HenVirtualCNode = _create_func_node([
+		{id = 0, name = 'return_1', type = 'Variant'},
+		{id = 1, name = 'return_2', type = 'Variant'}
+	])
+	var void_node: HenVirtualCNode = HenTest.get_void_with_input()
+	
+	# connect the func's second output to the void's input
+	void_node.get_new_input_connection_command(0, 1, func_node).add()
+
+	var code = HenTest.construct_and_get_code(void_node, [func_node], refs)
+	assert_str(code).is_equal('test_void(test_func()[1])')
