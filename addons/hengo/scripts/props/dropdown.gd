@@ -18,7 +18,7 @@ func _on_pressed() -> void:
 		'state_transition':
 			# all transitions
 			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				options = ((HenRouter.current_route.ref as WeakRef).get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
+				options = (HenRouter.current_route.get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
 					return {name = x.name, ref = x})
 		'action':
 			var arr: Array = []
@@ -50,8 +50,8 @@ func _on_pressed() -> void:
 			# local variables
 			match HenRouter.current_route.type:
 				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-					if (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
-						for var_data: HenVarData in (((HenRouter.current_route.ref as WeakRef).get_ref() as WeakRef).get_ref().local_vars as Array):
+					if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
+						for var_data: HenVarData in (HenRouter.current_route.get_ref().get(&'local_vars') as Array):
 							if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 								arr.append({
 									name = var_data.name,

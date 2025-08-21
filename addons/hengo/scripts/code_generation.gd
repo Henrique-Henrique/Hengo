@@ -146,8 +146,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> Hen
 		push_error('Error: resource not foundtore - generate: ', str(_id))
 		return null
 	
-	var res_path: StringName = 'res: / / hengo / save / ' + str(_id) + HenScriptData.HENGO_EXT
-	
+	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
 	var res: HenScriptData = HenScriptData.load_from_file(res_path)
 
 	refs.counter = res.node_counter

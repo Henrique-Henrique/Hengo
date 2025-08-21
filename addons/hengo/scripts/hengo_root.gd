@@ -197,3 +197,6 @@ func _input(event: InputEvent) -> void:
 				elif event.keycode == KEY_SPACE:
 					HenGlobal.HENGO_EDITOR_PLUGIN.bottom_panel_visibility(toggle_bottom_panel)
 					toggle_bottom_panel = not toggle_bottom_panel
+				elif event.keycode == KEY_P:
+					HenScriptDataCache.clear()
+					print('Script data cache cleared')

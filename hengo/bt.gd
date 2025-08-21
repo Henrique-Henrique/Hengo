@@ -20,7 +20,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
-		_STATE_CONTROLLER.change_state("")
+		_STATE_CONTROLLER.change_state("state_1")
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -33,4 +33,5 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
-	pass
+	func enter() -> void:
+		print(_ref.get_offset())

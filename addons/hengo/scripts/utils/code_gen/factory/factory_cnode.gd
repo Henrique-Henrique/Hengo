@@ -95,6 +95,3 @@ static func parse_connections(_refs: HenSaveCodeType.References) -> void:
 	for connection: Dictionary in _refs.script_data.connections:
 		var input: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new(connection, _refs)
 		input.get_to().input_connections.append(input)
-	
-	_refs.script_data.connections.clear()
-	_refs.script_data.flow_connections.clear()

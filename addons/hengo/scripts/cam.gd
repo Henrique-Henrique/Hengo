@@ -118,11 +118,7 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 
 
 	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		var list: Array = (HenRouter.current_route.ref as WeakRef).get_ref().children.virtual_cnode_list \
-			if (HenRouter.current_route.ref as WeakRef).get_ref() is HenVirtualCNode \
-			else (HenRouter.current_route.ref as WeakRef).get_ref().virtual_cnode_list
-
-		for v_cnode: HenVirtualCNode in list:
+		for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
 			v_cnode.check_visibility(rect)
 
 
@@ -151,12 +147,7 @@ func go_to_center(_pos: Vector2) -> void:
 
 func check_vc_action_menu() -> void:
 	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		var list: Array = (HenRouter.current_route.ref as WeakRef).get_ref().children.virtual_cnode_list \
-			if (HenRouter.current_route.ref as WeakRef).get_ref() is HenVirtualCNode \
-			else (HenRouter.current_route.ref as WeakRef).get_ref().virtual_cnode_list
-
-
-		for vc: HenVirtualCNode in list:
+		for vc: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
 			if not vc.state.is_showing:
 				continue
 

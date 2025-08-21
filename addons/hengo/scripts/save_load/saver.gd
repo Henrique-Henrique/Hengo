@@ -40,7 +40,7 @@ static func generate_script_data() -> HenScriptData:
 	# ---------------------------------------------------------------------------- #
 	var v_cnode_list: Array[Dictionary] = []
 
-	for v_cnode: HenVirtualCNode in (HenGlobal.BASE_ROUTE.ref as WeakRef).get_ref().virtual_cnode_list:
+	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.get_ref().virtual_cnode_list:
 		v_cnode_list.append(v_cnode.get_save(script_data))
 
 		if v_cnode.identity.type == HenVirtualCNode.Type.STATE_EVENT:
@@ -53,11 +53,12 @@ static func generate_script_data() -> HenScriptData:
 
 static func save() -> void:
 	HenGlobal.HENGO_SAVER = Saver.new()
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
+	# HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
 
-	var script_data: HenScriptData = generate_script_data()
-	var script_id: int = HenGlobal.script_config.id
+	HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(start_generate.bind(true)))
 
+
+static func start_generate(_regenerate: bool = false) -> void:
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
@@ -66,7 +67,8 @@ static func save() -> void:
 		DirAccess.make_dir_absolute('res://hengo/save')
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 
-	HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(generate.bind(script_data, script_id, true)))
+	for script_in_cache: HenScriptData in HenScriptDataCache.SCRIPT_DATA_CACHE.values():
+		generate(script_in_cache, ResourceLoader.get_resource_uid(script_in_cache.path), _regenerate)
 
 
 static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> void:
@@ -78,7 +80,7 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	# 	HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list)
 
 	HenCodeGeneration.get_code(_script_data)
-	# save_data(save_config)
+	save_data(_save_config)
 	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
 
 
@@ -120,8 +122,6 @@ static func save_data(_save_config: SaveConfig) -> void:
 			HenLoader.get_data_path(config.id) + TEMP_EXT,
 			HenLoader.get_data_path(config.id)
 		)
-
-		print('saving -> ', HenLoader.get_data_path(config.id))
 
 		if result != OK:
 			rollback(_save_config)

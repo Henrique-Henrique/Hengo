@@ -5,7 +5,6 @@ class_name HenLoader extends Node
 static var loaded_virtual_cnode_list: Dictionary = {}
 static var from_flow_list: Array = []
 static var script_to_open_id: int = -1
-static var script_to_open_reload_script_data: HenScriptData
 
 
 class BaseRouteRef extends RefCounted:
@@ -14,53 +13,20 @@ class BaseRouteRef extends RefCounted:
 
 
 static func load(_path: StringName) -> void:
-	script_to_open_id = ResourceLoader.get_resource_uid(_path)
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
-
-	# if HenGlobal.script_config:
-	# 	if HenGlobal.script_config.id == script_to_open_id:
-	# 		HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit([])
-	# 		return
-		# HenSaver.save()
-
-	# 	# if HenEnums.get_script_cache_refs(HenGlobal.script_config.id).has(str(script_to_open_id)):
-	# 	# 	script_to_open_reload_script_data = HenCodeGeneration.get_updated_script_data(script_to_open_id, HenGlobal.SIDE_BAR_LIST.get_save())
-	# 	# else:
-	# 	# 	script_to_open_reload_script_data = null
-		
-	# 	load_data(_path)
-	# 	return
-	
-	load_data(_path)
-
-
-static func clean() -> void:
-	# cleaning instances
-	if HenGlobal.BASE_ROUTE:
-		# cleaning vcnodes
-		for v_cnode: HenVirtualCNode in (HenGlobal.BASE_ROUTE.ref as WeakRef).get_ref().virtual_cnode_list:
-			print('refs -> ', v_cnode.identity.name, ' -> ', v_cnode.get_reference_count())
-
-
-	HenGlobal.BASE_ROUTE_REF = null
-	HenGlobal.SIDE_BAR_LIST.clear()
-	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
-	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
-
-	HenGlobal.script_config = HenGlobal.ScriptData.new()
-
-
-static func load_data(_path: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
 
-	HenGlobal.TABS.add_script_tab(_path)
+	# save current in cache
+	if HenGlobal.script_config:
+		HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), HenSaver.generate_script_data())
 
+	script_to_open_id = ResourceLoader.get_resource_uid(_path)
+	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
 	compile_bt.disabled = false
+
 	# ---------------------------------------------------------------------------- #
 	loaded_virtual_cnode_list.clear()
 	from_flow_list.clear()
-
 
 	# hide all virtuals
 	for cnode: HenCnode in HenGlobal.cnode_pool:
@@ -75,13 +41,14 @@ static func load_data(_path: StringName) -> void:
 	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
 		flow_connection.visible = false
 
-	clean()
-
-	# ---------------------------------------------------------------------------- #
+	HenGlobal.BASE_ROUTE_REF = null
+	HenGlobal.SIDE_BAR_LIST.clear()
+	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
+	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
+	HenGlobal.script_config = HenGlobal.ScriptData.new()
 
 	# confirming queue free before check errors
 	await HenGlobal.CAM.get_tree().process_frame
-
 	HenGlobal.current_script_path = _path
 	HenRouter.current_route = null
 	HenRouter.line_route_reference = {}
@@ -104,29 +71,33 @@ static func load_data(_path: StringName) -> void:
 
 	HenGlobal.script_config.path = _path
 	HenGlobal.script_config.id = resource_id
+	HenGlobal.TABS.add_script_tab(resource_id)
+
+	var script_data: HenScriptData
+
+	# loading hengo script data from cache
+	if HenScriptDataCache.has_script_data(str(resource_id)):
+		script_data = HenScriptDataCache.try_get_script_data(str(resource_id))
 
 	# loading hengo script data
-	if script_to_open_reload_script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
-		var data: HenScriptData
-		
-		if script_to_open_reload_script_data:
-			data = script_to_open_reload_script_data
-		else:
-			data = HenScriptData.load_from_file(path)
+	if script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
+		if not script_data:
+			script_data = HenScriptData.load_from_file(path)
+			HenScriptDataCache.add_script_data(str(resource_id), HenScriptData.load(script_data.get_save().duplicate(true)))
 
 		# setting script configs
-		HenGlobal.script_config.type = data.type
-		HenGlobal.node_counter = data.node_counter
-		HenGlobal.prop_counter = data.prop_counter
+		HenGlobal.script_config.type = script_data.type
+		HenGlobal.node_counter = script_data.node_counter
+		HenGlobal.prop_counter = script_data.prop_counter
 
 		# loading side bar list
-		HenGlobal.SIDE_BAR_LIST.load_save(data.side_bar_list)
+		HenGlobal.SIDE_BAR_LIST.load_save(script_data.side_bar_list)
 
 		# loading v_cnodes
-		parse_and_get_vc_list_dict(data.virtual_cnode_list, base_route)
+		parse_and_get_vc_list_dict(script_data.virtual_cnode_list, base_route)
 
 		# adding in/out connections
-		for input_data: Dictionary in data.connections:
+		for input_data: Dictionary in script_data.connections:
 			var to: HenVirtualCNode = loaded_virtual_cnode_list[int(input_data.to_vc_id)]
 			var connection: HenVCConnectionReturn = to.get_new_input_connection_command(
 				input_data.to_id,
@@ -138,19 +109,12 @@ static func load_data(_path: StringName) -> void:
 				connection.add()
 
 		# adding flow connection
-		for flow_data: Dictionary in data.flow_connections:
+		for flow_data: Dictionary in script_data.flow_connections:
 			var from: HenVirtualCNode = loaded_virtual_cnode_list[int(flow_data.from_vc_id)]
 			var connection = from.add_flow_connection(flow_data.from_id, flow_data.to_id, loaded_virtual_cnode_list[int(flow_data.to_vc_id)])
 		
 			if connection:
 				connection.add()
-			
-		# auto re-save
-		if script_to_open_reload_script_data:
-			if HenGlobal.HENGO_SAVER:
-				HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(HenSaver.generate.bind(script_to_open_reload_script_data, resource_id)))
-			else:
-				push_error('Error: HENGO_SAVER is not set')
 	else:
 		var reg: RegEx = RegEx.new()
 		reg.compile("extends ([a-zA-Z0-9]+)[\\s]*")
@@ -178,12 +142,6 @@ static func load_data(_path: StringName) -> void:
 
 		HenRouter.current_route = base_route
 		HenGlobal.CAM._check_virtual_cnodes()
-
-
-	# checking if debugging
-	# change debugger script path
-	if HenGlobal.HENGO_DEBUGGER_PLUGIN:
-		HenGlobal.HENGO_DEBUGGER_PLUGIN.reload_script()
 	
 	# showing current type
 	show_class_name()
@@ -224,6 +182,7 @@ static func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData)
 		_config.route = _route
 
 		var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(_config)
+		_config.erase('route')
 		loaded_virtual_cnode_list[vc.identity.id] = vc
 
 		if _config.has('from_vc_id'):
@@ -237,8 +196,6 @@ static func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData)
 			vc.children.virtual_cnode_list = parse_and_get_vc_list_dict(_config.virtual_cnode_list, vc.route_info.route)
 
 		vc_list.append(vc)
-
-	_cnode_list.clear()
 
 	return vc_list
 

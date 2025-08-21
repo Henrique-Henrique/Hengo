@@ -374,11 +374,11 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match _config.route.type:
 		HenRouter.ROUTE_TYPE.BASE:
-			((_config.route.ref as WeakRef).get_ref() as HenLoader.BaseRouteRef).virtual_cnode_list.append(v_cnode)
+			(_config.route.get_ref() as HenLoader.BaseRouteRef).virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.STATE:
-			((_config.route.ref as WeakRef).get_ref() as HenVirtualCNode).children.virtual_cnode_list.append(v_cnode)
+			(_config.route.get_ref() as HenVirtualCNode).children.virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.FUNC:
-			var _ref: HenFuncData = (_config.route.ref as WeakRef).get_ref()
+			var _ref: HenFuncData = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 		
 			match v_cnode.identity.sub_type:
@@ -387,13 +387,13 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.FUNC_OUTPUT:
 					_ref.output_ref = weakref(v_cnode)
 		HenRouter.ROUTE_TYPE.SIGNAL:
-			var _ref: HenSignalData = (_config.route.ref as WeakRef).get_ref()
+			var _ref: HenSignalData = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 			match v_cnode.identity.sub_type:
 				SubType.SIGNAL_ENTER:
 					_ref.signal_enter = v_cnode
 		HenRouter.ROUTE_TYPE.MACRO:
-			var _ref: HenMacroData = (_config.route.ref as WeakRef).get_ref()
+			var _ref: HenMacroData = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 
 			match v_cnode.identity.sub_type:
@@ -452,7 +452,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match v_cnode.identity.sub_type:
 		SubType.VIRTUAL:
-			((_config.route.ref as WeakRef).get_ref() as HenVirtualCNode).children.virtual_sub_type_vc_list.append(v_cnode)
+			(_config.route.get_ref() as HenVirtualCNode).children.virtual_sub_type_vc_list.append(v_cnode)
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
 			var _ref: HenMacroData = _config.ref
 

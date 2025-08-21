@@ -20,6 +20,7 @@ static func get_functions_code(_refs: HenSaveCodeType.References) -> String:
 		# func output (return)
 		var output_code: Array = []
 		
+		print('NAME ', func_data.name)
 		for token: Dictionary in func_data.output_ref.get_input_token_list():
 			output_code.append(HenGeneratorByToken.get_code_by_token(token))
 

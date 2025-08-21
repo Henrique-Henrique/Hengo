@@ -697,8 +697,8 @@ func get_local_var_list() -> Array:
 
 	match HenRouter.current_route.type:
 		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-			if (HenRouter.current_route.ref as WeakRef).get_ref().get(&'local_vars') is Array:
-				for var_data: HenVarData in ((HenRouter.current_route.ref as WeakRef).get_ref().local_vars as Array):
+			if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
+				for var_data: HenVarData in (HenRouter.current_route.get_ref().local_vars as Array):
 					var get_data: Dictionary = {
 						name = 'Local var -> ' + var_data.name,
 						type = FILTER_TYPE.SELF,
