@@ -76,7 +76,7 @@ func test_function_with_parameter_passed_to_node() -> void:
 func test_function_can_call_a_macro_containing_a_node() -> void:
 	HenTest.set_global_config()
 
-	# Setup the Macro
+	# Setup the HenTypeMacro
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.MACRO
 	HenGlobal.SIDE_BAR_LIST.add()
 	var macro_data: HenMacroData = HenGlobal.SIDE_BAR_LIST.macro_list[0]
@@ -100,7 +100,7 @@ func test_function_can_call_a_macro_containing_a_node() -> void:
 	func_data.name = 'my_func'
 	var main_func_node := func_data.input_ref.get_ref() as HenVirtualCNode
 
-	# Instantiate the Macro INSIDE the function
+	# Instantiate the HenTypeMacro INSIDE the function
 	var macro_conf: Dictionary = macro_data.get_cnode_data()
 	macro_conf.route = func_data.route # The instance belongs to the function's route
 	var macro_instance_node := HenVirtualCNode.instantiate_virtual_cnode(macro_conf)

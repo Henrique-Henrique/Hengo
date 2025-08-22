@@ -2,10 +2,10 @@ class_name HenTest extends RefCounted
 
 
 class CNodeDataCode:
-	var data: HenSaveCodeType.CNode
+	var data: HenTypeCnode
 	var code: String
 
-	func _init(_data: HenSaveCodeType.CNode, _code: String) -> void:
+	func _init(_data: HenTypeCnode, _code: String) -> void:
 		data = _data
 		code = _code
 
@@ -54,7 +54,7 @@ static func set_global_config() -> void:
 	)
 
 
-static func get_parent_ref(_vc: HenVirtualCNode, _refs: HenSaveCodeType.References) -> RefCounted:
+static func get_parent_ref(_vc: HenVirtualCNode, _refs: HenTypeReferences) -> RefCounted:
 	var parent_ref
 
 	if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
@@ -65,11 +65,11 @@ static func get_parent_ref(_vc: HenVirtualCNode, _refs: HenSaveCodeType.Referenc
 	return parent_ref
 
 
-static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenSaveCodeType.References) -> String:
+static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenTypeReferences) -> String:
 	for vc: HenVirtualCNode in _vc_dependencies:
 		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.script_data), _refs, get_parent_ref(vc, _refs))
 
-	var vc: HenSaveCodeType.CNode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.script_data), _refs, get_parent_ref(_base_vc, _refs))
+	var vc: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.script_data), _refs, get_parent_ref(_base_vc, _refs))
 	var code: String = ''
 
 	HenFactoryCNode.parse_connections(_refs)

@@ -304,11 +304,11 @@ func _filter_change(_name: StringName) -> void:
 			select_type = FILTER_TYPE.ALL
 		&'Native':
 			select_type = FILTER_TYPE.NATIVE
-		&'Func':
+		&'HenTypeFunc':
 			select_type = FILTER_TYPE.FUNC
 		&'Signal':
 			select_type = FILTER_TYPE.SIGNAL
-		&'Macro':
+		&'HenTypeMacro':
 			select_type = FILTER_TYPE.MACRO
 	
 	_build_api_list(selected_class)
@@ -705,7 +705,7 @@ func get_local_var_list() -> Array:
 						name = 'Local var -> ' + var_data.name,
 						type = FILTER_TYPE.SELF,
 						data = {
-							name = 'Get Variable',
+							name = 'Get HenTypeVariable',
 							sub_type = HenVirtualCNode.SubType.VAR,
 							route = HenRouter.current_route,
 							ref = var_data,
@@ -723,7 +723,7 @@ func get_local_var_list() -> Array:
 						name = 'Local var -> Set -> ' + var_data.name,
 						type = FILTER_TYPE.SELF,
 						data = {
-							name = 'Set Variable',
+							name = 'Set HenTypeVariable',
 							sub_type = HenVirtualCNode.SubType.SET_VAR,
 							route = HenRouter.current_route,
 							ref = var_data,
@@ -752,7 +752,7 @@ func get_var_list() -> Array:
 			name = 'Self -> ' + var_data.name,
 			type = FILTER_TYPE.SELF,
 			data = {
-				name = 'Get Variable',
+				name = 'Get HenTypeVariable',
 				sub_type = HenVirtualCNode.SubType.VAR,
 				route = HenRouter.current_route,
 				ref = var_data,
@@ -770,7 +770,7 @@ func get_var_list() -> Array:
 			name = 'Self -> Set -> ' + var_data.name,
 			type = FILTER_TYPE.SELF,
 			data = {
-				name = 'Set Variable',
+				name = 'Set HenTypeVariable',
 				sub_type = HenVirtualCNode.SubType.SET_VAR,
 				route = HenRouter.current_route,
 				ref = var_data,
@@ -919,7 +919,7 @@ func _on_select() -> void:
 
 	var vc_return: HenVCNodeReturn = HenVirtualCNode.instantiate(data)
 
-	HenGlobal.history.create_action('Add CNode')
+	HenGlobal.history.create_action('Add HenTypeCnode')
 	HenGlobal.history.add_do_method(vc_return.add)
 	HenGlobal.history.add_do_reference(vc_return)
 	HenGlobal.history.add_undo_method(vc_return.remove)

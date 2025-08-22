@@ -33,7 +33,7 @@ func add_flow_connection(_id: int, _to_id: int, _from: HenVirtualCNode, _to: Hen
 	var flow_output: HenVCFlow = get_flow_output(_id)
 
 	if not flow_input or not flow_output:
-		push_error('Not Found Flow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
+		push_error('Not Found HenTypeFlow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
 		return null
 
 	var flow_connection: HenVCFlowConnectionData = HenVCFlowConnectionData.new()
@@ -62,7 +62,7 @@ func get_flow_output_connection_command(_id: int) -> HenVCFlowConnectionReturn:
 
 
 func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
-	flow_outputs.append(HenVCFlow.new(_owner, {name = 'Flow ' + str(flow_connections_2.size())}))
+	flow_outputs.append(HenVCFlow.new(_owner, {name = 'HenTypeFlow ' + str(flow_connections_2.size())}))
 	cnode_need_update.emit()
 
 

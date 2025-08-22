@@ -23,7 +23,7 @@ func _create_for_range_node() -> HenVirtualCNode:
 
 # Tests the default code generation for an unconnected FOR node.
 func test_for_range_default_code() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var for_vc: HenVirtualCNode = _create_for_range_node()
 	
 	var expected_code = 'for index_2 in range(0, 0, 1):\n\tpass'
@@ -32,7 +32,7 @@ func test_for_range_default_code() -> void:
 
 # Tests a FOR node with the body flow connected.
 func test_for_range_with_body_flow() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var for_vc: HenVirtualCNode = _create_for_range_node()
 	var vc_flow_body: HenVirtualCNode = HenTest.get_void()
 
@@ -44,7 +44,7 @@ func test_for_range_with_body_flow() -> void:
 
 # Tests connecting the 'index' data output of the FOR to another node's input.
 func test_for_range_with_index_output_connected() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var for_vc: HenVirtualCNode = _create_for_range_node()
 	var vc_with_input: HenVirtualCNode = HenTest.get_void_with_input(3)
 
@@ -59,7 +59,7 @@ func test_for_range_with_index_output_connected() -> void:
 
 # Tests a FOR node with both the body and "after" flows connected.
 func test_for_range_with_after_flow() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var for_vc: HenVirtualCNode = _create_for_range_node()
 	var vc_flow_body: HenVirtualCNode = HenTest.get_void()
 	var vc_flow_after: HenVirtualCNode = HenTest.get_void()

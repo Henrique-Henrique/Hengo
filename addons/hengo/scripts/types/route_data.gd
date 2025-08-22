@@ -1,3 +1,4 @@
+@tool
 class_name HenRouteData extends RefCounted
 
 var name: String

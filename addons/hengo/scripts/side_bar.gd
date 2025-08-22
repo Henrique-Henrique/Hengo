@@ -31,7 +31,7 @@ const NAME = {
 	AddType.FUNC: 'Functions',
 	AddType.SIGNAL: 'Signals',
 	AddType.LOCAL_VAR: 'Local Variables',
-	AddType.MACRO: 'Macro'
+	AddType.MACRO: 'HenTypeMacro'
 }
 
 
@@ -215,13 +215,13 @@ func _on_gui(_event: InputEvent) -> void:
 				var text: String = ''
 
 				if _side_bar_item is HenVarData:
-					text = '[b]Variable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+					text = '[b]HenTypeVariable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenFuncData:
 					text = '[b]Function[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenSignalData:
 					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenMacroData:
-					text = '[b]Macro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+					text = '[b]HenTypeMacro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 
 				pos.x = HenGlobal.SIDE_PANEL.global_position.x
 

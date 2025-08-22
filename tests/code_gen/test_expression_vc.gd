@@ -24,7 +24,7 @@ func _create_expression_node() -> HenVirtualCNode:
 
 # Tests an expression node with no connected inputs
 func test_expression_with_no_inputs() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var vc: HenVirtualCNode = _create_expression_node()
 	
 	# Inputs should default to null when not connected
@@ -33,7 +33,7 @@ func test_expression_with_no_inputs() -> void:
 
 # Tests an expression with a single connected input
 func test_expression_with_one_input() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var vc: HenVirtualCNode = _create_expression_node()
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
@@ -44,7 +44,7 @@ func test_expression_with_one_input() -> void:
 
 # Tests an expression with all inputs connected
 func test_expression_with_two_inputs() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var vc: HenVirtualCNode = _create_expression_node()
 	var value_node: HenVirtualCNode = HenTest.get_const()
 

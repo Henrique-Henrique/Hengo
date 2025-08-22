@@ -1,8 +1,8 @@
 class_name HenFactoryCNode extends RefCounted
 
 
-static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.References, _parent_ref = null) -> HenSaveCodeType.CNode:
-	var cn: HenSaveCodeType.CNode = HenSaveCodeType.CNode.new()
+static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _parent_ref = null) -> HenTypeCnode:
+	var cn: HenTypeCnode = HenTypeCnode.new()
 
 	cn.id = int(_cnode.id)
 	cn.name = _cnode.name
@@ -37,9 +37,9 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 
 	# setting route types
 	if _parent_ref:
-		if _parent_ref is HenSaveCodeType.CNode and _parent_ref.type == HenVirtualCNode.Type.STATE:
+		if _parent_ref is HenTypeCnode and _parent_ref.type == HenVirtualCNode.Type.STATE:
 			cn.route_type = HenRouter.ROUTE_TYPE.STATE
-		elif _parent_ref is HenSaveCodeType.Func:
+		elif _parent_ref is HenTypeFunc:
 			cn.route_type = HenRouter.ROUTE_TYPE.FUNC
 
 			match cn.sub_type:
@@ -47,12 +47,12 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 					_parent_ref.input_ref = cn
 				HenVirtualCNode.SubType.FUNC_OUTPUT:
 					_parent_ref.output_ref = cn
-		elif _parent_ref is HenSaveCodeType.SignalData:
+		elif _parent_ref is HenTypeSignalData:
 			cn.route_type = HenRouter.ROUTE_TYPE.SIGNAL
 
 			if cn.sub_type == HenVirtualCNode.SubType.SIGNAL_ENTER:
 				_parent_ref.signal_enter = cn
-		elif _parent_ref is HenSaveCodeType.Macro:
+		elif _parent_ref is HenTypeMacro:
 			cn.route_type = HenRouter.ROUTE_TYPE.MACRO
 
 			if cn.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
@@ -68,12 +68,12 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 			_refs.states.append(cn)
 		HenVirtualCNode.Type.MACRO:
 			if not cn.invalid:
-				(cn.ref.get_ref() as HenSaveCodeType.Macro).macro_ref_list.append(cn)
+				(cn.ref.get_ref() as HenTypeMacro).macro_ref_list.append(cn)
 	
 	match cn.sub_type:
 		HenVirtualCNode.SubType.VIRTUAL:
 			if _parent_ref:
-				(_parent_ref as HenSaveCodeType.CNode).virtual_sub_type_vc_list.append(cn)
+				(_parent_ref as HenTypeCnode).virtual_sub_type_vc_list.append(cn)
 
 	return cn
 
@@ -84,14 +84,14 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenSaveCodeType.Refer
 #
 #
 #
-static func parse_connections(_refs: HenSaveCodeType.References) -> void:
+static func parse_connections(_refs: HenTypeReferences) -> void:
 	# generatin flow connection references
 	for flow_connection_data: Dictionary in _refs.script_data.flow_connections:
-		var flow_connection: HenSaveCodeType.FlowConnection = HenSaveCodeType.FlowConnection.new(flow_connection_data, _refs)
+		var flow_connection: HenTypeFlowConnection = HenTypeFlowConnection.new(flow_connection_data, _refs)
 		flow_connection.get_from().flow_connections.append(flow_connection)
 
 
 	# generating input connection references
 	for connection: Dictionary in _refs.script_data.connections:
-		var input: HenSaveCodeType.InputConnection = HenSaveCodeType.InputConnection.new(connection, _refs)
+		var input: HenTypeInputConnection = HenTypeInputConnection.new(connection, _refs)
 		input.get_to().input_connections.append(input)

@@ -26,14 +26,14 @@ func _physics_process(delta: float) -> void:
 {states}"""
 
 
-static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
+static func get_base_script_code(_refs: HenTypeReferences) -> String:
 	var code: String = ''
-	var start_state: HenSaveCodeType.CNode
+	var start_state: HenTypeCnode
 	var override_virtual_data: Dictionary = {}
 	var events: Array[Dictionary] = []
 
 	# getting states
-	for cnode: HenSaveCodeType.CNode in _refs.base_route_cnode_list:
+	for cnode: HenTypeCnode in _refs.base_route_cnode_list:
 		match cnode.sub_type:
 			# getting start state cnode
 			HenVirtualCNode.SubType.STATE_START:
@@ -43,7 +43,7 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 				var transitions: Array = []
 
 				# getting transition
-				for flow_connection: HenSaveCodeType.FlowConnection in cnode.flow_connections:
+				for flow_connection: HenTypeFlowConnection in cnode.flow_connections:
 					if flow_connection.to:
 						transitions.append({
 							name = 'flow_connection.name',
@@ -72,16 +72,16 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 
 
 	# search for override virtual inside macros
-	for macro: HenSaveCodeType.Macro in _refs.macros:
+	for macro: HenTypeMacro in _refs.macros:
 		# macro variables
-		for macro_var: HenSaveCodeType.Variable in macro.local_vars:
-			for macro_ref: HenSaveCodeType.CNode in macro.macro_ref_list:
+		for macro_var: HenTypeVariable in macro.local_vars:
+			for macro_ref: HenTypeCnode in macro.macro_ref_list:
 				code += HenGeneratorVariable.get_var_code(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}), str(macro_ref.id))
 
 		# macro override virtuals
-		for v_cnode: HenSaveCodeType.CNode in macro.virtual_cnode_list:
+		for v_cnode: HenTypeCnode in macro.virtual_cnode_list:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-				for macro_ref: HenSaveCodeType.CNode in macro.macro_ref_list:
+				for macro_ref: HenTypeCnode in macro.macro_ref_list:
 					HenGlobal.USE_MACRO_REF = true
 					HenGlobal.MACRO_REF = macro_ref
 					HenGlobal.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
@@ -145,15 +145,15 @@ static func get_base_script_code(_refs: HenSaveCodeType.References) -> String:
 #
 #
 #
-static func _parse_virtual_cnode(_cnode_list: Array[HenSaveCodeType.CNode]) -> Dictionary:
+static func _parse_virtual_cnode(_cnode_list: Array[HenTypeCnode]) -> Dictionary:
 	var data: Dictionary = {}
 
-	for cnode: HenSaveCodeType.CNode in _cnode_list:
+	for cnode: HenTypeCnode in _cnode_list:
 		if cnode.flow_connections.is_empty():
 			continue
 		
 		var cnode_name: String = cnode.name
-		var from_flow: HenSaveCodeType.FlowConnection = cnode.flow_connections[0]
+		var from_flow: HenTypeFlowConnection = cnode.flow_connections[0]
 
 		if from_flow.to:
 			var token_list = from_flow.get_to().get_flow_tokens(from_flow.to_id)

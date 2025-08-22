@@ -1,20 +1,20 @@
 class_name HenGeneratorFunc extends RefCounted
 
-static func get_functions_code(_refs: HenSaveCodeType.References) -> String:
+static func get_functions_code(_refs: HenTypeReferences) -> String:
 	var func_code: String = ''
 
-	for func_data: HenSaveCodeType.Func in _refs.functions:
+	for func_data: HenTypeFunc in _refs.functions:
 		# generating function
 		func_code += 'func {name}({params}):\n'.format({
 			name = func_data.name.to_snake_case(),
 			params = ', '.join(func_data.inputs.map(
-				func(x: HenSaveCodeType.Param) -> String:
+				func(x: HenTypeParam) -> String:
 					return x.name.to_snake_case()
 		))
 		})
 		
 		# local variable
-		func_code += '\n'.join(func_data.local_vars.map(func(x: HenSaveCodeType.Variable):
+		func_code += '\n'.join(func_data.local_vars.map(func(x: HenTypeVariable):
 			return '\t' + HenGeneratorVariable.get_var_code(x)))
 
 		# func output (return)

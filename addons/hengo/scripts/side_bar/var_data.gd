@@ -41,7 +41,7 @@ func load_save(_data: Dictionary) -> void:
 func delete() -> void:
     var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.var_list if not local_ref else local_ref.get(&'local_vars'))
 
-    HenGlobal.history.create_action('Delete Variable')
+    HenGlobal.history.create_action('Delete HenTypeVariable')
     HenGlobal.history.add_do_method(item_cache.remove)
     HenGlobal.history.add_undo_reference(item_cache)
     HenGlobal.history.add_undo_method(item_cache.add)

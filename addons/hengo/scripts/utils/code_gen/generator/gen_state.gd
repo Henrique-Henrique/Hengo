@@ -1,6 +1,6 @@
 class_name HenGeneratorState extends RefCounted
 
-static func get_states_start_code(_refs: HenSaveCodeType.References) -> String:
+static func get_states_start_code(_refs: HenTypeReferences) -> String:
 	var code: String = ''
 
 	# parsing dictionaries
@@ -8,13 +8,13 @@ static func get_states_start_code(_refs: HenSaveCodeType.References) -> String:
 		code += ',\n'.join(_refs.states_data.keys().map(
 				func(state_name: String) -> String:
 					return '\t\t{key}={c_name}.new(self{transitions})'.format({
-						key=state_name,
-						c_name=state_name.to_pascal_case(),
-						transitions=', {\n\t\t\t' + ',\n\t\t\t'.join(_refs.states_data[state_name].transitions.map(
+						key = state_name,
+						c_name = state_name.to_pascal_case(),
+						transitions = ', {\n\t\t\t' + ',\n\t\t\t'.join(_refs.states_data[state_name].transitions.map(
 						func(trans: Dictionary) -> String:
 						return '{state_name}="{to_state_name}"'.format({
-							state_name=trans.name.to_snake_case(),
-							to_state_name=trans.to_state_name.to_snake_case()
+							state_name = trans.name.to_snake_case(),
+							to_state_name = trans.to_state_name.to_snake_case()
 						})
 						)) + '\n\t\t}' if _refs.states_data[state_name].transitions.size() > 0 else ''
 					})
@@ -23,7 +23,7 @@ static func get_states_start_code(_refs: HenSaveCodeType.References) -> String:
 	return code
 
 
-static func get_states_code(_refs: HenSaveCodeType.References) -> String:
+static func get_states_code(_refs: HenTypeReferences) -> String:
 	var code: String = ''
 	var idx: int = 0
 	# generating classes implementation
@@ -31,8 +31,8 @@ static func get_states_code(_refs: HenSaveCodeType.References) -> String:
 		var item = _refs.states_data[state_name]
 
 		var base = '{new_line}class {name} extends HengoState:\n'.format({
-			name=state_name.to_pascal_case(),
-			new_line='\n\n' if idx > 0 else ''
+			name = state_name.to_pascal_case(),
+			new_line = '\n\n' if idx > 0 else ''
 		})
 
 		if item.virtual_tokens.is_empty():
@@ -50,9 +50,9 @@ static func get_states_code(_refs: HenSaveCodeType.References) -> String:
 				continue
 
 			var func_base: String = '{new_line}\tfunc {name}({params}) -> void:\n'.format({
-				name=virtual_name,
-				new_line='\n\n' if idx_1 > 0 else '',
-				params=', '.join(func_params.map(
+				name = virtual_name,
+				new_line = '\n\n' if idx_1 > 0 else '',
+				params = ', '.join(func_params.map(
 					func(x: Dictionary) -> String:
 						return x.name
 				

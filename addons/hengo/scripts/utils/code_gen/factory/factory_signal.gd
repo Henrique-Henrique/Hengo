@@ -1,7 +1,7 @@
 class_name HenFactorySignal extends RefCounted
 
-static func get_signal_from_dict(_signal_data: Dictionary, _refs: HenSaveCodeType.References) -> HenSaveCodeType.SignalData:
-	var signal_item: HenSaveCodeType.SignalData = HenSaveCodeType.SignalData.new()
+static func get_signal_from_dict(_signal_data: Dictionary, _refs: HenTypeReferences) -> HenTypeSignalData:
+	var signal_item: HenTypeSignalData = HenTypeSignalData.new()
 
 	signal_item.id = _signal_data.id
 	signal_item.name = _signal_data.name

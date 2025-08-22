@@ -105,7 +105,7 @@ const TOOLTIP_TEXT = {
     MOUSE_ICON = '[img]res://addons/hengo/assets/icons/mouse.svg[/img]',
     RIGHT_MOUSE_INSPECT = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Right Click to Inspect[/i]',
     DOUBLE_CLICK = '[img]res://addons/hengo/assets/icons/mouse.svg[/img] [i]Double Click to Enter[/i]',
-    CNODE_INVALID = "[color=#f55][b]Invalid CNode[/b][/color]\nThis node references a deleted or missing object\n[i]It will be ignored during code generation[/i]"
+    CNODE_INVALID = "[color=#f55][b]Invalid HenTypeCnode[/b][/color]\nThis node references a deleted or missing object\n[i]It will be ignored during code generation[/i]"
 }
 
 const START_MSG = "[center][font_size=24][b]Hengo Visual Script[/b][/font_size][font_size=16][color=#cccccc]Please open the script to begin editing.[/color][/font_size][font_size=13][i][color=#888888]Tip: You can open the script using the button at the top right to access the FileSystem,  or via \"Select Resource\" (Ctrl + P), or directly from Scene dock.[/color][/i][/font_size][/center]"

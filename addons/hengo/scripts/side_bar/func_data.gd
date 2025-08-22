@@ -101,7 +101,7 @@ func delete_param(_ref: HenParamData, _type: HenSideBar.ParamType) -> void:
 func get_cnode_data() -> Dictionary:
 	return {
 			name = name,
-			fantasy_name = 'Func -> ' + name,
+			fantasy_name = 'HenTypeFunc -> ' + name,
 			sub_type = HenVirtualCNode.SubType.USER_FUNC,
 			inputs = inputs.map(func(x: HenParamData) -> Dictionary: return x.get_data()),
 			outputs = outputs.map(func(x: HenParamData) -> Dictionary: return x.get_data()),

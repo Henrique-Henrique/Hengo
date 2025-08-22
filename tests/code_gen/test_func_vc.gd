@@ -14,7 +14,7 @@ func _create_func_node(outputs: Array) -> HenVirtualCNode:
 
 # a single output func should be a direct call, no index needed
 func test_single_output_function_call() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var func_node: HenVirtualCNode = _create_func_node([
 		{id = 0, name = 'output', type = 'Variant'}
 	])
@@ -25,7 +25,7 @@ func test_single_output_function_call() -> void:
 
 # using the first output from a multi-return func should add a [0]
 func test_multi_output_function_first_return_as_input() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var func_node: HenVirtualCNode = _create_func_node([
 		{id = 0, name = 'return_1', type = 'Variant'},
 		{id = 1, name = 'return_2', type = 'Variant'}
@@ -41,7 +41,7 @@ func test_multi_output_function_first_return_as_input() -> void:
 
 # using the second output from a multi-return func should add a [1]
 func test_multi_output_function_second_return_as_input() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var func_node: HenVirtualCNode = _create_func_node([
 		{id = 0, name = 'return_1', type = 'Variant'},
 		{id = 1, name = 'return_2', type = 'Variant'}

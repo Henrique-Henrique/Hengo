@@ -1,7 +1,7 @@
 class_name HenFactoryVariable extends RefCounted
 
-static func get_variable_from_dict(_data: Dictionary, _refs: HenSaveCodeType.References) -> HenSaveCodeType.Variable:
-	var variable: HenSaveCodeType.Variable = HenSaveCodeType.Variable.new()
+static func get_variable_from_dict(_data: Dictionary, _refs: HenTypeReferences) -> HenTypeVariable:
+	var variable: HenTypeVariable = HenTypeVariable.new()
 	
 	variable.id = _data.id
 	variable.name = _data.name

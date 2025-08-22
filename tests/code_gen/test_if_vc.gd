@@ -14,7 +14,7 @@ func _create_if_node() -> HenVirtualCNode:
 
 # Tests the default code generation for an unconnected IF node
 func test_if_default_code() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var vc: HenVirtualCNode = _create_if_node()
 	
 	var expected_code = 'if false:\n\tpass\n'
@@ -23,7 +23,7 @@ func test_if_default_code() -> void:
 
 # Tests an IF node with its condition input connected
 func test_if_with_input_connection() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	
 	var vc: HenVirtualCNode = _create_if_node()
 	var value: HenVirtualCNode = HenTest.get_const()
@@ -36,7 +36,7 @@ func test_if_with_input_connection() -> void:
 
 # Tests an IF node with the "true" flow connected
 func test_if_with_true_flow() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 
 	var vc: HenVirtualCNode = _create_if_node()
 	var value: HenVirtualCNode = HenTest.get_const()
@@ -51,7 +51,7 @@ func test_if_with_true_flow() -> void:
 
 # Tests an IF node with both "true" and "false" flows connected
 func test_if_with_false_flow() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 
 	var vc: HenVirtualCNode = _create_if_node()
 	var vc_flow_0: HenVirtualCNode = HenTest.get_const()
@@ -68,7 +68,7 @@ func test_if_with_false_flow() -> void:
 
 # Tests an IF node with "true", "false", and "after" flows connected
 func test_if_with_all_flows() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 
 	var vc: HenVirtualCNode = _create_if_node()
 	var vc_flow_0: HenVirtualCNode = HenTest.get_const()
@@ -86,7 +86,7 @@ func test_if_with_all_flows() -> void:
 
 # Tests that an IF with only the "false" flow inverts the condition
 func test_if_with_false_flow_only() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 
 	var vc: HenVirtualCNode = _create_if_node()
 	var vc_flow_0: HenVirtualCNode = HenTest.get_const()

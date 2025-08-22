@@ -1,110 +1,112 @@
-class_name HenSaveScript extends Node
+class_name HenSaveScript extends RefCounted
 
+const BACKUP_EXT: String = ".bak"
+const TEMP_EXT: String = ".tmp"
 
-const TEMP_EXT: String = '.tmp'
-const BACKUP_EXT: String = '.bkp'
-
-# a transactional save process that ensures data integrity.
-# if any step fails, it reverts all changes.
 static func save_data(save_config: HenSaver.SaveConfig) -> void:
-	if not _backup_existing_files(save_config):
-		push_error("Save process failed during backup creation.")
+	# orchestrates a transactional save process.
+	# if any critical step fails, it logs the error and triggers a rollback.
+	if not _create_backups(save_config):
+		push_error("Save process failed: could not create backups. Rolling back.")
 		rollback(save_config)
 		return
 
-	if not _save_temporary_data(save_config):
-		push_error("Save process failed while writing temporary files.")
+	if not _save_temporary_files(save_config):
+		push_error("Save process failed: could not save temporary files. Rolling back.")
 		rollback(save_config)
 		return
 
-	if not _commit_saved_data(save_config):
-		push_error("Save process failed while committing changes.")
+	if not _commit_changes(save_config):
+		push_error("Save process failed: could not commit changes. Rolling back.")
 		rollback(save_config)
 		return
 
-	_cleanup_backups(save_config)
-	_save_gdscript_source(save_config)
-
-	var script_list: PackedStringArray = []
-	for config in save_config.script_list:
-		script_list.append(ResourceUID.get_id_path(config.id))
-
+	_finalize_save_process(save_config)
 	print("Successfully saved")
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
 
 
-# reverts changes by restoring backups and cleaning temporary files.
 static func rollback(save_config: HenSaver.SaveConfig) -> void:
 	for config in save_config.script_list:
-		var path: StringName = HenLoader.get_data_path(config.id)
-		var backup_path: StringName = path + BACKUP_EXT
-		var temp_path: StringName = path + TEMP_EXT
+		var paths: Dictionary = _get_resource_paths(config.id)
 
-		# restore the original file from the backup, if it exists
-		if FileAccess.file_exists(backup_path):
-			var result: int = DirAccess.rename_absolute(backup_path, path)
+		# attempt to restore the original file from its backup
+		if FileAccess.file_exists(paths.backup):
+			var result: int = DirAccess.rename_absolute(paths.backup, paths.base)
 			if result != OK:
-				push_error("Rollback failed to restore backup for: ", path)
+				push_error("Rollback failed to restore backup for: ", paths.base)
 		
-		# remove any lingering temp files
-		if FileAccess.file_exists(temp_path):
-			DirAccess.remove_absolute(temp_path)
+		# ensure any temporary file is removed
+		if FileAccess.file_exists(paths.temp):
+			DirAccess.remove_absolute(paths.temp)
 
 
-# creates a .bak file for each script data file.
-static func _backup_existing_files(save_config: HenSaver.SaveConfig) -> bool:
+# returns a dictionary with base, backup, and temp paths for a given resource id
+static func _get_resource_paths(id: int) -> Dictionary:
+	var base_path: StringName = HenLoader.get_data_path(id)
+	return {
+		"base": base_path,
+		"backup": base_path + BACKUP_EXT,
+		"temp": base_path + TEMP_EXT,
+	}
+
+
+# creates a backup of each existing file
+static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
 	for config in save_config.script_list:
-		var res_path: StringName = HenLoader.get_data_path(config.id)
-		var backup_path: StringName = res_path + BACKUP_EXT
+		var paths: Dictionary = _get_resource_paths(config.id)
+		var result: int = OK
 
-		# rename existing file to .bak, or create an empty .bak if no file exists.
-		# this ensures the rollback can restore a non-existent state if needed.
-		if FileAccess.file_exists(res_path):
-			var result: int = DirAccess.rename_absolute(res_path, backup_path)
-			if result != OK:
-				return false
+		if FileAccess.file_exists(paths.base):
+			result = DirAccess.rename_absolute(paths.base, paths.backup)
 		else:
-			var file: FileAccess = FileAccess.open(backup_path, FileAccess.WRITE)
-			if not file:
-				return false
-			file.close()
-			
-	return true
+			# if the original file doesn't exist, create an empty backup
+			# this simplifies rollback logic, as it can assume a backup always exists
+			var file: FileAccess = FileAccess.open(paths.backup, FileAccess.WRITE)
+			if file:
+				file.close()
+			else:
+				result = FAILED
 
-
-# saves the new data to temporary .tmp files.
-static func _save_temporary_data(save_config: HenSaver.SaveConfig) -> bool:
-	for config in save_config.script_list:
-		var temp_path: StringName = HenLoader.get_data_path(config.id) + TEMP_EXT
-		var is_success: bool = HenScriptData.save(config.script_data, temp_path)
-		if not is_success:
-			return false
-			
-	return true
-
-
-# renames all .tmp files to their final names, committing the changes.
-static func _commit_saved_data(save_config: HenSaver.SaveConfig) -> bool:
-	for config in save_config.script_list:
-		var final_path: StringName = HenLoader.get_data_path(config.id)
-		var temp_path: StringName = final_path + TEMP_EXT
-		
-		var result: int = DirAccess.rename_absolute(temp_path, final_path)
 		if result != OK:
 			return false
 			
 	return true
 
 
-# removes all the .bak files after a successful save.
-static func _cleanup_backups(save_config: HenSaver.SaveConfig) -> void:
+# saves the new data to temporary files
+static func _save_temporary_files(save_config: HenSaver.SaveConfig) -> bool:
 	for config in save_config.script_list:
-		var backup_path: StringName = HenLoader.get_data_path(config.id) + BACKUP_EXT
-		if FileAccess.file_exists(backup_path):
-			DirAccess.remove_absolute(backup_path)
+		var paths: Dictionary = _get_resource_paths(config.id)
+		if not HenScriptData.save(config.script_data, paths.temp):
+			return false
+			
+	return true
 
 
-# saves the final gdscript source code files.
-static func _save_gdscript_source(save_config: HenSaver.SaveConfig) -> void:
+# renames temporary files to their final names, committing the changes
+static func _commit_changes(save_config: HenSaver.SaveConfig) -> bool:
+	for config in save_config.script_list:
+		var paths: Dictionary = _get_resource_paths(config.id)
+		var result: int = DirAccess.rename_absolute(paths.temp, paths.base)
+
+		if result != OK:
+			return false
+			
+	return true
+
+
+# cleans up backup files, saves final gdscript code, and emits the completion signal
+static func _finalize_save_process(save_config: HenSaver.SaveConfig) -> void:
+	var script_list: PackedStringArray = []
+	for config in save_config.script_list:
+		var paths: Dictionary = _get_resource_paths(config.id)
+
+		if FileAccess.file_exists(paths.backup):
+			DirAccess.remove_absolute(paths.backup)
+
+		script_list.append(ResourceUID.get_id_path(config.id))
+
 	for config in save_config.script_list:
 		HenScriptData.save_code(config.script_data, config.id)
+		
+	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)

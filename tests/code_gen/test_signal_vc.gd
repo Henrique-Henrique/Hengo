@@ -78,7 +78,7 @@ func test_generates_signal_handler_with_data_connection() -> void:
 
 # Tests the code generation for a simple signal connection without extra parameters.
 func test_generates_basic_signal_connection_code() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
 	var dt: Dictionary = signal_data.get_connect_cnode_data()
 	var script_data: HenScriptData = HenScriptData.new()
@@ -95,7 +95,7 @@ func test_generates_basic_signal_connection_code() -> void:
 
 # Tests the code generation for a signal connection that uses 'bind'
 func test_generates_signal_connection_code_with_bind() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
 	var dt: Dictionary = signal_data.get_connect_cnode_data()
 	var script_data: HenScriptData = HenScriptData.new()
@@ -117,7 +117,7 @@ func test_generates_signal_connection_code_with_bind() -> void:
 # Tests the code generation for disconnecting a signal connection
 # Verifies that the disconnect() call is generated with the correct signal name and handler function
 func test_disconnection_code() -> void:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
 	var dt: Dictionary = signal_data.get_diconnect_cnode_data()
 	var script_data: HenScriptData = HenScriptData.new()

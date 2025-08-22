@@ -14,7 +14,7 @@ static func get_flow_id() -> int:
 
 
 static func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
-	var refs: HenSaveCodeType.References = HenSaveCodeType.References.new(_data)
+	var refs: HenTypeReferences = HenTypeReferences.new(_data)
 	var code: String = ''
 
 
@@ -23,7 +23,7 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 	# generating macro references
 	for macro_data: Dictionary in _data.side_bar_list.macro_list:
-		var macro: HenSaveCodeType.Macro = HenSaveCodeType.Macro.new()
+		var macro: HenTypeMacro = HenTypeMacro.new()
 
 		macro.id = macro_data.id
 		macro.name = macro_data.name
@@ -31,13 +31,13 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 		refs.side_bar_item_ref[macro.id] = macro
 
 		for input: Dictionary in macro_data.inputs:
-			var flow: HenSaveCodeType.Flow = HenSaveCodeType.Flow.new()
+			var flow: HenTypeFlow = HenTypeFlow.new()
 			flow.id = input.id
 			flow.name = input.name
 			macro.flow_inputs.append(flow)
 
 		for output: Dictionary in macro_data.outputs:
-			var flow: HenSaveCodeType.Flow = HenSaveCodeType.Flow.new()
+			var flow: HenTypeFlow = HenTypeFlow.new()
 			flow.id = output.id
 			flow.name = output.name
 			macro.flow_outputs.append(flow)
@@ -70,7 +70,7 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 	# generating cnode references
 	for cnode: Dictionary in _data.virtual_cnode_list:
-		var cn: HenSaveCodeType.CNode = HenFactoryCNode.get_cnode_from_dict(cnode, refs)
+		var cn: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(cnode, refs)
 
 		refs.base_route_cnode_list.append(cn)
 

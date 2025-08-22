@@ -2,9 +2,9 @@ extends GdUnitTestSuite
 
 
 func test_get_var_code() -> void:
-    var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+    var refs: HenTypeReferences = HenTypeReferences.new()
     var var_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-        name = 'Get Variable',
+        name = 'Get HenTypeVariable',
         sub_type = HenVirtualCNode.SubType.VAR,
         outputs = [
             {
@@ -19,9 +19,9 @@ func test_get_var_code() -> void:
 
 
 func test_set_var_code() -> void:
-    var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+    var refs: HenTypeReferences = HenTypeReferences.new()
     var var_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-        name = 'Set Variable',
+        name = 'Set HenTypeVariable',
         sub_type = HenVirtualCNode.SubType.SET_VAR,
         inputs = [
             {
@@ -36,7 +36,7 @@ func test_set_var_code() -> void:
 
 
 func test_deep_prop_code() -> void:
-    var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+    var refs: HenTypeReferences = HenTypeReferences.new()
     var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
         name = 'Get Property',
         name_to_code = 'position.x',
@@ -54,7 +54,7 @@ func test_deep_prop_code() -> void:
 
 
 func test_set_deep_prop_code() -> void:
-    var refs: HenSaveCodeType.References = HenSaveCodeType.References.new()
+    var refs: HenTypeReferences = HenTypeReferences.new()
     var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
         name = 'Set Property',
         sub_type = HenVirtualCNode.SubType.SET_DEEP_PROP,

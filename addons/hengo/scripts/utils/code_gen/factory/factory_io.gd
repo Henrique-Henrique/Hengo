@@ -1,7 +1,7 @@
 class_name HenFactoryIO extends RefCounted
 
-static func get_inout_from_dict(_inout: Dictionary) -> HenSaveCodeType.Inout:
-	var input: HenSaveCodeType.Inout = HenSaveCodeType.Inout.new()
+static func get_inout_from_dict(_inout: Dictionary) -> HenTypeInout:
+	var input: HenTypeInout = HenTypeInout.new()
 
 	input.id = int(_inout.id)
 	input.name = _inout.name

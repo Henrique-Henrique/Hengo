@@ -51,7 +51,7 @@ static func generate_script_data() -> HenScriptData:
 static func save() -> void:
 	HenGlobal.HENGO_SAVER = Saver.new()
 	# HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
-
+	
 	HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(start_generate.bind(true)))
 
 
