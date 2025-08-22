@@ -35,3 +35,6 @@ func _physics_process(delta: float) -> void:
 class State1 extends HengoState:
 	func enter() -> void:
 		print(_ref.get_offset())
+		if not(false):
+			_ref.set_offset(_ref.get_scale())
+			HengoState.INVALID_PLACEHOLDER

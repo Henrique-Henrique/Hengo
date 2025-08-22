@@ -302,8 +302,8 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 						(data.to_flow as Array).append({name = flow_connection.name, id = flow_connection.id})
 
 
-	if identity.from_id > -1:
-		HenEnums.add_script_ref_cache(identity.from_id, HenGlobal.script_config.id)
+	# if identity.from_id > -1:
+	# 	HenEnums.add_script_ref_cache(identity.from_id, HenGlobal.script_config.id)
 
 
 	if not children.virtual_cnode_list.is_empty():

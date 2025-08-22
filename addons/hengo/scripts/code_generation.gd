@@ -117,18 +117,18 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 	var saves: Array = []
 
 	# generation dependencies
-	for id_str in HenEnums.get_script_cache_refs(_script_id):
-		if HenLoader.script_to_open_id == int(id_str):
-			continue
+	# for id_str in HenEnums.get_script_cache_refs(_script_id):
+	# 	if HenLoader.script_to_open_id == int(id_str):
+	# 		continue
 		
-		prints('re -> ', id_str, 'open -> ', HenLoader.script_to_open_id)
+	# 	prints('re -> ', id_str, 'open -> ', HenLoader.script_to_open_id)
 
-		var script_data: HenScriptData = get_updated_script_data(int(id_str), _side_bar_list)
+	# 	var script_data: HenScriptData = get_updated_script_data(int(id_str), _side_bar_list)
 
-		if script_data:
-			_save_config.add_script(
-				HenSaver.SaveData.new(int(id_str), script_data)
-			)
+	# 	if script_data:
+	# 		_save_config.add_script(
+	# 			HenSaver.SaveData.new(int(id_str), script_data)
+	# 		)
 
 	return saves
 

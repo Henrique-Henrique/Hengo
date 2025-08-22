@@ -2,28 +2,6 @@
 class_name HenEnums extends MainLoop
 
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
-
-
-static func add_script_ref_cache(_script_id: int, _id: int) -> void:
-    var script_id: StringName = str(_script_id)
-    var id: StringName = str(_id)
-
-    if HenGlobal.SCRIPT_REF_CACHE.has(script_id):
-        if HenGlobal.SCRIPT_REF_CACHE.get(script_id).has(id):
-            return
-
-        HenGlobal.SCRIPT_REF_CACHE.get(script_id).append(id)
-    else:
-        HenGlobal.SCRIPT_REF_CACHE.set(script_id, [id])
-
-
-static func get_script_cache_refs(_script_id: int) -> Array:
-    if HenGlobal.SCRIPT_REF_CACHE.has(str(_script_id)):
-        return HenGlobal.SCRIPT_REF_CACHE.get(str(_script_id))
-
-    return []
-
-
 const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
 const STATE_SELECTED_GROUP: String = 'hen_state_selected'
 const NATIVE_API_PATH: String = 'res://addons/hengo/api/native_api.json'

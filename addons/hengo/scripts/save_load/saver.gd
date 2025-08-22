@@ -1,9 +1,6 @@
 @tool
 class_name HenSaver extends Node
 
-const TEMP_EXT: String = '.tmp'
-const BACKUP_EXT: String = '.bkp'
-
 
 class Saver:
 	var task_id_list: Array[int] = []
@@ -67,7 +64,11 @@ static func start_generate(_regenerate: bool = false) -> void:
 		DirAccess.make_dir_absolute('res://hengo/save')
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 
+	# update current script data
+	HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), generate_script_data())
+
 	for script_in_cache: HenScriptData in HenScriptDataCache.SCRIPT_DATA_CACHE.values():
+		print(JSON.stringify(script_in_cache.get_save()))
 		generate(script_in_cache, ResourceLoader.get_resource_uid(script_in_cache.path), _regenerate)
 
 
@@ -80,87 +81,5 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	# 	HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list)
 
 	HenCodeGeneration.get_code(_script_data)
-	save_data(_save_config)
+	HenSaveScript.save_data(_save_config)
 	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
-
-
-static func save_data(_save_config: SaveConfig) -> void:
-	# creating backup files
-	for config in _save_config.script_list:
-		var res_path: StringName = HenLoader.get_data_path(config.id)
-		var result: int = OK
-
-		if FileAccess.file_exists(res_path):
-			result = DirAccess.rename_absolute(res_path, res_path + BACKUP_EXT)
-		else:
-			var file: FileAccess = FileAccess.open(res_path + BACKUP_EXT, FileAccess.WRITE)
-			
-			if file: file.close()
-			else: result = false
-
-		if result != OK:
-			rollback(_save_config)
-			return
-
-	# saving temp files
-	for config in _save_config.script_list:
-		var valid: bool = HenScriptData.save(config.script_data, HenLoader.get_data_path(config.id) + TEMP_EXT)
-		
-		if not valid:
-			rollback(_save_config)
-			return
-
-	# checking if all temp files are created
-	for config in _save_config.script_list:
-		if not FileAccess.file_exists(HenLoader.get_data_path(config.id) + TEMP_EXT):
-			rollback(_save_config)
-			return
-
-	# renaming temp files to original files
-	for config in _save_config.script_list:
-		var result: int = DirAccess.rename_absolute(
-			HenLoader.get_data_path(config.id) + TEMP_EXT,
-			HenLoader.get_data_path(config.id)
-		)
-
-		if result != OK:
-			rollback(_save_config)
-			return
-
-	var script_list: PackedStringArray = []
-
-	# removing backup files
-	for config in _save_config.script_list:
-		var path: StringName = HenLoader.get_data_path(config.id)
-
-		# remove backup
-		if FileAccess.file_exists(path + BACKUP_EXT):
-			DirAccess.remove_absolute(path + BACKUP_EXT)
-
-		script_list.append(ResourceUID.get_id_path(config.id))
-
-	# saving gdscript files
-	for config in _save_config.script_list:
-		HenScriptData.save_code(config.script_data, config.id)
-
-	print('Successfully saved')
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
-
-
-static func rollback(_save_config: SaveConfig) -> void:
-	for config in _save_config.script_list:
-		var path: StringName = HenLoader.get_data_path(config.id)
-
-		# renaming backup files to original files
-		if FileAccess.file_exists(path + BACKUP_EXT):
-			var result: int = DirAccess.rename_absolute(
-				path + BACKUP_EXT,
-				path
-			)
-
-			if result != OK:
-				push_error('Rollback failed -> ', path)
-			
-		# removing temp files
-		if FileAccess.file_exists(path + TEMP_EXT):
-			DirAccess.remove_absolute(path + TEMP_EXT)

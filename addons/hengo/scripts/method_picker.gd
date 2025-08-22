@@ -513,15 +513,17 @@ func build_list() -> void:
 func get_from_list() -> Array:
 	var local_api: Array = []
 
-	for script_path: String in DirAccess.get_files_at('res://hengo/save'):
-		var id: int = int(script_path.get_basename())
+	print(DirAccess.get_files_at('res://hengo/save'))
 
-		if id == 0:
-			continue
+	# for script_path: String in DirAccess.get_files_at('res://hengo/save'):
+	# 	var id: int = int(script_path.get_basename())
 
-		var path: StringName = HenLoader.get_data_path(id)
-		var res: HenScriptData = HenScriptData.load_from_file(path)
-		var res_name: String = ResourceUID.get_id_path(id).get_file().get_basename()
+	# 	if id == 0:
+	# 		continue
+
+	for id: String in HenScriptDataCache.SCRIPT_DATA_CACHE.keys():
+		var res: HenScriptData = HenScriptDataCache.try_get_script_data(id)
+		var res_name: String = ResourceUID.get_id_path(int(id)).get_file().get_basename()
 
 		for var_data: Dictionary in res.side_bar_list.var_list:
 			var dt: Dictionary = {
