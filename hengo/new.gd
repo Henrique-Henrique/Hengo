@@ -9,7 +9,9 @@
 
 extends Node
 
-func my_func_60(name_0, name_1):
+var my_var_2 = bool()  
+ 
+func my_func_60(name_1):
 	return [null, null]
 
 

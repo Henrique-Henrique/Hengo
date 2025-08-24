@@ -189,7 +189,14 @@
 		],
 		"macro_list": [],
 		"signal_list": [],
-		"var_list": []
+		"var_list": [
+			{
+				"export": false,
+				"id": 913,
+				"name": "my var 2",
+				"type": "int"
+			}
+		]
 	},
 	"state_event_list": [],
 	"type": "Node",

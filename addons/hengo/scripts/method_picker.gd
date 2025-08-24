@@ -536,6 +536,7 @@ func get_from_list() -> Array:
 					],
 					outputs = [
 						{
+							id = var_data.id,
 							name = var_data.name,
 							type = var_data.type
 						}
@@ -562,8 +563,8 @@ func get_from_list() -> Array:
 							type = res.type,
 							is_ref = true,
 						}
-					] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, id = x.id}),
-					outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type, id = x.id}),
+					] + (func_data.inputs as Array).map(func(x): return {name = x.name, type = x.type, id = x.id}),
+					outputs = (func_data.outputs as Array).map(func(x): return {name = x.name, type = x.type, id = x.id}),
 					route = HenRouter.current_route,
 				}
 			}

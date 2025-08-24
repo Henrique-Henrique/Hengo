@@ -21,7 +21,7 @@ static func get_var_code(_var_data: HenTypeVariable, _custom_name: String = '', 
 	elif ClassDB.can_instantiate(_var_data.type):
 		type_value = _var_data.type + '.new()'
 
-	var_code += ' {export_var} var {name} = {value} {id} \n'.format({
+	var_code += '{export_var}var {name} = {value} {id} \n'.format({
 		name = _var_data.name.to_snake_case() if not _custom_name else _custom_name,
 		value = type_value,
 		export_var = '@export ' if _var_data.export_var else '',

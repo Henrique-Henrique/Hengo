@@ -54,20 +54,34 @@ static func check_changes_func(_cnode_data: Dictionary, _refs: HenRegenerateRefs
 			var current: Dictionary = existing_inputs[f_in.id]
 			current.name = f_in.name
 			current.type = f_in.type
+			_reset_inout_dict_value(current)
 			new_inputs.append(current)
 		else:
-			new_inputs.append({
+			var new_input = {
 				'category': 'default_value', 'code_value': 'null',
 				'id': f_in.id, 'name': f_in.name, 'type': f_in.type, 'value': 'null'
-			})
+			}
+			_reset_inout_dict_value(new_input)
+			new_inputs.append(new_input)
 
-	# check for changes in inputs
+	# check for changes in inputs and reset removed inputs
 	if not _cnode_data.has('inputs') or (_cnode_data.inputs as Array).size() != new_inputs.size():
 		inputs_changed = true
+		# Reset all existing inputs that will be removed
+		if _cnode_data.has('inputs'):
+			var new_input_ids: Dictionary = {}
+			for inp in new_inputs:
+				new_input_ids[inp.id] = true
+			
+			for old_inp in _cnode_data.inputs:
+				if not new_input_ids.has(old_inp.id):
+					_reset_inout_dict_value(old_inp)
 	else:
 		for i: int in new_inputs.size():
 			if _cnode_data.inputs[i].id != new_inputs[i].id:
 				inputs_changed = true
+				# Reset the old input that's being replaced
+				_reset_inout_dict_value(_cnode_data.inputs[i])
 				break
 
 	if inputs_changed:
@@ -130,3 +144,30 @@ static func check_changes_func(_cnode_data: Dictionary, _refs: HenRegenerateRefs
 		if connections_changed:
 			_refs.connections = filtered_conns
 			_refs.reload = true
+	
+
+static func _reset_inout_dict_value(_dict: Dictionary) -> void:
+	match _dict.type:
+		'String', 'NodePath', 'StringName':
+			_dict.code_value = '""'
+		'int':
+			_dict.code_value = '0'
+		'float':
+			_dict.code_value = '0.'
+		'Vector2':
+			_dict.code_value = 'Vector2(0, 0)'
+		'bool':
+			_dict.code_value = 'false'
+		'Variant':
+			_dict.code_value = 'null'
+		_:
+			if HenEnums.VARIANT_TYPES.has(_dict.type):
+				_dict.code_value = _dict.type + '()'
+			elif ClassDB.can_instantiate(_dict.type):
+				_dict.code_value = _dict.type + '.new()'
+
+	match _dict.type:
+		'String', 'NodePath', 'StringName':
+			_dict.value = ''
+		_:
+			_dict.value = _dict.code_value
