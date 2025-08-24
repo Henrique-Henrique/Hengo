@@ -9,8 +9,8 @@
 
 extends Node
 
-func my_func():
-	pass
+func my_func_60(name_0, name_1):
+	return [null, null]
 
 
 var _STATE_CONTROLLER = HengoStateController.new()

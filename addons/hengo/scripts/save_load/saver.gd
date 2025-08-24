@@ -49,10 +49,8 @@ static func generate_script_data() -> HenScriptData:
 
 
 static func save() -> void:
-	HenGlobal.HENGO_SAVER = Saver.new()
 	# HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
-	
-	HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(start_generate.bind(true)))
+	HenThreadHelper.add_task(start_generate.bind(true))
 
 
 static func start_generate(_regenerate: bool = false) -> void:
@@ -68,7 +66,6 @@ static func start_generate(_regenerate: bool = false) -> void:
 	HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), generate_script_data())
 
 	for script_in_cache: HenScriptData in HenScriptDataCache.SCRIPT_DATA_CACHE.values():
-		print(JSON.stringify(script_in_cache.get_save()))
 		generate(script_in_cache, ResourceLoader.get_resource_uid(script_in_cache.path), _regenerate)
 
 
@@ -77,8 +74,8 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	var _save_config: SaveConfig = SaveConfig.new()
 	_save_config.add_script(_save_data)
 
-	# if _regenerate:
-	# 	HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list)
+	if _regenerate:
+		HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list)
 
 	HenCodeGeneration.get_code(_script_data)
 	HenSaveScript.save_data(_save_config)

@@ -253,7 +253,8 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 		data.from_side_bar_id = identity.from_side_bar_id
 
 	if identity.from_id > -1:
-		data.from_id = identity.from_id
+		data.from_id = str(identity.from_id)
+		_script_data.deps.append(str(identity.from_id))
 
 	if not io.inputs.is_empty():
 		data.inputs = []
@@ -300,10 +301,6 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 			for flow_connection: HenVCFlow in flow.flow_outputs:
 					if flow_connection.name:
 						(data.to_flow as Array).append({name = flow_connection.name, id = flow_connection.id})
-
-
-	# if identity.from_id > -1:
-	# 	HenEnums.add_script_ref_cache(identity.from_id, HenGlobal.script_config.id)
 
 
 	if not children.virtual_cnode_list.is_empty():
@@ -413,7 +410,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		v_cnode.identity.from_side_bar_id = _config.from_side_bar_id
 
 	if _config.has('from_id'):
-		v_cnode.identity.from_id = _config.from_id
+		v_cnode.identity.from_id = int(_config.from_id)
 
 	if _config.has('invalid'):
 		v_cnode.state.invalid = _config.invalid

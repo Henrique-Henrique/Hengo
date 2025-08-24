@@ -37,4 +37,4 @@ class State1 extends HengoState:
 		print(_ref.get_offset())
 		if not(false):
 			_ref.set_offset(_ref.get_scale())
-			HengoState.INVALID_PLACEHOLDER
+			_ref.get_node("").my_func_60(_ref.is_centered(), _ref.is_centered())[0]

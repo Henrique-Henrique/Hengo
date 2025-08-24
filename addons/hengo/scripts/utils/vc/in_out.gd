@@ -14,7 +14,6 @@ var is_prop: bool
 var is_static: bool
 var ref: RefCounted
 var ref_change_rule: RefChangeRule
-var from_id: int = -1
 var owner: WeakRef
 
 signal update_changes
@@ -37,7 +36,6 @@ func _init(_data: Dictionary, _owner: HenVirtualCNode) -> void:
 	name = _data.name
 	type = _data.type
 
-	if _data.has('from_id'): from_id = _data.from_id
 	if _data.has('id'): id = _data.id
 	if _data.has('sub_type'): sub_type = _data.sub_type
 	if _data.has('category'): category = _data.category
@@ -128,7 +126,6 @@ func get_save() -> Dictionary:
 		type = type
 	}
 
-	if from_id > -1: dt.from_id = from_id
 	if sub_type: dt.sub_type = sub_type
 	if category: dt.category = category
 	if is_ref: dt.is_ref = is_ref

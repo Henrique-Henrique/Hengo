@@ -16,11 +16,25 @@ static func load(_path: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
 
-	# save current in cache
-	if HenGlobal.script_config:
-		HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), HenSaver.generate_script_data())
-
 	script_to_open_id = ResourceLoader.get_resource_uid(_path)
+
+	# cache the current script's state before switching, ensuring any updates
+	# are propagated to the target script when it's analyzed
+	if HenGlobal.script_config:
+		var current_script_data: HenScriptData = HenSaver.generate_script_data()
+		HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), current_script_data)
+		
+		# the generation logic handles cases where the target is not yet cached
+		var target_cached: HenScriptData = HenScriptDataCache.try_get_script_data(str(script_to_open_id))
+		var updated_target: HenScriptData = HenCodeGeneration.get_updated_script_data(
+			script_to_open_id,
+			current_script_data.side_bar_list,
+			target_cached
+		)
+
+		if updated_target:
+			HenScriptDataCache.add_script_data(str(script_to_open_id), updated_target)
+
 	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
 	compile_bt.disabled = false
 

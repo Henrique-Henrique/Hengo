@@ -18,6 +18,9 @@ func _ready() -> void:
 
 	set_process(true)
 
+	# map dependencies
+	HenThreadHelper.add_task(HenMapDependencies.start_map)
+
 	# initializing
 	HenRouter.current_route = null
 	HenRouter.line_route_reference = {}
@@ -25,7 +28,6 @@ func _ready() -> void:
 	# HenGlobal.history = UndoRedo.new()
 	HenEnums.DROPDOWN_STATES = []
 	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
-
 
 	# defining types
 	var object_list = ClassDB.get_inheriters_from_class('Object')
@@ -130,13 +132,11 @@ func _process(_delta: float) -> void:
 			can_select = false
 			HenGlobal.CAM.get_node('SelectionRect').visible = false
 
-
 	# task id
-	if HenGlobal.HENGO_SAVER:
-		for id in HenGlobal.HENGO_SAVER.task_id_list:
-			if WorkerThreadPool.is_task_completed(id):
-				WorkerThreadPool.wait_for_task_completion(id)
-				HenGlobal.HENGO_SAVER.task_id_list.erase(id)
+	for id in HenThreadHelper.task_id_list:
+		if WorkerThreadPool.is_task_completed(id):
+			WorkerThreadPool.wait_for_task_completion(id)
+			HenThreadHelper.task_id_list.erase(id)
 
 
 func _input(event: InputEvent) -> void:

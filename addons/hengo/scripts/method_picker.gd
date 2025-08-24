@@ -513,14 +513,6 @@ func build_list() -> void:
 func get_from_list() -> Array:
 	var local_api: Array = []
 
-	print(DirAccess.get_files_at('res://hengo/save'))
-
-	# for script_path: String in DirAccess.get_files_at('res://hengo/save'):
-	# 	var id: int = int(script_path.get_basename())
-
-	# 	if id == 0:
-	# 		continue
-
 	for id: String in HenScriptDataCache.SCRIPT_DATA_CACHE.keys():
 		var res: HenScriptData = HenScriptDataCache.try_get_script_data(id)
 		var res_name: String = ResourceUID.get_id_path(int(id)).get_file().get_basename()
@@ -570,8 +562,8 @@ func get_from_list() -> Array:
 							type = res.type,
 							is_ref = true,
 						}
-					] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
-					outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type, from_id = x.id}),
+					] + func_data.inputs.map(func(x): return {name = x.name, type = x.type, id = x.id}),
+					outputs = func_data.outputs.map(func(x): return {name = x.name, type = x.type, id = x.id}),
 					route = HenRouter.current_route,
 				}
 			}

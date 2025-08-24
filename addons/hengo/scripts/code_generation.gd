@@ -1,8 +1,6 @@
 @tool
 class_name HenCodeGeneration extends Node
 
-static var _debug_counter: float = 1.
-static var _debug_symbols: Dictionary = {}
 static var flow_id: int = 0
 static var flows_refs: Dictionary = {}
 static var flow_errors: Array[Dictionary] = []
@@ -115,20 +113,21 @@ static func _get_start(_data: HenScriptData) -> String:
 #
 static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> Array:
 	var saves: Array = []
-
-	# generation dependencies
-	# for id_str in HenEnums.get_script_cache_refs(_script_id):
-	# 	if HenLoader.script_to_open_id == int(id_str):
-	# 		continue
 		
-	# 	prints('re -> ', id_str, 'open -> ', HenLoader.script_to_open_id)
+	for dependency_id: StringName in HenMapDependencies.get_dependencies(str(_script_id)):
+		var dep_id_i: int = int(dependency_id)
+		var old_script_data: HenScriptData = HenScriptDataCache.try_get_script_data(dependency_id)
+		var script_data: HenScriptData = get_updated_script_data(dep_id_i, _side_bar_list, old_script_data)
 
-	# 	var script_data: HenScriptData = get_updated_script_data(int(id_str), _side_bar_list)
+		if not script_data:
+			continue
 
-	# 	if script_data:
-	# 		_save_config.add_script(
-	# 			HenSaver.SaveData.new(int(id_str), script_data)
-	# 		)
+		if old_script_data:
+			HenScriptDataCache.add_script_data(dependency_id, script_data)
+
+		_save_config.add_script(
+			HenSaver.SaveData.new(dep_id_i, script_data)
+		)
 
 	return saves
 
@@ -138,7 +137,7 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 #
 #
 #
-static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> HenScriptData:
+static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _script_data: HenScriptData = null) -> HenScriptData:
 	var refs:  HenRegenerateRefs = HenRegenerateRefs.new()
 	var path: StringName = HenLoader.get_data_path(_id)
 
@@ -147,28 +146,15 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary) -> Hen
 		return null
 	
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
-	var res: HenScriptData = HenScriptData.load_from_file(res_path)
+	var res: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
 
 	refs.counter = res.node_counter
 	refs.side_bar_list = _side_bar_list
+	refs.connections = res.connections
 
 	_parse_vc_list(res.virtual_cnode_list, refs)
 
 	if refs.reload:
-		# cleaning connections that dont using
-		for cnode: Dictionary in refs.cnode_list.values():
-			var remove_connections: Array = []
-
-			if not cnode.input_connections.is_empty():
-				for connection: Dictionary in cnode.input_connections:
-					for ref: Dictionary in refs.disconnect_list:
-						if ref.id == connection.from_vc_id and ref.output_id == connection.from_id:
-							remove_connections.append(connection)
-							break
-
-			for connection: Dictionary in remove_connections:
-				cnode.input_connections.erase(connection)
-		
 		return res
 
 	return null

@@ -15,6 +15,7 @@ var comments: Array
 var virtual_cnode_list: Array
 var state_event_list: Array
 var side_bar_list: Dictionary
+var deps: Array
 
 const HENGO_EXT: StringName = '.hengo'
 
@@ -34,6 +35,7 @@ func get_save() -> Dictionary:
 		virtual_cnode_list = virtual_cnode_list,
 		state_event_list = state_event_list,
 		side_bar_list = side_bar_list,
+		deps = deps,
 	}
 
 
@@ -54,6 +56,7 @@ static func load(_data: Dictionary) -> HenScriptData:
 	script_data.virtual_cnode_list = _data.virtual_cnode_list
 	script_data.state_event_list = _data.state_event_list
 	script_data.side_bar_list = _data.side_bar_list
+	script_data.deps = _data.deps
 
 	return script_data
 
