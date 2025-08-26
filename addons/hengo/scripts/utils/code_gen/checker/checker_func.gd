@@ -9,7 +9,10 @@ static func check_changes_func(_cnode_data: Dictionary, _refs: HenRegenerateRefs
 			func_data = data
 			break
 
-	if func_data == null:
+	if func_data.is_empty():
+		if not _cnode_data.has('invalid') or (_cnode_data.has('invalid') and not _cnode_data.invalid):
+			_cnode_data.invalid = true
+			_refs.reload = true
 		return
 
 	# sync function name

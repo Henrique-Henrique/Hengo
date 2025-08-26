@@ -1,7 +1,6 @@
 @tool
 class_name HenSaver extends Node
 
-
 class Saver:
 	var task_id_list: Array[int] = []
 
@@ -28,7 +27,6 @@ static func generate_script_data() -> HenScriptData:
 	script_data.path = HenGlobal.script_config.path
 	script_data.type = HenGlobal.script_config.type
 	script_data.node_counter = HenGlobal.node_counter
-	script_data.prop_counter = HenGlobal.prop_counter
 
 	# ---------------------------------------------------------------------------- #
 	# Side Bar List
@@ -70,6 +68,9 @@ static func start_generate(_regenerate: bool = false) -> void:
 
 
 static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> void:
+	if not HenCheckerScriptData.is_script_data_valid(_script_data):
+		return
+
 	var _save_data: SaveData = SaveData.new(_script_id, _script_data)
 	var _save_config: SaveConfig = SaveConfig.new()
 	_save_config.add_script(_save_data)

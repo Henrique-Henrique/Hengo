@@ -102,7 +102,6 @@ static func load(_path: StringName) -> void:
 		# setting script configs
 		HenGlobal.script_config.type = script_data.type
 		HenGlobal.node_counter = script_data.node_counter
-		HenGlobal.prop_counter = script_data.prop_counter
 
 		# loading side bar list
 		HenGlobal.SIDE_BAR_LIST.load_save(script_data.side_bar_list)

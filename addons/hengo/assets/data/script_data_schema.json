@@ -1,0 +1,383 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"type": "object",
+	"properties": {
+		"connections": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/connection"
+			}
+		},
+		"deps": {
+			"type": "array"
+		},
+		"flow_connections": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/connection"
+			}
+		},
+		"node_counter": {
+			"type": "integer",
+			"minimum": 0
+		},
+		"path": {
+			"type": "string",
+			"pattern": "^res://.*"
+		},
+		"side_bar_list": {
+			"type": "object",
+			"properties": {
+				"func_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/functionDefinition"
+					}
+				},
+				"macro_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/macroDefinition"
+					}
+				},
+				"signal_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/signalDefinition"
+					}
+				},
+				"var_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/variable"
+					}
+				}
+			},
+			"required": [
+				"func_list",
+				"macro_list",
+				"signal_list",
+				"var_list"
+			]
+		},
+		"state_event_list": {
+			"type": "array"
+		},
+		"type": {
+			"type": "string"
+		},
+		"virtual_cnode_list": {
+			"type": "array",
+			"items": {
+				"$ref": "#/$defs/virtualCNode"
+			}
+		}
+	},
+	"required": [
+		"connections",
+		"deps",
+		"flow_connections",
+		"node_counter",
+		"path",
+		"side_bar_list",
+		"state_event_list",
+		"type",
+		"virtual_cnode_list"
+	],
+	"$defs": {
+		"connection": {
+			"type": "object",
+			"properties": {
+				"from_id": {
+					"type": "integer"
+				},
+				"from_vc_id": {
+					"type": "integer"
+				},
+				"to_id": {
+					"type": "integer"
+				},
+				"to_vc_id": {
+					"type": "integer"
+				}
+			},
+			"required": [
+				"from_id",
+				"from_vc_id",
+				"to_id",
+				"to_vc_id"
+			]
+		},
+		"ioParameter": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"ref_id": {
+					"type": "integer"
+				},
+				"category": {
+					"type": "string"
+				},
+				"code_value": {
+					"type": "string"
+				},
+				"value": {
+					"type": "string"
+				},
+				"is_ref": {
+					"type": "boolean"
+				}
+			},
+			"required": [
+				"id",
+				"name"
+			]
+		},
+		"variable": {
+			"type": "object",
+			"properties": {
+				"export": {
+					"type": "boolean"
+				},
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				}
+			},
+			"required": [
+				"export",
+				"id",
+				"name",
+				"type"
+			]
+		},
+		"virtualCNode": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"position": {
+					"type": "string",
+					"pattern": "^Vector2\\(\\s*-?\\d+(\\.\\d+)?\\s*,\\s*-?\\d+(\\.\\d+)?\\s*\\)$"
+				},
+				"size": {
+					"type": "string",
+					"pattern": "^Vector2\\(\\s*-?\\d+(\\.\\d+)?\\s*,\\s*-?\\d+(\\.\\d+)?\\s*\\)$"
+				},
+				"sub_type": {
+					"type": "integer"
+				},
+				"type": {
+					"type": "integer"
+				},
+				"can_delete": {
+					"type": "boolean"
+				},
+				"inputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"outputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"ref_id": {
+					"type": "integer"
+				},
+				"category": {
+					"type": "string"
+				},
+				"to_flow": {
+					"type": "array"
+				},
+				"virtual_cnode_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/virtualCNode"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"position",
+				"size",
+				"sub_type",
+				"type"
+			]
+		},
+		"functionDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"inputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"outputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"local_vars": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/variable"
+					}
+				},
+				"virtual_cnode_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/virtualCNode"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"inputs",
+				"outputs",
+				"local_vars",
+				"virtual_cnode_list"
+			]
+		},
+		"macroDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"inputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"inputs_value": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"outputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"outputs_value": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"local_vars": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/variable"
+					}
+				},
+				"virtual_cnode_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/virtualCNode"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"inputs",
+				"inputs_value",
+				"outputs",
+				"outputs_value",
+				"local_vars",
+				"virtual_cnode_list"
+			]
+		},
+		"signalDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"bind_params": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioParameter"
+					}
+				},
+				"params": {
+					"type": "array"
+				},
+				"local_vars": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/variable"
+					}
+				},
+				"signal_name": {
+					"type": "string"
+				},
+				"signal_name_to_code": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
+				},
+				"virtual_cnode_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/virtualCNode"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"bind_params",
+				"params",
+				"local_vars",
+				"signal_name",
+				"signal_name_to_code",
+				"type",
+				"virtual_cnode_list"
+			]
+		}
+	}
+}

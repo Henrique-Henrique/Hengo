@@ -142,20 +142,24 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _scrip
 	var path: StringName = HenLoader.get_data_path(_id)
 
 	if not FileAccess.file_exists(path):
-		push_error('Error: resource not foundtore - generate: ', str(_id))
+		push_error('Error: resource not found', str(_id))
 		return null
 	
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
-	var res: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
+	var script_data: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
 
-	refs.counter = res.node_counter
+	if not HenCheckerScriptData.is_script_data_valid(script_data):
+		push_error("Invalid script data when updating script: " + str(_id))
+		return null
+
+	refs.counter = script_data.node_counter
 	refs.side_bar_list = _side_bar_list
-	refs.connections = res.connections
+	refs.connections = script_data.connections
 
-	_parse_vc_list(res.virtual_cnode_list, refs)
+	_parse_vc_list(script_data.virtual_cnode_list, refs)
 
 	if refs.reload:
-		return res
+		return script_data
 
 	return null
 
