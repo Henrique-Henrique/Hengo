@@ -57,14 +57,17 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 
 		refs.variables.append(HenFactoryVariable.get_variable_from_dict(variable_data, refs))
 
+	# signals
+	for signal_data: Dictionary in _data.side_bar_list.signal_list:
+		HenFactorySignal.get_signal_from_dict(signal_data, refs)
+
 	# generating function references
 	for func_data: Dictionary in _data.side_bar_list.func_list:
 		HenFactoryFunc.get_func_from_dict(func_data, refs)
 
 	# generating macro references
-	for signal_data: Dictionary in _data.side_bar_list.signal_list:
-		HenFactorySignal.get_signal_from_dict(signal_data, refs)
-
+	for signal_data: Dictionary in _data.side_bar_list.signal_callback_list:
+		HenFactorySignalCallback.get_signal_from_dict(signal_data, refs)
 
 	# generating cnode references
 	for cnode: Dictionary in _data.virtual_cnode_list:
@@ -79,9 +82,10 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 	HenFactoryCNode.parse_connections(refs)
 
 	code += _get_start(_data)
+	code += HenGeneratorSignal.get_signals_code(refs)
 	code += HenGeneratorVariable.get_variables_code(refs)
 	code += HenGeneratorFunc.get_functions_code(refs)
-	code += HenGeneratorSignal.get_signals_code(refs)
+	code += HenGeneratorSignalCallback.get_signals_callback_code(refs)
 	code += HenGeneratorBase.get_base_script_code(refs)
 
 	return code

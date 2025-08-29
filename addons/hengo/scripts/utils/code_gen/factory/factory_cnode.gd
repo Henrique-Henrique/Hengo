@@ -47,7 +47,7 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 					_parent_ref.input_ref = cn
 				HenVirtualCNode.SubType.FUNC_OUTPUT:
 					_parent_ref.output_ref = cn
-		elif _parent_ref is HenTypeSignalData:
+		elif _parent_ref is HenTypeSignalCallbackData:
 			cn.route_type = HenRouter.ROUTE_TYPE.SIGNAL
 
 			if cn.sub_type == HenVirtualCNode.SubType.SIGNAL_ENTER:

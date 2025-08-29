@@ -11,6 +11,10 @@ func test_script_data_schema() -> void:
 func test_script_data_schema_from_save() -> void:
 	HenTest.set_global_config()
 
+	# adding a signal to the side bar list
+	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.SIGNAL
+	HenGlobal.SIDE_BAR_LIST.add()
+
 	# adding a function to the side bar list
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.FUNC
 	HenGlobal.SIDE_BAR_LIST.add()
@@ -19,8 +23,8 @@ func test_script_data_schema_from_save() -> void:
 	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.MACRO
 	HenGlobal.SIDE_BAR_LIST.add()
 
-	# adding a signal to the side bar list
-	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.SIGNAL
+	# adding a signal callback to the side bar list
+	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.SIGNAL_CALLBACK
 	HenGlobal.SIDE_BAR_LIST.add()
 
 	# adding a variable to the side bar list

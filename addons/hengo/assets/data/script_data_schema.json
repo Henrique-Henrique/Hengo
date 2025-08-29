@@ -40,10 +40,10 @@
 						"$ref": "#/$defs/macroDefinition"
 					}
 				},
-				"signal_list": {
+				"signal_callback_list": {
 					"type": "array",
 					"items": {
-						"$ref": "#/$defs/signalDefinition"
+						"$ref": "#/$defs/signalCallbackDefinition"
 					}
 				},
 				"var_list": {
@@ -51,13 +51,20 @@
 					"items": {
 						"$ref": "#/$defs/variable"
 					}
+				},
+				"signal_list": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/signalDefinition"
+					}
 				}
 			},
 			"required": [
 				"func_list",
 				"macro_list",
-				"signal_list",
-				"var_list"
+				"signal_callback_list",
+				"var_list",
+				"signal_list"
 			]
 		},
 		"state_event_list": {
@@ -134,6 +141,24 @@
 				},
 				"is_ref": {
 					"type": "boolean"
+				}
+			},
+			"required": [
+				"id",
+				"name"
+			]
+		},
+		"ioBaseParameter": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"type": {
+					"type": "string"
 				}
 			},
 			"required": [
@@ -327,7 +352,7 @@
 				"virtual_cnode_list"
 			]
 		},
-		"signalDefinition": {
+		"signalCallbackDefinition": {
 			"type": "object",
 			"properties": {
 				"id": {
@@ -377,6 +402,28 @@
 				"signal_name_to_code",
 				"type",
 				"virtual_cnode_list"
+			]
+		},
+		"signalDefinition": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer"
+				},
+				"name": {
+					"type": "string"
+				},
+				"inputs": {
+					"type": "array",
+					"items": {
+						"$ref": "#/$defs/ioBaseParameter"
+					}
+				}
+			},
+			"required": [
+				"id",
+				"name",
+				"inputs"
 			]
 		}
 	}

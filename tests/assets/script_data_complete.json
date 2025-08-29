@@ -144,7 +144,7 @@
 				]
 			}
 		],
-		"signal_list": [
+		"signal_callback_list": [
 			{
 				"bind_params": [
 					{
@@ -188,6 +188,19 @@
 				"id": 26,
 				"name": "var 96741951",
 				"type": "Variant"
+			}
+		],
+		"signal_list": [
+			{
+				"id": 26,
+				"name": "signal 96741951",
+				"inputs": [
+					{
+						"id": 11,
+						"name": "name 0",
+						"type": "Variant"
+					}
+				]
 			}
 		]
 	},

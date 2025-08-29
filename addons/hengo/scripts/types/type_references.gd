@@ -7,6 +7,7 @@ var cnode_ref: Dictionary = {}
 var states_data: Dictionary = {}
 var variables: Array[HenTypeVariable]
 var functions: Array[HenTypeFunc]
+var signals_callback: Array[HenTypeSignalCallbackData]
 var signals: Array[HenTypeSignalData]
 var macros: Array[HenTypeMacro]
 var side_bar_item_ref: Dictionary = {}

@@ -8,14 +8,14 @@ extends GdUnitTestSuite
 #
 
 # Helper function that sets up and returns a basic signal configuration for testing
-func base_signal() -> HenSignalData:
+func base_signal() -> HenSignalCallbackData:
 	HenTest.set_global_config()
 
 	# Initialize a new signal and configure it with default test parameters
-	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.SIGNAL
+	HenGlobal.SIDE_BAR_LIST.type = HenSideBar.AddType.SIGNAL_CALLBACK
 	HenGlobal.SIDE_BAR_LIST.add()
 
-	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
+	var signal_data: HenSignalCallbackData = HenGlobal.SIDE_BAR_LIST.signal_callback_list[0]
 	signal_data.name = 'my_signal'
 	signal_data.set_signal_params('BaseButton', 'toggled')
 
@@ -35,7 +35,7 @@ func test_generates_empty_signal_handler() -> void:
 
 # Tests signal handler generation with a connected void function call
 func test_generates_signal_handler_with_flow_connection() -> void:
-	var signal_data: HenSignalData = base_signal()
+	var signal_data: HenSignalCallbackData = base_signal()
 	# Create a virtual node for a void function call
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
@@ -55,7 +55,7 @@ func test_generates_signal_handler_with_flow_connection() -> void:
 
 # Tests signal handler with data flow to a function parameter
 func test_generates_signal_handler_with_data_connection() -> void:
-	var signal_data: HenSignalData = base_signal()
+	var signal_data: HenSignalCallbackData = base_signal()
 	# Create a virtual function node that accepts parameters
 	var vc_input: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
@@ -79,12 +79,12 @@ func test_generates_signal_handler_with_data_connection() -> void:
 # Tests the code generation for a simple signal connection without extra parameters.
 func test_generates_basic_signal_connection_code() -> void:
 	var refs: HenTypeReferences = HenTypeReferences.new()
-	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
+	var signal_data: HenSignalCallbackData = HenGlobal.SIDE_BAR_LIST.signal_callback_list[0]
 	var dt: Dictionary = signal_data.get_connect_cnode_data()
 	var script_data: HenScriptData = HenScriptData.new()
 
 	dt.route = HenTest.get_base_route()
-	HenFactorySignal.get_signal_from_dict(signal_data.get_save(script_data), refs)
+	HenFactorySignalCallback.get_signal_from_dict(signal_data.get_save(script_data), refs)
 
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 	
@@ -96,12 +96,12 @@ func test_generates_basic_signal_connection_code() -> void:
 # Tests the code generation for a signal connection that uses 'bind'
 func test_generates_signal_connection_code_with_bind() -> void:
 	var refs: HenTypeReferences = HenTypeReferences.new()
-	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
+	var signal_data: HenSignalCallbackData = HenGlobal.SIDE_BAR_LIST.signal_callback_list[0]
 	var dt: Dictionary = signal_data.get_connect_cnode_data()
 	var script_data: HenScriptData = HenScriptData.new()
 
 	dt.route = HenTest.get_base_route()
-	HenFactorySignal.get_signal_from_dict(signal_data.get_save(script_data), refs)
+	HenFactorySignalCallback.get_signal_from_dict(signal_data.get_save(script_data), refs)
 	
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)
 
@@ -118,13 +118,13 @@ func test_generates_signal_connection_code_with_bind() -> void:
 # Verifies that the disconnect() call is generated with the correct signal name and handler function
 func test_disconnection_code() -> void:
 	var refs: HenTypeReferences = HenTypeReferences.new()
-	var signal_data: HenSignalData = HenGlobal.SIDE_BAR_LIST.signal_list[0]
+	var signal_data: HenSignalCallbackData = HenGlobal.SIDE_BAR_LIST.signal_callback_list[0]
 	var dt: Dictionary = signal_data.get_diconnect_cnode_data()
 	var script_data: HenScriptData = HenScriptData.new()
 	
 	# Configure the route and process the signal data
 	dt.route = HenTest.get_base_route()
-	HenFactorySignal.get_signal_from_dict(signal_data.get_save(script_data), refs)
+	HenFactorySignalCallback.get_signal_from_dict(signal_data.get_save(script_data), refs)
 
 	# Create a virtual node for the disconnect operation
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(dt)

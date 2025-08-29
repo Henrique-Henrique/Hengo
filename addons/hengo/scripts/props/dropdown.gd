@@ -119,11 +119,11 @@ func _on_pressed() -> void:
 
 			# if data.has('state_event_list'):
 			# 	options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
-		'signal_list':
+		'signal_callback_list':
 			var arr: Array = []
 			var all_classes: PackedStringArray = ClassDB.get_class_list()
 
-			# print(ClassDB.class_get_signal_list('BaseButton', true))
+			# print(ClassDB.class_get_signal_callback_list('BaseButton', true))
 
 			for class_name_data: String in all_classes:
 				for signal_data: Dictionary in ClassDB.class_get_signal_list(class_name_data, true):
@@ -199,8 +199,8 @@ func _selected(_item: Dictionary) -> void:
 				second_input.input_ref.reset_input_value()
 				second_input.input_ref.update_changes.emit()
 			return
-		'signal_list':
-			var item: HenSignalData = custom_data.signal_ref
+		'signal_callback_list':
+			var item: HenSignalCallbackData = custom_data.signal_ref
 			item.set_signal_params(_item.signal_class, _item.signal_name)
 
 	value_changed.emit(text)

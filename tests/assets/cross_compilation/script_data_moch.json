@@ -188,7 +188,7 @@
 			}
 		],
 		"macro_list": [],
-		"signal_list": [],
+		"signal_callback_list": [],
 		"var_list": [
 			{
 				"export": false,

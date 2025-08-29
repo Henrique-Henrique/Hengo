@@ -362,14 +362,14 @@ func get_token(_id: int = 0) -> Dictionary:
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
 			token.merge({
 				params = get_input_token_list(true),
-				signal_name = (ref.get_ref() as HenTypeSignalData).signal_name_to_code,
-				name = (ref.get_ref() as HenTypeSignalData).name
+				signal_name = (ref.get_ref() as HenTypeSignalCallbackData).signal_name_to_code,
+				name = (ref.get_ref() as HenTypeSignalCallbackData).name
 			})
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 			token.merge({
 				params = get_input_token_list(true),
-				signal_name = (ref.get_ref() as HenTypeSignalData).signal_name_to_code,
-				name = (ref.get_ref() as HenTypeSignalData).name.to_snake_case()
+				signal_name = (ref.get_ref() as HenTypeSignalCallbackData).signal_name_to_code,
+				name = (ref.get_ref() as HenTypeSignalCallbackData).name.to_snake_case()
 			})
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			if not input_has_connection(inputs[0].id):

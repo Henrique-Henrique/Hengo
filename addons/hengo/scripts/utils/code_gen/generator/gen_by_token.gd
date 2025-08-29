@@ -263,14 +263,14 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 						return get_code_by_token(x))),
 					signal_name = _token.signal_name,
 					call_ref = prefix,
-					callable = HenGeneratorSignal.get_signal_call_name(_token.name)
+					callable = HenGeneratorSignalCallback.get_signal_call_name(_token.name)
 				})
 
 			return indent + '{ref}connect("{signal_name}", {call_ref}{callable})'.format({
 				ref = my_prefix,
 				signal_name = _token.signal_name,
 				call_ref = prefix,
-				callable = HenGeneratorSignal.get_signal_call_name(_token.name)
+				callable = HenGeneratorSignalCallback.get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 			var values: Array = _provide_params_ref(_token.params, prefix)
@@ -281,7 +281,7 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				ref = my_prefix,
 				signal_name = _token.signal_name,
 				call_ref = prefix,
-				callable = HenGeneratorSignal.get_signal_call_name(_token.name)
+				callable = HenGeneratorSignalCallback.get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.MACRO:
 			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return get_code_by_token(x, _level, preview_id)))

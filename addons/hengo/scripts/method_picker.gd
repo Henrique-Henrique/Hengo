@@ -356,7 +356,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 				FILTER_TYPE.ALL:
 					local_api.append_array(get_native_list())
 					local_api.append_array(get_function_list())
-					local_api.append_array(get_hengo_signal_list())
+					local_api.append_array(get_hengo_signal_callback_list())
 					local_api.append_array(get_macro_list())
 					local_api.append_array(get_others_classes_list())
 					local_api.append_array(get_from_list())
@@ -368,7 +368,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 				FILTER_TYPE.FUNC:
 					local_api.append_array(get_function_list())
 				FILTER_TYPE.SIGNAL:
-					local_api.append_array(get_hengo_signal_list())
+					local_api.append_array(get_hengo_signal_callback_list())
 				FILTER_TYPE.MACRO:
 					local_api.append_array(get_macro_list())
 		CLASS_TYPE.TO:
@@ -513,11 +513,11 @@ func build_list() -> void:
 func get_from_list() -> Array:
 	var local_api: Array = []
 
-	for id: String in HenScriptDataCache.SCRIPT_DATA_CACHE.keys():
-		var res: HenScriptData = HenScriptDataCache.try_get_script_data(id)
+	for id: String in HenMapObjects.objects.keys():
+		var object: Dictionary = HenMapObjects.objects[id]
 		var res_name: String = ResourceUID.get_id_path(int(id)).get_file().get_basename()
 
-		for var_data: Dictionary in res.side_bar_list.var_list:
+		for var_data: Dictionary in object.var_list:
 			var dt: Dictionary = {
 				name = '({0}) {1}'.format([res_name, var_data.name]),
 				type = FILTER_TYPE.VAR_FROM,
@@ -530,7 +530,7 @@ func get_from_list() -> Array:
 					inputs = [
 						{
 							name = 'from',
-							type = res.type,
+							type = object.type,
 							is_ref = true,
 						}
 					],
@@ -547,7 +547,7 @@ func get_from_list() -> Array:
 
 			local_api.append(dt)
 
-		for func_data: Dictionary in res.side_bar_list.func_list:
+		for func_data: Dictionary in object.func_list:
 			var dt: Dictionary = {
 				name = '({0}) {1}'.format([res_name, func_data.name]),
 				type = FILTER_TYPE.FUNC_FROM,
@@ -560,7 +560,7 @@ func get_from_list() -> Array:
 					inputs = [
 						{
 							name = 'from',
-							type = res.type,
+							type = object.type,
 							is_ref = true,
 						}
 					] + (func_data.inputs as Array).map(func(x): return {name = x.name, type = x.type, id = x.id}),
@@ -859,10 +859,10 @@ func get_others_classes_list() -> Array:
 	return local_api
 
 
-func get_hengo_signal_list() -> Array:
+func get_hengo_signal_callback_list() -> Array:
 	var local_api: Array = []
 
-	for signal_data: HenSignalData in HenGlobal.SIDE_BAR_LIST.signal_list:
+	for signal_data: HenSignalCallbackData in HenGlobal.SIDE_BAR_LIST.signal_callback_list:
 		var connect_dt: Dictionary = {
 			name = 'Connect ' + signal_data.name,
 			type = FILTER_TYPE.SIGNAL,

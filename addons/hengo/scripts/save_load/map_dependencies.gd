@@ -16,7 +16,7 @@ static func start_map() -> void:
 
 	for file_path: String in script_files:
 		_process_script_file(file_path)
-
+	
 
 static func _get_script_files_from_dir(path: String) -> Array:
 	var files: Array = []
@@ -67,14 +67,17 @@ static func _process_script_file(file_path: String) -> void:
 
 	for dependency_id: StringName in script_data.deps:
 		_register_dependency(dependency_id, dependent_id)
+	
+	HenMapObjects.map_script_data(dependent_id, script_data)
 
 
 static func _register_dependency(dependency_id: StringName, dependent_id: StringName) -> void:
 	if not dependencies.has(dependency_id):
 		dependencies[dependency_id] = []
-	
+
 	# prevent duplicate entries
 	var dependents: Array = dependencies[dependency_id]
+
 	if not dependents.has(dependent_id):
 		dependents.append(dependent_id)
 	

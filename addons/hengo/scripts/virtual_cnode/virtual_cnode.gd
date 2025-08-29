@@ -384,7 +384,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.FUNC_OUTPUT:
 					_ref.output_ref = weakref(v_cnode)
 		HenRouter.ROUTE_TYPE.SIGNAL:
-			var _ref: HenSignalData = _config.route.get_ref()
+			var _ref: HenSignalCallbackData = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 			match v_cnode.identity.sub_type:
 				SubType.SIGNAL_ENTER:

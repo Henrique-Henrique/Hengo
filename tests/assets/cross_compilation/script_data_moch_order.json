@@ -123,7 +123,7 @@
 			}
 		],
 		"macro_list": [],
-		"signal_list": [],
+		"signal_callback_list": [],
 		"var_list": []
 	},
 	"state_event_list": [],

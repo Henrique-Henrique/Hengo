@@ -7,49 +7,54 @@ var list: Tree
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 const CATEGORY_FONT = preload('res://addons/hengo/assets/fonts/Inter-Bold.ttf')
 
-enum AddType {VAR, FUNC, SIGNAL, LOCAL_VAR, MACRO}
+enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
 
 const BG_COLOR = {
 	AddType.VAR: Color('#509fa6'),
 	AddType.FUNC: Color('#b05353'),
-	AddType.SIGNAL: Color('#51a650'),
+	AddType.SIGNAL_CALLBACK: Color('#51a650'),
 	AddType.MACRO: Color('#9f50a6'),
-	AddType.LOCAL_VAR: Color('#a69150')
+	AddType.LOCAL_VAR: Color('#a69150'),
+	AddType.SIGNAL: Color('#51a650')
 }
 
 const ICONS = {
 	AddType.VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg'),
 	AddType.MACRO: preload('res://addons/hengo/assets/icons/menu/text.svg'),
 	AddType.FUNC: preload('res://addons/hengo/assets/icons/menu/void.svg'),
-	AddType.SIGNAL: preload('res://addons/hengo/assets/icons/menu/wifi.svg'),
-	AddType.LOCAL_VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg')
+	AddType.SIGNAL_CALLBACK: preload('res://addons/hengo/assets/icons/menu/wifi.svg'),
+	AddType.LOCAL_VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg'),
+	AddType.SIGNAL: preload('res://addons/hengo/assets/icons/menu/wifi.svg')
 }
 
 const NAME = {
 	AddType.VAR: 'Variables',
 	AddType.FUNC: 'Functions',
-	AddType.SIGNAL: 'Signals',
+	AddType.SIGNAL_CALLBACK: 'Signal Callback',
 	AddType.LOCAL_VAR: 'Local Variables',
-	AddType.MACRO: 'HenTypeMacro'
+	AddType.MACRO: 'Macro',
+	AddType.SIGNAL: 'Signal'
 }
 
 
 class SideBarList:
 	var type: AddType
 
+	var signal_list: Array
 	var var_list: Array
 	var func_list: Array
-	var signal_list: Array
+	var signal_callback_list: Array
 	var macro_list: Array
 	var inspecting: bool = false
 
 	signal list_changed
 
 	func clear() -> void:
+		signal_list.clear()
 		var_list.clear()
 		func_list.clear()
-		signal_list.clear()
+		signal_callback_list.clear()
 		macro_list.clear()
 
 		change(AddType.VAR)
@@ -61,8 +66,8 @@ class SideBarList:
 				var_list.append(HenVarData.new())
 			AddType.FUNC:
 				func_list.append(HenFuncData.new())
-			AddType.SIGNAL:
-				signal_list.append(HenSignalData.new())
+			AddType.SIGNAL_CALLBACK:
+				signal_callback_list.append(HenSignalCallbackData.new())
 			AddType.MACRO:
 				macro_list.append(HenMacroData.new())
 			AddType.LOCAL_VAR:
@@ -71,6 +76,8 @@ class SideBarList:
 					var_data.local_ref = HenRouter.current_route.get_ref()
 					
 					(HenRouter.current_route.get_ref().local_vars as Array).append(var_data)
+			AddType.SIGNAL:
+				signal_list.append(HenSignalData.new())
 
 		list_changed.emit()
 
@@ -83,14 +90,16 @@ class SideBarList:
 				return var_list.map(func(x: HenVarData): return {name = x.name})
 			AddType.FUNC:
 				return func_list.map(func(x: HenFuncData): return {name = x.name})
-			AddType.SIGNAL:
-				return signal_list.map(func(x: HenSignalData): return {name = x.name})
+			AddType.SIGNAL_CALLBACK:
+				return signal_callback_list.map(func(x: HenSignalCallbackData): return {name = x.name})
 			AddType.MACRO:
 				return macro_list.map(func(x: HenMacroData): return {name = x.name})
 			AddType.LOCAL_VAR:
 				if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
 					return (HenRouter.current_route.get_ref().local_vars as Array).map(func(x: HenVarData): return {name = x.name})
-			
+			AddType.SIGNAL:
+				return signal_list.map(func(x: HenSignalData): return {name = x.name})
+
 		return []
 	
 	func on_click(_item, _mouse_pos: Vector2) -> void:
@@ -118,8 +127,9 @@ class SideBarList:
 		return {
 			var_list = var_list.map(func(x: HenVarData): return x.get_save()),
 			func_list = func_list.map(func(x: HenFuncData): return x.get_save(_script_data)),
-			signal_list = signal_list.map(func(x: HenSignalData): return x.get_save(_script_data)),
-			macro_list = macro_list.map(func(x: HenMacroData): return x.get_save(_script_data))
+			signal_callback_list = signal_callback_list.map(func(x: HenSignalCallbackData): return x.get_save(_script_data)),
+			macro_list = macro_list.map(func(x: HenMacroData): return x.get_save(_script_data)),
+			signal_list = signal_list.map(func(x: HenSignalData): return x.get_save())
 		}
 	
 	func load_save(_data: Dictionary) -> void:
@@ -133,15 +143,20 @@ class SideBarList:
 			item.load_save(item_data)
 			func_list.append(item)
 		
-		for item_data: Dictionary in _data.signal_list:
-			var item: HenSignalData = HenSignalData.new(false)
+		for item_data: Dictionary in _data.signal_callback_list:
+			var item: HenSignalCallbackData = HenSignalCallbackData.new(false)
 			item.load_save(item_data)
-			signal_list.append(item)
+			signal_callback_list.append(item)
 
 		for item_data: Dictionary in _data.macro_list:
 			var item: HenMacroData = HenMacroData.new(false)
 			item.load_save(item_data)
 			macro_list.append(item)
+		
+		for item_data: Dictionary in _data.signal_list:
+			var item: HenSignalData = HenSignalData.new()
+			item.load_save(item_data)
+			signal_list.append(item)
 
 		# loading cnodes
 		for item in HenGlobal.SIDE_BAR_LIST_CACHE.values():
@@ -218,10 +233,12 @@ func _on_gui(_event: InputEvent) -> void:
 					text = '[b]HenTypeVariable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenFuncData:
 					text = '[b]Function[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				elif _side_bar_item is HenSignalData:
+				elif _side_bar_item is HenSignalCallbackData:
 					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenMacroData:
 					text = '[b]HenTypeMacro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				elif _side_bar_item is HenSignalData:
+					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 
 				pos.x = HenGlobal.SIDE_PANEL.global_position.x
 
@@ -255,9 +272,10 @@ func _on_list_changed() -> void:
 	base.set_metadata(0, {route = HenGlobal.BASE_ROUTE})
 
 	# variables
+	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Variables', AddType.VAR)
 	_add_categories(root, 'Functions', AddType.FUNC)
-	_add_categories(root, 'Signals', AddType.SIGNAL)
+	_add_categories(root, 'Signals Callback', AddType.SIGNAL_CALLBACK)
 	_add_categories(root, 'Macros', AddType.MACRO)
 
 	if HenRouter.current_route and HenRouter.current_route.get_ref() and HenRouter.current_route.get_ref().get(&'local_vars') is Array:
@@ -283,13 +301,15 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 			arr = HenGlobal.SIDE_BAR_LIST.var_list
 		AddType.FUNC:
 			arr = HenGlobal.SIDE_BAR_LIST.func_list
-		AddType.SIGNAL:
-			arr = HenGlobal.SIDE_BAR_LIST.signal_list
+		AddType.SIGNAL_CALLBACK:
+			arr = HenGlobal.SIDE_BAR_LIST.signal_callback_list
 		AddType.MACRO:
 			arr = HenGlobal.SIDE_BAR_LIST.macro_list
 		AddType.LOCAL_VAR:
 			if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
 				arr = (HenRouter.current_route.get_ref().local_vars as Array)
+		AddType.SIGNAL:
+			arr = HenGlobal.SIDE_BAR_LIST.signal_list
 
 	for item_data in arr:
 		var item: TreeItem = category.create_child()
