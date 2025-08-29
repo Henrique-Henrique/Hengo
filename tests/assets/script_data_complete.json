@@ -193,12 +193,17 @@
 		"signal_list": [
 			{
 				"id": 26,
-				"name": "signal 96741951",
+				"name": "new name",
 				"inputs": [
 					{
+						"id": 12,
+						"name": "name 5",
+						"type": "Node"
+					},
+					{
 						"id": 11,
-						"name": "name 0",
-						"type": "Variant"
+						"name": "name 2",
+						"type": "Node"
 					}
 				]
 			}

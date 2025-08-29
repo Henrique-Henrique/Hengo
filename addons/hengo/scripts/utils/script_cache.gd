@@ -25,6 +25,7 @@ static func add_script_data(_id: StringName, _script_data: HenScriptData) -> voi
 		return
 	
 	SCRIPT_DATA_CACHE.set(_id, _script_data)
+	HenMapObjects.map_script_data(_id, HenScriptData.load(_script_data.get_save().duplicate(true)))
 
 
 # removing script data from cache

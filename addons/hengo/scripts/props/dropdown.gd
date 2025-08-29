@@ -123,13 +123,18 @@ func _on_pressed() -> void:
 			var arr: Array = []
 			var all_classes: PackedStringArray = ClassDB.get_class_list()
 
-			# print(ClassDB.class_get_signal_callback_list('BaseButton', true))
+			for data in HenMapObjects.objects.values():
+				for signal_data: Dictionary in data.signal_list:
+					var dt: Dictionary = signal_data.duplicate(true)
+					dt.use_custom = true
+					arr.append(dt)
+
 
 			for class_name_data: String in all_classes:
 				for signal_data: Dictionary in ClassDB.class_get_signal_list(class_name_data, true):
 					arr.append(
 						{
-							name = '{name}   ({class})'.format({
+							name = '{name} :: ({class})'.format({
 								name = signal_data.name,
 								'class' = class_name_data
 							}),
@@ -201,7 +206,11 @@ func _selected(_item: Dictionary) -> void:
 			return
 		'signal_callback_list':
 			var item: HenSignalCallbackData = custom_data.signal_ref
-			item.set_signal_params(_item.signal_class, _item.signal_name)
+
+			if _item.has('use_custom'):
+				item.set_custom_signal_params(_item)
+			else:
+				item.set_signal_params(_item.signal_class, _item.signal_name)
 
 	value_changed.emit(text)
 

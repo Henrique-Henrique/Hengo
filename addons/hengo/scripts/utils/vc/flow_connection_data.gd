@@ -31,8 +31,3 @@ func get_save() -> Dictionary:
 		from_vc_id = get_from().identity.id,
 		to_vc_id = get_to().identity.id
 	}
-
-
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE:
-		print('FLOW CONNECTION DELETED')

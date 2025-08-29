@@ -9,7 +9,7 @@ static func map_script_data(_id: StringName, _script_data: HenScriptData) -> voi
 		type = _script_data.type,
 		var_list = _script_data.side_bar_list.var_list,
 		func_list = [],
-		signal_callback_list = _script_data.side_bar_list.signal_callback_list,
+		signal_list = _script_data.side_bar_list.signal_list,
 	}
 	
 	for func_data: Dictionary in _script_data.side_bar_list.func_list:

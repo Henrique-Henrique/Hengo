@@ -148,7 +148,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _scrip
 	if not FileAccess.file_exists(path):
 		push_error('Error: resource not found', str(_id))
 		return null
-	
+
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
 	var script_data: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
 
@@ -161,6 +161,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _scrip
 	refs.connections = script_data.connections
 
 	_parse_vc_list(script_data.virtual_cnode_list, refs)
+	_parse_signal_callback_list(script_data.side_bar_list.signal_callback_list, refs)
 
 	if refs.reload:
 		return script_data
@@ -190,3 +191,11 @@ static func _parse_vc_list(_cnode_list: Array, _refs: HenRegenerateRefs) -> void
 
 		if cnode.has(&'virtual_cnode_list'):
 			_parse_vc_list(cnode.virtual_cnode_list, _refs)
+
+
+static func _parse_signal_callback_list(_signal_callback_list: Array, _refs: HenRegenerateRefs) -> void:
+	for signal_callback: Dictionary in _signal_callback_list:
+		if not signal_callback.has('custom_id'):
+			continue
+
+		HenCheckerSignal.check_changes_signal(signal_callback, _refs)

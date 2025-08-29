@@ -38,6 +38,4 @@ func test_create_two_signals() -> void:
 	var script_data: HenScriptData = HenSaver.generate_script_data()
 	var code: String = HenCodeGeneration.get_code(script_data)
 
-	print(code)
-
 	assert_bool(code.contains('signal my_signal\nsignal my_signal_2')).is_true()

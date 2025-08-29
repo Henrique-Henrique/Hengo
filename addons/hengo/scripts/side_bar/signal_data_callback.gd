@@ -18,6 +18,8 @@ var signal_name_to_code: StringName
 var signal_enter: HenVirtualCNode
 var local_vars: Array
 var cnode_list_to_load: Array
+var custom_id: int = -1
+
 
 func _init(_load_vc: bool = true) -> void:
 	route = HenRouteData.new(
@@ -51,6 +53,21 @@ func on_change_signal_name(_name: String) -> void:
 	signal_name = _name
 
 
+func set_custom_signal_params(_data: Dictionary) -> void:
+	type = 'Variant'
+	signal_name_to_code = _data.name
+	custom_id = _data.id
+	params = []
+
+	for input: Dictionary in _data.inputs:
+		var param: HenParamData = HenParamData.new()
+		param.name = input.name
+		param.type = input.type
+		params.append(param)
+	
+	bind_signal_params()
+
+
 func set_signal_params(_class: StringName, _signal: StringName) -> void:
 	type = _class
 	signal_name_to_code = _signal
@@ -61,7 +78,11 @@ func set_signal_params(_class: StringName, _signal: StringName) -> void:
 		param.name = param_data.name
 		param.type = type_string(param_data.type)
 		params.append(param)
-	
+
+	bind_signal_params()
+
+
+func bind_signal_params() -> void:
 	var inputs: Array = params.map(func(x: HenParamData) -> Dictionary: return x.get_data())
 	var bind_inputs: Array = bind_params.map(func(x: HenParamData) -> Dictionary: return x.get_data())
 	
@@ -85,6 +106,7 @@ func set_signal_params(_class: StringName, _signal: StringName) -> void:
 		[HenVirtualCNode.SubType.SIGNAL_DISCONNECTION],
 	)
 
+
 func get_connect_cnode_data() -> Dictionary:
 	return {
 			name = name,
@@ -95,6 +117,7 @@ func get_connect_cnode_data() -> Dictionary:
 			ref = self
 	}
 
+
 func get_diconnect_cnode_data() -> Dictionary:
 	return {
 			name = name,
@@ -104,6 +127,7 @@ func get_diconnect_cnode_data() -> Dictionary:
 			route = HenRouter.current_route,
 			ref = self
 	}
+
 
 func create_param() -> HenParamData:
 	var in_out: HenParamData = HenParamData.new()
@@ -173,8 +197,9 @@ func get_inspector_array_list() -> Array:
 		}),
 	]
 
+
 func get_save(_script_data: HenScriptData) -> Dictionary:
-	return {
+	var data: Dictionary = {
 		id = id,
 		name = name,
 		type = type,
@@ -186,12 +211,21 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 		local_vars = local_vars.map(func(x: HenVarData) -> Dictionary: return x.get_save()),
 	}
 
+	if custom_id >= 0:
+		data.custom_id = custom_id
+
+	return data
+
+
 func load_save(_data: Dictionary) -> void:
 	id = _data.id
 	name = _data.name
 	type = _data.type
 	signal_name = _data.signal_name
 	signal_name_to_code = _data.signal_name_to_code
+
+	if _data.has('custom_id'):
+		custom_id = _data.custom_id
 
 	HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
 

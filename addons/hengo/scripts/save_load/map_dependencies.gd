@@ -80,7 +80,7 @@ static func _register_dependency(dependency_id: StringName, dependent_id: String
 
 	if not dependents.has(dependent_id):
 		dependents.append(dependent_id)
-	
+
 
 # get all dependencies for a given script
 static func get_dependencies(_script_id: StringName) -> Array:
