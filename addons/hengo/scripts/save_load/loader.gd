@@ -152,7 +152,6 @@ static func load(_path: StringName) -> void:
 			position = Vector2(0, 0),
 			can_delete = false
 		})
-
 		HenRouter.current_route = base_route
 		HenGlobal.CAM._check_virtual_cnodes()
 	

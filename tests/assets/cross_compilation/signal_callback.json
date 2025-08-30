@@ -4,13 +4,7 @@
     "id": 1392,
     "local_vars": [],
     "name": "signal 167480704",
-    "params": [
-        {
-            "id": 1656,
-            "name": "name 0",
-            "type": "Variant"
-        }
-    ],
+    "params": [],
     "signal_name": "my signal",
     "signal_name_to_code": "my signal",
     "type": "Variant",
@@ -19,14 +13,6 @@
             "can_delete": false,
             "id": 1393,
             "name": "signal",
-            "outputs": [
-                {
-                    "id": 1657,
-                    "name": "name 0",
-                    "ref_id": 1656,
-                    "type": "Variant"
-                }
-            ],
             "position": "Vector2(0, 0)",
             "ref_id": 1392,
             "size": "Vector2(0, 0)",

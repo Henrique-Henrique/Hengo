@@ -23,48 +23,29 @@ static func check_changes_func(_cnode_data: Dictionary, _refs: HenRegenerateRefs
 			_cnode_data.name_to_code = func_data.name
 		_refs.reload = true
 
+	# ensure inputs and outputs keys exist
+	if not _cnode_data.has('inputs'):
+		_cnode_data.inputs = []
+	if not _cnode_data.has('outputs'):
+		_cnode_data.outputs = []
+
 	# Process inputs
-	var existing_inputs = _cnode_data.get('inputs', [])
+	var existing_inputs = _cnode_data.inputs
 	var input_result = HenCheckerUtils.sync_node_inputs(_cnode_data, func_data.inputs, existing_inputs)
 	if input_result.changed:
 		_cnode_data.inputs = input_result.new_inputs
 		_refs.reload = true
 
 	# Process outputs
-	var existing_outputs = _cnode_data.get('outputs', [])
+	var existing_outputs = _cnode_data.outputs
 	var output_result = HenCheckerUtils.sync_node_outputs(_cnode_data, func_data.outputs, existing_outputs)
 	if output_result.changed:
 		_cnode_data.outputs = output_result.new_outputs
 		_refs.reload = true
 	
-	# Check and update connections if needed
-	if _refs.connections is Array and not _refs.connections.is_empty():
-		var allowed_input_ids: Dictionary = {}
-		for inp: Dictionary in _cnode_data.get('inputs', []):
-			allowed_input_ids[inp.id] = true
-			
-		var allowed_output_ids: Dictionary = {}
-		for outp: Dictionary in _cnode_data.get('outputs', []):
-			allowed_output_ids[outp.id] = true
-		
-		var filtered_conns: Array = []
-		var connections_changed: bool = false
-		
-		for con: Dictionary in _refs.connections:
-			var connection_is_valid: bool = true
-			if con.to_vc_id == _cnode_data.id and not allowed_input_ids.has(con.to_id):
-				connection_is_valid = false
-			if con.from_vc_id == _cnode_data.id and not allowed_output_ids.has(con.from_id):
-				connection_is_valid = false
-			
-			if connection_is_valid:
-				filtered_conns.append(con)
-			else:
-				connections_changed = true
-		
-		if connections_changed:
-			_refs.connections = filtered_conns
-			_refs.reload = true
+	# check and update connections if needed
+	if HenCheckerUtils.update_connections(_refs, _cnode_data):
+		_refs.reload = true
 	
 
 static func _reset_inout_dict_value(_dict: Dictionary) -> void:
