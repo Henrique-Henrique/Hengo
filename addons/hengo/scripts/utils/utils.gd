@@ -97,13 +97,16 @@ static func disable_scene(_ref: Node) -> bool:
 
 
 static func get_error_text(_text: String) -> String:
-	return "[b][color=#f5c6cb]" + _text + "[/color]"
+	return "[b][color=#ff8a95]" + _text + "[/color] [color=#ff4757]🔴[/color][/b]"
 
 static func get_success_text(_text: String) -> String:
-	return "[b][i][color=#c8e6c9]" + _text + "[/color][/i]"
+	return "[b][color=#7bed9f]" + _text + "[/color] [color=#2ed573]🟢[/color][/b]"
 
 static func get_warning_text(_text: String) -> String:
-	return "[b][color=#fffacd]" + _text + "[/color]"
+	return "[b][color=#ffb142]" + _text + "[/color] [color=#ffa502]🟡[/color][/b]"
+
+static func get_checklist_text(_text: String) -> String:
+	return "[color=#a4b0ff]" + _text + "[/color] [color=#70a1ff]🔵[/color]"
 
 static func get_building_text(_text: String) -> String:
-	return "[b][i][color=#d3d3d3]" + _text + "[/color][/i]"
+	return "[color=#a4b0be]" + _text + "[/color] [color=#747d8c] - [/color]"

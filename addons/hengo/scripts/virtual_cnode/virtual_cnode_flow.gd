@@ -62,7 +62,7 @@ func get_flow_output_connection_command(_id: int) -> HenVCFlowConnectionReturn:
 
 
 func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
-	flow_outputs.append(HenVCFlow.new(_owner, {name = 'HenTypeFlow ' + str(flow_connections_2.size())}))
+	flow_outputs.append(HenVCFlow.new(_owner, {name = 'Flow ' + str(flow_connections_2.size())}))
 	cnode_need_update.emit()
 
 

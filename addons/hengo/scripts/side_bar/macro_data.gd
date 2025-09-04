@@ -93,11 +93,11 @@ func create_flow(_type: HenSideBar.ParamType, _custom_id: int = -1) -> MacroInOu
 
     match _type:
         HenSideBar.ParamType.INPUT:
-            flow.name = 'HenTypeFlow ' + str(inputs.size())
+            flow.name = 'Flow ' + str(inputs.size())
             inputs.append(flow)
             flow_added.emit(true, flow.get_data())
         HenSideBar.ParamType.OUTPUT:
-            flow.name = 'HenTypeFlow ' + str(outputs.size())
+            flow.name = 'Flow ' + str(outputs.size())
             outputs.append(flow)
             flow_added.emit(false, flow.get_data())
     
@@ -210,7 +210,7 @@ func get_inspector_array_list() -> Array[HenProp]:
             on_value_changed = on_change_name
         }),
         HenProp.new({
-            name = 'HenTypeFlow Input',
+            name = 'Flow Input',
             type = HenProp.Type.ARRAY,
             on_item_create = create_flow.bind(HenSideBar.ParamType.INPUT),
             prop_list = inputs.map(func(x: MacroInOut) -> HenProp: return HenProp.new({
@@ -223,7 +223,7 @@ func get_inspector_array_list() -> Array[HenProp]:
             })),
         }),
         HenProp.new({
-            name = 'HenTypeFlow Output',
+            name = 'Flow Output',
             type = HenProp.Type.ARRAY,
             on_item_create = create_flow.bind(HenSideBar.ParamType.OUTPUT),
             prop_list = outputs.map(func(x: MacroInOut) -> HenProp: return HenProp.new({

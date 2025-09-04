@@ -79,7 +79,7 @@
 				"inputs": [
 					{
 						"id": 20,
-						"name": "HenTypeFlow 0"
+						"name": "Flow 0"
 					}
 				],
 				"inputs_value": [
@@ -94,7 +94,7 @@
 				"outputs": [
 					{
 						"id": 21,
-						"name": "HenTypeFlow 0"
+						"name": "Flow 0"
 					}
 				],
 				"outputs_value": [

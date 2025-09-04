@@ -321,10 +321,6 @@ func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> He
 	return io.on_in_out_added(self, _is_input, _data, _check_types)
 
 
-func get_vc() -> HenVirtualCNode:
-	return self
-
-
 func get_history_obj() -> HenVCNodeReturn:
 	return HenVCNodeReturn.new(self)
 
@@ -342,7 +338,7 @@ func get_inspector_array_list() -> Array:
 				HenProp.new({
 					name = 'Outputs',
 					type = HenProp.Type.ARRAY,
-					on_item_create = flow.create_input_flow_connection.bind(get_vc),
+					on_item_create = flow.create_input_flow_connection.bind(self),
 					prop_list = flow.flow_outputs.map(func(x: HenVCFlow) -> HenProp: return HenProp.new({
 						name = 'name',
 						type = HenProp.Type.STRING,
