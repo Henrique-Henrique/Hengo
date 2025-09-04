@@ -33,7 +33,7 @@ func add_flow_connection(_id: int, _to_id: int, _from: HenVirtualCNode, _to: Hen
 	var flow_output: HenVCFlow = get_flow_output(_id)
 
 	if not flow_input or not flow_output:
-		push_error('Not Found HenTypeFlow Connections: Id -> ', _id, ' or To Id -> ', _to_id)
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not Found HenTypeFlow Connections: Id -> " + str(_id) + " or To Id -> " + str(_to_id)))
 		return null
 
 	var flow_connection: HenVCFlowConnectionData = HenVCFlowConnectionData.new()

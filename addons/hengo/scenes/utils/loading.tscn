@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://bvf3im7llmah5"]
+
+[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_jp3sh"]
+[ext_resource type="Texture2D" uid="uid://dibqfnkm4yg4k" path="res://addons/hengo/assets/icons/menu/loading.svg" id="1_pkvuo"]
+[ext_resource type="Script" uid="uid://bu6qi3oaq40y8" path="res://addons/hengo/scripts/utils/loading_node.gd" id="1_qux7k"]
+
+[node name="Loading" type="PanelContainer"]
+visible = false
+size_flags_horizontal = 8
+theme_override_styles/panel = ExtResource("1_jp3sh")
+script = ExtResource("1_qux7k")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Loading" type="TextureRect" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("1_pkvuo")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="Control" type="Control" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Something..."

@@ -192,7 +192,7 @@ func get_cnode_data() -> Dictionary:
 func delete() -> void:
     var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.macro_list)
 
-    HenGlobal.history.create_action('Delete HenTypeMacro')
+    HenGlobal.history.create_action('Delete Macro')
     HenGlobal.history.add_do_method(item_cache.remove)
     HenGlobal.history.add_undo_reference(item_cache)
     HenGlobal.history.add_undo_method(item_cache.add)

@@ -94,3 +94,16 @@ static func disable_scene(_ref: Node) -> bool:
 		_ref.set_process_unhandled_key_input(false)
 	
 	return can_disable
+
+
+static func get_error_text(_text: String) -> String:
+	return "[b][color=#f5c6cb]" + _text + "[/color]"
+
+static func get_success_text(_text: String) -> String:
+	return "[b][i][color=#c8e6c9]" + _text + "[/color][/i]"
+
+static func get_warning_text(_text: String) -> String:
+	return "[b][color=#fffacd]" + _text + "[/color]"
+
+static func get_building_text(_text: String) -> String:
+	return "[b][i][color=#d3d3d3]" + _text + "[/color][/i]"

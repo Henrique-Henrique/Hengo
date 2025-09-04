@@ -117,7 +117,7 @@ static func _get_start(_data: HenScriptData) -> String:
 #
 static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> Array:
 	var saves: Array = []
-		
+	
 	for dependency_id: StringName in HenMapDependencies.get_dependencies(str(_script_id)):
 		var dep_id_i: int = int(dependency_id)
 		var old_script_data: HenScriptData = HenScriptDataCache.try_get_script_data(dependency_id)
@@ -125,6 +125,8 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 
 		if not script_data:
 			continue
+		
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Generating' + ResourceUID.get_id_path(dep_id_i).get_basename() + '...'))
 
 		if old_script_data:
 			HenScriptDataCache.add_script_data(dependency_id, script_data)
@@ -142,18 +144,18 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 #
 #
 static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _script_data: HenScriptData = null) -> HenScriptData:
-	var refs:  HenRegenerateRefs = HenRegenerateRefs.new()
+	var refs: HenRegenerateRefs = HenRegenerateRefs.new()
 	var path: StringName = HenLoader.get_data_path(_id)
 
 	if not FileAccess.file_exists(path):
-		push_error('Error: resource not found', str(_id))
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
 		return null
 
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
 	var script_data: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
 
 	if not HenCheckerScriptData.is_script_data_valid(script_data):
-		push_error("Invalid script data when updating script: " + str(_id))
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Invalid script data when updating script: " + str(_id)))
 		return null
 
 	refs.counter = script_data.node_counter

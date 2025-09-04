@@ -47,7 +47,7 @@ static func generate_script_data() -> HenScriptData:
 
 
 static func save() -> void:
-	# HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
+	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
 	HenThreadHelper.add_task(start_generate.bind(true))
 
 
@@ -71,6 +71,7 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	if not HenCheckerScriptData.is_script_data_valid(_script_data):
 		return
 
+	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Generating ' + ResourceUID.get_id_path(_script_id).get_basename() + '...'))
 	var _save_data: SaveData = SaveData.new(_script_id, _script_data)
 	var _save_config: SaveConfig = SaveConfig.new()
 	_save_config.add_script(_save_data)
@@ -80,4 +81,3 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 
 	HenCodeGeneration.get_code(_script_data)
 	HenSaveScript.save_data(_save_config)
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])

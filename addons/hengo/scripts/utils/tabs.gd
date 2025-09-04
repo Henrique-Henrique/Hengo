@@ -8,18 +8,18 @@ class TabData:
 
 func _ready() -> void:
 	tab_clicked.connect(_on_tab_selected)
-	# HenGlobal.SIGNAL_BUS.scripts_generation_started.connect(_on_scripts_generation_started)
-	# HenGlobal.SIGNAL_BUS.scripts_generation_finished.connect(_on_scripts_generation_finished)
+	HenGlobal.SIGNAL_BUS.scripts_generation_started.connect(_on_scripts_generation_started)
+	HenGlobal.SIGNAL_BUS.scripts_generation_finished.connect(_on_scripts_generation_finished)
 
 
-# func _on_scripts_generation_started() -> void:
-# 	for idx in tab_count:
-# 		set_tab_disabled(idx, true)
+func _on_scripts_generation_started() -> void:
+	for idx in tab_count:
+		set_tab_disabled(idx, true)
 
 	
-# func _on_scripts_generation_finished(_script_list: PackedStringArray) -> void:
-# 	for idx in tab_count:
-# 		set_tab_disabled(idx, false)
+func _on_scripts_generation_finished(_script_list: PackedStringArray) -> void:
+	for idx in tab_count:
+		set_tab_disabled(idx, false)
 
 
 func _on_tab_selected(_index: int) -> void:

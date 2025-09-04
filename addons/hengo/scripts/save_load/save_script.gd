@@ -7,22 +7,21 @@ static func save_data(save_config: HenSaver.SaveConfig) -> void:
 	# orchestrates a transactional save process.
 	# if any critical step fails, it logs the error and triggers a rollback.
 	if not _create_backups(save_config):
-		push_error("Save process failed: could not create backups. Rolling back.")
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save process failed: could not create backups. Rolling back."))
 		rollback(save_config)
 		return
 
 	if not _save_temporary_files(save_config):
-		push_error("Save process failed: could not save temporary files. Rolling back.")
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save process failed: could not save temporary files. Rolling back."))
 		rollback(save_config)
 		return
 
 	if not _commit_changes(save_config):
-		push_error("Save process failed: could not commit changes. Rolling back.")
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save process failed: could not commit changes. Rolling back."))
 		rollback(save_config)
 		return
 
 	_finalize_save_process(save_config)
-	print("Successfully saved")
 
 
 static func rollback(save_config: HenSaver.SaveConfig) -> void:
@@ -33,7 +32,7 @@ static func rollback(save_config: HenSaver.SaveConfig) -> void:
 		if FileAccess.file_exists(paths.backup):
 			var result: int = DirAccess.rename_absolute(paths.backup, paths.base)
 			if result != OK:
-				push_error("Rollback failed to restore backup for: ", paths.base)
+				HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rollback failed to restore backup for: " + paths.base))
 		
 		# ensure any temporary file is removed
 		if FileAccess.file_exists(paths.temp):
@@ -53,6 +52,7 @@ static func _get_resource_paths(id: int) -> Dictionary:
 # creates a backup of each existing file
 static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
 	for config in save_config.script_list:
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text("Creating backup for: " + HenLoader.get_data_path(config.id)))
 		var paths: Dictionary = _get_resource_paths(config.id)
 		var result: int = OK
 
@@ -69,7 +69,8 @@ static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
 
 		if result != OK:
 			return false
-			
+	
+	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Backup successfully created for all scripts"))
 	return true
 
 
@@ -77,9 +78,11 @@ static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
 static func _save_temporary_files(save_config: HenSaver.SaveConfig) -> bool:
 	for config in save_config.script_list:
 		var paths: Dictionary = _get_resource_paths(config.id)
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Saving temporary file for: " + paths.base))
 		if not HenScriptData.save(config.script_data, paths.temp):
 			return false
-			
+		
+	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Temp file successfully saved"))
 	return true
 
 
@@ -91,7 +94,9 @@ static func _commit_changes(save_config: HenSaver.SaveConfig) -> bool:
 
 		if result != OK:
 			return false
-			
+		
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Committing changes for: " + paths.base))
+	
 	return true
 
 
@@ -110,3 +115,4 @@ static func _finalize_save_process(save_config: HenSaver.SaveConfig) -> void:
 		HenScriptData.save_code(config.script_data, config.id)
 		
 	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
+	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Script successfully saved"))

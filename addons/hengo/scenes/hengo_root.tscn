@@ -15,9 +15,9 @@
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
-[ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
 [ext_resource type="Texture2D" uid="uid://lbtan5ojs7w8" path="res://addons/hengo/assets/images/grid_2.png" id="14_8emys"]
+[ext_resource type="Script" uid="uid://dmrj5ajx7qbuc" path="res://addons/hengo/scripts/utils/terminal.gd" id="15_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://b0m53nlcuqhhw" path="res://addons/hengo/assets/images/grid_1.png" id="15_w813u"]
 [ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
@@ -37,9 +37,9 @@ bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 667)
-shader_parameter/offset = Vector2(774.351, 136.988)
-shader_parameter/zoom_factor = 0.849982
+shader_parameter/screen_size = Vector2(1904, 611)
+shader_parameter/offset = Vector2(-1520.65, -1408.7)
+shader_parameter/zoom_factor = 0.899995
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
@@ -85,7 +85,7 @@ content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.290196)
+bg_color = Color(0.431373, 0.564706, 0.905882, 0.2)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -323,9 +323,8 @@ size_flags_horizontal = 3
 tab_alignment = 2
 script = ExtResource("11_lxtpw")
 
-[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="Terminal" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 unique_name_in_owner = true
-process_mode = 4
 layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = ExtResource("20_y63ss")
@@ -344,6 +343,7 @@ horizontal_alignment = 2
 justification_flags = 0
 deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
+script = ExtResource("15_lxtpw")
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
@@ -413,12 +413,6 @@ theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
 text = "Compile"
-
-[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
-layout_mode = 2
-texture = ExtResource("11_xut0q")
-expand_mode = 2
-stretch_mode = 3
 
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 layout_mode = 2

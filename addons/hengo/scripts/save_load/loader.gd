@@ -35,7 +35,6 @@ static func load(_path: StringName) -> void:
 		if updated_target:
 			HenScriptDataCache.add_script_data(str(script_to_open_id), updated_target)
 
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
 	compile_bt.disabled = false
 
 	# ---------------------------------------------------------------------------- #
@@ -138,7 +137,7 @@ static func load(_path: StringName) -> void:
 
 
 		if type.begins_with('res://hengo/save'):
-			push_error("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type)
+			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type))
 			return
 
 		HenGlobal.script_config.type = type

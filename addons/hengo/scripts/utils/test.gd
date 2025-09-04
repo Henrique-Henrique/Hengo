@@ -44,7 +44,7 @@ static func set_global_config() -> void:
 	global_script_data.type = 'Sprite2D'
 
 	HenGlobal.script_config = global_script_data
-	HenGlobal.SIDE_BAR_LIST = HenSideBar.SideBarList.new()
+	HenGlobal.SIDE_BAR_LIST = HenSideBarList.new()
 	HenGlobal.BASE_ROUTE_REF = HenLoader.BaseRouteRef.new()
 	HenGlobal.BASE_ROUTE = HenRouteData.new(
 		'Base',

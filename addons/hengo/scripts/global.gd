@@ -15,7 +15,7 @@ static var CONNECTION_GUIDE: HenConnectionGuide
 static var HENGO_ROOT: HenHengoRoot
 static var DASHBOARD: HenDashboard
 static var BASE_ROUTE: HenRouteData
-static var SIDE_BAR_LIST: HenSideBar.SideBarList
+static var SIDE_BAR_LIST: HenSideBarList
 static var SIDE_BAR: HenSideBar
 static var SIDE_PANEL: PanelContainer
 static var SIDE_BAR_LIST_CACHE: Dictionary = {}
@@ -79,15 +79,11 @@ static var state_references: Dictionary = {}
 
 # counter
 static var node_counter: int = 0
-static var prop_counter: int = 0
 
 static func get_new_node_counter() -> int:
     node_counter += 1
     return node_counter
 
-static func get_new_prop_counter() -> int:
-    prop_counter += 1
-    return prop_counter
 
 # debug
 static var HENGO_EDITOR_PLUGIN: HenHengo

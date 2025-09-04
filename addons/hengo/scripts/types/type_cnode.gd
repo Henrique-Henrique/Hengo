@@ -184,7 +184,7 @@ func get_input_token(_id: int) -> Dictionary:
 	var input: HenTypeInout = get_input(_id)
 
 	if not input:
-		push_error('Not found input token to generate: id -> ', _id)
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not found input token to generate: id -> " + str(_id)))
 		return {}
 
 	for input_connection: HenTypeInputConnection in input_connections:

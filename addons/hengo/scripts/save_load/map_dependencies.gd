@@ -23,7 +23,7 @@ static func _get_script_files_from_dir(path: String) -> Array:
 	var dir: DirAccess = DirAccess.open(path)
 
 	if not dir:
-		push_error("failed to open directory: " + path)
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("failed to open directory: " + path))
 		return files
 
 	dir.list_dir_begin()
