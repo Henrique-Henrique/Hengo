@@ -37,9 +37,9 @@ bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 2041)
-shader_parameter/offset = Vector2(2461.13, 816.977)
-shader_parameter/zoom_factor = 0.200032
+shader_parameter/screen_size = Vector2(3824, 1118)
+shader_parameter/offset = Vector2(1040.21, 45.3525)
+shader_parameter/zoom_factor = 1.24999
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
@@ -338,8 +338,6 @@ theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
 bbcode_enabled = true
-text = "dsadsa
-dsadas"
 fit_content = true
 autowrap_mode = 0
 shortcut_keys_enabled = false

@@ -11,7 +11,7 @@ extends Node
 
 signal signal_96741951
  
-var my_var_50 = bool()  
+var my_var_3 = bool()  
  
 func my_func_60(name_1):
 	return [null, null]

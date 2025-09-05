@@ -79,12 +79,16 @@ static func start_generate(_regenerate: bool = false) -> void:
 	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("\nGenerated " + str(all_generated_scripts.size()) + " scripts in [color=#58a6ff]" + str(compilation_time) + "ms[/color]"))
 
 	if all_generated_scripts.size() > 0:
-		var stats_text = "\n[b][color=#74c0fc]Generated Scripts[/color][/b] [img]res://addons/hengo/assets/icons/terminal/file.svg[/img]"
-		for i in range(all_generated_scripts.size()):
-			var script_name: String = all_generated_scripts[i]
-			stats_text += "\n[color=#8b949e]" + script_name + "[/color] [img]res://addons/hengo/assets/icons/terminal/script.svg[/img]"
+		_display_generated_scripts_stats(all_generated_scripts)
+
+
+static func _display_generated_scripts_stats(_all_generated_scripts: Array[String]) -> void:
+	var stats_text = "\n[b][color=#fff]Generated Scripts[/color][/b] [img]res://addons/hengo/assets/icons/terminal/file.svg[/img]"
+	for i in range(_all_generated_scripts.size()):
+		var script_name: String = _all_generated_scripts[i]
+		stats_text += "\n[color=#8b949e]" + script_name + "[/color] [img]res://addons/hengo/assets/icons/terminal/script.svg[/img]"
 	
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(stats_text)
+	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(stats_text)
 
 
 static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> Array[String]:
