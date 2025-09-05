@@ -126,7 +126,7 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 		if not script_data:
 			continue
 		
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Generating' + ResourceUID.get_id_path(dep_id_i).get_basename() + '...'))
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename()))
 
 		if old_script_data:
 			HenScriptDataCache.add_script_data(dependency_id, script_data)

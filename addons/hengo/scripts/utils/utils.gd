@@ -97,16 +97,13 @@ static func disable_scene(_ref: Node) -> bool:
 
 
 static func get_error_text(_text: String) -> String:
-	return "[b][color=#ff8a95]" + _text + "[/color] [color=#ff4757]🔴[/color][/b]"
+	return "[b][color=#dc3545]" + _text + "[/color][color=#ff4757][/color][/b] [img]res://addons/hengo/assets/icons/terminal/circle-x.svg[/img]"
 
 static func get_success_text(_text: String) -> String:
-	return "[b][color=#7bed9f]" + _text + "[/color] [color=#2ed573]🟢[/color][/b]"
+	return "[b][color=#28a745]" + _text + "[/color][color=#2ed573][/color][/b] [img]res://addons/hengo/assets/icons/terminal/check.svg[/img]"
 
 static func get_warning_text(_text: String) -> String:
-	return "[b][color=#ffb142]" + _text + "[/color] [color=#ffa502]🟡[/color][/b]"
-
-static func get_checklist_text(_text: String) -> String:
-	return "[color=#a4b0ff]" + _text + "[/color] [color=#70a1ff]🔵[/color]"
+	return "[b][color=#ffc107]" + _text + "[/color][color=#ffa502][/color][/b] [img]res://addons/hengo/assets/icons/terminal/triangle-alert.svg[/img]"
 
 static func get_building_text(_text: String) -> String:
-	return "[color=#a4b0be]" + _text + "[/color] [color=#747d8c] - [/color]"
+	return "[color=#ffffff]" + _text + "[/color][color=#747d8c][/color] [img]res://addons/hengo/assets/icons/terminal/chevron-right.svg[/img]"

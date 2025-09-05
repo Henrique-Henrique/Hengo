@@ -37,9 +37,9 @@ bg_color = Color(0.109804, 0.109804, 0.109804, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 611)
-shader_parameter/offset = Vector2(1776.93, 1084.94)
-shader_parameter/zoom_factor = 0.200001
+shader_parameter/screen_size = Vector2(3824, 2041)
+shader_parameter/offset = Vector2(2461.13, 816.977)
+shader_parameter/zoom_factor = 0.200032
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("14_8emys")
 shader_parameter/text_size = 200.0
@@ -85,7 +85,7 @@ content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0.431373, 0.564706, 0.905882, 0.2)
+bg_color = Color(0, 0, 0, 0.290196)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -308,10 +308,12 @@ mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control"]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 32.0
+anchor_bottom = 1.0
 grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 layout_mode = 2
@@ -327,6 +329,7 @@ script = ExtResource("11_lxtpw")
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
+theme_override_constants/line_separation = 4
 theme_override_fonts/normal_font = ExtResource("20_y63ss")
 theme_override_fonts/italics_font = ExtResource("16_xresw")
 theme_override_fonts/bold_font = ExtResource("23_tlngq")
@@ -335,6 +338,8 @@ theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
 bbcode_enabled = true
+text = "dsadsa
+dsadas"
 fit_content = true
 autowrap_mode = 0
 shortcut_keys_enabled = false

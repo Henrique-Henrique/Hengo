@@ -4,10 +4,6 @@ const BACKUP_EXT: String = ".bak"
 const TEMP_EXT: String = ".tmp"
 
 static func save_data(save_config: HenSaver.SaveConfig) -> void:
-	# orchestrates a transactional save process.
-	# if any critical step fails, it logs the error and triggers a rollback.
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text("Saving " + str(save_config.script_list.size()) + " scripts"))
-	
 	if not _create_backups(save_config):
 		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to create backups"))
 		rollback(save_config)
@@ -116,9 +112,8 @@ static func _finalize_save_process(save_config: HenSaver.SaveConfig) -> void:
 		script_list.append(ResourceUID.get_id_path(config.id))
 
 	# generate gdscript code
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text("Generating GDScript code"))
 	for config in save_config.script_list:
 		HenScriptData.save_code(config.script_data, config.id)
 		
 	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_checklist_text("Scripts saved successfully"))
+	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Scripts saved successfully"))
