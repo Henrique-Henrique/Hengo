@@ -64,7 +64,9 @@ static func start_generate(_regenerate: bool = false) -> void:
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 
 	# update current script data
-	HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), generate_script_data())
+	if not HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), generate_script_data()):
+		HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
+		return
 
 	for script_in_cache: HenScriptData in HenScriptDataCache.SCRIPT_DATA_CACHE.values():
 		var script_id: int = ResourceLoader.get_resource_uid(script_in_cache.path)
@@ -103,7 +105,8 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	_save_config.add_script(_save_data)
 
 	if _regenerate:
-		HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list)
+		if not HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list):
+			return generated_scripts
 
 	HenCodeGeneration.get_code(_script_data)
 	HenSaveScript.save_data(_save_config)

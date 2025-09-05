@@ -12,7 +12,7 @@ class BaseRouteRef extends RefCounted:
 	var virtual_cnode_list: Array = []
 
 
-static func load(_path: StringName) -> void:
+static func load(_path: StringName) -> bool:
 	var start: int = Time.get_ticks_usec()
 	var compile_bt: Button = HenGlobal.CAM.get_parent().get_node('%Compile')
 
@@ -22,7 +22,8 @@ static func load(_path: StringName) -> void:
 	# are propagated to the target script when it's analyzed
 	if HenGlobal.script_config:
 		var current_script_data: HenScriptData = HenSaver.generate_script_data()
-		HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), current_script_data)
+		if not HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), current_script_data):
+			return false
 		
 		# the generation logic handles cases where the target is not yet cached
 		var target_cached: HenScriptData = HenScriptDataCache.try_get_script_data(str(script_to_open_id))
@@ -33,7 +34,8 @@ static func load(_path: StringName) -> void:
 		)
 
 		if updated_target:
-			HenScriptDataCache.add_script_data(str(script_to_open_id), updated_target)
+			if not HenScriptDataCache.add_script_data(str(script_to_open_id), updated_target):
+				return false
 
 	compile_bt.disabled = false
 
@@ -96,7 +98,8 @@ static func load(_path: StringName) -> void:
 	if script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
 		if not script_data:
 			script_data = HenScriptData.load_from_file(path)
-			HenScriptDataCache.add_script_data(str(resource_id), HenScriptData.load(script_data.get_save().duplicate(true)))
+			if not HenScriptDataCache.add_script_data(str(resource_id), HenScriptData.load(script_data.get_save().duplicate(true))):
+				return false
 
 		# setting script configs
 		HenGlobal.script_config.type = script_data.type
@@ -138,7 +141,7 @@ static func load(_path: StringName) -> void:
 
 		if type.begins_with('res://hengo/save'):
 			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type))
-			return
+			return false
 
 		HenGlobal.script_config.type = type
 		HenGlobal.node_counter = 0
@@ -164,6 +167,8 @@ static func load(_path: StringName) -> void:
 	(HenGlobal.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible = false
 
 	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
+
+	return true
 
 
 static func show_class_name() -> void:

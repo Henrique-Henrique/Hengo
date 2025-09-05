@@ -171,12 +171,18 @@ func _has_main_screen() -> bool:
 
 func _handles(object: Object) -> bool:
 	if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
-		HenLoader.load((object as GDScript).resource_path)
+		if not await HenLoader.load((object as GDScript).resource_path):
+			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + (object as GDScript).resource_path))
+			return true
+		
 		HenGlobal.CAM.can_scroll = true
 		return true
 
 	if object is Resource and (object as Resource).resource_path.begins_with('res://hengo/save/'):
-		HenLoader.load((object as Resource).resource_path)
+		if not await HenLoader.load((object as Resource).resource_path):
+			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load save file: " + (object as Resource).resource_path))
+			return true
+		
 		HenGlobal.CAM.can_scroll = true
 		return true
 

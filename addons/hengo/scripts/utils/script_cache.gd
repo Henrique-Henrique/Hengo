@@ -19,13 +19,14 @@ static func has_script_data(_id: StringName) -> bool:
 
 
 # adding script data to cache
-static func add_script_data(_id: StringName, _script_data: HenScriptData) -> void:
+static func add_script_data(_id: StringName, _script_data: HenScriptData) -> bool:
 	if not HenCheckerScriptData.is_script_data_valid(_script_data):
 		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Tried to add invalid script data to cache: " + str(_id)))
-		return
+		return false
 	
 	SCRIPT_DATA_CACHE.set(_id, _script_data)
 	HenMapObjects.map_script_data(_id, HenScriptData.load(_script_data.get_save().duplicate(true)))
+	return true
 
 
 # removing script data from cache

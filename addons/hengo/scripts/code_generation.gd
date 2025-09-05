@@ -115,27 +115,26 @@ static func _get_start(_data: HenScriptData) -> String:
 #
 #
 #
-static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> Array:
-	var saves: Array = []
-	
+static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> bool:
 	for dependency_id: StringName in HenMapDependencies.get_dependencies(str(_script_id)):
 		var dep_id_i: int = int(dependency_id)
 		var old_script_data: HenScriptData = HenScriptDataCache.try_get_script_data(dependency_id)
 		var script_data: HenScriptData = get_updated_script_data(dep_id_i, _side_bar_list, old_script_data)
 
 		if not script_data:
-			continue
+			return false
 		
 		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename()))
 
 		if old_script_data:
-			HenScriptDataCache.add_script_data(dependency_id, script_data)
+			if not HenScriptDataCache.add_script_data(dependency_id, script_data):
+				return false
 
 		_save_config.add_script(
 			HenSaver.SaveData.new(dep_id_i, script_data)
 		)
 
-	return saves
+	return true
 
 #
 #

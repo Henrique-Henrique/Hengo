@@ -26,7 +26,8 @@ func _on_tab_selected(_index: int) -> void:
 	var meta: TabData = get_tab_metadata(_index)
 
 	if meta:
-		HenLoader.load(ResourceUID.get_id_path(meta.id))
+		if not await HenLoader.load(ResourceUID.get_id_path(meta.id)):
+			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + ResourceUID.get_id_path(meta.id)))
 
 
 func add_script_tab(id: int) -> void:
