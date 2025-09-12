@@ -7,7 +7,11 @@
 # *       Edit only if you are confident in your changes.       *
 # ***************************************************************
 
-extends Sprite2D
+extends Node
+
+func func_30550403(name_0, name_1):
+	pass
+
 
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -20,7 +24,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
-		_STATE_CONTROLLER.change_state("")
+		_STATE_CONTROLLER.change_state("state_1")
 
 func trigger_event(_event: String) -> void:
 	if _EVENTS.has(_event):
@@ -33,4 +37,22 @@ func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 
 class State1 extends HengoState:
-	pass
+	func enter() -> void:
+		print(null)
+		if false:
+			print(null)
+			if false:
+				if false:
+					pass
+				print(null)
+			else:
+				if false:
+					pass
+				print(null)
+			print(null)
+			if _ref.get_node("").has_node(""):
+				pass
+			print(null)
+		else:
+			print(_ref.get_name())
+		_ref.func_30550403(_ref.has_node(""), _ref.get_path())

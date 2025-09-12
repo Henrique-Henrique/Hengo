@@ -11,7 +11,7 @@ extends Node
 
 signal signal_96741951
  
-var my_var_3 = bool()  
+var my_var_645 = bool()  
  
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -38,4 +38,10 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
+		if false:
+			print(null)
+		else:
+			if false:
+				print(null)
+
 		print(null)

@@ -84,14 +84,14 @@ func _on_gui(_event: InputEvent) -> void:
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
-						for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
-							i.moving = true
+						for vc: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
+							vc.set_cnode_moving(true)
 					else:
 						moving = true
 						# cleaning other selects
-						for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
-							i.moving = false
-							i.unselect()
+						for vc: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
+							vc.set_cnode_moving(false)
+							vc.unselect()
 						
 						select()
 				elif _event.button_index == MOUSE_BUTTON_RIGHT:
@@ -102,8 +102,8 @@ func _on_gui(_event: InputEvent) -> void:
 			HenVCActionButtons.get_singleton().show_action(self)
 
 			# group moving false
-			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
-				i.moving = false
+			for vc: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
+				vc.set_cnode_moving(false)
 			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
 		on_hovering.emit(get_global_mouse_position())
@@ -143,10 +143,9 @@ func move(_pos: Vector2) -> void:
 func select() -> void:
 	selected = true
 	hover_animation()
-	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 	
 	if HenGlobal.CODE_PREVIEWER.visible:
-		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x: HenCnode): return x.id)
+		var new_id_list: Array = HenGlobal.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
 		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
 			return
 
@@ -159,7 +158,6 @@ func select() -> void:
 func unselect(_time: float = .2) -> void:
 	selected = false
 	exit_animation(_time)
-	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
 
 func change_name(_name: String) -> void:
 	get_node('%Title').text = _name

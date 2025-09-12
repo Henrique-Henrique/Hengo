@@ -103,9 +103,9 @@ func _select_cnode() -> void:
 	for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
 		if v_cnode.cnode_instance:
 			if selection_rect.get_global_rect().has_point(v_cnode.cnode_instance.global_position):
-				v_cnode.cnode_instance.select()
+				v_cnode.select()
 			else:
-				v_cnode.cnode_instance.unselect()
+				v_cnode.unselect()
 
 
 func _process(_delta: float) -> void:
@@ -152,7 +152,6 @@ func _input(event: InputEvent) -> void:
 				for v_cnode: HenVirtualCNode in all_nodes:
 					if not v_cnode.cnode_instance:
 						continue
-					
 
 					var v_cnode_return: HenVCNodeReturn = v_cnode.get_history_obj()
 
@@ -200,3 +199,13 @@ func _input(event: InputEvent) -> void:
 				elif event.keycode == KEY_P:
 					HenScriptDataCache.clear()
 					print('Script data cache cleared')
+				elif event.keycode == KEY_F:
+					get_tree().root.set_input_as_handled()
+
+					for node in HenGlobal.BASE_ROUTE_REF.virtual_cnode_list:
+						if node is HenVirtualCNode and (node as HenVirtualCNode).identity.sub_type == HenVirtualCNode.SubType.STATE:
+							HenFormatter.format_virtual_cnode_list((node as HenVirtualCNode).children.virtual_cnode_list)
+				
+					print('FORMATTED')
+				elif event.keycode == KEY_I:
+					HenFormatter.clean_rects()

@@ -174,6 +174,7 @@ func unselect() -> void:
 
 
 func on_cnode_mouse_enter() -> void:
+	print(identity.id)
 	if HenGlobal.can_make_flow_connection and not flow.flow_inputs.is_empty():
 		HenGlobal.flow_connection_to_data = {
 			to_cnode = self,
@@ -219,8 +220,20 @@ func on_cnode_right_click(_mouse_pos: Vector2) -> void:
 		)
 
 
+func set_cnode_moving(_moving: bool) -> void:
+	if not cnode_instance:
+		return
+
+	cnode_instance.moving = _moving
+
+
 func on_cnode_changed_position(_pos: Vector2) -> void:
 	visual.position = _pos
+
+
+func set_position(_position: Vector2) -> void:
+	visual.position = _position
+	update()
 
 
 func get_save(_script_data: HenScriptData) -> Dictionary:
@@ -442,6 +455,9 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('position'):
 		v_cnode.visual.position = _config.position if _config.position is Vector2 else str_to_var(_config.position)
+	
+	if _config.has('size'):
+		v_cnode.visual.size = _config.size if _config.size is Vector2 else str_to_var(_config.size)
 
 	match v_cnode.identity.sub_type:
 		SubType.VIRTUAL:

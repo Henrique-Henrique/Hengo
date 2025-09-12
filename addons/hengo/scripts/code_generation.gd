@@ -147,7 +147,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _scrip
 	var path: StringName = HenLoader.get_data_path(_id)
 
 	if not FileAccess.file_exists(path):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
+		# HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
 		return null
 
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT

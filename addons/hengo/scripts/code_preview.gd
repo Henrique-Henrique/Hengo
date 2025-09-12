@@ -33,7 +33,7 @@ func set_code(_code: String) -> void:
 
 func show_vc_line_reference() -> void:
 	var idx: int = 0
-	var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.id)
+	var new_id_list: Array = HenGlobal.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
 
 	if id_list != new_id_list:
 		id_list.clear()
