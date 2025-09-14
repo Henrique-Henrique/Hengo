@@ -1,7 +1,7 @@
 class_name HenFormatter extends Node
 
-const DEBUG_FORMATTER = preload('res://debug_formatter.gd')
 const Y_GAP = 250
+
 
 class FormatterData:
 	var x_layer: int = 0
