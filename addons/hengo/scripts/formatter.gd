@@ -4,44 +4,69 @@ const Y_GAP = 250
 
 
 class FormatterData:
-	var x_layer: int = 0
-	var X_LAYER_HEIGHT: Dictionary[StringName, Rect2] = {}
-	var Y_LAYER_WIDTH: Dictionary[StringName, Rect2] = {}
+	var x_limit: float = 0.
+	var list: Array[HenVirtualCNode] = []
+
 
 static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Array[HenVirtualCNode]
 	var data: FormatterData = FormatterData.new()
+	var x_gap: float = 200.
 
 	for vc: HenVirtualCNode in _virtual_cnode_list:
 		if vc.identity.sub_type == HenVirtualCNode.SubType.VIRTUAL:
 			start_navigation(vc, data)
 			vc.set_position(Vector2.ZERO)
-			break
+			# break
+	
+	data.list.reverse()
+
+	for vc: HenVirtualCNode in data.list:
+		if vc.flow.flow_outputs.size() == 1:
+			var flow_connection: HenVCFlowConnectionData = vc.get_flow_output_connection(vc.flow.flow_outputs[0].id)
+
+			if flow_connection:
+				vc.set_position(Vector2(flow_connection.get_to().visual.position.x, vc.visual.position.y))
+			else:
+				vc.set_position(Vector2(data.x_limit - vc.visual.size.x, vc.visual.position.y))
+		else:
+			if vc.flow.flow_outputs.size() == 3:
+				var left_flow_connection: HenVCFlowConnectionData = vc.get_flow_output_connection(vc.flow.flow_outputs[0].id)
+				var middle_flow_connection: HenVCFlowConnectionData = vc.get_flow_output_connection(vc.flow.flow_outputs[1].id)
+				var right_flow_connection: HenVCFlowConnectionData = vc.get_flow_output_connection(vc.flow.flow_outputs[2].id)
+
+				if middle_flow_connection:
+					vc.set_position(Vector2(middle_flow_connection.get_to().visual.position.x, vc.visual.position.y))
+				elif left_flow_connection and right_flow_connection:
+					var left_to: HenVirtualCNode = left_flow_connection.get_to()
+					var right_to: HenVirtualCNode = right_flow_connection.get_to()
+
+					vc.set_position(
+						Vector2(
+							((left_to.visual.position.x + right_to.visual.position.x) / 2),
+							vc.visual.position.y
+						) - Vector2(vc.visual.size.x / 4, 0)
+					)
+				elif right_flow_connection:
+					vc.set_position(Vector2(data.x_limit - vc.visual.size.x, vc.visual.position.y))
+				elif left_flow_connection:
+					var to: HenVirtualCNode = left_flow_connection.get_to()
+					vc.set_position(Vector2(to.visual.position.x + to.visual.size.x, vc.visual.position.y))
+
+			else:
+				vc.set_position(Vector2(data.x_limit - vc.visual.size.x, vc.visual.position.y))
 		
+		# data.x_limit -= vc.visual.size.x + x_gap
+		data.x_limit = minf(data.x_limit, data.x_limit - (vc.visual.size.x + x_gap))
+
 
 static func start_navigation(_vc: HenVirtualCNode, _data: FormatterData) -> void:
-	update_x_layer(_vc, _data)
-	start_navigation_flow(_vc, _data)
+	_data.list.append(_vc)
 
+	for flow: HenVCFlow in _vc.flow.flow_outputs:
+		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow.id)
 
-static func start_navigation_flow(_vc: HenVirtualCNode, _data: FormatterData) -> void:
-	_data.x_layer += 1
-
-	if _vc.flow.flow_outputs.size() == 1:
-		for connection: HenVCFlowConnectionData in _vc.flow.flow_connections_2:
-			if connection.get_from() == _vc:
-				start_navigation(connection.get_to(), _data)
-				break
-
-
-static func update_x_layer(_vc: HenVirtualCNode, _data: FormatterData) -> void:
-	var rect: Rect2 = _data.X_LAYER_HEIGHT.get(str(_vc.identity.id), Rect2())
-	_data.X_LAYER_HEIGHT[str(_vc.identity.id)] = rect.merge(Rect2(Vector2.ONE, _vc.visual.size))
-	print(_data.X_LAYER_HEIGHT[str(_vc.identity.id)])
-	var rect_2: Rect2 = _data.X_LAYER_HEIGHT[str(_vc.identity.id)]
-	var pos: Vector2 = Vector2(rect_2.position.x, rect_2.position.y + (Y_GAP * _data.x_layer))
-
-	_vc.set_position(pos)
-	create_rect(pos, rect_2.size)
+		if flow_connection:
+			start_navigation(flow_connection.get_to(), _data)
 
 
 static func clean_rects() -> void:

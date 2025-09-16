@@ -152,13 +152,6 @@ func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtual
 	return io.create_input_connection(_id, _from_id, self, _from)
 
 
-func get_flow_input_connection(_id: int) -> HenVCFlowConnectionReturn:
-	return flow.get_flow_input_connection_command(_id)
-
-func get_flow_output_connection(_id: int) -> HenVCFlowConnectionReturn:
-	return flow.get_flow_output_connection_command(_id)
-
-
 func select() -> void:
 	HenGlobal.SELECTED_VIRTUAL_CNODE.append(self)
 	
@@ -234,6 +227,10 @@ func on_cnode_changed_position(_pos: Vector2) -> void:
 func set_position(_position: Vector2) -> void:
 	visual.position = _position
 	update()
+
+
+func get_id() -> int:
+	return identity.id
 
 
 func get_save(_script_data: HenScriptData) -> Dictionary:
@@ -364,6 +361,14 @@ func get_inspector_array_list() -> Array:
 			]
 		
 	return []
+
+
+func get_flow_input_connection(_id: int) -> HenVCFlowConnectionData:
+	return flow.get_flow_input_connection(_id, self)
+
+
+func get_flow_output_connection(_id: int) -> HenVCFlowConnectionData:
+	return flow.get_flow_output_connection(_id, self)
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:

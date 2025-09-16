@@ -67,19 +67,35 @@ func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
 
 
 func flow_input_has_connection(_id: int) -> bool:
-	for flow: HenVCFlowConnectionData in flow_connections_2:
-		if flow.from_id == _id:
-			return not flow.from or flow.from.get_ref() != null
+	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+		if flow_connection.from_id == _id:
+			return not flow_connection.from or flow_connection.from.get_ref() != null
 
 	return false
 
 
 func flow_output_has_connection(_id: int) -> bool:
-	for flow: HenVCFlowConnectionData in flow_connections_2:
-		if flow.to_id == _id:
-			return not flow.to or flow.to.get_ref() != null
+	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+		if flow_connection.to_id == _id:
+			return not flow_connection.to or flow_connection.to.get_ref() != null
 
 	return false
+
+
+func get_flow_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
+	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+		if flow_connection.get_to() == _virtual_cnode and flow_connection.to_id == _id:
+			return flow_connection
+
+	return null
+
+
+func get_flow_output_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
+	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+		if flow_connection.get_from() == _virtual_cnode and flow_connection.from_id == _id:
+			return flow_connection
+
+	return null
 
 
 func move_flow(_direction: HenArrayItem.ArrayMove, _ref: HenVCFlowConnectionData, _is_input: bool) -> void:
