@@ -207,5 +207,3 @@ func _input(event: InputEvent) -> void:
 							HenFormatter.format_virtual_cnode_list((node as HenVirtualCNode).children.virtual_cnode_list)
 				
 					print('FORMATTED')
-				elif event.keycode == KEY_I:
-					HenFormatter.clean_rects()
