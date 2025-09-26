@@ -53,6 +53,14 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 	return HenVCConnectionReturn.new(connection, _id)
 
 
+func get_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCConnectionData:
+	for input_connection: HenVCConnectionData in connections:
+		if input_connection.get_to() == _virtual_cnode and input_connection.to_id == _id:
+			return input_connection
+
+	return null
+
+
 func clear_in_out(_is_input: bool) -> void:
 	if _is_input:
 		inputs.clear()

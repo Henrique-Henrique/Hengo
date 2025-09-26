@@ -35,6 +35,7 @@ static var connection_to_data: HenVCInOutData.CNodeInOutConnectionData
 static var can_make_flow_connection: bool = false
 static var flow_connection_to_data: Dictionary = {}
 static var flow_cnode_from: PanelContainer = null
+static var can_format_again: bool = true
 
 # cam
 static var mouse_on_cnode_ui: bool = false

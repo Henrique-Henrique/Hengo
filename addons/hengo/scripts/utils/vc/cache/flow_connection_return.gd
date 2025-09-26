@@ -38,6 +38,7 @@ func add(_update: bool = true) -> void:
     if _update:
         connection.get_from().update()
         connection.get_to().update()
+        HenFormatter.format_current_route()
 
 
 func remove() -> void:
@@ -56,3 +57,4 @@ func remove() -> void:
 
     connection.get_from().update()
     connection.get_to().update()
+    HenFormatter.format_current_route()

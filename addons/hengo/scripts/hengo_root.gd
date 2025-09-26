@@ -201,9 +201,5 @@ func _input(event: InputEvent) -> void:
 					print('Script data cache cleared')
 				elif event.keycode == KEY_F:
 					get_tree().root.set_input_as_handled()
-
-					for node in HenGlobal.BASE_ROUTE_REF.virtual_cnode_list:
-						if node is HenVirtualCNode and (node as HenVirtualCNode).identity.sub_type == HenVirtualCNode.SubType.STATE:
-							HenFormatter.format_virtual_cnode_list((node as HenVirtualCNode).children.virtual_cnode_list)
-				
+					HenFormatter.format_current_route()
 					print('FORMATTED')

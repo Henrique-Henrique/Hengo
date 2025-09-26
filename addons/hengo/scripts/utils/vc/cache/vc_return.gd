@@ -11,16 +11,18 @@ func _init(_v_cnode: HenVirtualCNode) -> void:
 
 
 func add() -> void:
-    if v_cnode.state.is_deleted and not v_cnode.state.can_delete:
+    if not v_cnode.state.can_delete:
         return
     
+    if not v_cnode.state.is_deleted:
+        return
+
     var list: Array = v_cnode.route_info.route_ref.get_ref().children.virtual_cnode_list \
         if v_cnode.route_info.route_ref.get_ref() is HenVirtualCNode \
         else v_cnode.route_info.route_ref.get_ref().virtual_cnode_list
 
     if not list.has(v_cnode):
         list.append(v_cnode)
-
 
     # io
     for connection: HenVCConnectionData in old_connections:
@@ -44,10 +46,14 @@ func add() -> void:
 
     v_cnode.state.is_deleted = false
     v_cnode.update()
+    HenFormatter.format_current_route()
 
 
 func remove() -> void:
     if not v_cnode.state.can_delete:
+        return
+    
+    if v_cnode.state.is_deleted:
         return
 
     var list: Array = v_cnode.route_info.route_ref.get_ref().children.virtual_cnode_list \
@@ -92,6 +98,6 @@ func remove() -> void:
         flow_connection.get_to().update()
         old_flow_connections.append(flow_connection)
 
-
     v_cnode.hide()
     v_cnode.state.is_deleted = true
+    HenFormatter.format_current_route()

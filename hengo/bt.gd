@@ -46,6 +46,12 @@ class State1 extends HengoState:
 			else:
 				print(null)
 			print(_ref.is_region_enabled())
+			if _ref.get_node("").is_centered():
+				pass
+			print(null)
+			if false:
+				pass
+			print(null)
 		print(_ref.is_centered())
 
 	func update(delta) -> void:

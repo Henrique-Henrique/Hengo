@@ -229,6 +229,15 @@ func set_position(_position: Vector2) -> void:
 	update()
 
 
+func follow(_position: Vector2) -> void:
+	if cnode_instance:
+		cnode_instance.follow(_position)
+
+
+func set_position_transition(_position: Vector2) -> void:
+	visual.position = _position
+	
+
 func get_id() -> int:
 	return identity.id
 

@@ -102,34 +102,37 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			if not connection.line_ref:
 				continue
 
-		connection.line_ref.to_pool_visible = connection.get_to().state.is_showing
-		connection.line_ref.from_pool_visible = connection.get_from().state.is_showing
+		var from: HenVirtualCNode = connection.get_from()
+		var to: HenVirtualCNode = connection.get_to()
+
+		connection.line_ref.to_pool_visible = to.state.is_showing
+		connection.line_ref.from_pool_visible = from.state.is_showing
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:
-			var input: HenCnodeInOut = connection.get_to().cnode_instance.get_node('%InputContainer').get_child(
-				connection.get_to().io.inputs.find(connection.get_to().io.get_input(connection.to_id))
+			var input: HenCnodeInOut = to.cnode_instance.get_node('%InputContainer').get_child(
+				to.io.inputs.find(to.io.get_input(connection.to_id))
 			)
 
 			connection.line_ref.output = input.get_node('%Connector')
 			input.remove_in_prop()
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
 
-			if not connection.get_to().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
-				connection.get_to().cnode_instance.connect('on_move', connection.line_ref.update_line)
+			if not to.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
+				to.cnode_instance.connect('on_move', connection.line_ref.update_line)
 
 
 		# drawing outputs
 		if connection.line_ref.from_pool_visible:
-			var output: HenCnodeInOut = connection.get_from().cnode_instance.get_node('%OutputContainer').get_child(
-				connection.get_from().io.outputs.find(connection.get_from().io.get_output(connection.from_id))
+			var output: HenCnodeInOut = from.cnode_instance.get_node('%OutputContainer').get_child(
+				from.io.outputs.find(from.io.get_output(connection.from_id))
 			)
 
 			connection.line_ref.input = output.get_node('%Connector')
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
 
-			if not connection.get_from().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
-				connection.get_from().cnode_instance.connect('on_move', connection.line_ref.update_line)
+			if not from.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
+				from.cnode_instance.connect('on_move', connection.line_ref.update_line)
 		
 	
 	# cleaning from flows
@@ -179,10 +182,6 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		flow_input_instance.id = flow_input.id
 		flow_input_instance.visible = true
 
-		# if flow_input.from_connections.is_empty():
-		# 	idx += 1
-		# 	continue
-
 		(from_flow_container.get_child(idx).get_node('%Arrow') as TextureRect).visible = true
 		idx += 1
 
@@ -216,24 +215,27 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 			if not connection.line_ref:
 				continue
 
-		connection.line_ref.to_pool_visible = connection.get_to().state.is_showing
-		connection.line_ref.from_pool_visible = connection.get_from().state.is_showing
+		var from: HenVirtualCNode = connection.get_from()
+		var to: HenVirtualCNode = connection.get_to()
+
+		connection.line_ref.to_pool_visible = to.state.is_showing
+		connection.line_ref.from_pool_visible = from.state.is_showing
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:
-			var flow_idx = connection.get_to().flow.flow_inputs.find(connection.get_to().flow.get_flow_input(connection.to_id))
-			connection.line_ref.output = connection.get_to().cnode_instance.get_node('%FromFlowContainer').get_child(flow_idx).get_node('%Arrow')
+			var flow_idx = to.flow.flow_inputs.find(to.flow.get_flow_input(connection.to_id))
+			connection.line_ref.output = to.cnode_instance.get_node('%FromFlowContainer').get_child(flow_idx).get_node('%Arrow')
 
-			if not connection.get_to().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
-				connection.get_to().cnode_instance.connect('on_move', connection.line_ref.update_line)
+			if not to.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
+				to.cnode_instance.connect('on_move', connection.line_ref.update_line)
 
 		# drawing outputs
 		if connection.line_ref.from_pool_visible:
-			var flow_idx = connection.get_from().flow.flow_outputs.find(connection.get_from().flow.get_flow_output(connection.from_id))
-			connection.line_ref.input = connection.get_from().cnode_instance.get_node('%FlowContainer').get_child(flow_idx).get_node('FlowSlot/Control/Connector')
+			var flow_idx = from.flow.flow_outputs.find(from.flow.get_flow_output(connection.from_id))
+			connection.line_ref.input = from.cnode_instance.get_node('%FlowContainer').get_child(flow_idx).get_node('FlowSlot/Control/Connector')
 
-			if not connection.get_from().cnode_instance.is_connected('on_move', connection.line_ref.update_line):
-				connection.get_from().cnode_instance.connect('on_move', connection.line_ref.update_line)
+			if not from.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
+				from.cnode_instance.connect('on_move', connection.line_ref.update_line)
 
 
 	_cnode.reset_size()
@@ -268,24 +270,27 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 		if not connection.line_ref:
 			continue
 		
-		connection.line_ref.to_pool_visible = connection.get_to().state.is_showing
-		connection.line_ref.from_pool_visible = connection.get_from().state.is_showing
+		var from: HenVirtualCNode = connection.get_from()
+		var to: HenVirtualCNode = connection.get_to()
+
+		connection.line_ref.to_pool_visible = to.state.is_showing
+		connection.line_ref.from_pool_visible = from.state.is_showing
 
 		# input positions
-		if connection.get_from().state.is_showing:
+		if from.state.is_showing:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2) + connection.line_ref.conn_size
 			connection.to_old_pos = pos
 		else:
 			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		# output positions
-		if connection.get_to().state.is_showing:
+		if to.state.is_showing:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2) + connection.line_ref.conn_size
 			connection.from_old_pos = pos
 		else:
 			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
-		if not connection.get_from().state.is_showing and not connection.get_to().state.is_showing:
+		if not from.state.is_showing and not to.state.is_showing:
 			connection.line_ref.visible = false
 			connection.line_ref = null
 
@@ -294,26 +299,28 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 		if not connection.line_ref:
 			continue
 
-		connection.line_ref.to_pool_visible = connection.get_to().state.is_showing
-		connection.line_ref.from_pool_visible = connection.get_from().state.is_showing
+		var from: HenVirtualCNode = connection.get_from()
+		var to: HenVirtualCNode = connection.get_to()
+
+		connection.line_ref.to_pool_visible = to.state.is_showing
+		connection.line_ref.from_pool_visible = from.state.is_showing
 
 		# input positions
-		if connection.get_from().state.is_showing:
+		if from.state.is_showing:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
 			connection.to_old_pos = pos
 		else:
 			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		# output positions
-		if connection.get_to().state.is_showing:
+		if to.state.is_showing:
 			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
 			connection.from_old_pos = pos
 		else:
 			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
-		if not connection.get_from().state.is_showing and not connection.get_to().state.is_showing:
+		if not from.state.is_showing and not to.state.is_showing:
 			connection.line_ref.visible = false
 			connection.line_ref = null
-
 
 	_cnode.visible = false

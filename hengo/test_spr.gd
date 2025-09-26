@@ -19,7 +19,7 @@ const _EVENTS = {}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_1 = State1.new(self)
+		state_1=State1.new(self)
 	})
 
 func _ready() -> void:
@@ -39,20 +39,7 @@ func _physics_process(delta: float) -> void:
 class State1 extends HengoState:
 	func enter() -> void:
 		print(null)
-		if false:
-			print(null)
-			if false:
-				if false:
-					pass
-				print(null)
-			else:
-				if false:
-					print(null)
-				print(null)
-			print(null)
-			if _ref.get_node("").has_node(""):
-				pass
-			print(null)
-		else:
-			print(_ref.get_name())
-		_ref.func_30550403(_ref.has_node(""), _ref.get_path())
+
+
+	func update(delta) -> void:
+		print(null)

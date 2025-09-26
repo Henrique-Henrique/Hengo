@@ -21,7 +21,8 @@ var can_move_to_format: bool = true
 
 # pool
 var is_pool: bool = false
-
+var can_follow: bool = false
+var follow_position: Vector2 = Vector2.ZERO
 
 signal on_hovering(_mouse_pos: Vector2)
 signal on_double_click
@@ -41,6 +42,16 @@ func _ready():
 
 # private
 #
+
+func follow(_position: Vector2) -> void:
+	if position.is_equal_approx(_position):
+		can_follow = false
+		set_process(false)
+		return
+	
+	set_process(true)
+	can_follow = true
+	follow_position = _position
 
 
 func _on_enter() -> void:
@@ -137,6 +148,11 @@ func move(_pos: Vector2) -> void:
 	position = _pos
 	changed_position.emit(position)
 	HenVCActionButtons.get_singleton().hide_action()
+	emit_signal('on_move')
+
+
+func move_simple(_pos: Vector2) -> void:
+	position = _pos
 	emit_signal('on_move')
 
 
@@ -270,3 +286,12 @@ static func instantiate_and_add_pool() -> void:
 		print('time => ', (end - start) / 1000., 'ms')
 
 		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
+
+
+func _process(_delta: float) -> void:
+	if can_follow:
+		position = lerp(position, follow_position, _delta * 24.0)
+		on_move.emit()
+		if position.is_equal_approx(follow_position):
+			can_follow = false
+			set_process(false)
