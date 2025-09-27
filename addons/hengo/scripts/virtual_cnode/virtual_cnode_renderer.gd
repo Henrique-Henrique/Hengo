@@ -29,6 +29,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	_cnode.change_name(identity.name)
 	_cnode.category = identity.category
 	_cnode.id = identity.id
+	_cnode.can_follow = false
+	_cnode.set_process(false)
 
 	var idx: int = 0
 
@@ -261,6 +263,9 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 	state.is_showing = false
+
+	_cnode.can_follow = false
+	_cnode.set_process(false)
 
 	for signal_data: Dictionary in _cnode.get_signal_connection_list('on_move'):
 		_cnode.disconnect('on_move', signal_data.callable as Callable)

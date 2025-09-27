@@ -167,7 +167,7 @@ func unselect() -> void:
 
 
 func on_cnode_mouse_enter() -> void:
-	print(identity.id)
+	prints(identity.id, visual.position)
 	if HenGlobal.can_make_flow_connection and not flow.flow_inputs.is_empty():
 		HenGlobal.flow_connection_to_data = {
 			to_cnode = self,
