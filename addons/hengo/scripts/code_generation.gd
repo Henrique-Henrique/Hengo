@@ -122,7 +122,7 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 		var script_data: HenScriptData = get_updated_script_data(dep_id_i, _side_bar_list, old_script_data)
 
 		if not script_data:
-			return false
+			return true
 		
 		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename()))
 
@@ -147,7 +147,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _scrip
 	var path: StringName = HenLoader.get_data_path(_id)
 
 	if not FileAccess.file_exists(path):
-		# HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
+		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
 		return null
 
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
@@ -179,9 +179,12 @@ static func _parse_vc_list(_cnode_list: Array, _refs: HenRegenerateRefs) -> void
 	for cnode: Dictionary in _cnode_list:
 		_refs.cnode_list[cnode.id] = cnode
 
-		if not cnode.has('from_id'):
+		if not cnode.has('from_id') or not cnode.has('side_bar_id'):
 			if cnode.has(&'virtual_cnode_list'):
 				_parse_vc_list(cnode.virtual_cnode_list, _refs)
+			continue
+
+		if cnode.side_bar_id != _refs.side_bar_list.id:
 			continue
 
 		match cnode.sub_type as HenVirtualCNode.SubType:

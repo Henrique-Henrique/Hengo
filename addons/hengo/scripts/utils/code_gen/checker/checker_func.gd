@@ -15,6 +15,8 @@ static func check_changes_func(_cnode_data: Dictionary, _refs: HenRegenerateRefs
 			_cnode_data.invalid = true
 			_refs.reload = true
 		return
+	
+	# _cnode_data.erase('invalid')
 
 	# sync function name
 	if _cnode_data.name != func_data.name:

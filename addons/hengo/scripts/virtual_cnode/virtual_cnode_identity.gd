@@ -11,6 +11,7 @@ var singleton_class: String
 # references
 var from_side_bar_id: int = -1
 var from_id: int = -1
+var side_bar_id: int = -1
 
 signal cnode_need_update
 

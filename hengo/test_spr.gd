@@ -38,8 +38,7 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(null)
-
+		print(HengoState.INVALID_PLACEHOLDER)
 
 	func update(delta) -> void:
 		print(null)

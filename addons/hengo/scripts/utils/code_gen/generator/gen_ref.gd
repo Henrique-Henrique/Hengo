@@ -6,6 +6,7 @@ var disconnect_list: Array
 var connections: Array
 var counter: int
 var side_bar_list: Dictionary
+var side_bar_from_id: StringName
 var ref_data: Dictionary
 
 func get_new_node_counter() -> int:

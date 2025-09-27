@@ -273,6 +273,7 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 
 	if identity.from_id > -1:
 		data.from_id = str(identity.from_id)
+		data.side_bar_id = identity.side_bar_id
 		_script_data.deps.append(str(identity.from_id))
 
 	if not io.inputs.is_empty():
@@ -434,6 +435,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('from_id'):
 		v_cnode.identity.from_id = int(_config.from_id)
+		v_cnode.identity.side_bar_id = int(_config.side_bar_id)
 
 	if _config.has('invalid'):
 		v_cnode.state.invalid = _config.invalid

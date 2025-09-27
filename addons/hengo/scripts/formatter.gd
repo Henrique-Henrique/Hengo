@@ -277,7 +277,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 					side_boundings.append(calculate_tree_bounding(to, _data))
 				idx += 1
 
-			# # adjust positions to avoid overlaps
+			# adjust positions to avoid overlaps
 			for i in range(1, side_flows.size()):
 				var current_node: HenVirtualCNode = side_flows[i]
 				var current_bounding: Rect2 = side_boundings[i]
@@ -345,6 +345,11 @@ static func move_flow_tree(_vc: HenVirtualCNode, _offset: Vector2, _data: Format
 static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) -> Rect2:
 	var min_pos: Vector2 = _vc.visual.position
 	var max_pos: Vector2 = _vc.visual.position + _vc.visual.size
+
+	# include inputs in bounding calculation
+	var input_rect: Rect2 = start_map_inputs(_vc, _data)
+	min_pos = min_pos.min(input_rect.position)
+	max_pos = max_pos.max(input_rect.position + input_rect.size)
 
 	for flow_output: HenVCFlow in _vc.flow.flow_outputs:
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)

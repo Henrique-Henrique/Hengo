@@ -2,7 +2,7 @@
 class_name HenSideBarList extends RefCounted
 
 var type: HenSideBar.AddType
-
+var id: int
 var signal_list: Array
 var var_list: Array
 var func_list: Array
@@ -87,6 +87,7 @@ func _on_inspector_close() -> void:
 
 func get_save(_script_data: HenScriptData) -> Dictionary:
 	return {
+		id = id,
 		var_list = var_list.map(func(x: HenVarData): return x.get_save()),
 		func_list = func_list.map(func(x: HenFuncData): return x.get_save(_script_data)),
 		signal_callback_list = signal_callback_list.map(func(x: HenSignalCallbackData): return x.get_save(_script_data)),
@@ -95,6 +96,8 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 	}
 
 func load_save(_data: Dictionary) -> void:
+	id = HenGlobal.get_new_node_counter() if not _data.has('id') else _data.id
+
 	for item_data: Dictionary in _data.var_list:
 		var item: HenVarData = HenVarData.new()
 		item.load_save(item_data)

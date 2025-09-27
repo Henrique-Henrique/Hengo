@@ -1,5 +1,6 @@
 class_name HenFactoryFunc extends RefCounted
 
+
 static func get_func_from_dict(_func_data: Dictionary, _refs: HenTypeReferences) -> HenTypeFunc:
 	var function: HenTypeFunc = HenTypeFunc.new()
 

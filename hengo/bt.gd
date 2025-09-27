@@ -9,6 +9,10 @@
 
 extends Sprite2D
 
+func func_31283544():
+	pass
+
+
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}

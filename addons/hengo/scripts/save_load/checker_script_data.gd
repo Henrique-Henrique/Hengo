@@ -11,6 +11,32 @@ static func is_script_data_valid(_script_data: HenScriptData) -> bool:
 	
 	if not errors.is_empty():
 		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Script data is invalid: " + _script_data.path))
+		for error in errors:
+			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Error: " + error.message))
 		return false
 	
+	# custom errors handling
+	if not check_func_input_output(_script_data):
+		return false
+
+	return true
+
+
+static func check_func_input_output(_script_data: HenScriptData) -> bool:
+	for func_data: Dictionary in _script_data.side_bar_list.func_list:
+		var has_input: bool = false
+		var has_output: bool = false
+		
+		for vc: Dictionary in func_data.virtual_cnode_list:
+			if vc.sub_type == HenVirtualCNode.SubType.FUNC_INPUT:
+				has_input = true
+			elif vc.sub_type == HenVirtualCNode.SubType.FUNC_OUTPUT:
+				has_output = true
+			
+			if has_input and has_output:
+				return true
+		
+		if not has_input or not has_output:
+			return false
+
 	return true

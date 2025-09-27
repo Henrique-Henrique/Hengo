@@ -527,6 +527,7 @@ func get_from_list() -> Array:
 					from_side_bar_id = var_data.id,
 					sub_type = HenVirtualCNode.SubType.GET_FROM_PROP,
 					from_id = id,
+					side_bar_id = object.side_bar_id,
 					inputs = [
 						{
 							name = 'from',
@@ -555,6 +556,7 @@ func get_from_list() -> Array:
 					name = func_data.name,
 					from_side_bar_id = func_data.id,
 					from_id = id,
+					side_bar_id = object.side_bar_id,
 					sub_type = HenVirtualCNode.SubType.FUNC_FROM,
 					name_to_code = func_data.name,
 					inputs = [
