@@ -54,20 +54,20 @@ static func is_type_relation_valid(_type: StringName, _to_type: StringName) -> b
 
 
 static func reposition_control_inside(_control: Control) -> void:
-	var rect: Rect2 = HenGlobal.CAM.get_viewport_rect()
+	var rect: Rect2 = HenGlobal.CNODE_UI.get_viewport_rect()
 
 	# x
-	if _control.position.x + _control.size.x > rect.size.x:
-		_control.position.x = rect.size.x - _control.size.x - 8
+	if _control.position.x + _control.size.x > rect.position.x + rect.size.x:
+		_control.position.x = rect.position.x + rect.size.x - _control.size.x - 8
 	
 	if _control.position.x < rect.position.x:
-		_control.position.x = rect.position.x + _control.size.x + 8
+		_control.position.x = rect.position.x + 8
 	
 	# y
-	if _control.position.y + _control.size.y > rect.size.y:
-		_control.position.y = rect.size.y - _control.size.y - 8
+	if _control.position.y + _control.size.y > rect.position.y + rect.size.y:
+		_control.position.y = rect.position.y + rect.size.y - _control.size.y - 8
 	elif _control.position.y < rect.position.y:
-		_control.position.y = rect.position.y + _control.size.y + 8
+		_control.position.y = rect.position.y + 8
 	
 
 static func disable_scene_with_owner(_ref: Node) -> bool:

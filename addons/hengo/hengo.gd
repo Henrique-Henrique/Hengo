@@ -81,6 +81,7 @@ func _enter_tree():
 	HenGlobal.TABS = main_scene.get_node('%Tabs')
 	HenGlobal.script_config = null
 	HenGlobal.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
+	HenGlobal.CNODE_UI = cnode_ui
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)

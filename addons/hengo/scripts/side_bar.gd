@@ -6,6 +6,7 @@ var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 const CATEGORY_FONT = preload('res://addons/hengo/assets/fonts/Inter-Bold.ttf')
+const TREE_ITEM_STYLEBOX = preload('res://addons/hengo/resources/style_box/flat_tree.tres')
 
 enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
@@ -95,7 +96,7 @@ func _on_gui(_event: InputEvent) -> void:
 
 		if item:
 			var _side_bar_item = item.get_metadata(0)
-			
+
 			if _side_bar_item is not int and _side_bar_item is RefCounted:
 				var pos: Vector2 = (_event as InputEventMouseMotion).global_position
 				var text: String = ''
@@ -110,10 +111,10 @@ func _on_gui(_event: InputEvent) -> void:
 					text = '[b]HenTypeMacro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				elif _side_bar_item is HenSignalData:
 					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				
+				pos.x = HenGlobal.SIDE_PANEL.global_position.x + HenGlobal.SIDE_PANEL.size.x
 
-				pos.x = HenGlobal.SIDE_PANEL.global_position.x
-
-				HenGlobal.TOOLTIP.go_to(pos, text, Vector2(-1, 0))
+				HenGlobal.TOOLTIP.go_to(pos, text)
 			else:
 				HenGlobal.TOOLTIP.close()
 		else:
@@ -125,7 +126,7 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 		1:
 			var obj = list.get_selected().get_metadata(0)
 
-			await RenderingServer.frame_post_draw
+			await RenderingServer.frame_pre_draw
 			
 			if obj.get('route'):
 				HenRouter.change_route(obj.get('route'))
@@ -184,17 +185,57 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 
 	for item_data in arr:
 		var item: TreeItem = category.create_child()
-		item.set_text(0, item_data.name)
+		var icon: Texture2D
 		item.set_metadata(0, item_data)
-		# item.set_custom_bg_color(0, Color((BG_COLOR[_type] as Color), .1))
-		item.set_custom_color(0, Color('#868686'))
 
+		var icon_color: Color
 		match _type:
 			AddType.VAR, AddType.LOCAL_VAR:
-				item.set_icon(0, HenAssets.get_icon_texture(item_data.type))
+				icon = HenAssets.get_icon_texture(item_data.type)
+				icon_color = Color.WHITE
 			_:
-				item.set_icon_modulate(0, BG_COLOR[_type])
-				item.set_icon(0, ICONS[_type])
+				icon = ICONS[_type]
+				icon_color = BG_COLOR[_type]
+		
+		item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
+		item.set_custom_draw_callback(0, _draw_custom_button.bind(item_data.name, icon, icon_color))
+		item.set_custom_color(0, Color('#737278'))
+
+
+func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
+	# get text from parameter
+	var text: String = _text
+	var font: Font = list.get_theme_font(&'font', &'Tree')
+	var font_size: int = list.get_theme_font_size(&'font_size', &'Tree')
+	var text_size: Vector2 = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	var padding = 50
+	var button_width = text_size.x + padding
+	
+	# add vertical spacing by reducing the height and adding margin
+	var spacing = 8
+	var button_height = _rect.size.y - spacing
+	var button_pos = Vector2(_rect.position.x, _rect.position.y + spacing / 2.)
+	
+	# draw the stylebox with reduced height
+	list.draw_style_box(TREE_ITEM_STYLEBOX, Rect2(button_pos, Vector2(button_width, button_height)))
+	
+	if _icon:
+		var icon_size = Vector2(18, 18)
+		var icon_pos = Vector2(button_pos.x + 8, button_pos.y + (button_height - icon_size.y) / 2)
+		list.draw_texture_rect(_icon, Rect2(icon_pos, icon_size), false, _icon_color)
+		
+		# draw text after icon with spacing
+		var text_offset = 32 # icon width + spacing
+		var text_pos_x = button_pos.x + text_offset + (button_width - text_offset - text_size.x) / 2
+		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
+		var text_pos = Vector2(text_pos_x, text_pos_y)
+		list.draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
+	else:
+		# draw text centered when no icon
+		var text_pos_x = button_pos.x + button_width / 2 - text_size.x / 2
+		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
+		var text_pos = Vector2(text_pos_x, text_pos_y)
+		list.draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
 
 
 func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:

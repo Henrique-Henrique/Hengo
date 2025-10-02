@@ -66,16 +66,19 @@ func get_list_to_draw() -> Array:
 
 func on_click(_item, _mouse_pos: Vector2) -> void:
 	var pos: Vector2 = HenGlobal.SIDE_BAR.global_position
-	
-	pos.x = HenGlobal.SIDE_PANEL.global_position.x
+	var prop_editor: HenPropEditor = HenPropEditor.mount(_item)
+
+	pos.x = HenGlobal.SIDE_BAR.position.x + HenGlobal.SIDE_BAR.size.x + 10
 	pos.y += _mouse_pos.y
 
-	var popup: HenPopupContainer = HenGlobal.GENERAL_POPUP.get_parent().show_content(
-		HenPropEditor.mount(_item),
+	var popup: HenPopupContainer = (HenGlobal.GENERAL_POPUP.get_parent() as HenPopupContainer).show_content(
+		prop_editor,
 		'Testing',
 		pos,
 		1.5
 	)
+
+	popup.move(Vector2(0, -prop_editor.size.y / 2.))
 
 	if not popup.closed.is_connected(_on_inspector_close): popup.closed.connect(_on_inspector_close)
 	inspecting = true

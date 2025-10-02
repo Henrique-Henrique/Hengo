@@ -5,7 +5,7 @@
 [ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="2_xbr4r"]
 [ext_resource type="StyleBox" uid="uid://1ectx2h3jrw7" path="res://addons/hengo/resources/style_box/string.tres" id="4_el3g6"]
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="5_yvxym"]
-[ext_resource type="StyleBox" uid="uid://4y7hysplpx56" path="res://addons/hengo/resources/style_box/level_1_flat.tres" id="6_el3g6"]
+[ext_resource type="StyleBox" uid="uid://jda727vlnubw" path="res://addons/hengo/resources/style_box/flat_tree.tres" id="6_el3g6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvxym"]
 bg_color = Color(1, 1, 1, 0.0901961)
@@ -81,13 +81,12 @@ SpinBox/icons/up_disabled = null
 SpinBox/icons/up_hover = null
 SpinBox/icons/up_pressed = null
 SpinBox/icons/updown = SubResource("ImageTexture_6gb4l")
+Tree/constants/draw_guides = 0
+Tree/constants/v_separation = 12
 Tree/fonts/font = ExtResource("1_revyj")
 Tree/styles/button_hover = ExtResource("6_el3g6")
 Tree/styles/button_pressed = ExtResource("6_el3g6")
-Tree/styles/cursor = ExtResource("6_el3g6")
-Tree/styles/cursor_unfocused = ExtResource("6_el3g6")
 Tree/styles/custom_button = ExtResource("6_el3g6")
-Tree/styles/custom_button_hover = ExtResource("6_el3g6")
 Tree/styles/custom_button_pressed = ExtResource("6_el3g6")
 Tree/styles/hovered = ExtResource("6_el3g6")
 Tree/styles/hovered_dimmed = ExtResource("6_el3g6")

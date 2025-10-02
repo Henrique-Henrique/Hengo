@@ -6,27 +6,27 @@ enum ArrayMove {UP, DOWN}
 var prop: HenProp
 
 func _ready() -> void:
-    (get_node('%Options') as MenuButton).get_popup().id_pressed.connect(_on_item_config_select)
+	(get_node('%Options') as MenuButton).get_popup().id_pressed.connect(_on_item_config_select)
 
 
 func _on_item_config_select(_id: int) -> void:
-    match _id:
-        # delete
-        0:
-            if prop.on_item_delete:
-                prop.on_item_delete.call()
-        # up
-        1:
-            if prop.on_item_move:
-                prop.on_item_move.call(HenArrayItem.ArrayMove.UP)
-        # down
-        2:
-            if prop.on_item_move:
-                prop.on_item_move.call(HenArrayItem.ArrayMove.DOWN)
-    
-    HenPropEditor.get_singleton().start()
+	match _id:
+		# delete
+		0:
+			if prop.on_item_delete:
+				prop.on_item_delete.call()
+		# up
+		1:
+			if prop.on_item_move:
+				prop.on_item_move.call(HenArrayItem.ArrayMove.UP)
+		# down
+		2:
+			if prop.on_item_move:
+				prop.on_item_move.call(HenArrayItem.ArrayMove.DOWN)
+	
+	HenPropEditor.get_singleton().start()
 
 
 func start(_prop: HenProp) -> HenArrayItem:
-    prop = _prop
-    return self
+	prop = _prop
+	return self

@@ -1,9 +1,20 @@
-[gd_scene load_steps=5 format=3 uid="uid://fw614nu57fni"]
+[gd_scene load_steps=6 format=3 uid="uid://fw614nu57fni"]
 
 [ext_resource type="Script" uid="uid://bobl7w3f5fstw" path="res://addons/hengo/scripts/utils/prop_editor/prop_array_item.gd" id="1_3yona"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_p2mjy"]
 [ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="1_sw1tn"]
 [ext_resource type="Texture2D" uid="uid://dguwkk3raakpa" path="res://addons/hengo/assets/icons/menu/plus.svg" id="2_5nhsi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3yona"]
+content_margin_left = 4.0
+content_margin_top = 8.0
+content_margin_right = 4.0
+content_margin_bottom = 8.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_bottom = 1
+border_color = Color(0.29803923, 0.29803923, 0.33333334, 1)
+expand_margin_left = 10.0
+expand_margin_right = 10.0
 
 [node name="PropArrayItem" type="PanelContainer"]
 theme_override_styles/panel = ExtResource("1_sw1tn")
@@ -11,18 +22,23 @@ script = ExtResource("1_3yona")
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]
 layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2"]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer2"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_3yona")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/PanelContainer"]
 layout_mode = 2
 
-[node name="Name" type="Label" parent="VBoxContainer2/HBoxContainer"]
+[node name="Name" type="Label" parent="VBoxContainer2/PanelContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("1_p2mjy")
 text = "Name"
 
-[node name="Add" type="Button" parent="VBoxContainer2/HBoxContainer"]
+[node name="Add" type="Button" parent="VBoxContainer2/PanelContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
@@ -34,3 +50,4 @@ icon_alignment = 1
 [node name="Container" type="VBoxContainer" parent="VBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_constants/separation = 8

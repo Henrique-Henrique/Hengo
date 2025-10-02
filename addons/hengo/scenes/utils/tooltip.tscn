@@ -3,18 +3,7 @@
 [ext_resource type="Script" uid="uid://e77fkqwrtpaw" path="res://addons/hengo/scripts/utils/tooltip.gd" id="1_6luta"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_f5gqd"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_5j0lf"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_60crp"]
-content_margin_left = 12.0
-content_margin_top = 12.0
-content_margin_right = 12.0
-content_margin_bottom = 12.0
-bg_color = Color(0, 0, 0, 0.270588)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-shadow_size = 15
+[ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="3_5j0lf"]
 
 [node name="Tooltip" type="RichTextLabel"]
 process_mode = 4
@@ -25,7 +14,8 @@ mouse_filter = 2
 theme_override_colors/default_color = Color(1, 1, 1, 1)
 theme_override_fonts/normal_font = ExtResource("1_f5gqd")
 theme_override_fonts/bold_font = ExtResource("2_5j0lf")
-theme_override_styles/normal = SubResource("StyleBoxFlat_60crp")
+theme_override_styles/normal = ExtResource("3_5j0lf")
+theme_override_styles/focus = ExtResource("3_5j0lf")
 bbcode_enabled = true
 text = "dsadsa"
 fit_content = true

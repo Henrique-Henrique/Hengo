@@ -6,15 +6,15 @@ enum ArrayMove {UP, DOWN}
 var prop: HenProp
 
 func _ready() -> void:
-    %Add.pressed.connect(_on_add)
+	%Add.pressed.connect(_on_add)
 
 
 func _on_add() -> void:
-    if prop.on_item_create:
-        prop.on_item_create.call()
-        HenPropEditor.get_singleton().start()
+	if prop.on_item_create:
+		prop.on_item_create.call()
+		HenPropEditor.get_singleton().start()
 
 
 func start(_prop: HenProp) -> HenPropArrayItem:
-    prop = _prop
-    return self
+	prop = _prop
+	return self

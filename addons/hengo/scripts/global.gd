@@ -28,6 +28,7 @@ static var TABS: HenTabs
 static var SIGNAL_BUS: HenSignalBus
 static var BASE_ROUTE_REF: HenLoader.BaseRouteRef
 static var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
+static var CNODE_UI: Panel
 
 # cnodes
 static var can_make_connection: bool = false

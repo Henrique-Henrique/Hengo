@@ -17,10 +17,10 @@
 [ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
-[ext_resource type="Texture2D" uid="uid://lbtan5ojs7w8" path="res://addons/hengo/assets/images/grid_2.png" id="14_8emys"]
 [ext_resource type="Script" uid="uid://dmrj5ajx7qbuc" path="res://addons/hengo/scripts/utils/terminal.gd" id="15_lxtpw"]
-[ext_resource type="Texture2D" uid="uid://b0m53nlcuqhhw" path="res://addons/hengo/assets/images/grid_1.png" id="15_w813u"]
+[ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
 [ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
+[ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="17_lxtpw"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
 [ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
@@ -55,7 +55,7 @@ content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.2901961)
+bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -99,15 +99,15 @@ shadow_size = 10
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1518, 925)
-shader_parameter/offset = Vector2(707.82764, 357.4584)
-shader_parameter/zoom_factor = 0.20029023
+shader_parameter/screen_size = Vector2(3058, 2008)
+shader_parameter/offset = Vector2(-549.7897, 705.9204)
+shader_parameter/zoom_factor = 0.20005754
 shader_parameter/alpha = 0.2
-shader_parameter/text = ExtResource("14_8emys")
-shader_parameter/text_size = 200.0
+shader_parameter/text = ExtResource("17_lxtpw")
+shader_parameter/text_size = 400.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 0.74509805, 0.74509805, 0.74509805, 1)
+colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
@@ -125,12 +125,13 @@ bg_color = Color(0.123256, 0.126406, 0.129557, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_48snx"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_top = 1
+border_width_top = 2
 border_color = Color(0.8, 0.8, 0.8, 0.5176471)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+expand_margin_left = 8.0
+expand_margin_top = 12.0
+expand_margin_right = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
 content_margin_left = 4.0
@@ -207,7 +208,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
@@ -215,7 +216,6 @@ size_flags_horizontal = 3
 mouse_filter = 0
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
 [node name="SidePanel" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
@@ -382,7 +382,8 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_lxtpw")
 
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
+[node name="CNodeContainerBG" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
+unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
 anchors_preset = 15
@@ -390,10 +391,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("16_74kfo")
 
-[node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control"]
+[node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG"]
 process_mode = 4
-visible = false
 texture_filter = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_r8ipe")
@@ -404,19 +405,19 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("15_w813u")
+texture = ExtResource("17_lxtpw")
 
-[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control" node_paths=PackedStringArray("grid")]
+[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG" node_paths=PackedStringArray("grid")]
 unique_name_in_owner = true
 position = Vector2(0, -8)
 script = ExtResource("3_84akk")
 grid = NodePath("../Grid")
 
-[node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 visible = false
 position = Vector2(289, 313)
 
-[node name="CommentContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="CommentContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -425,7 +426,7 @@ offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
 
-[node name="CnodeContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="CnodeContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -434,7 +435,7 @@ offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
 
-[node name="ConnectionGuide" type="Line2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="ConnectionGuide" type="Line2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 visible = false
 z_index = 2
@@ -444,9 +445,9 @@ texture = ExtResource("7_6jref")
 texture_mode = 1
 script = ExtResource("7_gj1gq")
 
-[node name="Lines" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="Lines" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 
-[node name="SelectionRect" type="ReferenceRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="SelectionRect" type="ReferenceRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 process_mode = 4
 visible = false
 offset_left = 153.0
@@ -457,7 +458,7 @@ mouse_filter = 2
 border_color = Color(0.749928, 0.915784, 0.889306, 1)
 border_width = 3.0
 
-[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam/SelectionRect"]
+[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam/SelectionRect"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -466,20 +467,20 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
-[node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 visible = false
 modulate = Color(0.270724, 0.690067, 0.0733794, 1)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
-[node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+[node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 visible = false
 modulate = Color(0.270724, 0.690067, 0.0733794, 1)
 position = Vector2(0, 3000)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
-[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam" instance=ExtResource("20_w813u")]
+[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam" instance=ExtResource("20_w813u")]
 unique_name_in_owner = true
 visible = false
 
@@ -532,7 +533,7 @@ visible = false
 
 [node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUp"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(230, 0)
+custom_minimum_size = Vector2(400, 0)
 offset_right = 230.0
 offset_bottom = 39.0
 size_flags_horizontal = 3

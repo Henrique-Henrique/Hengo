@@ -288,15 +288,11 @@ static func instantiate_and_add_pool() -> void:
 		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
 
 
-func _process(_delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if can_follow:
-		position = move_smooth(position, follow_position, _delta)
+		position = position.lerp(follow_position, _delta * 48)
 		on_move.emit()
+		print(1)
 		if position.is_equal_approx(follow_position):
 			can_follow = false
 			set_process(false)
-
-
-func move_smooth(_position: Vector2, _follow_position: Vector2, _delta: float) -> Vector2:
-	var weight: float = clamp(_delta * 48.0, 0.0, 1.0)
-	return _position.lerp(_follow_position, weight)

@@ -56,6 +56,11 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _l
 
     return self
 
+func move(_pos: Vector2) -> void:
+    var gp = get_node('%GeneralPopUp')
+    gp.position += _pos
+    HenUtils.reposition_control_inside(gp)
+
 
 func reset_size() -> void:
     var gp = get_node('%GeneralPopUp')
