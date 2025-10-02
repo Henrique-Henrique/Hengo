@@ -1,8 +1,11 @@
-[gd_resource type="Theme" load_steps=11 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=12 format=3 uid="uid://xxj7abqbehjg"]
 
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
-[ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="2_nhkyk"]
+[ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="2_xbr4r"]
+[ext_resource type="StyleBox" uid="uid://1ectx2h3jrw7" path="res://addons/hengo/resources/style_box/string.tres" id="4_el3g6"]
+[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="5_yvxym"]
+[ext_resource type="StyleBox" uid="uid://4y7hysplpx56" path="res://addons/hengo/resources/style_box/level_1_flat.tres" id="6_el3g6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvxym"]
 bg_color = Color(1, 1, 1, 0.0901961)
@@ -28,18 +31,6 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nhkyk"]
-bg_color = Color(1, 1, 1, 0.0901961)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.207843)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xbr4r"]
@@ -54,22 +45,6 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghilx"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.140412, 0.144739, 0.149066, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.2484, 0.2484, 0.2484, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
 [sub_resource type="ImageTexture" id="ImageTexture_6gb4l"]
 
 [resource]
@@ -77,15 +52,15 @@ default_font = ExtResource("1_revyj")
 Button/fonts/font = ExtResource("1_ghilx")
 Button/styles/focus = SubResource("StyleBoxFlat_yvxym")
 Button/styles/hover = SubResource("StyleBoxFlat_el3g6")
-Button/styles/normal = SubResource("StyleBoxFlat_nhkyk")
+Button/styles/normal = ExtResource("2_xbr4r")
 ItemList/fonts/font = ExtResource("1_revyj")
 Label/fonts/font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
 LineEdit/fonts/font = ExtResource("1_ghilx")
 LineEdit/styles/focus = SubResource("StyleBoxFlat_xbr4r")
-LineEdit/styles/normal = ExtResource("2_nhkyk")
-PopupMenu/styles/panel = SubResource("StyleBoxFlat_ghilx")
+LineEdit/styles/normal = ExtResource("4_el3g6")
+PopupMenu/styles/panel = ExtResource("5_yvxym")
 SpinBox/colors/down_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)
 SpinBox/colors/down_hover_icon_modulate = Color(0.95, 0.95, 0.95, 0)
 SpinBox/colors/down_icon_modulate = Color(0.88, 0.88, 0.88, 0)
@@ -107,3 +82,19 @@ SpinBox/icons/up_hover = null
 SpinBox/icons/up_pressed = null
 SpinBox/icons/updown = SubResource("ImageTexture_6gb4l")
 Tree/fonts/font = ExtResource("1_revyj")
+Tree/styles/button_hover = ExtResource("6_el3g6")
+Tree/styles/button_pressed = ExtResource("6_el3g6")
+Tree/styles/cursor = ExtResource("6_el3g6")
+Tree/styles/cursor_unfocused = ExtResource("6_el3g6")
+Tree/styles/custom_button = ExtResource("6_el3g6")
+Tree/styles/custom_button_hover = ExtResource("6_el3g6")
+Tree/styles/custom_button_pressed = ExtResource("6_el3g6")
+Tree/styles/hovered = ExtResource("6_el3g6")
+Tree/styles/hovered_dimmed = ExtResource("6_el3g6")
+Tree/styles/hovered_selected = ExtResource("6_el3g6")
+Tree/styles/hovered_selected_focus = ExtResource("6_el3g6")
+Tree/styles/selected = ExtResource("6_el3g6")
+Tree/styles/selected_focus = ExtResource("6_el3g6")
+Tree/styles/title_button_hover = ExtResource("6_el3g6")
+Tree/styles/title_button_normal = ExtResource("6_el3g6")
+Tree/styles/title_button_pressed = ExtResource("6_el3g6")

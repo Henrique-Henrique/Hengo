@@ -68,7 +68,7 @@ func _enter_tree():
 
 	HenGlobal.history = UndoRedo.new()
 	HenGlobal.HENGO_ROOT = main_scene
-	HenGlobal.CAM = cnode_ui.get_node('Cam')
+	HenGlobal.CAM = main_scene.get_node('%Cam')
 	HenGlobal.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
 	HenGlobal.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
 	HenGlobal.DROPDOWN_MENU = main_scene.get_node('%DropDownMenu')

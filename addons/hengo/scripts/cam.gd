@@ -28,7 +28,7 @@ func _ready() -> void:
 		return
 	
 	can_scroll = false
-	var parent: Panel = get_parent()
+	var parent: Control = get_parent()
 
 	parent.item_rect_changed.connect(_on_ui_size_changed)
 
@@ -113,7 +113,7 @@ func _physics_process(_delta: float) -> void:
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom, # position
-		(get_parent() as Panel).size / _zoom
+		(get_parent() as Control).size / _zoom
 	)
 
 
@@ -125,7 +125,7 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 func get_rect() -> Rect2:
 	return Rect2(
 		transform.origin / -transform.x.x, # position
-		(get_parent() as Panel).size / transform.x.x
+		(get_parent() as Control).size / transform.x.x
 	)
 
 # public

@@ -2,26 +2,11 @@
 
 [ext_resource type="Script" uid="uid://bobl7w3f5fstw" path="res://addons/hengo/scripts/utils/prop_editor/prop_array_item.gd" id="1_3yona"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_p2mjy"]
+[ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="1_sw1tn"]
 [ext_resource type="Texture2D" uid="uid://dguwkk3raakpa" path="res://addons/hengo/assets/icons/menu/plus.svg" id="2_5nhsi"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_73rgf"]
-content_margin_left = 12.0
-content_margin_top = 12.0
-content_margin_right = 12.0
-content_margin_bottom = 12.0
-bg_color = Color(0, 0, 0, 0.223529)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.270222, 0.270222, 0.270222, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
 [node name="PropArrayItem" type="PanelContainer"]
-theme_override_styles/panel = SubResource("StyleBoxFlat_73rgf")
+theme_override_styles/panel = ExtResource("1_sw1tn")
 script = ExtResource("1_3yona")
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]

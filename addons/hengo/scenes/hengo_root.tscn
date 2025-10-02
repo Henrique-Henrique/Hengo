@@ -1,9 +1,10 @@
-[gd_scene load_steps=60 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=64 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
+[ext_resource type="StyleBox" uid="uid://4y7hysplpx56" path="res://addons/hengo/resources/style_box/level_1_flat.tres" id="7_74kfo"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
@@ -33,104 +34,103 @@
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.109804, 0.109804, 0.109804, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
-shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3824, 1118)
-shader_parameter/offset = Vector2(1040.21, 45.3525)
-shader_parameter/zoom_factor = 1.24999
-shader_parameter/alpha = 0.2
-shader_parameter/text = ExtResource("14_8emys")
-shader_parameter/text_size = 200.0
-
-[sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.352941, 0.733333, 0.937255, 1, 1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
-bg_color = Color(1, 1, 1, 0.0862745)
+bg_color = Color(0.105882354, 0.105882354, 0.11372549, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
 content_margin_right = 8.0
 content_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ji2ve"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8emys"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w813u"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hg3xi"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w813u"]
-content_margin_left = 8.0
-content_margin_top = 8.0
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.1, 0.1, 0.890196)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.152941)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_uvl0d"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tk0ia"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eipqu"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5te2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_top = 4.0
 content_margin_right = 8.0
 content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.290196)
+bg_color = Color(0, 0, 0, 0.2901961)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rluxx"]
-bg_color = Color(0.219501, 0.219501, 0.219501, 0.6)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5te2"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eipqu"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tk0ia"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ny40n"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_74kfo"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yt1h"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.230315, 0.230315, 0.230315, 0.458824)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5yt1h"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0js6d"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rg66s"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nqb6j"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1gx8m"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hg3xi"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w813u"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8emys"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ji2ve"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lxtpw"]
+bg_color = Color(0.12156863, 0.12156863, 0.13333334, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16862746, 0.16862746, 0.1764706, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0.07621712, 0.07621694, 0.08263492, 1)
+shadow_size = 10
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
+shader = ExtResource("9_5sxro")
+shader_parameter/screen_size = Vector2(1518, 925)
+shader_parameter/offset = Vector2(707.82764, 357.4584)
+shader_parameter/zoom_factor = 0.20029023
+shader_parameter/alpha = 0.2
+shader_parameter/text = ExtResource("14_8emys")
+shader_parameter/text_size = 200.0
+
+[sub_resource type="Gradient" id="Gradient_rg8iy"]
+colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 0.74509805, 0.74509805, 0.74509805, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
+bg_color = Color(1, 1, 1, 0.0862745)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xresw"]
 bg_color = Color(0.123256, 0.126406, 0.129557, 1)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x5h56"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xresw"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r5155"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vu20g"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r5155"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xresw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x5h56"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_48snx"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_top = 1
+border_color = Color(0.8, 0.8, 0.8, 0.5176471)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
 content_margin_left = 4.0
@@ -181,111 +181,19 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]
-process_mode = 4
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_r8ipe")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("15_w813u")
-
-[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI" node_paths=PackedStringArray("grid")]
-script = ExtResource("3_84akk")
-grid = NodePath("../Grid")
-
-[node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/Cam"]
-visible = false
-position = Vector2(289, 313)
-
-[node name="CommentContainer" type="Control" parent="VBoxContainer/CNodeUI/Cam"]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-theme = ExtResource("1_2muha")
-metadata/_edit_use_anchors_ = true
-
-[node name="CnodeContainer" type="Control" parent="VBoxContainer/CNodeUI/Cam"]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-theme = ExtResource("1_2muha")
-metadata/_edit_use_anchors_ = true
-
-[node name="ConnectionGuide" type="Line2D" parent="VBoxContainer/CNodeUI/Cam"]
-unique_name_in_owner = true
-visible = false
-z_index = 2
-width = 6.0
-gradient = SubResource("Gradient_rg8iy")
-texture = ExtResource("7_6jref")
-texture_mode = 1
-script = ExtResource("7_gj1gq")
-
-[node name="Lines" type="Node2D" parent="VBoxContainer/CNodeUI/Cam"]
-
-[node name="SelectionRect" type="ReferenceRect" parent="VBoxContainer/CNodeUI/Cam"]
-process_mode = 4
-visible = false
-offset_left = 153.0
-offset_top = 148.0
-offset_right = 193.0
-offset_bottom = 188.0
-mouse_filter = 2
-border_color = Color(0.749928, 0.915784, 0.889306, 1)
-border_width = 3.0
-
-[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/Cam/SelectionRect"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
-
-[node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/Cam"]
-visible = false
-modulate = Color(0.270724, 0.690067, 0.0733794, 1)
-scale = Vector2(0.21, 0.21)
-texture = ExtResource("9_si04b")
-
-[node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/Cam"]
-visible = false
-modulate = Color(0.270724, 0.690067, 0.0733794, 1)
-position = Vector2(0, 3000)
-scale = Vector2(0.21, 0.21)
-texture = ExtResource("9_si04b")
-
-[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/Cam" instance=ExtResource("20_w813u")]
-unique_name_in_owner = true
-visible = false
-
 [node name="Center2" type="Marker2D" parent="VBoxContainer/CNodeUI"]
 visible = false
-position = Vector2(-580, 0)
+position = Vector2(-580, 4)
 
 [node name="CNodeStatLabel" type="Label" parent="VBoxContainer/CNodeUI"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(1, 1, 1, 0.658824)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -20.0
+layout_mode = 0
+offset_left = 4.0
+offset_top = 307.0
+offset_right = 1144.0
+offset_bottom = 333.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
@@ -299,53 +207,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 4.0
-mouse_filter = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
-layout_mode = 2
-
-[node name="Tabs" type="TabBar" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-tab_alignment = 2
-script = ExtResource("11_lxtpw")
-
-[node name="Terminal" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/line_separation = 4
-theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_fonts/italics_font = ExtResource("16_xresw")
-theme_override_fonts/bold_font = ExtResource("23_tlngq")
-theme_override_styles/fill = SubResource("StyleBoxEmpty_ji2ve")
-theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
-bbcode_enabled = true
-fit_content = true
-autowrap_mode = 0
-shortcut_keys_enabled = false
-horizontal_alignment = 2
-justification_flags = 0
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
-script = ExtResource("15_lxtpw")
+theme_override_constants/separation = 12
 
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
@@ -356,14 +218,10 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-
 [node name="SidePanel" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_w813u")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_uvl0d")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
 layout_mode = 2
@@ -381,6 +239,24 @@ alignment = 2
 script = ExtResource("7_sagw0")
 dashboard = NodePath("DashBoard")
 
+[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+script = ExtResource("11_35y2j")
+
+[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
+text = "Compile"
+
 [node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 tooltip_text = "Dashboard"
@@ -391,36 +267,20 @@ flat = true
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
-
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 1
-theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
-
-[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_constants/separation = 0
-script = ExtResource("11_35y2j")
-
-[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("23_tlngq")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
-text = "Compile"
 
 [node name="TabContainer" type="TabContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/tab_separation = 12
 theme_override_styles/panel = SubResource("StyleBoxEmpty_74kfo")
-theme_override_styles/tab_selected = SubResource("StyleBoxFlat_5yt1h")
+theme_override_styles/tabbar_background = SubResource("StyleBoxEmpty_5yt1h")
+theme_override_styles/tab_unselected = SubResource("StyleBoxEmpty_0js6d")
+theme_override_styles/tab_hovered = SubResource("StyleBoxEmpty_rg66s")
+theme_override_styles/tab_selected = ExtResource("7_74kfo")
+theme_override_styles/tab_disabled = SubResource("StyleBoxEmpty_nqb6j")
+theme_override_styles/tab_focus = ExtResource("7_74kfo")
 current_tab = 0
 script = ExtResource("18_hg3xi")
 
@@ -450,6 +310,179 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
+[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 4.0
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+visible = false
+layout_mode = 2
+
+[node name="Tabs" type="TabBar" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tab_alignment = 2
+script = ExtResource("11_lxtpw")
+
+[node name="Terminal" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/line_separation = 4
+theme_override_fonts/normal_font = ExtResource("20_y63ss")
+theme_override_fonts/bold_font = ExtResource("23_tlngq")
+theme_override_fonts/italics_font = ExtResource("16_xresw")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
+theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_ji2ve")
+bbcode_enabled = true
+fit_content = true
+autowrap_mode = 0
+shortcut_keys_enabled = false
+horizontal_alignment = 2
+justification_flags = 0
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
+script = ExtResource("15_lxtpw")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Base > Test"
+
+[node name="Panel" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
+process_mode = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_lxtpw")
+
+[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control"]
+process_mode = 4
+visible = false
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_r8ipe")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("15_w813u")
+
+[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control" node_paths=PackedStringArray("grid")]
+unique_name_in_owner = true
+position = Vector2(0, -8)
+script = ExtResource("3_84akk")
+grid = NodePath("../Grid")
+
+[node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+visible = false
+position = Vector2(289, 313)
+
+[node name="CommentContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+theme = ExtResource("1_2muha")
+metadata/_edit_use_anchors_ = true
+
+[node name="CnodeContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+theme = ExtResource("1_2muha")
+metadata/_edit_use_anchors_ = true
+
+[node name="ConnectionGuide" type="Line2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+unique_name_in_owner = true
+visible = false
+z_index = 2
+width = 6.0
+gradient = SubResource("Gradient_rg8iy")
+texture = ExtResource("7_6jref")
+texture_mode = 1
+script = ExtResource("7_gj1gq")
+
+[node name="Lines" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+
+[node name="SelectionRect" type="ReferenceRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+process_mode = 4
+visible = false
+offset_left = 153.0
+offset_top = 148.0
+offset_right = 193.0
+offset_bottom = 188.0
+mouse_filter = 2
+border_color = Color(0.749928, 0.915784, 0.889306, 1)
+border_width = 3.0
+
+[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam/SelectionRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
+
+[node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+visible = false
+modulate = Color(0.270724, 0.690067, 0.0733794, 1)
+scale = Vector2(0.21, 0.21)
+texture = ExtResource("9_si04b")
+
+[node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam"]
+visible = false
+modulate = Color(0.270724, 0.690067, 0.0733794, 1)
+position = Vector2(0, 3000)
+scale = Vector2(0.21, 0.21)
+texture = ExtResource("9_si04b")
+
+[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/Control/Cam" instance=ExtResource("20_w813u")]
+unique_name_in_owner = true
+visible = false
+
 [node name="ScriptMsgContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI"]
 unique_name_in_owner = true
 process_mode = 4
@@ -472,12 +505,12 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_fonts/italics_font = ExtResource("16_xresw")
 theme_override_fonts/bold_font = ExtResource("23_tlngq")
-theme_override_styles/fill = SubResource("StyleBoxEmpty_x5h56")
-theme_override_styles/background = SubResource("StyleBoxEmpty_xresw")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_vu20g")
+theme_override_fonts/italics_font = ExtResource("16_xresw")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_r5155")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_vu20g")
+theme_override_styles/background = SubResource("StyleBoxEmpty_xresw")
+theme_override_styles/fill = SubResource("StyleBoxEmpty_x5h56")
 bbcode_enabled = true
 text = "[center]
 [font_size=24][b]Hengo Visual Script[/b][/font_size]
@@ -513,14 +546,20 @@ layout_mode = 2
 process_mode = 4
 layout_mode = 2
 mouse_filter = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/font_color = Color(0, 0, 0, 1)
 disabled = true
 text = "Name"
 icon = ExtResource("24_hg3xi")
 flat = true
 alignment = 0
+
+[node name="Panel" type="Panel" parent="GeneralPopUp/GeneralPopUp"]
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_48snx")
 
 [node name="PopupContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true

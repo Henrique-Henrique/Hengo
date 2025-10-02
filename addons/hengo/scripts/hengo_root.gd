@@ -109,8 +109,7 @@ func _select_cnode() -> void:
 
 
 func _process(_delta: float) -> void:
-	cnode_stat_label.text = str('pos => ', HenGlobal.CAM.position as Vector2i) + str(' zoom => ', snapped(HenGlobal.CAM.transform.x.x, 0.01))
-
+	# cnode_stat_label.text = str('pos => ', HenGlobal.CAM.position as Vector2i) + str(' zoom => ', snapped(HenGlobal.CAM.transform.x.x, 0.01))
 	if cnode_selecting_rect and HenGlobal.CAM:
 		if get_global_mouse_position().distance_to(start_select_pos) > 50:
 			var selection_rect: ReferenceRect = HenGlobal.CAM.get_node('SelectionRect')

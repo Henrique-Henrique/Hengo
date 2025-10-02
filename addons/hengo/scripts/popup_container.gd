@@ -41,7 +41,7 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _l
 
     if _lod > 0:
         (get_node('%Background') as Panel).modulate = Color.WHITE
-        ((get_node('%Background') as Panel).material as ShaderMaterial).set_shader_parameter('lod', _lod)
+        # ((get_node('%Background') as Panel).material as ShaderMaterial).set_shader_parameter('lod', _lod)
     else:
         (get_node('%Background') as Panel).modulate = Color.TRANSPARENT
 
