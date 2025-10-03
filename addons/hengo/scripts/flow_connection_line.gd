@@ -11,6 +11,11 @@ var output: TextureRect
 var flow_type: StringName = ''
 var from_flow_idx: int = 0
 
+var from: WeakRef
+var to: WeakRef
+var from_idx: int
+var to_idx: int
+
 # debug
 const DEBUG_TIMER_TIME = .15
 const DEBUG_TRANS_TIME = .7
@@ -28,9 +33,14 @@ var last_to_pos: Vector2
 
 
 func update_line() -> void:
-	var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) if from_pool_visible and input else last_from_pos
-	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) if to_pool_visible and output else last_to_pos
+	var from_ref: HenVirtualCNode = from.get_ref()
+	var to_ref: HenVirtualCNode = to.get_ref()
 
+	if not from_ref or not to_ref:
+		return
+
+	var start_pos: Vector2 = get_flow_io_position(from_ref, false, from_idx) + Vector2(0, 20)
+	var end_pos: Vector2 = get_flow_io_position(to_ref, true, to_idx) - Vector2(0, 20)
 	var first_point: Vector2 = start_pos + Vector2(0, POINT_WIDTH)
 	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)
 
@@ -95,3 +105,40 @@ func hide_debug() -> void:
 
 func change_debug_line_color(_color: Color) -> void:
 	material.set_shader_parameter('color', _color)
+
+
+func get_flow_io_position(_from: HenVirtualCNode, _is_input: bool, _target_idx: int) -> Vector2:
+	var parent_visual: HenVirtualCNodeVisual = _from.visual
+	var flows: Array = _from.flow.flow_inputs if _is_input else _from.flow.flow_outputs
+	
+	if _target_idx < 0 or _target_idx >= flows.size():
+		return parent_visual.position
+	
+	var y_pos: float = 0.0 if _is_input else parent_visual.size.y
+	
+	if flows.size() == 1:
+		var center_x: float = parent_visual.size.x / 2.0
+		
+		return parent_visual.position + Vector2(center_x, y_pos)
+
+	var spacing: float = 10.0
+	var total_flows_width: float = 0.0
+	var widths: Array = []
+
+	for flow: HenVCFlow in flows:
+		var item_width: float = HenUtils.get_text_size(flow.name).x
+		widths.append(item_width)
+		total_flows_width += item_width
+	
+	total_flows_width += spacing * (flows.size() - 1)
+	
+	var current_x_offset: float = (parent_visual.size.x - total_flows_width) / 2.0
+	
+	for i in range(flows.size()):
+		var current_item_width: float = widths[i]
+		if i == _target_idx:
+			var port_center_x: float = current_x_offset + (current_item_width / 2.0)
+			return parent_visual.position + Vector2(port_center_x, y_pos)
+		current_x_offset += current_item_width + spacing
+	
+	return parent_visual.position

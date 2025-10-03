@@ -222,6 +222,10 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 		connection.line_ref.to_pool_visible = to.state.is_showing
 		connection.line_ref.from_pool_visible = from.state.is_showing
+		connection.line_ref.from = weakref(from)
+		connection.line_ref.to = weakref(to)
+		connection.line_ref.from_idx = from.flow.flow_outputs.find(from.flow.get_flow_output(connection.from_id))
+		connection.line_ref.to_idx = to.flow.flow_inputs.find(to.flow.get_flow_input(connection.to_id))
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:

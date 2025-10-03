@@ -2,12 +2,27 @@
 
 [ext_resource type="Script" uid="uid://bobl7w3f5fstw" path="res://addons/hengo/scripts/utils/prop_editor/prop_array_item.gd" id="1_3yona"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_p2mjy"]
-[ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="1_sw1tn"]
 [ext_resource type="Texture2D" uid="uid://dguwkk3raakpa" path="res://addons/hengo/assets/icons/menu/plus.svg" id="2_5nhsi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2mjy"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.22391462, 0.22391927, 0.25194994, 1)
+border_width_left = 1
+border_width_top = 2
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.29803923, 0.29803923, 0.33333334, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3yona"]
 content_margin_left = 4.0
-content_margin_top = 8.0
+content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 8.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -17,7 +32,7 @@ expand_margin_left = 10.0
 expand_margin_right = 10.0
 
 [node name="PropArrayItem" type="PanelContainer"]
-theme_override_styles/panel = ExtResource("1_sw1tn")
+theme_override_styles/panel = SubResource("StyleBoxFlat_p2mjy")
 script = ExtResource("1_3yona")
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]

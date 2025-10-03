@@ -292,7 +292,6 @@ func _physics_process(_delta: float) -> void:
 	if can_follow:
 		position = position.lerp(follow_position, _delta * 48)
 		on_move.emit()
-		print(1)
 		if position.is_equal_approx(follow_position):
 			can_follow = false
 			set_process(false)

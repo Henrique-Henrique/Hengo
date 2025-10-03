@@ -203,11 +203,9 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 
 
 func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
-	# get text from parameter
-	var text: String = _text
 	var font: Font = list.get_theme_font(&'font', &'Tree')
 	var font_size: int = list.get_theme_font_size(&'font_size', &'Tree')
-	var text_size: Vector2 = font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+	var text_size: Vector2 = font.get_string_size(_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 	var padding = 50
 	var button_width = text_size.x + padding
 	
@@ -220,7 +218,7 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 	list.draw_style_box(TREE_ITEM_STYLEBOX, Rect2(button_pos, Vector2(button_width, button_height)))
 	
 	if _icon:
-		var icon_size = Vector2(18, 18)
+		var icon_size = Vector2(14, 14)
 		var icon_pos = Vector2(button_pos.x + 8, button_pos.y + (button_height - icon_size.y) / 2)
 		list.draw_texture_rect(_icon, Rect2(icon_pos, icon_size), false, _icon_color)
 		
@@ -229,13 +227,13 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 		var text_pos_x = button_pos.x + text_offset + (button_width - text_offset - text_size.x) / 2
 		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
 		var text_pos = Vector2(text_pos_x, text_pos_y)
-		list.draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
+		list.draw_string(font, text_pos, _text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
 	else:
 		# draw text centered when no icon
 		var text_pos_x = button_pos.x + button_width / 2 - text_size.x / 2
 		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
 		var text_pos = Vector2(text_pos_x, text_pos_y)
-		list.draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
+		list.draw_string(font, text_pos, _text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
 
 
 func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:

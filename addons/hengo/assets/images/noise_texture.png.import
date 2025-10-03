@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dq6u32kawcvf5"
-path="res://.godot/imported/cardboard-texture.jpg-198fbeb9f03c691868125bb846ac2904.ctex"
+uid="uid://bsptgo01fl6k"
+path="res://.godot/imported/noise_texture.png-92572e69e2412669cb85d07c7c26a9b2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/hengo/assets/images/cardboard-texture.jpg"
-dest_files=["res://.godot/imported/cardboard-texture.jpg-198fbeb9f03c691868125bb846ac2904.ctex"]
+source_file="res://addons/hengo/assets/images/noise_texture.png"
+dest_files=["res://.godot/imported/noise_texture.png-92572e69e2412669cb85d07c7c26a9b2.ctex"]
 
 [params]
 

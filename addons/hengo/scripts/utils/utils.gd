@@ -107,3 +107,9 @@ static func get_warning_text(_text: String) -> String:
 
 static func get_building_text(_text: String) -> String:
 	return "[color=#ffffff]" + _text + "[/color][color=#747d8c][/color] [img]res://addons/hengo/assets/icons/terminal/chevron-right.svg[/img]"
+
+
+static func get_text_size(_text: String) -> Vector2:
+	var font: Font = HenGlobal.HENGO_ROOT.get_theme_font(&'font', &'Control')
+	var font_size: int = HenGlobal.HENGO_ROOT.get_theme_font_size(&'font_size', &'Control')
+	return font.get_string_size(_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)

@@ -98,6 +98,7 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 		signal_list = signal_list.map(func(x: HenSignalData): return x.get_save())
 	}
 
+
 func load_save(_data: Dictionary) -> void:
 	id = HenGlobal.get_new_node_counter() if not _data.has('id') else _data.id
 
