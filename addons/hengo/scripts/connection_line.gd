@@ -21,6 +21,14 @@ const DEBUG_TRANS_TIME = 1.
 
 var debug_timer: Timer
 
+var from: WeakRef
+var to: WeakRef
+var from_idx: int
+var to_idx: int
+
+const TITLE_SIZE_Y = 43
+const CNODE_IO_SIZE = 40
+
 # pool
 var from_pool_visible: bool = true
 var to_pool_visible: bool = true
@@ -29,8 +37,18 @@ var last_to_pos: Vector2
 
 
 func update_line() -> void:
-	var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) + conn_size if from_pool_visible and input else last_from_pos
-	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) + conn_size if to_pool_visible and output else last_to_pos
+	var from_ref: HenVirtualCNode = from.get_ref()
+	var to_ref: HenVirtualCNode = to.get_ref()
+
+	if not from_ref or not to_ref:
+		return
+	
+	var start_size_y: float = TITLE_SIZE_Y + CNODE_IO_SIZE / 2.
+ 
+	var start_pos: Vector2 = from_ref.visual.position + Vector2(from_ref.visual.size.x, start_size_y + (CNODE_IO_SIZE * from_idx))
+	var end_pos: Vector2 = to_ref.visual.position + Vector2(0, start_size_y + (CNODE_IO_SIZE * to_idx))
+	# var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) + conn_size if from_pool_visible and input else last_from_pos
+	# var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) + conn_size if to_pool_visible and output else last_to_pos
 
 	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
 	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)

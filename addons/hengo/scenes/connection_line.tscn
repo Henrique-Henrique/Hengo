@@ -14,7 +14,6 @@ colors = PackedColorArray(0.4, 0.2, 0.6, 1, 0.4, 0.2, 0.6, 1)
 z_index = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_pxqr5")
-width = 7.0
 default_color = Color(0.574328, 0.574328, 0.574328, 1)
 gradient = SubResource("Gradient_saaee")
 texture = ExtResource("1_106ed")
