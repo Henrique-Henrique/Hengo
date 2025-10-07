@@ -20,8 +20,8 @@ func clean() -> void:
         node.queue_free()
 
 # public
-func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
-    var gp = get_node('%GeneralPopUp')
+func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
+    var gp: PanelContainer = get_node('%GeneralPopUp')
     var container = gp.get_child(0)
 
     clean()
@@ -29,13 +29,13 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _l
     container.add_child(_content)
     container.get_child(0).text = _name
     
+    gp.reset_size()
+
     if _pos == Vector2.INF:
         # center
-        gp.position = (get_window().size / 2) - (Vector2i(_content.size) / 2)
+        gp.position = HenGlobal.HENGO_ROOT.size / 2 - _content.size / 2
     else:
         gp.position = _pos
-    
-    gp.reset_size()
 
     HenUtils.reposition_control_inside(gp)
 
@@ -55,6 +55,7 @@ func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _l
     HenGlobal.CAM.can_scroll = false
 
     return self
+
 
 func move(_pos: Vector2) -> void:
     var gp = get_node('%GeneralPopUp')

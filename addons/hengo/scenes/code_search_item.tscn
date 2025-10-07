@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3 uid="uid://uku58hykbu48"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12dj8"]
+bg_color = Color(0, 0, 0, 0)
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.14509805)
+
+[node name="CodeSearchItem" type="PanelContainer"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_12dj8")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Name" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+mouse_behavior_recursive = 1
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 0.8980392)
+disabled = true
+text = "BaseButton"
+flat = true
+alignment = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="SubCategoryContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2

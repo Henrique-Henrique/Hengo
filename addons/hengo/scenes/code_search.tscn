@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://bihfp8yx5bhak"]
+
+[ext_resource type="Script" uid="uid://wlu45tx3jnix" path="res://addons/hengo/scripts/utils/code_search.gd" id="1_lav8o"]
+
+[node name="TabContainer" type="TabContainer"]
+custom_minimum_size = Vector2(700, 500)
+offset_right = 153.0
+offset_bottom = 18.0
+current_tab = 1
+tabs_visible = false
+script = ExtResource("1_lav8o")
+
+[node name="CodeSearch" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 0
+metadata/_tab_index = 0
+
+[node name="Label" type="Label" parent="CodeSearch"]
+layout_mode = 2
+text = "Select Category"
+
+[node name="LineEdit" type="LineEdit" parent="CodeSearch"]
+layout_mode = 2
+
+[node name="Container" type="VBoxContainer" parent="CodeSearch"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="APIList" type="HBoxContainer" parent="."]
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="ItemList" type="ItemList" parent="APIList"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="RichTextLabel" type="RichTextLabel" parent="APIList"]
+layout_mode = 2
+size_flags_horizontal = 3

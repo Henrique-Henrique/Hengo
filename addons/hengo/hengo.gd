@@ -22,8 +22,7 @@ func _enter_tree():
 	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
 	add_debugger_plugin(debug_plugin)
 
-	if not FileAccess.file_exists(HenEnums.NATIVE_API_PATH):
-		HenApiGenerator.generate_native_api()
+	HenThreadHelper.add_task(HenApiFinder.map_api)
 
 	# getting native api like String, float... methods.
 	var native_api_file: FileAccess = FileAccess.open(HenEnums.NATIVE_API_PATH, FileAccess.READ)

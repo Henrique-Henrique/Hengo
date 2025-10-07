@@ -100,9 +100,9 @@ shadow_size = 10
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1523, 909)
-shader_parameter/offset = Vector2(965.95966, 109.85716)
-shader_parameter/zoom_factor = 0.20001979
+shader_parameter/screen_size = Vector2(1523, 648)
+shader_parameter/offset = Vector2(-542.1953, -131.5579)
+shader_parameter/zoom_factor = 1.2999952
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -538,15 +538,23 @@ deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
 
 [node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
-visible = false
 
 [node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUp"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(300, 0)
-offset_right = 230.0
-offset_bottom = 39.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -18.0
+offset_right = 150.0
+offset_bottom = 18.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
 theme_override_styles/panel = ExtResource("33_n637n")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
@@ -572,7 +580,6 @@ visible = false
 [node name="DropDownMenu" parent="PopupContainer" instance=ExtResource("9_xwbyp")]
 unique_name_in_owner = true
 theme = ExtResource("1_2muha")
-theme_override_styles/panel = ExtResource("33_n637n")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = 100
