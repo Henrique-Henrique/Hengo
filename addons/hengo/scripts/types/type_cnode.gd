@@ -36,7 +36,7 @@ func get_flow_tokens(_input_id: int, _token_list: Array = []) -> Array:
 		var _id: int = current.id
 
 		if current.has('flow_id'):
-			token_list = HenCodeGeneration.flows_refs[current.flow_id]
+			token_list = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flows_refs[current.flow_id]
 
 		match vc.sub_type:
 			HenVirtualCNode.SubType.IF:
@@ -46,13 +46,14 @@ func get_flow_tokens(_input_id: int, _token_list: Array = []) -> Array:
 			HenVirtualCNode.SubType.MACRO:
 				token_list.append(vc.get_macro_token(_id, vc))
 			HenVirtualCNode.SubType.MACRO_OUTPUT:
-				if HenGlobal.USE_MACRO_REF:
-					var flow: HenTypeFlowConnection = HenGlobal.MACRO_REF.get_flow_connection(_id) if not HenGlobal.MACRO_REF.flow_connections.is_empty() else null
+				var global: HenGlobal = Engine.get_singleton(&'Global')
+				if global.USE_MACRO_REF:
+					var flow: HenTypeFlowConnection = global.MACRO_REF.get_flow_connection(_id) if not global.MACRO_REF.flow_connections.is_empty() else null
 
 					if flow and flow.get_to():
 						stack.append({node = flow.get_to(), id = flow.to_id})
 					
-					HenGlobal.USE_MACRO_REF = false
+					global.USE_MACRO_REF = false
 			_:
 				token_list.append(vc.get_token())
 				
@@ -78,12 +79,13 @@ func get_macro_token(_flow_id: int, _macro_ref: HenTypeCnode) -> Dictionary:
 	var input_flow: HenTypeFlowConnection = (ref.get_ref().input_ref as HenTypeCnode).get_flow_connection(_flow_id)
 
 	if input_flow and input_flow.to:
-		HenGlobal.USE_MACRO_REF = true
-		HenGlobal.MACRO_REF = self
-		HenGlobal.MACRO_USE_SELF = _macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
-		HenGlobal.USE_MACRO_USE_SELF = true
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		global.USE_MACRO_REF = true
+		global.MACRO_REF = self
+		global.MACRO_USE_SELF = _macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
+		global.USE_MACRO_USE_SELF = true
 		flow_tokens = input_flow.get_to().get_flow_tokens(input_flow.to_id)
-		HenGlobal.USE_MACRO_USE_SELF = false
+		global.USE_MACRO_USE_SELF = false
 
 	return {
 		vc_id = id,
@@ -94,13 +96,15 @@ func get_macro_token(_flow_id: int, _macro_ref: HenTypeCnode) -> Dictionary:
 
 
 func get_if_token(_stack: Array) -> Dictionary:
-	var true_flow_id: int = HenCodeGeneration.get_flow_id()
-	var false_flow_id: int = HenCodeGeneration.get_flow_id()
-	var then_flow_id: int = HenCodeGeneration.get_flow_id()
+	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
 
-	HenCodeGeneration.flows_refs[true_flow_id] = []
-	HenCodeGeneration.flows_refs[false_flow_id] = []
-	HenCodeGeneration.flows_refs[then_flow_id] = []
+	var true_flow_id: int = code_generation.get_flow_id()
+	var false_flow_id: int = code_generation.get_flow_id()
+	var then_flow_id: int = code_generation.get_flow_id()
+
+	code_generation.flows_refs[true_flow_id] = []
+	code_generation.flows_refs[false_flow_id] = []
+	code_generation.flows_refs[then_flow_id] = []
 
 	for flow: HenTypeFlowConnection in flow_connections:
 		match flow.from_id:
@@ -123,11 +127,13 @@ func get_if_token(_stack: Array) -> Dictionary:
 
 
 func get_for_token(_stack: Array) -> Dictionary:
-	var body_flow_id: int = HenCodeGeneration.get_flow_id()
-	var then_flow_id: int = HenCodeGeneration.get_flow_id()
+	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
 
-	HenCodeGeneration.flows_refs[body_flow_id] = []
-	HenCodeGeneration.flows_refs[then_flow_id] = []
+	var body_flow_id: int = code_generation.get_flow_id()
+	var then_flow_id: int = code_generation.get_flow_id()
+
+	code_generation.flows_refs[body_flow_id] = []
+	code_generation.flows_refs[then_flow_id] = []
 
 	for flow: HenTypeFlowConnection in flow_connections:
 		match flow.from_id:
@@ -182,9 +188,10 @@ func get_output_index(_id: int) -> int:
 func get_input_token(_id: int) -> Dictionary:
 	var connection: HenTypeInputConnection
 	var input: HenTypeInout = get_input(_id)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	if not input:
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not found input token to generate: id -> " + str(_id)))
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not found input token to generate: id -> " + str(_id)))
 		return {}
 
 	for input_connection: HenTypeInputConnection in input_connections:
@@ -195,14 +202,14 @@ func get_input_token(_id: int) -> Dictionary:
 	if connection and connection.from:
 		match connection.get_from().sub_type:
 			HenVirtualCNode.SubType.MACRO_INPUT:
-				if HenGlobal.USE_MACRO_REF:
-					var data: Dictionary = HenGlobal.MACRO_REF.get_input_token(connection.from_id)
+				if global.USE_MACRO_REF:
+					var data: Dictionary = global.MACRO_REF.get_input_token(connection.from_id)
 					return data
 			HenVirtualCNode.SubType.MACRO:
-				HenGlobal.USE_MACRO_USE_SELF = true
-				HenGlobal.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
+				global.USE_MACRO_USE_SELF = true
+				global.MACRO_USE_SELF = route_type != HenRouter.ROUTE_TYPE.STATE
 				var data: Dictionary = (connection.get_from().ref.get_ref() as HenTypeMacro).output_ref.get_input_token(connection.to_id)
-				HenGlobal.USE_MACRO_USE_SELF = false
+				global.USE_MACRO_USE_SELF = false
 				return data
 			_:
 				var data: Dictionary = connection.get_from().get_token(connection.get_from().get_output_index(connection.from_id))
@@ -210,9 +217,9 @@ func get_input_token(_id: int) -> Dictionary:
 				if not data.type == HenVirtualCNode.SubType.INVALID:
 					data.prop_name = input.name
 
-				if HenGlobal.USE_MACRO_REF:
+				if global.USE_MACRO_REF:
 					if data.has('value'):
-						data.value += '_' + str(HenGlobal.MACRO_REF.id)
+						data.value += '_' + str(global.MACRO_REF.id)
 
 				if input.is_ref:
 					data.is_ref = input.is_ref
@@ -223,12 +230,12 @@ func get_input_token(_id: int) -> Dictionary:
 			type = HenVirtualCNode.SubType.IN_PROP,
 			prop_name = input.name,
 			value = input.code_value,
-			use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF,
+			use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
 		}
 
-		if HenGlobal.USE_MACRO_REF:
+		if global.USE_MACRO_REF:
 			if input.category == 'class_props':
-				data.value += '_' + str(HenGlobal.MACRO_REF.id)
+				data.value += '_' + str(global.MACRO_REF.id)
 
 		if input.is_ref:
 			data.is_ref = input.is_ref
@@ -268,10 +275,11 @@ func get_output_token_list() -> Array:
 
 
 func get_token(_id: int = 0) -> Dictionary:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var token: Dictionary = {
 		vc_id = id,
 		type = sub_type,
-		use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not HenGlobal.USE_MACRO_USE_SELF else HenGlobal.MACRO_USE_SELF,
+		use_self = (route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
 	}
 
 	if category:
@@ -290,7 +298,7 @@ func get_token(_id: int = 0) -> Dictionary:
 		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
 			if sub_type == HenVirtualCNode.SubType.FUNC_FROM:
 				if not input_has_connection(inputs[0].id):
-					HenCodeGeneration.flow_errors.append({})
+					(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 					return INVALID_TOKEN
 
 			token.merge({
@@ -353,7 +361,7 @@ func get_token(_id: int = 0) -> Dictionary:
 			# check inputs
 			for input: HenTypeInout in inputs.slice(1):
 				if not input_has_connection(input.id):
-					HenCodeGeneration.flow_errors.append({})
+					(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 
 			token.merge({
 				params = get_input_token_list(true),
@@ -373,7 +381,7 @@ func get_token(_id: int = 0) -> Dictionary:
 			})
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			if not input_has_connection(inputs[0].id):
-				HenCodeGeneration.flow_errors.append({})
+				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 				return INVALID_TOKEN
 			
 			token.merge({

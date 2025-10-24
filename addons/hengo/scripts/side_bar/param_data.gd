@@ -1,6 +1,6 @@
 class_name HenParamData extends RefCounted
 
-var id: int = HenGlobal.get_new_node_counter()
+var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 var name: String: set = on_change_name
 var type: String = &'Variant': set = on_change_type
 
@@ -49,7 +49,7 @@ func get_save_with_from_id() -> Dictionary:
 func load_save(_data: Dictionary) -> void:
     id = _data.id
     
-    HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+    (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[id] = self
 
     name = _data.name
     type = _data.type

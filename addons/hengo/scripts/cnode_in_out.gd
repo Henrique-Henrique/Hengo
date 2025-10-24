@@ -4,6 +4,7 @@ class_name HenCnodeInOut extends PanelContainer
 @export var root: HenCnode
 @export_enum('in', 'out') var type: String
 
+const CNODE_INPUT_LABEL = preload('res://addons/hengo/scenes/cnode_input_label.tscn')
 
 var io_type: StringName
 var sub_type: StringName
@@ -24,35 +25,37 @@ func _ready():
 const DROPDOWN_SCENE = preload('res://addons/hengo/scenes/props/dropdown.tscn')
 
 func _on_gui(_event: InputEvent) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if _event is InputEventMouseButton:
 		if _event.pressed:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
-				HenGlobal.can_make_connection = true
+				global.can_make_connection = true
 
 				var connector: TextureRect = get_node('%Connector')
-				var pos = HenGlobal.CAM.get_relative_vec2(get_node('%Connector').global_position)
+				var pos = global.CAM.get_relative_vec2(get_node('%Connector').global_position)
 
-				HenGlobal.CONNECTION_GUIDE.is_in_out = true
-				HenGlobal.CONNECTION_GUIDE.start(pos + connector.size / 2, self)
+				global.CONNECTION_GUIDE.is_in_out = true
+				global.CONNECTION_GUIDE.start(pos + connector.size / 2, self)
 		else:
-			if HenGlobal.can_make_connection and not HenGlobal.connection_to_data:
+			if global.can_make_connection and not global.connection_to_data:
 				request_method_picker.emit(type, get_global_mouse_position())
-			elif HenGlobal.can_make_connection and HenGlobal.connection_to_data:
+			elif global.can_make_connection and global.connection_to_data:
 				request_create_connection.emit(type)
 
-			HenGlobal.CONNECTION_GUIDE.end()
+			global.CONNECTION_GUIDE.end()
 
-			HenGlobal.connection_to_data = null
-			HenGlobal.can_make_connection = false
-			HenGlobal.TOOLTIP.close()
+			global.connection_to_data = null
+			global.can_make_connection = false
+			global.TOOLTIP.close()
 	elif _event is InputEventMouseMotion:
 		if type == 'out':
-			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), '[i]Connect[/i]')
+			global.TOOLTIP.go_to(get_global_mouse_position(), '[i]Connect[/i]')
 		else:
-			HenGlobal.TOOLTIP.close()
+			global.TOOLTIP.close()
 
 func _on_enter() -> void:
-	if not HenGlobal.can_make_connection:
+	if not (Engine.get_singleton(&'Global') as HenGlobal).can_make_connection:
 		get('theme_override_styles/panel/').set('border_color', Color(1., 1., 1., .7))
 		return
 
@@ -62,14 +65,15 @@ func _on_enter() -> void:
 
 
 func _on_exit() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	get('theme_override_styles/panel/').set('border_color', Color.TRANSPARENT)
 	
-	HenGlobal.TOOLTIP.close()
-	HenGlobal.connection_to_data = null
+	global.TOOLTIP.close()
+	global.connection_to_data = null
 
-	if HenGlobal.CONNECTION_GUIDE.is_in_out:
-		HenGlobal.CONNECTION_GUIDE.hover_pos = null
-		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
+	if global.CONNECTION_GUIDE.is_in_out:
+		global.CONNECTION_GUIDE.hover_pos = null
+		global.CONNECTION_GUIDE.gradient.colors[1] = Color.WHITE
 
 
 func change_name(_text: String) -> void:
@@ -154,11 +158,11 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						prop_container.add_child(prop_bool)
 						prop = prop_bool
 					'Variant':
-						var l: Label = HenAssets.CNodeInputLabel.instantiate()
+						var l: Label = CNODE_INPUT_LABEL.instantiate()
 						l.text = 'null'
 						prop_container.add_child(l)
 					_:
-						var l: Label = HenAssets.CNodeInputLabel.instantiate()
+						var l: Label = CNODE_INPUT_LABEL.instantiate()
 
 						if prop_container.get_child_count() < 3:
 							# l.text = input_ref.code_value
@@ -260,22 +264,22 @@ func set_type(_type: String) -> void:
 
 	match _type:
 		'String':
-			connector.texture = HenAssets.get_icon_texture('circle')
+			connector.texture = HenUtils.get_icon_texture('circle')
 			connector.set('modulate', Color('#8eef97'))
 		'float':
-			connector.texture = HenAssets.get_icon_texture('circle')
+			connector.texture = HenUtils.get_icon_texture('circle')
 			connector.set('modulate', Color('#FFDD65'))
 		'int':
-			connector.texture = HenAssets.get_icon_texture('circle')
+			connector.texture = HenUtils.get_icon_texture('circle')
 			connector.set('modulate', Color('#5ABBEF'))
 		'bool':
-			connector.texture = HenAssets.get_icon_texture('circle')
+			connector.texture = HenUtils.get_icon_texture('circle')
 			connector.set('modulate', Color('#FC7F7F'))
 		'Variant':
-			connector.texture = HenAssets.get_icon_texture('circle')
+			connector.texture = HenUtils.get_icon_texture('circle')
 			connector.set('modulate', Color('#72788a'))
 		_:
-			connector.texture = HenAssets.get_icon_texture(_type)
+			connector.texture = HenUtils.get_icon_texture(_type)
 	
 	tooltip_text = _type
 

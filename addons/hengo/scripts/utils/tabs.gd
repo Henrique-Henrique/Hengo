@@ -7,9 +7,10 @@ class TabData:
 
 
 func _ready() -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	tab_clicked.connect(_on_tab_selected)
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.connect(_on_scripts_generation_started)
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.connect(_on_scripts_generation_finished)
+	signal_bus.scripts_generation_started.connect(_on_scripts_generation_started)
+	signal_bus.scripts_generation_finished.connect(_on_scripts_generation_finished)
 
 
 func _on_scripts_generation_started() -> void:
@@ -26,8 +27,9 @@ func _on_tab_selected(_index: int) -> void:
 	var meta: TabData = get_tab_metadata(_index)
 
 	if meta:
-		if not await HenLoader.load(ResourceUID.get_id_path(meta.id)):
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + ResourceUID.get_id_path(meta.id)))
+		var loader: HenLoader = Engine.get_singleton(&'Loader')
+		if not await loader.load(ResourceUID.get_id_path(meta.id)):
+			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + ResourceUID.get_id_path(meta.id)))
 
 
 func add_script_tab(id: int) -> void:

@@ -1,5 +1,6 @@
 class_name HenUtils extends Node
 
+const NONE_ICON = preload('res://addons/hengo/assets/icons/menu/none.svg')
 
 static func move_array_item(_arr: Array, _ref, _factor: int) -> bool:
 	var target_idx: int = _arr.find(_ref) - _factor
@@ -54,7 +55,7 @@ static func is_type_relation_valid(_type: StringName, _to_type: StringName) -> b
 
 
 static func reposition_control_inside(_control: Control) -> void:
-	var rect: Rect2 = HenGlobal.CNODE_UI.get_viewport_rect()
+	var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CNODE_UI.get_viewport_rect()
 
 	# x
 	if _control.position.x + _control.size.x > rect.position.x + rect.size.x:
@@ -110,6 +111,14 @@ static func get_building_text(_text: String) -> String:
 
 
 static func get_text_size(_text: String) -> Vector2:
-	var font: Font = HenGlobal.HENGO_ROOT.get_theme_font(&'font', &'Control')
-	var font_size: int = HenGlobal.HENGO_ROOT.get_theme_font_size(&'font_size', &'Control')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var font: Font = global.HENGO_ROOT.get_theme_font(&'font', &'Control')
+	var font_size: int = global.HENGO_ROOT.get_theme_font_size(&'font_size', &'Control')
 	return font.get_string_size(_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+
+
+static func get_icon_texture(_type: StringName) -> Texture2D:
+	if EditorInterface.get_editor_theme().has_icon(_type, &'EditorIcons'):
+		return EditorInterface.get_editor_theme().get_icon(_type, &'EditorIcons')
+	
+	return NONE_ICON

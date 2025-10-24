@@ -3,8 +3,9 @@ extends RichTextLabel
 
 
 func _ready() -> void:
-	HenGlobal.SIGNAL_BUS.set_terminal_text.connect(add_custom_text)
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.connect(finish)
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.set_terminal_text.connect(add_custom_text)
+	signal_bus.scripts_generation_finished.connect(finish)
 
 
 func finish(_script_list: PackedStringArray) -> void:

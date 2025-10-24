@@ -23,7 +23,7 @@ signal type_changed
 func _ready() -> void:
     get_node('%MenuButton').get_popup().id_pressed.connect(_on_id_pressed)
     var type_picker = get_node('%TypePick')
-    type_picker.options = HenEnums.DROPDOWN_ALL_CLASSES
+    type_picker.options = (Engine.get_singleton(&'Enums') as HenEnums).DROPDOWN_ALL_CLASSES
     type_picker.connect('value_changed', _on_type_change)
 
 

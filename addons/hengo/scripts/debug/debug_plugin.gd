@@ -7,20 +7,22 @@ func _has_capture(prefix) -> bool:
 	return prefix == PREFIX
 
 func _capture(message, data, session_id) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	match message:
 		'hengo:cnode':
 			for num: int in get_debug_ids(data[0]):
 				var id_str: String = str(num)
 
-				if HenGlobal.current_script_debug_symbols.has(id_str):
-					var symbol_data: Array = HenGlobal.current_script_debug_symbols[id_str]
+				if global.current_script_debug_symbols.has(id_str):
+					var symbol_data: Array = global.current_script_debug_symbols[id_str]
 					var hash_number: int = symbol_data[0]
 					var flow: String = symbol_data[1]
 
-					if not HenGlobal.node_references.has(hash_number):
+					if not global.node_references.has(hash_number):
 						continue
 
-					var node_data: Dictionary = HenGlobal.node_references[hash_number]
+					var node_data: Dictionary = global.node_references[hash_number]
 					var flow_name: String = flow if flow else 'cnode'
 
 					if node_data.has('base_conn'):
@@ -40,19 +42,19 @@ func _capture(message, data, session_id) -> bool:
 
 			return true
 		'hengo:debugger_loaded':
-			# get_session(session_id).send_message('hengo:start_script', [HenGlobal.current_script_path, HenGlobal.DEBUG_TOKEN])
+			# get_session(session_id).send_message('hengo:start_script', [global.current_script_path, global.DEBUG_TOKEN])
 			return true
 		'hengo:debug_value':
 			var id_str: String = str(data[0])
 
-			if HenGlobal.current_script_debug_symbols.has(id_str):
-				var symbol_data: Array = HenGlobal.current_script_debug_symbols[id_str]
+			if global.current_script_debug_symbols.has(id_str):
+				var symbol_data: Array = global.current_script_debug_symbols[id_str]
 				var hash_number: int = symbol_data[0]
 
-				if not HenGlobal.node_references.has(hash_number):
+				if not global.node_references.has(hash_number):
 					return true
 				
-				var node_data: Dictionary = HenGlobal.node_references[hash_number]
+				var node_data: Dictionary = global.node_references[hash_number]
 				var cnode = node_data['cnode'][2]
 				
 				cnode.show_debug_value(str_to_var(data[1]))
@@ -61,14 +63,14 @@ func _capture(message, data, session_id) -> bool:
 		'hengo:debug_state':
 			var id_str: String = str(data[0])
 
-			if HenGlobal.current_script_debug_symbols.has(id_str):
-				var symbol_data: Array = HenGlobal.current_script_debug_symbols[id_str]
+			if global.current_script_debug_symbols.has(id_str):
+				var symbol_data: Array = global.current_script_debug_symbols[id_str]
 				var hash_number: int = symbol_data[0]
 
-				if not HenGlobal.state_references.has(hash_number):
+				if not global.state_references.has(hash_number):
 					return true
 
-				HenGlobal.state_references[hash_number].show_debug()
+				global.state_references[hash_number].show_debug()
 			
 			return true
 
@@ -76,10 +78,11 @@ func _capture(message, data, session_id) -> bool:
 
 
 func reload_script() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	load_references()
 
 	for session in get_sessions():
-		session.send_message('hengo:reload_script', [HenGlobal.current_script_path, HenGlobal.DEBUG_TOKEN])
+		session.send_message('hengo:reload_script', [global.current_script_path, global.DEBUG_TOKEN])
 
 
 func get_debug_ids(_num: int) -> Array:
@@ -112,13 +115,14 @@ func load_references() -> void:
 
 func _on_started() -> void:
 	load_references()
-	HenGlobal.HENGO_DEBUGGER_PLUGIN = self
+	(Engine.get_singleton(&'Global') as HenGlobal).HENGO_DEBUGGER_PLUGIN = self
 
 	print('Hengo Debugger Started!')
 
 
 func _on_stopped() -> void:
-	HenGlobal.node_references = {}
-	HenGlobal.HENGO_DEBUGGER_PLUGIN = null
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.node_references = {}
+	global.HENGO_DEBUGGER_PLUGIN = null
 
 	print('Hengo Debugger Stopped!')

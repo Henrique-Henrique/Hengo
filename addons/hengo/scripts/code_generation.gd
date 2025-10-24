@@ -1,23 +1,22 @@
 @tool
 class_name HenCodeGeneration extends Node
 
-static var flow_id: int = 0
-static var flows_refs: Dictionary = {}
-static var flow_errors: Array[Dictionary] = []
+var flow_id: int = 0
+var flows_refs: Dictionary = {}
+var flow_errors: Array[Dictionary] = []
 
 
-static func get_flow_id() -> int:
+func get_flow_id() -> int:
 	flow_id += 1
 	return flow_id
 
 
-static func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
+func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
 	var refs: HenTypeReferences = HenTypeReferences.new(_data)
 	var code: String = ''
 
-
-	HenGlobal.GENERATE_PREVIEW_CODE = _build_preview
-	HenCodeGeneration.flow_errors.clear()
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERATE_PREVIEW_CODE = _build_preview
+	(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.clear()
 
 	# generating macro references
 	for macro_data: Dictionary in _data.side_bar_list.macro_list:
@@ -96,10 +95,11 @@ static func get_code(_data: HenScriptData, _build_preview: bool = false) -> Stri
 #
 #
 #
-static func _get_start(_data: HenScriptData) -> String:
+func _get_start(_data: HenScriptData) -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	# reseting macro use self condition
-	HenGlobal.USE_MACRO_USE_SELF = false
-	HenGlobal.USE_MACRO_REF = false
+	global.USE_MACRO_USE_SELF = false
+	global.USE_MACRO_REF = false
 
 	return '# ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -115,19 +115,22 @@ static func _get_start(_data: HenScriptData) -> String:
 #
 #
 #
-static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> bool:
-	for dependency_id: StringName in HenMapDependencies.get_dependencies(str(_script_id)):
+func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> bool:
+	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+
+	for dependency_id: StringName in map_deps.get_dependencies(str(_script_id)):
 		var dep_id_i: int = int(dependency_id)
-		var old_script_data: HenScriptData = HenScriptDataCache.try_get_script_data(dependency_id)
+		var old_script_data: HenScriptData = script_data_cache.try_get_script_data(dependency_id)
 		var script_data: HenScriptData = get_updated_script_data(dep_id_i, _side_bar_list, old_script_data)
 
 		if not script_data:
 			return true
 		
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename()))
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename()))
 
 		if old_script_data:
-			if not HenScriptDataCache.add_script_data(dependency_id, script_data):
+			if not script_data_cache.add_script_data(dependency_id, script_data):
 				return false
 
 		_save_config.add_script(
@@ -142,19 +145,21 @@ static func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side
 #
 #
 #
-static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _script_data: HenScriptData = null) -> HenScriptData:
+func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _script_data: HenScriptData = null) -> HenScriptData:
 	var refs: HenRegenerateRefs = HenRegenerateRefs.new()
-	var path: StringName = HenLoader.get_data_path(_id)
+	var loader: HenLoader = Engine.get_singleton(&'Loader')
+	var path: StringName = loader.get_data_path(_id)
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 
 	if not FileAccess.file_exists(path):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
+		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
 		return null
 
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
 	var script_data: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
 
 	if not HenCheckerScriptData.is_script_data_valid(script_data):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Invalid script data when updating script: " + str(_id)))
+		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Invalid script data when updating script: " + str(_id)))
 		return null
 
 	refs.counter = script_data.node_counter
@@ -175,7 +180,7 @@ static func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _scrip
 #
 #
 #
-static func _parse_vc_list(_cnode_list: Array, _refs: HenRegenerateRefs) -> void:
+func _parse_vc_list(_cnode_list: Array, _refs: HenRegenerateRefs) -> void:
 	for cnode: Dictionary in _cnode_list:
 		_refs.cnode_list[cnode.id] = cnode
 
@@ -197,7 +202,7 @@ static func _parse_vc_list(_cnode_list: Array, _refs: HenRegenerateRefs) -> void
 			_parse_vc_list(cnode.virtual_cnode_list, _refs)
 
 
-static func _parse_signal_callback_list(_signal_callback_list: Array, _refs: HenRegenerateRefs) -> void:
+func _parse_signal_callback_list(_signal_callback_list: Array, _refs: HenRegenerateRefs) -> void:
 	for signal_callback: Dictionary in _signal_callback_list:
 		if not signal_callback.has('custom_id'):
 			continue

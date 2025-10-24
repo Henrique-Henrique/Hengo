@@ -9,7 +9,7 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 	
-	HenGlobal.ACTION_BAR = self
+	(Engine.get_singleton(&'Global') as HenGlobal).ACTION_BAR = self
 	dashboard.pressed.connect(_on_dashboard)
 
 
@@ -23,15 +23,17 @@ func filesystem_dock(_hide_docks: bool = false) -> void:
 	filesystem_parent = null
 	
 	if _hide_docks:
-		HenGlobal.CAM.can_scroll = true
-		HenGlobal.HENGO_EDITOR_PLUGIN.hide_docks()
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		global.CAM.can_scroll = true
+		global.HENGO_EDITOR_PLUGIN.hide_docks()
 
 
 func _on_dashboard() -> void:
-	HenGlobal.CAM.can_scroll = false
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.CAM.can_scroll = false
 	
 	var filesystem: FileSystemDock = EditorInterface.get_file_system_dock()
-	var right_dock: TabContainer = HenGlobal.DOCKS[EditorPlugin.DOCK_SLOT_RIGHT_UR].ref
+	var right_dock: TabContainer = global.DOCKS[EditorPlugin.DOCK_SLOT_RIGHT_UR].ref
 
 	if not filesystem_parent:
 		filesystem_parent = filesystem.get_parent()
@@ -45,7 +47,7 @@ func _on_dashboard() -> void:
 	filesystem.get_parent().remove_child(filesystem)
 	filesystem_parent.add_child(filesystem)
 	
-	HenGlobal.HENGO_EDITOR_PLUGIN.hide_docks()
+	global.HENGO_EDITOR_PLUGIN.hide_docks()
 	filesystem_parent = null
 
-	HenGlobal.CAM.can_scroll = true
+	global.CAM.can_scroll = true

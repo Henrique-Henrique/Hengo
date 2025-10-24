@@ -10,9 +10,10 @@ static func is_script_data_valid(_script_data: HenScriptData) -> bool:
 	var errors: Array = HenJSONSchema.validate(_script_data.get_save(), SCRIPT_DATA_SCHEMA.get_data())
 	
 	if not errors.is_empty():
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Script data is invalid: " + _script_data.path))
+		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Script data is invalid: " + _script_data.path))
 		for error in errors:
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Error: " + error.message))
+			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Error: " + error.message))
 		return false
 	
 	# custom errors handling

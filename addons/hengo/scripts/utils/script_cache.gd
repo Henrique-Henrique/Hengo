@@ -1,12 +1,12 @@
 @tool
-class_name HenScriptDataCache extends RefCounted
+class_name HenScriptDataCache extends Node
 
 
-static var SCRIPT_DATA_CACHE: Dictionary = {}
+var SCRIPT_DATA_CACHE: Dictionary = {}
 
 
 # getting script data from cache
-static func try_get_script_data(_id: StringName) -> HenScriptData:
+func try_get_script_data(_id: StringName) -> HenScriptData:
 	if SCRIPT_DATA_CACHE.has(_id):
 		return SCRIPT_DATA_CACHE.get(_id)
 	
@@ -14,26 +14,27 @@ static func try_get_script_data(_id: StringName) -> HenScriptData:
 
 
 # checking if script data is in cache
-static func has_script_data(_id: StringName) -> bool:
+func has_script_data(_id: StringName) -> bool:
 	return SCRIPT_DATA_CACHE.has(_id)
 
 
 # adding script data to cache
-static func add_script_data(_id: StringName, _script_data: HenScriptData) -> bool:
+func add_script_data(_id: StringName, _script_data: HenScriptData) -> bool:
 	if not HenCheckerScriptData.is_script_data_valid(_script_data):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Tried to add invalid script data to cache: " + str(_id)))
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Tried to add invalid script data to cache: " + str(_id)))
 		return false
 	
 	SCRIPT_DATA_CACHE.set(_id, _script_data)
-	HenMapObjects.map_script_data(_id, HenScriptData.load(_script_data.get_save().duplicate(true)))
+	var map_objects: HenMapObjects = Engine.get_singleton(&'MapObjects')
+	map_objects.map_script_data(_id, HenScriptData.load(_script_data.get_save().duplicate(true)))
 	return true
 
 
 # removing script data from cache
-static func remove_script_data(_id: StringName) -> void:
+func remove_script_data(_id: StringName) -> void:
 	SCRIPT_DATA_CACHE.erase(_id)
 
 
 # clearing script data cache
-static func clear() -> void:
+func clear() -> void:
 	SCRIPT_DATA_CACHE.clear()

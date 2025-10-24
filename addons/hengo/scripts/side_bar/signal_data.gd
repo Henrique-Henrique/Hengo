@@ -1,13 +1,13 @@
 class_name HenSignalData extends RefCounted
 
-var id: int = HenGlobal.get_new_node_counter()
+var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 var name: String = 'signal ' + str(Time.get_ticks_usec())
 var inputs: Array
 
 
 func on_change_name(_name: String) -> void:
 	name = _name
-	HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+	(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 
 
 func create_param() -> HenParamData:
@@ -41,7 +41,7 @@ func load_save(_data: Dictionary) -> void:
 	name = _data.name
 	id = _data.id
 
-	HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+	(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[id] = self
 
 	for item_data: Dictionary in _data.inputs:
 		var item: HenParamData = HenParamData.new()

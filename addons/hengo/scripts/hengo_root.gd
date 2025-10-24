@@ -9,29 +9,27 @@ var start_select_pos: Vector2 = Vector2.ZERO
 var can_select: bool = false
 var toggle_bottom_panel: bool = true
 
-
 func _ready() -> void:
 	if HenUtils.disable_scene(self):
 		return
 
 	set_process(true)
 
-	# map dependencies
-	HenThreadHelper.add_task(HenMapDependencies.start_map)
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
 
 	# initializing
-	HenRouter.current_route = null
-	HenRouter.line_route_reference = {}
-	HenRouter.comment_reference = {}
+	router.current_route = null
+	router.comment_reference = {}
 	# HenGlobal.history = UndoRedo.new()
-	HenEnums.DROPDOWN_STATES = []
-	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
+	enums.DROPDOWN_STATES = []
+	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.clear()
 
 	# defining types
 	var object_list = ClassDB.get_inheriters_from_class('Object')
 	object_list.sort()
-	HenEnums.OBJECT_TYPES = object_list
-	HenEnums.DROPDOWN_OBJECT_TYPES = Array(HenEnums.OBJECT_TYPES).map(
+	enums.OBJECT_TYPES = object_list
+	enums.DROPDOWN_OBJECT_TYPES = Array(enums.OBJECT_TYPES).map(
 		func(x: String) -> Dictionary:
 			return {
 				name = x
@@ -42,8 +40,8 @@ func _ready() -> void:
 	all_classes.sort()
 
 	all_classes = HenEnums.VARIANT_TYPES + all_classes
-	HenEnums.ALL_CLASSES = all_classes.duplicate()
-	HenEnums.DROPDOWN_ALL_CLASSES = Array(HenEnums.ALL_CLASSES).map(
+	enums.ALL_CLASSES = all_classes.duplicate()
+	enums.DROPDOWN_ALL_CLASSES = Array(enums.ALL_CLASSES).map(
 		func(x: String) -> Dictionary:
 			return {
 				name = x
@@ -55,9 +53,10 @@ func _ready() -> void:
 
 
 func _select_cnode() -> void:
-	var selection_rect: ReferenceRect = HenGlobal.CAM.get_node('SelectionRect')
+	var selection_rect: ReferenceRect = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_node('SelectionRect')
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
+	for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
 		if v_cnode.cnode_instance:
 			if selection_rect.get_global_rect().has_point(v_cnode.cnode_instance.global_position):
 				v_cnode.select()
@@ -65,23 +64,16 @@ func _select_cnode() -> void:
 				v_cnode.unselect()
 
 
-func _process(_delta: float) -> void:
-	# task id
-	for id in HenThreadHelper.task_id_list:
-		if WorkerThreadPool.is_task_completed(id):
-			WorkerThreadPool.wait_for_task_completion(id)
-			HenThreadHelper.task_id_list.erase(id)
-
-
 func _input(event: InputEvent) -> void:
-	if HenGlobal.HENGO_ROOT and not HenGlobal.HENGO_ROOT.visible:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global.HENGO_ROOT and not global.HENGO_ROOT.visible:
 		return
 	
 	if event is InputEventKey:
 		if event.pressed:
 			if event.shift_pressed and event.keycode == KEY_F:
-				var all_nodes = HenGlobal.SELECTED_VIRTUAL_CNODE
-				HenGlobal.history.create_action('Delete Node')
+				var all_nodes = global.SELECTED_VIRTUAL_CNODE
+				global.history.create_action('Delete Node')
 
 				for v_cnode: HenVirtualCNode in all_nodes:
 					if not v_cnode.cnode_instance:
@@ -89,21 +81,21 @@ func _input(event: InputEvent) -> void:
 
 					var v_cnode_return: HenVCNodeReturn = v_cnode.get_history_obj()
 
-					HenGlobal.history.add_do_method(v_cnode_return.remove)
-					HenGlobal.history.add_undo_reference(v_cnode_return)
-					HenGlobal.history.add_undo_method(v_cnode_return.add)
+					global.history.add_do_method(v_cnode_return.remove)
+					global.history.add_undo_reference(v_cnode_return)
+					global.history.add_undo_method(v_cnode_return.add)
 
-				HenGlobal.history.commit_action()
+				global.history.commit_action()
 				
 			elif event.keycode == KEY_F8:
-				# just for test
-				HenRouter.change_route(HenGlobal.BASE_ROUTE)
+				(Engine.get_singleton(&'Router') as HenRouter).change_route(global.BASE_ROUTE)
 			elif event.keycode == KEY_F10:
-				for line: HenConnectionLine in HenGlobal.connection_line_pool:
+				for line: HenConnectionLine in global.connection_line_pool:
 					if line.visible:
 						line.visible = true
 			elif event.keycode == KEY_F9:
 				var old: HenVirtualCNode
+				var router: HenRouter = Engine.get_singleton(&'Router')
 				for i in range(1000):
 					var cnode2: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode_and_add({
 						name = 'print',
@@ -115,27 +107,28 @@ func _input(event: InputEvent) -> void:
 								type = 'String'
 							}
 						],
-						route = HenRouter.current_route,
+						route = router.current_route,
 						position = Vector2(0, 500 * i + 1)
 					})
 
 			if event.ctrl_pressed:
 				if event.keycode == KEY_Z:
 					get_tree().root.set_input_as_handled()
-					HenGlobal.history.undo()
+					global.history.undo()
 				elif event.keycode == KEY_Y:
-					HenGlobal.history.redo()
+					global.history.redo()
 				elif event.keycode == KEY_C:
-					HenGlobal.history.clear_history()
+					global.history.clear_history()
 				elif event.keycode == KEY_SPACE:
-					HenGlobal.HENGO_EDITOR_PLUGIN.bottom_panel_visibility(toggle_bottom_panel)
+					global.HENGO_EDITOR_PLUGIN.bottom_panel_visibility(toggle_bottom_panel)
 					toggle_bottom_panel = not toggle_bottom_panel
 				elif event.keycode == KEY_P:
-					HenScriptDataCache.clear()
+					var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
+					script_data_cache.clear()
 					print('Script data cache cleared')
 				elif event.keycode == KEY_F:
 					get_tree().root.set_input_as_handled()
 					HenFormatter.format_current_route()
 					print('FORMATTED')
 				elif event.keycode == KEY_L:
-					HenGlobal.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(&'Button'), 'Code Search')
+					global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(&'Button'), 'Code Search')

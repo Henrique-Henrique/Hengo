@@ -19,7 +19,7 @@ func _on_change_name(_name: String) -> void:
 func _init(_owner: HenVirtualCNode, _data: Dictionary = {}) -> void:
 	owner = weakref(_owner)
 	name = _data.name if _data.has('name') else ''
-	id = _data.id if _data.has('id') else HenGlobal.get_new_node_counter()
+	id = _data.id if _data.has('id') else (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 
 	if _data.has('ref'): set_ref(_data.ref)
 
@@ -65,19 +65,19 @@ func create_virtual_connection(_config: Dictionary) -> HenVCFlowConnectionReturn
 
 
 func on_create_connection_request() -> void:
-	print(HenGlobal.flow_connection_to_data)
-	var connection: HenVCFlowConnectionReturn = create_virtual_connection(HenGlobal.flow_connection_to_data)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var connection: HenVCFlowConnectionReturn = create_virtual_connection(global.flow_connection_to_data)
 					
 	if connection:
-		HenGlobal.history.create_action('Add Connection')
-		HenGlobal.history.add_do_method(connection.add)
-		HenGlobal.history.add_do_reference(connection)
-		HenGlobal.history.add_undo_method(connection.remove)
-		HenGlobal.history.commit_action()
+		global.history.create_action('Add Connection')
+		global.history.add_do_method(connection.add)
+		global.history.add_do_reference(connection)
+		global.history.add_undo_method(connection.remove)
+		global.history.commit_action()
 	
 
 func on_flow_input_hover(_id: int) -> void:
-	HenGlobal.flow_connection_to_data = {
+	(Engine.get_singleton(&'Global') as HenGlobal).flow_connection_to_data = {
 		to_cnode = get_owner(),
 		to_id = _id
 	}

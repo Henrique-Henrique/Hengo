@@ -4,10 +4,12 @@ class_name HenCompile extends HBoxContainer
 @onready var compile_bt: Button = get_node('%Compile')
 
 func _ready() -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	compile_bt.pressed.connect(_on_compile_press)
 	set_process(false)
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.connect(start)
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.connect(reset)
+
+	signal_bus.scripts_generation_started.connect(start)
+	signal_bus.scripts_generation_finished.connect(reset)
 	
 
 func _on_compile_press() -> void:
@@ -25,10 +27,10 @@ func reset(_script_list: PackedStringArray) -> void:
 
 
 static func start_load() -> void:
-	var instance: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
+	var instance: HenCompile = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%CompileContainer')
 	instance.start()
 
 
 static func reset_load() -> void:
-	var instance: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
+	var instance: HenCompile = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%CompileContainer')
 	instance.reset([])

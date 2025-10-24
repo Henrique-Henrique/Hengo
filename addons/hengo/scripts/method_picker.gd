@@ -62,230 +62,14 @@ const FILTER_ICONS = {
 }
 
 
-var native_list: Array = [
-	{
-		name = 'State',
-		data = {
-			name = 'State 1',
-			type = HenVirtualCNode.Type.STATE,
-			sub_type = HenVirtualCNode.SubType.STATE,
-			route = HenRouter.current_route,
-		}
-	},
-	{
-		name = 'State Event',
-		data = {
-			name = 'State Event 1',
-			type = HenVirtualCNode.Type.STATE_EVENT,
-			sub_type = HenVirtualCNode.SubType.STATE_EVENT,
-			route = HenRouter.current_route,
-		}
-	},
-	{
-		name = 'Expression',
-		data = {
-			name = 'Expression',
-			type = HenVirtualCNode.Type.EXPRESSION,
-			sub_type = HenVirtualCNode.SubType.EXPRESSION,
-			category = 'native',
-			inputs = [
-				{
-					name = '',
-					type = 'Variant',
-					sub_type = 'expression',
-					is_static = true
-				}
-			],
-			outputs = [
-				{
-					name = 'result',
-					type = 'Variant'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'Make Transition',
-		data = {
-			name = 'make_transition',
-			sub_type = HenVirtualCNode.SubType.FUNC,
-			category = 'native',
-			inputs = [
-				{
-					name = 'name',
-					type = 'StringName',
-					sub_type = '@dropdown',
-					code_value = '',
-					category = 'state_transition'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'debug value',
-		data = {
-			name = '',
-			fantasy_name = 'Debug Value',
-			sub_type = HenVirtualCNode.SubType.DEBUG_VALUE,
-			category = 'native',
-			inputs = [
-				{
-					name = 'content',
-					type = 'Variant'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'print',
-		data = {
-			name = 'print',
-			sub_type = HenVirtualCNode.SubType.VOID,
-			category = 'native',
-			inputs = [
-				{
-					name = 'content',
-					type = 'Variant'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'Print Text',
-		data = {
-			name = 'print',
-			sub_type = HenVirtualCNode.SubType.VOID,
-			category = 'native',
-			inputs = [
-				{
-					name = 'content',
-					type = 'String'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'IF Condition',
-		data = {
-			name = 'IF',
-			type = HenVirtualCNode.Type.IF,
-			sub_type = HenVirtualCNode.SubType.IF,
-			route = HenRouter.current_route,
-			inputs = [
-				{
-					name = 'condition',
-					type = 'bool'
-				},
-			],
-		}
-	},
-	{
-		name = 'For -> Range',
-		data = {
-			name = 'For -> Range',
-			type = HenVirtualCNode.Type.FOR,
-			sub_type = HenVirtualCNode.SubType.FOR,
-			inputs = [
-				{
-					name = 'start',
-					type = 'int'
-				},
-				{
-					name = 'end',
-					type = 'int'
-				},
-				{
-					name = 'step',
-					type = 'int',
-					value = 1,
-                	code_value = '1'
-				}
-			],
-			outputs = [
-				{
-					name = 'index',
-					type = 'int',
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'For -> Item',
-		data = {
-			name = 'For -> Item',
-			type = HenVirtualCNode.Type.FOR,
-			sub_type = HenVirtualCNode.SubType.FOR_ARR,
-			inputs = [
-				{
-					name = 'array',
-					type = 'Array'
-				},
-			],
-			outputs = [
-				{
-					name = 'item',
-					type = 'Variant'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'break',
-		data = {
-			name = 'break',
-			sub_type = HenVirtualCNode.SubType.BREAK,
-			category = 'native',
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'continue',
-		data = {
-			name = 'continue',
-			sub_type = HenVirtualCNode.SubType.CONTINUE,
-			category = 'native',
-			route = HenRouter.current_route
-		}
-	},
-	{
-		name = 'Raw Code',
-		data = {
-			name = 'Raw Code',
-			sub_type = HenVirtualCNode.SubType.RAW_CODE,
-			category = 'native',
-			inputs = [
-				{
-					name = '',
-					category = 'disabled',
-					type = 'String'
-				},
-			],
-			outputs = [
-				{
-					name = 'code',
-					type = 'Variant'
-				}
-			],
-			route = HenRouter.current_route
-		}
-	},
-]
-
-
 func _ready() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	set_process(false)
 
-	if not HenGlobal.script_config:
+	if not global.script_config:
 		return
 
-	var _type: StringName = HenGlobal.script_config.type
+	var _type: StringName = global.script_config.type
 
 	tree.item_activated.connect(_on_select)
 	(%Search as LineEdit).text_changed.connect(_on_search)
@@ -328,7 +112,7 @@ func _build_api_list(_class: StringName) -> void:
 
 	%LoadingBt.visible = true
 	set_process(true)
-	await HenGlobal.CAM.get_tree().process_frame
+	await (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_tree().process_frame
 	%LoadingBt.pivot_offset = %LoadingBt.size / 2
 	var thread: Thread = Thread.new()
 
@@ -343,6 +127,7 @@ func hide_loading_bt() -> void:
 
 func mount_list(_class: StringName, _thread: Thread) -> void:
 	var local_api: Array = []
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	match current_class_type:
 		CLASS_TYPE.SELF:
@@ -352,7 +137,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 						local_api.append(_get_class_obj(dict, selected_class))
 					local_api.append_array(get_var_list())
 					local_api.append_array(get_local_var_list())
-					local_api.append_array(get_prop_list(HenGlobal.script_config.type))
+					local_api.append_array(get_prop_list((Engine.get_singleton(&'Global') as HenGlobal).script_config.type))
 				FILTER_TYPE.ALL:
 					local_api.append_array(get_native_list())
 					local_api.append_array(get_function_list())
@@ -372,27 +157,29 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 				FILTER_TYPE.MACRO:
 					local_api.append_array(get_macro_list())
 		CLASS_TYPE.TO:
+			var enums: HenEnums = Engine.get_singleton(&'Enums')
 			for dict in ClassDB.class_get_method_list(to_type):
 				local_api.append(_get_class_obj(dict, to_type))
 
-			if HenEnums.NATIVE_API_LIST.has(to_type):
-				for dict: Dictionary in HenEnums.NATIVE_API_LIST.get(to_type):
+			if enums.NATIVE_API_LIST.has(to_type):
+				for dict: Dictionary in enums.NATIVE_API_LIST.get(to_type):
 					var dt: Dictionary = dict.duplicate()
 					dt.name = '({0}) -> {1}'.format([to_type, dict.name])
 					dt.icon_type = &'void'
-					dt.data.route = HenRouter.current_route
+					dt.data.route = router.current_route
 					local_api.append(dt)
 			else:
 				local_api.append_array(get_prop_list(to_type))
 			
-			if HenEnums.NATIVE_PROPS_LIST.has(to_type):
-				for dict: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(to_type):
+			if enums.NATIVE_PROPS_LIST.has(to_type):
+				for dict: Dictionary in enums.NATIVE_PROPS_LIST.get(to_type):
 					var dt: Dictionary = dict.duplicate()
 
 					get_deep_prop_data(local_api, dt.name, to_type, dt.type, true)
 					get_deep_prop(local_api, to_type, dt.name, dt.type, true)
 
 		CLASS_TYPE.FROM:
+			var enums: HenEnums = Engine.get_singleton(&'Enums')
 			var idx: int = 0
 
 			match select_type:
@@ -425,8 +212,8 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 									idx += 1
 				
 
-			if HenEnums.NATIVE_API_LIST.has(selected_class):
-				for dict: Dictionary in HenEnums.NATIVE_API_LIST.get(selected_class):
+			if enums.NATIVE_API_LIST.has(selected_class):
+				for dict: Dictionary in enums.NATIVE_API_LIST.get(selected_class):
 					if dict.data.has(&'outputs'):
 						idx = 0
 						for output: Dictionary in dict.data.outputs:
@@ -434,7 +221,7 @@ func mount_list(_class: StringName, _thread: Thread) -> void:
 								var dt: Dictionary = dict.duplicate()
 								dt.name = '({0}) -> {1}'.format([selected_class, dict.name])
 								dt.icon_type = &'void'
-								dt.data.route = HenRouter.current_route
+								dt.data.route = router.current_route
 								dt.data.idx_to_connect = idx
 								local_api.append(dt)
 							
@@ -484,7 +271,7 @@ func build_list() -> void:
 					dt.icon = FILTER_ICONS[FILTER_TYPE.FUNC]
 					dt.bg_color = Color(1, 1, 1, .03)
 				else:
-					dt.icon = HenAssets.get_icon_texture(data.icon_type)
+					dt.icon = HenUtils.get_icon_texture(data.icon_type)
 
 			tree_items.append(dt)
 
@@ -501,20 +288,22 @@ func build_list() -> void:
 		var item_size: Vector2 = tree.get_item_area_rect(root.get_child(0)).size
 		tree.custom_minimum_size.y = item_size.y * tree_items.size()
 
-		var rect: Rect2 = HenGlobal.CAM.get_viewport_rect()
+		var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_viewport_rect()
 		if tree.custom_minimum_size.y > rect.size.y:
 			tree.custom_minimum_size.y = rect.size.y * .4
 	else:
 		tree.custom_minimum_size.y = 0
 		
-	HenGlobal.GENERAL_POPUP.get_parent().reset_size()
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().reset_size()
 
 
 func get_from_list() -> Array:
 	var local_api: Array = []
+	var map_objects: HenMapObjects = Engine.get_singleton(&'MapObjects')
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	for id: String in HenMapObjects.objects.keys():
-		var object: Dictionary = HenMapObjects.objects[id]
+	for id: String in map_objects.objects.keys():
+		var object: Dictionary = map_objects.objects[id]
 		var res_name: String = ResourceUID.get_id_path(int(id)).get_file().get_basename()
 
 		for var_data: Dictionary in object.var_list:
@@ -542,7 +331,7 @@ func get_from_list() -> Array:
 							type = var_data.type
 						}
 					],
-					route = HenRouter.current_route,
+					route = router.current_route,
 				}
 			}
 
@@ -567,7 +356,7 @@ func get_from_list() -> Array:
 						}
 					] + (func_data.inputs as Array).map(func(x): return {name = x.name, type = x.type, id = x.id}),
 					outputs = (func_data.outputs as Array).map(func(x): return {name = x.name, type = x.type, id = x.id}),
-					route = HenRouter.current_route,
+					route = router.current_route,
 				}
 			}
 
@@ -577,6 +366,7 @@ func get_from_list() -> Array:
 
 
 func get_deep_prop_data(_local_api: Array, _name: String, _class: StringName, _type: StringName, _create_get_input: bool = false) -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
 	var get_dt: Dictionary = {
 		name = 'Get -> ' + _name,
 		type = FILTER_TYPE.SELF,
@@ -584,7 +374,7 @@ func get_deep_prop_data(_local_api: Array, _name: String, _class: StringName, _t
 			name = 'Get Property',
 			name_to_code = _name.replacen(' -> ', '.'),
 			sub_type = HenVirtualCNode.SubType.DEEP_PROP,
-			route = HenRouter.current_route,
+			route = router.current_route,
 			outputs = [
 				{
 					name = _name,
@@ -611,7 +401,7 @@ func get_deep_prop_data(_local_api: Array, _name: String, _class: StringName, _t
 			name = 'Set Property',
 			sub_type = HenVirtualCNode.SubType.SET_DEEP_PROP,
 			name_to_code = _name.replacen(' -> ', '.'),
-			route = HenRouter.current_route,
+			route = router.current_route,
 			inputs = [
 				{
 					id = 0,
@@ -629,8 +419,10 @@ func get_deep_prop_data(_local_api: Array, _name: String, _class: StringName, _t
 	})
 
 func get_deep_prop(_local_api: Array, _type: StringName, _name: String, _prop_type: StringName, _create_get_input: bool = false) -> void:
-	if HenEnums.NATIVE_PROPS_LIST.has(_prop_type):
-		for prop: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(_prop_type):
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+
+	if enums.NATIVE_PROPS_LIST.has(_prop_type):
+		for prop: Dictionary in enums.NATIVE_PROPS_LIST.get(_prop_type):
 			var my_name: String = _name + ' -> ' + prop.name
 			
 			get_deep_prop_data(_local_api, my_name, _type, prop.type, _create_get_input)
@@ -639,7 +431,7 @@ func get_deep_prop(_local_api: Array, _type: StringName, _name: String, _prop_ty
 
 func get_prop_list(_class: StringName) -> Array:
 	var local_api: Array = []
-
+	var router: HenRouter = Engine.get_singleton(&'Router')
 	for prop: Dictionary in ClassDB.class_get_property_list(_class):
 		var prop_type: StringName = type_string(prop.type)
 
@@ -650,7 +442,7 @@ func get_prop_list(_class: StringName) -> Array:
 				data = {
 					name = 'Get Property',
 					sub_type = HenVirtualCNode.SubType.VAR,
-					route = HenRouter.current_route,
+					route = router.current_route,
 					outputs = [
 						{
 							name = prop.name,
@@ -667,7 +459,7 @@ func get_prop_list(_class: StringName) -> Array:
 					name = 'Set Property',
 					sub_type = HenVirtualCNode.SubType.SET_DEEP_PROP,
 					name_to_code = prop.name,
-					route = HenRouter.current_route,
+					route = router.current_route,
 					inputs = [
 						{
 							id = 0,
@@ -691,18 +483,19 @@ func get_prop_list(_class: StringName) -> Array:
 
 func get_local_var_list() -> Array:
 	var local_api: Array = []
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	match HenRouter.current_route.type:
-		HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-			if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
-				for var_data: HenVarData in (HenRouter.current_route.get_ref().local_vars as Array):
+	match router.current_route.type:
+		router.ROUTE_TYPE.FUNC, router.ROUTE_TYPE.SIGNAL, router.ROUTE_TYPE.MACRO:
+			if router.current_route.get_ref().get(&'local_vars') is Array:
+				for var_data: HenVarData in (router.current_route.get_ref().local_vars as Array):
 					var get_data: Dictionary = {
 						name = 'Local var -> ' + var_data.name,
 						type = FILTER_TYPE.SELF,
 						data = {
 							name = 'Get HenTypeVariable',
 							sub_type = HenVirtualCNode.SubType.VAR,
-							route = HenRouter.current_route,
+							route = router.current_route,
 							ref = var_data,
 							outputs = [
 								{
@@ -720,7 +513,7 @@ func get_local_var_list() -> Array:
 						data = {
 							name = 'Set HenTypeVariable',
 							sub_type = HenVirtualCNode.SubType.SET_VAR,
-							route = HenRouter.current_route,
+							route = router.current_route,
 							ref = var_data,
 							inputs = [
 								{
@@ -741,15 +534,15 @@ func get_local_var_list() -> Array:
 
 func get_var_list() -> Array:
 	var local_api: Array = []
-
-	for var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	for var_data: HenVarData in (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.var_list:
 		var get_data: Dictionary = {
 			name = 'Self -> ' + var_data.name,
 			type = FILTER_TYPE.SELF,
 			data = {
 				name = 'Get HenTypeVariable',
 				sub_type = HenVirtualCNode.SubType.VAR,
-				route = HenRouter.current_route,
+				route = router.current_route,
 				ref = var_data,
 				outputs = [
 					{
@@ -767,7 +560,7 @@ func get_var_list() -> Array:
 			data = {
 				name = 'Set HenTypeVariable',
 				sub_type = HenVirtualCNode.SubType.SET_VAR,
-				route = HenRouter.current_route,
+				route = router.current_route,
 				ref = var_data,
 				inputs = [
 					{
@@ -788,10 +581,11 @@ func get_var_list() -> Array:
 
 func get_native_singleton_list() -> Array:
 	var local_api: Array = []
-
-	for data: Dictionary in HenEnums.SINGLETON_API_LIST:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+	for data: Dictionary in enums.SINGLETON_API_LIST:
 		data.type = FILTER_TYPE.NATIVE
-		data.data.route = HenRouter.current_route
+		data.data.route = router.current_route
 		local_api.append(data)
 
 	return local_api
@@ -799,9 +593,10 @@ func get_native_singleton_list() -> Array:
 
 func get_global_const_list() -> Array:
 	var local_api: Array = []
-
-	for key: StringName in HenEnums.CONST_API_LIST.keys():
-		var items: Array = HenEnums.CONST_API_LIST[key]
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+	for key: StringName in enums.CONST_API_LIST.keys():
+		var items: Array = enums.CONST_API_LIST[key]
 
 		for data: Dictionary in items:
 			var custom_name: String = '({0}) {1}'.format([key, data.name])
@@ -819,7 +614,7 @@ func get_global_const_list() -> Array:
 							type = data.type
 						}
 					],
-					route = HenRouter.current_route,
+					route = router.current_route,
 				}
 			}
 
@@ -830,7 +625,7 @@ func get_global_const_list() -> Array:
 
 func get_native_list() -> Array:
 	var local_api: Array = []
-	for data: Dictionary in native_list:
+	for data: Dictionary in get_native_list_raw():
 		data.type = FILTER_TYPE.NATIVE
 		local_api.append(data)
 	
@@ -839,7 +634,7 @@ func get_native_list() -> Array:
 
 func get_function_list() -> Array:
 	var local_api: Array = []
-	for func_data: HenFuncData in HenGlobal.SIDE_BAR_LIST.func_list:
+	for func_data: HenFuncData in (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.func_list:
 		var dt: Dictionary = {
 			name = func_data.name,
 			type = FILTER_TYPE.FUNC,
@@ -864,7 +659,7 @@ func get_others_classes_list() -> Array:
 func get_hengo_signal_callback_list() -> Array:
 	var local_api: Array = []
 
-	for signal_data: HenSignalCallbackData in HenGlobal.SIDE_BAR_LIST.signal_callback_list:
+	for signal_data: HenSignalCallbackData in (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.signal_callback_list:
 		var connect_dt: Dictionary = {
 			name = 'Connect ' + signal_data.name,
 			type = FILTER_TYPE.SIGNAL,
@@ -886,7 +681,7 @@ func get_hengo_signal_callback_list() -> Array:
 func get_macro_list() -> Array:
 	var local_api: Array = []
 
-	for macro_data: HenMacroData in HenGlobal.SIDE_BAR_LIST.macro_list:
+	for macro_data: HenMacroData in (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.macro_list:
 		var dt: Dictionary = {
 			name = macro_data.name,
 			type = FILTER_TYPE.MACRO,
@@ -907,17 +702,16 @@ func search_name(_name: String, _name_to_search: String) -> bool:
 
 func _on_select() -> void:
 	var data: Dictionary = tree.get_selected().get_metadata(0)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	print(data)
-
-	data.position = HenGlobal.CAM.get_relative_vec2(start_pos)
+	data.position = global.CAM.get_relative_vec2(start_pos)
 
 	var vc_return: HenVCNodeReturn = HenVirtualCNode.instantiate(data)
 
-	HenGlobal.history.create_action('Add HenTypeCnode')
-	HenGlobal.history.add_do_method(vc_return.add)
-	HenGlobal.history.add_do_reference(vc_return)
-	HenGlobal.history.add_undo_method(vc_return.remove)
+	global.history.create_action('Add HenTypeCnode')
+	global.history.add_do_method(vc_return.add)
+	global.history.add_do_reference(vc_return)
+	global.history.add_undo_method(vc_return.remove)
 
 	# make connection
 	if cnode_config.has('from_virtual_ref'):
@@ -941,8 +735,8 @@ func _on_select() -> void:
 		# if connector.root.virtual_ref and connector.root.virtual_ref.get_ref():
 		# 	(connector.root.virtual_ref.get_ref() as HenVirtualCNode).add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.flow.from_flow_connections[0].id, weakref(vc_return.v_cnode)).add()
 
-	HenGlobal.history.commit_action()
-	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+	global.history.commit_action()
+	global.GENERAL_POPUP.get_parent().hide_popup()
 	api_list.clear()
 
 
@@ -970,6 +764,7 @@ func _get_typeny_arg(_arg: Dictionary) -> StringName:
 
 func _get_class_obj(_dict: Dictionary, _class_name: StringName, _use_class_name: bool = false) -> Dictionary:
 	var _obj_type: StringName = _get_typeny_arg(_dict.return )
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	var obj: Dictionary = {
 		name = _dict.name if not _use_class_name else '({0}) -> {1}'.format([_class_name, _dict.name]),
@@ -977,7 +772,7 @@ func _get_class_obj(_dict: Dictionary, _class_name: StringName, _use_class_name:
 		data = {
 			name = _dict.name,
 			sub_type = _get_sub_type(_dict.return.type, _dict.return.usage) if _dict.flags != METHOD_FLAG_VIRTUAL else HenVirtualCNode.SubType.OVERRIDE_VIRTUAL,
-			route = HenRouter.current_route
+			route = router.current_route
 		},
 	}
 
@@ -1059,4 +854,224 @@ func start(_type: StringName, _pos: Vector2, _show_native: bool = true, _came_fr
 	else:
 		current_class_type = CLASS_TYPE.SELF
 
-	_build_api_list(HenGlobal.script_config.type)
+	_build_api_list((Engine.get_singleton(&'Global') as HenGlobal).script_config.type)
+
+
+func get_native_list_raw() -> Array:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	return [
+	{
+		name = 'State',
+		data = {
+			name = 'State 1',
+			type = HenVirtualCNode.Type.STATE,
+			sub_type = HenVirtualCNode.SubType.STATE,
+			route = router.current_route,
+		}
+	},
+	{
+		name = 'State Event',
+		data = {
+			name = 'State Event 1',
+			type = HenVirtualCNode.Type.STATE_EVENT,
+			sub_type = HenVirtualCNode.SubType.STATE_EVENT,
+			route = router.current_route,
+		}
+	},
+	{
+		name = 'Expression',
+		data = {
+			name = 'Expression',
+			type = HenVirtualCNode.Type.EXPRESSION,
+			sub_type = HenVirtualCNode.SubType.EXPRESSION,
+			category = 'native',
+			inputs = [
+				{
+					name = '',
+					type = 'Variant',
+					sub_type = 'expression',
+					is_static = true
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'Variant'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Make Transition',
+		data = {
+			name = 'make_transition',
+			sub_type = HenVirtualCNode.SubType.FUNC,
+			category = 'native',
+			inputs = [
+				{
+					name = 'name',
+					type = 'StringName',
+					sub_type = '@dropdown',
+					code_value = '',
+					category = 'state_transition'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'debug value',
+		data = {
+			name = '',
+			fantasy_name = 'Debug Value',
+			sub_type = HenVirtualCNode.SubType.DEBUG_VALUE,
+			category = 'native',
+			inputs = [
+				{
+					name = 'content',
+					type = 'Variant'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'print',
+		data = {
+			name = 'print',
+			sub_type = HenVirtualCNode.SubType.VOID,
+			category = 'native',
+			inputs = [
+				{
+					name = 'content',
+					type = 'Variant'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Print Text',
+		data = {
+			name = 'print',
+			sub_type = HenVirtualCNode.SubType.VOID,
+			category = 'native',
+			inputs = [
+				{
+					name = 'content',
+					type = 'String'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'IF Condition',
+		data = {
+			name = 'IF',
+			type = HenVirtualCNode.Type.IF,
+			sub_type = HenVirtualCNode.SubType.IF,
+			route = router.current_route,
+			inputs = [
+				{
+					name = 'condition',
+					type = 'bool'
+				},
+			],
+		}
+	},
+	{
+		name = 'For -> Range',
+		data = {
+			name = 'For -> Range',
+			type = HenVirtualCNode.Type.FOR,
+			sub_type = HenVirtualCNode.SubType.FOR,
+			inputs = [
+				{
+					name = 'start',
+					type = 'int'
+				},
+				{
+					name = 'end',
+					type = 'int'
+				},
+				{
+					name = 'step',
+					type = 'int',
+					value = 1,
+                	code_value = '1'
+				}
+			],
+			outputs = [
+				{
+					name = 'index',
+					type = 'int',
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'For -> Item',
+		data = {
+			name = 'For -> Item',
+			type = HenVirtualCNode.Type.FOR,
+			sub_type = HenVirtualCNode.SubType.FOR_ARR,
+			inputs = [
+				{
+					name = 'array',
+					type = 'Array'
+				},
+			],
+			outputs = [
+				{
+					name = 'item',
+					type = 'Variant'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'break',
+		data = {
+			name = 'break',
+			sub_type = HenVirtualCNode.SubType.BREAK,
+			category = 'native',
+			route = router.current_route
+		}
+	},
+	{
+		name = 'continue',
+		data = {
+			name = 'continue',
+			sub_type = HenVirtualCNode.SubType.CONTINUE,
+			category = 'native',
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Raw Code',
+		data = {
+			name = 'Raw Code',
+			sub_type = HenVirtualCNode.SubType.RAW_CODE,
+			category = 'native',
+			inputs = [
+				{
+					name = '',
+					category = 'disabled',
+					type = 'String'
+				},
+			],
+			outputs = [
+				{
+					name = 'code',
+					type = 'Variant'
+				}
+			],
+			route = router.current_route
+		}
+	},
+]

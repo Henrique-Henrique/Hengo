@@ -23,19 +23,19 @@ class SaveConfig:
 
 static func generate_script_data() -> HenScriptData:
 	var script_data: HenScriptData = HenScriptData.new()
-
-	script_data.path = HenGlobal.script_config.path
-	script_data.type = HenGlobal.script_config.type
-	script_data.node_counter = HenGlobal.node_counter
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	script_data.path = global.script_config.path
+	script_data.type = global.script_config.type
+	script_data.node_counter = global.node_counter
 
 	# ---------------------------------------------------------------------------- #
 	# Side Bar List
-	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save(script_data)
+	script_data.side_bar_list = global.SIDE_BAR_LIST.get_save(script_data)
 
 	# ---------------------------------------------------------------------------- #
 	var v_cnode_list: Array[Dictionary] = []
 
-	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.get_ref().virtual_cnode_list:
+	for v_cnode: HenVirtualCNode in global.BASE_ROUTE.get_ref().virtual_cnode_list:
 		v_cnode_list.append(v_cnode.get_save(script_data))
 
 		if v_cnode.identity.type == HenVirtualCNode.Type.STATE_EVENT:
@@ -47,14 +47,17 @@ static func generate_script_data() -> HenScriptData:
 
 
 static func save() -> void:
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
-	HenThreadHelper.add_task(start_generate.bind(true))
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_started.emit()
+	(Engine.get_singleton(&'ThreadHelper') as HenThreadHelper).add_task(start_generate.bind(true))
 
 
 static func start_generate(_regenerate: bool = false) -> void:
 	var start_time: int = Time.get_ticks_msec()
 	var all_generated_scripts: Array[String] = []
-	
+	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
@@ -64,11 +67,11 @@ static func start_generate(_regenerate: bool = false) -> void:
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
 
 	# update current script data
-	if not HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), generate_script_data()):
-		HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred([])
+	if not script_data_cache.add_script_data(str(global.script_config.id), generate_script_data()):
+		signal_bus.scripts_generation_finished.emit.call_deferred([])
 		return
 
-	for script_in_cache: HenScriptData in HenScriptDataCache.SCRIPT_DATA_CACHE.values():
+	for script_in_cache: HenScriptData in script_data_cache.SCRIPT_DATA_CACHE.values():
 		var script_id: int = ResourceLoader.get_resource_uid(script_in_cache.path)
 		var generated_scripts: Array[String] = generate(script_in_cache, script_id, _regenerate)
 		for script_name in generated_scripts:
@@ -78,7 +81,7 @@ static func start_generate(_regenerate: bool = false) -> void:
 	var end_time: int = Time.get_ticks_msec()
 	var compilation_time: float = (end_time - start_time)
 	
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("\nGenerated " + str(all_generated_scripts.size()) + " scripts in [color=#58a6ff]" + str(compilation_time) + "ms[/color]"))
+	signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("\nGenerated " + str(all_generated_scripts.size()) + " scripts in [color=#58a6ff]" + str(compilation_time) + "ms[/color]"))
 
 	if all_generated_scripts.size() > 0:
 		_display_generated_scripts_stats(all_generated_scripts)
@@ -90,7 +93,7 @@ static func _display_generated_scripts_stats(_all_generated_scripts: Array[Strin
 		var script_name: String = _all_generated_scripts[i]
 		stats_text += "\n[color=#8b949e]" + script_name + "[/color] [img]res://addons/hengo/assets/icons/terminal/script.svg[/img]"
 	
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(stats_text)
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(stats_text)
 
 
 static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> Array[String]:
@@ -99,16 +102,18 @@ static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: 
 	if not HenCheckerScriptData.is_script_data_valid(_script_data):
 		return generated_scripts
 
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(_script_id).get_basename()))
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(_script_id).get_basename()))
 	var _save_data: SaveData = SaveData.new(_script_id, _script_data)
 	var _save_config: SaveConfig = SaveConfig.new()
+	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+
 	_save_config.add_script(_save_data)
 
 	if _regenerate:
-		if not HenCodeGeneration.regenerate(_save_config, _script_id, _script_data.side_bar_list):
+		if not code_generation.regenerate(_save_config, _script_id, _script_data.side_bar_list):
 			return generated_scripts
 
-	HenCodeGeneration.get_code(_script_data)
+	code_generation.get_code(_script_data)
 	HenSaveScript.save_data(_save_config)
 	
 	# collect all scripts that were processed in the save_config

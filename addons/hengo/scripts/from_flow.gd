@@ -10,7 +10,7 @@ func _ready() -> void:
 
 
 func _on_hover() -> void:
-	if not HenGlobal.can_make_flow_connection: return
+	if not (Engine.get_singleton(&'Global') as HenGlobal).can_make_flow_connection: return
 	hover.emit(id)
 
 

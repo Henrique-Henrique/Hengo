@@ -4,18 +4,20 @@ const BACKUP_EXT: String = ".bak"
 const TEMP_EXT: String = ".tmp"
 
 static func save_data(save_config: HenSaver.SaveConfig) -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
 	if not _create_backups(save_config):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to create backups"))
+		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to create backups"))
 		rollback(save_config)
 		return
 
 	if not _save_temporary_files(save_config):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to write temporary files"))
+		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to write temporary files"))
 		rollback(save_config)
 		return
 
 	if not _commit_changes(save_config):
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to commit changes"))
+		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to commit changes"))
 		rollback(save_config)
 		return
 
@@ -23,7 +25,8 @@ static func save_data(save_config: HenSaver.SaveConfig) -> void:
 
 
 static func rollback(save_config: HenSaver.SaveConfig) -> void:
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rolling back save process"))
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rolling back save process"))
 	
 	for config in save_config.script_list:
 		var paths: Dictionary = _get_resource_paths(config.id)
@@ -32,7 +35,7 @@ static func rollback(save_config: HenSaver.SaveConfig) -> void:
 		if FileAccess.file_exists(paths.backup):
 			var result: int = DirAccess.rename_absolute(paths.backup, paths.base)
 			if result != OK:
-				HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rollback failed: cannot restore backup for " + paths.base))
+				signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rollback failed: cannot restore backup for " + paths.base))
 		
 		# ensure any temporary file is removed
 		if FileAccess.file_exists(paths.temp):
@@ -41,7 +44,7 @@ static func rollback(save_config: HenSaver.SaveConfig) -> void:
 
 # returns a dictionary with base, backup, and temp paths for a given resource id
 static func _get_resource_paths(id: int) -> Dictionary:
-	var base_path: StringName = HenLoader.get_data_path(id)
+	var base_path: StringName = (Engine.get_singleton(&'Loader') as HenLoader).get_data_path(id)
 	return {
 		"base": base_path,
 		"backup": base_path + BACKUP_EXT,
@@ -51,6 +54,8 @@ static func _get_resource_paths(id: int) -> Dictionary:
 
 # creates a backup of each existing file
 static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
+	var loader: HenLoader = Engine.get_singleton(&'Loader')
+
 	for config in save_config.script_list:
 		var paths: Dictionary = _get_resource_paths(config.id)
 		var result: int = OK
@@ -67,7 +72,7 @@ static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
 				result = FAILED
 
 		if result != OK:
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to create backup for: " + HenLoader.get_data_path(config.id)))
+			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to create backup for: " + loader.get_data_path(config.id)))
 			return false
 	
 	return true
@@ -79,7 +84,7 @@ static func _save_temporary_files(save_config: HenSaver.SaveConfig) -> bool:
 		var paths: Dictionary = _get_resource_paths(config.id)
 		
 		if not HenScriptData.save(config.script_data, paths.temp):
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to write temp file: " + paths.temp))
+			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to write temp file: " + paths.temp))
 			return false
 		
 	return true
@@ -92,7 +97,7 @@ static func _commit_changes(save_config: HenSaver.SaveConfig) -> bool:
 		var result: int = DirAccess.rename_absolute(paths.temp, paths.base)
 
 		if result != OK:
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to commit changes for: " + paths.base))
+			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to commit changes for: " + paths.base))
 			return false
 	
 	return true
@@ -114,6 +119,7 @@ static func _finalize_save_process(save_config: HenSaver.SaveConfig) -> void:
 	# generate gdscript code
 	for config in save_config.script_list:
 		HenScriptData.save_code(config.script_data, config.id)
-		
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
-	HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Scripts saved successfully"))
+	
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.scripts_generation_finished.emit.call_deferred(script_list)
+	signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Scripts saved successfully"))

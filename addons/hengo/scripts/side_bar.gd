@@ -52,18 +52,20 @@ class DeleteItemCache:
 		idx = arr.find(item)
 		arr.erase(item)
 		item.emit_signal('deleted', true)
-		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+		(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 	
 	func add() -> void:
 		arr.append(item)
 		HenUtils.move_array_item_to_idx(arr, item, idx)
 		item.emit_signal('deleted', false)
-		HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+		(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 
 
 func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	list = get_node('%List')
 	list.auto_tooltip = false
@@ -72,26 +74,27 @@ func _ready() -> void:
 	list.gui_input.connect(_on_gui)
 	list.mouse_exited.connect(_on_exit)
 
-	HenGlobal.SIDE_BAR = self
-	HenGlobal.SIDE_BAR_LIST = HenSideBarList.new()
-	HenGlobal.SIDE_BAR_LIST.list_changed.connect(_on_list_changed)
+	global.SIDE_BAR = self
+	global.SIDE_BAR_LIST = HenSideBarList.new()
+	global.SIDE_BAR_LIST.list_changed.connect(_on_list_changed)
 
 
 func _on_exit() -> void:
-	HenGlobal.TOOLTIP.close()
+	(Engine.get_singleton(&'Global') as HenGlobal).TOOLTIP.close()
 
 
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseMotion:
 		var item: TreeItem = list.get_item_at_position((_event as InputEventMouseMotion).position)
 		var bt_id: int = list.get_button_id_at_position((_event as InputEventMouseMotion).position)
+		var global: HenGlobal = Engine.get_singleton(&'Global')
 
 		if bt_id >= 0:
-			HenGlobal.TOOLTIP.close()
+			global.TOOLTIP.close()
 			return
 
-		if HenGlobal.SIDE_BAR_LIST.inspecting:
-			HenGlobal.TOOLTIP.close()
+		if global.SIDE_BAR_LIST.inspecting:
+			global.TOOLTIP.close()
 			return
 
 		if item:
@@ -112,13 +115,13 @@ func _on_gui(_event: InputEvent) -> void:
 				elif _side_bar_item is HenSignalData:
 					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				
-				pos.x = HenGlobal.SIDE_PANEL.global_position.x + HenGlobal.SIDE_PANEL.size.x
+				pos.x = global.SIDE_PANEL.global_position.x + global.SIDE_PANEL.size.x
 
-				HenGlobal.TOOLTIP.go_to(pos, text)
+				global.TOOLTIP.go_to(pos, text)
 			else:
-				HenGlobal.TOOLTIP.close()
+				global.TOOLTIP.close()
 		else:
-			HenGlobal.TOOLTIP.close()
+			global.TOOLTIP.close()
 
 
 func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> void:
@@ -129,9 +132,9 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 			await RenderingServer.frame_pre_draw
 			
 			if obj.get('route'):
-				HenRouter.change_route(obj.get('route'))
+				(Engine.get_singleton(&'Router') as HenRouter).change_route(obj.get('route'))
 		2:
-			HenGlobal.SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0), _mouse_position)
+			(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0), _mouse_position)
 
 
 func _on_list_changed() -> void:
@@ -141,7 +144,7 @@ func _on_list_changed() -> void:
 	var base: TreeItem = root.create_child()
 
 	base.set_text(0, 'Base')
-	base.set_metadata(0, {route = HenGlobal.BASE_ROUTE})
+	base.set_metadata(0, {route = (Engine.get_singleton(&'Global') as HenGlobal).BASE_ROUTE})
 
 	# variables
 	_add_categories(root, 'Signals', AddType.SIGNAL)
@@ -150,13 +153,15 @@ func _on_list_changed() -> void:
 	_add_categories(root, 'Signals Callback', AddType.SIGNAL_CALLBACK)
 	_add_categories(root, 'Macros', AddType.MACRO)
 
-	if HenRouter.current_route and HenRouter.current_route.get_ref() and HenRouter.current_route.get_ref().get(&'local_vars') is Array:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	if router.current_route and router.current_route.get_ref() and router.current_route.get_ref().get(&'local_vars') is Array:
 		_add_categories(root, 'Local Variables', AddType.LOCAL_VAR)
 
 
 func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
-	# variables
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var category: TreeItem = _root.create_child()
+
 	category.set_text(0, _name)
 	category.add_button(0, ADD_ICON)
 	category.set_metadata(0, _type)
@@ -170,18 +175,19 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 
 	match _type:
 		AddType.VAR:
-			arr = HenGlobal.SIDE_BAR_LIST.var_list
+			arr = global.SIDE_BAR_LIST.var_list
 		AddType.FUNC:
-			arr = HenGlobal.SIDE_BAR_LIST.func_list
+			arr = global.SIDE_BAR_LIST.func_list
 		AddType.SIGNAL_CALLBACK:
-			arr = HenGlobal.SIDE_BAR_LIST.signal_callback_list
+			arr = global.SIDE_BAR_LIST.signal_callback_list
 		AddType.MACRO:
-			arr = HenGlobal.SIDE_BAR_LIST.macro_list
+			arr = global.SIDE_BAR_LIST.macro_list
 		AddType.LOCAL_VAR:
-			if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
-				arr = (HenRouter.current_route.get_ref().local_vars as Array)
+			var router: HenRouter = Engine.get_singleton(&'Router')
+			if router.current_route.get_ref().get(&'local_vars') is Array:
+				arr = (router.current_route.get_ref().local_vars as Array)
 		AddType.SIGNAL:
-			arr = HenGlobal.SIDE_BAR_LIST.signal_list
+			arr = global.SIDE_BAR_LIST.signal_list
 
 	for item_data in arr:
 		var item: TreeItem = category.create_child()
@@ -191,7 +197,7 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		var icon_color: Color
 		match _type:
 			AddType.VAR, AddType.LOCAL_VAR:
-				icon = HenAssets.get_icon_texture(item_data.type)
+				icon = HenUtils.get_icon_texture(item_data.type)
 				icon_color = Color.WHITE
 			_:
 				icon = ICONS[_type]
@@ -238,6 +244,7 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 
 func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:
 	var _type: AddType = _item.get_metadata(0)
-
-	HenGlobal.SIDE_BAR_LIST.change(_type)
-	HenGlobal.SIDE_BAR_LIST.add()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
+	global.SIDE_BAR_LIST.change(_type)
+	global.SIDE_BAR_LIST.add()

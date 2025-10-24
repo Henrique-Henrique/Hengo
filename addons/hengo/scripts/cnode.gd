@@ -1,6 +1,12 @@
 @tool
 class_name HenCnode extends PanelContainer
 
+const CNODE_INPUT = preload('res://addons/hengo/scenes/cnode_input.tscn')
+const CNODE_OUTPUT = preload('res://addons/hengo/scenes/cnode_output.tscn')
+const CNODE = preload('res://addons/hengo/scenes/cnode.tscn')
+const CONNECTION_LINE = preload('res://addons/hengo/scenes/connection_line.tscn')
+const FLOW_CONNECTION_LINE = preload('res://addons/hengo/scenes/flow_connection_line.tscn')
+
 var flow_to: Dictionary = {}
 var data: Dictionary = {}
 var category: String
@@ -63,10 +69,11 @@ func _on_enter() -> void:
 
 
 func _on_exit() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	_is_mouse_enter = false
-	HenGlobal.flow_connection_to_data.clear()
+	global.flow_connection_to_data.clear()
 	if not selected: exit_animation()
-	HenGlobal.TOOLTIP.close()
+	global.TOOLTIP.close()
 
 
 func hover_animation() -> void:
@@ -82,9 +89,11 @@ func exit_animation(_time: float = .2) -> void:
 
 
 func _on_gui(_event: InputEvent) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if _event is InputEventMouseButton:
 		if _event.pressed:
-			HenGlobal.DOCS_TOOLTIP.visible = false
+			global.DOCS_TOOLTIP.visible = false
 			if _event.ctrl_pressed:
 				if selected:
 					unselect()
@@ -95,12 +104,12 @@ func _on_gui(_event: InputEvent) -> void:
 			else:
 				if _event.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
-						for vc: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
+						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 							vc.set_cnode_moving(true)
 					else:
 						moving = true
 						# cleaning other selects
-						for vc: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
+						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 							vc.set_cnode_moving(false)
 							vc.unselect()
 						
@@ -113,7 +122,7 @@ func _on_gui(_event: InputEvent) -> void:
 			HenVCActionButtons.get_singleton().show_action(self)
 
 			# group moving false
-			for vc: HenVirtualCNode in HenGlobal.SELECTED_VIRTUAL_CNODE:
+			for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 				vc.set_cnode_moving(false)
 			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
@@ -122,9 +131,10 @@ func _on_gui(_event: InputEvent) -> void:
 
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
 		# moving on click
-		if moving and HenGlobal.CAM:
-			move(position + _event.relative / HenGlobal.CAM.transform.x.x)
+		if moving and global.CAM:
+			move(position + _event.relative / global.CAM.transform.x.x)
 
 
 # used when pick state on state signal
@@ -157,18 +167,19 @@ func move_simple(_pos: Vector2) -> void:
 
 
 func select() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	selected = true
 	hover_animation()
 	
-	if HenGlobal.CODE_PREVIEWER.visible:
-		var new_id_list: Array = HenGlobal.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
-		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
+	if global.CODE_PREVIEWER.visible:
+		var new_id_list: Array = global.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
+		if not (global.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (global.CODE_PREVIEWER.id_list == new_id_list):
 			return
 
 		var script_data: HenScriptData = HenSaver.generate_script_data()
-		var code: String = HenCodeGeneration.get_code(script_data, true)
-		HenGlobal.CODE_PREVIEWER.set_code(code)
-		HenGlobal.CODE_PREVIEWER.show_vc_line_reference()
+		var code: String = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(script_data, true)
+		global.CODE_PREVIEWER.set_code(code)
+		global.CODE_PREVIEWER.show_vc_line_reference()
 
 
 func unselect(_time: float = .2) -> void:
@@ -185,7 +196,7 @@ func get_fantasy_name() -> String:
 
 func add_input(__input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
 	var in_container = get_node('%InputContainer')
-	var input: HenCnodeInOut = HenAssets.CNodeInputScene.instantiate()
+	var input: HenCnodeInOut = CNODE_INPUT.instantiate()
 
 	input.set_type(__input.get('type') if __input.has('type') else 'Variant')
 	(input.get_node('%Name') as Label).text = __input.name
@@ -198,7 +209,7 @@ func add_input(__input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeI
 
 func add_output(_output: Dictionary) -> void:
 	var out_container = get_node('%OutputContainer')
-	var output: HenCnodeInOut = HenAssets.CNodeOutputScene.instantiate()
+	var output: HenCnodeInOut = CNODE_OUTPUT.instantiate()
 
 	output.set_type(_output.get('type') if _output.has('type') else 'Variant')
 	(output.get_node('%Name') as Label).text = _output.name
@@ -236,16 +247,21 @@ func reset_signals(_vc: HenVirtualCNode = null):
 
 
 static func instantiate_and_add_pool() -> void:
-	HenGlobal.can_instantiate_pool = true
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	global.can_instantiate_pool = true
 
 	for loop_idx in range(3):
-		if not HenGlobal.can_instantiate_pool:
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+			return
+
+		if not global.can_instantiate_pool:
 			return
 		
 		var start: float = Time.get_ticks_usec()
 
 		for vc_idx in range(30): # pool size
-			var instance: HenCnode = HenAssets.CNodeScene.instantiate()
+			var instance: HenCnode = CNODE.instantiate()
 
 			for input_idx in range(5): # input pool size
 				instance.add_input({name = "", type = "Variant"}, false)
@@ -257,35 +273,38 @@ static func instantiate_and_add_pool() -> void:
 			instance.is_pool = true
 			instance.visible = false
 
-			if not HenGlobal.can_instantiate_pool:
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+				return
+
+			if not global.can_instantiate_pool:
 				return
 			
-			HenGlobal.cnode_pool.append(instance)
-			HenGlobal.CNODE_CONTAINER.add_child(instance)
+			global.cnode_pool.append(instance)
+			global.CNODE_CONTAINER.add_child(instance)
 
 			await RenderingServer.frame_post_draw
 			
 
 		for connection_line_idx in range(30): # connection line pool size
-			var line: HenConnectionLine = HenAssets.ConnectionLineScene.instantiate()
+			var line: HenConnectionLine = CONNECTION_LINE.instantiate()
 			line.visible = false
 			line.position = Vector2(50000, 50000)
-			HenGlobal.connection_line_pool.append(line)
-			HenGlobal.CAM.get_node('Lines').add_child(line)
+			global.connection_line_pool.append(line)
+			global.CAM.get_node('Lines').add_child(line)
 		
 
 		for flow_connection_line_idx in range(30): # flow connection line pool size
-			var line: HenFlowConnectionLine = HenAssets.FlowConnectionLineScene.instantiate()
+			var line: HenFlowConnectionLine = FLOW_CONNECTION_LINE.instantiate()
 			line.visible = false
 			line.position = Vector2(50000, 50000)
-			HenGlobal.flow_connection_line_pool.append(line)
-			HenGlobal.CAM.get_node('Lines').add_child(line)
+			global.flow_connection_line_pool.append(line)
+			global.CAM.get_node('Lines').add_child(line)
 
 
 		var end: float = Time.get_ticks_usec()
 		print('time => ', (end - start) / 1000., 'ms')
 
-		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
+		await global.CNODE_CONTAINER.get_tree().create_timer(1).timeout
 
 
 func _physics_process(_delta: float) -> void:

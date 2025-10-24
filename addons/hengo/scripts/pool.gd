@@ -4,7 +4,7 @@ class_name HenPool extends RefCounted
 func get_cnode_from_pool() -> HenCnode:
     var _cnode: HenCnode
 
-    for cnode: HenCnode in HenGlobal.cnode_pool:
+    for cnode: HenCnode in (Engine.get_singleton(&'Global') as HenGlobal).cnode_pool:
         if not cnode.visible:
             _cnode = cnode
             cnode.unselect(0)
@@ -16,7 +16,7 @@ func get_cnode_from_pool() -> HenCnode:
 func get_line_from_pool() -> HenConnectionLine:
     var _line: HenConnectionLine
 
-    for line: HenConnectionLine in HenGlobal.connection_line_pool:
+    for line: HenConnectionLine in (Engine.get_singleton(&'Global') as HenGlobal).connection_line_pool:
         if not line.visible:
             line.points = []
             line.position = Vector2.ZERO
@@ -34,7 +34,7 @@ func get_line_from_pool() -> HenConnectionLine:
 func get_flow_line_from_pool() -> HenFlowConnectionLine:
     var _line: HenFlowConnectionLine
 
-    for line: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+    for line: HenFlowConnectionLine in (Engine.get_singleton(&'Global') as HenGlobal).flow_connection_line_pool:
         if not line.visible:
             line.points = []
             line.position = Vector2.ZERO

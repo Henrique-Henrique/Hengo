@@ -2,51 +2,50 @@
 class_name HenGlobal extends Node
 
 # nodes referencs
-static var CAM: HenCam
-static var CNODE_CONTAINER: Control
-static var COMMENT_CONTAINER: Control
-static var SIDE_MENU_POPUP: PanelContainer
-static var DROPDOWN_MENU: HenDropDownMenu
-static var POPUP_CONTAINER: CanvasLayer
-static var GENERAL_POPUP: PanelContainer
-static var DOCS_TOOLTIP: HenDocsToolTip
-static var ERROR_BT: HenErrorBt
-static var CONNECTION_GUIDE: HenConnectionGuide
-static var HENGO_ROOT: HenHengoRoot
-static var BASE_ROUTE: HenRouteData
-static var SIDE_BAR_LIST: HenSideBarList
-static var SIDE_BAR: HenSideBar
-static var SIDE_PANEL: PanelContainer
-static var SIDE_BAR_LIST_CACHE: Dictionary = {}
-static var TOOLTIP: HenTooltip
-static var DOCKS: Dictionary = {}
-static var ACTION_BAR: HenCNodeActionBar
-static var CODE_PREVIEWER: HenCodePreview
-static var GENERATE_PREVIEW_CODE: bool = false
-static var SCRIPT_REF_CACHE: Dictionary = {}
-static var TABS: HenTabs
-static var SIGNAL_BUS: HenSignalBus
-static var BASE_ROUTE_REF: HenLoader.BaseRouteRef
-static var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
-static var CNODE_UI: Panel
+var CAM: HenCam
+var CNODE_CONTAINER: Control
+var COMMENT_CONTAINER: Control
+var SIDE_MENU_POPUP: PanelContainer
+var DROPDOWN_MENU: HenDropDownMenu
+var POPUP_CONTAINER: CanvasLayer
+var GENERAL_POPUP: PanelContainer
+var DOCS_TOOLTIP: HenDocsToolTip
+var ERROR_BT: HenErrorBt
+var CONNECTION_GUIDE: HenConnectionGuide
+var HENGO_ROOT: HenHengoRoot
+var BASE_ROUTE: HenRouteData
+var SIDE_BAR_LIST: HenSideBarList
+var SIDE_BAR: HenSideBar
+var SIDE_PANEL: PanelContainer
+var SIDE_BAR_LIST_CACHE: Dictionary = {}
+var TOOLTIP: HenTooltip
+var DOCKS: Dictionary = {}
+var ACTION_BAR: HenCNodeActionBar
+var CODE_PREVIEWER: HenCodePreview
+var GENERATE_PREVIEW_CODE: bool = false
+var SCRIPT_REF_CACHE: Dictionary = {}
+var TABS: HenTabs
+var BASE_ROUTE_REF: HenLoader.BaseRouteRef
+var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
+var CNODE_UI: Panel
 
 # cnodes
-static var can_make_connection: bool = false
-static var connection_to_data: HenVCInOutData.CNodeInOutConnectionData
-static var can_make_flow_connection: bool = false
-static var flow_connection_to_data: Dictionary = {}
-static var flow_cnode_from: PanelContainer = null
-static var can_format_again: bool = true
+var can_make_connection: bool = false
+var connection_to_data: HenVCInOutData.CNodeInOutConnectionData
+var can_make_flow_connection: bool = false
+var flow_connection_to_data: Dictionary = {}
+var flow_cnode_from: PanelContainer = null
+var can_format_again: bool = true
 
 # cam
-static var mouse_on_cnode_ui: bool = false
+var mouse_on_cnode_ui: bool = false
 
 # states
-static var can_make_state_connection: bool = false
-static var state_connection_to_date: Dictionary = {}
+var can_make_state_connection: bool = false
+var state_connection_to_date: Dictionary = {}
 
 # history
-static var history: UndoRedo
+var history: UndoRedo
 
 # cam
 enum UI_STATE {
@@ -55,10 +54,10 @@ enum UI_STATE {
     BOTH
 }
 
-static var ui_mode: UI_STATE = UI_STATE.BOTH
+var ui_mode: UI_STATE = UI_STATE.BOTH
 
 # name generator
-static var unique_id: int = 0
+var unique_id: int = 0
 
 
 class ScriptData:
@@ -67,46 +66,46 @@ class ScriptData:
     var type: StringName
 
 # save load
-static var current_script_path: StringName = ''
-static var script_config: ScriptData
+var current_script_path: StringName = ''
+var script_config: ScriptData
 
 # parser
-static var SCRIPTS_INFO: Dictionary = {}
-static var SCRIPTS_STATES: Dictionary = {}
+var SCRIPTS_INFO: Dictionary = {}
+var SCRIPTS_STATES: Dictionary = {}
 
 # debug
-static var node_references: Dictionary = {}
-static var state_references: Dictionary = {}
+var node_references: Dictionary = {}
+var state_references: Dictionary = {}
 
 # counter
-static var node_counter: int = 0
+var node_counter: int = 0
 
-static func get_new_node_counter() -> int:
+func get_new_node_counter() -> int:
     node_counter += 1
     return node_counter
 
 
 # debug
-static var HENGO_EDITOR_PLUGIN: HenHengo
-static var HENGO_DEBUGGER_PLUGIN
+var HENGO_EDITOR_PLUGIN: HenHengo
+var HENGO_DEBUGGER_PLUGIN
 const DEBUG_TOKEN: String = '#hen_dbg#'
 const DEBUG_VAR_NAME: String = '__hen_id__'
-static var current_script_debug_symbols: Dictionary = {}
+var current_script_debug_symbols: Dictionary = {}
 
 
 # pool
-static var cnode_pool: Array = []
-static var state_pool: Array = []
-static var connection_line_pool: Array = []
-static var flow_connection_line_pool: Array = []
-static var state_connection_line_pool: Array = []
+var cnode_pool: Array = []
+var state_pool: Array = []
+var connection_line_pool: Array = []
+var flow_connection_line_pool: Array = []
+var state_connection_line_pool: Array = []
 # virtual state list
-static var vs_list: Array = []
-static var can_instantiate_pool: bool = true
+var vs_list: Array = []
+var can_instantiate_pool: bool = true
 
 
 # macro
-static var USE_MACRO_USE_SELF: bool = false
-static var MACRO_REF: HenTypeCnode
-static var USE_MACRO_REF: bool = false
-static var MACRO_USE_SELF: bool = false
+var USE_MACRO_USE_SELF: bool = false
+var MACRO_REF: HenTypeCnode
+var USE_MACRO_REF: bool = false
+var MACRO_USE_SELF: bool = false

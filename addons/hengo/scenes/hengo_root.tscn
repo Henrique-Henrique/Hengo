@@ -1,19 +1,28 @@
-[gd_scene load_steps=64 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=73 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
+[ext_resource type="Script" uid="uid://dndakpv2e001o" path="res://addons/hengo/scripts/utils/thread_helper.gd" id="3_1gx8m"]
 [ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
+[ext_resource type="Script" uid="uid://b4ofysvfj7n7d" path="res://addons/hengo/scripts/utils/script_cache.gd" id="4_uvl0d"]
+[ext_resource type="Script" uid="uid://d1n10yp2g2hds" path="res://addons/hengo/scripts/save_load/map_objects.gd" id="5_5yt1h"]
+[ext_resource type="Script" uid="uid://txuf5gnky3em" path="res://addons/hengo/scripts/save_load/map_dependencies.gd" id="6_0js6d"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="StyleBox" uid="uid://4y7hysplpx56" path="res://addons/hengo/resources/style_box/level_1_flat.tres" id="7_74kfo"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
+[ext_resource type="Script" uid="uid://bojhvy7et13dd" path="res://addons/hengo/scripts/save_load/loader.gd" id="7_rg66s"]
 [ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
+[ext_resource type="Script" uid="uid://2jt18jo67ub8" path="res://addons/hengo/scripts/router.gd" id="8_nqb6j"]
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
 [ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
+[ext_resource type="Script" uid="uid://bwvlnkdrjks50" path="res://addons/hengo/scripts/code_generation.gd" id="9_dkwui"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="9_si04b"]
 [ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
+[ext_resource type="Script" uid="uid://exlq4wcwactd" path="res://addons/hengo/scripts/enums.gd" id="10_q27l4"]
 [ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
 [ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
+[ext_resource type="Script" uid="uid://itdfd6vqm34v" path="res://addons/hengo/scripts/global.gd" id="11_3680e"]
 [ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
@@ -100,9 +109,9 @@ shadow_size = 10
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1523, 648)
-shader_parameter/offset = Vector2(-542.1953, -131.5579)
-shader_parameter/zoom_factor = 1.2999952
+shader_parameter/screen_size = Vector2(1523, 472)
+shader_parameter/offset = Vector2(0, -6.4)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -155,6 +164,53 @@ size_flags_vertical = 3
 mouse_filter = 1
 theme = ExtResource("1_2muha")
 script = ExtResource("2_velgh")
+
+[node name="AutoLoads" type="Node" parent="."]
+unique_name_in_owner = true
+
+[node name="ThreadHelper" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("3_1gx8m")
+
+[node name="ScriptDataCache" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("4_uvl0d")
+
+[node name="MapObjects" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("5_5yt1h")
+metadata/_custom_type_script = "uid://d1n10yp2g2hds"
+
+[node name="MapDependencies" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("6_0js6d")
+metadata/_custom_type_script = "uid://txuf5gnky3em"
+
+[node name="Loader" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("7_rg66s")
+metadata/_custom_type_script = "uid://bojhvy7et13dd"
+
+[node name="Router" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("8_nqb6j")
+
+[node name="CodeGeneration" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("9_dkwui")
+metadata/_custom_type_script = "uid://bwvlnkdrjks50"
+
+[node name="Enums" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("10_q27l4")
+
+[node name="Global" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("11_3680e")
+
+[node name="SignalBus" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("27_ji2ve")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -538,6 +594,7 @@ deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
 
 [node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
+visible = false
 
 [node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUp"]
 unique_name_in_owner = true
@@ -624,7 +681,3 @@ selection_enabled = true
 unique_name_in_owner = true
 visible = false
 theme = ExtResource("1_2muha")
-
-[node name="SignalBus" type="Node" parent="."]
-unique_name_in_owner = true
-script = ExtResource("27_ji2ve")

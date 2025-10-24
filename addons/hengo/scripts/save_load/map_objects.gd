@@ -1,10 +1,10 @@
 @tool
-class_name HenMapObjects extends RefCounted
+class_name HenMapObjects extends Node
 
-static var objects: Dictionary = {}
+var objects: Dictionary = {}
 
 
-static func map_script_data(_id: StringName, _script_data: HenScriptData) -> void:
+func map_script_data(_id: StringName, _script_data: HenScriptData) -> void:
 	objects[_id] = {
 		side_bar_id = _script_data.side_bar_list.id,
 		type = _script_data.type,

@@ -30,10 +30,12 @@ func _ready() -> void:
 
 
 func _completion_request() -> void:
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+
 	for key in completion_list:
 		code_edit.add_code_completion_option(CodeEdit.KIND_VARIABLE, key, key)
 
-	for native_name in HenEnums.MATH_UTILITY_NAME_LIST:
+	for native_name in enums.MATH_UTILITY_NAME_LIST:
 		code_edit.add_code_completion_option(CodeEdit.KIND_FUNCTION, native_name, native_name + '(')
 	
 	code_edit.update_code_completion_options(true)
@@ -94,7 +96,7 @@ func _on_save() -> void:
 			type = 'Variant'
 		})
 		
-	HenGlobal.GENERAL_POPUP.get_parent().hide()
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().hide()
 	v_cnode.update()
 
 

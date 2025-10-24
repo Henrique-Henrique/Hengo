@@ -33,7 +33,7 @@ func add_flow_connection(_id: int, _to_id: int, _from: HenVirtualCNode, _to: Hen
 	var flow_output: HenVCFlow = get_flow_output(_id)
 
 	if not flow_input or not flow_output:
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not Found HenTypeFlow Connections: Id -> " + str(_id) + " or To Id -> " + str(_to_id)))
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not Found HenTypeFlow Connections: Id -> " + str(_id) + " or To Id -> " + str(_to_id)))
 		return null
 
 	var flow_connection: HenVCFlowConnectionData = HenVCFlowConnectionData.new()
@@ -133,7 +133,7 @@ func on_flow_added(_is_input: bool, _data: Dictionary, _owner: HenVirtualCNode) 
 		flow_outputs.append(flow)
 	
 	if _data.has('id'):
-		HenGlobal.SIDE_BAR_LIST_CACHE[_data.id] = flow
+		(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[_data.id] = flow
 
 	flow.moved.connect(on_flow_moved)
 	flow.deleted.connect(on_flow_deleted)

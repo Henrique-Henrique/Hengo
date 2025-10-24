@@ -41,7 +41,7 @@ func _on_ui_size_changed() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if HenGlobal.CAM == self:
+	if (Engine.get_singleton(&'Global') as HenGlobal).CAM == self:
 		if event is InputEventMouseMotion:
 			check_vc_action_menu()
 
@@ -92,7 +92,7 @@ func _set_transform(_pos: Vector2) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if ignore_process or HenGlobal.CAM == self:
+	if ignore_process or (Engine.get_singleton(&'Global') as HenGlobal).CAM == self:
 		var factor: float = ZOOM_RATE * _delta
 		transform.x = lerp(transform.x, t_x, factor)
 		transform.y = lerp(transform.y, t_y, factor)
@@ -115,10 +115,10 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 		_pos / -_zoom, # position
 		(get_parent() as Control).size / _zoom
 	)
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
-
-	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		for v_cnode: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
+	if router.current_route and is_instance_valid(router.current_route.get('ref')):
+		for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
 			v_cnode.check_visibility(rect)
 
 
@@ -146,8 +146,10 @@ func go_to_center(_pos: Vector2) -> void:
 
 
 func check_vc_action_menu() -> void:
-	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		for vc: HenVirtualCNode in HenRouter.get_current_route_v_cnodes():
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	if router.current_route and is_instance_valid(router.current_route.get('ref')):
+		for vc: HenVirtualCNode in router.get_current_route_v_cnodes():
 			if not vc.state.is_showing:
 				continue
 

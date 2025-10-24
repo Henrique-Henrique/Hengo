@@ -17,12 +17,12 @@ func _ready() -> void:
 
 func _on_hover() -> void:
 	is_hovering = true
-	HenGlobal.CAM.can_scroll = false
+	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = false
 
 func _on_exit() -> void:
 	is_hovering = false
 	hide_docs()
-	HenGlobal.CAM.can_scroll = true
+	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = true
 
 
 func hide_docs() -> void:
@@ -85,7 +85,7 @@ func start_docs(_class_name: StringName, _member: String = '') -> void:
 
 
 	# await get_tree().process_frame
-	EditorInterface.set_main_screen_editor(HenGlobal.HENGO_EDITOR_PLUGIN.PLUGIN_NAME)
+	EditorInterface.set_main_screen_editor((Engine.get_singleton(&'Global') as HenGlobal).HENGO_EDITOR_PLUGIN.PLUGIN_NAME)
 
 	rich_text_label.text = result
 	title_label.text = _class_name + '.' + _member

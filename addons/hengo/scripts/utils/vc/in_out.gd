@@ -1,7 +1,7 @@
 @tool
 class_name HenVCInOutData extends RefCounted
 
-var id: int = HenGlobal.get_new_node_counter()
+var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 var name: String
 var type: StringName: set = _on_change_type
 var sub_type: StringName
@@ -141,10 +141,11 @@ func get_save() -> Dictionary:
 
 
 func reset_input_value() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	category = &'default_value'
 	is_prop = false
 
-	if HenGlobal.script_config and HenGlobal.script_config.type == type:
+	if global.script_config and global.script_config.type == type:
 		code_value = '_ref.'
 		is_ref = true
 		return
@@ -241,33 +242,34 @@ func on_method_picker_request(_type: StringName, _mouse_pos: Vector2) -> void:
 		_data.from_virtual_ref = self
 
 	method_list.start(type, _mouse_pos, false, _type, _data)
-	HenGlobal.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', _mouse_pos)
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', _mouse_pos)
 
 
 func on_io_mouse_enter(_connector) -> void:
-	HenGlobal.connection_to_data = CNodeInOutConnectionData.new(
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.connection_to_data = CNodeInOutConnectionData.new(
 		get_owner(),
 		self,
 	)
 
-	if HenGlobal.CONNECTION_GUIDE.is_in_out:
+	if global.CONNECTION_GUIDE.is_in_out:
 		var connector: TextureRect = _connector
-		var pos = HenGlobal.CAM.get_relative_vec2(_connector.global_position)
+		var pos = global.CAM.get_relative_vec2(_connector.global_position)
 
-		HenGlobal.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
-		HenGlobal.CONNECTION_GUIDE.gradient.colors[1] = get_type_color()
+		global.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
+		global.CONNECTION_GUIDE.gradient.colors[1] = get_type_color()
 	
 
 func on_create_connection_request(_type: StringName) -> void:
-	# try connection
-	var connection: HenVCConnectionReturn = create_virtual_connection(_type, HenGlobal.connection_to_data)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var connection: HenVCConnectionReturn = create_virtual_connection(_type, global.connection_to_data)
 
 	if connection:
-		HenGlobal.history.create_action('Add Connection')
-		HenGlobal.history.add_do_method(connection.add)
-		HenGlobal.history.add_do_reference(connection)
-		HenGlobal.history.add_undo_method(connection.remove)
-		HenGlobal.history.commit_action()
+		global.history.create_action('Add Connection')
+		global.history.add_do_method(connection.add)
+		global.history.add_do_reference(connection)
+		global.history.add_undo_method(connection.remove)
+		global.history.commit_action()
 
 
 func on_value_change(_value, _generated_code: StringName) -> void:

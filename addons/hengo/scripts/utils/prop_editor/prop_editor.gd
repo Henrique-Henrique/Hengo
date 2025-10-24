@@ -6,7 +6,7 @@ const PROP_ITEM = preload('res://addons/hengo/scenes/utils/prop_editor/prop_item
 const PROP_ARRAY_ITEM = preload('res://addons/hengo/scenes/utils/prop_editor/prop_array_item.tscn')
 const ARRAY_ITEM = preload('res://addons/hengo/scenes/utils/prop_editor/array_item.tscn')
 
-static var editor_ref: HenPropEditor
+static var instance: HenPropEditor
 
 #
 #
@@ -24,8 +24,8 @@ var instance_ref
 #
 #
 func _ready() -> void:
+	instance = self
 	(%Delete as Button).pressed.connect(_on_delete)
-
 #
 #
 #
@@ -81,11 +81,9 @@ static func mount(_ref: RefCounted) -> HenPropEditor:
 	var editor: HenPropEditor = PROP_EDITOR.instantiate() as HenPropEditor
 	editor.get_prop_callback = (_ref as Variant).get_inspector_array_list
 	editor.instance_ref = _ref
-	editor_ref = editor
-
 	editor.start()
 	return editor
 
 
 static func get_singleton() -> HenPropEditor:
-	return editor_ref
+	return instance

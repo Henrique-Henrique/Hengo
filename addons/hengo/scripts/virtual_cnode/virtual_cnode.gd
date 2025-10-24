@@ -127,8 +127,8 @@ func hide() -> void:
 func update() -> void:
 	if not cnode_instance:
 		return
-
-	var should_hide: bool = state.is_deleted or (not route_info.route_ref or not HenRouter.current_route or route_info.route_ref.id != HenRouter.current_route.id)
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var should_hide: bool = state.is_deleted or (not route_info.route_ref or not router.current_route or route_info.route_ref.id != router.current_route.id)
 
 	hide()
 
@@ -136,7 +136,7 @@ func update() -> void:
 		check_visibility()
 
 
-func check_visibility(_rect: Rect2 = HenGlobal.CAM.get_rect()) -> void:
+func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_rect()) -> void:
 	state.is_showing = _rect.intersects(Rect2(
 		visual.position,
 		visual.size
@@ -153,23 +153,24 @@ func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtual
 
 
 func select() -> void:
-	HenGlobal.SELECTED_VIRTUAL_CNODE.append(self)
+	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.append(self)
 	
 	if cnode_instance:
 		cnode_instance.select()
 
 
 func unselect() -> void:
-	HenGlobal.SELECTED_VIRTUAL_CNODE.erase(self)
+	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.erase(self)
 
 	if cnode_instance:
 		cnode_instance.unselect()
 
 
 func on_cnode_mouse_enter() -> void:
-	prints(identity.id, visual.position)
-	if HenGlobal.can_make_flow_connection and not flow.flow_inputs.is_empty():
-		HenGlobal.flow_connection_to_data = {
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if global.can_make_flow_connection and not flow.flow_inputs.is_empty():
+		global.flow_connection_to_data = {
 			to_cnode = self,
 			to_id = flow.flow_inputs[0].id
 		}
@@ -182,31 +183,35 @@ func on_cnode_selected(_selected: bool) -> void:
 
 
 func on_cnode_hovering(_mouse_pos: Vector2) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if state.invalid:
-		HenGlobal.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
+		global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
 	else:
 		match identity.type:
 			HenVirtualCNode.Type.STATE:
-				HenGlobal.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
+				global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
 			_:
-				HenGlobal.TOOLTIP.close()
+				global.TOOLTIP.close()
 
 
 func on_cnode_double_click() -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
 	if route_info.route:
-		HenRouter.change_route(route_info.route)
+		router.change_route(route_info.route)
 	elif references.ref and references.ref.get_ref():
 		@warning_ignore('unsafe_method_access')
 		if references.ref.get_ref().get('route'):
 			@warning_ignore('unsafe_method_access')
-			HenRouter.change_route(references.ref.get_ref().get('route'))
+			router.change_route(references.ref.get_ref().get('route'))
 
 
 func on_cnode_right_click(_mouse_pos: Vector2) -> void:
 	# showing state config on doubleclick
 	if identity.type == HenVirtualCNode.Type.STATE:
 		@warning_ignore('unsafe_method_access')
-		HenGlobal.GENERAL_POPUP.get_parent().show_content(
+		(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().show_content(
 			HenPropEditor.mount(self),
 			'Testing',
 			_mouse_pos
@@ -388,7 +393,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.identity.name = _config.name
 	v_cnode.identity.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.identity.sub_type = _config.sub_type
-	v_cnode.identity.id = HenGlobal.get_new_node_counter() if not _config.has('id') else _config.id
+	v_cnode.identity.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter() if not _config.has('id') else _config.id
 	v_cnode.route_info.route_ref = _config.route
 	
 	if _config.has('name_to_code'): v_cnode.identity.name_to_code = _config.name_to_code
@@ -442,7 +447,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('ref_id'):
 		if not v_cnode.state.invalid:
-			_config.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
+			_config.ref = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
 
 	if _config.has('ref'):
 		# ref is required to have id to save and load work
@@ -506,8 +511,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				weakref(v_cnode)
 			)
 
-			HenRouter.line_route_reference[v_cnode.route_info.route.id] = []
-			
 			if not _config.has('virtual_cnode_list'):
 				HenVirtualCNode.instantiate_virtual_cnode({
 					name = 'enter',

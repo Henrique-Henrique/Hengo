@@ -1,5 +1,5 @@
 @tool
-class_name HenEnums extends MainLoop
+class_name HenEnums extends Node
 
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
 const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
@@ -84,21 +84,21 @@ const RULES_TO_CONNECT: Dictionary = {
 var string: String = NodePath()
 
 # dynamic native api
-static var NATIVE_API_LIST: Dictionary = {}
-static var CONST_API_LIST: Dictionary = {}
-static var SINGLETON_API_LIST: Array = []
-static var NATIVE_PROPS_LIST: Dictionary = {}
-static var MATH_UTILITY_NAME_LIST: Array = []
+var NATIVE_API_LIST: Dictionary = {}
+var CONST_API_LIST: Dictionary = {}
+var SINGLETON_API_LIST: Array = []
+var NATIVE_PROPS_LIST: Dictionary = {}
+var MATH_UTILITY_NAME_LIST: Array = []
 
 # static
 #
-static var OBJECT_TYPES: PackedStringArray
-static var ALL_CLASSES: PackedStringArray
+var OBJECT_TYPES: PackedStringArray
+var ALL_CLASSES: PackedStringArray
 
 # dropdown
-static var DROPDOWN_ALL_CLASSES: Array
-static var DROPDOWN_OBJECT_TYPES: Array
-static var DROPDOWN_STATES: Array = []
+var DROPDOWN_ALL_CLASSES: Array
+var DROPDOWN_OBJECT_TYPES: Array
+var DROPDOWN_STATES: Array = []
 
 
 const TOOLTIP_TEXT = {

@@ -23,6 +23,8 @@ func clear() -> void:
 	list_changed.emit()
 
 func add() -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
 	match type:
 		HenSideBar.AddType.VAR:
 			var_list.append(HenVarData.new())
@@ -33,11 +35,11 @@ func add() -> void:
 		HenSideBar.AddType.MACRO:
 			macro_list.append(HenMacroData.new())
 		HenSideBar.AddType.LOCAL_VAR:
-			if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
+			if router.current_route.get_ref().get(&'local_vars') is Array:
 				var var_data: HenVarData = HenVarData.new()
-				var_data.local_ref = HenRouter.current_route.get_ref()
+				var_data.local_ref = router.current_route.get_ref()
 				
-				(HenRouter.current_route.get_ref().local_vars as Array).append(var_data)
+				(router.current_route.get_ref().local_vars as Array).append(var_data)
 		HenSideBar.AddType.SIGNAL:
 			signal_list.append(HenSignalData.new())
 
@@ -47,6 +49,8 @@ func change(_type: HenSideBar.AddType) -> void:
 	type = _type
 
 func get_list_to_draw() -> Array:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
 	match type:
 		HenSideBar.AddType.VAR:
 			return var_list.map(func(x: HenVarData): return {name = x.name})
@@ -57,21 +61,22 @@ func get_list_to_draw() -> Array:
 		HenSideBar.AddType.MACRO:
 			return macro_list.map(func(x: HenMacroData): return {name = x.name})
 		HenSideBar.AddType.LOCAL_VAR:
-			if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
-				return (HenRouter.current_route.get_ref().local_vars as Array).map(func(x: HenVarData): return {name = x.name})
+			if router.current_route.get_ref().get(&'local_vars') is Array:
+				return (router.current_route.get_ref().local_vars as Array).map(func(x: HenVarData): return {name = x.name})
 		HenSideBar.AddType.SIGNAL:
 			return signal_list.map(func(x: HenSignalData): return {name = x.name})
 
 	return []
 
 func on_click(_item, _mouse_pos: Vector2) -> void:
-	var pos: Vector2 = HenGlobal.SIDE_BAR.global_position
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var pos: Vector2 = global.SIDE_BAR.global_position
 	var prop_editor: HenPropEditor = HenPropEditor.mount(_item)
 
-	pos.x = HenGlobal.SIDE_BAR.position.x + HenGlobal.SIDE_BAR.size.x + 10
+	pos.x = global.SIDE_BAR.position.x + global.SIDE_BAR.size.x + 10
 	pos.y += _mouse_pos.y
 
-	var popup: HenPopupContainer = (HenGlobal.GENERAL_POPUP.get_parent() as HenPopupContainer).show_content(
+	var popup: HenPopupContainer = (global.GENERAL_POPUP.get_parent() as HenPopupContainer).show_content(
 		prop_editor,
 		'Testing',
 		pos,
@@ -100,7 +105,8 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 
 
 func load_save(_data: Dictionary) -> void:
-	id = HenGlobal.get_new_node_counter() if not _data.has('id') else _data.id
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	id = global.get_new_node_counter() if not _data.has('id') else _data.id
 
 	for item_data: Dictionary in _data.var_list:
 		var item: HenVarData = HenVarData.new()
@@ -128,10 +134,11 @@ func load_save(_data: Dictionary) -> void:
 		signal_list.append(item)
 
 	# loading cnodes
-	for item in HenGlobal.SIDE_BAR_LIST_CACHE.values():
+	for item in global.SIDE_BAR_LIST_CACHE.values():
 		@warning_ignore('unsafe_method_access')
 		if item.get('cnode_list_to_load') is Array:
-			HenLoader.parse_and_get_vc_list_dict(item.cnode_list_to_load, item.route)
+			var loader: HenLoader = Engine.get_singleton(&'Loader')
+			loader.parse_and_get_vc_list_dict(item.cnode_list_to_load, item.route)
 			(item.cnode_list_to_load as Array).clear()
 
 	list_changed.emit()

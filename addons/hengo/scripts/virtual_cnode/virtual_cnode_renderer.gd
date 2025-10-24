@@ -291,14 +291,14 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 
 		# input positions
 		if from.state.is_showing:
-			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2) + connection.line_ref.conn_size
+			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2) + connection.line_ref.conn_size
 			connection.to_old_pos = pos
 		else:
 			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		# output positions
 		if to.state.is_showing:
-			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2) + connection.line_ref.conn_size
+			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2) + connection.line_ref.conn_size
 			connection.from_old_pos = pos
 		else:
 			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
@@ -320,14 +320,14 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 
 		# input positions
 		if from.state.is_showing:
-			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
+			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
 			connection.to_old_pos = pos
 		else:
 			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
 
 		# output positions
 		if to.state.is_showing:
-			var pos: Vector2 = HenGlobal.CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
+			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
 			connection.from_old_pos = pos
 		else:
 			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO

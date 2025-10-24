@@ -13,10 +13,10 @@ texture = ExtResource("1_wvpun")
 script = ExtResource("2_m0rpm")
 
 [node name="Button" type="Button" parent="Icon"]
-offset_left = 4.0
-offset_top = 264.0
-offset_right = 190.0
-offset_bottom = 422.0
+offset_left = 6.0
+offset_top = 220.0
+offset_right = 192.0
+offset_bottom = 378.0
 text = "CLICK TO TEST"
 
 [node name="Node" type="Node" parent="Icon"]

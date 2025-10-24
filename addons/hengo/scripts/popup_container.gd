@@ -23,6 +23,7 @@ func clean() -> void:
 func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
     var gp: PanelContainer = get_node('%GeneralPopUp')
     var container = gp.get_child(0)
+    var global: HenGlobal = Engine.get_singleton(&'Global')
 
     clean()
     
@@ -33,7 +34,7 @@ func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF,
 
     if _pos == Vector2.INF:
         # center
-        gp.position = HenGlobal.HENGO_ROOT.size / 2 - _content.size / 2
+        gp.position = global.HENGO_ROOT.size / 2 - _content.size / 2
     else:
         gp.position = _pos
 
@@ -52,7 +53,7 @@ func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF,
 
     gp.scale = Vector2(.95, .95)
     tween.tween_property(gp, 'scale', Vector2.ONE, .5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-    HenGlobal.CAM.can_scroll = false
+    global.CAM.can_scroll = false
 
     return self
 
@@ -69,11 +70,11 @@ func reset_size() -> void:
 
 
 func show_container() -> void:
-    HenGlobal.CAM.can_scroll = false
+    (Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = false
     show()
 
 
 func hide_popup() -> void:
-    HenGlobal.CAM.can_scroll = true
+    (Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = true
     hide()
     closed.emit()

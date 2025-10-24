@@ -14,11 +14,14 @@ func _ready() -> void:
 
 
 func _on_pressed() -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	match type:
 		'state_transition':
 			# all transitions
-			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				options = (HenRouter.current_route.get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
+			if router.current_route.type == router.ROUTE_TYPE.STATE:
+				options = (router.current_route.get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
 					return {name = x.name, ref = x})
 		'action':
 			var arr: Array = []
@@ -31,12 +34,12 @@ func _on_pressed() -> void:
 			
 			options = arr
 		'hengo_states':
-			options = HenGlobal.SCRIPTS_STATES[custom_data] if HenGlobal.SCRIPTS_STATES.has(custom_data) else []
+			options = global.SCRIPTS_STATES[custom_data] if global.SCRIPTS_STATES.has(custom_data) else []
 		'all_classes':
-			options = HenEnums.DROPDOWN_ALL_CLASSES
+			options = (Engine.get_singleton(&'Enums') as HenEnums).DROPDOWN_ALL_CLASSES
 		'all_classes_self':
 			options = [ {name = 'SELF'}]
-			options.append_array(HenEnums.DROPDOWN_ALL_CLASSES)
+			options.append_array((Engine.get_singleton(&'Enums') as HenEnums).DROPDOWN_ALL_CLASSES)
 		'enum_list':
 			var enum_reference: Dictionary = {}
 
@@ -48,10 +51,10 @@ func _on_pressed() -> void:
 			var arr: Array = []
 
 			# local variables
-			match HenRouter.current_route.type:
-				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-					if HenRouter.current_route.get_ref().get(&'local_vars') is Array:
-						for var_data: HenVarData in (HenRouter.current_route.get_ref().get(&'local_vars') as Array):
+			match router.current_route.type:
+				router.ROUTE_TYPE.FUNC, router.ROUTE_TYPE.SIGNAL, router.ROUTE_TYPE.MACRO:
+					if router.current_route.get_ref().get(&'local_vars') is Array:
+						for var_data: HenVarData in (router.current_route.get_ref().get(&'local_vars') as Array):
 							if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 								arr.append({
 									name = var_data.name,
@@ -60,7 +63,7 @@ func _on_pressed() -> void:
 								})
 
 			# variables
-			for var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
+			for var_data: HenVarData in global.SIDE_BAR_LIST.var_list:
 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 					arr.append({
 						name = var_data.name,
@@ -69,7 +72,7 @@ func _on_pressed() -> void:
 					})
 			
 			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type):
+			for prop: Dictionary in ClassDB.class_get_property_list(global.script_config.type):
 				var _type: StringName = input_ref.type
 				var prop_type: StringName = type_string(prop.type)
 				
@@ -102,7 +105,7 @@ func _on_pressed() -> void:
 			# 	arr.append({name = var_data.name, type = var_data.type, ref = var_data})
 
 			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type if not custom_data else custom_data):
+			for prop: Dictionary in ClassDB.class_get_property_list((Engine.get_singleton(&'Global') as HenGlobal).script_config.type if not custom_data else custom_data):
 				var prop_type: StringName = type_string(prop.type)
 				if prop.type != TYPE_NIL:
 					arr.append({
@@ -122,8 +125,9 @@ func _on_pressed() -> void:
 		'signal_callback_list':
 			var arr: Array = []
 			var all_classes: PackedStringArray = ClassDB.get_class_list()
+			var map_objects: HenMapObjects = Engine.get_singleton(&'MapObjects')
 
-			for data in HenMapObjects.objects.values():
+			for data in map_objects.objects.values():
 				for signal_data: Dictionary in data.signal_list:
 					var dt: Dictionary = signal_data.duplicate(true)
 					dt.use_custom = true
@@ -145,15 +149,15 @@ func _on_pressed() -> void:
 			options = arr
 			
 
-	HenGlobal.DROPDOWN_MENU.position = global_position
-	HenGlobal.DROPDOWN_MENU.get_parent().show_container()
-	HenGlobal.DROPDOWN_MENU.mount(options, _selected, type)
+	global.DROPDOWN_MENU.position = global_position
+	global.DROPDOWN_MENU.get_parent().show_container()
+	global.DROPDOWN_MENU.mount(options, _selected, type)
 
 
 func _selected(_item: Dictionary) -> void:
 	text = _item.name
 
-	HenGlobal.CAM.can_scroll = true
+	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = true
 
 	match type:
 		'hengo_states':
@@ -246,8 +250,9 @@ func get_generated_code() -> String:
 	
 
 func get_const_list(_arr: Array, _type: StringName, _name: String, _prop_type: StringName, _check_type: bool = true) -> Array:
-	if HenEnums.NATIVE_PROPS_LIST.has(_prop_type):
-		for prop: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(_prop_type):
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+	if enums.NATIVE_PROPS_LIST.has(_prop_type):
+		for prop: Dictionary in enums.NATIVE_PROPS_LIST.get(_prop_type):
 			var my_name: String = _name + ' -> ' + prop.name
 
 			if _check_type:

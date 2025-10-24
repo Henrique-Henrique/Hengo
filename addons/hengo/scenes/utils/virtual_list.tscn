@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3 uid="uid://6urv5rx15yye"]
+
+[ext_resource type="Script" uid="uid://c25cuksh8x6c0" path="res://addons/hengo/scripts/utils/virtual_list.gd" id="1_01w3k"]
+
+[node name="VirtualList" type="Control" node_paths=PackedStringArray("scroll_container", "content")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_01w3k")
+scroll_container = NodePath("ScrollContainer")
+content = NodePath("ScrollContainer/Content")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="Control" parent="ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3

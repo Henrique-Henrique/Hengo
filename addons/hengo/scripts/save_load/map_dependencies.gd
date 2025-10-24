@@ -1,11 +1,11 @@
 @tool
-class_name HenMapDependencies extends RefCounted
+class_name HenMapDependencies extends Node
 
 const SAVE_PATH: String = "res://hengo/save/"
-static var dependencies: Dictionary = {}
+var dependencies: Dictionary = {}
 
 
-static func start_map() -> void:
+func start_map() -> void:
 	# ensure a clean state for each run
 	dependencies.clear()
 
@@ -18,12 +18,12 @@ static func start_map() -> void:
 		_process_script_file(file_path)
 	
 
-static func _get_script_files_from_dir(path: String) -> Array:
+func _get_script_files_from_dir(path: String) -> Array:
 	var files: Array = []
 	var dir: DirAccess = DirAccess.open(path)
 
 	if not dir:
-		HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("failed to open directory: " + path))
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("failed to open directory: " + path))
 		return files
 
 	dir.list_dir_begin()
@@ -38,7 +38,7 @@ static func _get_script_files_from_dir(path: String) -> Array:
 	return files
 
 
-static func _process_script_file(file_path: String) -> void:
+func _process_script_file(file_path: String) -> void:
 	var file: FileAccess = FileAccess.open(file_path, FileAccess.READ)
 	if not file:
 		push_warning("could not open file: " + file_path)
@@ -68,10 +68,11 @@ static func _process_script_file(file_path: String) -> void:
 	for dependency_id: StringName in script_data.deps:
 		_register_dependency(dependency_id, dependent_id)
 	
-	HenMapObjects.map_script_data(dependent_id, script_data)
+	var map_objects: HenMapObjects = Engine.get_singleton(&'MapObjects')
+	map_objects.map_script_data(dependent_id, script_data)
 
 
-static func _register_dependency(dependency_id: StringName, dependent_id: StringName) -> void:
+func _register_dependency(dependency_id: StringName, dependent_id: StringName) -> void:
 	if not dependencies.has(dependency_id):
 		dependencies[dependency_id] = []
 
@@ -83,5 +84,5 @@ static func _register_dependency(dependency_id: StringName, dependent_id: String
 
 
 # get all dependencies for a given script
-static func get_dependencies(_script_id: StringName) -> Array:
+func get_dependencies(_script_id: StringName) -> Array:
 	return dependencies.get(_script_id, [])

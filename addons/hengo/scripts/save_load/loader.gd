@@ -2,8 +2,8 @@
 class_name HenLoader extends Node
 
 
-static var loaded_virtual_cnode_list: Dictionary = {}
-static var from_flow_list: Array = []
+var loaded_virtual_cnode_list: Dictionary = {}
+var from_flow_list: Array = []
 
 
 class BaseRouteRef extends RefCounted:
@@ -11,28 +11,31 @@ class BaseRouteRef extends RefCounted:
 	var virtual_cnode_list: Array = []
 
 
-static func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> bool:
+func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> bool:
+	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	# cache the current script's state before switching, ensuring any updates
 	# are propagated to the target script when it's analyzed
-	if HenGlobal.script_config:
+	if global.script_config:
 		var current_script_data: HenScriptData = HenSaver.generate_script_data()
-		if not HenScriptDataCache.add_script_data(str(HenGlobal.script_config.id), current_script_data):
+		if not script_data_cache.add_script_data(str(global.script_config.id), current_script_data):
 			return false
 		
 		# the generation logic handles cases where the target is not yet cached
-		var target_cached: HenScriptData = HenScriptDataCache.try_get_script_data(str(_resource_id))
-		var updated_target: HenScriptData = HenCodeGeneration.get_updated_script_data(
+		var target_cached: HenScriptData = script_data_cache.try_get_script_data(str(_resource_id))
+		var updated_target: HenScriptData = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_updated_script_data(
 			_resource_id,
 			current_script_data.side_bar_list,
 			target_cached
 		)
 
 		if updated_target:
-			if not HenScriptDataCache.add_script_data(str(_resource_id), updated_target):
+			if not script_data_cache.add_script_data(str(_resource_id), updated_target):
 				return false
 
 	if not _headless:
-		var compile_bt: Button = HenGlobal.CAM.get_parent().get_node_or_null('%Compile')
+		var compile_bt: Button = global.CAM.get_parent().get_node_or_null('%Compile')
 		compile_bt.disabled = false
 
 	# ---------------------------------------------------------------------------- #
@@ -40,51 +43,53 @@ static func reset_to_load(_resource_id: int, _headless: bool, _path: StringName)
 	from_flow_list.clear()
 
 	# hide all virtuals
-	for cnode: HenCnode in HenGlobal.cnode_pool:
+	for cnode: HenCnode in global.cnode_pool:
 		for signal_data: Dictionary in cnode.get_signal_connection_list('on_move'):
 			cnode.disconnect('on_move', signal_data.callable)
 
 		cnode.visible = false
 
-	for connection: HenConnectionLine in HenGlobal.connection_line_pool:
+	for connection: HenConnectionLine in global.connection_line_pool:
 		connection.visible = false
 
-	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+	for flow_connection: HenFlowConnectionLine in global.flow_connection_line_pool:
 		flow_connection.visible = false
 
-	HenGlobal.BASE_ROUTE_REF = null
-	HenGlobal.SIDE_BAR_LIST.clear()
-	HenGlobal.SIDE_BAR_LIST_CACHE.clear()
-	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
-	HenGlobal.script_config = HenGlobal.ScriptData.new()
-	HenGlobal.script_config.path = _path
-	HenGlobal.script_config.id = _resource_id
+	global.BASE_ROUTE_REF = null
+	global.SIDE_BAR_LIST.clear()
+	global.SIDE_BAR_LIST_CACHE.clear()
+	global.SELECTED_VIRTUAL_CNODE.clear()
+	global.script_config = global.ScriptData.new()
+	global.script_config.path = _path
+	global.script_config.id = _resource_id
 
 	# confirming queue free before check errors
-	if not _headless: await HenGlobal.CAM.get_tree().process_frame
-	
-	HenGlobal.current_script_path = _path
-	HenRouter.current_route = null
-	HenRouter.line_route_reference = {}
-	HenRouter.comment_reference = {}
-	HenGlobal.history = UndoRedo.new()
-	HenGlobal.BASE_ROUTE_REF = BaseRouteRef.new()
+	if not _headless: await global.CAM.get_tree().process_frame
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	global.current_script_path = _path
+	router.current_route = null
+	router.comment_reference = {}
+	global.history = UndoRedo.new()
+	global.BASE_ROUTE_REF = BaseRouteRef.new()
 
 	return true
 
 
-static func load(_path: StringName, _headless: bool = false) -> bool:
+func load(_path: StringName, _headless: bool = false) -> bool:
 	var start: int = Time.get_ticks_usec()
 	var resource_id: int = _path.get_file().get_basename().to_int() if _path.get_extension() == 'hengo' else ResourceLoader.get_resource_uid(_path)
-
+	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
 	var is_resource: bool = _path.begins_with('res://hengo/save/') and _path.get_extension() == 'hengo'
 	var path: StringName = get_data_path(resource_id) if not is_resource else _path
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	var script_data: HenScriptData
 
 	# loading hengo script data from cache
-	if HenScriptDataCache.has_script_data(str(resource_id)):
-		script_data = HenScriptDataCache.try_get_script_data(str(resource_id))
+	if script_data_cache.has_script_data(str(resource_id)):
+		script_data = script_data_cache.try_get_script_data(str(resource_id))
 
 	# loading hengo script data
 	if script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
@@ -101,22 +106,22 @@ static func load(_path: StringName, _headless: bool = false) -> bool:
 			'Base',
 			HenRouter.ROUTE_TYPE.BASE,
 			HenUtilsName.get_unique_name(),
-			weakref(HenGlobal.BASE_ROUTE_REF)
+			weakref(global.BASE_ROUTE_REF)
 		)
 
-		HenGlobal.BASE_ROUTE = base_route
+		global.BASE_ROUTE = base_route
 
-		if not HenScriptDataCache.add_script_data(str(resource_id), HenScriptData.load(script_data.get_save().duplicate(true))):
+		if not script_data_cache.add_script_data(str(resource_id), HenScriptData.load(script_data.get_save().duplicate(true))):
 			return false
 
-		if not _headless: HenGlobal.TABS.add_script_tab(resource_id)
+		if not _headless: global.TABS.add_script_tab(resource_id)
 
 		# setting script configs
-		HenGlobal.script_config.type = script_data.type
-		HenGlobal.node_counter = script_data.node_counter
+		global.script_config.type = script_data.type
+		global.node_counter = script_data.node_counter
 
 		# loading side bar list
-		HenGlobal.SIDE_BAR_LIST.load_save(script_data.side_bar_list)
+		global.SIDE_BAR_LIST.load_save(script_data.side_bar_list)
 		
 		# loading v_cnodes
 		parse_and_get_vc_list_dict(script_data.virtual_cnode_list, base_route)
@@ -149,7 +154,7 @@ static func load(_path: StringName, _headless: bool = false) -> bool:
 		var type: String = reg.search(script.source_code).get_string(1)
 
 		if type.begins_with('res://hengo/save'):
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type))
+			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type))
 			return false
 
 		if not await reset_to_load(resource_id, _headless, _path):
@@ -159,12 +164,12 @@ static func load(_path: StringName, _headless: bool = false) -> bool:
 			'Base',
 			HenRouter.ROUTE_TYPE.BASE,
 			HenUtilsName.get_unique_name(),
-			weakref(HenGlobal.BASE_ROUTE_REF)
+			weakref(global.BASE_ROUTE_REF)
 		)
 
-		HenGlobal.BASE_ROUTE = base_route
-		HenGlobal.script_config.type = type
-		HenGlobal.node_counter = 0
+		global.BASE_ROUTE = base_route
+		global.script_config.type = type
+		global.node_counter = 0
 
 		HenVirtualCNode.instantiate_virtual_cnode({
 			name = 'Stat State',
@@ -174,14 +179,14 @@ static func load(_path: StringName, _headless: bool = false) -> bool:
 			position = Vector2(0, 0),
 			can_delete = false
 		})
-		HenRouter.current_route = base_route
-		HenGlobal.CAM._check_virtual_cnodes()
+		router.current_route = base_route
+		global.CAM._check_virtual_cnodes()
 	
 	# showing current type
 	if not _headless:
 		show_class_name()
-		HenRouter.change_route(HenGlobal.BASE_ROUTE)
-		(HenGlobal.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible = false
+		router.change_route(global.BASE_ROUTE)
+		(global.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible = false
 
 	var end: int = Time.get_ticks_usec()
 		
@@ -190,9 +195,10 @@ static func load(_path: StringName, _headless: bool = false) -> bool:
 	return true
 
 
-static func show_class_name() -> void:
-	var cl_label: Label = HenGlobal.HENGO_ROOT.get_node('%ClassName')
-	var type = HenGlobal.script_config.type
+func show_class_name() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var cl_label: Label = global.HENGO_ROOT.get_node('%ClassName')
+	var type = global.script_config.type
 	var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
 
 	cl_label.visible = true
@@ -210,7 +216,7 @@ static func show_class_name() -> void:
 		sb.bg_color = Color('#0000004a')
 
 
-static func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData) -> Array:
+func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData) -> Array:
 	var vc_list: Array = []
 
 	for _config: Dictionary in _cnode_list:
@@ -235,5 +241,5 @@ static func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData)
 	return vc_list
 
 
-static func get_data_path(_id: int) -> StringName:
+func get_data_path(_id: int) -> StringName:
 	return 'res://hengo/save/' + str(_id) + HenScriptData.HENGO_EXT

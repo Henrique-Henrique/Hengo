@@ -47,8 +47,6 @@ func update_line() -> void:
  
 	var start_pos: Vector2 = from_ref.visual.position + Vector2(from_ref.visual.size.x, start_size_y + (CNODE_IO_SIZE * from_idx))
 	var end_pos: Vector2 = to_ref.visual.position + Vector2(0, start_size_y + (CNODE_IO_SIZE * to_idx))
-	# var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) + conn_size if from_pool_visible and input else last_from_pos
-	# var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) + conn_size if to_pool_visible and output else last_to_pos
 
 	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
 	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)

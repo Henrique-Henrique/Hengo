@@ -35,10 +35,11 @@ static func get_format_data(id: int, _data: FormatterData) -> VCFormatData:
 
 
 static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Array[HenVirtualCNode]
-	if not HenGlobal.can_format_again:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global.can_format_again:
 		return
 	
-	HenGlobal.can_format_again = false
+	global.can_format_again = false
 	var data: FormatterData = FormatterData.new()
 	var virtual_roots: Array[HenVirtualCNode] = []
 	var root_boundings: Array[Rect2] = []
@@ -70,7 +71,7 @@ static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Arr
 	for vc: HenVirtualCNode in data.list_to_update:
 		vc.follow.call_deferred(vc.visual.position)
 
-	HenGlobal.can_format_again = true
+	global.can_format_again = true
 
 static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_data: VCFormatData) -> Rect2:
 	var min_pos: Vector2 = _vc.visual.position
@@ -397,12 +398,15 @@ static func set_position(_vc: HenVirtualCNode, _position: Vector2, _data: Format
 
 	
 static func format_current_route() -> void:
-	if not HenRouter.current_route:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	if not router.current_route:
 		return
-	
-	var ref = HenRouter.current_route.get_ref()
+
+	var ref = router.current_route.get_ref()
+	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
 
 	if ref is HenVirtualCNode:
-		HenThreadHelper.add_task(HenFormatter.format_virtual_cnode_list.bind((ref as HenVirtualCNode).children.virtual_cnode_list))
+		thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind((ref as HenVirtualCNode).children.virtual_cnode_list))
 	elif ref is HenLoader.BaseRouteRef:
-		HenThreadHelper.add_task(HenFormatter.format_virtual_cnode_list.bind((ref as HenLoader.BaseRouteRef).virtual_cnode_list))
+		thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind((ref as HenLoader.BaseRouteRef).virtual_cnode_list))

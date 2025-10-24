@@ -101,19 +101,21 @@ func hide_border() -> void:
 
 func remove_from_scene() -> void:
 	if is_inside_tree():
-		HenRouter.comment_reference[HenRouter.current_route.id].erase(self)
+		var router: HenRouter = Engine.get_singleton(&'Router')
+		router.comment_reference[router.current_route.id].erase(self)
 		
 		for cnode in cnode_inside:
 			cnode.comment_ref = null
 		
-		HenGlobal.COMMENT_CONTAINER.remove_child(self)
+		(Engine.get_singleton(&'Global') as HenGlobal).COMMENT_CONTAINER.remove_child(self)
 
 
 func add_to_scene() -> void:
-	HenGlobal.COMMENT_CONTAINER.add_child(self)
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	(Engine.get_singleton(&'Global') as HenGlobal).COMMENT_CONTAINER.add_child(self)
 
-	if not HenRouter.comment_reference[HenRouter.current_route.id].has(self):
-		HenRouter.comment_reference[HenRouter.current_route.id].append(self)
+	if not router.comment_reference[router.current_route.id].has(self):
+		router.comment_reference[router.current_route.id].append(self)
 	
 	for cnode in cnode_inside:
 		cnode.comment_ref = self
@@ -135,7 +137,7 @@ func _on_pin() -> void:
 
 func pin_to_cnodes(_use_intern_list: bool = false, _use_animation: bool = true) -> void:
 	var min_vec: Vector2 = Vector2.INF
-	var max_vec: Vector2 = -Vector2.INF
+	var max_vec: Vector2 = - Vector2.INF
 
 	if _use_intern_list:
 		for cnode in cnode_inside:
@@ -145,7 +147,7 @@ func pin_to_cnodes(_use_intern_list: bool = false, _use_animation: bool = true) 
 			cnode.comment_ref = self
 	else:
 		# defyning cnode area
-		for cnode in HenGlobal.CNODE_CONTAINER.get_children():
+		for cnode in (Engine.get_singleton(&'Global') as HenGlobal).CNODE_CONTAINER.get_children():
 			if get_rect().has_point(cnode.position):
 				min_vec = min_vec.min(cnode.position)
 				max_vec = max_vec.max(cnode.position + cnode.size)
@@ -184,12 +186,13 @@ func pin_to_cnodes(_use_intern_list: bool = false, _use_animation: bool = true) 
 func _on_menu(_idx: int) -> void:
 	match _idx:
 		0:
+			var global: HenGlobal = Engine.get_singleton(&'Global')
 			# delete
-			HenGlobal.history.create_action('Delete Comment')
-			HenGlobal.history.add_do_method(remove_from_scene)
-			HenGlobal.history.add_undo_reference(self)
-			HenGlobal.history.add_undo_method(add_to_scene)
-			HenGlobal.history.commit_action()
+			global.history.create_action('Delete Comment')
+			global.history.add_do_method(remove_from_scene)
+			global.history.add_undo_reference(self)
+			global.history.add_undo_method(add_to_scene)
+			global.history.commit_action()
 
 func _on_color(_color: Color) -> void:
 	var style: StyleBoxFlat = title_panel.get('theme_override_styles/panel')

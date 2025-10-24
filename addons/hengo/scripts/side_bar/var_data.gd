@@ -1,6 +1,6 @@
 class_name HenVarData extends RefCounted
 
-var id: int = HenGlobal.get_new_node_counter()
+var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 var name: String = 'var ' + str(Time.get_ticks_usec()): set = on_change_name
 var type: StringName = &'Variant': set = on_change_type
 var local_ref: RefCounted
@@ -17,7 +17,7 @@ func on_change_type(_type: StringName) -> void:
 func on_change_name(_name: String) -> void:
     name = _name
     data_changed.emit('name', _name)
-    HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+    (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 
 func on_change_export(_export: bool) -> void:
     export = _export
@@ -36,18 +36,19 @@ func load_save(_data: Dictionary) -> void:
     type = _data.type
     export = _data.export
 
-    HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+    (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[id] = self
 
 func delete() -> void:
-    var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.var_list if not local_ref else local_ref.get(&'local_vars'))
+    var global: HenGlobal = Engine.get_singleton(&'Global')
+    var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, global.SIDE_BAR_LIST.var_list if not local_ref else local_ref.get(&'local_vars'))
 
-    HenGlobal.history.create_action('Delete Variable')
-    HenGlobal.history.add_do_method(item_cache.remove)
-    HenGlobal.history.add_undo_reference(item_cache)
-    HenGlobal.history.add_undo_method(item_cache.add)
-    HenGlobal.history.commit_action()
+    global.history.create_action('Delete Variable')
+    global.history.add_do_method(item_cache.remove)
+    global.history.add_undo_reference(item_cache)
+    global.history.add_undo_method(item_cache.add)
+    global.history.commit_action()
 
-    HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+    global.GENERAL_POPUP.get_parent().hide_popup()
 
 
 func get_inspector_array_list(_is_local: bool = false) -> Array:

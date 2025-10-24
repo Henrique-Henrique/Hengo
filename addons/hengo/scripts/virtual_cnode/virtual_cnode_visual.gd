@@ -9,4 +9,4 @@ func check_mouse_inside() -> bool:
 	return Rect2(
 		position - MOUSE_INSIDE_THRESHOLD,
 		size + MOUSE_INSIDE_THRESHOLD * 2
-	).has_point(HenGlobal.CAM.get_local_mouse_position())
+	).has_point((Engine.get_singleton(&'Global') as HenGlobal).CAM.get_local_mouse_position())

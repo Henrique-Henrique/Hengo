@@ -173,7 +173,7 @@ func on_in_out_added(_owner: HenVirtualCNode, _is_input: bool, _data: Dictionary
 	if _data.has('ref_id'):
 		if not state.invalid:
 			@warning_ignore('unsafe_call_argument')
-			_data.ref = HenGlobal.SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
+			_data.ref = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
 
 	var in_out: HenVCInOutData = HenVCInOutData.new(_data, _owner)
 

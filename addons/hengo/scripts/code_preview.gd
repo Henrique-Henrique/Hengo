@@ -18,9 +18,9 @@ func _ready() -> void:
 
 
 func _on_visibility() -> void:
-	if visible and HenGlobal.script_config:
+	if visible and (Engine.get_singleton(&'Global') as HenGlobal).script_config:
 		var script_data: HenScriptData = HenSaver.generate_script_data()
-		var code: String = HenCodeGeneration.get_code(script_data, true)
+		var code: String = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(script_data, true)
 
 		set_code(code)
 		show_vc_line_reference()
@@ -33,7 +33,7 @@ func set_code(_code: String) -> void:
 
 func show_vc_line_reference() -> void:
 	var idx: int = 0
-	var new_id_list: Array = HenGlobal.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
+	var new_id_list: Array = (Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
 
 	if id_list != new_id_list:
 		id_list.clear()

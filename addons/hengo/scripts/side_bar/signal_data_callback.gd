@@ -6,7 +6,7 @@ signal in_out_added(_is_input: bool, _data: Dictionary)
 signal in_out_reseted(_new_inputs: Array[Dictionary])
 signal deleted(_deleted: bool)
 
-var id: int = HenGlobal.get_new_node_counter()
+var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 var name: String = 'signal ' + str(Time.get_ticks_usec())
 var route: HenRouteData
 var virtual_cnode_list: Array = []
@@ -22,6 +22,7 @@ var custom_id: int = -1
 
 
 func _init(_load_vc: bool = true) -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
 	route = HenRouteData.new(
 		name,
 		HenRouter.ROUTE_TYPE.SIGNAL,
@@ -29,8 +30,7 @@ func _init(_load_vc: bool = true) -> void:
 		weakref(self)
 	)
 
-	HenRouter.line_route_reference[route.id] = []
-	HenRouter.comment_reference[route.id] = []
+	router.comment_reference[route.id] = []
 
 	if _load_vc:
 		HenVirtualCNode.instantiate_virtual_cnode({
@@ -46,7 +46,7 @@ func _init(_load_vc: bool = true) -> void:
 func on_change_name(_name: String) -> void:
 	name = _name
 	name_changed.emit(_name)
-	HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+	(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 
 
 func on_change_signal_name(_name: String) -> void:
@@ -108,23 +108,27 @@ func bind_signal_params() -> void:
 
 
 func get_connect_cnode_data() -> Dictionary:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
 	return {
 			name = name,
 			fantasy_name = 'Signal -> ' + name,
 			sub_type = HenVirtualCNode.SubType.SIGNAL_CONNECTION,
 			inputs = [ {name = type, type = type, is_ref = true}] + bind_params.map(func(x: HenParamData) -> Dictionary: return x.get_data()),
-			route = HenRouter.current_route,
+			route = router.current_route,
 			ref = self
 	}
 
 
 func get_diconnect_cnode_data() -> Dictionary:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
 	return {
 			name = name,
 			fantasy_name = 'Dis Signal -> ' + name,
 			sub_type = HenVirtualCNode.SubType.SIGNAL_DISCONNECTION,
 			inputs = [ {name = type, type = type, is_ref = true}],
-			route = HenRouter.current_route,
+			route = router.current_route,
 			ref = self
 	}
 
@@ -154,15 +158,16 @@ func delete_param(_ref: HenParamData) -> void:
 
 
 func delete() -> void:
-	var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.signal_callback_list)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, global.SIDE_BAR_LIST.signal_callback_list)
 
-	HenGlobal.history.create_action('Delete Signal')
-	HenGlobal.history.add_do_method(item_cache.remove)
-	HenGlobal.history.add_undo_reference(item_cache)
-	HenGlobal.history.add_undo_method(item_cache.add)
-	HenGlobal.history.commit_action()
+	global.history.create_action('Delete Signal')
+	global.history.add_do_method(item_cache.remove)
+	global.history.add_undo_reference(item_cache)
+	global.history.add_undo_method(item_cache.add)
+	global.history.commit_action()
 
-	HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+	global.GENERAL_POPUP.get_parent().hide_popup()
 
 func get_inspector_array_list() -> Array:
 	return [
@@ -227,7 +232,7 @@ func load_save(_data: Dictionary) -> void:
 	if _data.has('custom_id'):
 		custom_id = _data.custom_id
 
-	HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+	(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[id] = self
 
 	for item_data: Dictionary in _data.params:
 		var item: HenParamData = HenParamData.new()

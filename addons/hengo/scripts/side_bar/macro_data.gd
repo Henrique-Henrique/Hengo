@@ -5,7 +5,7 @@ signal flow_added(_is_input: bool, _data: Dictionary)
 signal in_out_added(_is_input: bool, _data: Dictionary)
 signal deleted(_deleted: bool)
 
-var id: int = HenGlobal.get_new_node_counter()
+var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 var name: String = 'macro ' + str(Time.get_ticks_usec()): set = on_change_name
 var route: HenRouteData
 var virtual_cnode_list: Array = []
@@ -19,7 +19,7 @@ var local_vars: Array
 var cnode_list_to_load: Array
 
 class MacroInOut:
-    var id: int = HenGlobal.get_new_node_counter()
+    var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
     var name: String: set = on_change_name
 
     signal data_changed(_property: String, _value)
@@ -43,10 +43,11 @@ class MacroInOut:
         id = _data.id
         name = _data.name
         
-        HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+        (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[id] = self
 
 
 func _init(_load_vc: bool = true) -> void:
+    var router: HenRouter = Engine.get_singleton(&'Router')
     route = HenRouteData.new(
         name,
         HenRouter.ROUTE_TYPE.MACRO,
@@ -54,8 +55,7 @@ func _init(_load_vc: bool = true) -> void:
         weakref(self)
     )
 
-    HenRouter.line_route_reference[route.id] = []
-    HenRouter.comment_reference[route.id] = []
+    router.comment_reference[route.id] = []
 
     if _load_vc:
         HenVirtualCNode.instantiate_virtual_cnode({
@@ -82,7 +82,7 @@ func _init(_load_vc: bool = true) -> void:
 func on_change_name(_name: String) -> void:
     name = _name
     name_changed.emit(_name)
-    HenGlobal.SIDE_BAR_LIST.list_changed.emit()
+    (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 
 
 func create_flow(_type: HenSideBar.ParamType, _custom_id: int = -1) -> MacroInOut:
@@ -179,26 +179,29 @@ func delete_flow(_ref: MacroInOut, _type: HenSideBar.ParamType) -> void:
 
 
 func get_cnode_data() -> Dictionary:
+    var router: HenRouter = Engine.get_singleton(&'Router')
+
     return {
             name = name,
             type = HenVirtualCNode.Type.MACRO,
             sub_type = HenVirtualCNode.SubType.MACRO,
             inputs = inputs_value.map(func(x: HenParamData) -> Dictionary: return x.get_data_with_id()),
             outputs = outputs_value.map(func(x: HenParamData) -> Dictionary: return x.get_data_with_id()),
-            route = HenRouter.current_route,
+            route = router.current_route,
             ref = self
     }
 
 func delete() -> void:
-    var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, HenGlobal.SIDE_BAR_LIST.macro_list)
+    var global: HenGlobal = Engine.get_singleton(&'Global')
+    var item_cache: HenSideBar.DeleteItemCache = HenSideBar.DeleteItemCache.new(self, global.SIDE_BAR_LIST.macro_list)
 
-    HenGlobal.history.create_action('Delete Macro')
-    HenGlobal.history.add_do_method(item_cache.remove)
-    HenGlobal.history.add_undo_reference(item_cache)
-    HenGlobal.history.add_undo_method(item_cache.add)
-    HenGlobal.history.commit_action()
+    global.history.create_action('Delete Macro')
+    global.history.add_do_method(item_cache.remove)
+    global.history.add_undo_reference(item_cache)
+    global.history.add_undo_method(item_cache.add)
+    global.history.commit_action()
 
-    HenGlobal.GENERAL_POPUP.get_parent().hide_popup()
+    global.GENERAL_POPUP.get_parent().hide_popup()
 
 
 func get_inspector_array_list() -> Array[HenProp]:
@@ -280,7 +283,7 @@ func load_save(_data: Dictionary) -> void:
     name = _data.name
     id = _data.id
 
-    HenGlobal.SIDE_BAR_LIST_CACHE[id] = self
+    (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[id] = self
 
     for item_data: Dictionary in _data.inputs:
         var item: MacroInOut = MacroInOut.new()

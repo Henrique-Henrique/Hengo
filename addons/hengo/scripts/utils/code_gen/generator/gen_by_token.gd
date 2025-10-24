@@ -27,7 +27,7 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 	var prefix: StringName = '_ref.'
 	var preview_id: String = ''
 
-	if HenGlobal.GENERATE_PREVIEW_CODE:
+	if (Engine.get_singleton(&'Global') as HenGlobal).GENERATE_PREVIEW_CODE:
 		if _token.has('vc_id'):
 			preview_id += '#ID:' + str(_token.vc_id)
 		
@@ -127,9 +127,10 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL, HenVirtualCNode.SubType.SIGNAL_ENTER:
 			return _token.param
 		HenVirtualCNode.SubType.IF:
-			var true_flow = HenCodeGeneration.flows_refs[_token.true_flow_id]
-			var false_flow = HenCodeGeneration.flows_refs[_token.false_flow_id]
-			var then_flow = HenCodeGeneration.flows_refs[_token.then_flow_id]
+			var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+			var true_flow = code_generation.flows_refs[_token.true_flow_id]
+			var false_flow = code_generation.flows_refs[_token.false_flow_id]
+			var then_flow = code_generation.flows_refs[_token.then_flow_id]
 			var code_list: Array = []
 			var only_false: bool = true_flow.is_empty() and not false_flow.is_empty()
 			var if_code: String = 'if {condition}:{id}\n'
@@ -181,8 +182,9 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			var base: String = ''
 			var code_list: Array = []
-			var body_flow = HenCodeGeneration.flows_refs[_token.body_flow_id]
-			var then_flow = HenCodeGeneration.flows_refs[_token.then_flow_id]
+			var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+			var body_flow = code_generation.flows_refs[_token.body_flow_id]
+			var then_flow = code_generation.flows_refs[_token.then_flow_id]
 			var loop_item: String = _token.index_name + '_' + str(_token.id)
 
 			if _token.type == HenVirtualCNode.SubType.FOR:

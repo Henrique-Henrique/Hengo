@@ -31,6 +31,7 @@ static func get_base_script_code(_refs: HenTypeReferences) -> String:
 	var start_state: HenTypeCnode
 	var override_virtual_data: Dictionary = {}
 	var events: Array[Dictionary] = []
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	# getting states
 	for cnode: HenTypeCnode in _refs.base_route_cnode_list:
@@ -82,10 +83,10 @@ static func get_base_script_code(_refs: HenTypeReferences) -> String:
 		for v_cnode: HenTypeCnode in macro.virtual_cnode_list:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				for macro_ref: HenTypeCnode in macro.macro_ref_list:
-					HenGlobal.USE_MACRO_REF = true
-					HenGlobal.MACRO_REF = macro_ref
-					HenGlobal.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
-					HenGlobal.USE_MACRO_USE_SELF = true
+					global.USE_MACRO_REF = true
+					global.MACRO_REF = macro_ref
+					global.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
+					global.USE_MACRO_USE_SELF = true
 
 					if v_cnode.flow_connections[0].to:
 						if not override_virtual_data.has(v_cnode.name):
@@ -98,7 +99,7 @@ static func get_base_script_code(_refs: HenTypeReferences) -> String:
 							token.vc_id = macro_ref.id
 							override_virtual_data[v_cnode.name].tokens.append(token)
 
-					HenGlobal.USE_MACRO_REF = false
+					global.USE_MACRO_REF = false
 
 
 	var ready_code: Array = []

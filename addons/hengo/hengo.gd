@@ -1,10 +1,24 @@
 @tool
 class_name HenHengo extends EditorPlugin
 
+const HENGO_ROOT = preload('res://addons/hengo/scenes/hengo_root.tscn')
+
 const PLUGIN_NAME = 'Hengo'
 
-var main_scene
+var main_scene: HenHengoRoot
 var gd_previewer: CodeEdit
+var singleton_list: Array[StringName] = [
+	&'ThreadHelper',
+	&'ScriptDataCache',
+	&'MapObjects',
+	&'MapDependencies',
+	&'Loader',
+	&'Router',
+	&'CodeGeneration',
+	&'Enums',
+	&'Global',
+	&'SignalBus',
+]
 
 # debug
 var debug_plugin: EditorDebuggerPlugin
@@ -22,72 +36,68 @@ func _enter_tree():
 	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
 	add_debugger_plugin(debug_plugin)
 
-	HenThreadHelper.add_task(HenApiFinder.map_api)
-
-	# getting native api like String, float... methods.
-	var native_api_file: FileAccess = FileAccess.open(HenEnums.NATIVE_API_PATH, FileAccess.READ)
-
-	if native_api_file:
-		var api_json: Dictionary = JSON.parse_string(native_api_file.get_as_text())
-
-		HenEnums.NATIVE_API_LIST = api_json.native_api
-		HenEnums.CONST_API_LIST = api_json.const_api
-		HenEnums.SINGLETON_API_LIST = api_json.singleton_api
-		HenEnums.NATIVE_PROPS_LIST = api_json.native_props
-		HenEnums.MATH_UTILITY_NAME_LIST = api_json.math_utility_names
-
-		native_api_file.close()
-	else:
-		print('NATIVE LIST JSON -> ', FileAccess.get_open_error())
-
 	# creating hengo folder
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
 		EditorInterface.get_resource_filesystem().scan()
 
-	# setting scene reference here to prevent crash on development when reload scripts on editor :)
-	HenAssets.ConnectionLineScene = load('res://addons/hengo/scenes/connection_line.tscn')
-	HenAssets.FlowConnectionLineScene = load('res://addons/hengo/scenes/flow_connection_line.tscn')
-	HenAssets.HengoRootScene = load('res://addons/hengo/scenes/hengo_root.tscn')
-	HenAssets.CNodeInputScene = load('res://addons/hengo/scenes/cnode_input.tscn')
-	HenAssets.CNodeOutputScene = load('res://addons/hengo/scenes/cnode_output.tscn')
-	HenAssets.CNodeScene = load('res://addons/hengo/scenes/cnode.tscn')
-	HenAssets.CNodeFlowScene = load('res://addons/hengo/scenes/cnode_flow.tscn')
-	HenAssets.CNodeIfFlowScene = load('res://addons/hengo/scenes/cnode_if_flow.tscn')
-	HenAssets.EventScene = load('res://addons/hengo/scenes/event.tscn')
-	HenAssets.EventStructScene = load('res://addons/hengo/scenes/event_structure.tscn')
-	HenAssets.PropContainerScene = load('res://addons/hengo/scenes/prop_container.tscn')
-	HenAssets.CNodeInputLabel = load('res://addons/hengo/scenes/cnode_input_label.tscn')
-	HenAssets.CNodeCenterImage = load('res://addons/hengo/scenes/cnode_center_image.tscn')
 
-	main_scene = HenAssets.HengoRootScene.instantiate()
+	main_scene = HENGO_ROOT.instantiate()
+
+	register_singletons()
+	print(22)
+
+	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	# map dependencies
+	thread_helper.add_task(HenApiFinder.map_api)
+	thread_helper.add_task(map_deps.start_map)
+
+	# getting native api like String, float... methods.
+	var native_api_file: FileAccess = FileAccess.open(enums.NATIVE_API_PATH, FileAccess.READ)
+
+	if native_api_file:
+		var api_json: Dictionary = JSON.parse_string(native_api_file.get_as_text())
+
+		enums.NATIVE_API_LIST = api_json.native_api
+		enums.CONST_API_LIST = api_json.const_api
+		enums.SINGLETON_API_LIST = api_json.singleton_api
+		enums.NATIVE_PROPS_LIST = api_json.native_props
+		enums.MATH_UTILITY_NAME_LIST = api_json.math_utility_names
+
+		native_api_file.close()
+	else:
+		print('NATIVE LIST JSON -> ', FileAccess.get_open_error())
 
 	# setting globals
 	var cnode_ui = main_scene.get_node('%CNodeUI') as Panel
 
-	HenGlobal.history = UndoRedo.new()
-	HenGlobal.HENGO_ROOT = main_scene
-	HenGlobal.CAM = main_scene.get_node('%Cam')
-	HenGlobal.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
-	HenGlobal.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
-	HenGlobal.DROPDOWN_MENU = main_scene.get_node('%DropDownMenu')
-	HenGlobal.POPUP_CONTAINER = main_scene.get_node('%PopupContainer')
-	HenGlobal.DOCS_TOOLTIP = main_scene.get_node('%DocsToolTip')
-	HenGlobal.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
-	HenGlobal.TOOLTIP = main_scene.get_node('%Tooltip')
-	HenGlobal.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
-	HenGlobal.SIDE_PANEL = main_scene.get_node('%SidePanel')
-	HenGlobal.TABS = main_scene.get_node('%Tabs')
-	HenGlobal.script_config = null
-	HenGlobal.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
-	HenGlobal.CNODE_UI = cnode_ui
+	global.history = UndoRedo.new()
+	global.HENGO_ROOT = main_scene
+	global.CAM = main_scene.get_node('%Cam')
+	global.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
+	global.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
+	global.DROPDOWN_MENU = main_scene.get_node('%DropDownMenu')
+	global.POPUP_CONTAINER = main_scene.get_node('%PopupContainer')
+	global.DOCS_TOOLTIP = main_scene.get_node('%DocsToolTip')
+	global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
+	global.TOOLTIP = main_scene.get_node('%Tooltip')
+	global.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
+	global.SIDE_PANEL = main_scene.get_node('%SidePanel')
+	global.TABS = main_scene.get_node('%Tabs')
+	global.script_config = null
+	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
+	global.CNODE_UI = cnode_ui
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)
 
 
 	# getting tabs
-	if HenGlobal.DOCKS.is_empty():
+	if global.DOCKS.is_empty():
 		var docks: Array[int] = [
 			EditorPlugin.DOCK_SLOT_LEFT_UL,
 			EditorPlugin.DOCK_SLOT_LEFT_UR,
@@ -103,29 +113,30 @@ func _enter_tree():
 			var c: Control = Control.new()
 			add_control_to_dock(dock, c)
 			var parent: TabContainer = c.get_parent()
-			HenGlobal.DOCKS[dock] = DockConfig.new(dock, parent)
+			global.DOCKS[dock] = DockConfig.new(dock, parent)
 			parent.remove_child(c)
 
 	main_screen_changed.connect(_on_change_main_screen)
 	set_docks()
 
 	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
-	HenGlobal.HENGO_EDITOR_PLUGIN = self
+	global.HENGO_EDITOR_PLUGIN = self
 
-	HenGlobal.cnode_pool.clear()
-	HenGlobal.state_pool.clear()
-	HenGlobal.connection_line_pool.clear()
-	HenGlobal.flow_connection_line_pool.clear()
-	HenGlobal.state_connection_line_pool.clear()
-	HenGlobal.script_config = null
+	global.cnode_pool.clear()
+	global.state_pool.clear()
+	global.connection_line_pool.clear()
+	global.flow_connection_line_pool.clear()
+	global.state_connection_line_pool.clear()
+	global.script_config = null
 
 	# creating cnode pool
 	HenCnode.instantiate_and_add_pool()
+	print(Engine.get_singleton_list())
 
 	
 func _get_window_layout(_configuration: ConfigFile) -> void:
 	if main_scene.visible:
-		if HenGlobal.ACTION_BAR.filesystem_parent:
+		if (Engine.get_singleton(&'Global') as HenGlobal).ACTION_BAR.filesystem_parent:
 			return
 
 		hide_docks()
@@ -139,9 +150,11 @@ func _on_change_main_screen(_name: String) -> void:
 
 
 func _exit_tree():
-	HenGlobal.can_instantiate_pool = false
-	HenGlobal.script_config = null
-	HenGlobal.SELECTED_VIRTUAL_CNODE.clear()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	global.can_instantiate_pool = false
+	global.script_config = null
+	global.SELECTED_VIRTUAL_CNODE.clear()
 
 	remove_debugger_plugin(debug_plugin)
 	remove_control_from_bottom_panel(gd_previewer)
@@ -150,15 +163,29 @@ func _exit_tree():
 		main_scene.queue_free()
 	
 	remove_autoload_singleton('HengoDebugger')
-	HenGlobal.HENGO_EDITOR_PLUGIN = null
-	print('Done')
+	global.HENGO_EDITOR_PLUGIN = null
+	unregister_singletons()
+
+
+func register_singletons() -> void:
+	if not main_scene:
+		return
+	
+	for singleton_name: StringName in singleton_list:
+		Engine.register_singleton(singleton_name, (main_scene as HenHengoRoot).get_node(NodePath(StringName('%'+ singleton_name))))
+
+
+func unregister_singletons() -> void:
+	for singleton_name: StringName in singleton_list:
+		if Engine.has_singleton(singleton_name):
+			Engine.unregister_singleton(singleton_name)
 
 
 func _make_visible(_visible: bool):
 	if main_scene:
 		if _visible: hide_docks()
 		else:
-			HenGlobal.ACTION_BAR.filesystem_dock()
+			(Engine.get_singleton(&'Global') as HenGlobal).ACTION_BAR.filesystem_dock()
 			show_docks()
 
 		main_scene.visible = _visible
@@ -170,20 +197,24 @@ func _has_main_screen() -> bool:
 	return true
 
 func _handles(object: Object) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var loader: HenLoader = Engine.get_singleton(&'Loader')
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
 	if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
-		if not await HenLoader.load((object as GDScript).resource_path):
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + (object as GDScript).resource_path))
+		if not await loader.load((object as GDScript).resource_path):
+			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + (object as GDScript).resource_path))
 			return true
 		
-		HenGlobal.CAM.can_scroll = true
+		global.CAM.can_scroll = true
 		return true
 
 	if object is Resource and (object as Resource).resource_path.begins_with('res://hengo/save/'):
-		if not await HenLoader.load((object as Resource).resource_path):
-			HenGlobal.SIGNAL_BUS.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load save file: " + (object as Resource).resource_path))
+		if not await loader.load((object as Resource).resource_path):
+			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load save file: " + (object as Resource).resource_path))
 			return true
 		
-		HenGlobal.CAM.can_scroll = true
+		global.CAM.can_scroll = true
 		return true
 
 	return false
@@ -191,21 +222,21 @@ func _handles(object: Object) -> bool:
 # public
 #
 func set_docks() -> void:
-	for dock: DockConfig in HenGlobal.DOCKS.values():
+	for dock: DockConfig in (Engine.get_singleton(&'Global') as HenGlobal).DOCKS.values():
 		dock.tab_control = dock.ref.get_current_tab_control()
 
 func hide_docks() -> void:
 	tab_visibility(false)
 	bottom_panel_visibility(false)
 
-	for dock: DockConfig in HenGlobal.DOCKS.values():
+	for dock: DockConfig in (Engine.get_singleton(&'Global') as HenGlobal).DOCKS.values():
 		dock.ref.visible = false
 
 func show_docks() -> void:
 	tab_visibility(true)
 	bottom_panel_visibility(true)
 	
-	for dock: DockConfig in HenGlobal.DOCKS.values():
+	for dock: DockConfig in (Engine.get_singleton(&'Global') as HenGlobal).DOCKS.values():
 		if dock.tab_control:
 			dock.ref.visible = true
 			dock.tab_control.visible = true
