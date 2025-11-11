@@ -65,6 +65,11 @@ namespace ${name_space}
 	}
 }
 "
+hooks/session_hooks=Dictionary[String, bool]({
+"res://addons/gdUnit4/src/core/hooks/GdUnitHtmlReporterTestSessionHook.gd": true,
+"res://addons/gdUnit4/src/core/hooks/GdUnitXMLReporterTestSessionHook.gd": true,
+"res://tests/base/test_base.gd": true
+})
 
 [input]
 

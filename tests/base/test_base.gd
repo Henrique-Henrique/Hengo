@@ -1,13 +1,19 @@
-extends GdUnitTestSuite
+extends GdUnitTestSessionHook
 
 const HENGO_ROOT = preload('res://addons/hengo/scenes/hengo_root.tscn')
 
-func before_test() -> void:
+func _init():
+	super ("MyCustomHook", "Description of what this hook does")
+
+func startup(_session: GdUnitTestSession) -> GdUnitResult:
 	register_singletons()
 
+	return GdUnitResult.success()
 
-func test_start() -> void:
-	pass
+
+func shutdown(_session: GdUnitTestSession) -> GdUnitResult:
+	unregister_singletons()
+	return GdUnitResult.success()
 
 
 func register_singletons() -> void:
