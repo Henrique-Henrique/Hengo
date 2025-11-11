@@ -72,9 +72,9 @@ func start_docs(_class_name: StringName, _member: String = '') -> void:
 					result += '\n\n' + txt.split(limiter)[0]
 					has_limiter = true
 					break
-			
+
 			if has_limiter: break
-				
+
 			result += txt
 	else:
 		for txt in arr.slice(1):
@@ -98,7 +98,7 @@ func start_docs(_class_name: StringName, _member: String = '') -> void:
 		rich_text_label.size = Vector2(500, 200)
 	else:
 		rich_text_label.size = Vector2(500, label_height)
-	
+
 	size = Vector2(500, rich_text_label.size.y + title_label.size.y + 20)
 
 	rich_text_label.scroll_to_line(0)

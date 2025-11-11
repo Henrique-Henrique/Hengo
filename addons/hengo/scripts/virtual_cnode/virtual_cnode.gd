@@ -148,6 +148,17 @@ func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlob
 		hide()
 
 
+func get_input(_id: int) -> HenVCInOutData:
+	return io.get_input(_id)
+
+
+func get_input_by_idx(_idx: int) -> HenVCInOutData:
+	return io.inputs.get(_idx)
+
+func get_output_by_idx(_idx: int) -> HenVCInOutData:
+	return io.outputs.get(_idx)
+
+
 func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
 	return io.create_input_connection(_id, _from_id, self, _from)
 
@@ -193,6 +204,26 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 				global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
 			_:
 				global.TOOLTIP.close()
+
+
+func request_flow_connector_connection(_id: int, _mouse_pos: Vector2) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(_mouse_pos, {
+		id = _id,
+		from_flow_connector = self
+	}), '')
+
+
+func request_io_connection(_io_type: StringName, _id: int, _mouse_pos: Vector2, _type: StringName) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(_mouse_pos, {
+		io_type = _io_type,
+		id = _id,
+		vc_ref = self,
+		type = _type
+	}), '')
 
 
 func on_cnode_double_click() -> void:

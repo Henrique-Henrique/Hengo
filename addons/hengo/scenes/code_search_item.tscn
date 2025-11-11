@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://uku58hykbu48"]
+[gd_scene load_steps=3 format=3 uid="uid://uku58hykbu48"]
+
+[ext_resource type="Script" uid="uid://cf5wc77cp4q5y" path="res://addons/hengo/scripts/utils/code_search_item.gd" id="1_5wlq4"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12dj8"]
 bg_color = Color(0, 0, 0, 0)
@@ -6,7 +8,14 @@ border_width_bottom = 1
 border_color = Color(0.8, 0.8, 0.8, 0.14509805)
 
 [node name="CodeSearchItem" type="PanelContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_12dj8")
+script = ExtResource("1_5wlq4")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -28,6 +37,6 @@ layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_right = 16
 
-[node name="SubCategoryContainer" type="HBoxContainer" parent="VBoxContainer/MarginContainer"]
+[node name="SubCategoryContainer" type="HFlowContainer" parent="VBoxContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2

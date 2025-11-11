@@ -1,8 +1,6 @@
 @tool
 class_name HenFlowConnector extends TextureRect
 
-@export var type: String = 'cnode'
-
 var id: int = 0
 var is_connected: bool = false
 
@@ -38,11 +36,7 @@ func _on_gui(_event: InputEvent) -> void:
 		else:
 			if _event.button_index == MOUSE_BUTTON_LEFT:
 				if global.can_make_flow_connection and global.flow_connection_to_data.is_empty():
-					var method_list: HenMethodPicker = preload('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
-					method_list.start(global.script_config.type, get_global_mouse_position(), true, 'out', {
-						from_flow_connector = self
-					})
-					global.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
+					(owner as HenCnode).request_flow_connetor_connection(id, get_global_mouse_position())
 				elif global.can_make_flow_connection and not global.flow_connection_to_data.is_empty():
 					create_flow_connection_request.emit()
 

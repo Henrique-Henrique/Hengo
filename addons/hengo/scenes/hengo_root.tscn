@@ -1,4 +1,4 @@
-[gd_scene load_steps=73 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -26,6 +26,7 @@
 [ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
+[ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
 [ext_resource type="Script" uid="uid://dmrj5ajx7qbuc" path="res://addons/hengo/scripts/utils/terminal.gd" id="15_lxtpw"]
 [ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
 [ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
@@ -211,6 +212,10 @@ script = ExtResource("11_3680e")
 [node name="SignalBus" type="Node" parent="AutoLoads"]
 unique_name_in_owner = true
 script = ExtResource("27_ji2ve")
+
+[node name="API" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("13_5c7h0")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1

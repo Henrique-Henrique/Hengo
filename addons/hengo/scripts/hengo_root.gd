@@ -130,5 +130,3 @@ func _input(event: InputEvent) -> void:
 					get_tree().root.set_input_as_handled()
 					HenFormatter.format_current_route()
 					print('FORMATTED')
-				elif event.keycode == KEY_L:
-					global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(&'Button'), 'Code Search')

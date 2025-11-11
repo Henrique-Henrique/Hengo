@@ -227,22 +227,11 @@ func create_virtual_connection(_type: StringName, _data: CNodeInOutConnectionDat
 	)
 
 
-func on_method_picker_request(_type: StringName, _mouse_pos: Vector2) -> void:
-	# call mehotd list on in_out type
-	var method_list: HenMethodPicker = METHOD_PICKER.instantiate()
+func on_method_picker_request(_io_type: StringName, _mouse_pos: Vector2) -> void:
+	var vc: HenVirtualCNode = get_owner()
 
-	var _data: Dictionary = {
-		from = get_owner(),
-		in_out_id = id,
-	}
-
-	if _type == 'in':
-		_data.to_virtual_ref = self
-	else:
-		_data.from_virtual_ref = self
-
-	method_list.start(type, _mouse_pos, false, _type, _data)
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', _mouse_pos)
+	if vc:
+		vc.request_io_connection(_io_type, id, _mouse_pos, type)
 
 
 func on_io_mouse_enter(_connector) -> void:

@@ -33,6 +33,8 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 	var input: HenVCInOutData = get_input(_id)
 	var output: HenVCInOutData = _from.io.get_output(_from_id)
 
+	prints(outputs.map(func(x): return x.id), _id, _from_id, input, output)
+
 	if not input or not output:
 		return
 	

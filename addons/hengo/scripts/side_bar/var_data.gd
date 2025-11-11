@@ -74,3 +74,38 @@ func get_inspector_array_list(_is_local: bool = false) -> Array:
             on_value_changed = on_change_export,
         }),
     ] if not _is_local else [])
+
+
+func get_getter_cnode_data() -> Dictionary:
+    var router: HenRouter = Engine.get_singleton(&'Router')
+
+    return {
+        name = 'Get ' + name,
+        sub_type = HenVirtualCNode.SubType.VAR,
+        route = router.current_route,
+        ref = self,
+        outputs = [
+            {
+                name = name,
+                type = type,
+                ref = self
+            }
+        ]
+    }
+
+func get_setter_cnode_data() -> Dictionary:
+    var router: HenRouter = Engine.get_singleton(&'Router')
+
+    return {
+        name = 'Set ' + name,
+        sub_type = HenVirtualCNode.SubType.SET_VAR,
+        route = router.current_route,
+        ref = self,
+        inputs = [
+            {
+                name = name,
+                type = type,
+                ref = self
+            }
+        ]
+    }

@@ -18,6 +18,7 @@ var singleton_list: Array[StringName] = [
 	&'Enums',
 	&'Global',
 	&'SignalBus',
+	&'API',
 ]
 
 # debug
@@ -53,7 +54,6 @@ func _enter_tree():
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	# map dependencies
-	thread_helper.add_task(HenApiFinder.map_api)
 	thread_helper.add_task(map_deps.start_map)
 
 	# getting native api like String, float... methods.

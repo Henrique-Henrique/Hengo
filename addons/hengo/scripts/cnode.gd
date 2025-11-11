@@ -36,7 +36,7 @@ signal on_mouse_enter
 signal on_move
 signal on_right_click
 signal changed_position(_pos: Vector2)
-
+signal request_flow_connection
 
 func _ready():
 	var title_container := get_node('%TitleContainer') as PanelContainer
@@ -233,6 +233,7 @@ func reset_signals(_vc: HenVirtualCNode = null):
 		'on_right_click',
 		'changed_position',
 		'on_mouse_enter',
+		'request_flow_connection',
 	]:
 		for connection: Dictionary in get_signal_connection_list(signal_name):
 			@warning_ignore('unsafe_method_access')
@@ -244,6 +245,11 @@ func reset_signals(_vc: HenVirtualCNode = null):
 		on_right_click.connect(_vc.on_cnode_right_click)
 		changed_position.connect(_vc.on_cnode_changed_position)
 		on_mouse_enter.connect(_vc.on_cnode_mouse_enter)
+		request_flow_connection.connect(_vc.request_flow_connector_connection)
+
+
+func request_flow_connetor_connection(_id: int, _mouse_pos: Vector2) -> void:
+	request_flow_connection.emit(_id, _mouse_pos)
 
 
 static func instantiate_and_add_pool() -> void:

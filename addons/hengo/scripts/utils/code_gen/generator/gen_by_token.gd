@@ -232,14 +232,6 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				op = _token.name,
 				b = get_code_by_token(_token.params[1])
 			})
-		HenVirtualCNode.SubType.DEBUG:
-			return indent + HenGlobal.DEBUG_TOKEN + HenGlobal.DEBUG_VAR_NAME + ' += ' + str(_token.counter)
-		HenVirtualCNode.SubType.DEBUG_STATE:
-			return indent + HenGlobal.DEBUG_TOKEN + "EngineDebugger.send_message('hengo:debug_state', [" + str(_token.id) + "])"
-		HenVirtualCNode.SubType.START_DEBUG_STATE:
-			return indent + "EngineDebugger.send_message('hengo:debug_state', [" + str(_token.id) + "])"
-		HenVirtualCNode.SubType.DEBUG_VALUE:
-			return indent + HenGlobal.DEBUG_TOKEN + "EngineDebugger.send_message('hengo:debug_value', [" + str(_token.id) + ", var_to_str(" + get_code_by_token(_token.value) + ")])"
 		HenVirtualCNode.SubType.PASS:
 			return indent + 'pass'
 		HenVirtualCNode.SubType.RAW_CODE:

@@ -25,9 +25,7 @@ func _on_gui(_event: InputEvent) -> void:
 			match _event.button_index:
 				MOUSE_BUTTON_RIGHT:
 					if not (global.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible:
-						var method_list = load('res://addons/hengo/scenes/utils/method_picker.tscn').instantiate()
-						method_list.start(global.script_config.type, get_global_mouse_position())
-						global.GENERAL_POPUP.get_parent().show_content(method_list, 'Pick a Method', get_global_mouse_position())
+						global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(get_global_mouse_position()), 'Code Search')
 				MOUSE_BUTTON_LEFT:
 					for cnode: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 						cnode.unselect()
