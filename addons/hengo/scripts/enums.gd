@@ -14,6 +14,21 @@ enum PROP_TYPE {
     BOOL
 }
 
+const SINGLETON_LIST: Array[StringName] = [
+	&'ThreadHelper',
+	&'ScriptDataCache',
+	&'MapObjects',
+	&'MapDependencies',
+	&'Loader',
+	&'Router',
+	&'CodeGeneration',
+	&'Enums',
+	&'Global',
+	&'SignalBus',
+	&'API',
+]
+
+
 const VARIANT_TYPES: PackedStringArray = [
     'int',
     'float',

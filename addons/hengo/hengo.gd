@@ -2,24 +2,10 @@
 class_name HenHengo extends EditorPlugin
 
 const HENGO_ROOT = preload('res://addons/hengo/scenes/hengo_root.tscn')
-
 const PLUGIN_NAME = 'Hengo'
 
 var main_scene: HenHengoRoot
 var gd_previewer: CodeEdit
-var singleton_list: Array[StringName] = [
-	&'ThreadHelper',
-	&'ScriptDataCache',
-	&'MapObjects',
-	&'MapDependencies',
-	&'Loader',
-	&'Router',
-	&'CodeGeneration',
-	&'Enums',
-	&'Global',
-	&'SignalBus',
-	&'API',
-]
 
 # debug
 var debug_plugin: EditorDebuggerPlugin
@@ -171,12 +157,12 @@ func register_singletons() -> void:
 	if not main_scene:
 		return
 	
-	for singleton_name: StringName in singleton_list:
+	for singleton_name: StringName in HenEnums.SINGLETON_LIST:
 		Engine.register_singleton(singleton_name, (main_scene as HenHengoRoot).get_node(NodePath(StringName('%'+ singleton_name))))
 
 
 func unregister_singletons() -> void:
-	for singleton_name: StringName in singleton_list:
+	for singleton_name: StringName in HenEnums.SINGLETON_LIST:
 		if Engine.has_singleton(singleton_name):
 			Engine.unregister_singleton(singleton_name)
 
