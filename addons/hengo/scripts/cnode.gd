@@ -292,6 +292,12 @@ static func instantiate_and_add_pool() -> void:
 			
 
 		for connection_line_idx in range(30): # connection line pool size
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+				return
+
+			if not global.can_instantiate_pool:
+				return
+			
 			var line: HenConnectionLine = CONNECTION_LINE.instantiate()
 			line.visible = false
 			line.position = Vector2(50000, 50000)
@@ -300,6 +306,12 @@ static func instantiate_and_add_pool() -> void:
 		
 
 		for flow_connection_line_idx in range(30): # flow connection line pool size
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+				return
+
+			if not global.can_instantiate_pool:
+				return
+			
 			var line: HenFlowConnectionLine = FLOW_CONNECTION_LINE.instantiate()
 			line.visible = false
 			line.position = Vector2(50000, 50000)

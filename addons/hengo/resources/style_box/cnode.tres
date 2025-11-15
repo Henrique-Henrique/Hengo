@@ -1,37 +1,13 @@
-[gd_resource type="StyleBox" script_class="StyleboxStack" load_steps=4 format=3 uid="uid://b0ss25v1amkw5"]
-
-[ext_resource type="Script" uid="uid://tkhvq8lsbhsu" path="res://addons/hengo/scripts/utils/stylebox_stack.gd" id="1_l6i6r"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_u05js"]
-bg_color = Color(0.15686275, 0.15686275, 0.17254902, 1)
-border_width_left = 1
-border_width_top = 2
-border_width_right = 1
-border_color = Color(0.2777402, 0.2776777, 0.31268412, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0, 0, 0, 0.29411766)
-shadow_size = 5
-shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ock46"]
-bg_color = Color(0.15686275, 0.15686275, 0.17254902, 0)
-border_width_bottom = 2
-border_color = Color(0.10251295, 0.10251375, 0.11503231, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[gd_resource type="StyleBoxFlat" format=3 uid="uid://b0ss25v1amkw5"]
 
 [resource]
-resource_local_to_scene = false
-resource_name = ""
-content_margin_left = -1.0
-content_margin_top = -1.0
-content_margin_right = -1.0
-content_margin_bottom = -1.0
-script = ExtResource("1_l6i6r")
-style_boxes = Array[StyleBox]([SubResource("StyleBoxFlat_u05js"), SubResource("StyleBoxFlat_ock46")])
-metadata/_custom_type_script = "uid://tkhvq8lsbhsu"
+bg_color = Color(0.529067, 0.52906656, 0.52906656, 0.101960786)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.09803922)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14

@@ -28,6 +28,7 @@ var TABS: HenTabs
 var BASE_ROUTE_REF: HenLoader.BaseRouteRef
 var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
 var CNODE_UI: Panel
+var DASHBOARD: HenDashboard
 
 # cnodes
 var can_make_connection: bool = false

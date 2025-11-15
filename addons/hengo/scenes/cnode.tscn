@@ -16,7 +16,7 @@ border_color = Color(0.301961, 0.313726, 0.321569, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b2gmx"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
 border_width_bottom = 2
-border_color = Color(0.19510302, 0.19509372, 0.22342718, 1)
+border_color = Color(0.50980395, 0.50980395, 0.50980395, 0.14509805)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12ubu"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
@@ -199,7 +199,6 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 script = ExtResource("6_gsclm")
-type = "true_flow"
 
 [node name="FlowSlot2" parent="Container/PanelContainer/FlowContainer" instance=ExtResource("5_t32p4")]
 visible = false

@@ -15,7 +15,7 @@ func _on_gui(_event: InputEvent) -> void:
 func clean() -> void:
     var container = get_node('%GeneralPopUp').get_child(0)
     # cleaning other controls of popup
-    for node in container.get_children().slice(1):
+    for node in container.get_children():
         container.remove_child(node)
         node.queue_free()
 
@@ -28,17 +28,8 @@ func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF,
     clean()
     
     container.add_child(_content)
-    container.get_child(0).text = _name
     
-    gp.reset_size()
-
-    if _pos == Vector2.INF:
-        # center
-        gp.position = global.HENGO_ROOT.size / 2 - _content.size / 2
-    else:
-        gp.position = _pos
-
-    HenUtils.reposition_control_inside(gp)
+    # HenUtils.reposition_control_inside(gp)
 
     if _lod > 0:
         (get_node('%Background') as Panel).modulate = Color.WHITE
@@ -48,11 +39,16 @@ func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF,
 
     show()
 
-    # animations
+    gp.pivot_offset = gp.size / 2.0
     var tween: Tween = get_tree().create_tween()
 
     gp.scale = Vector2(.95, .95)
-    tween.tween_property(gp, 'scale', Vector2.ONE, .5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+    gp.modulate.a = 0.0 # Começa invisível
+
+    tween.set_parallel(true)
+    tween.tween_property(gp, 'scale', Vector2.ONE, .4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+    tween.tween_property(gp, 'modulate:a', 1.0, .4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+    
     global.CAM.can_scroll = false
 
     return self

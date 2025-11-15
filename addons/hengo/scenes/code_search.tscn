@@ -1,11 +1,33 @@
-[gd_scene load_steps=4 format=3 uid="uid://bihfp8yx5bhak"]
+[gd_scene load_steps=9 format=3 uid="uid://bihfp8yx5bhak"]
 
 [ext_resource type="Script" uid="uid://wlu45tx3jnix" path="res://addons/hengo/scripts/utils/code_search.gd" id="1_lav8o"]
 [ext_resource type="PackedScene" uid="uid://6urv5rx15yye" path="res://addons/hengo/scenes/utils/virtual_list.tscn" id="2_fvg77"]
 [ext_resource type="PackedScene" uid="uid://uku58hykbu48" path="res://addons/hengo/scenes/code_search_item.tscn" id="3_ogmfe"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ogmfe"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6fpm2"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.08627451)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ogmfe"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6fpm2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xop2f"]
+bg_color = Color(0, 0, 0, 0.19607843)
+
 [node name="Code Search" type="VBoxContainer"]
-custom_minimum_size = Vector2(1000, 800)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -16,6 +38,8 @@ script = ExtResource("1_lav8o")
 [node name="Search" type="LineEdit" parent="."]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_ogmfe")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6fpm2")
 placeholder_text = "Type to search..."
 
 [node name="Navigation" type="HBoxContainer" parent="."]
@@ -47,6 +71,7 @@ flat = true
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ogmfe")
 current_tab = 1
 tabs_visible = false
 
@@ -70,11 +95,13 @@ metadata/_tab_index = 1
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_6fpm2")
 hide_root = true
 
 [node name="Info" type="RichTextLabel" parent="TabContainer/ListContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxFlat_xop2f")
 bbcode_enabled = true
 shortcut_keys_enabled = false

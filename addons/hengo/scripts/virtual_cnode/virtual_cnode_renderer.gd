@@ -153,6 +153,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 	for flow_c: PanelContainer in flow_container.get_children():
 		flow_c.visible = false
+
 		(flow_c.get_node('FlowSlot/Label') as Label).visible = false
 
 	# Showing Flows
@@ -201,6 +202,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 		connector.reset_signals(flow_output)
 		connector.id = flow_output.id
+		connector.owner = _cnode
 
 		if flow_output.name:
 			var my_flow_label: Label = (my_flow_container.get_node('FlowSlot/Label') as Label)

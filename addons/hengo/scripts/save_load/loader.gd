@@ -186,23 +186,25 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 	if not _headless:
 		show_class_name()
 		router.change_route(global.BASE_ROUTE)
-		(global.HENGO_ROOT.get_node('%ScriptMsgContainer') as PanelContainer).visible = false
 
 	var end: int = Time.get_ticks_usec()
 		
 	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
 
+	global.CAM.can_scroll = true
+	global.DASHBOARD.hide_dashboard()
 	return true
 
 
 func show_class_name() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var cl_label: Label = global.HENGO_ROOT.get_node('%ClassName')
+	var cl_label: Button = global.HENGO_ROOT.get_node('%ClassName')
 	var type = global.script_config.type
 	var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
 
 	cl_label.visible = true
 	cl_label.text = type
+	cl_label.icon = HenUtils.get_icon_texture(type)
 
 	if ClassDB.is_parent_class(type, 'Node2D'):
 		sb.bg_color = Color('#6E90E7', .2)

@@ -3,6 +3,9 @@ extends RichTextLabel
 
 
 func _ready() -> void:
+	if HenUtils.disable_scene_with_owner(self):
+		return
+	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	signal_bus.set_terminal_text.connect(add_custom_text)
 	signal_bus.scripts_generation_finished.connect(finish)

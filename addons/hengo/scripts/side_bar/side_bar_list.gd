@@ -83,8 +83,6 @@ func on_click(_item, _mouse_pos: Vector2) -> void:
 		1.5
 	)
 
-	popup.move(Vector2(0, -prop_editor.size.y / 2.))
-
 	if not popup.closed.is_connected(_on_inspector_close): popup.closed.connect(_on_inspector_close)
 	inspecting = true
 

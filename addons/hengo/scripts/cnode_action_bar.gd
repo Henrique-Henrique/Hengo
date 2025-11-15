@@ -21,11 +21,6 @@ func filesystem_dock(_hide_docks: bool = false) -> void:
 		filesystem_parent.add_child(filesystem)
 	
 	filesystem_parent = null
-	
-	if _hide_docks:
-		var global: HenGlobal = Engine.get_singleton(&'Global')
-		global.CAM.can_scroll = true
-		global.HENGO_EDITOR_PLUGIN.hide_docks()
 
 
 func _on_dashboard() -> void:
@@ -47,7 +42,6 @@ func _on_dashboard() -> void:
 	filesystem.get_parent().remove_child(filesystem)
 	filesystem_parent.add_child(filesystem)
 	
-	global.HENGO_EDITOR_PLUGIN.hide_docks()
 	filesystem_parent = null
 
 	global.CAM.can_scroll = true

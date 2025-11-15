@@ -1,4 +1,4 @@
-[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=75 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -8,7 +8,6 @@
 [ext_resource type="Script" uid="uid://d1n10yp2g2hds" path="res://addons/hengo/scripts/save_load/map_objects.gd" id="5_5yt1h"]
 [ext_resource type="Script" uid="uid://txuf5gnky3em" path="res://addons/hengo/scripts/save_load/map_dependencies.gd" id="6_0js6d"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
-[ext_resource type="StyleBox" uid="uid://4y7hysplpx56" path="res://addons/hengo/resources/style_box/level_1_flat.tres" id="7_74kfo"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" uid="uid://bojhvy7et13dd" path="res://addons/hengo/scripts/save_load/loader.gd" id="7_rg66s"]
 [ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
@@ -31,21 +30,24 @@
 [ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
 [ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
 [ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="17_lxtpw"]
+[ext_resource type="Texture2D" uid="uid://byhp341nd8v2j" path="res://addons/hengo/assets/new_icons/cog.svg" id="18_fdf88"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
+[ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="19_33cyo"]
 [ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
 [ext_resource type="Texture2D" uid="uid://bsptgo01fl6k" path="res://addons/hengo/assets/images/noise_texture.png" id="24_48snx"]
-[ext_resource type="Texture2D" uid="uid://k4vqsiuhja06" path="res://addons/hengo/assets/icons/cnode/enum.svg" id="24_hg3xi"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
-[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
+[ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
+[ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="37_33cyo"]
+[ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.105882354, 0.105882354, 0.11372549, 1)
+bg_color = Color(0.011764706, 0.02745098, 0.07058824, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
 content_margin_right = 8.0
@@ -55,22 +57,25 @@ content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hog2e"]
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.20784314, 0.27058825, 0.3647059, 0.73333335)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.36078432)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tk0ia"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eipqu"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5te2"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.2901961)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_74kfo"]
 
@@ -94,45 +99,72 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ji2ve"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lxtpw"]
-bg_color = Color(0.117379524, 0.11737957, 0.12967286, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.16862746, 0.16862746, 0.1764706, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-shadow_color = Color(0.07621712, 0.07621694, 0.08263492, 1)
-shadow_size = 10
+border_color = Color(0.4745098, 0.4745098, 0.4745098, 0.44313726)
+border_blend = true
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lxtpw"]
+bg_color = Color(0.011764706, 0.02745098, 0.07058824, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1523, 472)
-shader_parameter/offset = Vector2(0, -6.4)
-shader_parameter/zoom_factor = 1.0
+shader_parameter/screen_size = Vector2(1598, 966)
+shader_parameter/offset = Vector2(1111.0264, 476.4378)
+shader_parameter/zoom_factor = 0.20000772
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
 
 [sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
+colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 0.74509805, 0.74509805, 0.74509805, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xresw"]
-bg_color = Color(0.123256, 0.126406, 0.129557, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fdf88"]
+shader = ExtResource("37_33cyo")
+shader_parameter/lod = 2.50000011875
+shader_parameter/color = Color(0.35982865, 0.4958688, 0.7427542, 1)
+shader_parameter/transparency = 0.10000000475
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r5155"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5c7h0"]
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vu20g"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xresw"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x5h56"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_33cyo"]
+bg_color = Color(1, 1, 1, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.11372549)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+expand_margin_left = 1.0
+expand_margin_top = 1.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
 content_margin_left = 4.0
@@ -217,8 +249,10 @@ script = ExtResource("27_ji2ve")
 unique_name_in_owner = true
 script = ExtResource("13_5c7h0")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
+[node name="Content" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Content"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -226,7 +260,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="CNodeUI" type="Panel" parent="VBoxContainer"]
+[node name="CNodeUI" type="Panel" parent="Content/VBoxContainer"]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
@@ -234,7 +268,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="Panel2" type="TextureRect" parent="VBoxContainer/CNodeUI"]
+[node name="Panel2" type="TextureRect" parent="Content/VBoxContainer/CNodeUI"]
 process_mode = 4
 modulate = Color(1, 1, 1, 0.49019608)
 layout_mode = 1
@@ -247,11 +281,11 @@ mouse_filter = 2
 texture = ExtResource("24_48snx")
 stretch_mode = 1
 
-[node name="Center2" type="Marker2D" parent="VBoxContainer/CNodeUI"]
+[node name="Center2" type="Marker2D" parent="Content/VBoxContainer/CNodeUI"]
 visible = false
 position = Vector2(-580, 4)
 
-[node name="CNodeStatLabel" type="Label" parent="VBoxContainer/CNodeUI"]
+[node name="CNodeStatLabel" type="Label" parent="Content/VBoxContainer/CNodeUI"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(1, 1, 1, 0.658824)
@@ -265,7 +299,7 @@ grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
 
-[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/CNodeUI"]
+[node name="HSplitContainer" type="HSplitContainer" parent="Content/VBoxContainer/CNodeUI"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -275,7 +309,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
@@ -283,59 +317,54 @@ theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="SidePanel" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+[node name="SidePanel" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_uvl0d")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
 
-[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="MenuBar" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
 layout_mode = 2
 alignment = 2
 script = ExtResource("7_sagw0")
 dashboard = NodePath("DashBoard")
 
-[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="CompileContainer" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
+[node name="Compile" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_default_cursor_shape = 2
 theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/normal = SubResource("StyleBoxFlat_hog2e")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
 text = "Compile"
+icon = ExtResource("18_fdf88")
 
-[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="DashBoard" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 tooltip_text = "Dashboard"
 icon = ExtResource("11_rvhdl")
 flat = true
 
-[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-size_flags_horizontal = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
-
-[node name="TabContainer" type="TabContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/tab_separation = 12
@@ -343,19 +372,19 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_74kfo")
 theme_override_styles/tabbar_background = SubResource("StyleBoxEmpty_5yt1h")
 theme_override_styles/tab_unselected = SubResource("StyleBoxEmpty_0js6d")
 theme_override_styles/tab_hovered = SubResource("StyleBoxEmpty_rg66s")
-theme_override_styles/tab_selected = ExtResource("7_74kfo")
+theme_override_styles/tab_selected = ExtResource("19_33cyo")
 theme_override_styles/tab_disabled = SubResource("StyleBoxEmpty_nqb6j")
-theme_override_styles/tab_focus = ExtResource("7_74kfo")
+theme_override_styles/tab_focus = ExtResource("19_33cyo")
 current_tab = 0
 script = ExtResource("18_hg3xi")
 
-[node name="SideBar" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
+[node name="SideBar" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 metadata/_tab_name = "Props"
 
-[node name="CodePreview" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 0)
@@ -375,13 +404,13 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="Control" type="Control" parent="Content/VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 4.0
 mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -390,18 +419,18 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 visible = false
 layout_mode = 2
 
-[node name="Tabs" type="TabBar" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
+[node name="Tabs" type="TabBar" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tab_alignment = 2
 script = ExtResource("11_lxtpw")
 
-[node name="Terminal" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="Terminal" type="RichTextLabel" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
@@ -424,24 +453,37 @@ deselect_on_focus_loss_enabled = false
 drag_and_drop_selection_enabled = false
 script = ExtResource("15_lxtpw")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer2"]
+[node name="ClassName" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/HBoxContainer2"]
+unique_name_in_owner = true
+visible = false
 layout_mode = 2
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_bottom = 8
+size_flags_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="Label" type="Label" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer2/MarginContainer"]
+[node name="Label" type="Label" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/HBoxContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Base > Test"
 
-[node name="Panel" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="CloseBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("30_hog2e")
+flat = true
+
+[node name="Panel" type="Control" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
+[node name="Panel" type="Panel" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
 process_mode = 4
 layout_mode = 1
 anchors_preset = 15
@@ -452,7 +494,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_lxtpw")
 
-[node name="CNodeContainerBG" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
+[node name="CNodeContainerBG" type="Control" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel"]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
@@ -463,7 +505,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("16_74kfo")
 
-[node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG"]
+[node name="Grid" type="TextureRect" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG"]
 process_mode = 4
 texture_filter = 1
 texture_repeat = 2
@@ -477,17 +519,17 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("17_lxtpw")
 
-[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG" node_paths=PackedStringArray("grid")]
+[node name="Cam" type="Node2D" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG" node_paths=PackedStringArray("grid")]
 unique_name_in_owner = true
 position = Vector2(0, -8)
 script = ExtResource("3_84akk")
 grid = NodePath("../Grid")
 
-[node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="RefPoint" type="Marker2D" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 visible = false
 position = Vector2(289, 313)
 
-[node name="CommentContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="CommentContainer" type="Control" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -496,7 +538,7 @@ offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
 
-[node name="CnodeContainer" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="CnodeContainer" type="Control" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -505,7 +547,7 @@ offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
 
-[node name="ConnectionGuide" type="Line2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="ConnectionGuide" type="Line2D" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 visible = false
 z_index = 2
@@ -515,9 +557,9 @@ texture = ExtResource("7_6jref")
 texture_mode = 1
 script = ExtResource("7_gj1gq")
 
-[node name="Lines" type="Node2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="Lines" type="Node2D" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 
-[node name="SelectionRect" type="ReferenceRect" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="SelectionRect" type="ReferenceRect" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 process_mode = 4
 visible = false
 offset_left = 153.0
@@ -528,7 +570,7 @@ mouse_filter = 2
 border_color = Color(0.749928, 0.915784, 0.889306, 1)
 border_width = 3.0
 
-[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam/SelectionRect"]
+[node name="Panel" type="Panel" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam/SelectionRect"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -537,103 +579,49 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
-[node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="ref" type="Sprite2D" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 visible = false
 modulate = Color(0.270724, 0.690067, 0.0733794, 1)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
-[node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
+[node name="ref2" type="Sprite2D" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam"]
 visible = false
 modulate = Color(0.270724, 0.690067, 0.0733794, 1)
 position = Vector2(0, 3000)
 scale = Vector2(0.21, 0.21)
 texture = ExtResource("9_si04b")
 
-[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam" instance=ExtResource("20_w813u")]
+[node name="VCActionButtons" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/Panel/CNodeContainerBG/Cam" instance=ExtResource("20_w813u")]
 unique_name_in_owner = true
 visible = false
-
-[node name="ScriptMsgContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI"]
-unique_name_in_owner = true
-process_mode = 4
-visible = false
-z_index = 99
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_xresw")
-
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/CNodeUI/ScriptMsgContainer"]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="ScriptMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/ScriptMsgContainer/CenterContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_fonts/bold_font = ExtResource("23_tlngq")
-theme_override_fonts/italics_font = ExtResource("16_xresw")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_r5155")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_vu20g")
-theme_override_styles/background = SubResource("StyleBoxEmpty_xresw")
-theme_override_styles/fill = SubResource("StyleBoxEmpty_x5h56")
-bbcode_enabled = true
-text = "[center]
-[font_size=24][b]Hengo Visual Script[/b][/font_size]
-[font_size=16][color=#cccccc]
-Please open the script to begin editing.
-[/color][/font_size]
-[font_size=13][i][color=#888888]Tip: You can open the script using the button at the top right to access the FileSystem,  
-or via \"Select Resource\" (Ctrl + P), or directly from Scene dock.[/color][/i][/font_size]
-[/center]"
-fit_content = true
-autowrap_mode = 0
-shortcut_keys_enabled = false
-justification_flags = 0
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
 
 [node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
 visible = false
 
 [node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUp"]
 unique_name_in_owner = true
+material = SubResource("ShaderMaterial_fdf88")
 custom_minimum_size = Vector2(300, 0)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -18.0
-offset_right = 150.0
-offset_bottom = 18.0
+anchors_preset = -1
+anchor_left = 0.2
+anchor_top = 0.05
+anchor_right = 0.8
+anchor_bottom = 0.9
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
-theme_override_styles/panel = ExtResource("33_n637n")
+theme_override_styles/panel = SubResource("StyleBoxFlat_5c7h0")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
+[node name="VBoxContainer" type="PanelContainer" parent="GeneralPopUp/GeneralPopUp"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="GeneralPopUp/GeneralPopUp/VBoxContainer"]
+[node name="Panel" type="Panel" parent="GeneralPopUp/GeneralPopUp"]
 process_mode = 4
 layout_mode = 2
 mouse_filter = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
-disabled = true
-text = "Name"
-icon = ExtResource("24_hg3xi")
-flat = true
-alignment = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_33cyo")
 
 [node name="PopupContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true
@@ -686,3 +674,10 @@ selection_enabled = true
 unique_name_in_owner = true
 visible = false
 theme = ExtResource("1_2muha")
+
+[node name="DashboardCanvas" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+
+[node name="DashBoard" parent="DashboardCanvas" instance=ExtResource("44_33cyo")]
+unique_name_in_owner = true
+visible = false

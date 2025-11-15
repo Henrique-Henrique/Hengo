@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=12 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=15 format=3 uid="uid://xxj7abqbehjg"]
 
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
@@ -31,6 +31,10 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_el3g6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3mdrv"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xbr4r"]
@@ -45,6 +49,22 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3mdrv"]
+bg_color = Color(1, 1, 1, 0.050980393)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.16470589)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
+
 [sub_resource type="ImageTexture" id="ImageTexture_6gb4l"]
 
 [resource]
@@ -54,12 +74,15 @@ Button/styles/focus = SubResource("StyleBoxFlat_yvxym")
 Button/styles/hover = SubResource("StyleBoxFlat_el3g6")
 Button/styles/normal = ExtResource("2_xbr4r")
 ItemList/fonts/font = ExtResource("1_revyj")
+ItemList/styles/focus = SubResource("StyleBoxEmpty_el3g6")
+ItemList/styles/panel = SubResource("StyleBoxEmpty_3mdrv")
 Label/fonts/font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
 LineEdit/fonts/font = ExtResource("1_ghilx")
 LineEdit/styles/focus = SubResource("StyleBoxFlat_xbr4r")
 LineEdit/styles/normal = ExtResource("4_el3g6")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_3mdrv")
 PopupMenu/styles/panel = ExtResource("5_yvxym")
 SpinBox/colors/down_disabled_icon_modulate = Color(0.88, 0.88, 0.88, 0)
 SpinBox/colors/down_hover_icon_modulate = Color(0.95, 0.95, 0.95, 0)

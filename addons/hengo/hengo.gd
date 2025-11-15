@@ -5,10 +5,10 @@ const HENGO_ROOT = preload('res://addons/hengo/scenes/hengo_root.tscn')
 const PLUGIN_NAME = 'Hengo'
 
 var main_scene: HenHengoRoot
-var gd_previewer: CodeEdit
-
+var last_scene: StringName
 # debug
 var debug_plugin: EditorDebuggerPlugin
+
 
 class DockConfig:
 	var id: EditorPlugin.DockSlot
@@ -19,6 +19,7 @@ class DockConfig:
 		id = _id
 		ref = _ref
 
+
 func _enter_tree():
 	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
 	add_debugger_plugin(debug_plugin)
@@ -28,11 +29,9 @@ func _enter_tree():
 		DirAccess.make_dir_absolute('res://hengo')
 		EditorInterface.get_resource_filesystem().scan()
 
-
 	main_scene = HENGO_ROOT.instantiate()
 
 	register_singletons()
-	print(22)
 
 	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
@@ -77,10 +76,10 @@ func _enter_tree():
 	global.script_config = null
 	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
 	global.CNODE_UI = cnode_ui
+	global.DASHBOARD = main_scene.get_node('%DashBoard')
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)
-
 
 	# getting tabs
 	if global.DOCKS.is_empty():
@@ -102,9 +101,6 @@ func _enter_tree():
 			global.DOCKS[dock] = DockConfig.new(dock, parent)
 			parent.remove_child(c)
 
-	main_screen_changed.connect(_on_change_main_screen)
-	set_docks()
-
 	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
 	global.HENGO_EDITOR_PLUGIN = self
 
@@ -115,25 +111,11 @@ func _enter_tree():
 	global.state_connection_line_pool.clear()
 	global.script_config = null
 
+	main_screen_changed.connect(_on_main_changed)
+
 	# creating cnode pool
 	HenCnode.instantiate_and_add_pool()
-	print(Engine.get_singleton_list())
-
-	
-func _get_window_layout(_configuration: ConfigFile) -> void:
-	if main_scene.visible:
-		if (Engine.get_singleton(&'Global') as HenGlobal).ACTION_BAR.filesystem_parent:
-			return
-
-		hide_docks()
-	else:
-		set_docks()
-
-
-func _on_change_main_screen(_name: String) -> void:
-	if _name == PLUGIN_NAME:
-		hide_docks()
-
+	global.DASHBOARD.show_dashboard()
 
 func _exit_tree():
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -143,7 +125,6 @@ func _exit_tree():
 	global.SELECTED_VIRTUAL_CNODE.clear()
 
 	remove_debugger_plugin(debug_plugin)
-	remove_control_from_bottom_panel(gd_previewer)
 
 	if main_scene:
 		main_scene.queue_free()
@@ -151,6 +132,24 @@ func _exit_tree():
 	remove_autoload_singleton('HengoDebugger')
 	global.HENGO_EDITOR_PLUGIN = null
 	unregister_singletons()
+
+
+func _on_main_changed(_screen_name: String) -> void:
+	if _screen_name == PLUGIN_NAME:
+		return
+	
+	last_scene = _screen_name
+
+
+func hide_plugin() -> void:
+	_make_visible(false)
+	EditorInterface.set_main_screen_editor(
+		last_scene if not last_scene.is_empty() else &'2D'
+	)
+
+func show_plugin() -> void:
+	_make_visible(true)
+	EditorInterface.set_main_screen_editor(PLUGIN_NAME)
 
 
 func register_singletons() -> void:
@@ -169,18 +168,18 @@ func unregister_singletons() -> void:
 
 func _make_visible(_visible: bool):
 	if main_scene:
-		if _visible: hide_docks()
-		else:
-			(Engine.get_singleton(&'Global') as HenGlobal).ACTION_BAR.filesystem_dock()
-			show_docks()
-
 		main_scene.visible = _visible
+		(main_scene.get_node('%Content') as CanvasLayer).visible = _visible
+		(main_scene.get_node('%DashboardCanvas') as CanvasLayer).visible = _visible
+
 
 func _get_plugin_name():
 	return PLUGIN_NAME
 
+
 func _has_main_screen() -> bool:
 	return true
+
 
 func _handles(object: Object) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -204,41 +203,3 @@ func _handles(object: Object) -> bool:
 		return true
 
 	return false
-
-# public
-#
-func set_docks() -> void:
-	for dock: DockConfig in (Engine.get_singleton(&'Global') as HenGlobal).DOCKS.values():
-		dock.tab_control = dock.ref.get_current_tab_control()
-
-func hide_docks() -> void:
-	tab_visibility(false)
-	bottom_panel_visibility(false)
-
-	for dock: DockConfig in (Engine.get_singleton(&'Global') as HenGlobal).DOCKS.values():
-		dock.ref.visible = false
-
-func show_docks() -> void:
-	tab_visibility(true)
-	bottom_panel_visibility(true)
-	
-	for dock: DockConfig in (Engine.get_singleton(&'Global') as HenGlobal).DOCKS.values():
-		if dock.tab_control:
-			dock.ref.visible = true
-			dock.tab_control.visible = true
-
-
-func tab_visibility(_show: bool) -> void:
-	var tabs_container = EditorInterface.get_editor_main_screen().get_node_or_null('../..')
-	
-	if tabs_container:
-		var tab = tabs_container.get_child(0) if tabs_container.get_child_count() > 0 else null
-
-		if tab: tab.visible = _show
-
-
-func bottom_panel_visibility(_show: bool) -> void:
-	var bottom_panel = get_tree().root.find_child('*EditorBottomPanel*', true, false)
-
-	if bottom_panel:
-		bottom_panel.visible = _show

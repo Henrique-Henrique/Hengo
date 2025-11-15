@@ -205,7 +205,6 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		
 		item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
 		item.set_custom_draw_callback(0, _draw_custom_button.bind(item_data.name, icon, icon_color))
-		item.set_custom_color(0, Color('#737278'))
 
 
 func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
@@ -216,7 +215,7 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 	var button_width = text_size.x + padding
 	
 	# add vertical spacing by reducing the height and adding margin
-	var spacing = 8
+	var spacing = 4
 	var button_height = _rect.size.y - spacing
 	var button_pos = Vector2(_rect.position.x, _rect.position.y + spacing / 2.)
 	
@@ -229,7 +228,7 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 		list.draw_texture_rect(_icon, Rect2(icon_pos, icon_size), false, _icon_color)
 		
 		# draw text after icon with spacing
-		var text_offset = 32 # icon width + spacing
+		var text_offset = icon_size.x + spacing
 		var text_pos_x = button_pos.x + text_offset + (button_width - text_offset - text_size.x) / 2
 		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
 		var text_pos = Vector2(text_pos_x, text_pos_y)

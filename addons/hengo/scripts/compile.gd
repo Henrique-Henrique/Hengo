@@ -4,6 +4,9 @@ class_name HenCompile extends HBoxContainer
 @onready var compile_bt: Button = get_node('%Compile')
 
 func _ready() -> void:
+	if HenUtils.disable_scene_with_owner(self):
+		return
+	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	compile_bt.pressed.connect(_on_compile_press)
 	set_process(false)

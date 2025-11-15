@@ -7,6 +7,9 @@ class TabData:
 
 
 func _ready() -> void:
+	if HenUtils.disable_scene_with_owner(self):
+		return
+	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	tab_clicked.connect(_on_tab_selected)
 	signal_bus.scripts_generation_started.connect(_on_scripts_generation_started)
