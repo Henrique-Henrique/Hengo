@@ -11,11 +11,11 @@ func _on_press() -> void:
 	expression_editor.v_cnode = v_cnode
 	expression_editor.bt_ref = self
 
-
 	if text != 'Expression':
 		expression_editor.default_config = {
 			exp = text
 		}
+	
 	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(expression_editor, 'Expression Editor')
 
 

@@ -1,4 +1,4 @@
-#[hengo] res://hengo/save/5651739105259045626.hengo
+#[hengo] res://hengo/save/7734610539309608366.hengo
 
 # ***************************************************************
 # *                 CREATED BY HENGO VISUAL SCRIPT              *
@@ -7,19 +7,17 @@
 # *       Edit only if you are confident in your changes.       *
 # ***************************************************************
 
-extends Sprite2D
+extends Node2D
 
-func func_31283544():
-	pass
-
-
+@export var velocity = float()
+ 
 var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_1=State1.new(self)
+		state_1 = State1.new(self)
 	})
 
 func _ready() -> void:
@@ -38,29 +36,8 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_offset())
-		if false:
-			print(null)
-		else:
-			_ref.set_offset(_ref.get_offset())
-			HengoState.INVALID_PLACEHOLDER
-			print(HengoState.INVALID_PLACEHOLDER)
-			if false:
-				print(null)
-			else:
-				print(null)
-			print(_ref.is_region_enabled())
-			if _ref.get_node("").is_centered():
-				pass
-			print(null)
-			if false:
-				pass
-			print(null)
-		print(_ref.is_centered())
+		print("Testing")
 
 	func update(delta) -> void:
-		print(null)
-		print(null)
-		print(null)
-		print(null)
-		print(null)
+		_ref.rotate(_ref.velocity)
+		_ref.set_position(Vector2(7, 0))

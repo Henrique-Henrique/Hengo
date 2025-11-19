@@ -12,8 +12,9 @@ static func is_script_data_valid(_script_data: HenScriptData) -> bool:
 	if not errors.is_empty():
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Script data is invalid: " + _script_data.path))
-		for error: Dictionary in errors:
-			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Error: " + error.get('message', error)))
+		for error in errors:
+			var msg: String = (error as Dictionary).get('message', error) if error is Dictionary else error
+			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Error: " + msg))
 		return false
 	
 	# custom errors handling

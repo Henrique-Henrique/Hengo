@@ -68,6 +68,9 @@ static func save(_script_data: HenScriptData, _data_path: String) -> bool:
 
 
 static func save_code(_script_data: HenScriptData, _script_id: int) -> void:
+	if _script_id == -1:
+		return
+	
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 	var code: String = '#[hengo] ' + loader.get_data_path(_script_id) + '\n\n' + (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(_script_data)
 

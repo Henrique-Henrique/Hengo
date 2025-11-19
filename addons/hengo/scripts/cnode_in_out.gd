@@ -130,8 +130,6 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 			'expression':
 				var expression_bt: HenExpressionBt = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
 
-				expression_bt.v_cnode = (root.virtual_ref.get_ref() as HenVirtualCNode)
-
 				prop_container.add_child(expression_bt)
 				prop = expression_bt
 

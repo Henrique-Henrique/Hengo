@@ -10,9 +10,7 @@ var v_cnode: HenVirtualCNode
 var bt_ref: HenExpressionBt
 var word_list: Array
 var completion_list: Array
-
 var default_config: Dictionary
-
 
 const NATIVE_KEYWORDS: Array[StringName] = ['and', 'or', 'not', 'in', 'is']
 

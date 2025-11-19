@@ -114,7 +114,8 @@ static func _finalize_save_process(save_config: HenSaver.SaveConfig) -> void:
 		if FileAccess.file_exists(paths.backup):
 			DirAccess.remove_absolute(paths.backup)
 
-		script_list.append(ResourceUID.get_id_path(config.id))
+		if ResourceUID.has_id(config.id):
+			script_list.append(ResourceUID.get_id_path(config.id))
 
 	# generate gdscript code
 	for config in save_config.script_list:

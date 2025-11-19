@@ -7,7 +7,8 @@ const _TYPE_MAP: Dictionary = {
 	'number': [TYPE_FLOAT, TYPE_INT],
 	'boolean': [TYPE_BOOL],
 	'object': [TYPE_DICTIONARY],
-	'array': [TYPE_ARRAY]
+	'array': [TYPE_ARRAY],
+	'any': [TYPE_NIL]
 }
 
 
@@ -101,7 +102,7 @@ static func _validate_type(_data: Variant, _schema: Dictionary, _path: String) -
 	var data_type: int = typeof(_data)
 	var valid_godot_types: Array = _TYPE_MAP[expected_type]
 	
-	if not data_type in valid_godot_types:
+	if expected_type != 'any' and not data_type in valid_godot_types:
 		var error_msg: String = 'type mismatch at %s: expected %s, but got %s (value: %s)' % [
 			_path,
 			expected_type,
@@ -117,6 +118,9 @@ static func _validate_type(_data: Variant, _schema: Dictionary, _path: String) -
 static func _validate_content(_data: Variant, _schema: Dictionary, _path: String, _root_schema: Dictionary) -> Array:
 	var errors: Array = []
 	
+	if _schema.get(&'type') == &'any':
+		return []
+
 	match typeof(_data):
 		TYPE_DICTIONARY:
 			if _schema.has('required'):
