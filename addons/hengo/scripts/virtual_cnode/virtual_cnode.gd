@@ -165,14 +165,12 @@ func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtual
 
 func select() -> void:
 	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.append(self)
-	
 	if cnode_instance:
 		cnode_instance.select()
 
 
 func unselect() -> void:
 	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.erase(self)
-
 	if cnode_instance:
 		cnode_instance.unselect()
 
@@ -209,7 +207,7 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 func request_flow_connector_connection(_id: int, _mouse_pos: Vector2) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(_mouse_pos, {
+	global.GENERAL_POPUP.show_content(HenCodeSearch.load(_mouse_pos, {
 		id = _id,
 		from_flow_connector = self
 	}), '')
@@ -218,7 +216,7 @@ func request_flow_connector_connection(_id: int, _mouse_pos: Vector2) -> void:
 func request_io_connection(_io_type: StringName, _id: int, _mouse_pos: Vector2, _type: StringName) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	global.GENERAL_POPUP.get_parent().show_content(HenCodeSearch.load(_mouse_pos, {
+	global.GENERAL_POPUP.show_content(HenCodeSearch.load(_mouse_pos, {
 		io_type = _io_type,
 		id = _id,
 		vc_ref = self,
@@ -242,7 +240,7 @@ func on_cnode_right_click(_mouse_pos: Vector2) -> void:
 	# showing state config on doubleclick
 	if identity.type == HenVirtualCNode.Type.STATE:
 		@warning_ignore('unsafe_method_access')
-		(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().show_content(
+		(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(
 			HenPropEditor.mount(self),
 			'Testing',
 			_mouse_pos

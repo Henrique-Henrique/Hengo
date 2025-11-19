@@ -201,7 +201,7 @@ func delete() -> void:
     global.history.add_undo_method(item_cache.add)
     global.history.commit_action()
 
-    global.GENERAL_POPUP.get_parent().hide_popup()
+    global.GENERAL_POPUP.hide_popup()
 
 
 func get_inspector_array_list() -> Array[HenProp]:

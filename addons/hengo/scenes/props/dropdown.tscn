@@ -2,7 +2,7 @@
 
 [ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="1_jd8h6"]
 [ext_resource type="Texture2D" uid="uid://dvwar0heqfh58" path="res://addons/hengo/assets/icons/search.svg" id="1_kf6tg"]
-[ext_resource type="Script" uid="uid://cdt5u6to8oims" path="res://addons/hengo/scripts/props/dropdown.gd" id="1_oknia"]
+[ext_resource type="Script" uid="uid://cdt5u6to8oims" path="res://addons/hengo/scripts/props/dropdown.gd" id="3_jd8h6"]
 
 [node name="DropDown" type="Button"]
 offset_right = 8.0
@@ -10,4 +10,4 @@ offset_bottom = 8.0
 theme_override_styles/normal = ExtResource("1_jd8h6")
 text = "Variant"
 icon = ExtResource("1_kf6tg")
-script = ExtResource("1_oknia")
+script = ExtResource("3_jd8h6")

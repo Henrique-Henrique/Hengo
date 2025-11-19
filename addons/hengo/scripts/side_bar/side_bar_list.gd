@@ -76,7 +76,7 @@ func on_click(_item, _mouse_pos: Vector2) -> void:
 	pos.x = global.SIDE_BAR.position.x + global.SIDE_BAR.size.x + 10
 	pos.y += _mouse_pos.y
 
-	var popup: HenPopupContainer = (global.GENERAL_POPUP.get_parent() as HenPopupContainer).show_content(
+	var popup: HenPopupContainer = global.GENERAL_POPUP.show_content(
 		prop_editor,
 		'Testing',
 		pos,

@@ -205,6 +205,7 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 		
 		item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
 		item.set_custom_draw_callback(0, _draw_custom_button.bind(item_data.name, icon, icon_color))
+		item.set_custom_color(0, Color.WHITE)
 
 
 func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:

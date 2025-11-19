@@ -294,7 +294,7 @@ func build_list() -> void:
 	else:
 		tree.custom_minimum_size.y = 0
 		
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().reset_size()
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.reset_size()
 
 
 func get_from_list() -> Array:
@@ -737,7 +737,7 @@ func _on_select() -> void:
 		# 	(connector.root.virtual_ref.get_ref() as HenVirtualCNode).add_flow_connection(cnode_config.from_flow_connector.id, vc_return.v_cnode.flow.from_flow_connections[0].id, weakref(vc_return.v_cnode)).add()
 
 	global.history.commit_action()
-	global.GENERAL_POPUP.get_parent().hide_popup()
+	global.GENERAL_POPUP.hide_popup()
 	api_list.clear()
 
 

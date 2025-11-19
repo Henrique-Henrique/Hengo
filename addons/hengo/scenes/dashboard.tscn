@@ -79,7 +79,8 @@ text = "QUICK ACTIONS"
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="NewScript" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "New Script"
@@ -89,7 +90,7 @@ icon = ExtResource("1_v3ptv")
 layout_mode = 2
 size_flags_horizontal = 3
 disabled = true
-text = "Documentation"
+text = "Documentation (WIP)"
 icon = ExtResource("2_jlpx7")
 
 [node name="Label4" type="Label" parent="MarginContainer/VBoxContainer"]
@@ -102,14 +103,14 @@ layout_mode = 2
 [node name="Button" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 disabled = true
-text = "How to use"
+text = "How to use (WIP)"
 icon = ExtResource("3_ksiib")
 flat = true
 
 [node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
 layout_mode = 2
 disabled = true
-text = "Website"
+text = "Website (WIP)"
 icon = ExtResource("4_l2d5o")
 flat = true
 

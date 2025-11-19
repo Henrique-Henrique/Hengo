@@ -47,11 +47,18 @@ func _ready() -> void:
 			}
 	)
 	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
+	(get_node('%OpenDashboard') as Button).pressed.connect(_on_open_dashboard)
+
+
+func _on_open_dashboard() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.DASHBOARD.show_dashboard()
 
 
 func _on_close() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	global.HENGO_EDITOR_PLUGIN.hide_plugin()
+
 
 func _select_cnode() -> void:
 	var selection_rect: ReferenceRect = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_node('SelectionRect')

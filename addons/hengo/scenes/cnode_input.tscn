@@ -46,7 +46,6 @@ theme_override_constants/separation = 8
 
 [node name="Connector" type="TextureRect" parent="Margin/CNameInput"]
 unique_name_in_owner = true
-z_index = 2
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
 mouse_filter = 2

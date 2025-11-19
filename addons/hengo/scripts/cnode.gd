@@ -37,6 +37,9 @@ signal on_move
 signal on_right_click
 signal changed_position(_pos: Vector2)
 signal request_flow_connection
+signal on_select
+signal on_unselect
+
 
 func _ready():
 	var title_container := get_node('%TitleContainer') as PanelContainer
@@ -92,29 +95,32 @@ func _on_gui(_event: InputEvent) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	if _event is InputEventMouseButton:
-		if _event.pressed:
+		var e: InputEventMouseButton = _event
+		if e.pressed:
 			global.DOCS_TOOLTIP.visible = false
-			if _event.ctrl_pressed:
+			if e.ctrl_pressed:
 				if selected:
-					unselect()
+					on_unselect.emit()
 				else:
-					select()
-			elif _event.double_click:
+					on_select.emit()
+			elif e.double_click:
 				on_double_click.emit()
 			else:
-				if _event.button_index == MOUSE_BUTTON_LEFT:
+				if e.button_index == MOUSE_BUTTON_LEFT:
+					print(44)
+
 					if selected:
 						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 							vc.set_cnode_moving(true)
 					else:
-						moving = true
 						# cleaning other selects
 						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 							vc.set_cnode_moving(false)
 							vc.unselect()
 						
-						select()
-				elif _event.button_index == MOUSE_BUTTON_RIGHT:
+						moving = true
+						on_select.emit()
+				elif e.button_index == MOUSE_BUTTON_RIGHT:
 					on_right_click.emit(get_global_mouse_position())
 					
 		else:
@@ -170,7 +176,7 @@ func select() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	selected = true
 	hover_animation()
-	
+
 	if global.CODE_PREVIEWER.visible:
 		var new_id_list: Array = global.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
 		if not (global.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (global.CODE_PREVIEWER.id_list == new_id_list):
@@ -185,6 +191,7 @@ func select() -> void:
 func unselect(_time: float = .2) -> void:
 	selected = false
 	exit_animation(_time)
+
 
 func change_name(_name: String) -> void:
 	get_node('%Title').text = _name
@@ -234,6 +241,8 @@ func reset_signals(_vc: HenVirtualCNode = null):
 		'changed_position',
 		'on_mouse_enter',
 		'request_flow_connection',
+		'on_select',
+		'on_unselect'
 	]:
 		for connection: Dictionary in get_signal_connection_list(signal_name):
 			@warning_ignore('unsafe_method_access')
@@ -246,6 +255,8 @@ func reset_signals(_vc: HenVirtualCNode = null):
 		changed_position.connect(_vc.on_cnode_changed_position)
 		on_mouse_enter.connect(_vc.on_cnode_mouse_enter)
 		request_flow_connection.connect(_vc.request_flow_connector_connection)
+		on_select.connect(_vc.select)
+		on_unselect.connect(_vc.unselect)
 
 
 func request_flow_connetor_connection(_id: int, _mouse_pos: Vector2) -> void:

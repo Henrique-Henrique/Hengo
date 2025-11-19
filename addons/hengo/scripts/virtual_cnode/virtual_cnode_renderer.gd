@@ -31,6 +31,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	_cnode.id = identity.id
 	_cnode.can_follow = false
 	_cnode.set_process(false)
+	_cnode.selected = false
+	_cnode.moving = false
 
 	var idx: int = 0
 

@@ -74,7 +74,7 @@ func _enter_tree():
 	global.SIDE_PANEL = main_scene.get_node('%SidePanel')
 	global.TABS = main_scene.get_node('%Tabs')
 	global.script_config = null
-	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUp')
+	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUpContainer')
 	global.CNODE_UI = cnode_ui
 	global.DASHBOARD = main_scene.get_node('%DashBoard')
 

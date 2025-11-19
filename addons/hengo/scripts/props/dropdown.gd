@@ -33,6 +33,10 @@ func _on_pressed() -> void:
 					})
 			
 			options = arr
+		'all_godot_classes':
+			options = (ClassDB.get_class_list() as Array).map(func(x: String): return {
+				name = x
+			})
 		'hengo_states':
 			options = global.SCRIPTS_STATES[custom_data] if global.SCRIPTS_STATES.has(custom_data) else []
 		'all_classes':
@@ -152,6 +156,7 @@ func _on_pressed() -> void:
 	global.DROPDOWN_MENU.position = global_position
 	global.DROPDOWN_MENU.get_parent().show_container()
 	global.DROPDOWN_MENU.mount(options, _selected, type)
+	global.DROPDOWN_MENU.size.x = size.x
 
 
 func _selected(_item: Dictionary) -> void:

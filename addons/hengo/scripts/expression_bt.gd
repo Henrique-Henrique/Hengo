@@ -16,7 +16,7 @@ func _on_press() -> void:
 		expression_editor.default_config = {
 			exp = text
 		}
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().show_content(expression_editor, 'Expression Editor')
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(expression_editor, 'Expression Editor')
 
 
 func set_default(_text: String) -> void:

@@ -91,10 +91,6 @@ func map_category_data(_class_name: StringName, _item: Dictionary, _io_type: Str
 	return arr
 
 
-func class_is_singleton() -> void:
-	pass
-
-
 func search_api(_search_text: String, _io_type: StringName = '', _type: StringName = '') -> void:
 	var start: int = Time.get_ticks_usec()
 	if not compressed_api:

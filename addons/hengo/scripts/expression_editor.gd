@@ -96,7 +96,7 @@ func _on_save() -> void:
 			type = 'Variant'
 		})
 		
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.get_parent().hide()
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide()
 	v_cnode.update()
 
 

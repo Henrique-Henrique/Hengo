@@ -4,6 +4,7 @@ class_name HenDashboard extends PanelContainer
 const ICON = preload('res://addons/hengo/assets/new_icons/file-code.svg')
 
 @onready var close_bt: Button = %CloseBt
+@onready var new_script_bt: Button = %NewScript
 @onready var search_edit: LineEdit = %Search
 @onready var script_list_node: ItemList = %ScriptList
 
@@ -12,13 +13,28 @@ var script_list: Array[Dictionary]
 
 
 func _ready() -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.request_list_update.connect(show_dashboard)
+
 	search_edit.text_changed.connect(_on_search_change)
 	script_list_node.item_activated.connect(_on_select)
 	close_bt.pressed.connect(_on_close)
+	new_script_bt.pressed.connect(_on_create_script)
+
+
+func _on_create_script() -> void:
+	var c: HenCreateScript = (load('res://addons/hengo/scenes/utils/create_script.tscn') as PackedScene).instantiate()
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(c, 'Expression Editor')
 
 
 func _on_close() -> void:
-	hide_dashboard()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if global.script_config:
+		hide_dashboard()
+		return
+	
+	global.HENGO_EDITOR_PLUGIN.hide_plugin()
 
 
 func _on_select(_id: int) -> void:
@@ -65,8 +81,6 @@ func debounce_search(delay: float, callback: Callable) -> void:
 
 func show_dashboard() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	close_bt.disabled = not global.script_config
 
 	script_list.clear()
 
