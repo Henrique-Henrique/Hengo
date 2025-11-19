@@ -226,6 +226,26 @@ func create_virtual_connection(_type: StringName, _data: CNodeInOutConnectionDat
 		owner_vc
 	)
 
+func on_expression_save(_code_value: String, _word_list: Array) -> void:
+	var vc: HenVirtualCNode = get_owner()
+
+	if not vc:
+		return
+	
+	vc.io.inputs[0].value = _code_value
+
+	for input: HenVCInOutData in vc.io.inputs.slice(1):
+		input._on_delete(true)
+
+	for word in _word_list:
+		vc.add_io(true, {
+			name = word,
+			type = 'Variant'
+		})
+
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
+	vc.update()
+
 
 func on_method_picker_request(_io_type: StringName, _mouse_pos: Vector2) -> void:
 	var vc: HenVirtualCNode = get_owner()

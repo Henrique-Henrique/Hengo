@@ -12,6 +12,8 @@ var word_list: Array
 var completion_list: Array
 var default_config: Dictionary
 
+signal on_save
+
 const NATIVE_KEYWORDS: Array[StringName] = ['and', 'or', 'not', 'in', 'is']
 
 
@@ -82,20 +84,7 @@ func _on_change() -> void:
 
 
 func _on_save() -> void:
-	# cleaning inputs
-	v_cnode.inputs[0].value = code_edit.text
-
-	for input: HenVCInOutData in v_cnode.inputs.slice(1):
-		v_cnode._on_in_out_deleted(true, input)
-
-	for word in word_list:
-		v_cnode._on_in_out_added(true, {
-			name = word,
-			type = 'Variant'
-		})
-		
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide()
-	v_cnode.update()
+	on_save.emit(code_edit.text, word_list)
 
 
 func unique_array(arr: Array) -> Array:

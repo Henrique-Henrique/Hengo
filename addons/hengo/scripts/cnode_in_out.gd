@@ -16,6 +16,7 @@ signal on_value_change
 signal on_outprop_value_change
 signal outprop_config_request
 signal inprop_config_request
+signal on_expression_save
 
 func _ready():
 	mouse_entered.connect(_on_enter)
@@ -129,7 +130,7 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 				prop = dropdown
 			'expression':
 				var expression_bt: HenExpressionBt = preload('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
-
+				expression_bt.on_expression_save.connect(_on_expression_save)
 				prop_container.add_child(expression_bt)
 				prop = expression_bt
 
@@ -297,6 +298,10 @@ func change_type(_type: String, _default_value = null, _sub_type: String = '', _
 	root.reset_size()
 
 
+func _on_expression_save(_code_value: String, _word_list: Array) -> void:
+	on_expression_save.emit(_code_value, _word_list)
+
+
 func reset_signals(_inout: HenVCInOutData):
 	for signal_name: StringName in [
 		'request_method_picker',
@@ -306,6 +311,7 @@ func reset_signals(_inout: HenVCInOutData):
 		'on_outprop_value_change',
 		'outprop_config_request',
 		'inprop_config_request',
+		'on_expression_save'
 	]:
 		for connection: Dictionary in get_signal_connection_list(signal_name):
 			@warning_ignore('unsafe_method_access')
@@ -318,3 +324,4 @@ func reset_signals(_inout: HenVCInOutData):
 	on_outprop_value_change.connect(_inout.on_outprop_value_change)
 	outprop_config_request.connect(_inout.on_outprop_config_request)
 	inprop_config_request.connect(_inout.on_inprop_config_request)
+	on_expression_save.connect(_inout.on_expression_save)

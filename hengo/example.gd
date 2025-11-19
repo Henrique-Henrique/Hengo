@@ -9,7 +9,7 @@
 
 extends Node2D
 
-@export var velocity = float()
+@export var velocity = float()  
  
 var _STATE_CONTROLLER = HengoStateController.new()
 
@@ -17,7 +17,7 @@ const _EVENTS = {}
 
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
-		state_1 = State1.new(self)
+		state_1=State1.new(self)
 	})
 
 func _ready() -> void:
@@ -39,5 +39,5 @@ class State1 extends HengoState:
 		print("Testing")
 
 	func update(delta) -> void:
-		_ref.rotate(_ref.velocity)
+		_ref.rotate(_ref.velocity * delta)
 		_ref.set_position(Vector2(7, 0))
