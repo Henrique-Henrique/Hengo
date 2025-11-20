@@ -33,7 +33,7 @@ func add_flow_connection(_id: int, _to_id: int, _from: HenVirtualCNode, _to: Hen
 	var flow_output: HenVCFlow = get_flow_output(_id)
 
 	if not flow_input or not flow_output:
-		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not Found HenTypeFlow Connections: Id -> " + str(_id) + " or To Id -> " + str(_to_id)))
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Not Found HenTypeFlow Connections: Id -> " + str(_id) + " or To Id -> " + str(_to_id), HenToast.MessageType.ERROR)
 		return null
 
 	var flow_connection: HenVCFlowConnectionData = HenVCFlowConnectionData.new()

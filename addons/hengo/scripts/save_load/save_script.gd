@@ -4,20 +4,20 @@ const BACKUP_EXT: String = ".bak"
 const TEMP_EXT: String = ".tmp"
 
 static func save_data(save_config: HenSaver.SaveConfig) -> void:
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 
 	if not _create_backups(save_config):
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to create backups"))
+		toast.notify.call_deferred("Save failed: unable to create backups", HenToast.MessageType.ERROR)
 		rollback(save_config)
 		return
 
 	if not _save_temporary_files(save_config):
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to write temporary files"))
+		toast.notify.call_deferred("Save failed: unable to write temporary files", HenToast.MessageType.ERROR)
 		rollback(save_config)
 		return
 
 	if not _commit_changes(save_config):
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Save failed: unable to commit changes"))
+		toast.notify.call_deferred("Save failed: unable to commit changes", HenToast.MessageType.ERROR)
 		rollback(save_config)
 		return
 
@@ -25,8 +25,8 @@ static func save_data(save_config: HenSaver.SaveConfig) -> void:
 
 
 static func rollback(save_config: HenSaver.SaveConfig) -> void:
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rolling back save process"))
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+	toast.notify.call_deferred("Rolling back save process", HenToast.MessageType.ERROR)
 	
 	for config in save_config.script_list:
 		var paths: Dictionary = _get_resource_paths(config.id)
@@ -35,7 +35,7 @@ static func rollback(save_config: HenSaver.SaveConfig) -> void:
 		if FileAccess.file_exists(paths.backup):
 			var result: int = DirAccess.rename_absolute(paths.backup, paths.base)
 			if result != OK:
-				signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Rollback failed: cannot restore backup for " + paths.base))
+				toast.notify.call_deferred("Rollback failed: cannot restore backup for " + paths.base, HenToast.MessageType.ERROR)
 		
 		# ensure any temporary file is removed
 		if FileAccess.file_exists(paths.temp):
@@ -72,7 +72,7 @@ static func _create_backups(save_config: HenSaver.SaveConfig) -> bool:
 				result = FAILED
 
 		if result != OK:
-			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to create backup for: " + loader.get_data_path(config.id)))
+			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to create backup for: " + loader.get_data_path(config.id), HenToast.MessageType.ERROR)
 			return false
 	
 	return true
@@ -84,7 +84,7 @@ static func _save_temporary_files(save_config: HenSaver.SaveConfig) -> bool:
 		var paths: Dictionary = _get_resource_paths(config.id)
 		
 		if not HenScriptData.save(config.script_data, paths.temp):
-			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to write temp file: " + paths.temp))
+			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to write temp file: " + paths.temp, HenToast.MessageType.ERROR)
 			return false
 		
 	return true
@@ -97,7 +97,7 @@ static func _commit_changes(save_config: HenSaver.SaveConfig) -> bool:
 		var result: int = DirAccess.rename_absolute(paths.temp, paths.base)
 
 		if result != OK:
-			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to commit changes for: " + paths.base))
+			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to commit changes for: " + paths.base, HenToast.MessageType.ERROR)
 			return false
 	
 	return true
@@ -121,6 +121,8 @@ static func _finalize_save_process(save_config: HenSaver.SaveConfig) -> void:
 	for config in save_config.script_list:
 		HenScriptData.save_code(config.script_data, config.id)
 	
+	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	signal_bus.scripts_generation_finished.emit.call_deferred(script_list)
-	signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("Scripts saved successfully"))
+	toast.notify.call_deferred("Scripts saved successfully", HenToast.MessageType.SUCCESS)

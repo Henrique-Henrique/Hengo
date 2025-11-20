@@ -127,7 +127,7 @@ func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_li
 		if not script_data:
 			return true
 		
-		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename()))
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename())
 
 		if old_script_data:
 			if not script_data_cache.add_script_data(dependency_id, script_data):
@@ -149,17 +149,17 @@ func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _script_data:
 	var refs: HenRegenerateRefs = HenRegenerateRefs.new()
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 	var path: StringName = loader.get_data_path(_id)
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 
 	if not FileAccess.file_exists(path):
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text('Error: resource not found'))
+		toast.notify.call_deferred('Error: resource not found', HenToast.MessageType.ERROR)
 		return null
 
 	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
 	var script_data: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
 
 	if not HenCheckerScriptData.is_script_data_valid(script_data):
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Invalid script data when updating script: " + str(_id)))
+		toast.notify.call_deferred("Invalid script data when updating script: " + str(_id), HenToast.MessageType.ERROR)
 		return null
 
 	refs.counter = script_data.node_counter

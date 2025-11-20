@@ -24,8 +24,8 @@ func _on_gui(_event: InputEvent) -> void:
 				MOUSE_BUTTON_RIGHT:
 					global.GENERAL_POPUP.show_content(HenCodeSearch.load(get_global_mouse_position()), 'Code Search')
 				MOUSE_BUTTON_LEFT:
-					for cnode: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
-						cnode.unselect()
+					for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE.duplicate():
+						vc.unselect()
 					
 					global.CODE_PREVIEWER.clear_code()
 					

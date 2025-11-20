@@ -23,7 +23,7 @@ func _get_script_files_from_dir(path: String) -> Array:
 	var dir: DirAccess = DirAccess.open(path)
 
 	if not dir:
-		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("failed to open directory: " + path))
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("failed to open directory: " + path, HenToast.MessageType.ERROR)
 		return files
 
 	dir.list_dir_begin()

@@ -20,7 +20,7 @@ func clean() -> void:
         node.queue_free()
 
 # public
-func show_content(_content: Control, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
+func show_content(_content: Control, _name: String = '', _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
     var gp: PanelContainer = get_node('%GeneralPopUp')
     var container = gp.get_child(0)
     var global: HenGlobal = Engine.get_singleton(&'Global')

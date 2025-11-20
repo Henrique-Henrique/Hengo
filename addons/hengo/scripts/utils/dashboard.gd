@@ -44,12 +44,11 @@ func _on_select(_id: int) -> void:
 		return
 	
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 
 	if await loader.load(meta.path):
 		hide_dashboard()
 	else:
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + meta.path))
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.path, HenToast.MessageType.ERROR)
 
 
 func _on_search_change(_text: String) -> void:

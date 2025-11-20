@@ -40,4 +40,4 @@ class State1 extends HengoState:
 
 	func update(delta) -> void:
 		_ref.rotate(_ref.velocity * delta)
-		_ref.set_position(Vector2(7, 0))
+		_ref.set_position(Vector2(76, 0))

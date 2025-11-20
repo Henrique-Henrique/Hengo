@@ -191,7 +191,7 @@ func get_input_token(_id: int) -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	if not input:
-		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Not found input token to generate: id -> " + str(_id)))
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Not found input token to generate: id -> " + str(_id), HenToast.MessageType.ERROR)
 		return {}
 
 	for input_connection: HenTypeInputConnection in input_connections:

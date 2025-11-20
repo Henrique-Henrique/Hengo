@@ -1,4 +1,4 @@
-[gd_scene load_steps=78 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -25,9 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
 [ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
-[ext_resource type="Script" uid="uid://dmrj5ajx7qbuc" path="res://addons/hengo/scripts/utils/terminal.gd" id="15_lxtpw"]
 [ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
-[ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
 [ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="17_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://byhp341nd8v2j" path="res://addons/hengo/assets/new_icons/cog.svg" id="18_fdf88"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
@@ -46,7 +44,9 @@
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 [ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="37_33cyo"]
 [ext_resource type="Texture2D" uid="uid://d1gvhd43e01be" path="res://addons/hengo/assets/new_icons/layout-dashboard.svg" id="40_174hx"]
+[ext_resource type="Texture2D" uid="uid://cixkj7ofrlhy3" path="res://addons/hengo/assets/new_icons/square-terminal.svg" id="41_174hx"]
 [ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
+[ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
 bg_color = Color(0.011764706, 0.02745098, 0.07058824, 1)
@@ -65,8 +65,8 @@ corner_radius_bottom_left = 12
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1920, 1009)
-shader_parameter/offset = Vector2(-101, -167.4)
-shader_parameter/zoom_factor = 1.4999852
+shader_parameter/offset = Vector2(744.3715, 253.32324)
+shader_parameter/zoom_factor = 0.8497586
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -118,14 +118,6 @@ corner_radius_bottom_left = 12
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1gx8m"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hg3xi"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w813u"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8emys"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ji2ve"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_onj4m"]
 shader = ExtResource("37_33cyo")
@@ -558,29 +550,6 @@ size_flags_horizontal = 3
 tab_alignment = 2
 script = ExtResource("11_lxtpw")
 
-[node name="Terminal" type="RichTextLabel" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/line_separation = 4
-theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_fonts/bold_font = ExtResource("23_tlngq")
-theme_override_fonts/italics_font = ExtResource("16_xresw")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
-theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
-theme_override_styles/fill = SubResource("StyleBoxEmpty_ji2ve")
-bbcode_enabled = true
-fit_content = true
-autowrap_mode = 0
-shortcut_keys_enabled = false
-horizontal_alignment = 2
-justification_flags = 0
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
-script = ExtResource("15_lxtpw")
-
 [node name="MarginContainer" type="MarginContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
@@ -622,6 +591,13 @@ layout_mode = 2
 icon = ExtResource("40_174hx")
 flat = true
 
+[node name="TerminalBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("41_174hx")
+flat = true
+icon_alignment = 2
+
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true
 visible = false
@@ -639,6 +615,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
+theme = ExtResource("1_2muha")
 theme_override_styles/panel = SubResource("StyleBoxFlat_5c7h0")
 
 [node name="VBoxContainer" type="PanelContainer" parent="GeneralPopUpContainer/GeneralPopUp"]
@@ -708,3 +685,7 @@ unique_name_in_owner = true
 [node name="DashBoard" parent="DashboardCanvas" instance=ExtResource("44_33cyo")]
 unique_name_in_owner = true
 visible = false
+
+[node name="ToastContainer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("47_h1p8r")

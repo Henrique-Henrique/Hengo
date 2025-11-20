@@ -182,13 +182,13 @@ func _has_main_screen() -> bool:
 
 
 func _handles(object: Object) -> bool:
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 
 	if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
 		if not await loader.load((object as GDScript).resource_path):
-			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + (object as GDScript).resource_path))
+			toast.notify.call_deferred("Failed to load script: " + (object as GDScript).resource_path, HenToast.MessageType.ERROR)
 			return true
 		
 		global.CAM.can_scroll = true
@@ -196,7 +196,7 @@ func _handles(object: Object) -> bool:
 
 	if object is Resource and (object as Resource).resource_path.begins_with('res://hengo/save/'):
 		if not await loader.load((object as Resource).resource_path):
-			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load save file: " + (object as Resource).resource_path))
+			toast.notify.call_deferred("Failed to load save file: " + (object as Resource).resource_path, HenToast.MessageType.ERROR)
 			return true
 		
 		global.CAM.can_scroll = true

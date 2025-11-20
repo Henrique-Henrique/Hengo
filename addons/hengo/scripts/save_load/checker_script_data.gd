@@ -10,11 +10,11 @@ static func is_script_data_valid(_script_data: HenScriptData) -> bool:
 	var errors: Array = HenJSONSchema.validate(_script_data.get_save(), SCRIPT_DATA_SCHEMA.get_data())
 	
 	if not errors.is_empty():
-		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-		signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Script data is invalid: " + _script_data.path))
+		var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+		toast.notify.call_deferred("Script data is invalid: " + _script_data.path, HenToast.MessageType.ERROR)
 		for error in errors:
 			var msg: String = (error as Dictionary).get('message', error) if error is Dictionary else error
-			signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Error: " + msg))
+			toast.notify.call_deferred("Error: " + msg, HenToast.MessageType.ERROR)
 		return false
 	
 	# custom errors handling

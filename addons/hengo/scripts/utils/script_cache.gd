@@ -21,7 +21,7 @@ func has_script_data(_id: StringName) -> bool:
 # adding script data to cache
 func add_script_data(_id: StringName, _script_data: HenScriptData) -> bool:
 	if not HenCheckerScriptData.is_script_data_valid(_script_data):
-		(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Tried to add invalid script data to cache: " + str(_id)))
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Tried to add invalid script data to cache: " + str(_id), HenToast.MessageType.ERROR)
 		return false
 	
 	SCRIPT_DATA_CACHE.set(_id, _script_data)

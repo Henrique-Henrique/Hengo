@@ -57,6 +57,9 @@ static func start_generate(_regenerate: bool = false) -> void:
 	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+
+	signal_bus.set_terminal_text.emit.call_deferred('\n\n-------------------------------\n')
 
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
@@ -81,28 +84,25 @@ static func start_generate(_regenerate: bool = false) -> void:
 	var end_time: int = Time.get_ticks_msec()
 	var compilation_time: float = (end_time - start_time)
 	
-	signal_bus.set_terminal_text.emit.call_deferred(HenUtils.get_success_text("\nGenerated " + str(all_generated_scripts.size()) + " scripts in [color=#58a6ff]" + str(compilation_time) + "ms[/color]"))
+	toast.notify.call_deferred("Generated " + str(all_generated_scripts.size()) + " scripts in " + str(compilation_time) + "ms", HenToast.MessageType.SUCCESS)
 
 	if all_generated_scripts.size() > 0:
 		_display_generated_scripts_stats(all_generated_scripts)
 
 
 static func _display_generated_scripts_stats(_all_generated_scripts: Array[String]) -> void:
-	var stats_text = "\n[b][color=#fff]Generated Scripts[/color][/b] [img]res://addons/hengo/assets/icons/terminal/file.svg[/img]"
-	for i in range(_all_generated_scripts.size()):
-		var script_name: String = _all_generated_scripts[i]
-		stats_text += "\n[color=#8b949e]" + script_name + "[/color] [img]res://addons/hengo/assets/icons/terminal/script.svg[/img]"
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+	for script: String in _all_generated_scripts:
+		toast.notify.call_deferred('Generated: ' + script.get_basename(), HenToast.MessageType.SUCCESS)
+
 	
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(stats_text)
-
-
 static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> Array[String]:
 	var generated_scripts: Array[String] = []
 	
 	if not HenCheckerScriptData.is_script_data_valid(_script_data):
 		return generated_scripts
 
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_building_text('Saving: ' + ResourceUID.get_id_path(_script_id).get_basename()))
+	(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred('Saving: ' + ResourceUID.get_id_path(_script_id).get_basename())
 	var _save_data: SaveData = SaveData.new(_script_id, _script_data)
 	var _save_config: SaveConfig = SaveConfig.new()
 	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')

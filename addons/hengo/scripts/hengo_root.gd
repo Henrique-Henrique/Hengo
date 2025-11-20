@@ -48,6 +48,12 @@ func _ready() -> void:
 	)
 	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
 	(get_node('%OpenDashboard') as Button).pressed.connect(_on_open_dashboard)
+	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
+
+
+func _on_open_terminal() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.GENERAL_POPUP.show_content(HenTerminal.new())
 
 
 func _on_open_dashboard() -> void:
@@ -58,18 +64,6 @@ func _on_open_dashboard() -> void:
 func _on_close() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	global.HENGO_EDITOR_PLUGIN.hide_plugin()
-
-
-func _select_cnode() -> void:
-	var selection_rect: ReferenceRect = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_node('SelectionRect')
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
-		if v_cnode.cnode_instance:
-			if selection_rect.get_global_rect().has_point(v_cnode.cnode_instance.global_position):
-				v_cnode.select()
-			else:
-				v_cnode.unselect()
 
 
 func _input(event: InputEvent) -> void:

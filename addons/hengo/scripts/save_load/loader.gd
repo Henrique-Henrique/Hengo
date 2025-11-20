@@ -154,7 +154,7 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 		var type: String = reg.search(script.source_code).get_string(1)
 
 		if type.begins_with('res://hengo/save'):
-			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type))
+			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type, HenToast.MessageType.ERROR)
 			return false
 
 		if not await reset_to_load(resource_id, _headless, _path):

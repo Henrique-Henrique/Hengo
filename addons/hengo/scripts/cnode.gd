@@ -107,8 +107,6 @@ func _on_gui(_event: InputEvent) -> void:
 				on_double_click.emit()
 			else:
 				if e.button_index == MOUSE_BUTTON_LEFT:
-					print(44)
-
 					if selected:
 						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
 							vc.set_cnode_moving(true)

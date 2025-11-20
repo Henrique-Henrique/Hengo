@@ -164,13 +164,20 @@ func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtual
 
 
 func select() -> void:
-	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.append(self)
-	if cnode_instance:
-		cnode_instance.select()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global.SELECTED_VIRTUAL_CNODE.has(self):
+		global.SELECTED_VIRTUAL_CNODE.append(self)
+
+		if cnode_instance:
+			cnode_instance.select()
 
 
 func unselect() -> void:
-	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.erase(self)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	global.SELECTED_VIRTUAL_CNODE.erase(self)
+
 	if cnode_instance:
 		cnode_instance.unselect()
 

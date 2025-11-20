@@ -32,7 +32,7 @@ func _on_tab_selected(_index: int) -> void:
 	if meta:
 		var loader: HenLoader = Engine.get_singleton(&'Loader')
 		if not await loader.load(ResourceUID.get_id_path(meta.id)):
-			(Engine.get_singleton(&'SignalBus') as HenSignalBus).set_terminal_text.emit.call_deferred(HenUtils.get_error_text("Failed to load script: " + ResourceUID.get_id_path(meta.id)))
+			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + ResourceUID.get_id_path(meta.id), HenToast.MessageType.ERROR)
 
 
 func add_script_tab(id: int) -> void:

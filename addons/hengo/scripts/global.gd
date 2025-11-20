@@ -110,3 +110,16 @@ var USE_MACRO_USE_SELF: bool = false
 var MACRO_REF: HenTypeCnode
 var USE_MACRO_REF: bool = false
 var MACRO_USE_SELF: bool = false
+
+
+# terminal
+var terminal_content: String = ''
+
+
+func _ready() -> void:
+    var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+    signal_bus.set_terminal_text.connect(_on_terminal_msg)
+
+
+func _on_terminal_msg(_msg: String) -> void:
+    terminal_content += _msg
