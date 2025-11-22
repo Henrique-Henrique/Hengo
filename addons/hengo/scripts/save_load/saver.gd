@@ -59,8 +59,6 @@ static func start_generate(_regenerate: bool = false) -> void:
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 
-	signal_bus.set_terminal_text.emit.call_deferred('\n\n-------------------------------\n')
-
 	# check if save dierctory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')

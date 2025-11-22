@@ -20,22 +20,52 @@ var types = {
 	}
 }
 
+func _set_terminal_info(_type: HenToast.MessageType) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var value: int = 0
+	var bt: Button
+
+	match _type:
+		HenToast.MessageType.INFO:
+			bt = global.HENGO_ROOT.get_node('%InfoBt')
+			value = int(bt.text)
+		HenToast.MessageType.ERROR:
+			bt = global.HENGO_ROOT.get_node('%ErrorBt')
+			value = int(bt.text)
+		HenToast.MessageType.SUCCESS:
+			bt = global.HENGO_ROOT.get_node('%SuccessBt')
+			value = int(bt.text)
+	
+	if not bt:
+		return
+	
+	value += 1
+	bt.text = str(value)
+
+	for chd: Button in bt.get_parent().get_children():
+		chd.self_modulate = Color.WHITE
+
+		if int(chd.text) <= 0:
+			chd.self_modulate = Color(1, 1, 1, .2)
+
+
 # initializes ui elements based on type and schedules the animation
-func setup(text: String, type: HenToast.MessageType = HenToast.MessageType.INFO, duration: float = 4.0):
+func setup(_text: String, type: HenToast.MessageType = HenToast.MessageType.INFO, duration: float = 4.0):
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	
-	label.text = text
+	label.text = _text
 
 	var terminal_text: String = ''
 
 	match type:
 		HenToast.MessageType.INFO:
-			terminal_text = HenUtils.get_building_text(text)
+			terminal_text = HenUtils.get_building_text(_text)
 		HenToast.MessageType.ERROR:
-			terminal_text = HenUtils.get_error_text(text)
+			terminal_text = HenUtils.get_error_text(_text)
 		HenToast.MessageType.SUCCESS:
-			terminal_text = HenUtils.get_success_text(text)
+			terminal_text = HenUtils.get_success_text(_text)
 
+	_set_terminal_info(type)
 	signal_bus.set_terminal_text.emit.call_deferred(terminal_text)
 	
 	if type in types:

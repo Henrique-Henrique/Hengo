@@ -1,4 +1,4 @@
-[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=79 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -43,8 +43,10 @@
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 [ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="37_33cyo"]
+[ext_resource type="Texture2D" uid="uid://cdltixrky1fo7" path="res://addons/hengo/assets/new_icons/info.svg" id="38_onj4m"]
+[ext_resource type="Texture2D" uid="uid://e6883ccr0kd4" path="res://addons/hengo/assets/new_icons/circle-check.svg" id="39_vlu6e"]
 [ext_resource type="Texture2D" uid="uid://d1gvhd43e01be" path="res://addons/hengo/assets/new_icons/layout-dashboard.svg" id="40_174hx"]
-[ext_resource type="Texture2D" uid="uid://cixkj7ofrlhy3" path="res://addons/hengo/assets/new_icons/square-terminal.svg" id="41_174hx"]
+[ext_resource type="Texture2D" uid="uid://cih44fa46xubd" path="res://addons/hengo/assets/new_icons/shield-alert.svg" id="40_aqok7"]
 [ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
 [ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
 
@@ -65,8 +67,8 @@ corner_radius_bottom_left = 12
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(1920, 1009)
-shader_parameter/offset = Vector2(744.3715, 253.32324)
-shader_parameter/zoom_factor = 0.8497586
+shader_parameter/offset = Vector2(505.61902, 415.98154)
+shader_parameter/zoom_factor = 0.35002014
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -127,9 +129,7 @@ shader_parameter/transparency = 0.6000000285
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
-content_margin_top = 4.0
 content_margin_right = 8.0
-content_margin_bottom = 4.0
 bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
 border_width_left = 1
 border_width_top = 1
@@ -137,10 +137,25 @@ border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.4745098, 0.4745098, 0.4745098, 0.44313726)
 border_blend = true
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_onj4m"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vlu6e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h1p8r"]
+content_margin_left = 8.0
+content_margin_top = 0.0
+content_margin_right = 8.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 0.16862746)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fdf88"]
 shader = ExtResource("37_33cyo")
@@ -575,7 +590,6 @@ flat = true
 
 [node name="ClassName" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
@@ -591,12 +605,67 @@ layout_mode = 2
 icon = ExtResource("40_174hx")
 flat = true
 
-[node name="TerminalBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="PanelContainer" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
+
+[node name="TerminalBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-icon = ExtResource("41_174hx")
+mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
 flat = true
-icon_alignment = 2
+
+[node name="TerminalInfo" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+
+[node name="InfoBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("38_onj4m")
+
+[node name="SuccessBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("39_vlu6e")
+
+[node name="ErrorBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("40_aqok7")
 
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true
