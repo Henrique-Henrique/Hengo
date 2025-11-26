@@ -86,22 +86,27 @@ func _init() -> void:
 	visual = HenVirtualCNodeVisual.new()
 	route_info = HenVirtualCNodeRoute.new()
 	children = HenVirtualCNodeChildren.new()
-	io = HenVirtualCNodeIO.new(identity, state)
 	flow = HenVirtualCNodeFlow.new(identity)
 	references = HenVirtualCNodeReference.new()
+	io = HenVirtualCNodeIO.new(identity, state, references)
 	renderer = HenVirtualCNodeRenderer.new(
 		state,
 		visual,
 		identity,
 		io,
 		flow,
-		pool
+		pool,
+		references
 	)
 
 	identity.cnode_need_update.connect(update)
 	io.cnode_need_update.connect(update)
 	flow.cnode_need_update.connect(update)
 	state.cnode_need_update.connect(update)
+	io.connection_request.connect(on_node_connection_command_requested)
+	io.io_hovered.connect(on_node_io_hovered)
+	io.expression_saved.connect(on_expression_saved)
+	io.method_picker_requested.connect(on_method_picker_requested)
 
 
 func show() -> void:
@@ -153,10 +158,10 @@ func get_input(_id: int) -> HenVCInOutData:
 
 
 func get_input_by_idx(_idx: int) -> HenVCInOutData:
-	return io.inputs.get(_idx)
+	return io.get_inputs().get(_idx)
 
 func get_output_by_idx(_idx: int) -> HenVCInOutData:
-	return io.outputs.get(_idx)
+	return io.get_outputs().get(_idx)
 
 
 func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
@@ -200,6 +205,9 @@ func on_cnode_selected(_selected: bool) -> void:
 
 func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+
+	toast.notify(JSON.stringify(get_save(HenScriptData.new())))
 
 	if state.invalid:
 		global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
@@ -236,11 +244,6 @@ func on_cnode_double_click() -> void:
 
 	if route_info.route:
 		router.change_route(route_info.route)
-	elif references.ref and references.ref.get_ref():
-		@warning_ignore('unsafe_method_access')
-		if references.ref.get_ref().get('route'):
-			@warning_ignore('unsafe_method_access')
-			router.change_route(references.ref.get_ref().get('route'))
 
 
 func on_cnode_right_click(_mouse_pos: Vector2) -> void:
@@ -252,6 +255,81 @@ func on_cnode_right_click(_mouse_pos: Vector2) -> void:
 			'Testing',
 			_mouse_pos
 		)
+
+func on_node_io_hovered(context: Dictionary) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
+	# creates connection data using self as the owner and context source as the port
+	global.connection_to_data = CNodeInOutConnectionData.new(
+		self,
+		context.source
+	)
+
+	if global.CONNECTION_GUIDE.is_in_out:
+		var connector: TextureRect = context.connector
+		var pos = global.CAM.get_relative_vec2(connector.global_position)
+
+		# updates the global guide visual state
+		global.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
+		global.CONNECTION_GUIDE.gradient.colors[1] = context.color
+
+
+func on_expression_saved(context: Dictionary) -> void:
+	var inputs: Array[HenVCInOutData] = io.get_inputs()
+	# updates the first input value and clears subsequent inputs
+	inputs[0].value = context.code
+	
+	for input: HenVCInOutData in inputs.slice(1):
+		input._on_delete(true)
+
+	for word in context.words:
+		# adds new inputs based on the word list
+		add_io(true, {
+			name = word,
+			type = 'Variant'
+		})
+
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
+	update()
+
+
+func on_node_connection_command_requested(_context: Dictionary) -> void:
+	var connection: HenVCConnectionReturn
+	var r_data: CNodeInOutConnectionData = _context.remote_data
+	
+	# determines creation direction based on type
+	if _context.type == "in":
+		connection = get_new_input_connection_command(
+			_context.local_port_id,
+			r_data.in_out.id,
+			r_data.vc
+		)
+	else:
+		connection = (r_data.vc as HenVirtualCNode).get_new_input_connection_command(
+			r_data.in_out.id,
+			_context.local_port_id,
+			self
+		)
+
+	# executes history logic if connection command is valid
+	if connection:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		
+		global.history.create_action('Add Connection')
+		global.history.add_do_method(connection.add)
+		global.history.add_do_reference(connection)
+		global.history.add_undo_method(connection.remove)
+		global.history.commit_action()
+
+
+func on_method_picker_requested(context: Dictionary) -> void:
+	# triggers the internal logic to open the connection menu
+	request_io_connection(
+		context.io_type,
+		context.port_id,
+		context.mouse_pos,
+		context.port_type
+	)
 
 
 func set_cnode_moving(_moving: bool) -> void:
@@ -305,10 +383,6 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 	if state.invalid:
 		data.invalid = state.invalid
 
-	if references.ref and references.ref.get_ref():
-		@warning_ignore("UNSAFE_PROPERTY_ACCESS")
-		data.ref_id = references.ref.get_ref().id
-
 	if identity.from_side_bar_id > -1:
 		data.from_side_bar_id = identity.from_side_bar_id
 
@@ -317,21 +391,27 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 		data.side_bar_id = identity.side_bar_id
 		_script_data.deps.append(str(identity.from_id))
 
-	if not io.inputs.is_empty():
-		data.inputs = []
+	if references.res:
+		if references.res is HenSaveResType:
+			data.res_id = (references.res as HenSaveResType).id
+	else:
+		var inputs: Array[HenVCInOutData] = io.get_inputs()
+		var outputs: Array[HenVCInOutData] = io.get_outputs()
 
-		for input: HenVCInOutData in io.inputs:
-			data.inputs.append(input.get_save())
-	
-	if not io.outputs.is_empty():
-		data.outputs = []
+		if not inputs.is_empty():
+			data.inputs = []
 
-		for output: HenVCInOutData in io.outputs:
-			data.outputs.append(output.get_save())
+			for input: HenVCInOutData in inputs:
+				(data.inputs as Array).append(input.get_save())
+		
+		if not outputs.is_empty():
+			data.outputs = []
+
+			for output: HenVCInOutData in outputs:
+				(data.outputs as Array).append(output.get_save())
 
 	if identity.category:
 		data.category = identity.category
-
 
 	for flow_connection: HenVCFlowConnectionData in flow.flow_connections_2:
 		if not flow_connection.get_to(): continue
@@ -379,7 +459,7 @@ func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFl
 
 
 func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
-	return io.on_in_out_added(self, _is_input, _data, _check_types)
+	return io.on_in_out_added(_is_input, _data, _check_types)
 
 
 func get_history_obj() -> HenVCNodeReturn:
@@ -481,31 +561,11 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	if _config.has('invalid'):
 		v_cnode.state.invalid = _config.invalid
 
-	if _config.has('ref_id'):
-		if not v_cnode.state.invalid:
-			_config.ref = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[int(_config.ref_id)]
+	if _config.has('res_id'):
+		v_cnode.references.res = HenUtils.load_res(_config.get('res_id'), v_cnode.identity.sub_type)
 
-	if _config.has('ref'):
-		# ref is required to have id to save and load work
-		v_cnode.references.ref = weakref(_config.ref)
-
-		if _config.ref.has_signal('name_changed'):
-			_config.ref.name_changed.connect(v_cnode.identity.on_change_name)
-
-		if _config.ref.has_signal('in_out_added'):
-			_config.ref.in_out_added.connect(v_cnode.add_io)
-	
-
-		if _config.ref.has_signal('deleted'):
-			_config.ref.deleted.connect(v_cnode.state.on_side_bar_deleted)
-
-
-		if _config.ref.has_signal('in_out_reseted'):
-			_config.ref.in_out_reseted.connect(v_cnode.io.on_in_out_reset.bind(v_cnode))
-
-		if _config.ref.has_signal('flow_added'):
-			_config.ref.flow_added.connect(v_cnode.flow.on_flow_added.bind(v_cnode))
-
+	if _config.has('res'):
+		v_cnode.references.res = _config.get('res')
 
 	if _config.has('category'):
 		v_cnode.identity.category = _config.category

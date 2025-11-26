@@ -508,7 +508,22 @@ func get_side_bar_list() -> Dictionary:
 			data = func_data.get_cnode_data()
 		})
 
-	for var_data: HenVarData in global.SIDE_BAR_LIST.var_list:
+	# for var_data: HenVarData in global.SIDE_BAR_LIST.var_list:
+	# 	var getter_name: String = 'get: ' + var_data.name
+	# 	var setter_name: String = 'set: ' + var_data.name
+
+	# 	(var_category.method_list as Array).append({
+	# 		_class_name = 'Variable',
+	# 		name = getter_name,
+	# 		data = var_data.get_getter_cnode_data()
+	# 	})
+	# 	(var_category.method_list as Array).append({
+	# 		_class_name = 'Variable',
+	# 		name = setter_name,
+	# 		data = var_data.get_setter_cnode_data()
+	# 	})
+	
+	for var_data: HenSaveVar in global.SAVE_DATA.variables:
 		var getter_name: String = 'get: ' + var_data.name
 		var setter_name: String = 'set: ' + var_data.name
 

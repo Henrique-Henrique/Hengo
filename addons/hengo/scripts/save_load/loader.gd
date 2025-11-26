@@ -74,6 +74,24 @@ func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> boo
 	global.BASE_ROUTE_REF = BaseRouteRef.new()
 
 	return true
+ 
+
+func load_res(_res_id: int) -> void:
+	var SAVE_PATH: String = 'res://hengo/save_2/'
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if FileAccess.file_exists(SAVE_PATH + str(_res_id) + '/save.tres'):
+		global.SAVE_DATA = ResourceLoader.load(SAVE_PATH + str(_res_id) + '/save.tres')
+	else:
+		global.SAVE_DATA = HenSaveData.new()
+		global.SAVE_DATA.id = _res_id
+		
+		var first_var: HenSaveVar = HenSaveVar.new()
+
+		first_var.name = 'variable name'
+		first_var.type = &'String'
+
+		global.SAVE_DATA.variables.append(first_var)
 
 
 func load(_path: StringName, _headless: bool = false) -> bool:
@@ -101,6 +119,8 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 
 		if not await reset_to_load(resource_id, _headless, _path):
 			return false
+
+		load_res(resource_id)
 
 		var base_route: HenRouteData = HenRouteData.new(
 			'Base',
@@ -193,6 +213,7 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 
 	global.CAM.can_scroll = true
 	global.DASHBOARD.hide_dashboard()
+
 	return true
 
 

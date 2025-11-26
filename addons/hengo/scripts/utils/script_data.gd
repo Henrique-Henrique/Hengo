@@ -1,5 +1,5 @@
 @tool
-class_name HenScriptData extends RefCounted
+class_name HenScriptData extends Resource
 
 var path: StringName
 var type: String

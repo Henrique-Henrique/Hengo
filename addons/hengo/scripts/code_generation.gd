@@ -12,7 +12,8 @@ func get_flow_id() -> int:
 
 
 func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
-	var refs: HenTypeReferences = HenTypeReferences.new(_data)
+	var global: HenGlobal = Engine.get_singleton('Global')
+	var refs: HenTypeReferences = HenTypeReferences.new(_data, global.SAVE_DATA)
 	var code: String = ''
 
 	(Engine.get_singleton(&'Global') as HenGlobal).GENERATE_PREVIEW_CODE = _build_preview

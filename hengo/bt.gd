@@ -38,29 +38,5 @@ func _physics_process(delta: float) -> void:
 
 class State1 extends HengoState:
 	func enter() -> void:
-		print(_ref.get_offset())
-		if false:
-			print(null)
-		else:
-			_ref.set_offset(_ref.get_offset())
-			HengoState.INVALID_PLACEHOLDER
-			print(HengoState.INVALID_PLACEHOLDER)
-			if false:
-				print(null)
-			else:
-				print(null)
-			print(_ref.is_region_enabled())
-			if _ref.get_node("").is_centered():
-				pass
-			print(null)
-			if false:
-				pass
-			print(null)
-		print(_ref.is_centered())
-
-	func update(delta) -> void:
-		print(null)
-		print(null)
-		print(null)
-		print(null)
+		print(_ref.variable_name)
 		print(null)

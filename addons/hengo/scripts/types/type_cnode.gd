@@ -20,6 +20,7 @@ var virtual_sub_type_vc_list: Array[HenTypeCnode]
 var input_connections: Array[HenTypeInputConnection]
 var route_type: HenRouter.ROUTE_TYPE
 var ref: WeakRef
+var res: Resource
 var invalid: bool = false
 var singleton_class: String
 
@@ -196,6 +197,14 @@ func get_input_token(_id: int) -> Dictionary:
 
 	for input_connection: HenTypeInputConnection in input_connections:
 		if input_connection.to_id == _id:
+			var output_id_list: Array = (input_connection.from.get_ref() as HenTypeCnode).outputs.map(func(x): return x.id)
+			var input_id_list: Array = (input_connection.to.get_ref() as HenTypeCnode).inputs.map(func(x): return x.id)
+
+			prints(output_id_list, input_id_list)
+
+			if not output_id_list.has(input_connection.from_id) or not input_id_list.has(input_connection.to_id):
+				continue
+
 			connection = input_connection
 			break
 
@@ -212,6 +221,7 @@ func get_input_token(_id: int) -> Dictionary:
 				global.USE_MACRO_USE_SELF = false
 				return data
 			_:
+				print(connection.get_from().get_output_index(connection.from_id))
 				var data: Dictionary = connection.get_from().get_token(connection.get_from().get_output_index(connection.from_id))
 				
 				if not data.type == HenVirtualCNode.SubType.INVALID:

@@ -29,10 +29,11 @@ var BASE_ROUTE_REF: HenLoader.BaseRouteRef
 var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
 var CNODE_UI: Panel
 var DASHBOARD: HenDashboard
+var SAVE_DATA: HenSaveData
 
 # cnodes
 var can_make_connection: bool = false
-var connection_to_data: HenVCInOutData.CNodeInOutConnectionData
+var connection_to_data: CNodeInOutConnectionData
 var can_make_flow_connection: bool = false
 var flow_connection_to_data: Dictionary = {}
 var flow_cnode_from: PanelContainer = null

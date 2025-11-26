@@ -4,36 +4,42 @@ var inputs: Array[HenVCInOutData]
 var outputs: Array[HenVCInOutData]
 var connections: Array[HenVCConnectionData]
 
+var references: HenVirtualCNodeReference
 var identity: HenVirtualCNodeIdentity
 var state: HenVirtualCNodeState
 
 signal cnode_need_update
+signal connection_request(_data: Dictionary)
+signal io_hovered(_context: Dictionary)
+signal expression_saved(_context: Dictionary)
+signal method_picker_requested(_context: Dictionary)
 
 
-func _init(_identity: HenVirtualCNodeIdentity, _state: HenVirtualCNodeState) -> void:
+func _init(_identity: HenVirtualCNodeIdentity, _state: HenVirtualCNodeState, _refs: HenVirtualCNodeReference) -> void:
 	identity = _identity
 	state = _state
+	references = _refs
 
 
 func get_input(_id: int) -> HenVCInOutData:
-	for input: HenVCInOutData in inputs:
+	for input: HenVCInOutData in get_inputs():
 		if input.id == _id:
 			return input
+	
 	return null
 
 
 func get_output(_id: int) -> HenVCInOutData:
-	for output: HenVCInOutData in outputs:
+	for output: HenVCInOutData in get_outputs():
 		if output.id == _id:
 			return output
+	
 	return null
 
 
 func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _from: HenVirtualCNode) -> HenVCConnectionReturn:
 	var input: HenVCInOutData = get_input(_id)
 	var output: HenVCInOutData = _from.io.get_output(_from_id)
-
-	prints(outputs.map(func(x): return x.id), _id, _from_id, input, output)
 
 	if not input or not output:
 		return
@@ -159,7 +165,7 @@ func on_in_out_deleted(_is_input: bool, _in_ou_ref: HenVCInOutData) -> void:
 	cnode_need_update.emit()
 
 
-func on_in_out_added(_owner: HenVirtualCNode, _is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
+func on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
 	# restrict creation by sub_type
 	if _check_types:
 		match identity.sub_type:
@@ -172,12 +178,15 @@ func on_in_out_added(_owner: HenVirtualCNode, _is_input: bool, _data: Dictionary
 			HenVirtualCNode.SubType.SIGNAL_ENTER:
 				_is_input = false
 
-	if _data.has('ref_id'):
-		if not state.invalid:
-			@warning_ignore('unsafe_call_argument')
-			_data.ref = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST_CACHE[int(_data.ref_id)]
 
-	var in_out: HenVCInOutData = HenVCInOutData.new(_data, _owner)
+	var in_out: HenVCInOutData = create_io(_is_input, _data)
+	
+	cnode_need_update.emit()
+	return in_out
+
+
+func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
+	var in_out: HenVCInOutData = HenVCInOutData.new(_data)
 
 	if _data.has('ref'):
 		@warning_ignore('unsafe_call_argument')
@@ -187,13 +196,16 @@ func on_in_out_added(_owner: HenVirtualCNode, _is_input: bool, _data: Dictionary
 	in_out.deleted.connect(on_in_out_deleted)
 	in_out.update_changes.connect(on_need_update)
 	in_out.type_changed.connect(on_in_out_type_changed)
+	in_out.connection_request.connect(connection_request.emit)
+	in_out.io_hovered.connect(io_hovered.emit)
+	in_out.expression_saved.connect(expression_saved.emit)
+	in_out.method_picker_requested.connect(method_picker_requested.emit)
 
 	if _is_input:
 		inputs.append(in_out)
 	else:
 		outputs.append(in_out)
 	
-	cnode_need_update.emit()
 	return in_out
 
 
@@ -206,7 +218,7 @@ func on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenV
 		remove_io_connection(_ref)
 
 
-func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array, _owner: HenVirtualCNode) -> void:
+func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array) -> void:
 	var is_input: bool = _is_input
 
 	match identity.sub_type:
@@ -221,10 +233,55 @@ func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array
 	clear_in_out(is_input)
 
 	for input_data: Dictionary in _new_inputs:
-		var in_out: HenVCInOutData = on_in_out_added(_owner, is_input, input_data)
+		var in_out: HenVCInOutData = on_in_out_added(is_input, input_data)
 
 		match identity.sub_type:
 			HenVirtualCNode.SubType.SIGNAL_CONNECTION, HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 				in_out.reset_input_value()
 
 	cnode_need_update.emit()
+
+
+func get_inputs() -> Array[HenVCInOutData]:
+	if references.res and references.res is HenSaveResType:
+		var new_data_list: Array = (references.res as HenSaveResType).get_inputs(identity.sub_type)
+
+		for i: int in new_data_list.size():
+			var data: Dictionary = new_data_list[i]
+
+			if i < inputs.size():
+				var existing: HenVCInOutData = inputs[i]
+				# prevents recursion: only assign if value actually changed
+				if existing.id != data.get('id'): existing.id = data.get('id')
+				if existing.name != data.get('name'): existing.name = data.get('name')
+				if existing.type != data.get('type'): existing.type = data.get('type')
+			else:
+				create_io(true, data)
+		
+		if inputs.size() > new_data_list.size():
+			inputs.resize(new_data_list.size())
+			
+	return inputs
+
+
+func get_outputs() -> Array[HenVCInOutData]:
+	if references.res and references.res is HenSaveVar:
+		var new_data_list: Array = (references.res as HenSaveVar).get_outputs(identity.sub_type)
+
+		for i: int in new_data_list.size():
+			var data: Dictionary = new_data_list[i]
+
+			if i < outputs.size():
+				var existing: HenVCInOutData = outputs[i]
+				# prevents recursion: only assign if value actually changed
+				if existing.id != data.get('id'): existing.id = data.get('id')
+				if existing.name != data.get('name'): existing.name = data.get('name')
+				if existing.type != data.get('type'): existing.type = data.get('type')
+			else:
+				create_io(false, data)
+		
+		# safer and faster way to remove excess elements
+		if outputs.size() > new_data_list.size():
+			outputs.resize(new_data_list.size())
+	
+	return outputs

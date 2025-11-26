@@ -12,6 +12,8 @@ var signals: Array[HenTypeSignalData]
 var macros: Array[HenTypeMacro]
 var side_bar_item_ref: Dictionary = {}
 var script_data: HenScriptData
+var save_data: HenSaveData
 
-func _init(_script_data: HenScriptData = null) -> void:
+func _init(_script_data: HenScriptData = null, _save_data: HenSaveData = null) -> void:
 	script_data = HenScriptData.new() if not _script_data else _script_data
+	save_data = HenSaveData.new() if not _save_data else _save_data

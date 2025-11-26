@@ -77,6 +77,11 @@ func update_line() -> void:
 		points = [start_pos, end_pos]
 
 
+func set_color(_color: Color) -> void:
+	gradient.colors[0] = _color
+	gradient.colors[1] = _color
+
+
 func update_colors(_from_type: StringName, _to_type: StringName) -> void:
 	gradient.colors[0] = get_type_color(_from_type)
 	gradient.colors[1] = get_type_color(_to_type)

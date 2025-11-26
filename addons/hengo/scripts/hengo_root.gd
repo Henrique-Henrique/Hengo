@@ -106,6 +106,8 @@ func _input(event: InputEvent) -> void:
 					global.HENGO_EDITOR_PLUGIN.hide_plugin()
 				elif e.keycode == KEY_E:
 					global.DASHBOARD.toggle_dashboard()
+				elif e.keycode == KEY_H:
+					global.SAVE_DATA.variables[0]
 				
 			elif e.keycode == KEY_F8:
 				(Engine.get_singleton(&'Router') as HenRouter).change_route(global.BASE_ROUTE)

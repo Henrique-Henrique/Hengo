@@ -51,6 +51,40 @@ static func save() -> void:
 	(Engine.get_singleton(&'ThreadHelper') as HenThreadHelper).add_task(start_generate.bind(true))
 
 
+static func save_new() -> void:
+	var SAVE_PATH: String = 'res://hengo/save_2/'
+
+	if not DirAccess.dir_exists_absolute('res://hengo'):
+		DirAccess.make_dir_absolute('res://hengo')
+	
+	if not DirAccess.dir_exists_absolute(SAVE_PATH):
+		DirAccess.make_dir_absolute(SAVE_PATH)
+	
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+	var script_id: StringName = str(global.script_config.id)
+	var script_path: StringName = SAVE_PATH + script_id
+	var variables_path: StringName = script_path + '/variables/'
+
+	if not DirAccess.dir_exists_absolute(script_path):
+		DirAccess.make_dir_absolute(script_path)
+	
+	if not DirAccess.dir_exists_absolute(variables_path):
+		DirAccess.make_dir_absolute(variables_path)
+	
+	var save_data: HenSaveData = global.SAVE_DATA
+	print(save_data.variables.size())
+
+	for variable: HenSaveVar in save_data.variables:
+		variable.take_over_path(variables_path + str(variable.id) + '.tres')
+		var var_result: int = ResourceSaver.save(variable)
+		toast.notify.call_deferred(('Saved VAR: ' + str(variable.id)) if var_result == OK else 'Erro saving' + str(variable.id))
+
+	save_data.take_over_path(script_path + '/save' + '.tres')
+	var result: int = ResourceSaver.save(save_data)
+	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.id)) if result == OK else 'Erro saving' + str(save_data.id))
+
+
 static func start_generate(_regenerate: bool = false) -> void:
 	var start_time: int = Time.get_ticks_msec()
 	var all_generated_scripts: Array[String] = []
@@ -66,6 +100,8 @@ static func start_generate(_regenerate: bool = false) -> void:
 	if not DirAccess.dir_exists_absolute('res://hengo/save'):
 		DirAccess.make_dir_absolute('res://hengo/save')
 		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
+
+	save_new()
 
 	# update current script data
 	if not script_data_cache.add_script_data(str(global.script_config.id), generate_script_data()):

@@ -6,6 +6,7 @@ var identity: HenVirtualCNodeIdentity
 var io: HenVirtualCNodeIO
 var flow: HenVirtualCNodeFlow
 var pool: HenPool
+var refs: HenVirtualCNodeReference
 
 func _init(
 	_state: HenVirtualCNodeState,
@@ -13,7 +14,8 @@ func _init(
 	_identity: HenVirtualCNodeIdentity,
 	_io: HenVirtualCNodeIO,
 	_flow: HenVirtualCNodeFlow,
-	_pool: HenPool
+	_pool: HenPool,
+	_refs: HenVirtualCNodeReference
 ) -> void:
 	state = _state
 	visual = _visual
@@ -21,6 +23,7 @@ func _init(
 	io = _io
 	flow = _flow
 	pool = _pool
+	refs = _refs
 
 
 func configure_cnode_to_show(_cnode: HenCnode) -> void:
@@ -35,15 +38,20 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	_cnode.moving = false
 
 	var idx: int = 0
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+
+	# sync
+	var inputs: Array[HenVCInOutData] = io.get_inputs()
+	var outputs: Array[HenVCInOutData] = io.get_outputs()
 
 	# clearing inputs and change to new
 	for input: HenCnodeInOut in _cnode.get_node('%InputContainer').get_children():
 		input.visible = false
 
-		if idx < io.inputs.size():
+		if idx < inputs.size():
 			input.visible = true
 			
-			var input_data: HenVCInOutData = io.inputs[idx]
+			var input_data: HenVCInOutData = inputs[idx]
 
 			input.reset_signals(input_data)
 			input.change_name(input_data.name)
@@ -81,10 +89,10 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	for output: HenCnodeInOut in _cnode.get_node('%OutputContainer').get_children():
 		output.visible = false
 
-		if idx < io.outputs.size():
+		if idx < outputs.size():
 			output.visible = true
 			
-			var output_data: HenVCInOutData = io.outputs[idx]
+			var output_data: HenVCInOutData = outputs[idx]
 			
 			output.reset_signals(output_data)
 			
@@ -98,6 +106,44 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		idx += 1
 
 	for connection: HenVCConnectionData in io.connections:
+		var from: HenVirtualCNode = connection.get_from()
+		var to: HenVirtualCNode = connection.get_to()
+
+		if not from or not to:
+			if not connection.line_ref: continue
+
+			connection.line_ref.visible = false
+			connection.line_ref = null
+			continue
+
+		var output_arr: Array[HenVCInOutData] = from.io.get_outputs()
+		var input_arr: Array[HenVCInOutData] = to.io.get_inputs()
+
+		var output_ref: HenVCInOutData = from.io.get_output(connection.from_id)
+		var input_ref: HenVCInOutData = to.io.get_input(connection.to_id)
+
+		var from_idx: int = output_arr.find(output_ref)
+		var to_idx: int = input_arr.find(input_ref)
+
+		prints(from_idx, to_idx)
+
+		# var to_idx: int = .find(to.io.get_input(connection.to_id))
+		# prints(from_idx)
+
+		# prints(
+		# 	from.io.get_outputs().find(from.io.get_output(connection.from_id)),
+		# 	from.io.get_outputs(),
+		# 	from.io.get_output(connection.from_id),
+		# 	connection.from_id,
+		# )
+
+		if from_idx < 0 or to_idx < 0:
+			if not connection.line_ref: continue
+
+			connection.line_ref.visible = false
+			connection.line_ref = null
+			continue
+		
 		if connection.line_ref is HenConnectionLine:
 			connection.line_ref = connection.line_ref
 		else:
@@ -105,21 +151,19 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 			if not connection.line_ref:
 				continue
-
-		var from: HenVirtualCNode = connection.get_from()
-		var to: HenVirtualCNode = connection.get_to()
-
+		
 		connection.line_ref.to_pool_visible = to.state.is_showing
 		connection.line_ref.from_pool_visible = from.state.is_showing
 		connection.line_ref.from = weakref(from)
 		connection.line_ref.to = weakref(to)
-		connection.line_ref.from_idx = from.io.outputs.find(from.io.get_output(connection.from_id))
-		connection.line_ref.to_idx = to.io.inputs.find(to.io.get_input(connection.to_id))
+		connection.line_ref.from_idx = from_idx
+		connection.line_ref.to_idx = to_idx
+
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:
 			var input: HenCnodeInOut = to.cnode_instance.get_node('%InputContainer').get_child(
-				to.io.inputs.find(to.io.get_input(connection.to_id))
+				to_idx
 			)
 
 			connection.line_ref.output = input.get_node('%Connector')
@@ -133,7 +177,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		# drawing outputs
 		if connection.line_ref.from_pool_visible:
 			var output: HenCnodeInOut = from.cnode_instance.get_node('%OutputContainer').get_child(
-				from.io.outputs.find(from.io.get_output(connection.from_id))
+				from_idx
 			)
 
 			connection.line_ref.input = output.get_node('%Connector')

@@ -317,9 +317,10 @@ func reset_signals(_inout: HenVCInOutData):
 			@warning_ignore('unsafe_method_access')
 			connection.signal.disconnect(connection.callable)
 
+
 	request_method_picker.connect(_inout.on_method_picker_request)
 	on_mouse_enter.connect(_inout.on_io_mouse_enter)
-	request_create_connection.connect(_inout.on_create_connection_request)
+	request_create_connection.connect(_inout.create_virtual_connection)
 	on_value_change.connect(_inout.on_value_change)
 	on_outprop_value_change.connect(_inout.on_outprop_value_change)
 	outprop_config_request.connect(_inout.on_outprop_config_request)

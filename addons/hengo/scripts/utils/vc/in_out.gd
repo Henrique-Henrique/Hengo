@@ -14,12 +14,15 @@ var is_prop: bool
 var is_static: bool
 var ref: RefCounted
 var ref_change_rule: RefChangeRule
-var owner: WeakRef
 
 signal update_changes
 signal moved
 signal deleted
 signal type_changed
+signal connection_request(_data: Dictionary)
+signal io_hovered(_context: Dictionary)
+signal expression_saved(_context: Dictionary)
+signal method_picker_requested(_context: Dictionary)
 
 enum RefChangeRule {
 	NONE = 0,
@@ -28,11 +31,8 @@ enum RefChangeRule {
 	IS_PROP = 3
 }
 
-const METHOD_PICKER = preload('res://addons/hengo/scenes/utils/method_picker.tscn')
 
-func _init(_data: Dictionary, _owner: HenVirtualCNode) -> void:
-	owner = weakref(_owner)
-
+func _init(_data: Dictionary) -> void:
 	name = _data.name
 	type = _data.type
 
@@ -134,7 +134,6 @@ func get_save() -> Dictionary:
 	if data: dt.data = data
 	if is_prop: dt.is_prop = is_prop
 	if is_static: dt.is_static = is_static
-	if ref: dt.ref_id = ref.id
 	if ref_change_rule != RefChangeRule.NONE: dt.ref_change_rule = int(ref_change_rule)
 
 	return dt
@@ -203,82 +202,48 @@ func get_type_color() -> Color:
 			return Color.WHITE
 
 
-func get_owner() -> HenVirtualCNode:
-	if not owner:
-		return null
-	
-	return owner.get_ref()
+func create_virtual_connection(_type: StringName) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
+	# packs necessary data, moving dependency resolution to the manager
+	var context = {
+		type = _type,
+		local_port_id = id,
+		remote_data = global.connection_to_data
+	}
 
-func create_virtual_connection(_type: StringName, _data: CNodeInOutConnectionData) -> HenVCConnectionReturn:
-	var owner_vc: HenVirtualCNode = get_owner()
+	connection_request.emit(context)
 
-	if _type == 'in':
-		return owner_vc.get_new_input_connection_command(
-			id,
-			_data.in_out.id,
-			_data.vc
-		)
-
-	return _data.vc.get_new_input_connection_command(
-		_data.in_out.id,
-		id,
-		owner_vc
-	)
 
 func on_expression_save(_code_value: String, _word_list: Array) -> void:
-	var vc: HenVirtualCNode = get_owner()
-
-	if not vc:
-		return
+	var context = {
+		code = _code_value,
+		words = _word_list
+	}
 	
-	vc.io.inputs[0].value = _code_value
-
-	for input: HenVCInOutData in vc.io.inputs.slice(1):
-		input._on_delete(true)
-
-	for word in _word_list:
-		vc.add_io(true, {
-			name = word,
-			type = 'Variant'
-		})
-
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
-	vc.update()
+	expression_saved.emit(context)
 
 
 func on_method_picker_request(_io_type: StringName, _mouse_pos: Vector2) -> void:
-	var vc: HenVirtualCNode = get_owner()
-
-	if vc:
-		vc.request_io_connection(_io_type, id, _mouse_pos, type)
+	# packs local port data and mouse position for the handler
+	var context = {
+		io_type = _io_type,
+		port_id = id,
+		mouse_pos = _mouse_pos,
+		port_type = type,
+	}
+	
+	method_picker_requested.emit(context)
 
 
 func on_io_mouse_enter(_connector) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.connection_to_data = CNodeInOutConnectionData.new(
-		get_owner(),
-		self,
-	)
-
-	if global.CONNECTION_GUIDE.is_in_out:
-		var connector: TextureRect = _connector
-		var pos = global.CAM.get_relative_vec2(_connector.global_position)
-
-		global.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
-		global.CONNECTION_GUIDE.gradient.colors[1] = get_type_color()
+	var context = {
+		connector = _connector,
+		color = get_type_color(),
+		source = self
+	}
 	
-
-func on_create_connection_request(_type: StringName) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var connection: HenVCConnectionReturn = create_virtual_connection(_type, global.connection_to_data)
-
-	if connection:
-		global.history.create_action('Add Connection')
-		global.history.add_do_method(connection.add)
-		global.history.add_do_reference(connection)
-		global.history.add_undo_method(connection.remove)
-		global.history.commit_action()
+	io_hovered.emit(context)
 
 
 func on_value_change(_value, _generated_code: StringName) -> void:
@@ -310,12 +275,3 @@ func on_inprop_config_request(_dropdown: HenDropdown) -> void:
 		'get_prop', 'set_prop':
 			_dropdown.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			_dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-
-class CNodeInOutConnectionData:
-	var vc: HenVirtualCNode
-	var in_out: HenVCInOutData
-
-	func _init(_vc: HenVirtualCNode, _in_out: HenVCInOutData) -> void:
-		vc = _vc
-		in_out = _in_out
