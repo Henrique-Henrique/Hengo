@@ -44,6 +44,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	var inputs: Array[HenVCInOutData] = io.get_inputs()
 	var outputs: Array[HenVCInOutData] = io.get_outputs()
 
+
 	# clearing inputs and change to new
 	for input: HenCnodeInOut in _cnode.get_node('%InputContainer').get_children():
 		input.visible = false

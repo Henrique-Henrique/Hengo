@@ -139,5 +139,7 @@ static func load_res(_id: int, _sub_type: HenVirtualCNode.SubType, _res_id: int 
 		HenVirtualCNode.SubType.VAR, \
 		HenVirtualCNode.SubType.SET_VAR:
 			return load(script_path + '/variables/' + str(_id) + '.tres')
+		HenVirtualCNode.SubType.USER_FUNC:
+			return load(script_path + '/functions/' + str(_id) + '.tres')
 
 	return null

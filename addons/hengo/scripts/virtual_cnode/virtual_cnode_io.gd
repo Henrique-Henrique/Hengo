@@ -265,8 +265,8 @@ func get_inputs() -> Array[HenVCInOutData]:
 
 
 func get_outputs() -> Array[HenVCInOutData]:
-	if references.res and references.res is HenSaveVar:
-		var new_data_list: Array = (references.res as HenSaveVar).get_outputs(identity.sub_type)
+	if references.res and references.res is HenSaveResType:
+		var new_data_list: Array = (references.res as HenSaveResType).get_outputs(identity.sub_type)
 
 		for i: int in new_data_list.size():
 			var data: Dictionary = new_data_list[i]

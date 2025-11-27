@@ -64,7 +64,9 @@ static func save_new() -> void:
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	var script_id: StringName = str(global.script_config.id)
 	var script_path: StringName = SAVE_PATH + script_id
+
 	var variables_path: StringName = script_path + '/variables/'
+	var functions_path: StringName = script_path + '/functions/'
 
 	if not DirAccess.dir_exists_absolute(script_path):
 		DirAccess.make_dir_absolute(script_path)
@@ -72,11 +74,18 @@ static func save_new() -> void:
 	if not DirAccess.dir_exists_absolute(variables_path):
 		DirAccess.make_dir_absolute(variables_path)
 	
+	if not DirAccess.dir_exists_absolute(functions_path):
+		DirAccess.make_dir_absolute(functions_path)
+	
 	var save_data: HenSaveData = global.SAVE_DATA
-	print(save_data.variables.size())
 
 	for variable: HenSaveVar in save_data.variables:
 		variable.take_over_path(variables_path + str(variable.id) + '.tres')
+		var var_result: int = ResourceSaver.save(variable)
+		toast.notify.call_deferred(('Saved VAR: ' + str(variable.id)) if var_result == OK else 'Erro saving' + str(variable.id))
+	
+	for variable: HenSaveFunc in save_data.functions:
+		variable.take_over_path(functions_path + str(variable.id) + '.tres')
 		var var_result: int = ResourceSaver.save(variable)
 		toast.notify.call_deferred(('Saved VAR: ' + str(variable.id)) if var_result == OK else 'Erro saving' + str(variable.id))
 

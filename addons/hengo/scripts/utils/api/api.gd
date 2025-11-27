@@ -501,27 +501,12 @@ func get_side_bar_list() -> Dictionary:
 	}
 
 
-	for func_data: HenFuncData in global.SIDE_BAR_LIST.func_list:
+	for func_data: HenSaveFunc in global.SAVE_DATA.functions:
 		(func_category.method_list as Array).append({
 			_class_name = 'Function',
 			name = func_data.name,
 			data = func_data.get_cnode_data()
 		})
-
-	# for var_data: HenVarData in global.SIDE_BAR_LIST.var_list:
-	# 	var getter_name: String = 'get: ' + var_data.name
-	# 	var setter_name: String = 'set: ' + var_data.name
-
-	# 	(var_category.method_list as Array).append({
-	# 		_class_name = 'Variable',
-	# 		name = getter_name,
-	# 		data = var_data.get_getter_cnode_data()
-	# 	})
-	# 	(var_category.method_list as Array).append({
-	# 		_class_name = 'Variable',
-	# 		name = setter_name,
-	# 		data = var_data.get_setter_cnode_data()
-	# 	})
 	
 	for var_data: HenSaveVar in global.SAVE_DATA.variables:
 		var getter_name: String = 'get: ' + var_data.name
@@ -538,7 +523,7 @@ func get_side_bar_list() -> Dictionary:
 			data = var_data.get_setter_cnode_data()
 		})
 
-	for signal_data: HenSignalCallbackData in global.SIDE_BAR_LIST.signal_callback_list:
+	for signal_data: HenSaveSignalCallback in global.SAVE_DATA.signals_callback:
 		var connect_name: String = 'connect: ' + signal_data.name
 		var disconnect_name: String = 'disconnect: ' + signal_data.name
 
@@ -559,6 +544,7 @@ func get_side_bar_list() -> Dictionary:
 			name = macro_data.name,
 			data = macro_data.get_cnode_data()
 		})
+
 
 	(dt.categories as Array).append(func_category)
 	(dt.categories as Array).append(var_category)

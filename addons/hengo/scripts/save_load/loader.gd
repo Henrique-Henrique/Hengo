@@ -86,12 +86,41 @@ func load_res(_res_id: int) -> void:
 		global.SAVE_DATA = HenSaveData.new()
 		global.SAVE_DATA.id = _res_id
 		
-		var first_var: HenSaveVar = HenSaveVar.new()
+		var first_var: HenSaveVar = HenSaveVar.create()
 
 		first_var.name = 'variable name'
 		first_var.type = &'String'
 
+		var first_func: HenSaveFunc = HenSaveFunc.create()
+		first_func.name = 'my func'
+		var param1: HenSaveParam = HenSaveParam.create()
+		var param2: HenSaveParam = HenSaveParam.create()
+		var param3: HenSaveParam = HenSaveParam.create()
+
+		param1.name = 'one'
+		param2.name = 'two'
+		param3.name = 'three'
+
+		first_func.inputs.append(param1)
+		first_func.inputs.append(param2)
+		first_func.outputs.append(param3)
+
+		var first_signal_callback: HenSaveSignalCallback = HenSaveSignalCallback.create()
+
+		first_signal_callback.name = 'signal cb'
+		first_signal_callback.type = &'BaseButton'
+		first_signal_callback.signal_name = 'toggled'
+		first_signal_callback.signal_name_to_code = 'toggled'
+
+		var param4: HenSaveParam = HenSaveParam.create()
+
+		param4.name = 'four'
+
+		first_signal_callback.bind_params.append(param4)
+
 		global.SAVE_DATA.variables.append(first_var)
+		global.SAVE_DATA.functions.append(first_func)
+		global.SAVE_DATA.signals_callback.append(first_signal_callback)
 
 
 func load(_path: StringName, _headless: bool = false) -> bool:

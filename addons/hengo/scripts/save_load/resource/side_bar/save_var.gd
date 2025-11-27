@@ -3,8 +3,12 @@ class_name HenSaveVar extends HenSaveResType
 
 @export var type: StringName
 
-func _init() -> void:
-    id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+
+static func create() -> HenSaveVar:
+    var v: HenSaveVar = HenSaveVar.new()
+    v.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+    v.type = &'Variant'
+    return v
 
 
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
@@ -27,12 +31,7 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
                 id = 0,
                 name = name,
                 type = type,
-            },
-            {
-                id = 1,
-                name = name + '_2',
-                type = &'int',
-            },
+            }
         ]
     
     return []
