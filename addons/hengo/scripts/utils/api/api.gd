@@ -538,13 +538,12 @@ func get_side_bar_list() -> Dictionary:
 			data = signal_data.get_diconnect_cnode_data()
 		})
 
-	for macro_data: HenMacroData in global.SIDE_BAR_LIST.macro_list:
+	for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
 		(macro_category.method_list as Array).append({
 			_class_name = 'Macro',
 			name = macro_data.name,
 			data = macro_data.get_cnode_data()
 		})
-
 
 	(dt.categories as Array).append(func_category)
 	(dt.categories as Array).append(var_category)

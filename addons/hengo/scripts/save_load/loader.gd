@@ -118,9 +118,26 @@ func load_res(_res_id: int) -> void:
 
 		first_signal_callback.bind_params.append(param4)
 
+		var first_macro: HenSaveMacro = HenSaveMacro.create()
+
+		var param5: HenSaveParam = HenSaveParam.create()
+		var param6: HenSaveParam = HenSaveParam.create()
+
+		first_macro.inputs.append(param5)
+		first_macro.outputs.append(param6)
+	
+		var param7: HenSaveParam = HenSaveParam.create()
+		var param8: HenSaveParam = HenSaveParam.create()
+
+		first_macro.flow_inputs.append(param7)
+		first_macro.flow_outputs.append(param8)
+
+		first_macro.name = 'my macro'
+
 		global.SAVE_DATA.variables.append(first_var)
 		global.SAVE_DATA.functions.append(first_func)
 		global.SAVE_DATA.signals_callback.append(first_signal_callback)
+		global.SAVE_DATA.macros.append(first_macro)
 
 
 func load(_path: StringName, _headless: bool = false) -> bool:

@@ -577,10 +577,11 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		SubType.VIRTUAL:
 			(_config.route.get_ref() as HenVirtualCNode).children.virtual_sub_type_vc_list.append(v_cnode)
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
-			var _ref: HenMacroData = _config.ref
+			if v_cnode.references.res is HenSaveMacro:
+				var _ref: HenSaveMacro = v_cnode.references.res
 
-			_config.from_flow = _ref.inputs.map(func(x: HenMacroData.MacroInOut) -> Dictionary: return x.get_data())
-			_config.to_flow = _ref.outputs.map(func(x: HenMacroData.MacroInOut) -> Dictionary: return x.get_data())
+				_config.from_flow = _ref.flow_inputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
+				_config.to_flow = _ref.flow_outputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
 
 
 	match v_cnode.identity.type:

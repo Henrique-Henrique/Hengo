@@ -6,3 +6,4 @@ class_name HenSaveData extends Resource
 @export var functions: Array[HenSaveFunc]
 @export var signals: Array[HenSaveSignal]
 @export var signals_callback: Array[HenSaveSignalCallback]
+@export var macros: Array[HenSaveMacro]
