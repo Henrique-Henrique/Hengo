@@ -125,15 +125,14 @@ static func get_icon_texture(_type: StringName) -> Texture2D:
 
 
 static func load_res(_id: int, _sub_type: HenVirtualCNode.SubType, _res_id: int = -1) -> Resource:
-	var res_id: int = 0
+	var res_id: StringName = ''
 
 	if _res_id == -1:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		res_id = global.SAVE_DATA.id
 
-	var SAVE_PATH: String = 'res://hengo/save_2/'
-	var script_id: StringName = str(res_id)
-	var script_path: StringName = SAVE_PATH + script_id
+	var script_id: StringName = res_id
+	var script_path: StringName = HenEnums.HENGO_SAVE_PATH + script_id
 
 	match _sub_type:
 		HenVirtualCNode.SubType.VAR, \

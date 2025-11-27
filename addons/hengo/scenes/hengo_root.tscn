@@ -1,11 +1,9 @@
-[gd_scene load_steps=79 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=77 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" uid="uid://dndakpv2e001o" path="res://addons/hengo/scripts/utils/thread_helper.gd" id="3_1gx8m"]
 [ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
-[ext_resource type="Script" uid="uid://b4ofysvfj7n7d" path="res://addons/hengo/scripts/utils/script_cache.gd" id="4_uvl0d"]
-[ext_resource type="Script" uid="uid://d1n10yp2g2hds" path="res://addons/hengo/scripts/save_load/map_objects.gd" id="5_5yt1h"]
 [ext_resource type="Script" uid="uid://txuf5gnky3em" path="res://addons/hengo/scripts/save_load/map_dependencies.gd" id="6_0js6d"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
@@ -223,15 +221,6 @@ unique_name_in_owner = true
 [node name="ThreadHelper" type="Node" parent="AutoLoads"]
 unique_name_in_owner = true
 script = ExtResource("3_1gx8m")
-
-[node name="ScriptDataCache" type="Node" parent="AutoLoads"]
-unique_name_in_owner = true
-script = ExtResource("4_uvl0d")
-
-[node name="MapObjects" type="Node" parent="AutoLoads"]
-unique_name_in_owner = true
-script = ExtResource("5_5yt1h")
-metadata/_custom_type_script = "uid://d1n10yp2g2hds"
 
 [node name="MapDependencies" type="Node" parent="AutoLoads"]
 unique_name_in_owner = true

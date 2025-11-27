@@ -1,9 +1,6 @@
 @tool
 class_name HenCreateScript extends VBoxContainer
 
-const HENGO_PATH: StringName = 'res://hengo/'
-const HENGO_SAVE_PATH: StringName = 'res://hengo/save/'
-
 @onready var script_name_input: LineEdit = %ScriptName
 @onready var create_bt: Button = %CreateBt
 @onready var create_and_open_bt: Button = %CreateOpen
@@ -30,7 +27,7 @@ func _on_create(_open: bool = false) -> void:
 
     if _open:
         var loader: HenLoader = Engine.get_singleton(&'Loader')
-        loader.load(HENGO_PATH + script_name + '.gd')
+        loader.load(HenEnums.HENGO_PATH.path_join(script_name).path_join('.gd'))
     else:
         var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
         signal_bus.request_list_update.emit()
@@ -42,14 +39,14 @@ func get_script_content(_class: StringName) -> String:
     return 'extends ' + _class
 
 
-func get_save_content(_script_path: StringName) -> HenScriptData:
-    var script_data: HenScriptData = HenScriptData.new()
+func get_save_content(_script_path: StringName, _id: int) -> HenSaveData:
+    var save_data: HenSaveData = HenSaveData.new()
     var _class: StringName = extend_bt.text if ClassDB.class_exists(extend_bt.text) else 'Node'
 
-    script_data.side_bar_list = HenSideBarList.new().get_save(script_data)
-    script_data.node_counter = 1
-    script_data.type = _class
-    script_data.virtual_cnode_list.append(
+    save_data.id = str(_id)
+    save_data.counter = 1
+    save_data.type = _class
+    save_data.virtual_cnode_list.append(
         {
             can_delete = false,
             id = 1,
@@ -61,22 +58,33 @@ func get_save_content(_script_path: StringName) -> HenScriptData:
         }
     )
     
-    return script_data
+    return save_data
 
 
 func create_script(path: String, content: String):
-    var script = GDScript.new()
-    script.source_code = content
-    
-    var new_path: StringName = HENGO_PATH + path + '.gd'
+    var id: int = ResourceUID.create_id()
+    var id_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(str(id))
+    var res: HenSaveData = get_save_content(id_path, id)
 
-    var error = ResourceSaver.save(script, new_path)
-    if error == OK:
-        print('Script saved successfully at: ', new_path)
-        var id: int = ResourceSaver.get_resource_id_for_path(new_path)
-        HenScriptData.save(get_save_content(new_path), HENGO_SAVE_PATH + str(id) + '.hengo')
-        EditorInterface.get_resource_filesystem().scan()
-    else:
-        print('Error saving script: ', error)
-    
-    return error
+    # var id: int = ResourceUID.create_id_for_path(id_path)
+    # ResourceUID.add_id(id, id_path)
+    # var res: HenSaveData = get_save_content(id_path, id)
+    # if not DirAccess.dir_exists_absolute(id_path):
+    #     DirAccess.make_dir_absolute(id_path)
+    # ResourceSaver.save(res, id_path.path_join('save.tres'))
+    # EditorInterface.get_resource_filesystem().scan()
+    # var script = GDScript.new()
+    # script.source_code = content
+    # var new_path: StringName = HenEnums.HENGO_PATH.path_join(path + '.gd')
+    # var result = ResourceSaver.save(script, new_path)
+    # if result == OK:
+    #     ResourceUID.add_id(id, new_path)
+    #     var res: HenSaveData = get_save_content(new_path, id)
+    #     var id_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(str(id))
+    #     if not DirAccess.dir_exists_absolute(id_path):
+    #         DirAccess.make_dir_absolute(id_path)
+    #     ResourceSaver.save(res, id_path.path_join('save.tres'))
+    #     EditorInterface.get_resource_filesystem().scan()
+    # else:
+    #     print('Error saving script: ', result)
+    return 0

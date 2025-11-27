@@ -1,6 +1,10 @@
 @tool
 class_name HenEnums extends Node
 
+const HENGO_PATH: StringName = 'res://hengo/'
+const HENGO_SAVE_PATH: StringName = 'res://hengo/save/'
+
+
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
 const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
 const STATE_SELECTED_GROUP: String = 'hen_state_selected'
@@ -16,8 +20,6 @@ enum PROP_TYPE {
 
 const SINGLETON_LIST: Array[StringName] = [
 	&'ThreadHelper',
-	&'ScriptDataCache',
-	&'MapObjects',
 	&'MapDependencies',
 	&'Loader',
 	&'Router',

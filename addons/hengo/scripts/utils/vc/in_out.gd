@@ -61,9 +61,9 @@ func set_ref(_ref, _ref_change_rule: RefChangeRule = RefChangeRule.NONE) -> void
 	if ref.has_signal('moved') and not ref.is_connected('moved', _on_move):
 		ref.moved.connect(_on_move)
 
-	if ref.has_signal('deleted') and not ref.is_connected('deleted', _on_delete):
-		if not ref is HenVarData:
-			ref.deleted.connect(_on_delete)
+	# if ref.has_signal('deleted') and not ref.is_connected('deleted', _on_delete):
+	# 	if not ref is HenVarData:
+	# 		ref.deleted.connect(_on_delete)
 
 	if _ref.has_signal('data_changed') and not ref.is_connected('data_changed', on_data_changed):
 		_ref.data_changed.connect(on_data_changed)

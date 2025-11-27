@@ -104,16 +104,16 @@ func _on_gui(_event: InputEvent) -> void:
 				var pos: Vector2 = (_event as InputEventMouseMotion).global_position
 				var text: String = ''
 
-				if _side_bar_item is HenVarData:
-					text = '[b]HenTypeVariable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				elif _side_bar_item is HenFuncData:
-					text = '[b]Function[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				elif _side_bar_item is HenSignalCallbackData:
-					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				elif _side_bar_item is HenMacroData:
-					text = '[b]HenTypeMacro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				elif _side_bar_item is HenSignalData:
-					text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				# if _side_bar_item is HenVarData:
+				# 	text = '[b]HenTypeVariable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				# elif _side_bar_item is HenFuncData:
+				# 	text = '[b]Function[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				# elif _side_bar_item is HenSignalCallbackData:
+				# 	text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				# elif _side_bar_item is HenMacroData:
+				# 	text = '[b]HenTypeMacro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
+				# elif _side_bar_item is HenSignalData:
+				# 	text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
 				
 				pos.x = global.SIDE_PANEL.global_position.x + global.SIDE_PANEL.size.x
 

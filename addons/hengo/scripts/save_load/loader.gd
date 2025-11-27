@@ -12,27 +12,7 @@ class BaseRouteRef extends RefCounted:
 
 
 func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> bool:
-	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	# cache the current script's state before switching, ensuring any updates
-	# are propagated to the target script when it's analyzed
-	if global.script_config:
-		var current_script_data: HenScriptData = HenSaver.generate_script_data()
-		if not script_data_cache.add_script_data(str(global.script_config.id), current_script_data):
-			return false
-		
-		# the generation logic handles cases where the target is not yet cached
-		var target_cached: HenScriptData = script_data_cache.try_get_script_data(str(_resource_id))
-		var updated_target: HenScriptData = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_updated_script_data(
-			_resource_id,
-			current_script_data.side_bar_list,
-			target_cached
-		)
-
-		if updated_target:
-			if not script_data_cache.add_script_data(str(_resource_id), updated_target):
-				return false
 
 	if not _headless:
 		var compile_bt: Button = global.CAM.get_parent().get_node_or_null('%Compile')
@@ -76,15 +56,15 @@ func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> boo
 	return true
  
 
-func load_res(_res_id: int) -> void:
-	var SAVE_PATH: String = 'res://hengo/save_2/'
-	var global: HenGlobal = Engine.get_singleton(&'Global')
+func load_res(_res_id: int) -> HenSaveData:
+	var save_data: HenSaveData
+	var path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(str(_res_id)).path_join('save.tres')
 
-	if FileAccess.file_exists(SAVE_PATH + str(_res_id) + '/save.tres'):
-		global.SAVE_DATA = ResourceLoader.load(SAVE_PATH + str(_res_id) + '/save.tres')
+	if FileAccess.file_exists(path):
+		save_data = ResourceLoader.load(path)
 	else:
-		global.SAVE_DATA = HenSaveData.new()
-		global.SAVE_DATA.id = _res_id
+		save_data = HenSaveData.new()
+		save_data.id = str(_res_id)
 		
 		var first_var: HenSaveVar = HenSaveVar.create()
 
@@ -134,39 +114,31 @@ func load_res(_res_id: int) -> void:
 
 		first_macro.name = 'my macro'
 
-		global.SAVE_DATA.variables.append(first_var)
-		global.SAVE_DATA.functions.append(first_func)
-		global.SAVE_DATA.signals_callback.append(first_signal_callback)
-		global.SAVE_DATA.macros.append(first_macro)
+		save_data.variables.append(first_var)
+		save_data.functions.append(first_func)
+		save_data.signals_callback.append(first_signal_callback)
+		save_data.macros.append(first_macro)
+	
+	return save_data
 
 
 func load(_path: StringName, _headless: bool = false) -> bool:
 	var start: int = Time.get_ticks_usec()
-	var resource_id: int = _path.get_file().get_basename().to_int() if _path.get_extension() == 'hengo' else ResourceLoader.get_resource_uid(_path)
-	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
-	var is_resource: bool = _path.begins_with('res://hengo/save/') and _path.get_extension() == 'hengo'
-	var path: StringName = get_data_path(resource_id) if not is_resource else _path
+	var resource_id: int = ResourceLoader.get_resource_uid(_path)
+	prints(_path, ResourceSaver.get_resource_id_for_path(_path))
+	# var resource_id: int = _path.get_file().get_basename().to_int() if _path.get_extension() == 'hengo' else ResourceLoader.get_resource_uid(_path)
+	var is_resource: bool = _path.begins_with(HenEnums.HENGO_SAVE_PATH) and _path.get_extension() == 'hengo'
+	# var path: StringName = get_data_path(resource_id) if not is_resource else _path
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var save_data: HenSaveData = load_res(resource_id)
 
-	var script_data: HenScriptData
-
-	# loading hengo script data from cache
-	if script_data_cache.has_script_data(str(resource_id)):
-		script_data = script_data_cache.try_get_script_data(str(resource_id))
+	global.SAVE_DATA = save_data
 
 	# loading hengo script data
-	if script_data or (is_resource or FileAccess.file_exists(get_data_path(resource_id))):
-		if not script_data:
-			script_data = HenScriptData.load_from_file(path)
-
-		if not script_data:
-			return false
-
+	if save_data:
 		if not await reset_to_load(resource_id, _headless, _path):
 			return false
-
-		load_res(resource_id)
 
 		var base_route: HenRouteData = HenRouteData.new(
 			'Base',
@@ -177,23 +149,20 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 
 		global.BASE_ROUTE = base_route
 
-		if not script_data_cache.add_script_data(str(resource_id), HenScriptData.load(script_data.get_save().duplicate(true))):
-			return false
-
 		if not _headless: global.TABS.add_script_tab(resource_id)
 
 		# setting script configs
-		global.script_config.type = script_data.type
-		global.node_counter = script_data.node_counter
+		global.script_config.type = save_data.type
+		global.node_counter = save_data.counter
 
 		# loading side bar list
-		global.SIDE_BAR_LIST.load_save(script_data.side_bar_list)
+		# global.SIDE_BAR_LIST.load_save(save_data.side_bar_list)
 		
 		# loading v_cnodes
-		parse_and_get_vc_list_dict(script_data.virtual_cnode_list, base_route)
+		parse_and_get_vc_list_dict(save_data.virtual_cnode_list, base_route)
 
 		# adding in/out connections
-		for input_data: Dictionary in script_data.connections:
+		for input_data: Dictionary in save_data.connections:
 			var to: HenVirtualCNode = loaded_virtual_cnode_list[int(input_data.to_vc_id)]
 			var connection: HenVCConnectionReturn = to.get_new_input_connection_command(
 				input_data.to_id,
@@ -205,48 +174,12 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 				connection.add()
 
 		# adding flow connection
-		for flow_data: Dictionary in script_data.flow_connections:
+		for flow_data: Dictionary in save_data.flow_connections:
 			var from: HenVirtualCNode = loaded_virtual_cnode_list[int(flow_data.from_vc_id)]
 			var connection = from.add_flow_connection(flow_data.from_id, flow_data.to_id, loaded_virtual_cnode_list[int(flow_data.to_vc_id)])
 		
 			if connection:
 				connection.add()
-	else:
-		var reg: RegEx = RegEx.new()
-		reg.compile("extends ([a-zA-Z0-9]+)[\\s]*")
-
-		# setting script type
-		var script: GDScript = load(_path)
-		var type: String = reg.search(script.source_code).get_string(1)
-
-		if type.begins_with('res://hengo/save'):
-			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("You're trying to open a script with a save file, but the data couldn't be found. Save File: " + type, HenToast.MessageType.ERROR)
-			return false
-
-		if not await reset_to_load(resource_id, _headless, _path):
-			return false
-
-		var base_route: HenRouteData = HenRouteData.new(
-			'Base',
-			HenRouter.ROUTE_TYPE.BASE,
-			HenUtilsName.get_unique_name(),
-			weakref(global.BASE_ROUTE_REF)
-		)
-
-		global.BASE_ROUTE = base_route
-		global.script_config.type = type
-		global.node_counter = 0
-
-		HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'Stat State',
-			type = HenVirtualCNode.Type.STATE_START,
-			sub_type = HenVirtualCNode.SubType.STATE_START,
-			route = base_route,
-			position = Vector2(0, 0),
-			can_delete = false
-		})
-		router.current_route = base_route
-		global.CAM._check_virtual_cnodes()
 	
 	# showing current type
 	if not _headless:
@@ -265,6 +198,10 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 
 func show_class_name() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
+	if not global.script_config:
+		return
+	
 	var cl_label: Button = global.HENGO_ROOT.get_node('%ClassName')
 	var type = global.script_config.type
 	var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
@@ -311,4 +248,4 @@ func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData) -> Arr
 
 
 func get_data_path(_id: int) -> StringName:
-	return 'res://hengo/save/' + str(_id) + HenScriptData.HENGO_EXT
+	return HenEnums.HENGO_SAVE_PATH.path_join(str(_id)).path_join('/save.tres')

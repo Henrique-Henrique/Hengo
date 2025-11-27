@@ -25,9 +25,12 @@ func _enter_tree():
 	add_debugger_plugin(debug_plugin)
 
 	# creating hengo folder
-	if not DirAccess.dir_exists_absolute('res://hengo'):
-		DirAccess.make_dir_absolute('res://hengo')
-		EditorInterface.get_resource_filesystem().scan()
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_PATH)
+		# EditorInterface.get_resource_filesystem().scan()
+		 
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
 
 	main_scene = HENGO_ROOT.instantiate()
 
@@ -194,7 +197,7 @@ func _handles(object: Object) -> bool:
 		global.CAM.can_scroll = true
 		return true
 
-	if object is Resource and (object as Resource).resource_path.begins_with('res://hengo/save/'):
+	if object is Resource and (object as Resource).resource_path.begins_with(HenEnums.HENGO_SAVE_PATH):
 		if not await loader.load((object as Resource).resource_path):
 			toast.notify.call_deferred("Failed to load save file: " + (object as Resource).resource_path, HenToast.MessageType.ERROR)
 			return true

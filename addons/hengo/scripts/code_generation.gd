@@ -11,16 +11,15 @@ func get_flow_id() -> int:
 	return flow_id
 
 
-func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
-	var global: HenGlobal = Engine.get_singleton('Global')
-	var refs: HenTypeReferences = HenTypeReferences.new(_data, global.SAVE_DATA)
+func get_code(_data: HenSaveData, _build_preview: bool = false) -> String:
+	var refs: HenTypeReferences = HenTypeReferences.new(_data)
 	var code: String = ''
 
 	(Engine.get_singleton(&'Global') as HenGlobal).GENERATE_PREVIEW_CODE = _build_preview
 	(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.clear()
 
 	# generating macro references
-	for macro_data: Dictionary in _data.side_bar_list.macro_list:
+	for macro_data: HenSaveMacro in _data.macros:
 		var macro: HenTypeMacro = HenTypeMacro.new()
 
 		macro.id = macro_data.id
@@ -28,46 +27,43 @@ func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
 
 		refs.side_bar_item_ref[macro.id] = macro
 
-		for input: Dictionary in macro_data.inputs:
+		for input: HenSaveParam in macro_data.inputs:
 			var flow: HenTypeFlow = HenTypeFlow.new()
 			flow.id = input.id
 			flow.name = input.name
 			macro.flow_inputs.append(flow)
 
-		for output: Dictionary in macro_data.outputs:
+		for output: HenSaveParam in macro_data.outputs:
 			var flow: HenTypeFlow = HenTypeFlow.new()
 			flow.id = output.id
 			flow.name = output.name
 			macro.flow_outputs.append(flow)
 
-		if macro_data.has(&'local_vars'):
-			for local_var: Dictionary in macro_data.local_vars:
-				macro.local_vars.append(HenFactoryVariable.get_variable_from_dict(local_var, refs))
+		for local_var: HenSaveParam in macro_data.local_vars:
+			macro.local_vars.append(HenFactoryVariable.get_variable_from_dict(local_var.get_data(), refs))
 
-		if macro_data.has(&'virtual_cnode_list'):
-			for cnode: Dictionary in macro_data.virtual_cnode_list:
-				macro.virtual_cnode_list.append(HenFactoryCNode.get_cnode_from_dict(cnode, refs, macro))
+		for cnode: Dictionary in macro_data.virtual_cnode_list:
+			macro.virtual_cnode_list.append(HenFactoryCNode.get_cnode_from_dict(cnode, refs, macro))
 
 		refs.macros.append(macro)
 
 	# generating variables references
-	for variable_data: Dictionary in _data.side_bar_list.var_list:
-		if variable_data.has('invalid') and not variable_data.invalid:
-			continue
-
-		refs.variables.append(HenFactoryVariable.get_variable_from_dict(variable_data, refs))
+	for variable_data: HenSaveVar in _data.variables:
+		# if variable_data.has('invalid') and not variable_data.invalid:
+		# 	continue
+		refs.variables.append(HenFactoryVariable.get_variable_from_dict(variable_data.get_data(), refs))
 
 	# signals
-	for signal_data: Dictionary in _data.side_bar_list.signal_list:
-		HenFactorySignal.get_signal_from_dict(signal_data, refs)
+	for signal_data: HenSaveSignal in _data.signals:
+		HenFactorySignal.get_signal_from_dict(signal_data.get_data(), refs)
 
 	# generating function references
-	for func_data: Dictionary in _data.side_bar_list.func_list:
-		HenFactoryFunc.get_func_from_dict(func_data, refs)
+	for func_data: HenSaveFunc in _data.functions:
+		HenFactoryFunc.get_func_from_dict(func_data.get_data(), refs)
 
 	# generating macro references
-	for signal_data: Dictionary in _data.side_bar_list.signal_callback_list:
-		HenFactorySignalCallback.get_signal_from_dict(signal_data, refs)
+	for signal_data: HenSaveSignalCallback in _data.signals_callback:
+		HenFactorySignalCallback.get_signal_from_dict(signal_data.get_data(), refs)
 
 	# generating cnode references
 	for cnode: Dictionary in _data.virtual_cnode_list:
@@ -96,7 +92,7 @@ func get_code(_data: HenScriptData, _build_preview: bool = false) -> String:
 #
 #
 #
-func _get_start(_data: HenScriptData) -> String:
+func _get_start(_data: HenSaveData) -> String:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	# reseting macro use self condition
 	global.USE_MACRO_USE_SELF = false
@@ -108,104 +104,3 @@ func _get_start(_data: HenScriptData) -> String:
 # *               the Hengo Visual Script tool.                 *
 # *       Edit only if you are confident in your changes.       *
 # ***************************************************************\n\nextends {0}\n\n'.format([_data.type])
-
-
-#
-#
-#
-#
-#
-#
-func regenerate(_save_config: HenSaver.SaveConfig, _script_id: int, _side_bar_list: Dictionary) -> bool:
-	var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
-	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-
-	for dependency_id: StringName in map_deps.get_dependencies(str(_script_id)):
-		var dep_id_i: int = int(dependency_id)
-		var old_script_data: HenScriptData = script_data_cache.try_get_script_data(dependency_id)
-		var script_data: HenScriptData = get_updated_script_data(dep_id_i, _side_bar_list, old_script_data)
-
-		if not script_data:
-			return true
-		
-		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred('Saving: ' + ResourceUID.get_id_path(dep_id_i).get_basename())
-
-		if old_script_data:
-			if not script_data_cache.add_script_data(dependency_id, script_data):
-				return false
-
-		_save_config.add_script(
-			HenSaver.SaveData.new(dep_id_i, script_data)
-		)
-
-	return true
-
-#
-#
-#
-#
-#
-#
-func get_updated_script_data(_id: int, _side_bar_list: Dictionary, _script_data: HenScriptData = null) -> HenScriptData:
-	var refs: HenRegenerateRefs = HenRegenerateRefs.new()
-	var loader: HenLoader = Engine.get_singleton(&'Loader')
-	var path: StringName = loader.get_data_path(_id)
-	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
-
-	if not FileAccess.file_exists(path):
-		toast.notify.call_deferred('Error: resource not found', HenToast.MessageType.ERROR)
-		return null
-
-	var res_path: StringName = "res://hengo/save/" + str(_id) + HenScriptData.HENGO_EXT
-	var script_data: HenScriptData = _script_data if _script_data else HenScriptData.load_from_file(res_path)
-
-	if not HenCheckerScriptData.is_script_data_valid(script_data):
-		toast.notify.call_deferred("Invalid script data when updating script: " + str(_id), HenToast.MessageType.ERROR)
-		return null
-
-	refs.counter = script_data.node_counter
-	refs.side_bar_list = _side_bar_list
-	refs.connections = script_data.connections
-
-	_parse_vc_list(script_data.virtual_cnode_list, refs)
-	_parse_signal_callback_list(script_data.side_bar_list.signal_callback_list, refs)
-
-	if refs.reload:
-		return script_data
-
-	return null
-
-#
-#
-#
-#
-#
-#
-func _parse_vc_list(_cnode_list: Array, _refs: HenRegenerateRefs) -> void:
-	for cnode: Dictionary in _cnode_list:
-		_refs.cnode_list[cnode.id] = cnode
-
-		if not cnode.has('from_id') or not cnode.has('side_bar_id'):
-			if cnode.has(&'virtual_cnode_list'):
-				_parse_vc_list(cnode.virtual_cnode_list, _refs)
-			continue
-
-		if cnode.side_bar_id != _refs.side_bar_list.id:
-			continue
-
-		match cnode.sub_type as HenVirtualCNode.SubType:
-			HenVirtualCNode.SubType.GET_FROM_PROP:
-				HenCheckerVar.check_changes_var(cnode, _refs)
-			HenVirtualCNode.SubType.FUNC_FROM:
-				HenCheckerFunc.check_changes_func(cnode, _refs)
-
-		if cnode.has(&'virtual_cnode_list'):
-			_parse_vc_list(cnode.virtual_cnode_list, _refs)
-
-
-func _parse_signal_callback_list(_signal_callback_list: Array, _refs: HenRegenerateRefs) -> void:
-	for signal_callback: Dictionary in _signal_callback_list:
-		if not signal_callback.has('custom_id'):
-			continue
-
-		HenCheckerSignal.check_changes_signal(signal_callback, _refs)

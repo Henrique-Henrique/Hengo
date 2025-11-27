@@ -358,7 +358,7 @@ func get_id() -> int:
 	return identity.id
 
 
-func get_save(_script_data: HenScriptData) -> Dictionary:
+func get_save(_save_data: HenSaveData) -> Dictionary:
 	var data: Dictionary = {
 		id = identity.id,
 		type = identity.type,
@@ -386,7 +386,6 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 	if identity.from_id > -1:
 		data.from_id = str(identity.from_id)
 		data.side_bar_id = identity.side_bar_id
-		_script_data.deps.append(str(identity.from_id))
 
 	if references.res:
 		if references.res is HenSaveResType:
@@ -414,14 +413,14 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 		if not flow_connection.get_to(): continue
 		if flow_connection.get_to() == self: continue
 
-		_script_data.flow_connections.append(flow_connection.get_save())
+		_save_data.flow_connections.append(flow_connection.get_save())
 
 
 	for input: HenVCConnectionData in io.connections:
 		if input.get_to().identity.id != identity.id:
 			continue
 
-		_script_data.connections.append(input.get_save())
+		_save_data.connections.append(input.get_save())
 
 
 	# these types don't need to save the flow connections, are hengo's native
@@ -445,7 +444,7 @@ func get_save(_script_data: HenScriptData) -> Dictionary:
 		data.virtual_cnode_list = []
 
 		for v_cnode: HenVirtualCNode in children.virtual_cnode_list:
-			data.virtual_cnode_list.append(v_cnode.get_save(_script_data))
+			(data.virtual_cnode_list as Array).append(v_cnode.get_save(_save_data))
 
 
 	return data
@@ -517,7 +516,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		HenRouter.ROUTE_TYPE.STATE:
 			(_config.route.get_ref() as HenVirtualCNode).children.virtual_cnode_list.append(v_cnode)
 		HenRouter.ROUTE_TYPE.FUNC:
-			var _ref: HenFuncData = _config.route.get_ref()
+			var _ref: HenSaveFunc = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 		
 			match v_cnode.identity.sub_type:
@@ -526,13 +525,13 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.FUNC_OUTPUT:
 					_ref.output_ref = weakref(v_cnode)
 		HenRouter.ROUTE_TYPE.SIGNAL:
-			var _ref: HenSignalCallbackData = _config.route.get_ref()
+			var _ref: HenSaveSignalCallback = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 			match v_cnode.identity.sub_type:
 				SubType.SIGNAL_ENTER:
 					_ref.signal_enter = v_cnode
 		HenRouter.ROUTE_TYPE.MACRO:
-			var _ref: HenMacroData = _config.route.get_ref()
+			var _ref: HenSaveMacro = _config.route.get_ref()
 			_ref.virtual_cnode_list.append(v_cnode)
 
 			match v_cnode.identity.sub_type:

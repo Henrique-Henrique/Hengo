@@ -1,7 +1,6 @@
 @tool
 class_name HenMapDependencies extends Node
 
-const SAVE_PATH: String = 'res://hengo/save_2/'
 var dependencies: Dictionary[StringName, ProjectAST] = {}
 
 class ProjectAST:
@@ -27,7 +26,7 @@ func start_map() -> void:
 
 # loads variable resources for a specific project id
 func _map_project_variables(id: String) -> void:
-	var variables_path: String = SAVE_PATH.path_join(id).path_join('variables')
+	var variables_path: String = HenEnums.HENGO_SAVE_PATH.path_join(id).path_join('variables')
 	var var_dir: DirAccess = DirAccess.open(variables_path)
 	
 	if not var_dir:

@@ -55,19 +55,19 @@ func _on_pressed() -> void:
 			var arr: Array = []
 
 			# local variables
-			match router.current_route.type:
-				router.ROUTE_TYPE.FUNC, router.ROUTE_TYPE.SIGNAL, router.ROUTE_TYPE.MACRO:
-					if router.current_route.get_ref().get(&'local_vars') is Array:
-						for var_data: HenVarData in (router.current_route.get_ref().get(&'local_vars') as Array):
-							if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
-								arr.append({
-									name = var_data.name,
-									category = 'class_props',
-									ref = var_data
-								})
+			# match router.current_route.type:
+			# 	router.ROUTE_TYPE.FUNC, router.ROUTE_TYPE.SIGNAL, router.ROUTE_TYPE.MACRO:
+			# 		if router.current_route.get_ref().get(&'local_vars') is Array:
+			# 			for var_data: HenVarData in (router.current_route.get_ref().get(&'local_vars') as Array):
+			# 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
+			# 					arr.append({
+			# 						name = var_data.name,
+			# 						category = 'class_props',
+			# 						ref = var_data
+			# 					})
 
 			# variables
-			for var_data: HenVarData in global.SIDE_BAR_LIST.var_list:
+			for var_data: HenSaveVar in global.SAVE_DATA.variables:
 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 					arr.append({
 						name = var_data.name,
@@ -122,37 +122,8 @@ func _on_pressed() -> void:
 			options = arr
 		'state_event_list':
 			pass
-			# var data: Dictionary = HenGlobal.SCRIPTS_INFO.get(custom_data)
 
-			# if data.has('state_event_list'):
-			# 	options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
-		'signal_callback_list':
-			var arr: Array = []
-			var all_classes: PackedStringArray = ClassDB.get_class_list()
-			var map_objects: HenMapObjects = Engine.get_singleton(&'MapObjects')
-
-			for data in map_objects.objects.values():
-				for signal_data: Dictionary in data.signal_list:
-					var dt: Dictionary = signal_data.duplicate(true)
-					dt.use_custom = true
-					arr.append(dt)
-
-
-			for class_name_data: String in all_classes:
-				for signal_data: Dictionary in ClassDB.class_get_signal_list(class_name_data, true):
-					arr.append(
-						{
-							name = '{name} :: ({class})'.format({
-								name = signal_data.name,
-								'class' = class_name_data
-							}),
-							signal_name = signal_data.name,
-							signal_class = class_name_data
-						})
-				
-			options = arr
 			
-
 	global.DROPDOWN_MENU.position = global_position
 	global.DROPDOWN_MENU.get_parent().show_container()
 	global.DROPDOWN_MENU.mount(options, _selected, type)
@@ -213,13 +184,6 @@ func _selected(_item: Dictionary) -> void:
 				second_input.input_ref.reset_input_value()
 				second_input.input_ref.update_changes.emit()
 			return
-		'signal_callback_list':
-			var item: HenSignalCallbackData = custom_data.signal_ref
-
-			if _item.has('use_custom'):
-				item.set_custom_signal_params(_item)
-			else:
-				item.set_signal_params(_item.signal_class, _item.signal_name)
 
 	value_changed.emit(text)
 

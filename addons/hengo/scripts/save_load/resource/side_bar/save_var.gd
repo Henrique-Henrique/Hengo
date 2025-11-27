@@ -11,6 +11,14 @@ static func create() -> HenSaveVar:
     return v
 
 
+func get_data() -> Dictionary:
+    return {
+        name = name,
+        type = type,
+        id = id
+    }
+
+
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
     if _type == HenVirtualCNode.SubType.SET_VAR:
         return [

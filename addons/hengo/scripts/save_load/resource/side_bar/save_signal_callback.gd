@@ -15,6 +15,36 @@ static func create() -> HenSaveSignalCallback:
 	v.type = &'Variant'
 	return v
 
+func get_data() -> Dictionary:
+	var param_data: Array[Dictionary] = []
+	var bind_param_data: Array[Dictionary] = []
+	var lvars: Array[Dictionary] = []
+	var vc_list: Array[Dictionary] = []
+
+	for param: HenSaveParam in params:
+		param_data.append(param.get_data())
+
+	for param: HenSaveParam in bind_params:
+		bind_param_data.append(param.get_data())
+
+	for lv: HenSaveParam in local_vars:
+		lvars.append(lv.get_data())
+
+	for cnode: Dictionary in virtual_cnode_list:
+		vc_list.append(cnode)
+
+	return {
+		name = name,
+		id = id,
+		params = param_data,
+		bind_params = bind_param_data,
+		type = type,
+		signal_name = signal_name,
+		signal_name_to_code = signal_name_to_code,
+		local_vars = lvars,
+		virtual_cnode_list = vc_list,
+	}
+
 
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	match _type:

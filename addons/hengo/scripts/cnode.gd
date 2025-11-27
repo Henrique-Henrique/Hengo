@@ -175,15 +175,15 @@ func select() -> void:
 	selected = true
 	hover_animation()
 
-	if global.CODE_PREVIEWER.visible:
-		var new_id_list: Array = global.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
-		if not (global.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (global.CODE_PREVIEWER.id_list == new_id_list):
-			return
+	# if global.CODE_PREVIEWER.visible:
+	# 	var new_id_list: Array = global.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
+	# 	if not (global.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (global.CODE_PREVIEWER.id_list == new_id_list):
+	# 		return
 
-		var script_data: HenScriptData = HenSaver.generate_script_data()
-		var code: String = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(script_data, true)
-		global.CODE_PREVIEWER.set_code(code)
-		global.CODE_PREVIEWER.show_vc_line_reference()
+		# var script_data: HenScriptData = HenSaver.generate_script_data()
+		# var code: String = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(script_data, true)
+		# global.CODE_PREVIEWER.set_code(code)
+		# global.CODE_PREVIEWER.show_vc_line_reference()
 
 
 func unselect(_time: float = .2) -> void:

@@ -121,10 +121,6 @@ func _input(event: InputEvent) -> void:
 					global.history.redo()
 				elif e.keycode == KEY_C:
 					global.history.clear_history()
-				elif e.keycode == KEY_P:
-					var script_data_cache: HenScriptDataCache = Engine.get_singleton(&'ScriptDataCache')
-					script_data_cache.clear()
-					print('Script data cache cleared')
 				elif e.keycode == KEY_F:
 					get_tree().root.set_input_as_handled()
 					HenFormatter.format_current_route()

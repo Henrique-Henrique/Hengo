@@ -9,6 +9,19 @@ static func create() -> HenSaveSignal:
     return v
 
 
+func get_data() -> Dictionary:
+    var input_data: Array[Dictionary] = []
+
+    for param: HenSaveParam in inputs:
+        input_data.append(param.get_data())
+
+    return {
+        name = name,
+        id = id,
+        inputs = input_data,
+    }
+
+
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
     var arr: Array[Dictionary] = []
 

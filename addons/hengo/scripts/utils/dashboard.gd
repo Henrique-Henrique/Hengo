@@ -63,7 +63,6 @@ func search(_search_text: String) -> void:
 	var result: Array[Dictionary] = []
 
 	for script: Dictionary in script_list:
-		prints(_search_text.to_lower(), (script.base_name as String).to_lower())
 		var score: int = HenSearch.score_only(_search_text.to_lower(), (script.base_name as String).to_lower())
 		if score > 0: result.append(script)
 
@@ -79,17 +78,20 @@ func debounce_search(delay: float, callback: Callable) -> void:
 
 
 func show_dashboard() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
 	script_list.clear()
 
-	for file_name: StringName in DirAccess.get_files_at('res://hengo/save/'):
-		if not file_name.get_extension() == 'hengo':
+	for dir_name: StringName in DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH):
+		var script_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('save.tres')
+
+
+		if not FileAccess.file_exists(script_path):
 			continue
 		
-		var time: int = FileAccess.get_modified_time('res://hengo/save/' + file_name)
-		var name_id: StringName = file_name.get_basename()
+		var time: int = FileAccess.get_modified_time(script_path)
+		var name_id: StringName = script_path.get_basename()
 		var id: int = int(name_id)
+
+		prints(ResourceUID.has_id(id), id)
 
 		if ResourceUID.has_id(id):
 			var path: StringName = ResourceUID.get_id_path(id)
