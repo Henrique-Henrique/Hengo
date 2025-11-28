@@ -44,7 +44,7 @@ static func save_new() -> void:
 
 	save_data.take_over_path(script_path + '/save.tres')
 	var result: int = ResourceSaver.save(save_data)
-	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.id)) if result == OK else 'Erro saving' + str(save_data.id))
+	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.identity.id)) if result == OK else 'Erro saving' + str(save_data.identity.id))
 
 
 static func save_side_bar_item(_arr: Array, _path: StringName) -> void:

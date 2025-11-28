@@ -45,10 +45,10 @@ func _on_select(_id: int) -> void:
 	
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 
-	if await loader.load(meta.path):
+	if await loader.load(str(meta.id)):
 		hide_dashboard()
 	else:
-		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.path, HenToast.MessageType.ERROR)
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.base_name, HenToast.MessageType.ERROR)
 
 
 func _on_search_change(_text: String) -> void:
@@ -81,29 +81,21 @@ func show_dashboard() -> void:
 	script_list.clear()
 
 	for dir_name: StringName in DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH):
-		var script_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('save.tres')
+		var identity_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('identity.tres')
 
-
-		if not FileAccess.file_exists(script_path):
+		if not FileAccess.file_exists(identity_path):
 			continue
 		
-		var time: int = FileAccess.get_modified_time(script_path)
-		var name_id: StringName = script_path.get_basename()
-		var id: int = int(name_id)
+		var time: int = FileAccess.get_modified_time(identity_path)
+		var identity: HenSaveDataIdentity = ResourceLoader.load(identity_path)
 
-		prints(ResourceUID.has_id(id), id)
-
-		if ResourceUID.has_id(id):
-			var path: StringName = ResourceUID.get_id_path(id)
-			var base_name: String = path.get_file().get_basename()
-
-			script_list.append(
-				{
-					path = path,
-					base_name = base_name,
-					time = time
-				}
-			)
+		script_list.append(
+			{
+				id = identity.id,
+				base_name = identity.name,
+				time = time
+			}
+		)
 	
 	script_list.sort_custom(func(a, b): return a.time > b.time)
 

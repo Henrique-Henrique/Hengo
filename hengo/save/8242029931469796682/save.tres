@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=8 format=3 uid="uid://c64rlk2l7w1id"]
+
+[ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_smo2a"]
+[ext_resource type="Resource" uid="uid://dghyi052b7hxp" path="res://hengo/save/8242029931469796682/identity.tres" id="2_027k3"]
+[ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_37vg5"]
+[ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_alrhg"]
+[ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_vpa7e"]
+[ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_6rh48"]
+[ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="7_elqay"]
+
+[resource]
+script = ExtResource("4_alrhg")
+counter = 1
+identity = ExtResource("2_027k3")
+flow_connections = Array[Dictionary]([{
+&"from_id": 0,
+&"from_vc_id": 1,
+&"to_id": 0,
+&"to_vc_id": 2
+}, {
+&"from_id": 0,
+&"from_vc_id": 3,
+&"to_id": 0,
+&"to_vc_id": 6
+}])
+virtual_cnode_list = Array[Dictionary]([{
+&"can_delete": false,
+&"id": 1,
+&"name": "Stat State",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(99, 67)",
+&"sub_type": 37,
+&"type": 6
+}, {
+&"id": 2,
+&"name": "State 1",
+&"position": "Vector2(12, 167)",
+&"size": "Vector2(75, 44)",
+&"sub_type": 36,
+&"to_flow": [],
+&"type": 5,
+&"virtual_cnode_list": [{
+&"can_delete": false,
+&"id": 3,
+&"name": "enter",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(64, 48)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"can_delete": false,
+&"id": 4,
+&"name": "update",
+&"outputs": [{
+&"id": 5,
+&"name": "delta",
+&"type": &"float"
+}],
+&"position": "Vector2(221, 0)",
+&"size": "Vector2(104, 88)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"category": &"native",
+&"id": 6,
+&"inputs": [{
+&"category": &"default_value",
+&"code_value": "\"\"",
+&"id": 7,
+&"name": "content",
+&"type": &"String"
+}],
+&"name": "print",
+&"position": "Vector2(-57, 148)",
+&"size": "Vector2(178, 98)",
+&"sub_type": 1,
+&"type": 0
+}]
+}])

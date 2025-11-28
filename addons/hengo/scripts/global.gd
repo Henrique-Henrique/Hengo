@@ -63,12 +63,11 @@ var unique_id: int = 0
 
 
 class ScriptData:
-    var id: int
+    var id: StringName
     var path: StringName
     var type: StringName
 
 # save load
-var current_script_path: StringName = ''
 var script_config: ScriptData
 
 # parser

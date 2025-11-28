@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="HenSaveDataIdentity" load_steps=2 format=3 uid="uid://dghyi052b7hxp"]
+
+[ext_resource type="Script" uid="uid://chtcn73obhw0a" path="res://addons/hengo/scripts/save_load/resource/save_data_identity.gd" id="1_jjr5w"]
+
+[resource]
+script = ExtResource("1_jjr5w")
+id = &"8242029931469796682"
+type = &"Sprite2D"
+name = "other"

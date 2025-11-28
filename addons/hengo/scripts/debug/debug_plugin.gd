@@ -81,8 +81,8 @@ func reload_script() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	load_references()
 
-	for session in get_sessions():
-		session.send_message('hengo:reload_script', [global.current_script_path, global.DEBUG_TOKEN])
+	# for session in get_sessions():
+	# 	session.send_message('hengo:reload_script', [global.current_script_path, global.DEBUG_TOKEN])
 
 
 func get_debug_ids(_num: int) -> Array:

@@ -1,0 +1,130 @@
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=8 format=3 uid="uid://dw4nrriuc5xwp"]
+
+[ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_ma6xc"]
+[ext_resource type="Resource" uid="uid://crxvxwfkb4yi3" path="res://hengo/save/549533689790547712/identity.tres" id="2_ev7ns"]
+[ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_2shxq"]
+[ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_6ddmo"]
+[ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_fukmr"]
+[ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_18fw2"]
+[ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="7_fpg2c"]
+
+[resource]
+script = ExtResource("4_6ddmo")
+counter = 1
+identity = ExtResource("2_ev7ns")
+flow_connections = Array[Dictionary]([{
+&"from_id": 0,
+&"from_vc_id": 1,
+&"to_id": 0,
+&"to_vc_id": 2
+}, {
+&"from_id": 0,
+&"from_vc_id": 3,
+&"to_id": 0,
+&"to_vc_id": 6
+}, {
+&"from_id": 0,
+&"from_vc_id": 1,
+&"to_id": 0,
+&"to_vc_id": 2
+}, {
+&"from_id": 0,
+&"from_vc_id": 3,
+&"to_id": 0,
+&"to_vc_id": 6
+}, {
+&"from_id": 0,
+&"from_vc_id": 6,
+&"to_id": 0,
+&"to_vc_id": 5
+}])
+virtual_cnode_list = Array[Dictionary]([{
+&"can_delete": false,
+&"id": 1,
+&"name": "Stat State",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(99, 67)",
+&"sub_type": 37,
+&"type": 6
+}, {
+&"id": 2,
+&"name": "State 1",
+&"position": "Vector2(12, 167)",
+&"size": "Vector2(75, 44)",
+&"sub_type": 36,
+&"to_flow": [],
+&"type": 5,
+&"virtual_cnode_list": [{
+&"can_delete": false,
+&"id": 3,
+&"name": "enter",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(64, 48)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"can_delete": false,
+&"id": 4,
+&"name": "update",
+&"outputs": [{
+&"id": 5,
+&"name": "delta",
+&"type": &"float"
+}],
+&"position": "Vector2(278.5, 0)",
+&"size": "Vector2(104, 88)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"id": 6,
+&"inputs": [{
+&"category": &"default_value",
+&"code_value": "InputEventScreenDrag.new()",
+&"id": 7,
+&"is_ref": true,
+&"name": "InputEventScreenDrag",
+&"type": &"InputEventScreenDrag",
+&"value": "InputEventScreenDrag.new()"
+}, {
+&"category": &"default_value",
+&"code_value": "Vector2(0, 0)",
+&"id": 8,
+&"name": "position",
+&"type": &"Vector2",
+&"value": "Vector2(0, 0)"
+}],
+&"name": "set_position",
+&"position": "Vector2(-94.5, 148)",
+&"size": "Vector2(253, 138)",
+&"sub_type": 1,
+&"type": 0
+}, {
+&"id": 5,
+&"inputs": [{
+&"category": &"default_value",
+&"code_value": "KinematicCollision3D.new()",
+&"id": 6,
+&"is_ref": true,
+&"name": "KinematicCollision3D",
+&"type": &"KinematicCollision3D",
+&"value": "KinematicCollision3D.new()"
+}, {
+&"category": &"default_value",
+&"code_value": "0",
+&"id": 7,
+&"name": "collision_index",
+&"type": &"int",
+&"value": "0"
+}],
+&"name": "get_position",
+&"outputs": [{
+&"id": 8,
+&"name": "",
+&"type": &"Vector3"
+}],
+&"position": "Vector2(-114.5, 386)",
+&"size": "Vector2(293, 138)",
+&"sub_type": 0,
+&"type": 0
+}]
+}])

@@ -11,7 +11,7 @@ class BaseRouteRef extends RefCounted:
 	var virtual_cnode_list: Array = []
 
 
-func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> bool:
+func reset_to_load(_id: StringName, _headless: bool) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	if not _headless:
@@ -40,14 +40,12 @@ func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> boo
 	global.SIDE_BAR_LIST_CACHE.clear()
 	global.SELECTED_VIRTUAL_CNODE.clear()
 	global.script_config = global.ScriptData.new()
-	global.script_config.path = _path
-	global.script_config.id = _resource_id
+	global.script_config.id = _id
 
 	# confirming queue free before check errors
 	if not _headless: await global.CAM.get_tree().process_frame
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	global.current_script_path = _path
 	router.current_route = null
 	router.comment_reference = {}
 	global.history = UndoRedo.new()
@@ -56,88 +54,84 @@ func reset_to_load(_resource_id: int, _headless: bool, _path: StringName) -> boo
 	return true
  
 
-func load_res(_res_id: int) -> HenSaveData:
+func load_res(_res_id: StringName) -> HenSaveData:
 	var save_data: HenSaveData
-	var path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(str(_res_id)).path_join('save.tres')
+	var path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(_res_id).path_join('save.tres')
 
 	if FileAccess.file_exists(path):
 		save_data = ResourceLoader.load(path)
 	else:
-		save_data = HenSaveData.new()
-		save_data.id = str(_res_id)
+		print('error loading save')
+		# save_data = HenSaveData.new()
+		# save_data.id = _res_id
 		
-		var first_var: HenSaveVar = HenSaveVar.create()
+		# var first_var: HenSaveVar = HenSaveVar.create()
 
-		first_var.name = 'variable name'
-		first_var.type = &'String'
+		# first_var.name = 'variable name'
+		# first_var.type = &'String'
 
-		var first_func: HenSaveFunc = HenSaveFunc.create()
-		first_func.name = 'my func'
-		var param1: HenSaveParam = HenSaveParam.create()
-		var param2: HenSaveParam = HenSaveParam.create()
-		var param3: HenSaveParam = HenSaveParam.create()
+		# var first_func: HenSaveFunc = HenSaveFunc.create()
+		# first_func.name = 'my func'
+		# var param1: HenSaveParam = HenSaveParam.create()
+		# var param2: HenSaveParam = HenSaveParam.create()
+		# var param3: HenSaveParam = HenSaveParam.create()
 
-		param1.name = 'one'
-		param2.name = 'two'
-		param3.name = 'three'
+		# param1.name = 'one'
+		# param2.name = 'two'
+		# param3.name = 'three'
 
-		first_func.inputs.append(param1)
-		first_func.inputs.append(param2)
-		first_func.outputs.append(param3)
+		# first_func.inputs.append(param1)
+		# first_func.inputs.append(param2)
+		# first_func.outputs.append(param3)
 
-		var first_signal_callback: HenSaveSignalCallback = HenSaveSignalCallback.create()
+		# var first_signal_callback: HenSaveSignalCallback = HenSaveSignalCallback.create()
 
-		first_signal_callback.name = 'signal cb'
-		first_signal_callback.type = &'BaseButton'
-		first_signal_callback.signal_name = 'toggled'
-		first_signal_callback.signal_name_to_code = 'toggled'
+		# first_signal_callback.name = 'signal cb'
+		# first_signal_callback.type = &'BaseButton'
+		# first_signal_callback.signal_name = 'toggled'
+		# first_signal_callback.signal_name_to_code = 'toggled'
 
-		var param4: HenSaveParam = HenSaveParam.create()
+		# var param4: HenSaveParam = HenSaveParam.create()
 
-		param4.name = 'four'
+		# param4.name = 'four'
 
-		first_signal_callback.bind_params.append(param4)
+		# first_signal_callback.bind_params.append(param4)
 
-		var first_macro: HenSaveMacro = HenSaveMacro.create()
+		# var first_macro: HenSaveMacro = HenSaveMacro.create()
 
-		var param5: HenSaveParam = HenSaveParam.create()
-		var param6: HenSaveParam = HenSaveParam.create()
+		# var param5: HenSaveParam = HenSaveParam.create()
+		# var param6: HenSaveParam = HenSaveParam.create()
 
-		first_macro.inputs.append(param5)
-		first_macro.outputs.append(param6)
+		# first_macro.inputs.append(param5)
+		# first_macro.outputs.append(param6)
 	
-		var param7: HenSaveParam = HenSaveParam.create()
-		var param8: HenSaveParam = HenSaveParam.create()
+		# var param7: HenSaveParam = HenSaveParam.create()
+		# var param8: HenSaveParam = HenSaveParam.create()
 
-		first_macro.flow_inputs.append(param7)
-		first_macro.flow_outputs.append(param8)
+		# first_macro.flow_inputs.append(param7)
+		# first_macro.flow_outputs.append(param8)
 
-		first_macro.name = 'my macro'
+		# first_macro.name = 'my macro'
 
-		save_data.variables.append(first_var)
-		save_data.functions.append(first_func)
-		save_data.signals_callback.append(first_signal_callback)
-		save_data.macros.append(first_macro)
+		# save_data.variables.append(first_var)
+		# save_data.functions.append(first_func)
+		# save_data.signals_callback.append(first_signal_callback)
+		# save_data.macros.append(first_macro)
 	
 	return save_data
 
 
-func load(_path: StringName, _headless: bool = false) -> bool:
+func load(_id: StringName, _headless: bool = false) -> bool:
 	var start: int = Time.get_ticks_usec()
-	var resource_id: int = ResourceLoader.get_resource_uid(_path)
-	prints(_path, ResourceSaver.get_resource_id_for_path(_path))
-	# var resource_id: int = _path.get_file().get_basename().to_int() if _path.get_extension() == 'hengo' else ResourceLoader.get_resource_uid(_path)
-	var is_resource: bool = _path.begins_with(HenEnums.HENGO_SAVE_PATH) and _path.get_extension() == 'hengo'
-	# var path: StringName = get_data_path(resource_id) if not is_resource else _path
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var save_data: HenSaveData = load_res(resource_id)
+	var save_data: HenSaveData = load_res(_id)
 
 	global.SAVE_DATA = save_data
 
 	# loading hengo script data
 	if save_data:
-		if not await reset_to_load(resource_id, _headless, _path):
+		if not await reset_to_load(_id, _headless):
 			return false
 
 		var base_route: HenRouteData = HenRouteData.new(
@@ -149,10 +143,10 @@ func load(_path: StringName, _headless: bool = false) -> bool:
 
 		global.BASE_ROUTE = base_route
 
-		if not _headless: global.TABS.add_script_tab(resource_id)
+		# if not _headless: global.TABS.add_script_tab(resource_id)
 
 		# setting script configs
-		global.script_config.type = save_data.type
+		global.script_config.type = save_data.identity.type
 		global.node_counter = save_data.counter
 
 		# loading side bar list

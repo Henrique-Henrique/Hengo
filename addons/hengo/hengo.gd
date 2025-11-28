@@ -32,6 +32,9 @@ func _enter_tree():
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
 
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SCRIPTS_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)
+
 	main_scene = HENGO_ROOT.instantiate()
 
 	register_singletons()
@@ -189,20 +192,20 @@ func _handles(object: Object) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 
-	if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
-		if not await loader.load((object as GDScript).resource_path):
-			toast.notify.call_deferred("Failed to load script: " + (object as GDScript).resource_path, HenToast.MessageType.ERROR)
-			return true
+	# if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
+	# 	if not await loader.load((object as GDScript).resource_path):
+	# 		toast.notify.call_deferred("Failed to load script: " + (object as GDScript).resource_path, HenToast.MessageType.ERROR)
+	# 		return true
 		
-		global.CAM.can_scroll = true
-		return true
+	# 	global.CAM.can_scroll = true
+	# 	return true
 
-	if object is Resource and (object as Resource).resource_path.begins_with(HenEnums.HENGO_SAVE_PATH):
-		if not await loader.load((object as Resource).resource_path):
-			toast.notify.call_deferred("Failed to load save file: " + (object as Resource).resource_path, HenToast.MessageType.ERROR)
-			return true
+	# if object is Resource and (object as Resource).resource_path.begins_with(HenEnums.HENGO_SAVE_PATH):
+	# 	if not await loader.load((object as Resource).resource_path):
+	# 		toast.notify.call_deferred("Failed to load save file: " + (object as Resource).resource_path, HenToast.MessageType.ERROR)
+	# 		return true
 		
-		global.CAM.can_scroll = true
-		return true
+	# 	global.CAM.can_scroll = true
+	# 	return true
 
 	return false
