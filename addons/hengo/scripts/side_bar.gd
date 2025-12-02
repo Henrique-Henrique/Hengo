@@ -3,7 +3,6 @@ class_name HenSideBar extends PanelContainer
 
 var list: Tree
 
-
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 const CATEGORY_FONT = preload('res://addons/hengo/assets/fonts/Inter-Bold.ttf')
 const TREE_ITEM_STYLEBOX = preload('res://addons/hengo/resources/style_box/flat_tree.tres')
@@ -52,13 +51,11 @@ class DeleteItemCache:
 		idx = arr.find(item)
 		arr.erase(item)
 		item.emit_signal('deleted', true)
-		(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 	
 	func add() -> void:
 		arr.append(item)
 		HenUtils.move_array_item_to_idx(arr, item, idx)
 		item.emit_signal('deleted', false)
-		(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.list_changed.emit()
 
 
 func _ready() -> void:
@@ -75,8 +72,6 @@ func _ready() -> void:
 	list.mouse_exited.connect(_on_exit)
 
 	global.SIDE_BAR = self
-	global.SIDE_BAR_LIST = HenSideBarList.new()
-	global.SIDE_BAR_LIST.list_changed.connect(_on_list_changed)
 
 
 func _on_exit() -> void:
@@ -90,10 +85,6 @@ func _on_gui(_event: InputEvent) -> void:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 
 		if bt_id >= 0:
-			global.TOOLTIP.close()
-			return
-
-		if global.SIDE_BAR_LIST.inspecting:
 			global.TOOLTIP.close()
 			return
 
@@ -131,13 +122,14 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 
 			await RenderingServer.frame_pre_draw
 			
-			if obj.get('route'):
-				(Engine.get_singleton(&'Router') as HenRouter).change_route(obj.get('route'))
+		# 	if obj.get('route'):
+		# 		(Engine.get_singleton(&'Router') as HenRouter).change_route(obj.get('route'))
 		2:
-			(Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR_LIST.on_click(list.get_selected().get_metadata(0), _mouse_position)
+			var meta = list.get_selected().get_metadata(0)
+			if meta: HenInspector.edit_resource(meta)
 
 
-func _on_list_changed() -> void:
+func update() -> void:
 	list.clear()
 
 	var root: TreeItem = list.create_item()
@@ -171,41 +163,62 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	category.set_custom_font(0, CATEGORY_FONT)
 	category.set_button_color(0, 0, Color('#616161'))
 
-	var arr: Array
-
 	match _type:
 		AddType.VAR:
-			arr = global.SIDE_BAR_LIST.var_list
+			for var_data: HenSaveVar in global.SAVE_DATA.variables:
+				create_item(
+					category,
+					var_data.name,
+					var_data,
+					HenUtils.get_icon_texture(var_data.type),
+				)
 		AddType.FUNC:
-			arr = global.SIDE_BAR_LIST.func_list
+			for func_data: HenSaveFunc in global.SAVE_DATA.functions:
+				create_item(
+					category,
+					func_data.name,
+					func_data,
+					ICONS[_type],
+					BG_COLOR[_type]
+				)
 		AddType.SIGNAL_CALLBACK:
-			arr = global.SIDE_BAR_LIST.signal_callback_list
-		AddType.MACRO:
-			arr = global.SIDE_BAR_LIST.macro_list
-		AddType.LOCAL_VAR:
-			var router: HenRouter = Engine.get_singleton(&'Router')
-			if router.current_route.get_ref().get(&'local_vars') is Array:
-				arr = (router.current_route.get_ref().local_vars as Array)
+			for db_data: HenSaveSignalCallback in global.SAVE_DATA.signals_callback:
+				create_item(
+					category,
+					db_data.name,
+					db_data,
+					ICONS[_type],
+					BG_COLOR[_type]
+				)
 		AddType.SIGNAL:
-			arr = global.SIDE_BAR_LIST.signal_list
+			for signal_data: HenSaveSignal in global.SAVE_DATA.signals:
+				create_item(
+					category,
+					signal_data.name,
+					signal_data,
+					ICONS[_type],
+					BG_COLOR[_type]
+				)
+		AddType.MACRO:
+			for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
+				create_item(
+					category,
+					macro_data.name,
+					macro_data,
+					ICONS[_type],
+					BG_COLOR[_type]
+				)
 
-	for item_data in arr:
-		var item: TreeItem = category.create_child()
-		var icon: Texture2D
-		item.set_metadata(0, item_data)
-
-		var icon_color: Color
-		match _type:
-			AddType.VAR, AddType.LOCAL_VAR:
-				icon = HenUtils.get_icon_texture(item_data.type)
-				icon_color = Color.WHITE
-			_:
-				icon = ICONS[_type]
-				icon_color = BG_COLOR[_type]
-		
-		item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
-		item.set_custom_draw_callback(0, _draw_custom_button.bind(item_data.name, icon, icon_color))
-		item.set_custom_color(0, Color.WHITE)
+func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
+	var item: TreeItem = _category.create_child()
+	item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
+	item.set_metadata(0, _meta)
+	item.set_custom_draw_callback(0, _draw_custom_button.bind(
+		_name,
+		_icon,
+		_icon_color
+	))
+	item.set_custom_color(0, Color.WHITE)
 
 
 func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
@@ -246,5 +259,16 @@ func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_but
 	var _type: AddType = _item.get_metadata(0)
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
-	global.SIDE_BAR_LIST.change(_type)
-	global.SIDE_BAR_LIST.add()
+	match _type:
+		AddType.VAR:
+			global.SAVE_DATA.add_var()
+		AddType.FUNC:
+			global.SAVE_DATA.add_func()
+		AddType.SIGNAL:
+			global.SAVE_DATA.add_signal()
+		AddType.SIGNAL_CALLBACK:
+			global.SAVE_DATA.add_signals_callback()
+		AddType.MACRO:
+			global.SAVE_DATA.add_macro()
+		
+	update()

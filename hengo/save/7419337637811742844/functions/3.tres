@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="HenSaveFunc" load_steps=4 format=3 uid="uid://cmmtqk87lyug6"]
+
+[ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="1_0dc6v"]
+[ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="2_iu08x"]
+
+[sub_resource type="Resource" id="Resource_gg07r"]
+script = ExtResource("1_0dc6v")
+type = &"Sprite2D"
+name = "param_6"
+metadata/_custom_type_script = "uid://blv50wg83v7po"
+
+[resource]
+script = ExtResource("2_iu08x")
+inputs = Array[ExtResource("1_0dc6v")]([SubResource("Resource_gg07r")])
+name = "function_3"

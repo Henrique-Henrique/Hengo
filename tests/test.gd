@@ -42,12 +42,11 @@ static func set_global_config() -> void:
 	# setting global
 	var global_script_data := global.ScriptData.new()
 
-	global_script_data.id = 0
+	global_script_data.id = '0'
 	global_script_data.path = 'res://hengo/test.gd'
 	global_script_data.type = 'Sprite2D'
 
 	global.script_config = global_script_data
-	global.SIDE_BAR_LIST = HenSideBarList.new()
 	global.BASE_ROUTE_REF = HenLoader.BaseRouteRef.new()
 	global.BASE_ROUTE = HenRouteData.new(
 		'Base',

@@ -36,7 +36,6 @@ func reset_to_load(_id: StringName, _headless: bool) -> bool:
 		flow_connection.visible = false
 
 	global.BASE_ROUTE_REF = null
-	global.SIDE_BAR_LIST.clear()
 	global.SIDE_BAR_LIST_CACHE.clear()
 	global.SELECTED_VIRTUAL_CNODE.clear()
 	global.script_config = global.ScriptData.new()
@@ -148,9 +147,6 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 		# setting script configs
 		global.script_config.type = save_data.identity.type
 		global.node_counter = save_data.counter
-
-		# loading side bar list
-		# global.SIDE_BAR_LIST.load_save(save_data.side_bar_list)
 		
 		# loading v_cnodes
 		parse_and_get_vc_list_dict(save_data.virtual_cnode_list, base_route)

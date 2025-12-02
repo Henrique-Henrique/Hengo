@@ -101,13 +101,6 @@ func _on_pressed() -> void:
 		'get_prop', 'set_prop':
 			var arr: Array = []
 			
-			# local variables
-			# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-			# # variables
-			# for var_data:HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
-			# 	arr.append({name = var_data.name, type = var_data.type, ref = var_data})
-
 			# properties
 			for prop: Dictionary in ClassDB.class_get_property_list((Engine.get_singleton(&'Global') as HenGlobal).script_config.type if not custom_data else custom_data):
 				var prop_type: StringName = type_string(prop.type)

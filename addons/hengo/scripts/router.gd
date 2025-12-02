@@ -50,4 +50,4 @@ func change_route(_route: HenRouteData) -> void:
 	current_route = _route
 
 	global.CAM._check_virtual_cnodes()
-	global.SIDE_BAR._on_list_changed()
+	global.SIDE_BAR.update()

@@ -27,11 +27,13 @@ func _enter_tree():
 	# creating hengo folder
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_PATH)
-		# EditorInterface.get_resource_filesystem().scan()
 		 
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
 
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH.path_join('.gdignore')):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH.path_join('.gdignore'))
+	
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SCRIPTS_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)
 

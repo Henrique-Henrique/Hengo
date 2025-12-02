@@ -11,9 +11,18 @@ var signal_enter: HenVirtualCNode
 
 static func create() -> HenSaveSignalCallback:
 	var v: HenSaveSignalCallback = HenSaveSignalCallback.new()
-	v.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
-	v.type = &'Variant'
 	return v
+
+
+func _init() -> void:
+	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	name = get_new_name()
+	type = &'Variant'
+
+
+func get_new_name() -> String:
+	return 'signal_callback_' + str(id)
+
 
 func get_data() -> Dictionary:
 	var param_data: Array[Dictionary] = []

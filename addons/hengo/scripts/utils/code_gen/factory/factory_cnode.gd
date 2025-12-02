@@ -93,12 +93,12 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 #
 static func parse_connections(_refs: HenTypeReferences) -> void:
 	# generatin flow connection references
-	for flow_connection_data: Dictionary in _refs.script_data.flow_connections:
+	for flow_connection_data: Dictionary in _refs.save_data.flow_connections:
 		var flow_connection: HenTypeFlowConnection = HenTypeFlowConnection.new(flow_connection_data, _refs)
 		flow_connection.get_from().flow_connections.append(flow_connection)
 
 
 	# generating input connection references
-	for connection: Dictionary in _refs.script_data.connections:
+	for connection: Dictionary in _refs.save_data.connections:
 		var input: HenTypeInputConnection = HenTypeInputConnection.new(connection, _refs)
 		input.get_to().input_connections.append(input)

@@ -14,7 +14,6 @@ var ERROR_BT: HenErrorBt
 var CONNECTION_GUIDE: HenConnectionGuide
 var HENGO_ROOT: HenHengoRoot
 var BASE_ROUTE: HenRouteData
-var SIDE_BAR_LIST: HenSideBarList
 var SIDE_BAR: HenSideBar
 var SIDE_PANEL: PanelContainer
 var SIDE_BAR_LIST_CACHE: Dictionary = {}
@@ -30,6 +29,7 @@ var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
 var CNODE_UI: Panel
 var DASHBOARD: HenDashboard
 var SAVE_DATA: HenSaveData
+var CURRENT_INSPECTOR: HenInspector
 
 # cnodes
 var can_make_connection: bool = false

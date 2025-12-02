@@ -106,6 +106,10 @@ func _input(event: InputEvent) -> void:
 					global.HENGO_EDITOR_PLUGIN.hide_plugin()
 				elif e.keycode == KEY_E:
 					global.DASHBOARD.toggle_dashboard()
+				elif e.keycode == KEY_H:
+					pass
+					# var code_generation: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
+					# print(code_generation.get_code(global.SAVE_DATA))
 				
 			elif e.keycode == KEY_F8:
 				(Engine.get_singleton(&'Router') as HenRouter).change_route(global.BASE_ROUTE)
@@ -116,9 +120,18 @@ func _input(event: InputEvent) -> void:
 			if e.ctrl_pressed:
 				if e.keycode == KEY_Z:
 					get_tree().root.set_input_as_handled()
-					global.history.undo()
+
+					if global.CURRENT_INSPECTOR:
+						global.CURRENT_INSPECTOR.undo_redo(true)
+					else:
+						global.history.undo()
 				elif e.keycode == KEY_Y:
-					global.history.redo()
+					get_tree().root.set_input_as_handled()
+
+					if global.CURRENT_INSPECTOR:
+						global.CURRENT_INSPECTOR.undo_redo(false)
+					else:
+						global.history.redo()
 				elif e.keycode == KEY_C:
 					global.history.clear_history()
 				elif e.keycode == KEY_F:
