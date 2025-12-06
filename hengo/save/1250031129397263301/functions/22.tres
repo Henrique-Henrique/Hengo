@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="HenSaveFunc" load_steps=3 format=3 uid="uid://behnf80mrge1u"]
+
+[ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="1_wvqam"]
+[ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="2_1qa2y"]
+
+[resource]
+script = ExtResource("2_1qa2y")
+virtual_cnode_list = Array[Dictionary]([{
+&"can_delete": false,
+&"id": 23,
+&"name": "input",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(62, 48)",
+&"sub_type": 11,
+&"type": 0
+}, {
+&"can_delete": false,
+&"id": 24,
+&"name": "output",
+&"position": "Vector2(400, 0)",
+&"size": "Vector2(74, 48)",
+&"sub_type": 19,
+&"type": 0
+}])
+name = "function_22"
+id = 22

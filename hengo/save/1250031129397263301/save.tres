@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=10 format=3 uid="uid://52vjo2u288lu"]
+
+[ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_0rjht"]
+[ext_resource type="Resource" uid="uid://65mky3n66pc0" path="res://hengo/save/1250031129397263301/identity.tres" id="2_egb03"]
+[ext_resource type="Resource" uid="uid://bei6fp2gevho7" path="res://hengo/save/1250031129397263301/functions/6.tres" id="2_xkhiy"]
+[ext_resource type="Resource" uid="uid://behnf80mrge1u" path="res://hengo/save/1250031129397263301/functions/22.tres" id="3_wifnu"]
+[ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_xkhiy"]
+[ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_wifnu"]
+[ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_tinkm"]
+[ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_hddbd"]
+[ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="7_53lhb"]
+
+[resource]
+script = ExtResource("4_wifnu")
+counter = 28
+functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
+identity = ExtResource("2_egb03")
+connections = Array[Dictionary]([{
+&"from_id": 13,
+&"from_vc_id": 11,
+&"to_id": 10,
+&"to_vc_id": 9
+}])
+flow_connections = Array[Dictionary]([{
+&"from_id": 0,
+&"from_vc_id": 1,
+&"to_id": 0,
+&"to_vc_id": 2
+}, {
+&"from_id": 0,
+&"from_vc_id": 7,
+&"to_id": 0,
+&"to_vc_id": 9
+}])
+virtual_cnode_list = Array[Dictionary]([{
+&"can_delete": false,
+&"id": 1,
+&"name": "Stat State",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(99, 67)",
+&"sub_type": 37,
+&"type": 6
+}, {
+&"id": 2,
+&"name": "State 1",
+&"position": "Vector2(12, 167)",
+&"size": "Vector2(75, 44)",
+&"sub_type": 36,
+&"to_flow": [],
+&"type": 5,
+&"virtual_cnode_list": [{
+&"can_delete": false,
+&"id": 3,
+&"name": "enter",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(64, 48)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"can_delete": false,
+&"id": 4,
+&"name": "update",
+&"outputs": [{
+&"id": 5,
+&"name": "delta",
+&"type": &"float"
+}],
+&"position": "Vector2(400, 0)",
+&"size": "Vector2(104, 88)",
+&"sub_type": 10,
+&"type": 0
+}]
+}])

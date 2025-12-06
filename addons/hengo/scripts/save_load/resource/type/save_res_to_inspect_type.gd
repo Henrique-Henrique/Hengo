@@ -9,7 +9,10 @@ class_name HenSaveResToInspectType extends Resource
 
 # hides the default resource section properties
 func _validate_property(_property: Dictionary) -> void:
-	if _property.name in [&'resource_local_to_scene', &'resource_path', &'resource_name', &'id']:
+	if _property.name == &'id':
+		_property.usage = PROPERTY_USAGE_STORAGE
+
+	if _property.name in [&'resource_local_to_scene', &'resource_path', &'resource_name']:
 		_property.usage = PROPERTY_USAGE_NONE
 	
 
