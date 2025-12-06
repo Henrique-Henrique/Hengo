@@ -24,7 +24,6 @@ var CODE_PREVIEWER: HenCodePreview
 var GENERATE_PREVIEW_CODE: bool = false
 var SCRIPT_REF_CACHE: Dictionary = {}
 var TABS: HenTabs
-var BASE_ROUTE_REF: HenLoader.BaseRouteRef
 var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
 var CNODE_UI: Panel
 var DASHBOARD: HenDashboard
@@ -51,24 +50,15 @@ var history: UndoRedo
 
 # cam
 enum UI_STATE {
-    ONLY_STATE,
-    ONLY_CNODE,
-    BOTH
+	ONLY_STATE,
+	ONLY_CNODE,
+	BOTH
 }
 
 var ui_mode: UI_STATE = UI_STATE.BOTH
 
 # name generator
 var unique_id: int = 0
-
-
-class ScriptData:
-    var id: StringName
-    var path: StringName
-    var type: StringName
-
-# save load
-var script_config: ScriptData
 
 # parser
 var SCRIPTS_INFO: Dictionary = {}
@@ -82,8 +72,11 @@ var state_references: Dictionary = {}
 var node_counter: int = 0
 
 func get_new_node_counter() -> int:
-    node_counter += 1
-    return node_counter
+	if not SAVE_DATA:
+		return 0
+
+	SAVE_DATA.counter += 1
+	return SAVE_DATA.counter
 
 
 # debug
@@ -117,9 +110,9 @@ var terminal_content: String = ''
 
 
 func _ready() -> void:
-    var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-    signal_bus.set_terminal_text.connect(_on_terminal_msg)
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.set_terminal_text.connect(_on_terminal_msg)
 
 
 func _on_terminal_msg(_msg: String) -> void:
-    terminal_content += _msg
+	terminal_content += _msg

@@ -18,7 +18,7 @@ func _ready() -> void:
 
 
 func _on_visibility() -> void:
-	if visible and (Engine.get_singleton(&'Global') as HenGlobal).script_config:
+	if visible and (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA:
 		# var script_data: HenScriptData = HenSaver.generate_script_data()
 		# var code: String = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(script_data, true)
 		# set_code(code)

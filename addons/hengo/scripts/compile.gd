@@ -24,7 +24,7 @@ func start() -> void:
 	compile_bt.disabled = true
 
 
-func reset(_script_list: PackedStringArray) -> void:
+func reset() -> void:
 	set_process(false)
 	compile_bt.disabled = false
 
@@ -36,4 +36,4 @@ static func start_load() -> void:
 
 static func reset_load() -> void:
 	var instance: HenCompile = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%CompileContainer')
-	instance.reset([])
+	instance.reset()

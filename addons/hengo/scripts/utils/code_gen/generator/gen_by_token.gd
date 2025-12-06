@@ -42,7 +42,7 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
 			return indent + 'HengoState.INVALID_PLACEHOLDER'
-		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.DEEP_PROP:
+		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.VAR_FROM:
 			if _token.has('ref'):
 				return indent + get_prefix_with_dot(get_code_by_token(_token.ref)) + _token.name
 			return indent + prefix + _token.name
@@ -51,8 +51,8 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				name = _token.name,
 				value = get_code_by_token(_token.value)
 			})
-		HenVirtualCNode.SubType.SET_DEEP_PROP:
-			return indent + get_prefix_with_dot(get_code_by_token(_token.ref)) + '{name} = {value}'.format({
+		HenVirtualCNode.SubType.SET_VAR_FROM:
+			return indent + get_code_by_token(_token.ref) + '{name} = {value}'.format({
 				name = _token.name,
 				value = get_code_by_token(_token.value)
 			})

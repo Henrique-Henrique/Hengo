@@ -23,8 +23,8 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 	if _cnode.has(&'name_to_code'):
 		cn.name_to_code = _cnode.name_to_code
 
-	if _cnode.has('res_id'):
-		cn.res = HenUtils.load_res(_cnode.get('res_id', -1), cn.sub_type)
+	if _cnode.has('res'):
+		cn.res = _cnode.get('res')
 
 		if cn.res is HenSaveResType:
 			var res: HenSaveResType = cn.res
@@ -32,16 +32,17 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 			for input_data: Dictionary in res.get_inputs(cn.sub_type):
 				cn.inputs.append(HenFactoryIO.get_inout_from_dict(input_data))
 			
-			for input_data: Dictionary in res.get_outputs(cn.sub_type):
-				cn.outputs.append(HenFactoryIO.get_inout_from_dict(input_data))
+			for output_data: Dictionary in res.get_outputs(cn.sub_type):
+				cn.outputs.append(HenFactoryIO.get_inout_from_dict(output_data))
 	else:
 		if _cnode.has('inputs'):
 			for input_data: Dictionary in _cnode.inputs:
 				cn.inputs.append(HenFactoryIO.get_inout_from_dict(input_data))
 
 		if _cnode.has('outputs'):
-			for input_data: Dictionary in _cnode.outputs:
-				cn.outputs.append(HenFactoryIO.get_inout_from_dict(input_data))
+			for output_data: Dictionary in _cnode.outputs:
+				cn.outputs.append(HenFactoryIO.get_inout_from_dict(output_data))
+
 
 	# setting route types
 	if _parent_ref:

@@ -30,7 +30,7 @@ func _on_create_script() -> void:
 func _on_close() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	if global.script_config:
+	if global.SAVE_DATA:
 		hide_dashboard()
 		return
 	

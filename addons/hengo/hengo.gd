@@ -81,7 +81,6 @@ func _enter_tree():
 	global.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
 	global.SIDE_PANEL = main_scene.get_node('%SidePanel')
 	global.TABS = main_scene.get_node('%Tabs')
-	global.script_config = null
 	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUpContainer')
 	global.CNODE_UI = cnode_ui
 	global.DASHBOARD = main_scene.get_node('%DashBoard')
@@ -117,7 +116,6 @@ func _enter_tree():
 	global.connection_line_pool.clear()
 	global.flow_connection_line_pool.clear()
 	global.state_connection_line_pool.clear()
-	global.script_config = null
 
 	main_screen_changed.connect(_on_main_changed)
 
@@ -129,7 +127,6 @@ func _exit_tree():
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	global.can_instantiate_pool = false
-	global.script_config = null
 	global.SELECTED_VIRTUAL_CNODE.clear()
 
 	remove_debugger_plugin(debug_plugin)

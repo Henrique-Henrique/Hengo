@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="HenSaveMacro" load_steps=3 format=3 uid="uid://cd021xy6i2xfn"]
-
-[ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="1_x2ncb"]
-[ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="2_ft6as"]
-
-[resource]
-script = ExtResource("2_ft6as")
-name = "macro_5"

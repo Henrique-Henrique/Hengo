@@ -7,7 +7,6 @@ func _create_func_node(outputs: Array) -> HenVirtualCNode:
 		name = 'test func',
 		outputs = outputs,
 		sub_type = HenVirtualCNode.SubType.FUNC,
-		type = 0,
 		route = HenTest.get_base_route()
 	})
 
@@ -25,6 +24,7 @@ func test_single_output_function_call() -> void:
 
 # using the first output from a multi-return func should add a [0]
 func test_multi_output_function_first_return_as_input() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var refs: HenTypeReferences = HenTypeReferences.new()
 	var func_node: HenVirtualCNode = _create_func_node([
 		{id = 0, name = 'return_1', type = 'Variant'},
@@ -35,6 +35,7 @@ func test_multi_output_function_first_return_as_input() -> void:
 	# connect the func's first output to the void's input
 	void_node.get_new_input_connection_command(0, 0, func_node).add()
 
+	HenSaver.get_current_save_data(global)
 	var code = HenTest.construct_and_get_code(void_node, [func_node], refs)
 	assert_str(code).is_equal('test_void(test_func()[0])')
 

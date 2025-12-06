@@ -20,6 +20,8 @@ func register_singletons() -> void:
 	for singleton_name: StringName in HenEnums.SINGLETON_LIST:
 		var root: HenHengoRoot = HENGO_ROOT.instantiate()
 		Engine.register_singleton(singleton_name, root.get_node(NodePath(StringName('%'+ singleton_name))))
+	
+	HenTest.set_global_config()
 
 
 func unregister_singletons() -> void:

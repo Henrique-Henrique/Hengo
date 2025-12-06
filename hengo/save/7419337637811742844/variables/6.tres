@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="HenSaveVar" load_steps=2 format=3 uid="uid://cfc33lvinwk1t"]
-
-[ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="1_idrnd"]
-
-[resource]
-script = ExtResource("1_idrnd")
-type = &"Variant"
-name = "variable"

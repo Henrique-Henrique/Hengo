@@ -1,0 +1,87 @@
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=9 format=3 uid="uid://dkbv6m2woh7dq"]
+
+[ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_11rlu"]
+[ext_resource type="Resource" uid="uid://cxgmsywhkgbk" path="res://hengo/save/8137971539656368122/identity.tres" id="2_f0woa"]
+[ext_resource type="Resource" uid="uid://bb0qqp20emt7g" path="res://hengo/save/8137971539656368122/functions/2.tres" id="2_fq1gn"]
+[ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_fq1gn"]
+[ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_2mr4f"]
+[ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_4qeam"]
+[ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_tf6ao"]
+[ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="7_aiiiv"]
+
+[resource]
+script = ExtResource("4_2mr4f")
+counter = 18
+functions = Array[ExtResource("1_11rlu")]([ExtResource("2_fq1gn")])
+identity = ExtResource("2_f0woa")
+flow_connections = Array[Dictionary]([{
+&"from_id": 0,
+&"from_vc_id": 1,
+&"to_id": 0,
+&"to_vc_id": 7
+}, {
+&"from_id": 0,
+&"from_vc_id": 8,
+&"to_id": 0,
+&"to_vc_id": 11
+}, {
+&"from_id": 0,
+&"from_vc_id": 3,
+&"to_id": 0,
+&"to_vc_id": 5
+}])
+virtual_cnode_list = Array[Dictionary]([{
+&"can_delete": false,
+&"id": 1,
+&"name": "Stat State",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(99, 67)",
+&"sub_type": 37,
+&"type": 6
+}, {
+&"id": 7,
+&"name": "State 1",
+&"position": "Vector2(12, 167)",
+&"size": "Vector2(75, 44)",
+&"sub_type": 36,
+&"to_flow": [],
+&"type": 5,
+&"virtual_cnode_list": [{
+&"can_delete": false,
+&"id": 8,
+&"name": "enter",
+&"position": "Vector2(0, 0)",
+&"size": "Vector2(64, 48)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"can_delete": false,
+&"id": 9,
+&"name": "update",
+&"outputs": [{
+&"id": 10,
+&"name": "delta",
+&"type": &"float"
+}],
+&"position": "Vector2(208.5, 0)",
+&"size": "Vector2(104, 88)",
+&"sub_type": 10,
+&"type": 0
+}, {
+&"category": &"native",
+&"id": 11,
+&"inputs": [{
+&"category": &"default_value",
+&"code_value": "null",
+&"id": 12,
+&"name": "content",
+&"type": &"Variant",
+&"value": "null"
+}],
+&"name": "print",
+&"position": "Vector2(-44.5, 148)",
+&"size": "Vector2(153, 88)",
+&"sub_type": 1,
+&"type": 0
+}]
+}])

@@ -122,23 +122,3 @@ static func get_icon_texture(_type: StringName) -> Texture2D:
 		return EditorInterface.get_editor_theme().get_icon(_type, &'EditorIcons')
 	
 	return NONE_ICON
-
-
-static func load_res(_id: int, _sub_type: HenVirtualCNode.SubType, _res_id: int = -1) -> Resource:
-	var res_id: StringName = ''
-
-	if _res_id == -1:
-		var global: HenGlobal = Engine.get_singleton(&'Global')
-		res_id = global.SAVE_DATA.id
-
-	var script_id: StringName = res_id
-	var script_path: StringName = HenEnums.HENGO_SAVE_PATH + script_id
-
-	match _sub_type:
-		HenVirtualCNode.SubType.VAR, \
-		HenVirtualCNode.SubType.SET_VAR:
-			return load(script_path + '/variables/' + str(_id) + '.tres')
-		HenVirtualCNode.SubType.USER_FUNC:
-			return load(script_path + '/functions/' + str(_id) + '.tres')
-
-	return null

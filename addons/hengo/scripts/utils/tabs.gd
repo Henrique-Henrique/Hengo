@@ -21,7 +21,7 @@ func _on_scripts_generation_started() -> void:
 		set_tab_disabled(idx, true)
 
 	
-func _on_scripts_generation_finished(_script_list: PackedStringArray) -> void:
+func _on_scripts_generation_finished() -> void:
 	for idx in tab_count:
 		set_tab_disabled(idx, false)
 

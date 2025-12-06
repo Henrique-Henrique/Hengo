@@ -3,8 +3,6 @@ class_name HenSaveFunc extends HenSaveResTypeWithRoute
 
 @export var inputs: Array[HenSaveParam]
 @export var outputs: Array[HenSaveParam]
-var input_ref: WeakRef
-var output_ref: WeakRef
 
 
 static func create() -> HenSaveFunc:
@@ -15,6 +13,32 @@ static func create() -> HenSaveFunc:
 func _init() -> void:
 	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 	name = get_new_name()
+
+	route = HenRouteData.new(
+		name,
+		HenRouter.ROUTE_TYPE.FUNC,
+		HenUtilsName.get_unique_name(),
+	)
+
+	HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'input',
+		sub_type = HenVirtualCNode.SubType.FUNC_INPUT,
+		route = route,
+		position = Vector2.ZERO,
+		ref = self,
+		can_delete = false,
+		res = self,
+	})
+
+	HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'output',
+		sub_type = HenVirtualCNode.SubType.FUNC_OUTPUT,
+		route = route,
+		position = Vector2(400, 0),
+		ref = self,
+		can_delete = false,
+		res = self,
+	})
 
 
 func get_new_name() -> String:
@@ -36,8 +60,8 @@ func get_data() -> Dictionary:
 	for lv: HenSaveParam in local_vars:
 		lvars.append(lv.get_data())
 
-	for cnode: Dictionary in virtual_cnode_list:
-		vc_list.append(cnode)
+	for cnode: HenVirtualCNode in route.virtual_cnode_list:
+		vc_list.append(cnode.get_save(null))
 
 	return {
 		name = name,
@@ -52,8 +76,15 @@ func get_data() -> Dictionary:
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
 
-	for param: HenSaveParam in inputs:
-		arr.append(param.get_data())
+	match _type:
+		HenVirtualCNode.SubType.FUNC_OUTPUT:
+			for param: HenSaveParam in outputs:
+				arr.append(param.get_data())
+		HenVirtualCNode.SubType.FUNC_INPUT:
+			pass
+		_:
+			for param: HenSaveParam in inputs:
+				arr.append(param.get_data())
 
 	return arr
 
@@ -61,8 +92,15 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
 
-	for param: HenSaveParam in outputs:
-		arr.append(param.get_data())
+	match _type:
+		HenVirtualCNode.SubType.FUNC_INPUT:
+			for param: HenSaveParam in inputs:
+				arr.append(param.get_data())
+		HenVirtualCNode.SubType.FUNC_OUTPUT:
+			pass
+		_:
+			for param: HenSaveParam in outputs:
+				arr.append(param.get_data())
 
 	return arr
 

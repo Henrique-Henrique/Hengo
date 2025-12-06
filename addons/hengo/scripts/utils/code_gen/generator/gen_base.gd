@@ -149,6 +149,7 @@ static func get_base_script_code(_refs: HenTypeReferences) -> String:
 static func _parse_virtual_cnode(_cnode_list: Array[HenTypeCnode]) -> Dictionary:
 	var data: Dictionary = {}
 
+
 	for cnode: HenTypeCnode in _cnode_list:
 		if cnode.flow_connections.is_empty():
 			continue

@@ -27,6 +27,7 @@ func _ready() -> void:
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	signal_bus.request_code_search_show_list.connect(_on_list_request)
+	signal_bus.request_code_search_show_categories.connect(_show_custom_categories)
 	signal_bus.request_code_search_type_result.connect(_on_search_result)
 	signal_bus.request_code_search_select.connect(_on_select)
 
@@ -80,6 +81,11 @@ func back_to_classes() -> void:
 	clear_list()
 	hide_navigation_info()
 	tab_container.set_current_tab(0)
+
+
+func _show_custom_categories(_list: Array) -> void:
+	clear_list()
+	set_data.call_deferred(_list)
 
 
 func _search(_text: String) -> void:
@@ -150,7 +156,7 @@ func _open_categories() -> void:
 	update()
 
 
-func set_data(_api_list: Array[Dictionary]) -> void:
+func set_data(_api_list: Array) -> void:
 	var _list: HenVirtualList = get_node('%VirtualList')
 	_list.set_data(_api_list)
 
@@ -162,9 +168,11 @@ func update() -> void:
 	if not data:
 		return
 	
-	var api_list: Array[Dictionary] = [api.get_side_bar_list(), {_class_name = 'Native', categories = api.get_native_list_raw(), is_native = true}]
 	var global: HenGlobal = Engine.get_singleton('Global')
-	var _class: StringName = global.script_config.type
+	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+
+	var api_list: Array[Dictionary] = [map_dep.get_code_search_list(), api.get_side_bar_list(), {_class_name = 'Native', categories = api.get_native_list_raw(), is_native = true}]
+	var _class: StringName = global.SAVE_DATA.identity.type
 	var item_list: Array = get_class_parent_recursively(_class)
 	var io_type: StringName = config.get(&'io_type', &'')
 	var type: StringName = config.get(&'type', &'')

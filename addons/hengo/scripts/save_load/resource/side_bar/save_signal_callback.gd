@@ -7,7 +7,6 @@ class_name HenSaveSignalCallback extends HenSaveResTypeWithRoute
 @export var signal_name: StringName
 @export var signal_name_to_code: StringName
 
-var signal_enter: HenVirtualCNode
 
 static func create() -> HenSaveSignalCallback:
 	var v: HenSaveSignalCallback = HenSaveSignalCallback.new()
@@ -18,6 +17,21 @@ func _init() -> void:
 	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 	name = get_new_name()
 	type = &'Variant'
+
+	route = HenRouteData.new(
+		name,
+		HenRouter.ROUTE_TYPE.SIGNAL,
+		HenUtilsName.get_unique_name(),
+	)
+
+	HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'signal',
+		sub_type = HenVirtualCNode.SubType.SIGNAL_ENTER,
+		route = route,
+		position = Vector2.ZERO,
+		res = self,
+		can_delete = false
+	})
 
 
 func get_new_name() -> String:
@@ -39,8 +53,8 @@ func get_data() -> Dictionary:
 	for lv: HenSaveParam in local_vars:
 		lvars.append(lv.get_data())
 
-	for cnode: Dictionary in virtual_cnode_list:
-		vc_list.append(cnode)
+	for cnode: HenVirtualCNode in route.virtual_cnode_list:
+		vc_list.append(cnode.get_save(null))
 
 	return {
 		name = name,
@@ -60,6 +74,7 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
 			var arr: Array[Dictionary] = [
 				{
+					id = 0,
 					name = type,
 					type = type,
 					is_ref = true
@@ -71,13 +86,23 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 			
 			return arr
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
-			return [ {name = type, type = type, is_ref = true}]
+			return [ {id = 0, name = type, type = type, is_ref = true}]
 
 	return []
 
 
 func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	return []
+	var arr: Array[Dictionary] = []
+
+	match _type:
+		HenVirtualCNode.SubType.SIGNAL_ENTER:
+			for param: HenSaveParam in params:
+				arr.append(param.get_data())
+			
+			for param: HenSaveParam in bind_params:
+				arr.append(param.get_data())
+
+	return arr
 
 
 func get_connect_cnode_data() -> Dictionary:

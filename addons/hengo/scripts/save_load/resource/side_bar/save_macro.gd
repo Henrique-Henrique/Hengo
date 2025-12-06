@@ -6,9 +6,6 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 @export var flow_inputs: Array[HenSaveParam]
 @export var flow_outputs: Array[HenSaveParam]
 
-var input_ref: WeakRef
-var output_ref: WeakRef
-
 
 static func create() -> HenSaveMacro:
 	var v: HenSaveMacro = HenSaveMacro.new()
@@ -18,6 +15,10 @@ static func create() -> HenSaveMacro:
 func _init() -> void:
 	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 	name = get_new_name()
+
+
+func get_data() -> Dictionary:
+	return {}
 
 
 func get_new_name() -> String:

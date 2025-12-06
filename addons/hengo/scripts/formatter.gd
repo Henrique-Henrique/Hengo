@@ -403,10 +403,5 @@ static func format_current_route() -> void:
 	if not router.current_route:
 		return
 
-	var ref = router.current_route.get_ref()
 	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
-
-	if ref is HenVirtualCNode:
-		thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind((ref as HenVirtualCNode).children.virtual_cnode_list))
-	elif ref is HenLoader.BaseRouteRef:
-		thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind((ref as HenLoader.BaseRouteRef).virtual_cnode_list))
+	thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind(router.get_current_route_v_cnodes()))

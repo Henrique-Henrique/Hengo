@@ -24,54 +24,45 @@ class CNodeConnection:
 
 
 static func get_base_route() -> HenRouteData:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	if not global.BASE_ROUTE_REF:
-		global.BASE_ROUTE_REF = HenLoader.BaseRouteRef.new()
-	
 	return HenRouteData.new(
 		'Base',
 		HenRouter.ROUTE_TYPE.BASE,
 		'0',
-		weakref(global.BASE_ROUTE_REF)
 	)
 
 
 static func set_global_config() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	# setting global
-	var global_script_data := global.ScriptData.new()
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	global_script_data.id = '0'
-	global_script_data.path = 'res://hengo/test.gd'
-	global_script_data.type = 'Sprite2D'
+	global.SAVE_DATA = HenSaveData.new()
+	global.SAVE_DATA.identity = HenSaveDataIdentity.create(str(ResourceUID.create_id()), 'Node', 'JustTest')
 
-	global.script_config = global_script_data
-	global.BASE_ROUTE_REF = HenLoader.BaseRouteRef.new()
 	global.BASE_ROUTE = HenRouteData.new(
 		'Base',
 		HenRouter.ROUTE_TYPE.BASE,
 		'0',
-		weakref(global.BASE_ROUTE_REF)
 	)
+
+	router.current_route = global.BASE_ROUTE
 
 
 static func get_parent_ref(_vc: HenVirtualCNode, _refs: HenTypeReferences) -> RefCounted:
 	var parent_ref
 
-	if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
-		parent_ref = HenFactoryCNode.get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(_refs.script_data), _refs)
-	else:
-		parent_ref = _vc.route_info.route_ref.ref
+	# if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
+	# 	parent_ref = HenFactoryCNode.get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(_refs.save_data), _refs)
+	# else:
+	# 	parent_ref = _vc.route_info.route_ref.ref
 	
 	return parent_ref
 
 
 static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenTypeReferences) -> String:
 	for vc: HenVirtualCNode in _vc_dependencies:
-		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.script_data), _refs, get_parent_ref(vc, _refs))
+		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.save_data), _refs, get_parent_ref(vc, _refs))
 
-	var vc: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.script_data), _refs, get_parent_ref(_base_vc, _refs))
+	var vc: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.save_data), _refs, get_parent_ref(_base_vc, _refs))
 	var code: String = ''
 
 	HenFactoryCNode.parse_connections(_refs)

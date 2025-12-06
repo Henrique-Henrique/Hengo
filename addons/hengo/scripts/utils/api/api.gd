@@ -471,8 +471,22 @@ func decompress_and_get_data(compressed_data: CompressedData) -> Variant:
 
 
 func get_side_bar_list() -> Dictionary:
-	var dt: Dictionary = {_class_name = 'Hengo', categories = []}
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
+
+	ast.identity = global.SAVE_DATA.identity
+	ast.macros = global.SAVE_DATA.macros
+	ast.variables = global.SAVE_DATA.variables
+	ast.functions = global.SAVE_DATA.functions
+	ast.signals = global.SAVE_DATA.signals
+	ast.signals_callback = global.SAVE_DATA.signals_callback
+
+
+	return {_class_name = 'Hengo', categories = get_side_bar_categories(ast)}
+
+
+func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_script: bool = false) -> Array:
+	var arr: Array = []
 	
 	# datas
 	var func_category: Dictionary = {
@@ -500,30 +514,29 @@ func get_side_bar_list() -> Dictionary:
 		method_list = []
 	}
 
-
-	for func_data: HenSaveFunc in global.SAVE_DATA.functions:
+	for func_data: HenSaveFunc in _ast.functions:
 		(func_category.method_list as Array).append({
 			_class_name = 'Function',
 			name = func_data.name,
 			data = func_data.get_cnode_data()
 		})
 	
-	for var_data: HenSaveVar in global.SAVE_DATA.variables:
+	for var_data: HenSaveVar in _ast.variables:
 		var getter_name: String = 'get: ' + var_data.name
 		var setter_name: String = 'set: ' + var_data.name
 
 		(var_category.method_list as Array).append({
 			_class_name = 'Variable',
 			name = getter_name,
-			data = var_data.get_getter_cnode_data()
+			data = var_data.get_getter_cnode_data(_from_another_script)
 		})
 		(var_category.method_list as Array).append({
 			_class_name = 'Variable',
 			name = setter_name,
-			data = var_data.get_setter_cnode_data()
+			data = var_data.get_setter_cnode_data(_from_another_script)
 		})
 
-	for signal_data: HenSaveSignalCallback in global.SAVE_DATA.signals_callback:
+	for signal_data: HenSaveSignalCallback in _ast.signals_callback:
 		var connect_name: String = 'connect: ' + signal_data.name
 		var disconnect_name: String = 'disconnect: ' + signal_data.name
 
@@ -538,19 +551,19 @@ func get_side_bar_list() -> Dictionary:
 			data = signal_data.get_diconnect_cnode_data()
 		})
 
-	for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
+	for macro_data: HenSaveMacro in _ast.macros:
 		(macro_category.method_list as Array).append({
 			_class_name = 'Macro',
 			name = macro_data.name,
 			data = macro_data.get_cnode_data()
 		})
 
-	(dt.categories as Array).append(func_category)
-	(dt.categories as Array).append(var_category)
-	(dt.categories as Array).append(signal_category)
-	(dt.categories as Array).append(macro_category)
+	arr.append(func_category)
+	arr.append(var_category)
+	arr.append(signal_category)
+	arr.append(macro_category)
 
-	return dt
+	return arr
 
 
 func get_native_list_raw() -> Array:

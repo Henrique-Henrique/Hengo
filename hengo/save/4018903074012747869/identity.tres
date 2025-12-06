@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="HenSaveDataIdentity" load_steps=2 format=3 uid="uid://dbbi13hiwxbl8"]
+
+[ext_resource type="Script" uid="uid://chtcn73obhw0a" path="res://addons/hengo/scripts/save_load/resource/save_data_identity.gd" id="1_2vf2a"]
+
+[resource]
+script = ExtResource("1_2vf2a")
+id = &"4018903074012747869"
+type = &"Node"
+name = "first"

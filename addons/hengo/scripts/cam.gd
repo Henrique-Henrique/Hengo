@@ -117,9 +117,8 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 	)
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	if router.current_route and is_instance_valid(router.current_route.get('ref')):
-		for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
-			v_cnode.check_visibility(rect)
+	for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
+		v_cnode.check_visibility(rect)
 
 
 func get_rect() -> Rect2:

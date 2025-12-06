@@ -9,7 +9,7 @@ class_name HenVirtualList extends Control
 
 const Y_PADDING = 20
 
-var _full_data: Array[Dictionary] = []
+var _full_data: Array = []
 var _item_nodes: Array[Control] = []
 var _layout_cache: Array[Dictionary] = []
 var _is_updating: bool = false
@@ -32,7 +32,7 @@ func _on_scroll_changed(_value: float = 0.0) -> void:
 	_update_visible_items()
 
 
-func set_data(data: Array[Dictionary]) -> void:
+func set_data(data: Array) -> void:
 	_full_data = data
 	_heights_calculated.clear()
 	_build_layout_cache()

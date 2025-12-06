@@ -17,9 +17,7 @@ func add() -> void:
 	if not v_cnode.state.is_deleted:
 		return
 
-	var list: Array = v_cnode.route_info.route_ref.get_ref().children.virtual_cnode_list \
-		if v_cnode.route_info.route_ref.get_ref() is HenVirtualCNode \
-		else v_cnode.route_info.route_ref.get_ref().virtual_cnode_list
+	var list: Array = v_cnode.route_info.route_ref.virtual_cnode_list
 
 	if not list.has(v_cnode):
 		list.append(v_cnode)
@@ -56,9 +54,7 @@ func remove() -> void:
 	if v_cnode.state.is_deleted:
 		return
 
-	var list: Array = v_cnode.route_info.route_ref.get_ref().children.virtual_cnode_list \
-		if v_cnode.route_info.route_ref.get_ref() is HenVirtualCNode \
-		else v_cnode.route_info.route_ref.get_ref().virtual_cnode_list
+	var list: Array = v_cnode.route_info.route_ref.virtual_cnode_list
 	
 	list.erase(v_cnode)
 

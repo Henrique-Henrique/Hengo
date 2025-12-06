@@ -19,10 +19,11 @@ func _on_pressed() -> void:
 
 	match type:
 		'state_transition':
+			pass
 			# all transitions
-			if router.current_route.type == router.ROUTE_TYPE.STATE:
-				options = (router.current_route.get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
-					return {name = x.name, ref = x})
+			# if router.current_route.type == router.ROUTE_TYPE.STATE:
+				# options = (router.current_route.get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
+				# 	return {name = x.name, ref = x})
 		'action':
 			var arr: Array = []
 
@@ -76,7 +77,7 @@ func _on_pressed() -> void:
 					})
 			
 			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list(global.script_config.type):
+			for prop: Dictionary in ClassDB.class_get_property_list(global.SAVE_DATA.identity.type):
 				var _type: StringName = input_ref.type
 				var prop_type: StringName = type_string(prop.type)
 				
@@ -102,7 +103,7 @@ func _on_pressed() -> void:
 			var arr: Array = []
 			
 			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list((Engine.get_singleton(&'Global') as HenGlobal).script_config.type if not custom_data else custom_data):
+			for prop: Dictionary in ClassDB.class_get_property_list((Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.identity.type if not custom_data else custom_data):
 				var prop_type: StringName = type_string(prop.type)
 				if prop.type != TYPE_NIL:
 					arr.append({

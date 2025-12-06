@@ -107,9 +107,12 @@ func _input(event: InputEvent) -> void:
 				elif e.keycode == KEY_E:
 					global.DASHBOARD.toggle_dashboard()
 				elif e.keycode == KEY_H:
-					pass
-					# var code_generation: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
-					# print(code_generation.get_code(global.SAVE_DATA))
+					var code_generation: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
+					print(
+						code_generation.get_code(
+							HenSaver.get_current_save_data(global)
+						)
+					)
 				
 			elif e.keycode == KEY_F8:
 				(Engine.get_singleton(&'Router') as HenRouter).change_route(global.BASE_ROUTE)

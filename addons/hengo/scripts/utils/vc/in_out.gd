@@ -144,7 +144,7 @@ func reset_input_value() -> void:
 	category = &'default_value'
 	is_prop = false
 
-	if global.script_config and global.script_config.type == type:
+	if global.SAVE_DATA and global.SAVE_DATA.identity.type == type:
 		code_value = '_ref.'
 		is_ref = true
 		return

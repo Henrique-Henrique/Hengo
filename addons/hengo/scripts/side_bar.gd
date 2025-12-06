@@ -121,9 +121,11 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 			var obj = list.get_selected().get_metadata(0)
 
 			await RenderingServer.frame_pre_draw
-			
-		# 	if obj.get('route'):
-		# 		(Engine.get_singleton(&'Router') as HenRouter).change_route(obj.get('route'))
+
+			if obj is HenSaveResTypeWithRoute:
+				(Engine.get_singleton(&'Router') as HenRouter).change_route((obj as HenSaveResTypeWithRoute).route)
+			elif obj is HenRouteData:
+				(Engine.get_singleton(&'Router') as HenRouter).change_route(obj as HenRouteData)
 		2:
 			var meta = list.get_selected().get_metadata(0)
 			if meta: HenInspector.edit_resource(meta)
@@ -136,7 +138,7 @@ func update() -> void:
 	var base: TreeItem = root.create_child()
 
 	base.set_text(0, 'Base')
-	base.set_metadata(0, {route = (Engine.get_singleton(&'Global') as HenGlobal).BASE_ROUTE})
+	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).BASE_ROUTE)
 
 	# variables
 	_add_categories(root, 'Signals', AddType.SIGNAL)
@@ -144,10 +146,6 @@ func update() -> void:
 	_add_categories(root, 'Functions', AddType.FUNC)
 	_add_categories(root, 'Signals Callback', AddType.SIGNAL_CALLBACK)
 	_add_categories(root, 'Macros', AddType.MACRO)
-
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	if router.current_route and router.current_route.get_ref() and router.current_route.get_ref().get(&'local_vars') is Array:
-		_add_categories(root, 'Local Variables', AddType.LOCAL_VAR)
 
 
 func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:

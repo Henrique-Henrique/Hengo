@@ -7,7 +7,6 @@ var from_flow_list: Array = []
 
 
 class BaseRouteRef extends RefCounted:
-	signal loaded_new_project
 	var virtual_cnode_list: Array = []
 
 
@@ -35,11 +34,8 @@ func reset_to_load(_id: StringName, _headless: bool) -> bool:
 	for flow_connection: HenFlowConnectionLine in global.flow_connection_line_pool:
 		flow_connection.visible = false
 
-	global.BASE_ROUTE_REF = null
 	global.SIDE_BAR_LIST_CACHE.clear()
 	global.SELECTED_VIRTUAL_CNODE.clear()
-	global.script_config = global.ScriptData.new()
-	global.script_config.id = _id
 
 	# confirming queue free before check errors
 	if not _headless: await global.CAM.get_tree().process_frame
@@ -48,7 +44,6 @@ func reset_to_load(_id: StringName, _headless: bool) -> bool:
 	router.current_route = null
 	router.comment_reference = {}
 	global.history = UndoRedo.new()
-	global.BASE_ROUTE_REF = BaseRouteRef.new()
 
 	return true
  
@@ -137,19 +132,16 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 			'Base',
 			HenRouter.ROUTE_TYPE.BASE,
 			HenUtilsName.get_unique_name(),
-			weakref(global.BASE_ROUTE_REF)
 		)
 
 		global.BASE_ROUTE = base_route
-
-		# if not _headless: global.TABS.add_script_tab(resource_id)
-
-		# setting script configs
-		global.script_config.type = save_data.identity.type
-		global.node_counter = save_data.counter
 		
 		# loading v_cnodes
-		parse_and_get_vc_list_dict(save_data.virtual_cnode_list, base_route)
+		base_route.virtual_cnode_list = parse_and_get_vc_list_dict(save_data.virtual_cnode_list, base_route)
+
+		generate_item_with_routes(save_data.functions)
+		generate_item_with_routes(save_data.macros)
+		generate_item_with_routes(save_data.signals_callback)
 
 		# adding in/out connections
 		for input_data: Dictionary in save_data.connections:
@@ -186,14 +178,19 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 	return true
 
 
+func generate_item_with_routes(_arr: Array) -> void:
+	for item: HenSaveResTypeWithRoute in _arr:
+		item.route.virtual_cnode_list = parse_and_get_vc_list_dict(item.virtual_cnode_list, item.route, item)
+
+
 func show_class_name() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
-	if not global.script_config:
+	if not global.SAVE_DATA:
 		return
 	
 	var cl_label: Button = global.HENGO_ROOT.get_node('%ClassName')
-	var type = global.script_config.type
+	var type = global.SAVE_DATA.identity.type
 	var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
 
 	cl_label.visible = true
@@ -212,11 +209,16 @@ func show_class_name() -> void:
 		sb.bg_color = Color('#0000004a')
 
 
-func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData) -> Array:
-	var vc_list: Array = []
+func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData, _item: HenSaveResTypeWithRoute = null) -> Array:
+	var vc_list: Array[HenVirtualCNode] = []
 
 	for _config: Dictionary in _cnode_list:
 		_config.route = _route
+
+		# adding item reference here to prevent circular reference on saving
+		match _config.get('sub_type'):
+			HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.FUNC_OUTPUT:
+				_config.res = _item
 
 		var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(_config)
 		_config.erase('route')
@@ -230,7 +232,7 @@ func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData) -> Arr
 		
 		# if has sub vcnodes (basically states and etc)
 		if _config.has('virtual_cnode_list'):
-			vc.children.virtual_cnode_list = parse_and_get_vc_list_dict(_config.virtual_cnode_list, vc.route_info.route)
+			vc.route_info.route.virtual_cnode_list = parse_and_get_vc_list_dict(_config.virtual_cnode_list, vc.route_info.route, _item)
 
 		vc_list.append(vc)
 
