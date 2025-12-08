@@ -55,7 +55,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Vector2"
 }],
 &"position": "Vector2(-285, 148)",
-&"size": "Vector2(205, 88)",
+&"size": "Vector2(206, 88)",
 &"sub_type": 0,
 &"type": 0
 }])

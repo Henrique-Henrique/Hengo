@@ -2,7 +2,7 @@ class_name HenFactoryCNode extends RefCounted
 
 
 static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _parent_ref = null) -> HenTypeCnode:
-	var cn: HenTypeCnode = HenTypeCnode.new()
+	var cn: HenTypeCnode = HenTypeCnode.new();
 
 	cn.id = int(_cnode.id)
 	cn.name = _cnode.name
@@ -43,10 +43,11 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 			for output_data: Dictionary in _cnode.outputs:
 				cn.outputs.append(HenFactoryIO.get_inout_from_dict(output_data))
 
-
 	# setting route types
 	if _parent_ref:
-		if _parent_ref is HenTypeCnode and _parent_ref.type == HenVirtualCNode.Type.STATE:
+		if (_parent_ref is HenTypeCnode and _parent_ref.type == HenVirtualCNode.Type.STATE) \
+		or \
+		(_parent_ref is HenVirtualCNode and (_parent_ref as HenVirtualCNode).identity.type == HenVirtualCNode.Type.STATE):
 			cn.route_type = HenRouter.ROUTE_TYPE.STATE
 		elif _parent_ref is HenTypeFunc:
 			cn.route_type = HenRouter.ROUTE_TYPE.FUNC

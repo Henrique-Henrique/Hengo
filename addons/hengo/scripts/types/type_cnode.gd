@@ -264,6 +264,13 @@ func get_input_token(_id: int) -> Dictionary:
 				'state_transition':
 					data.value = '&"{0}"'.format([(data.value as String).to_snake_case()])
 
+		if data.get('is_ref', false) and not data.get('use_self', false):
+			if HenUtils.is_type_relation_valid(
+					global.SAVE_DATA.identity.type,
+					input.type,
+				):
+					data.ref_value = '_ref'
+
 		return data
 
 	var not_connected: Dictionary = {type = HenVirtualCNode.SubType.NOT_CONNECTED, input_type = input.type, use_self = true, prop_name = input.name}
@@ -292,6 +299,7 @@ func get_output_token_list() -> Array:
 
 func get_token(_id: int = 0) -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	var token: Dictionary = {
 		vc_id = id,
 		type = sub_type,

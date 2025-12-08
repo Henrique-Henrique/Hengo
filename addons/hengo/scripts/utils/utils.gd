@@ -39,7 +39,7 @@ static func is_type_relation_valid(_type: StringName, _to_type: StringName) -> b
 
 	# check some rules for types e.g. String <-> StringName
 	if HenEnums.RULES_TO_CONNECT.has(_to_type):
-		if HenEnums.RULES_TO_CONNECT[_to_type].has(_type):
+		if (HenEnums.RULES_TO_CONNECT[_to_type] as Array).has(_type):
 			return true
 
 	# check if class is from Node, this is useful when using methods like "get_node" e.g. Node -> BaseButton

@@ -120,7 +120,6 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 		if prop_container.get_child_count() > 4:
 			return
 
-
 		match sub_type:
 			'@dropdown':
 				var dropdown = DROPDOWN_SCENE.instantiate()
@@ -164,10 +163,13 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						var l: Label = CNODE_INPUT_LABEL.instantiate()
 
 						if prop_container.get_child_count() < 3:
-							# l.text = input_ref.code_value
-							if l.text == '_ref.':
+							var global: HenGlobal = Engine.get_singleton(&'Global')
+							if HenUtils.is_type_relation_valid(
+								global.SAVE_DATA.identity.type,
+								io_type,
+							):
 								l.text = 'self'
-							
+
 							prop_container.add_child(l)
 						
 

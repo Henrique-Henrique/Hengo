@@ -12,7 +12,7 @@
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 28
+counter = 35
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
 connections = Array[Dictionary]([{
@@ -26,6 +26,11 @@ flow_connections = Array[Dictionary]([{
 &"from_vc_id": 1,
 &"to_id": 0,
 &"to_vc_id": 2
+}, {
+&"from_id": 0,
+&"from_vc_id": 3,
+&"to_id": 0,
+&"to_vc_id": 33
 }, {
 &"from_id": 0,
 &"from_vc_id": 7,
@@ -65,9 +70,31 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "delta",
 &"type": &"float"
 }],
-&"position": "Vector2(400, 0)",
+&"position": "Vector2(215, 0)",
 &"size": "Vector2(104, 88)",
 &"sub_type": 10,
+&"type": 0
+}, {
+&"id": 33,
+&"inputs": [{
+&"category": &"default_value",
+&"code_value": "_ref.",
+&"id": 34,
+&"is_ref": true,
+&"name": "Node",
+&"type": &"Node"
+}, {
+&"category": &"default_value",
+&"code_value": "32.0",
+&"id": 35,
+&"name": "what",
+&"type": &"int",
+&"value": 32.0
+}],
+&"name": "notify_thread_safe",
+&"position": "Vector2(-51, 148)",
+&"size": "Vector2(166, 138.00002)",
+&"sub_type": 1,
 &"type": 0
 }]
 }])

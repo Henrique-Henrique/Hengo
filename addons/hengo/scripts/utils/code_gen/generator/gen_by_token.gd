@@ -7,6 +7,7 @@ static func _provide_params_ref(_params: Array, _prefix: StringName) -> Array:
 
 		if first.has('is_ref'):
 			var new_prefix: StringName = get_code_by_token(first)
+
 			return [
 				_params.slice(1),
 				get_prefix_with_dot(new_prefix)

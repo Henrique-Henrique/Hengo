@@ -47,22 +47,11 @@ static func set_global_config() -> void:
 	router.current_route = global.BASE_ROUTE
 
 
-static func get_parent_ref(_vc: HenVirtualCNode, _refs: HenTypeReferences) -> RefCounted:
-	var parent_ref
-
-	# if _vc.route_info.route_ref.ref.get_ref() is HenVirtualCNode:
-	# 	parent_ref = HenFactoryCNode.get_cnode_from_dict((_vc.route_info.route_ref.ref.get_ref() as HenVirtualCNode).get_save(_refs.save_data), _refs)
-	# else:
-	# 	parent_ref = _vc.route_info.route_ref.ref
-	
-	return parent_ref
-
-
-static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenTypeReferences) -> String:
+static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenTypeReferences, _parent_ref = null) -> String:
 	for vc: HenVirtualCNode in _vc_dependencies:
-		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.save_data), _refs, get_parent_ref(vc, _refs))
+		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.save_data), _refs, _parent_ref)
 
-	var vc: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.save_data), _refs, get_parent_ref(_base_vc, _refs))
+	var vc: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.save_data), _refs, _parent_ref)
 	var code: String = ''
 
 	HenFactoryCNode.parse_connections(_refs)
