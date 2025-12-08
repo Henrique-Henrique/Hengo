@@ -116,64 +116,82 @@ func _update_visible_items() -> void:
 	var scroll_y: float = scroll_container.scroll_vertical
 	var viewport_height: float = scroll_container.size.y
 	
-	# add buffer to prevent visual pop-in
+	# calculate available width minus scrollbar
+	var available_width: float = scroll_container.size.x
+	var v_scroll: VScrollBar = scroll_container.get_v_scroll_bar()
+	if v_scroll and v_scroll.visible:
+		available_width -= v_scroll.size.x
+	
+	# buffer logic
 	var buffer: float = default_item_height * 2.0
 	var render_start = max(0, scroll_y - buffer)
 	var render_end = scroll_y + viewport_height + buffer
 
 	var first_idx: int = _find_first_visible_item_index(render_start)
-	
 	var visible_items: Array[Dictionary] = []
 	
 	for i in range(first_idx, _full_data.size()):
 		var cache_info = _layout_cache[i]
-		
 		if cache_info.y_pos > render_end:
 			break
-		
-		visible_items.append({
-			"data_idx": i,
-			"cache": cache_info
-		})
+		visible_items.append({'data_idx': i, 'cache': cache_info})
 	
+	# pool management
 	while _item_nodes.size() < visible_items.size():
 		var new_item: Control = item_scene.instantiate()
+		new_item.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		
 		content.add_child(new_item)
 		_item_nodes.append(new_item)
-	
-	for i in range(visible_items.size()):
-		var item_info = visible_items[i]
-		var data_idx = item_info.data_idx
-		var cache_info = item_info.cache
-		var item_node = _item_nodes[i]
-		
-		item_node.position.y = cache_info.y_pos
-		item_node.size.x = content.size.x
-		item_node.size.y = cache_info.height
-		item_node.visible = true
-		
-		# only calculate height once per item to avoid flickering
-		if not _heights_calculated.has(data_idx):
-			if item_node.has_method("set_item_data"):
-				item_node.set_item_data(_full_data[data_idx])
-				
-				await get_tree().process_frame
-				
-				if item_node and is_instance_valid(item_node):
-					var actual_height = item_node.size.y + Y_PADDING
-					if actual_height > 0 and abs(actual_height - cache_info.height) > 0.01:
-						_update_item_height(data_idx, actual_height)
-						item_node.position.y = _layout_cache[data_idx].y_pos
-						item_node.size.y = actual_height
-		else:
-			if item_node.has_method("set_item_data"):
-				item_node.set_item_data(_full_data[data_idx])
 	
 	for i in range(visible_items.size(), _item_nodes.size()):
 		_item_nodes[i].visible = false
 	
-	_is_updating = false
+	var needs_recalculation: bool = false
 	
-	# handle any scroll that happened during update
+	for i in range(visible_items.size()):
+		var item_node: Control = _item_nodes[i]
+		var cache_info = visible_items[i].cache
+		var data_idx: int = visible_items[i].data_idx
+		
+		item_node.visible = true
+		item_node.position.y = cache_info.y_pos
+		item_node.custom_minimum_size.y = 0
+		item_node.size.y = 0
+		item_node.custom_minimum_size.x = available_width
+		item_node.size.x = available_width
+		
+		if item_node.has_method('set_item_data'):
+			item_node.set_item_data(_full_data[data_idx])
+		
+		if not _heights_calculated.has(data_idx):
+			needs_recalculation = true
+		else:
+			item_node.size.y = cache_info.height
+
+	if needs_recalculation:
+		await get_tree().process_frame
+		if _item_nodes.is_empty():
+			_is_updating = false
+			return
+
+		var correction_offset: float = 0.0
+		
+		for i in range(visible_items.size()):
+			var item_node: Control = _item_nodes[i]
+			var data_idx: int = visible_items[i].data_idx
+			
+			if correction_offset > 0.0:
+				item_node.position.y += correction_offset
+
+			var real_height: float = item_node.get_combined_minimum_size().y + Y_PADDING
+			var cached_height: float = _layout_cache[data_idx].height
+			
+			if abs(real_height - cached_height) > 0.1:
+				_update_item_height(data_idx, real_height)
+				item_node.size.y = real_height
+				correction_offset += (real_height - cached_height)
+	
+	_is_updating = false
 	if _pending_update:
-		call_deferred("_update_visible_items")
+		call_deferred('_update_visible_items')

@@ -385,6 +385,9 @@ func get_save(_save_data: HenSaveData) -> Dictionary:
 		data.from_id = str(identity.from_id)
 		data.side_bar_id = identity.side_bar_id
 
+	if not io.input_code_value_map.is_empty():
+		data.input_code_value_map = io.input_code_value_map
+
 	if references.res:
 		match identity.sub_type:
 			HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.FUNC_OUTPUT:
@@ -538,7 +541,9 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				SubType.MACRO_OUTPUT:
 					route.output_ref = weakref(v_cnode)
 
-	
+	if _config.has('input_code_value_map'):
+		v_cnode.io.input_code_value_map = _config.input_code_value_map
+
 	if _config.has('singleton_class'):
 		v_cnode.identity.singleton_class = _config.singleton_class
 
@@ -639,10 +644,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('inputs'):
 		for input_data: Dictionary in _config.inputs:
-			var input: HenVCInOutData = v_cnode.add_io(true, input_data, false)
+			v_cnode.add_io(true, input_data, false)
 
-			if not input_data.has('code_value'):
-				input.reset_input_value()
+			# if not input_data.has('code_value'):
+			# 	input.reset_input_value()
 
 
 	if _config.has('outputs'):

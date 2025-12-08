@@ -9,10 +9,13 @@ func _create_for_range_node() -> HenVirtualCNode:
 		name = 'For -> Range',
 		type = HenVirtualCNode.Type.FOR,
 		sub_type = HenVirtualCNode.SubType.FOR,
+		input_code_value_map = {
+			2: {type = 'int', value = 1, code_value = '1'}
+		},
 		inputs = [
-			{name = 'start', type = 'int'},
-			{name = 'end', type = 'int'},
-			{name = 'step', type = 'int', value = 1, code_value = '1'}
+			{id = 0, name = 'start', type = 'int'},
+			{id = 1, name = 'end', type = 'int'},
+			{id = 2, name = 'step', type = 'int'}
 		],
 		outputs = [
 			{id = 0, name = 'index', type = 'int'}

@@ -53,7 +53,6 @@ func remove() -> void:
         connection_ref.get_to().io.connections.append(connection_ref)
 
     old_connections.clear()
-    connection.input_ref.reset_input_value()
 
     connection.get_from().update()
     connection.get_to().update()

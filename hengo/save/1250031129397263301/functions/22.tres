@@ -1,10 +1,23 @@
-[gd_resource type="Resource" script_class="HenSaveFunc" load_steps=3 format=3 uid="uid://behnf80mrge1u"]
+[gd_resource type="Resource" script_class="HenSaveFunc" load_steps=5 format=3 uid="uid://behnf80mrge1u"]
 
 [ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="1_wvqam"]
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="2_1qa2y"]
 
+[sub_resource type="Resource" id="Resource_wvqam"]
+script = ExtResource("1_wvqam")
+name = "param_115"
+id = 115
+metadata/_custom_type_script = "uid://blv50wg83v7po"
+
+[sub_resource type="Resource" id="Resource_1qa2y"]
+script = ExtResource("1_wvqam")
+name = "param_116"
+id = 116
+metadata/_custom_type_script = "uid://blv50wg83v7po"
+
 [resource]
 script = ExtResource("2_1qa2y")
+outputs = Array[ExtResource("1_wvqam")]([SubResource("Resource_wvqam"), SubResource("Resource_1qa2y")])
 virtual_cnode_list = Array[Dictionary]([{
 &"can_delete": false,
 &"id": 23,
@@ -18,8 +31,52 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 24,
 &"name": "output",
 &"position": "Vector2(400, 0)",
-&"size": "Vector2(74, 48)",
+&"size": "Vector2(182, 142)",
 &"sub_type": 19,
+&"type": 0
+}, {
+&"category": &"native",
+&"id": 132,
+&"input_code_value_map": {
+133: {
+&"code_value": "\"ddd\"",
+&"type": &"String",
+&"value": "ddd"
+}
+},
+&"inputs": [{
+&"id": 133,
+&"name": "content",
+&"type": &"String"
+}],
+&"name": "print",
+&"position": "Vector2(-65, 148)",
+&"size": "Vector2(192, 110)",
+&"sub_type": 1,
+&"type": 0
+}, {
+&"id": 136,
+&"input_code_value_map": {
+138: {
+&"code_value": "Vector2(32, 0)",
+&"type": &"Vector2",
+&"value": "Vector2(32, 0)"
+}
+},
+&"inputs": [{
+&"id": 137,
+&"is_ref": true,
+&"name": "Node2D",
+&"type": &"Node2D"
+}, {
+&"id": 138,
+&"name": "position",
+&"type": &"Vector2"
+}],
+&"name": "set_position",
+&"position": "Vector2(-107.5, 358)",
+&"size": "Vector2(277, 157)",
+&"sub_type": 1,
 &"type": 0
 }])
 name = "function_22"

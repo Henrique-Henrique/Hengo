@@ -7,14 +7,24 @@ func _create_expression_node() -> HenVirtualCNode:
 		type = HenVirtualCNode.Type.EXPRESSION,
 		sub_type = HenVirtualCNode.SubType.EXPRESSION,
 		name = 'Expression',
+		input_code_value_map = {
+			0: {
+				type = 'Variant',
+				value = 'a + b',
+				code_value = 'null'
+			}
+		},
 		inputs = [
 			{
-				name = '', type = 'Variant', sub_type = 'expression',
-				category = 'default_value', code_value = 'null',
-				value = 'a + b', is_static = true
+				id = 0,
+				name = '',
+				type = 'Variant',
+				sub_type = 'expression',
+				category = 'default_value',
+				is_static = true
 			},
-			{id = 0, name = 'a', type = 'Variant'},
-			{id = 1, name = 'b', type = 'Variant'}
+			{id = 1, name = 'a', type = 'Variant'},
+			{id = 2, name = 'b', type = 'Variant'}
 		],
 		outputs = [ {id = 0, name = 'result', type = 'Variant'}],
 		category = 'native',
@@ -38,7 +48,7 @@ func test_expression_with_one_input() -> void:
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
 	# The first input is connected to a constant value
-	vc.get_new_input_connection_command(0, 0, value_node).add()
+	vc.get_new_input_connection_command(1, 0, value_node).add()
 	assert_str(HenTest.construct_and_get_code(vc, [value_node], refs)).is_equal('Test.CONST + null')
 
 
@@ -49,6 +59,6 @@ func test_expression_with_two_inputs() -> void:
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
 	# Both inputs are connected to the same constant
-	vc.get_new_input_connection_command(0, 0, value_node).add()
 	vc.get_new_input_connection_command(1, 0, value_node).add()
+	vc.get_new_input_connection_command(2, 0, value_node).add()
 	assert_str(HenTest.construct_and_get_code(vc, [value_node], refs)).is_equal('Test.CONST + Test.CONST')

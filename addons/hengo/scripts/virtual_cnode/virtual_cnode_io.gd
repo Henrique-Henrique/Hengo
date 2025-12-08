@@ -7,6 +7,7 @@ var connections: Array[HenVCConnectionData]
 var references: HenVirtualCNodeReference
 var identity: HenVirtualCNodeIdentity
 var state: HenVirtualCNodeState
+var input_code_value_map: Dictionary = {}
 
 signal cnode_need_update
 signal connection_request(_data: Dictionary)
@@ -180,33 +181,39 @@ func on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = tr
 
 
 	var in_out: HenVCInOutData = create_io(_is_input, _data)
-	
+
 	cnode_need_update.emit()
 	return in_out
 
 
 func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
+	# injecting values from map into data
+	if _is_input and input_code_value_map.has(_data.get(&'id', -1)):
+		var map_value: Dictionary = input_code_value_map.get(_data.id)
+
+		if map_value.get(&'type') == _data.get(&'type'):
+			_data.value = map_value.get(&'value')
+			_data.code_value = map_value.get(&'code_value')
+
 	var in_out: HenVCInOutData = HenVCInOutData.new(_data)
 
-	if _data.has('ref'):
-		@warning_ignore('unsafe_call_argument')
-		in_out.set_ref(_data.ref)
-
-	in_out.moved.connect(on_in_out_moved)
-	in_out.deleted.connect(on_in_out_deleted)
-	in_out.update_changes.connect(on_need_update)
-	in_out.type_changed.connect(on_in_out_type_changed)
 	in_out.connection_request.connect(connection_request.emit)
 	in_out.io_hovered.connect(io_hovered.emit)
 	in_out.expression_saved.connect(expression_saved.emit)
 	in_out.method_picker_requested.connect(method_picker_requested.emit)
+	in_out.changed_code_value.connect(_on_changed_code_value.bind(_is_input))
 
 	if _is_input:
 		inputs.append(in_out)
 	else:
 		outputs.append(in_out)
-	
+
 	return in_out
+
+
+func _on_changed_code_value(_id: int, _context: Dictionary, _is_input: bool) -> void:
+	if _is_input:
+		input_code_value_map.set(_id, _context)
 
 
 func on_need_update() -> void:
@@ -216,30 +223,6 @@ func on_need_update() -> void:
 func on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenVCInOutData) -> void:
 	if HenUtils.is_type_relation_valid(_old_type, _type):
 		remove_io_connection(_ref)
-
-
-func on_in_out_reset(_is_input: bool, _new_inputs: Array, _subtype_filter: Array) -> void:
-	var is_input: bool = _is_input
-
-	match identity.sub_type:
-		HenVirtualCNode.SubType.SIGNAL_ENTER:
-			if _is_input: is_input = false
-			else: return
-
-	# filtering sub_types
-	if not _subtype_filter.is_empty() and not _subtype_filter.has(identity.sub_type):
-		return
-
-	clear_in_out(is_input)
-
-	for input_data: Dictionary in _new_inputs:
-		var in_out: HenVCInOutData = on_in_out_added(is_input, input_data)
-
-		match identity.sub_type:
-			HenVirtualCNode.SubType.SIGNAL_CONNECTION, HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
-				in_out.reset_input_value()
-
-	cnode_need_update.emit()
 
 
 func get_inputs() -> Array[HenVCInOutData]:

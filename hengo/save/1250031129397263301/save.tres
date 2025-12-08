@@ -12,10 +12,15 @@
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 35
+counter = 138
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
 connections = Array[Dictionary]([{
+&"from_id": 115,
+&"from_vc_id": 121,
+&"to_id": 118,
+&"to_vc_id": 117
+}, {
 &"from_id": 13,
 &"from_vc_id": 11,
 &"to_id": 10,
@@ -33,16 +38,51 @@ flow_connections = Array[Dictionary]([{
 &"to_vc_id": 33
 }, {
 &"from_id": 0,
+&"from_vc_id": 33,
+&"to_id": 0,
+&"to_vc_id": 59
+}, {
+&"from_id": 0,
+&"from_vc_id": 59,
+&"to_id": 0,
+&"to_vc_id": 82
+}, {
+&"from_id": 0,
+&"from_vc_id": 82,
+&"to_id": 0,
+&"to_vc_id": 100
+}, {
+&"from_id": 2,
+&"from_vc_id": 82,
+&"to_id": 0,
+&"to_vc_id": 117
+}, {
+&"from_id": 0,
+&"from_vc_id": 117,
+&"to_id": 0,
+&"to_vc_id": 119
+}, {
+&"from_id": 0,
 &"from_vc_id": 7,
 &"to_id": 0,
 &"to_vc_id": 9
+}, {
+&"from_id": 0,
+&"from_vc_id": 23,
+&"to_id": 0,
+&"to_vc_id": 132
+}, {
+&"from_id": 0,
+&"from_vc_id": 132,
+&"to_id": 0,
+&"to_vc_id": 136
 }])
 virtual_cnode_list = Array[Dictionary]([{
 &"can_delete": false,
 &"id": 1,
 &"name": "Stat State",
 &"position": "Vector2(0, 0)",
-&"size": "Vector2(99, 67)",
+&"size": "Vector2(99, 69)",
 &"sub_type": 37,
 &"type": 6
 }, {
@@ -70,31 +110,135 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "delta",
 &"type": &"float"
 }],
-&"position": "Vector2(215, 0)",
+&"position": "Vector2(665, 0)",
 &"size": "Vector2(104, 88)",
 &"sub_type": 10,
 &"type": 0
 }, {
 &"id": 33,
+&"input_code_value_map": Dictionary[int, Dictionary]({
+35: {
+&"code_value": "42.0",
+&"type": &"int",
+&"value": 42.0
+}
+}),
 &"inputs": [{
 &"category": &"default_value",
-&"code_value": "_ref.",
 &"id": 34,
 &"is_ref": true,
 &"name": "Node",
 &"type": &"Node"
 }, {
 &"category": &"default_value",
-&"code_value": "32.0",
 &"id": 35,
 &"name": "what",
-&"type": &"int",
-&"value": 32.0
+&"type": &"int"
 }],
 &"name": "notify_thread_safe",
-&"position": "Vector2(-51, 148)",
-&"size": "Vector2(166, 138.00002)",
+&"position": "Vector2(-54, 148)",
+&"size": "Vector2(172, 157)",
 &"sub_type": 1,
+&"type": 0
+}, {
+&"id": 59,
+&"input_code_value_map": Dictionary[int, Dictionary]({
+63: {
+&"code_value": "\"okok\"",
+&"type": &"String",
+&"value": "okok"
+}
+}),
+&"name": "function_6",
+&"position": "Vector2(-75, 405)",
+&"res": ExtResource("2_xkhiy"),
+&"size": "Vector2(214, 110)",
+&"sub_type": 5,
+&"type": 0
+}, {
+&"id": 82,
+&"input_code_value_map": Dictionary[int, Dictionary]({
+83: {
+&"code_value": "true",
+&"type": &"bool",
+&"value": true
+}
+}),
+&"inputs": [{
+&"category": &"default_value",
+&"id": 83,
+&"name": "condition",
+&"type": &"bool"
+}],
+&"name": "IF",
+&"position": "Vector2(-76, 615)",
+&"size": "Vector2(216, 128)",
+&"sub_type": 13,
+&"type": 1
+}, {
+&"id": 100,
+&"input_code_value_map": Dictionary[int, Dictionary]({
+102: {
+&"code_value": "\"haha\"",
+&"type": &"StringName",
+&"value": "haha"
+}
+}),
+&"inputs": [{
+&"category": &"default_value",
+&"id": 101,
+&"is_ref": true,
+&"name": "Object",
+&"type": &"Object"
+}, {
+&"category": &"default_value",
+&"id": 102,
+&"name": "name",
+&"type": &"StringName"
+}, {
+&"category": &"default_value",
+&"id": 103,
+&"name": "value",
+&"type": &"Variant"
+}],
+&"name": "set_meta",
+&"position": "Vector2(-354, 943)",
+&"size": "Vector2(186, 204)",
+&"sub_type": 1,
+&"type": 0
+}, {
+&"category": &"native",
+&"id": 117,
+&"inputs": [{
+&"id": 118,
+&"name": "content",
+&"type": &"Variant"
+}],
+&"name": "print",
+&"position": "Vector2(422, 943)",
+&"size": "Vector2(122, 88)",
+&"sub_type": 1,
+&"type": 0
+}, {
+&"category": &"native",
+&"id": 119,
+&"inputs": [{
+&"id": 120,
+&"name": "content",
+&"type": &"Variant"
+}],
+&"name": "print",
+&"position": "Vector2(401, 1131)",
+&"size": "Vector2(164, 95)",
+&"sub_type": 1,
+&"type": 0
+}, {
+&"id": 121,
+&"name": "function_22",
+&"position": "Vector2(232, 943)",
+&"res": ExtResource("3_wifnu"),
+&"size": "Vector2(140, 128)",
+&"sub_type": 5,
 &"type": 0
 }]
 }])

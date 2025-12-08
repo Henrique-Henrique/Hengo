@@ -13,12 +13,10 @@ Button/styles/normal = ExtResource("2_twrqp")
 Button/styles/pressed = ExtResource("2_twrqp")
 
 [node name="CodeSearchItem" type="PanelContainer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = 32.0
+offset_bottom = 13.0
 size_flags_horizontal = 3
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_12dj8")
 script = ExtResource("1_5wlq4")
 

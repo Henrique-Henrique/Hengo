@@ -99,21 +99,6 @@ func _on_pressed() -> void:
 			# options = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
 			# 	name = x.route.name
 			# })
-		'get_prop', 'set_prop':
-			var arr: Array = []
-			
-			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list((Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.identity.type if not custom_data else custom_data):
-				var prop_type: StringName = type_string(prop.type)
-				if prop.type != TYPE_NIL:
-					arr.append({
-						name = prop.name,
-						type = prop_type
-					})
-				
-				get_const_list(arr, '', prop.name, prop_type, false)
-
-			options = arr
 		'state_event_list':
 			pass
 
@@ -134,7 +119,7 @@ func _selected(_item: Dictionary) -> void:
 			text = (_item.name as String).to_snake_case()
 		'state_transition':
 			emit_signal('value_changed', text)
-			input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+			# input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
 			return
 		'enum_list':
 			text = _item.name
@@ -149,10 +134,10 @@ func _selected(_item: Dictionary) -> void:
 
 			input_ref.category = 'class_props'
 
-			if _item.has('ref'):
-				input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.IS_PROP)
-			else:
-				input_ref.remove_ref()
+			# if _item.has('ref'):
+			# 	input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.IS_PROP)
+			# else:
+			# 	input_ref.remove_ref()
 			return
 		'get_prop':
 			emit_signal('value_changed', text, _item.type)
@@ -162,22 +147,7 @@ func _selected(_item: Dictionary) -> void:
 			else:
 				input_ref.remove_ref()
 			return
-		'set_prop':
-			emit_signal('value_changed', text)
-			
-			var second_input: HenCnodeInOut = get_parent().owner.get_parent().get_child(1 if not custom_data else 2)
-			
-			if _item.has('ref'):
-				second_input.input_ref.type = _item.ref.type
-				second_input.input_ref.reset_input_value()
-				second_input.input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.TYPE_CHANGE)
-				input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
-			else:
-				second_input.input_ref.remove_ref()
-				second_input.input_ref.type = _item.type
-				second_input.input_ref.reset_input_value()
-				second_input.input_ref.update_changes.emit()
-			return
+
 
 	value_changed.emit(text)
 

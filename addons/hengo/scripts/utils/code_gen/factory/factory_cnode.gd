@@ -3,6 +3,7 @@ class_name HenFactoryCNode extends RefCounted
 
 static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _parent_ref = null) -> HenTypeCnode:
 	var cn: HenTypeCnode = HenTypeCnode.new();
+	var input_code_value_map: Dictionary = _cnode.get(&'input_code_value_map', {})
 
 	cn.id = int(_cnode.id)
 	cn.name = _cnode.name
@@ -30,19 +31,19 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 			var res: HenSaveResType = cn.res
 			
 			for input_data: Dictionary in res.get_inputs(cn.sub_type):
-				cn.inputs.append(HenFactoryIO.get_inout_from_dict(input_data))
+				cn.inputs.append(HenFactoryIO.get_inout_from_dict(true, input_data, input_code_value_map.get(input_data.id, {})))
 			
 			for output_data: Dictionary in res.get_outputs(cn.sub_type):
-				cn.outputs.append(HenFactoryIO.get_inout_from_dict(output_data))
+				cn.outputs.append(HenFactoryIO.get_inout_from_dict(false, output_data))
 	else:
 		if _cnode.has('inputs'):
 			for input_data: Dictionary in _cnode.inputs:
-				cn.inputs.append(HenFactoryIO.get_inout_from_dict(input_data))
+				cn.inputs.append(HenFactoryIO.get_inout_from_dict(true, input_data, input_code_value_map.get(input_data.id, {})))
 
 		if _cnode.has('outputs'):
 			for output_data: Dictionary in _cnode.outputs:
-				cn.outputs.append(HenFactoryIO.get_inout_from_dict(output_data))
-
+				cn.outputs.append(HenFactoryIO.get_inout_from_dict(false, output_data))
+			
 	# setting route types
 	if _parent_ref:
 		if (_parent_ref is HenTypeCnode and _parent_ref.type == HenVirtualCNode.Type.STATE) \
