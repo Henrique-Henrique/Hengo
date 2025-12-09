@@ -18,7 +18,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 7,
 &"name": "input",
 &"position": "Vector2(0, 0)",
-&"size": "Vector2(62, 48)",
+&"size": "Vector2(136, 88)",
 &"sub_type": 11,
 &"type": 0
 }, {
@@ -28,39 +28,6 @@ virtual_cnode_list = Array[Dictionary]([{
 &"position": "Vector2(400, 0)",
 &"size": "Vector2(74, 48)",
 &"sub_type": 19,
-&"type": 0
-}, {
-&"category": &"native",
-&"id": 9,
-&"inputs": [{
-&"category": &"default_value",
-&"id": 10,
-&"name": "content",
-&"type": &"Variant"
-}],
-&"name": "print",
-&"position": "Vector2(-30, 148)",
-&"size": "Vector2(122, 88)",
-&"sub_type": 1,
-&"type": 0
-}, {
-&"id": 11,
-&"inputs": [{
-&"category": &"default_value",
-&"id": 12,
-&"is_ref": true,
-&"name": "Node2D",
-&"type": &"Node2D"
-}],
-&"name": "get_position",
-&"outputs": [{
-&"id": 13,
-&"name": "",
-&"type": &"Vector2"
-}],
-&"position": "Vector2(-285, 148)",
-&"size": "Vector2(206, 88)",
-&"sub_type": 0,
 &"type": 0
 }])
 name = "function_6"

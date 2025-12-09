@@ -54,30 +54,6 @@ virtual_cnode_list = Array[Dictionary]([{
 &"size": "Vector2(192, 110)",
 &"sub_type": 1,
 &"type": 0
-}, {
-&"id": 136,
-&"input_code_value_map": {
-138: {
-&"code_value": "Vector2(32, 0)",
-&"type": &"Vector2",
-&"value": "Vector2(32, 0)"
-}
-},
-&"inputs": [{
-&"id": 137,
-&"is_ref": true,
-&"name": "Node2D",
-&"type": &"Node2D"
-}, {
-&"id": 138,
-&"name": "position",
-&"type": &"Vector2"
-}],
-&"name": "set_position",
-&"position": "Vector2(-107.5, 358)",
-&"size": "Vector2(277, 157)",
-&"sub_type": 1,
-&"type": 0
 }])
 name = "function_22"
 id = 22

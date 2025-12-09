@@ -389,6 +389,15 @@ func get_save(_save_data: HenSaveData) -> Dictionary:
 		data.input_code_value_map = io.input_code_value_map
 
 	if references.res:
+		if _save_data:
+			var parent_id: String = HenUtils.get_res_parent_id(references.res)
+			if _save_data: _save_data.add_dep(parent_id)
+			
+			var dep_info: Dictionary = HenUtils.get_dependency_info(references.res)
+				
+			if not dep_info.is_empty():
+				if _save_data: _save_data.add_detailed_dep(parent_id, dep_info)
+
 		match identity.sub_type:
 			HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.FUNC_OUTPUT:
 				pass

@@ -122,3 +122,42 @@ static func get_icon_texture(_type: StringName) -> Texture2D:
 		return EditorInterface.get_editor_theme().get_icon(_type, &'EditorIcons')
 	
 	return NONE_ICON
+
+
+# extracts the id directly from the resource object
+static func get_res_parent_id(res: HenSaveResType) -> String:
+	var path: String = res.resource_path
+	var parts: PackedStringArray = path.split('/')
+
+	if parts.size() <= 4 or parts[4].is_empty() or not parts[4].is_valid_int():
+		return ''
+
+	return parts[4]
+
+
+static func get_dependency_info(res: Resource) -> Dictionary:
+	var dep_info: Dictionary = {}
+	
+	if res is HenSaveVar:
+		dep_info = {
+			type = 'var',
+			name = res.name,
+			data_type = res.type
+		}
+	elif res is HenSaveFunc:
+		dep_info = {
+			type = 'func',
+			name = res.name
+		}
+	elif res is HenSaveSignal:
+		dep_info = {
+			type = 'signal',
+			name = res.name
+		}
+	elif res is HenSaveMacro:
+		dep_info = {
+			type = 'macro',
+			name = res.name
+		}
+		
+	return dep_info

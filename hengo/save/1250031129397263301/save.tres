@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="HenSaveData" load_steps=10 format=3 uid="uid://52vjo2u288lu"]
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=11 format=3 uid="uid://52vjo2u288lu"]
 
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_0rjht"]
 [ext_resource type="Resource" uid="uid://65mky3n66pc0" path="res://hengo/save/1250031129397263301/identity.tres" id="2_egb03"]
@@ -9,10 +9,11 @@
 [ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_tinkm"]
 [ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_hddbd"]
 [ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="7_53lhb"]
+[ext_resource type="Resource" uid="uid://c5r0g8rmck6hh" path="res://hengo/save/6740249256344029370/variables/7.tres" id="10_wifnu"]
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 138
+counter = 384
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
 connections = Array[Dictionary]([{
@@ -21,10 +22,10 @@ connections = Array[Dictionary]([{
 &"to_id": 118,
 &"to_vc_id": 117
 }, {
-&"from_id": 13,
-&"from_vc_id": 11,
-&"to_id": 10,
-&"to_vc_id": 9
+&"from_id": 0,
+&"from_vc_id": 291,
+&"to_id": 120,
+&"to_vc_id": 119
 }])
 flow_connections = Array[Dictionary]([{
 &"from_id": 0,
@@ -63,19 +64,9 @@ flow_connections = Array[Dictionary]([{
 &"to_vc_id": 119
 }, {
 &"from_id": 0,
-&"from_vc_id": 7,
-&"to_id": 0,
-&"to_vc_id": 9
-}, {
-&"from_id": 0,
 &"from_vc_id": 23,
 &"to_id": 0,
 &"to_vc_id": 132
-}, {
-&"from_id": 0,
-&"from_vc_id": 132,
-&"to_id": 0,
-&"to_vc_id": 136
 }])
 virtual_cnode_list = Array[Dictionary]([{
 &"can_delete": false,
@@ -110,7 +101,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "delta",
 &"type": &"float"
 }],
-&"position": "Vector2(665, 0)",
+&"position": "Vector2(773, 0)",
 &"size": "Vector2(104, 88)",
 &"sub_type": 10,
 &"type": 0
@@ -215,7 +206,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Variant"
 }],
 &"name": "print",
-&"position": "Vector2(422, 943)",
+&"position": "Vector2(551, 943)",
 &"size": "Vector2(122, 88)",
 &"sub_type": 1,
 &"type": 0
@@ -228,17 +219,25 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Variant"
 }],
 &"name": "print",
-&"position": "Vector2(401, 1131)",
-&"size": "Vector2(164, 95)",
+&"position": "Vector2(551, 1131)",
+&"size": "Vector2(122, 88)",
 &"sub_type": 1,
 &"type": 0
 }, {
 &"id": 121,
 &"name": "function_22",
-&"position": "Vector2(232, 943)",
+&"position": "Vector2(361, 943)",
 &"res": ExtResource("3_wifnu"),
 &"size": "Vector2(140, 128)",
 &"sub_type": 5,
+&"type": 0
+}, {
+&"id": 291,
+&"name": "Get variable_7",
+&"position": "Vector2(232, 1131)",
+&"res": ExtResource("10_wifnu"),
+&"size": "Vector2(266, 95)",
+&"sub_type": 50,
 &"type": 0
 }]
 }])

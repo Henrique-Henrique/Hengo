@@ -127,3 +127,63 @@ func get_code_search_list() -> Dictionary:
 	# TODO
 
 	return dt
+
+
+func check_dependencies(_updated_script_id: StringName) -> Array[StringName]:
+	var scripts_to_recompile: Array[StringName] = []
+	var updated_ast: ProjectAST = ast_list.get(_updated_script_id)
+	
+	if not updated_ast:
+		return []
+		
+	for script_id: StringName in ast_list:
+		if script_id == _updated_script_id:
+			continue
+			
+		var ast: ProjectAST = ast_list[script_id]
+		if not ast.identity or not ast.identity.detailed_deps.has(_updated_script_id):
+			if ast.identity and ast.identity.deps.has(_updated_script_id):
+				scripts_to_recompile.append(script_id)
+			continue
+			
+		var deps: Array = ast.identity.detailed_deps[_updated_script_id]
+		if _has_dependency_changed(deps, updated_ast):
+			scripts_to_recompile.append(script_id)
+			
+	return scripts_to_recompile
+
+
+func _has_dependency_changed(_deps: Array, _updated_ast: ProjectAST) -> bool:
+	for dep: Dictionary in _deps:
+		var changed: bool = true
+		
+		match dep.type:
+			'var':
+				for v: HenSaveVar in _updated_ast.variables:
+					if v.name == dep.name and v.type == dep.data_type:
+						changed = false
+						break
+			'func':
+				for f: HenSaveFunc in _updated_ast.functions:
+					if f.name == dep.name:
+						changed = false
+						break
+			'signal':
+				for s: HenSaveSignal in _updated_ast.signals:
+					if s.name == dep.name:
+						changed = false
+						break
+			'macro':
+				for m: HenSaveMacro in _updated_ast.macros:
+					if m.name == dep.name:
+						changed = false
+						break
+		
+		if changed:
+			return true
+			
+	return false
+
+
+func update_project_data(_id: StringName) -> void:
+	_map_project_data(_id)

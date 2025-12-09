@@ -14,6 +14,34 @@ class_name HenSaveData extends Resource
 @export var signals_callback: Array[HenSaveSignalCallback]
 
 
+func add_dep(_id: StringName) -> void:
+    if not _id:
+        return
+
+    if identity.id == _id:
+        return
+
+    if not identity.deps.has(_id):
+        identity.deps.append(_id)
+
+
+func add_detailed_dep(_id: StringName, _dep_info: Dictionary) -> void:
+    if not _id:
+        return
+
+    if identity.id == _id:
+        return
+
+    if not identity.detailed_deps.has(_id):
+        identity.detailed_deps[_id] = []
+
+    for dep: Dictionary in identity.detailed_deps[_id]:
+        if dep.type == _dep_info.type and dep.name == _dep_info.name:
+            return
+
+    (identity.detailed_deps[_id] as Array).append(_dep_info)
+
+
 func add_var() -> void:
     var v: HenSaveVar = HenSaveVar.create()
 

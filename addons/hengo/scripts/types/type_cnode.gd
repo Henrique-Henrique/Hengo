@@ -222,7 +222,6 @@ func get_input_token(_id: int) -> Dictionary:
 				global.USE_MACRO_USE_SELF = false
 				return {}
 			_:
-				print(connection.get_from().get_output_index(connection.from_id))
 				var data: Dictionary = connection.get_from().get_token(connection.get_from().get_output_index(connection.from_id))
 				
 				if not data.type == HenVirtualCNode.SubType.INVALID:
