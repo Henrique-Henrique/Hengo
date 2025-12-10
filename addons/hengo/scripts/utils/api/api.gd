@@ -518,7 +518,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 		(func_category.method_list as Array).append({
 			_class_name = 'Function',
 			name = func_data.name,
-			data = func_data.get_cnode_data()
+			data = func_data.get_cnode_data(_from_another_script)
 		})
 	
 	for var_data: HenSaveVar in _ast.variables:

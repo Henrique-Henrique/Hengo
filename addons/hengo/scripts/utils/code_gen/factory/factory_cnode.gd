@@ -29,7 +29,9 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 
 		if cn.res is HenSaveResType:
 			var res: HenSaveResType = cn.res
-			
+
+			cn.name = res.name
+
 			for input_data: Dictionary in res.get_inputs(cn.sub_type):
 				cn.inputs.append(HenFactoryIO.get_inout_from_dict(true, input_data, input_code_value_map.get(input_data.id, {})))
 			

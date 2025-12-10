@@ -7,3 +7,5 @@ script = ExtResource("1_mmpgb")
 id = &"6740249256344029370"
 type = &"Node"
 name = "second"
+deps = Array[StringName]([])
+detailed_deps = {}

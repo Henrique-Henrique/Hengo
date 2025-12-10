@@ -7,11 +7,3 @@ script = ExtResource("1_qjir8")
 id = &"1250031129397263301"
 type = &"Node"
 name = "first"
-deps = Array[StringName]([&"6740249256344029370"])
-detailed_deps = {
-&"6740249256344029370": [{
-&"data_type": &"String",
-&"name": "test name",
-&"type": "var"
-}]
-}

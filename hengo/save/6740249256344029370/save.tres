@@ -12,7 +12,7 @@
 
 [resource]
 script = ExtResource("4_kjcli")
-counter = 13
+counter = 24
 variables = Array[ExtResource("7_32ml8")]([ExtResource("9_qvewk")])
 functions = Array[ExtResource("1_hbvhn")]([ExtResource("2_qvewk")])
 identity = ExtResource("2_ap15p")

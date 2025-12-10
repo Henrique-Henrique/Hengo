@@ -82,6 +82,16 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 				arr.append(param.get_data())
 		HenVirtualCNode.SubType.FUNC_INPUT:
 			pass
+		HenVirtualCNode.SubType.FUNC_FROM:
+			arr.append({
+				id = 0,
+				name = name,
+				type = &'Variant',
+				is_ref = true
+			})
+			
+			for param: HenSaveParam in inputs:
+				arr.append(param.get_data())
 		_:
 			for param: HenSaveParam in inputs:
 				arr.append(param.get_data())
@@ -105,12 +115,12 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	return arr
 
 
-func get_cnode_data() -> Dictionary:
+func get_cnode_data(_from_another_script: bool = false) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return {
 		name = name,
-		sub_type = HenVirtualCNode.SubType.USER_FUNC,
+		sub_type = HenVirtualCNode.SubType.USER_FUNC if not _from_another_script else HenVirtualCNode.SubType.FUNC_FROM,
 		route = router.current_route,
 		res = self,
 	}

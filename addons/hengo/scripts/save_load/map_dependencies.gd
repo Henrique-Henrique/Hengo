@@ -158,22 +158,47 @@ func _has_dependency_changed(_deps: Array, _updated_ast: ProjectAST) -> bool:
 		var changed: bool = true
 		
 		match dep.type:
-			'var':
+			HenEnums.DependencyType.VAR:
 				for v: HenSaveVar in _updated_ast.variables:
 					if v.name == dep.name and v.type == dep.data_type:
 						changed = false
 						break
-			'func':
+			HenEnums.DependencyType.FUNC:
 				for f: HenSaveFunc in _updated_ast.functions:
 					if f.name == dep.name:
-						changed = false
+						var inputs_match: bool = true
+						if dep.has(&'inputs'):
+							if f.inputs.size() != (dep.inputs as Array).size():
+								inputs_match = false
+							else:
+								for i in range(f.inputs.size()):
+									var p_curr: HenSaveParam = f.inputs[i]
+									var p_dep: Dictionary = dep.inputs[i]
+									if p_curr.name != p_dep.name or p_curr.type != p_dep.type:
+										inputs_match = false
+										break
+						
+						var outputs_match: bool = true
+						if inputs_match and dep.has(&'outputs'):
+							if f.outputs.size() != (dep.outputs as Array).size():
+								outputs_match = false
+							else:
+								for i in range(f.outputs.size()):
+									var p_curr: HenSaveParam = f.outputs[i]
+									var p_dep: Dictionary = dep.outputs[i]
+									if p_curr.name != p_dep.name or p_curr.type != p_dep.type:
+										outputs_match = false
+										break
+						
+						if inputs_match and outputs_match:
+							changed = false
 						break
-			'signal':
+			HenEnums.DependencyType.SIGNAL:
 				for s: HenSaveSignal in _updated_ast.signals:
 					if s.name == dep.name:
 						changed = false
 						break
-			'macro':
+			HenEnums.DependencyType.MACRO:
 				for m: HenSaveMacro in _updated_ast.macros:
 					if m.name == dep.name:
 						changed = false

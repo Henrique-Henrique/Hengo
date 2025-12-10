@@ -140,23 +140,34 @@ static func get_dependency_info(res: Resource) -> Dictionary:
 	
 	if res is HenSaveVar:
 		dep_info = {
-			type = 'var',
+			type = HenEnums.DependencyType.VAR,
 			name = res.name,
 			data_type = res.type
 		}
 	elif res is HenSaveFunc:
+		var inputs: Array[Dictionary] = []
+		var outputs: Array[Dictionary] = []
+		
+		for p: HenSaveParam in res.inputs:
+			inputs.append({name = p.name, type = p.type})
+			
+		for p: HenSaveParam in res.outputs:
+			outputs.append({name = p.name, type = p.type})
+			
 		dep_info = {
-			type = 'func',
-			name = res.name
+			type = HenEnums.DependencyType.FUNC,
+			name = res.name,
+			inputs = inputs,
+			outputs = outputs
 		}
 	elif res is HenSaveSignal:
 		dep_info = {
-			type = 'signal',
+			type = HenEnums.DependencyType.SIGNAL,
 			name = res.name
 		}
 	elif res is HenSaveMacro:
 		dep_info = {
-			type = 'macro',
+			type = HenEnums.DependencyType.MACRO,
 			name = res.name
 		}
 		

@@ -19,6 +19,13 @@ enum PROP_TYPE {
     BOOL
 }
 
+enum DependencyType {
+	VAR,
+	FUNC,
+	SIGNAL,
+	MACRO
+}
+
 const SINGLETON_LIST: Array[StringName] = [
 	&'ThreadHelper',
 	&'MapDependencies',
