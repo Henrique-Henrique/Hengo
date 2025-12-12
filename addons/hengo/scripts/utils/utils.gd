@@ -135,40 +135,51 @@ static func get_res_parent_id(res: HenSaveResType) -> String:
 	return parts[4]
 
 
-static func get_dependency_info(res: Resource) -> Dictionary:
-	var dep_info: Dictionary = {}
+static func get_dependency_hash(res: Resource) -> int:
+	var hash_val: int = 0
 	
 	if res is HenSaveVar:
-		dep_info = {
-			type = HenEnums.DependencyType.VAR,
-			name = res.name,
-			data_type = res.type
-		}
+		var v: HenSaveVar = res as HenSaveVar
+		hash_val = (v.name + str(v.type)).hash()
 	elif res is HenSaveFunc:
-		var inputs: Array[Dictionary] = []
-		var outputs: Array[Dictionary] = []
+		var f: HenSaveFunc = res as HenSaveFunc
+		var signature: String = f.name
 		
-		for p: HenSaveParam in res.inputs:
-			inputs.append({name = p.name, type = p.type})
+		for p: HenSaveParam in f.inputs:
+			signature += p.name + str(p.type)
 			
-		for p: HenSaveParam in res.outputs:
-			outputs.append({name = p.name, type = p.type})
+		for p: HenSaveParam in f.outputs:
+			signature += p.name + str(p.type)
 			
-		dep_info = {
-			type = HenEnums.DependencyType.FUNC,
-			name = res.name,
-			inputs = inputs,
-			outputs = outputs
-		}
+		hash_val = signature.hash()
 	elif res is HenSaveSignal:
-		dep_info = {
-			type = HenEnums.DependencyType.SIGNAL,
-			name = res.name
-		}
-	elif res is HenSaveMacro:
-		dep_info = {
-			type = HenEnums.DependencyType.MACRO,
-			name = res.name
-		}
+		var s: HenSaveSignal = res as HenSaveSignal
+		var signature: String = s.name
 		
-	return dep_info
+		for p: HenSaveParam in s.inputs:
+			signature += p.name + str(p.type)
+			
+		hash_val = signature.hash()
+	elif res is HenSaveMacro:
+		var m: HenSaveMacro = res as HenSaveMacro
+		hash_val = m.name.hash()
+		
+	return hash_val
+
+
+static func get_dependency_type(res: Resource) -> HenEnums.DependencyType:
+	if res is HenSaveVar:
+		return HenEnums.DependencyType.VAR
+	elif res is HenSaveFunc:
+		return HenEnums.DependencyType.FUNC
+	elif res is HenSaveSignal:
+		return HenEnums.DependencyType.SIGNAL
+	elif res is HenSaveMacro:
+		return HenEnums.DependencyType.MACRO
+		
+	return HenEnums.DependencyType.VAR
+
+
+# returns the scaled size for high dpi displays
+static func get_scaled_size(base_size: int) -> int:
+	return int(base_size * EditorInterface.get_editor_scale())

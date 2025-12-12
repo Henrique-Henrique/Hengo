@@ -1,25 +1,7 @@
-[gd_resource type="Resource" script_class="HenSaveFunc" load_steps=8 format=3 uid="uid://t4odes4m7q8h"]
+[gd_resource type="Resource" script_class="HenSaveFunc" load_steps=5 format=3 uid="uid://t4odes4m7q8h"]
 
 [ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="1_xqrrx"]
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="2_stob8"]
-
-[sub_resource type="Resource" id="Resource_adl0x"]
-script = ExtResource("1_xqrrx")
-name = "param_19"
-id = 19
-metadata/_custom_type_script = "uid://blv50wg83v7po"
-
-[sub_resource type="Resource" id="Resource_isxkb"]
-script = ExtResource("1_xqrrx")
-name = "param_22"
-id = 22
-metadata/_custom_type_script = "uid://blv50wg83v7po"
-
-[sub_resource type="Resource" id="Resource_tdxqc"]
-script = ExtResource("1_xqrrx")
-name = "param_24"
-id = 24
-metadata/_custom_type_script = "uid://blv50wg83v7po"
 
 [sub_resource type="Resource" id="Resource_xqrrx"]
 script = ExtResource("1_xqrrx")
@@ -36,7 +18,6 @@ metadata/_custom_type_script = "uid://blv50wg83v7po"
 
 [resource]
 script = ExtResource("2_stob8")
-inputs = Array[ExtResource("1_xqrrx")]([SubResource("Resource_adl0x"), SubResource("Resource_isxkb"), SubResource("Resource_tdxqc")])
 outputs = Array[ExtResource("1_xqrrx")]([SubResource("Resource_xqrrx"), SubResource("Resource_stob8")])
 virtual_cnode_list = Array[Dictionary]([{
 &"can_delete": false,
@@ -55,5 +36,5 @@ virtual_cnode_list = Array[Dictionary]([{
 &"sub_type": 19,
 &"type": 0
 }])
-name = "my func_12"
+name = "my func_18"
 id = 2

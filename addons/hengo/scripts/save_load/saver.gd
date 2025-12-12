@@ -207,10 +207,14 @@ static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) 
 			var parent_id: String = HenUtils.get_res_parent_id(res)
 			save_data.add_dep(parent_id)
 			
-			var dep_info: Dictionary = HenUtils.get_dependency_info(res)
+			var dep_hash: int = HenUtils.get_dependency_hash(res)
 				
-			if not dep_info.is_empty():
-				save_data.add_detailed_dep(parent_id, dep_info)
+			if dep_hash != 0:
+				save_data.add_detailed_dep(parent_id, {
+					type = HenUtils.get_dependency_type(res),
+					name = res.name,
+					hash = dep_hash
+				})
 		
 		if cnode_data.has('virtual_cnode_list'):
 			_process_cnodes_for_deps(save_data, cnode_data.virtual_cnode_list)

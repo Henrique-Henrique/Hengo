@@ -25,10 +25,10 @@ func _ready():
 	container.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	container.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	
-	container.offset_left = -300
-	container.offset_top = -500
-	container.offset_right = -20
-	container.offset_bottom = -20
+	container.offset_left = - HenUtils.get_scaled_size(300)
+	container.offset_top = - HenUtils.get_scaled_size(500)
+	container.offset_right = - HenUtils.get_scaled_size(20)
+	container.offset_bottom = - HenUtils.get_scaled_size(20)
 	
 	container.alignment = BoxContainer.ALIGNMENT_END
 

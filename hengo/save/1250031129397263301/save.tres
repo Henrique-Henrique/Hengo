@@ -14,7 +14,7 @@
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 579
+counter = 966
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
 connections = Array[Dictionary]([{
@@ -31,6 +31,11 @@ connections = Array[Dictionary]([{
 &"from_id": 512,
 &"from_vc_id": 509,
 &"to_id": 0,
+&"to_vc_id": 406
+}, {
+&"from_id": 809,
+&"from_vc_id": 807,
+&"to_id": 19,
 &"to_vc_id": 406
 }])
 flow_connections = Array[Dictionary]([{
@@ -133,9 +138,11 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Node"
 }, {
 &"category": &"default_value",
+&"code_value": "42.0",
 &"id": 35,
 &"name": "what",
-&"type": &"int"
+&"type": &"int",
+&"value": 42.0
 }],
 &"name": "notify_thread_safe",
 &"position": "Vector2(-54, 148)",
@@ -168,9 +175,11 @@ virtual_cnode_list = Array[Dictionary]([{
 }),
 &"inputs": [{
 &"category": &"default_value",
+&"code_value": "true",
 &"id": 83,
 &"name": "condition",
-&"type": &"bool"
+&"type": &"bool",
+&"value": true
 }],
 &"name": "IF",
 &"position": "Vector2(-76, 615)",
@@ -194,9 +203,11 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Object"
 }, {
 &"category": &"default_value",
+&"code_value": "\"haha\"",
 &"id": 102,
 &"name": "name",
-&"type": &"StringName"
+&"type": &"StringName",
+&"value": "haha"
 }, {
 &"category": &"default_value",
 &"id": 103,
@@ -204,7 +215,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Variant"
 }],
 &"name": "set_meta",
-&"position": "Vector2(-386, 943)",
+&"position": "Vector2(-405.5, 943)",
 &"size": "Vector2(186, 204)",
 &"sub_type": 1,
 &"type": 0
@@ -253,9 +264,9 @@ virtual_cnode_list = Array[Dictionary]([{
 }, {
 &"id": 406,
 &"name": "my func",
-&"position": "Vector2(-418, 1247)",
+&"position": "Vector2(-457, 1247)",
 &"res": ExtResource("11_tinkm"),
-&"size": "Vector2(289, 182)",
+&"size": "Vector2(289, 222)",
 &"sub_type": 46,
 &"type": 0
 }, {
@@ -273,9 +284,11 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "Node",
 &"type": &"Node"
 }, {
+&"code_value": "\"Testing\"",
 &"id": 511,
 &"name": "path",
-&"type": &"NodePath"
+&"type": &"NodePath",
+&"value": "Testing"
 }],
 &"name": "get_node",
 &"outputs": [{
@@ -283,8 +296,26 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "",
 &"type": &"Node"
 }],
-&"position": "Vector2(-688, 1247)",
+&"position": "Vector2(-762, 1247)",
 &"size": "Vector2(255, 157)",
+&"sub_type": 0,
+&"type": 0
+}, {
+&"id": 807,
+&"inputs": [{
+&"id": 808,
+&"is_ref": true,
+&"name": "Node2D",
+&"type": &"Node2D"
+}],
+&"name": "get_position",
+&"outputs": [{
+&"id": 809,
+&"name": "",
+&"type": &"Vector2"
+}],
+&"position": "Vector2(-725, 1424)",
+&"size": "Vector2(218, 95)",
 &"sub_type": 0,
 &"type": 0
 }]

@@ -154,6 +154,8 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 
 			if connection:
 				connection.add()
+			else:
+				pass
 
 		# adding flow connection
 		for flow_data: Dictionary in save_data.flow_connections:

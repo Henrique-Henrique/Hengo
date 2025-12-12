@@ -393,10 +393,14 @@ func get_save(_save_data: HenSaveData) -> Dictionary:
 			var parent_id: String = HenUtils.get_res_parent_id(references.res)
 			if _save_data: _save_data.add_dep(parent_id)
 			
-			var dep_info: Dictionary = HenUtils.get_dependency_info(references.res)
+			var dep_hash: int = HenUtils.get_dependency_hash(references.res)
 				
-			if not dep_info.is_empty():
-				if _save_data: _save_data.add_detailed_dep(parent_id, dep_info)
+			if dep_hash != 0:
+				if _save_data: _save_data.add_detailed_dep(parent_id, {
+					type = HenUtils.get_dependency_type(references.res),
+					name = references.res.name,
+					hash = dep_hash
+				})
 
 		match identity.sub_type:
 			HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.FUNC_OUTPUT:

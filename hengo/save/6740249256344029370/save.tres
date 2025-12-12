@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="HenSaveData" load_steps=10 format=3 uid="uid://pm40opdluhvv"]
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=11 format=3 uid="uid://pm40opdluhvv"]
 
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_hbvhn"]
 [ext_resource type="Resource" uid="uid://buboi5dte1ekp" path="res://hengo/save/6740249256344029370/identity.tres" id="2_ap15p"]
 [ext_resource type="Resource" uid="uid://t4odes4m7q8h" path="res://hengo/save/6740249256344029370/functions/2.tres" id="2_qvewk"]
+[ext_resource type="Resource" uid="uid://coqnduyouyby6" path="res://hengo/save/6740249256344029370/functions/29.tres" id="3_kjcli"]
 [ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_qvewk"]
 [ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_kjcli"]
 [ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_ekkwt"]
@@ -12,9 +13,9 @@
 
 [resource]
 script = ExtResource("4_kjcli")
-counter = 24
+counter = 33
 variables = Array[ExtResource("7_32ml8")]([ExtResource("9_qvewk")])
-functions = Array[ExtResource("1_hbvhn")]([ExtResource("2_qvewk")])
+functions = Array[ExtResource("1_hbvhn")]([ExtResource("2_qvewk"), ExtResource("3_kjcli")])
 identity = ExtResource("2_ap15p")
 flow_connections = Array[Dictionary]([{
 &"from_id": 0,

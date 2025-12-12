@@ -1,4 +1,4 @@
-[gd_scene load_steps=77 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=78 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -42,6 +42,7 @@
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 [ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="37_33cyo"]
 [ext_resource type="Texture2D" uid="uid://cdltixrky1fo7" path="res://addons/hengo/assets/new_icons/info.svg" id="38_onj4m"]
+[ext_resource type="Texture2D" uid="uid://upmmxrxll8y4" path="res://addons/hengo/assets/new_icons/mouse-pointer-click.svg" id="39_174hx"]
 [ext_resource type="Texture2D" uid="uid://e6883ccr0kd4" path="res://addons/hengo/assets/new_icons/circle-check.svg" id="39_vlu6e"]
 [ext_resource type="Texture2D" uid="uid://d1gvhd43e01be" path="res://addons/hengo/assets/new_icons/layout-dashboard.svg" id="40_174hx"]
 [ext_resource type="Texture2D" uid="uid://cih44fa46xubd" path="res://addons/hengo/assets/new_icons/shield-alert.svg" id="40_aqok7"]
@@ -64,9 +65,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1920, 1009)
-shader_parameter/offset = Vector2(505.61902, 415.98154)
-shader_parameter/zoom_factor = 0.35002014
+shader_parameter/screen_size = Vector2(3840, 2126)
+shader_parameter/offset = Vector2(1221.8125, 603.07965)
+shader_parameter/zoom_factor = 0.4499943
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -128,7 +129,7 @@ shader_parameter/transparency = 0.6000000285
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_right = 8.0
-bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
+bg_color = Color(0, 0, 0, 0.2901961)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -655,6 +656,12 @@ theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
 disabled = true
 text = "0"
 icon = ExtResource("40_aqok7")
+
+[node name="ActionsBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Actions"
+icon = ExtResource("39_174hx")
 
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true

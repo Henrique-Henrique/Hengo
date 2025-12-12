@@ -9,7 +9,11 @@ extends Node
 
 var test_name = String()  
  
-func my_func_12(param_19, param_22, param_24):
+func my_func_18():
+	pass
+
+
+func function_29(param_32):
 	pass
 
 
