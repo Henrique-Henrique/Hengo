@@ -23,6 +23,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 23,
 &"name": "input",
 &"position": "Vector2(0, 0)",
+&"res": null,
 &"size": "Vector2(62, 48)",
 &"sub_type": 11,
 &"type": 0
@@ -31,6 +32,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 24,
 &"name": "output",
 &"position": "Vector2(400, 0)",
+&"res": null,
 &"size": "Vector2(182, 142)",
 &"sub_type": 19,
 &"type": 0
@@ -45,9 +47,11 @@ virtual_cnode_list = Array[Dictionary]([{
 }
 },
 &"inputs": [{
+&"code_value": "\"ddd\"",
 &"id": 133,
 &"name": "content",
-&"type": &"String"
+&"type": &"String",
+&"value": "ddd"
 }],
 &"name": "print",
 &"position": "Vector2(-65, 148)",

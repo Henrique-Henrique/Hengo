@@ -14,7 +14,7 @@
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 966
+counter = 990
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
 connections = Array[Dictionary]([{

@@ -24,6 +24,7 @@ func get_current_route_v_cnodes() -> Array:
 
 func change_route(_route: HenRouteData) -> void:
 	if current_route == _route:
+		_centralize_cam()
 		return
 
 
@@ -48,3 +49,14 @@ func change_route(_route: HenRouteData) -> void:
 
 	global.CAM._check_virtual_cnodes()
 	global.SIDE_BAR.update()
+	_centralize_cam()
+
+
+func _centralize_cam() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var vc: HenVirtualCNode = current_route.virtual_cnode_list[-1]
+
+	if not vc:
+		return
+
+	global.CAM.go_to_center(vc.visual.position)

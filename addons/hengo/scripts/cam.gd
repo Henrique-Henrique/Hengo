@@ -45,12 +45,26 @@ func _input(event: InputEvent) -> void:
 		if event is InputEventMouseMotion:
 			check_vc_action_menu()
 
-			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE:
+			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE or \
+			   (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_RIGHT:
 				transform.origin += (event as InputEventMouseMotion).relative
 				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
 				_check_virtual_cnodes()
 		
+		elif event is InputEventPanGesture:
+			transform.origin -= (event as InputEventPanGesture).delta * 40
+			(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
+			set_physics_process(false)
+			_check_virtual_cnodes()
+
+		elif event is InputEventMagnifyGesture:
+			var zoom_amount = (event as InputEventMagnifyGesture).factor
+			if zoom_amount > 1.0:
+				_zoom_in((zoom_amount - 1.0) * 2.0)
+			elif zoom_amount < 1.0:
+				_zoom_out((1.0 - zoom_amount) * 2.0)
+
 		elif event is InputEventMouseButton:
 			if event.is_pressed():
 				if can_scroll:
@@ -60,13 +74,13 @@ func _input(event: InputEvent) -> void:
 						_zoom_out()
 
 
-func _zoom_in() -> void:
-	target_zoom = min(target_zoom + ZOOM_INCREMENT, MAX_ZOOM)
+func _zoom_in(amount: float = ZOOM_INCREMENT) -> void:
+	target_zoom = min(target_zoom + amount, MAX_ZOOM)
 	_set_transform(get_global_mouse_position())
 
 
-func _zoom_out() -> void:
-	target_zoom = max(target_zoom - ZOOM_INCREMENT, MIN_ZOOM)
+func _zoom_out(amount: float = ZOOM_INCREMENT) -> void:
+	target_zoom = max(target_zoom - amount, MIN_ZOOM)
 	_set_transform(get_global_mouse_position())
 
 
