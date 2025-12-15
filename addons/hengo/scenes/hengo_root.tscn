@@ -1,4 +1,4 @@
-[gd_scene load_steps=79 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=77 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -28,12 +28,12 @@
 [ext_resource type="Texture2D" uid="uid://byhp341nd8v2j" path="res://addons/hengo/assets/new_icons/cog.svg" id="18_fdf88"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
 [ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="19_33cyo"]
+[ext_resource type="Material" uid="uid://ck0pfs2wsnaeo" path="res://addons/hengo/assets/shaders/panels.tres" id="19_174hx"]
 [ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
-[ext_resource type="Texture2D" uid="uid://bsptgo01fl6k" path="res://addons/hengo/assets/images/noise_texture.png" id="24_48snx"]
 [ext_resource type="StyleBox" uid="uid://dqrpq6o5w3yhs" path="res://addons/hengo/resources/style_box/panel_blur.tres" id="24_h1p8r"]
 [ext_resource type="StyleBox" uid="uid://bwa35533sur43" path="res://addons/hengo/resources/style_box/blur_transparent.tres" id="25_174hx"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
@@ -50,7 +50,7 @@
 [ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_174hx"]
-bg_color = Color(0, 0, 0, 1)
+bg_color = Color(0.011087579, 0.011087578, 0.01108758, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
 bg_color = Color(0.03529412, 0.03529412, 0.043137256, 1)
@@ -63,8 +63,8 @@ corner_radius_bottom_left = 12
 content_margin_right = 8.0
 content_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lxtpw"]
-bg_color = Color(0.03529412, 0.03529412, 0.043137256, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onj4m"]
+bg_color = Color(1, 1, 1, 1)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -72,9 +72,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3576, 2236)
-shader_parameter/offset = Vector2(1891.2468, -1761.5258)
-shader_parameter/zoom_factor = 1.4999998
+shader_parameter/screen_size = Vector2(1904, 993)
+shader_parameter/offset = Vector2(822.03467, -200.43379)
+shader_parameter/zoom_factor = 0.6391829
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -84,12 +84,6 @@ colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_hog2e"]
-shader = ExtResource("37_33cyo")
-shader_parameter/lod = 2.000000095
-shader_parameter/color = Color(0.12073269, 0.12073409, 0.13611376, 1)
-shader_parameter/transparency = 0.6000000285
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
 
@@ -127,12 +121,6 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1gx8m"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_onj4m"]
-shader = ExtResource("37_33cyo")
-shader_parameter/lod = 2.000000095
-shader_parameter/color = Color(0.101960786, 0.11372549, 0.14901961, 1)
-shader_parameter/transparency = 0.6000000285
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_right = 8.0
@@ -166,7 +154,7 @@ corner_radius_bottom_left = 8
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_fdf88"]
 shader = ExtResource("37_33cyo")
 shader_parameter/lod = 2.50000011875
-shader_parameter/color = Color(0.35982865, 0.4958688, 0.7427542, 1)
+shader_parameter/color = Color(0.23031488, 0.23031497, 0.2303147, 1)
 shader_parameter/transparency = 0.10000000475
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5c7h0"]
@@ -283,10 +271,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer"]
 layout_mode = 2
@@ -299,19 +287,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
-
-[node name="Panel2" type="TextureRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
-process_mode = 4
-modulate = Color(1, 1, 1, 0.49019608)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("24_48snx")
-stretch_mode = 1
 
 [node name="Center2" type="Marker2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
 visible = false
@@ -340,17 +315,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel"]
-process_mode = 4
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_lxtpw")
-
 [node name="CNodeContainerBG" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel"]
 unique_name_in_owner = true
 clip_contents = true
@@ -362,7 +326,19 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("16_74kfo")
 
-[node name="Grid" type="TextureRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG"]
+process_mode = 4
+clip_children = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_onj4m")
+
+[node name="Grid" type="TextureRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Panel"]
 process_mode = 4
 texture_filter = 1
 texture_repeat = 2
@@ -380,7 +356,7 @@ texture = ExtResource("17_lxtpw")
 unique_name_in_owner = true
 position = Vector2(0, -8)
 script = ExtResource("3_84akk")
-grid = NodePath("../Grid")
+grid = NodePath("../Panel/Grid")
 
 [node name="RefPoint" type="Marker2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 visible = false
@@ -461,7 +437,7 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
-material = SubResource("ShaderMaterial_hog2e")
+material = ExtResource("19_174hx")
 layout_mode = 2
 theme_override_styles/panel = ExtResource("24_h1p8r")
 
@@ -584,7 +560,7 @@ size_flags_horizontal = 0
 theme_override_constants/margin_top = 8
 
 [node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
-material = SubResource("ShaderMaterial_onj4m")
+material = ExtResource("19_174hx")
 layout_mode = 2
 theme_override_styles/panel = ExtResource("24_h1p8r")
 

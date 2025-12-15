@@ -45,9 +45,11 @@ virtual_cnode_list = Array[Dictionary]([{
 }
 },
 &"inputs": [{
+&"code_value": "\"ddd\"",
 &"id": 133,
 &"name": "content",
-&"type": &"String"
+&"type": &"String",
+&"value": "ddd"
 }],
 &"name": "print",
 &"position": "Vector2(-65, 148)",
