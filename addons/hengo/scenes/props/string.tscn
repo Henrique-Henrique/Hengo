@@ -7,6 +7,7 @@
 offset_right = 64.0625
 offset_bottom = 31.0
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = ExtResource("1_kh25v")
 expand_to_text_length = true
 script = ExtResource("1_c07fc")

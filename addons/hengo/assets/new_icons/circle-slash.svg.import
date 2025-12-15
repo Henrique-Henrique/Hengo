@@ -5,6 +5,7 @@ type="CompressedTexture2D"
 uid="uid://5fcd0egmhe3g"
 path="res://.godot/imported/circle-slash.svg-d780b78e7618f12a8ccf6b00d9556387.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
@@ -39,5 +40,5 @@ process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=0.75
-editor/scale_with_editor_scale=false
+editor/scale_with_editor_scale=true
 editor/convert_colors_with_editor_theme=false

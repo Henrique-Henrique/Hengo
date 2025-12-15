@@ -1,5 +1,6 @@
-[gd_resource type="Theme" load_steps=16 format=3 uid="uid://xxj7abqbehjg"]
+[gd_resource type="Theme" load_steps=17 format=3 uid="uid://xxj7abqbehjg"]
 
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="1_3mdrv"]
 [ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
 [ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
 [ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="2_xbr4r"]
@@ -9,45 +10,51 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yvxym"]
 bg_color = Color(1, 1, 1, 0.0901961)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
 border_color = Color(1, 1, 1, 0.384314)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_el3g6"]
 bg_color = Color(1, 1, 1, 0.0901961)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
 border_color = Color(1, 1, 1, 0.384314)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_el3g6"]
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3mdrv"]
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3d5pg"]
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xbr4r"]
 bg_color = Color(0.6, 0.6, 0.6, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
 border_color = Color(0.8, 0.8, 0.8, 0.592157)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3mdrv"]
 bg_color = Color(1, 1, 1, 0.050980393)
@@ -56,23 +63,26 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(1, 1, 1, 0.16470589)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-expand_margin_left = 8.0
-expand_margin_top = 8.0
-expand_margin_right = 8.0
-expand_margin_bottom = 8.0
+corner_radius_top_left = 27
+corner_radius_top_right = 27
+corner_radius_bottom_right = 27
+corner_radius_bottom_left = 27
+expand_margin_left = 12.0
+expand_margin_top = 12.0
+expand_margin_right = 12.0
+expand_margin_bottom = 12.0
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mhtxk"]
+metadata/hengo_theme_scale = 1.5
 
 [sub_resource type="ImageTexture" id="ImageTexture_6gb4l"]
 
 [resource]
 default_font = ExtResource("1_revyj")
-Button/font_sizes/font_size = 16
-Button/fonts/font = ExtResource("1_ghilx")
+Button/colors/font_color = Color(0.7024225, 0.7024225, 0.7024223, 1)
+Button/font_sizes/font_size = 24
+Button/fonts/font = ExtResource("1_3mdrv")
 Button/styles/focus = SubResource("StyleBoxFlat_yvxym")
 Button/styles/hover = SubResource("StyleBoxFlat_el3g6")
 Button/styles/normal = ExtResource("2_xbr4r")
@@ -81,8 +91,8 @@ ItemList/styles/focus = SubResource("StyleBoxEmpty_el3g6")
 ItemList/styles/panel = SubResource("StyleBoxEmpty_3mdrv")
 Label/fonts/font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
-LineEdit/constants/minimum_character_width = 2
-LineEdit/font_sizes/font_size = 16
+LineEdit/constants/minimum_character_width = 3
+LineEdit/font_sizes/font_size = 24
 LineEdit/fonts/font = ExtResource("1_ghilx")
 LineEdit/styles/focus = SubResource("StyleBoxFlat_xbr4r")
 LineEdit/styles/normal = ExtResource("4_el3g6")
@@ -110,7 +120,7 @@ SpinBox/icons/up_hover = null
 SpinBox/icons/up_pressed = null
 SpinBox/icons/updown = SubResource("ImageTexture_6gb4l")
 Tree/constants/draw_guides = 0
-Tree/constants/v_separation = 8
+Tree/constants/v_separation = 12
 Tree/fonts/font = ExtResource("1_revyj")
 Tree/styles/button_hover = ExtResource("6_el3g6")
 Tree/styles/button_pressed = ExtResource("6_el3g6")
@@ -125,3 +135,4 @@ Tree/styles/selected_focus = ExtResource("6_el3g6")
 Tree/styles/title_button_hover = ExtResource("6_el3g6")
 Tree/styles/title_button_normal = ExtResource("6_el3g6")
 Tree/styles/title_button_pressed = ExtResource("6_el3g6")
+metadata/hengo_theme_scale = 1.5

@@ -225,11 +225,11 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 	var font: Font = list.get_theme_font(&'font', &'Tree')
 	var font_size: int = list.get_theme_font_size(&'font_size', &'Tree')
 	var text_size: Vector2 = font.get_string_size(_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-	var padding = 50
+	var padding = HenUtils.get_scaled_size(50)
 	var button_width = text_size.x + padding
 	
 	# add vertical spacing by reducing the height and adding margin
-	var spacing = 4
+	var spacing = HenUtils.get_scaled_size(4)
 	var button_height = _rect.size.y - spacing
 	var button_pos = Vector2(_rect.position.x, _rect.position.y + spacing / 2.)
 	
@@ -237,8 +237,9 @@ func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _ico
 	list.draw_style_box(TREE_ITEM_STYLEBOX, Rect2(button_pos, Vector2(button_width, button_height)))
 	
 	if _icon:
-		var icon_size = Vector2(14, 14)
-		var icon_pos = Vector2(button_pos.x + 8, button_pos.y + (button_height - icon_size.y) / 2)
+		var size_axis: int = HenUtils.get_scaled_size(14)
+		var icon_size = Vector2(size_axis, size_axis)
+		var icon_pos = Vector2(button_pos.x + HenUtils.get_scaled_size(8), button_pos.y + (button_height - icon_size.y) / 2)
 		list.draw_texture_rect(_icon, Rect2(icon_pos, icon_size), false, _icon_color)
 		
 		# draw text after icon with spacing

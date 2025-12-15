@@ -5,6 +5,7 @@ type="CompressedTexture2D"
 uid="uid://cgk8uis07bn7q"
 path="res://.godot/imported/square-play.svg-8965863d3e4f40b7030e4ad3d3c4029e.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
@@ -39,5 +40,5 @@ process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=0.75
-editor/scale_with_editor_scale=false
+editor/scale_with_editor_scale=true
 editor/convert_colors_with_editor_theme=false

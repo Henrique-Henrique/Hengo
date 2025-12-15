@@ -13,7 +13,7 @@
 
 [resource]
 script = ExtResource("4_kjcli")
-counter = 35
+counter = 36
 variables = Array[ExtResource("7_32ml8")]([ExtResource("9_qvewk")])
 functions = Array[ExtResource("1_hbvhn")]([ExtResource("2_qvewk"), ExtResource("3_kjcli")])
 identity = ExtResource("2_ap15p")
@@ -28,14 +28,14 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 1,
 &"name": "Stat State",
 &"position": "Vector2(0, 0)",
-&"size": "Vector2(100, 69)",
+&"size": "Vector2(128, 69)",
 &"sub_type": 37,
 &"type": 6
 }, {
 &"id": 8,
 &"name": "State 1",
 &"position": "Vector2(8.666454, 170.33344)",
-&"size": "Vector2(76, 44)",
+&"size": "Vector2(104, 44)",
 &"sub_type": 36,
 &"to_flow": [],
 &"type": 5,
@@ -44,7 +44,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 9,
 &"name": "enter",
 &"position": "Vector2(0, 0)",
-&"size": "Vector2(64, 48)",
+&"size": "Vector2(92, 48)",
 &"sub_type": 10,
 &"type": 0
 }, {
@@ -57,7 +57,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"float"
 }],
 &"position": "Vector2(400, 0)",
-&"size": "Vector2(104, 88)",
+&"size": "Vector2(106, 88)",
 &"sub_type": 10,
 &"type": 0
 }]

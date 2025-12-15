@@ -5,6 +5,7 @@ type="CompressedTexture2D"
 uid="uid://bpjuylopfeb8l"
 path="res://.godot/imported/move-diagonal-2.svg-c897f71e90ed472e00188f231c3ccb09.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
@@ -39,5 +40,5 @@ process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=0.75
-editor/scale_with_editor_scale=false
+editor/scale_with_editor_scale=true
 editor/convert_colors_with_editor_theme=false

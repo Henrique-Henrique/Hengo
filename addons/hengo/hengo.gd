@@ -3,6 +3,7 @@ class_name HenHengo extends EditorPlugin
 
 const HENGO_ROOT = preload('res://addons/hengo/scenes/hengo_root.tscn')
 const PLUGIN_NAME = 'Hengo'
+const MAIN_THEME = preload('res://addons/hengo/references/theme/main.tres')
 
 var main_scene: HenHengoRoot
 var last_scene: StringName
@@ -20,7 +21,67 @@ class DockConfig:
 		ref = _ref
 
 
+func scale_theme_to_editor_scale() -> void:
+	var current_scale: float = EditorInterface.get_editor_scale()
+	var stored_scale: float = MAIN_THEME.get_meta('hengo_theme_scale', 1.0)
+	
+	if not is_equal_approx(current_scale, stored_scale):
+		var scale_factor: float = current_scale / stored_scale
+		
+		for type in MAIN_THEME.get_type_list():
+			for constant in MAIN_THEME.get_constant_list(type):
+				var value = MAIN_THEME.get_constant(constant, type)
+				MAIN_THEME.set_constant(constant, type, int(value * scale_factor))
+			
+			for font_size in MAIN_THEME.get_font_size_list(type):
+				var value = MAIN_THEME.get_font_size(font_size, type)
+				MAIN_THEME.set_font_size(font_size, type, int(value * scale_factor))
+		
+		MAIN_THEME.set_meta('hengo_theme_scale', current_scale)
+
+	var visited_styleboxes: Dictionary = {}
+	
+	for type in MAIN_THEME.get_type_list():
+		for stylebox_name in MAIN_THEME.get_stylebox_list(type):
+			var stylebox: StyleBox = MAIN_THEME.get_stylebox(stylebox_name, type)
+			
+			if not stylebox or visited_styleboxes.has(stylebox):
+				continue
+				
+			visited_styleboxes[stylebox] = true
+			_scale_stylebox(stylebox, current_scale)
+
+
+func _scale_stylebox(stylebox: StyleBox, target_scale: float) -> void:
+	var stored_scale: float = stylebox.get_meta('hengo_theme_scale', 1.0)
+	
+	if is_equal_approx(target_scale, stored_scale):
+		return
+		
+	var scale_factor: float = target_scale / stored_scale
+
+	if stylebox is StyleBoxFlat:
+		var sb_flat = stylebox as StyleBoxFlat
+		sb_flat.border_width_left = int(sb_flat.border_width_left * scale_factor)
+		sb_flat.border_width_top = int(sb_flat.border_width_top * scale_factor)
+		sb_flat.border_width_right = int(sb_flat.border_width_right * scale_factor)
+		sb_flat.border_width_bottom = int(sb_flat.border_width_bottom * scale_factor)
+		
+		sb_flat.corner_radius_top_left = int(sb_flat.corner_radius_top_left * scale_factor)
+		sb_flat.corner_radius_top_right = int(sb_flat.corner_radius_top_right * scale_factor)
+		sb_flat.corner_radius_bottom_right = int(sb_flat.corner_radius_bottom_right * scale_factor)
+		sb_flat.corner_radius_bottom_left = int(sb_flat.corner_radius_bottom_left * scale_factor)
+		
+		sb_flat.expand_margin_left = sb_flat.expand_margin_left * scale_factor
+		sb_flat.expand_margin_top = sb_flat.expand_margin_top * scale_factor
+		sb_flat.expand_margin_right = sb_flat.expand_margin_right * scale_factor
+		sb_flat.expand_margin_bottom = sb_flat.expand_margin_bottom * scale_factor
+	
+	stylebox.set_meta('hengo_theme_scale', target_scale)
+
+
 func _enter_tree():
+	scale_theme_to_editor_scale()
 	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
 	add_debugger_plugin(debug_plugin)
 

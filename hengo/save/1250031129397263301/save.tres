@@ -15,7 +15,7 @@
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 1523
+counter = 1586
 variables = Array[ExtResource("7_53lhb")]([ExtResource("10_hddbd")])
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
@@ -141,7 +141,7 @@ virtual_cnode_list = Array[Dictionary]([{
 }],
 &"name": "notify_thread_safe",
 &"position": "Vector2(-52, 148)",
-&"size": "Vector2(196, 150)",
+&"size": "Vector2(201, 160)",
 &"sub_type": 1,
 &"type": 0
 }, {
@@ -156,7 +156,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "function_6",
 &"position": "Vector2(-55.5, 398)",
 &"res": ExtResource("2_xkhiy"),
-&"size": "Vector2(203, 103)",
+&"size": "Vector2(212, 103)",
 &"sub_type": 5,
 &"type": 0
 }, {
@@ -207,7 +207,7 @@ virtual_cnode_list = Array[Dictionary]([{
 }],
 &"name": "set_meta",
 &"position": "Vector2(-373, 929)",
-&"size": "Vector2(174, 197)",
+&"size": "Vector2(183, 197)",
 &"sub_type": 1,
 &"type": 0
 }, {

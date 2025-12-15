@@ -5,6 +5,7 @@ type="CompressedTexture2D"
 uid="uid://dxb1eiid3l1k0"
 path="res://.godot/imported/panel-top-open.svg-cf927b75e6665788381acca2fc9ecbdc.ctex"
 metadata={
+"has_editor_variant": true,
 "vram_texture": false
 }
 
@@ -39,5 +40,5 @@ process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
 svg/scale=0.75
-editor/scale_with_editor_scale=false
+editor/scale_with_editor_scale=true
 editor/convert_colors_with_editor_theme=false
