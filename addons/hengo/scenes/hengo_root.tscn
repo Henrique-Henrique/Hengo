@@ -1,4 +1,4 @@
-[gd_scene load_steps=78 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=79 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -49,15 +49,22 @@
 [ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
 [ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_174hx"]
+bg_color = Color(0, 0, 0, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.011764706, 0.02745098, 0.07058824, 1)
+bg_color = Color(0.03529412, 0.03529412, 0.043137256, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
 content_margin_right = 8.0
 content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lxtpw"]
-bg_color = Color(0.011764706, 0.02745098, 0.07058824, 1)
+bg_color = Color(0.03529412, 0.03529412, 0.043137256, 1)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -65,9 +72,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3840, 2126)
-shader_parameter/offset = Vector2(1221.8125, 603.07965)
-shader_parameter/zoom_factor = 0.4499943
+shader_parameter/screen_size = Vector2(3576, 2236)
+shader_parameter/offset = Vector2(1891.2468, -1761.5258)
+shader_parameter/zoom_factor = 1.4999998
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -81,7 +88,7 @@ bg_color = Color(1, 1, 1, 0.0862745)
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_hog2e"]
 shader = ExtResource("37_33cyo")
 shader_parameter/lod = 2.000000095
-shader_parameter/color = Color(0.101960786, 0.11372549, 0.14901961, 1)
+shader_parameter/color = Color(0.12073269, 0.12073409, 0.13611376, 1)
 shader_parameter/transparency = 0.6000000285
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
@@ -261,15 +268,31 @@ script = ExtResource("13_5c7h0")
 [node name="Content" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content"]
+[node name="Panel" type="Panel" parent="Content"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_174hx")
+
+[node name="MarginContainer" type="MarginContainer" parent="Content/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer"]
+layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="CNodeUI" type="Panel" parent="Content/VBoxContainer"]
+[node name="CNodeUI" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
@@ -277,7 +300,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="Panel2" type="TextureRect" parent="Content/VBoxContainer/CNodeUI"]
+[node name="Panel2" type="TextureRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
 process_mode = 4
 modulate = Color(1, 1, 1, 0.49019608)
 layout_mode = 1
@@ -290,11 +313,11 @@ mouse_filter = 2
 texture = ExtResource("24_48snx")
 stretch_mode = 1
 
-[node name="Center2" type="Marker2D" parent="Content/VBoxContainer/CNodeUI"]
+[node name="Center2" type="Marker2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
 visible = false
 position = Vector2(-580, 4)
 
-[node name="CNodeStatLabel" type="Label" parent="Content/VBoxContainer/CNodeUI"]
+[node name="CNodeStatLabel" type="Label" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(1, 1, 1, 0.658824)
@@ -308,7 +331,7 @@ grow_vertical = 0
 theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
 horizontal_alignment = 2
 
-[node name="Panel" type="Control" parent="Content/VBoxContainer/CNodeUI"]
+[node name="Panel" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -317,7 +340,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_vertical = 3
 
-[node name="Panel" type="Panel" parent="Content/VBoxContainer/CNodeUI/Panel"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel"]
 process_mode = 4
 layout_mode = 1
 anchors_preset = 15
@@ -328,7 +351,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_lxtpw")
 
-[node name="CNodeContainerBG" type="Control" parent="Content/VBoxContainer/CNodeUI/Panel"]
+[node name="CNodeContainerBG" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel"]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
@@ -339,7 +362,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("16_74kfo")
 
-[node name="Grid" type="TextureRect" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG"]
+[node name="Grid" type="TextureRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG"]
 process_mode = 4
 texture_filter = 1
 texture_repeat = 2
@@ -353,19 +376,19 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("17_lxtpw")
 
-[node name="Cam" type="Node2D" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG" node_paths=PackedStringArray("grid")]
+[node name="Cam" type="Node2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG" node_paths=PackedStringArray("grid")]
 unique_name_in_owner = true
 position = Vector2(0, -8)
 script = ExtResource("3_84akk")
 grid = NodePath("../Grid")
 
-[node name="RefPoint" type="Marker2D" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+[node name="RefPoint" type="Marker2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 visible = false
 position = Vector2(289, 313)
 
-[node name="Lines" type="Node2D" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+[node name="Lines" type="Node2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 
-[node name="CommentContainer" type="Control" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+[node name="CommentContainer" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -374,7 +397,7 @@ offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
 
-[node name="CnodeContainer" type="Control" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+[node name="CnodeContainer" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -383,7 +406,7 @@ offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
 
-[node name="ConnectionGuide" type="Line2D" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+[node name="ConnectionGuide" type="Line2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 visible = false
 z_index = 2
@@ -393,7 +416,7 @@ texture = ExtResource("7_6jref")
 texture_mode = 1
 script = ExtResource("7_gj1gq")
 
-[node name="SelectionRect" type="ReferenceRect" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+[node name="SelectionRect" type="ReferenceRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 process_mode = 4
 visible = false
 offset_left = 153.0
@@ -404,7 +427,7 @@ mouse_filter = 2
 border_color = Color(0.749928, 0.915784, 0.889306, 1)
 border_width = 3.0
 
-[node name="Panel" type="Panel" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam/SelectionRect"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam/SelectionRect"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -413,11 +436,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
-[node name="VCActionButtons" parent="Content/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" instance=ExtResource("20_w813u")]
+[node name="VCActionButtons" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" instance=ExtResource("20_w813u")]
 unique_name_in_owner = true
 visible = false
 
-[node name="HSplitContainer" type="HSplitContainer" parent="Content/VBoxContainer/CNodeUI"]
+[node name="HSplitContainer" type="HSplitContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -428,7 +451,7 @@ mouse_filter = 2
 theme_override_constants/separation = 0
 split_offset = -2000
 
-[node name="MarginContainer" type="MarginContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
@@ -437,40 +460,40 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Panel" type="Panel" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
 material = SubResource("ShaderMaterial_hog2e")
 layout_mode = 2
 theme_override_styles/panel = ExtResource("24_h1p8r")
 
-[node name="SidePanel" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+[node name="SidePanel" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = ExtResource("25_174hx")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
 
-[node name="MenuBar" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="MenuBar" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
 layout_mode = 2
 alignment = 2
 script = ExtResource("7_sagw0")
 dashboard = NodePath("DashBoard")
 
-[node name="CompileContainer" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="CompileContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
+[node name="Compile" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -483,13 +506,13 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
 text = "Compile"
 icon = ExtResource("18_fdf88")
 
-[node name="DashBoard" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="DashBoard" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 tooltip_text = "Dashboard"
 icon = ExtResource("11_rvhdl")
 flat = true
 
-[node name="TabContainer" type="TabContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/tab_separation = 12
@@ -503,13 +526,13 @@ theme_override_styles/tab_focus = ExtResource("19_33cyo")
 current_tab = 0
 script = ExtResource("18_hg3xi")
 
-[node name="SideBar" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
+[node name="SideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 metadata/_tab_name = "Props"
 
-[node name="CodePreview" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 0)
@@ -529,13 +552,13 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
-[node name="Control" type="Control" parent="Content/VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="Control" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 4.0
 mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -544,75 +567,75 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 visible = false
 layout_mode = 2
 
-[node name="Tabs" type="TabBar" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
+[node name="Tabs" type="TabBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tab_alignment = 2
 script = ExtResource("11_lxtpw")
 
-[node name="MarginContainer" type="MarginContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/margin_top = 8
 
-[node name="Panel" type="Panel" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
 material = SubResource("ShaderMaterial_onj4m")
 layout_mode = 2
 theme_override_styles/panel = ExtResource("24_h1p8r")
 
-[node name="PanelContainer" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
 layout_mode = 2
 theme_override_styles/panel = ExtResource("25_174hx")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer"]
 layout_mode = 2
 
-[node name="CloseBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="CloseBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("30_hog2e")
 flat = true
 
-[node name="ClassName" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="ClassName" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="Label" type="Label" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="Label" type="Label" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Base > Test"
 
-[node name="OpenDashboard" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="OpenDashboard" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("40_174hx")
 flat = true
 
-[node name="PanelContainer" type="PanelContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
 
-[node name="TerminalBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
+[node name="TerminalBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
 flat = true
 
-[node name="TerminalInfo" type="HBoxContainer" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
+[node name="TerminalInfo" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
 mouse_filter = 2
 
-[node name="InfoBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+[node name="InfoBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
@@ -627,7 +650,7 @@ disabled = true
 text = "0"
 icon = ExtResource("38_onj4m")
 
-[node name="SuccessBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+[node name="SuccessBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
@@ -642,7 +665,7 @@ disabled = true
 text = "0"
 icon = ExtResource("39_vlu6e")
 
-[node name="ErrorBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+[node name="ErrorBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
@@ -657,7 +680,7 @@ disabled = true
 text = "0"
 icon = ExtResource("40_aqok7")
 
-[node name="ActionsBt" type="Button" parent="Content/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="ActionsBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Actions"

@@ -7,7 +7,7 @@
 
 extends Node
 
-func function_6(param_63):
+func function_63(param_63):
 	pass
 
 
@@ -40,7 +40,7 @@ func _physics_process(delta: float) -> void:
 class State1 extends HengoState:
 	func enter() -> void:
 		_ref.notify_thread_safe(42.0)
-		_ref.function_6("okok")
+		_ref.function_63("okok")
 		if true:
 			_ref.set_meta("haha", null)
 			_ref.get_node("Testing").my_func_18()[0]

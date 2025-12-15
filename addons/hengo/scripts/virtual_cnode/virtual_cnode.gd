@@ -97,7 +97,6 @@ func _init() -> void:
 		references
 	)
 
-	identity.cnode_need_update.connect(update)
 	io.cnode_need_update.connect(update)
 	flow.cnode_need_update.connect(update)
 	state.cnode_need_update.connect(update)
@@ -242,14 +241,9 @@ func on_cnode_double_click() -> void:
 
 
 func on_cnode_right_click(_mouse_pos: Vector2) -> void:
-	# showing state config on doubleclick
+	# showing state config on right click
 	if identity.type == HenVirtualCNode.Type.STATE:
-		@warning_ignore('unsafe_method_access')
-		(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(
-			HenPropEditor.mount(self),
-			'Testing',
-			_mouse_pos
-		)
+		pass
 
 func on_node_io_hovered(context: Dictionary) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -478,34 +472,6 @@ func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> He
 
 func get_history_obj() -> HenVCNodeReturn:
 	return HenVCNodeReturn.new(self)
-
-
-func get_inspector_array_list() -> Array:
-	match identity.sub_type:
-		SubType.STATE:
-			return [
-				HenProp.new({
-					name = 'Name',
-					type = HenProp.Type.STRING,
-					default_value = identity.name,
-					on_value_changed = identity.on_change_name
-				}),
-				HenProp.new({
-					name = 'Outputs',
-					type = HenProp.Type.ARRAY,
-					on_item_create = flow.create_input_flow_connection.bind(self),
-					prop_list = flow.flow_outputs.map(func(x: HenVCFlow) -> HenProp: return HenProp.new({
-						name = 'name',
-						type = HenProp.Type.STRING,
-						default_value = x.name,
-						on_value_changed = flow.change_flow_name.bind(x),
-						on_item_delete = flow.on_delete_flow_state.bind(x),
-						on_item_move = flow.move_flow.bind(x, false),
-					})),
-				}),
-			]
-		
-	return []
 
 
 func get_flow_input_connection(_id: int) -> HenVCFlowConnectionData:

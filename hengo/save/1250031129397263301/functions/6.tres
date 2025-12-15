@@ -18,7 +18,6 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 7,
 &"name": "input",
 &"position": "Vector2(0, 0)",
-&"res": null,
 &"size": "Vector2(136, 88)",
 &"sub_type": 11,
 &"type": 0
@@ -27,10 +26,9 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 8,
 &"name": "output",
 &"position": "Vector2(400, 0)",
-&"res": null,
 &"size": "Vector2(74, 48)",
 &"sub_type": 19,
 &"type": 0
 }])
-name = "function_6"
+name = "function_63"
 id = 6

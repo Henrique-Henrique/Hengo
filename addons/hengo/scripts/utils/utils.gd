@@ -183,3 +183,15 @@ static func get_dependency_type(res: Resource) -> HenEnums.DependencyType:
 # returns the scaled size for high dpi displays
 static func get_scaled_size(base_size: int) -> int:
 	return int(base_size * EditorInterface.get_editor_scale())
+
+
+static func is_circular_dependent(_sub_type: HenVirtualCNode.SubType) -> bool:
+	match _sub_type:
+		HenVirtualCNode.SubType.FUNC_INPUT, \
+		HenVirtualCNode.SubType.FUNC_OUTPUT, \
+		HenVirtualCNode.SubType.MACRO_INPUT, \
+		HenVirtualCNode.SubType.MACRO_OUTPUT, \
+		HenVirtualCNode.SubType.SIGNAL_ENTER:
+			return true
+		
+	return false

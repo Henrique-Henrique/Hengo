@@ -71,6 +71,8 @@ func _ready() -> void:
 	list.gui_input.connect(_on_gui)
 	list.mouse_exited.connect(_on_exit)
 
+	custom_minimum_size = Vector2(HenUtils.get_scaled_size(250), 0)
+
 	global.SIDE_BAR = self
 
 

@@ -98,23 +98,6 @@ func get_flow_output_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> He
 	return null
 
 
-func move_flow(_direction: HenArrayItem.ArrayMove, _ref: HenVCFlowConnectionData, _is_input: bool) -> void:
-	var arr: Array
-
-	if _is_input:
-		arr = flow_inputs
-	else:
-		arr = flow_outputs
-
-	match _direction:
-		HenArrayItem.ArrayMove.UP:
-			HenUtils.move_array_item(arr, _ref, 1)
-		HenArrayItem.ArrayMove.DOWN:
-			HenUtils.move_array_item(arr, _ref, -1)
-
-	cnode_need_update.emit()
-
-
 func on_flow_added(_is_input: bool, _data: Dictionary, _owner: HenVirtualCNode) -> void:
 	# restrict creation by sub_type
 	match identity.sub_type:

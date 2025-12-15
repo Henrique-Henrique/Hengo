@@ -12,14 +12,3 @@ var singleton_class: String
 var from_side_bar_id: int = -1
 var from_id: int = -1
 var side_bar_id: int = -1
-
-signal cnode_need_update
-
-
-func on_change_name(_name: String) -> void:
-	match sub_type:
-		HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.FUNC_OUTPUT:
-			return
-
-	name = _name
-	cnode_need_update.emit()

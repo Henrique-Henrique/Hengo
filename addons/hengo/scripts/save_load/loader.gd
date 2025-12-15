@@ -217,12 +217,13 @@ func parse_and_get_vc_list_dict(_cnode_list: Array, _route: HenRouteData, _item:
 	for _config: Dictionary in _cnode_list:
 		_config.route = _route
 
-		# adding item reference here to prevent circular reference on saving
-		match _config.get('sub_type'):
-			HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.FUNC_OUTPUT:
-				_config.res = _item
+		var is_circular: bool = HenUtils.is_circular_dependent(_config.get('sub_type'))
 
+		# adding item reference here to prevent circular reference on saving
+		if is_circular: _config.res = _item
 		var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(_config)
+		if is_circular: _config.erase('res')
+		
 		_config.erase('route')
 		loaded_virtual_cnode_list[vc.identity.id] = vc
 
