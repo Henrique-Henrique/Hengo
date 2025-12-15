@@ -393,72 +393,66 @@ static func instantiate_and_add_pool() -> void:
 
 	global.can_instantiate_pool = true
 
-	for loop_idx in range(3):
-		if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+	var total_pool_size: int = 100
+	var budget_per_frame_usec: int = 8000
+	
+	var start_time: float = Time.get_ticks_usec()
+	
+	for i in range(total_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
 			return
 
-		if not global.can_instantiate_pool:
+		var instance: HenCnode = CNODE.instantiate()
+
+		for input_idx in range(5):
+			instance.add_input({name = "", type = "Variant"}, false)
+
+		for output_idx in range(5):
+			instance.add_output({name = "", type = "Variant"})
+		
+		instance.position = Vector2(50000, 50000)
+		instance.is_pool = true
+		instance.visible = false
+		
+		global.cnode_pool.append(instance)
+		global.CNODE_CONTAINER.add_child(instance)
+
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			start_time = Time.get_ticks_usec()
+
+	for i in range(total_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
 			return
+
+		var line: HenConnectionLine = CONNECTION_LINE.instantiate()
+		line.visible = false
+		line.position = Vector2(50000, 50000)
+		global.connection_line_pool.append(line)
+		global.CAM.get_node('Lines').add_child(line)
 		
-		var start: float = Time.get_ticks_usec()
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			start_time = Time.get_ticks_usec()
 
-		for vc_idx in range(30): # pool size
-			var instance: HenCnode = CNODE.instantiate()
+	for i in range(total_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
+			return
 
-			for input_idx in range(5): # input pool size
-				instance.add_input({name = "", type = "Variant"}, false)
+		var line: HenFlowConnectionLine = FLOW_CONNECTION_LINE.instantiate()
+		line.visible = false
+		line.position = Vector2(50000, 50000)
+		global.flow_connection_line_pool.append(line)
+		global.CAM.get_node('Lines').add_child(line)
 
-			for output_idx in range(5): # output pool size
-				instance.add_output({name = "", type = "Variant"})
-			
-			instance.position = Vector2(50000, 50000)
-			instance.is_pool = true
-			instance.visible = false
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			start_time = Time.get_ticks_usec()
 
-			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
-				return
-
-			if not global.can_instantiate_pool:
-				return
-			
-			global.cnode_pool.append(instance)
-			global.CNODE_CONTAINER.add_child(instance)
-
-			await RenderingServer.frame_post_draw
-			
-
-		for connection_line_idx in range(30): # connection line pool size
-			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
-				return
-
-			if not global.can_instantiate_pool:
-				return
-			
-			var line: HenConnectionLine = CONNECTION_LINE.instantiate()
-			line.visible = false
-			line.position = Vector2(50000, 50000)
-			global.connection_line_pool.append(line)
-			global.CAM.get_node('Lines').add_child(line)
-		
-
-		for flow_connection_line_idx in range(30): # flow connection line pool size
-			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
-				return
-
-			if not global.can_instantiate_pool:
-				return
-			
-			var line: HenFlowConnectionLine = FLOW_CONNECTION_LINE.instantiate()
-			line.visible = false
-			line.position = Vector2(50000, 50000)
-			global.flow_connection_line_pool.append(line)
-			global.CAM.get_node('Lines').add_child(line)
-
-
-		var end: float = Time.get_ticks_usec()
-		print('time => ', (end - start) / 1000., 'ms')
-
-		await global.CNODE_CONTAINER.get_tree().create_timer(1).timeout
+	print('Pool instantiation finished.')
 
 
 func _physics_process(_delta: float) -> void:

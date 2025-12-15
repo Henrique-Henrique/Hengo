@@ -7,6 +7,8 @@
 
 extends Node
 
+var variable_1502 = null  
+ 
 func function_63(param_63):
 	pass
 
