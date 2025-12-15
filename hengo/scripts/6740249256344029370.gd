@@ -7,9 +7,9 @@
 
 extends Node
 
-var test_name = String()  
+var test_name_2 = String()  
  
-func my_func_18():
+func my_func_183():
 	pass
 
 

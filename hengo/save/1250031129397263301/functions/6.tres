@@ -26,7 +26,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 8,
 &"name": "output",
 &"position": "Vector2(400, 0)",
-&"size": "Vector2(74, 48)",
+&"size": "Vector2(75, 48)",
 &"sub_type": 19,
 &"type": 0
 }])

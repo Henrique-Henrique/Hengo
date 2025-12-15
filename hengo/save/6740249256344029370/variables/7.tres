@@ -5,5 +5,5 @@
 [resource]
 script = ExtResource("1_mqqs0")
 type = &"String"
-name = "test name"
+name = "test name 2"
 id = 7

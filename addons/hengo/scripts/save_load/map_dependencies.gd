@@ -163,25 +163,25 @@ func _has_dependency_changed(_deps: Array, _updated_ast: ProjectAST) -> bool:
 		match dep.type:
 			HenEnums.DependencyType.VAR:
 				for v: HenSaveVar in _updated_ast.variables:
-					if v.name == dep.name:
+					if v.id == dep.id:
 						if HenUtils.get_dependency_hash(v) == dep.hash:
 							changed = false
 						break
 			HenEnums.DependencyType.FUNC:
 				for f: HenSaveFunc in _updated_ast.functions:
-					if f.name == dep.name:
+					if f.id == dep.id:
 						if HenUtils.get_dependency_hash(f) == dep.hash:
 							changed = false
 						break
 			HenEnums.DependencyType.SIGNAL:
 				for s: HenSaveSignal in _updated_ast.signals:
-					if s.name == dep.name:
+					if s.id == dep.id:
 						if HenUtils.get_dependency_hash(s) == dep.hash:
 							changed = false
 						break
 			HenEnums.DependencyType.MACRO:
 				for m: HenSaveMacro in _updated_ast.macros:
-					if m.name == dep.name:
+					if m.id == dep.id:
 						if HenUtils.get_dependency_hash(m) == dep.hash:
 							changed = false
 						break

@@ -36,7 +36,7 @@ func add_detailed_dep(_id: StringName, _dep_info: Dictionary) -> void:
         identity.detailed_deps[_id] = []
 
     for dep: Dictionary in identity.detailed_deps[_id]:
-        if dep.type == _dep_info.type and dep.name == _dep_info.name:
+        if dep.type == _dep_info.type and dep.id == _dep_info.id:
             return
 
     (identity.detailed_deps[_id] as Array).append(_dep_info)

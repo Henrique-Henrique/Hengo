@@ -7,6 +7,25 @@ const CNODE = preload('res://addons/hengo/scenes/cnode.tscn')
 const CONNECTION_LINE = preload('res://addons/hengo/scenes/connection_line.tscn')
 const FLOW_CONNECTION_LINE = preload('res://addons/hengo/scenes/flow_connection_line.tscn')
 
+const ICON_FUNCTION = preload("res://addons/hengo/assets/new_icons/square-function.svg")
+const ICON_VARIABLE = preload("res://addons/hengo/assets/new_icons/variable.svg")
+const ICON_IF = preload("res://addons/hengo/assets/new_icons/git-branch.svg")
+const ICON_LOOP = preload("res://addons/hengo/assets/new_icons/repeat.svg")
+const ICON_STATE = preload("res://addons/hengo/assets/new_icons/activity.svg")
+const ICON_SIGNAL = preload("res://addons/hengo/assets/new_icons/signal.svg")
+const ICON_DEBUG = preload("res://addons/hengo/assets/new_icons/bug.svg")
+const ICON_VOID = preload("res://addons/hengo/assets/new_icons/circle-slash.svg")
+const ICON_INVALID = preload("res://addons/hengo/assets/new_icons/triangle.svg")
+const ICON_CODE = preload("res://addons/hengo/assets/new_icons/code.svg")
+const ICON_IMAGE = preload("res://addons/hengo/assets/new_icons/image.svg")
+const ICON_CALCULATOR = preload("res://addons/hengo/assets/new_icons/calculator.svg")
+const ICON_LINK_OFF = preload("res://addons/hengo/assets/new_icons/link-2-off.svg")
+const ICON_INPUT = preload("res://addons/hengo/assets/new_icons/file-input.svg")
+const ICON_OUTPUT = preload("res://addons/hengo/assets/new_icons/file-output.svg")
+const ICON_BOX = preload("res://addons/hengo/assets/new_icons/box.svg")
+const ICON_LAYERS = preload("res://addons/hengo/assets/new_icons/layers.svg")
+const ICON_PLAY = preload("res://addons/hengo/assets/new_icons/play.svg")
+
 var flow_to: Dictionary = {}
 var data: Dictionary = {}
 var category: String
@@ -259,6 +278,114 @@ func reset_signals(_vc: HenVirtualCNode = null):
 
 func request_flow_connetor_connection(_id: int, _mouse_pos: Vector2) -> void:
 	request_flow_connection.emit(_id, _mouse_pos)
+
+
+func update_title_color(_sub_type: int) -> void:
+	var title_color: TextureRect = get_node('%TitleColor')
+	var title_icon: TextureRect = get_node('%TitleIcon')
+	title_color.modulate = Color('#343434')
+
+	match _sub_type:
+		HenVirtualCNode.SubType.FUNC, \
+		HenVirtualCNode.SubType.USER_FUNC, \
+		HenVirtualCNode.SubType.FUNC_FROM, \
+		HenVirtualCNode.SubType.MACRO:
+			title_color.modulate = Color("#54a0ff")
+			title_icon.texture = ICON_FUNCTION
+
+		HenVirtualCNode.SubType.VIRTUAL, \
+		HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
+			title_color.modulate = Color("#ff9ff3")
+			title_icon.texture = ICON_LAYERS
+
+		HenVirtualCNode.SubType.FUNC_INPUT, \
+		HenVirtualCNode.SubType.MACRO_INPUT:
+			title_color.modulate = Color("#ff9ff3")
+			title_icon.texture = ICON_INPUT
+
+		HenVirtualCNode.SubType.FUNC_OUTPUT, \
+		HenVirtualCNode.SubType.MACRO_OUTPUT:
+			title_color.modulate = Color("#ff9ff3")
+			title_icon.texture = ICON_OUTPUT
+
+		HenVirtualCNode.SubType.VAR, \
+		HenVirtualCNode.SubType.LOCAL_VAR, \
+		HenVirtualCNode.SubType.SET_VAR, \
+		HenVirtualCNode.SubType.SET_LOCAL_VAR, \
+		HenVirtualCNode.SubType.VAR_FROM, \
+		HenVirtualCNode.SubType.SET_VAR_FROM, \
+		HenVirtualCNode.SubType.CONST, \
+		HenVirtualCNode.SubType.GET_FROM_PROP, \
+		HenVirtualCNode.SubType.IN_PROP:
+			title_color.modulate = Color("#1dd1a1")
+			title_icon.texture = ICON_VARIABLE
+
+		HenVirtualCNode.SubType.IF:
+			title_color.modulate = Color("#ff6b6b")
+			title_icon.texture = ICON_IF
+
+		HenVirtualCNode.SubType.FOR, \
+		HenVirtualCNode.SubType.FOR_ARR, \
+		HenVirtualCNode.SubType.FOR_ITEM:
+			title_color.modulate = Color("#ff6b6b")
+			title_icon.texture = ICON_LOOP
+
+		HenVirtualCNode.SubType.BREAK, \
+		HenVirtualCNode.SubType.CONTINUE, \
+		HenVirtualCNode.SubType.PASS, \
+		HenVirtualCNode.SubType.GO_TO_VOID, \
+		HenVirtualCNode.SubType.SELF_GO_TO_VOID:
+			title_color.modulate = Color("#ff6b6b")
+			title_icon.texture = ICON_PLAY
+
+		HenVirtualCNode.SubType.STATE, \
+		HenVirtualCNode.SubType.STATE_START, \
+		HenVirtualCNode.SubType.STATE_EVENT:
+			title_color.modulate = Color("#a29bfe")
+			title_icon.texture = ICON_STATE
+
+		HenVirtualCNode.SubType.SIGNAL_ENTER, \
+		HenVirtualCNode.SubType.SIGNAL_CONNECTION, \
+		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			title_color.modulate = Color("#ff6b6b")
+			title_icon.texture = ICON_SIGNAL
+
+		HenVirtualCNode.SubType.DEBUG, \
+		HenVirtualCNode.SubType.DEBUG_VALUE, \
+		HenVirtualCNode.SubType.DEBUG_PUSH, \
+		HenVirtualCNode.SubType.DEBUG_FLOW_START, \
+		HenVirtualCNode.SubType.START_DEBUG_STATE, \
+		HenVirtualCNode.SubType.DEBUG_STATE:
+			title_color.modulate = Color("#c8d6e5")
+			title_icon.texture = ICON_DEBUG
+
+		HenVirtualCNode.SubType.VOID:
+			title_color.modulate = Color("#576574")
+			title_icon.texture = ICON_VOID
+		
+		HenVirtualCNode.SubType.INVALID:
+			title_color.modulate = Color("#e17055")
+			title_icon.texture = ICON_INVALID
+		
+		HenVirtualCNode.SubType.RAW_CODE:
+			title_color.modulate = Color("#8395a7")
+			title_icon.texture = ICON_CODE
+
+		HenVirtualCNode.SubType.IMG:
+			title_color.modulate = Color("#8395a7")
+			title_icon.texture = ICON_IMAGE
+
+		HenVirtualCNode.SubType.EXPRESSION:
+			title_color.modulate = Color("#8395a7")
+			title_icon.texture = ICON_CALCULATOR
+
+		HenVirtualCNode.SubType.NOT_CONNECTED:
+			title_color.modulate = Color("#8395a7")
+			title_icon.texture = ICON_LINK_OFF
+
+		HenVirtualCNode.SubType.CAST:
+			title_color.modulate = Color("#8395a7")
+			title_icon.texture = ICON_BOX
 
 
 static func instantiate_and_add_pool() -> void:

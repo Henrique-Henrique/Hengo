@@ -10,12 +10,12 @@ name = "first"
 deps = Array[StringName]([&"6740249256344029370"])
 detailed_deps = {
 &"6740249256344029370": [{
-&"hash": 401229821,
-&"name": "test name",
+&"hash": 2322895695,
+&"id": 7,
 &"type": 0
 }, {
-&"hash": 3239161866,
-&"name": "my func_18",
+&"hash": 2902485661,
+&"id": 2,
 &"type": 1
 }]
 }

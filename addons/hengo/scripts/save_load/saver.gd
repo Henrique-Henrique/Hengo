@@ -212,7 +212,7 @@ static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) 
 			if dep_hash != 0:
 				save_data.add_detailed_dep(parent_id, {
 					type = HenUtils.get_dependency_type(res),
-					name = res.name,
+					id = res.id,
 					hash = dep_hash
 				})
 		

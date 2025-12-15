@@ -66,18 +66,24 @@ func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
 	cnode_need_update.emit()
 
 
-func flow_input_has_connection(_id: int) -> bool:
+func flow_input_has_connection(_id: int, _input_id: int) -> bool:
 	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
-		if flow_connection.from_id == _id:
-			return not flow_connection.from or flow_connection.from.get_ref() != null
+		if not flow_connection.get_to():
+			continue
+		
+		if flow_connection.to_id == _id and flow_connection.get_to().identity.id == _input_id:
+			return true
 
 	return false
 
 
-func flow_output_has_connection(_id: int) -> bool:
+func flow_output_has_connection(_id: int, _output_id: int) -> bool:
 	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
-		if flow_connection.to_id == _id:
-			return not flow_connection.to or flow_connection.to.get_ref() != null
+		if not flow_connection.get_from():
+			continue
+
+		if flow_connection.from_id == _id and flow_connection.get_from().identity.id == _output_id:
+			return true
 
 	return false
 

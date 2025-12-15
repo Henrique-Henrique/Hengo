@@ -201,8 +201,6 @@ func get_input_token(_id: int) -> Dictionary:
 			var output_id_list: Array = (input_connection.from.get_ref() as HenTypeCnode).outputs.map(func(x): return x.id)
 			var input_id_list: Array = (input_connection.to.get_ref() as HenTypeCnode).inputs.map(func(x): return x.id)
 
-			prints(output_id_list, input_id_list)
-
 			if not output_id_list.has(input_connection.from_id) or not input_id_list.has(input_connection.to_id):
 				continue
 

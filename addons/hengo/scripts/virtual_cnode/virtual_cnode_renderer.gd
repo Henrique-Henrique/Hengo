@@ -29,7 +29,6 @@ func _init(
 func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	_cnode.position = visual.position
 	_cnode.visible = true
-	_cnode.change_name(identity.name)
 	_cnode.category = identity.category
 	_cnode.id = identity.id
 	_cnode.can_follow = false
@@ -37,13 +36,18 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	_cnode.selected = false
 	_cnode.moving = false
 
+	if refs.res:
+		_cnode.change_name(refs.res.get(&'name'))
+	else:
+		_cnode.change_name(identity.name)
+
 	var idx: int = 0
-	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+
+	_cnode.update_title_color(identity.sub_type)
 
 	# sync
 	var inputs: Array[HenVCInOutData] = io.get_inputs()
 	var outputs: Array[HenVCInOutData] = io.get_outputs()
-
 
 	# clearing inputs and change to new
 	for input: HenCnodeInOut in _cnode.get_node('%InputContainer').get_children():
@@ -126,18 +130,6 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		var from_idx: int = output_arr.find(output_ref)
 		var to_idx: int = input_arr.find(input_ref)
 
-		prints(from_idx, to_idx)
-
-		# var to_idx: int = .find(to.io.get_input(connection.to_id))
-		# prints(from_idx)
-
-		# prints(
-		# 	from.io.get_outputs().find(from.io.get_output(connection.from_id)),
-		# 	from.io.get_outputs(),
-		# 	from.io.get_output(connection.from_id),
-		# 	connection.from_id,
-		# )
-
 		if from_idx < 0 or to_idx < 0:
 			if not connection.line_ref: continue
 
@@ -159,7 +151,6 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		connection.line_ref.to = weakref(to)
 		connection.line_ref.from_idx = from_idx
 		connection.line_ref.to_idx = to_idx
-
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:
@@ -236,7 +227,8 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 		flow_input_instance.id = flow_input.id
 		flow_input_instance.visible = true
 
-		(from_flow_container.get_child(idx).get_node('%Arrow') as TextureRect).visible = true
+		var has_connection: bool = flow.flow_input_has_connection(flow_input.id, _cnode.id)
+		(from_flow_container.get_child(idx).get_node('%Arrow') as TextureRect).visible = has_connection
 		idx += 1
 
 	idx = 0

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="HenSaveData" load_steps=12 format=3 uid="uid://52vjo2u288lu"]
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=13 format=3 uid="uid://52vjo2u288lu"]
 
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_0rjht"]
 [ext_resource type="Resource" uid="uid://65mky3n66pc0" path="res://hengo/save/1250031129397263301/identity.tres" id="2_egb03"]
@@ -12,9 +12,16 @@
 [ext_resource type="Resource" uid="uid://c5r0g8rmck6hh" path="res://hengo/save/6740249256344029370/variables/7.tres" id="10_wifnu"]
 [ext_resource type="Resource" uid="uid://t4odes4m7q8h" path="res://hengo/save/6740249256344029370/functions/2.tres" id="11_tinkm"]
 
+[sub_resource type="Resource" id="Resource_tinkm"]
+script = ExtResource("7_53lhb")
+type = &"Variant"
+name = "variable_1502"
+id = 1502
+
 [resource]
 script = ExtResource("4_wifnu")
-counter = 1192
+counter = 1502
+variables = Array[ExtResource("7_53lhb")]([SubResource("Resource_tinkm")])
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
 connections = Array[Dictionary]([{
@@ -84,14 +91,14 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 1,
 &"name": "Stat State",
 &"position": "Vector2(0, 0)",
-&"size": "Vector2(99, 71)",
+&"size": "Vector2(100, 69)",
 &"sub_type": 37,
 &"type": 6
 }, {
 &"id": 2,
 &"name": "State 1",
 &"position": "Vector2(10.666354, 167)",
-&"size": "Vector2(75, 44)",
+&"size": "Vector2(76, 44)",
 &"sub_type": 36,
 &"to_flow": [],
 &"type": 5,
@@ -112,7 +119,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "delta",
 &"type": &"float"
 }],
-&"position": "Vector2(784, 0)",
+&"position": "Vector2(772, 0)",
 &"size": "Vector2(104, 88)",
 &"sub_type": 10,
 &"type": 0
@@ -140,8 +147,8 @@ virtual_cnode_list = Array[Dictionary]([{
 &"value": 42.0
 }],
 &"name": "notify_thread_safe",
-&"position": "Vector2(-63, 148)",
-&"size": "Vector2(190, 178)",
+&"position": "Vector2(-54, 148)",
+&"size": "Vector2(172, 157)",
 &"sub_type": 1,
 &"type": 0
 }, {
@@ -154,9 +161,9 @@ virtual_cnode_list = Array[Dictionary]([{
 }
 }),
 &"name": "function_6",
-&"position": "Vector2(-85, 426)",
+&"position": "Vector2(-75, 405)",
 &"res": ExtResource("2_xkhiy"),
-&"size": "Vector2(234, 123)",
+&"size": "Vector2(214, 110)",
 &"sub_type": 5,
 &"type": 0
 }, {
@@ -177,8 +184,8 @@ virtual_cnode_list = Array[Dictionary]([{
 &"value": true
 }],
 &"name": "IF",
-&"position": "Vector2(-88.5, 649)",
-&"size": "Vector2(241, 143)",
+&"position": "Vector2(-76, 615)",
+&"size": "Vector2(216, 128)",
 &"sub_type": 13,
 &"type": 1
 }, {
@@ -210,8 +217,8 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Variant"
 }],
 &"name": "set_meta",
-&"position": "Vector2(-399, 992)",
-&"size": "Vector2(207, 233)",
+&"position": "Vector2(-388.5, 943)",
+&"size": "Vector2(186, 204)",
 &"sub_type": 1,
 &"type": 0
 }, {
@@ -223,7 +230,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Variant"
 }],
 &"name": "print",
-&"position": "Vector2(562, 992)",
+&"position": "Vector2(550, 943)",
 &"size": "Vector2(122, 88)",
 &"sub_type": 1,
 &"type": 0
@@ -236,14 +243,14 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Variant"
 }],
 &"name": "print",
-&"position": "Vector2(562, 1180)",
+&"position": "Vector2(550, 1131)",
 &"size": "Vector2(122, 88)",
 &"sub_type": 1,
 &"type": 0
 }, {
 &"id": 121,
 &"name": "function_22",
-&"position": "Vector2(372, 992)",
+&"position": "Vector2(360, 943)",
 &"res": ExtResource("3_wifnu"),
 &"size": "Vector2(140, 128)",
 &"sub_type": 5,
@@ -251,15 +258,15 @@ virtual_cnode_list = Array[Dictionary]([{
 }, {
 &"id": 291,
 &"name": "Get variable_7",
-&"position": "Vector2(232, 1180)",
+&"position": "Vector2(232, 1131)",
 &"res": ExtResource("10_wifnu"),
-&"size": "Vector2(280, 103)",
+&"size": "Vector2(268, 95)",
 &"sub_type": 50,
 &"type": 0
 }, {
 &"id": 406,
 &"name": "my func",
-&"position": "Vector2(-423, 1325)",
+&"position": "Vector2(-423, 1247)",
 &"res": ExtResource("11_tinkm"),
 &"size": "Vector2(255, 128)",
 &"sub_type": 46,
@@ -291,8 +298,8 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "",
 &"type": &"Node"
 }],
-&"position": "Vector2(-757, 1325)",
-&"size": "Vector2(284, 178)",
+&"position": "Vector2(-728, 1247)",
+&"size": "Vector2(255, 157)",
 &"sub_type": 0,
 &"type": 0
 }]

@@ -71,6 +71,7 @@ expand_margin_bottom = 8.0
 
 [resource]
 default_font = ExtResource("1_revyj")
+Button/font_sizes/font_size = 16
 Button/fonts/font = ExtResource("1_ghilx")
 Button/styles/focus = SubResource("StyleBoxFlat_yvxym")
 Button/styles/hover = SubResource("StyleBoxFlat_el3g6")
@@ -81,6 +82,7 @@ ItemList/styles/panel = SubResource("StyleBoxEmpty_3mdrv")
 Label/fonts/font = ExtResource("1_revyj")
 Label/styles/normal = SubResource("StyleBoxEmpty_3d5pg")
 LineEdit/constants/minimum_character_width = 2
+LineEdit/font_sizes/font_size = 16
 LineEdit/fonts/font = ExtResource("1_ghilx")
 LineEdit/styles/focus = SubResource("StyleBoxFlat_xbr4r")
 LineEdit/styles/normal = ExtResource("4_el3g6")

@@ -43,6 +43,6 @@ class State1 extends HengoState:
 		_ref.function_63("okok")
 		if true:
 			_ref.set_meta("haha", null)
-			_ref.get_node("Testing").my_func_18()[0]
+			_ref.get_node("Testing").my_func_183()[0]
 		print(_ref.function_22()[0])
-		print(_ref.test_name)
+		print(_ref.test_name_2)

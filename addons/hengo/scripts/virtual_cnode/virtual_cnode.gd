@@ -392,7 +392,7 @@ func get_save(_save_data: HenSaveData) -> Dictionary:
 			if dep_hash != 0:
 				if _save_data: _save_data.add_detailed_dep(parent_id, {
 					type = HenUtils.get_dependency_type(references.res),
-					name = references.res.name,
+					id = references.res.id,
 					hash = dep_hash
 				})
 

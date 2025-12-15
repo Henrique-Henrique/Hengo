@@ -23,7 +23,7 @@ virtual_cnode_list = Array[Dictionary]([{
 &"id": 23,
 &"name": "input",
 &"position": "Vector2(0, 0)",
-&"size": "Vector2(62, 48)",
+&"size": "Vector2(63, 48)",
 &"sub_type": 11,
 &"type": 0
 }, {
