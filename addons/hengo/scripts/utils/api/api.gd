@@ -248,10 +248,6 @@ func _map_api() -> CompressedData:
 		native_classes = map_native_classes(data)
 	}
 
-	var f := FileAccess.open('res://.godot/hengo/ok.json', FileAccess.WRITE)
-	f.store_string(JSON.stringify(new_api_data))
-	f.close()
-
 	return save_and_get_compressed_data(new_api_data.duplicate(true), EXTENSION_API_COMPRESSED_PATH)
 
 
