@@ -33,7 +33,6 @@ func _on_gui(_event: InputEvent) -> void:
 
 					cnode_selecting_rect = true
 					start_select_pos = get_global_mouse_position()
-					global.ACTION_BAR.filesystem_dock(true)
 		else:
 			match _event.button_index:
 				MOUSE_BUTTON_LEFT:

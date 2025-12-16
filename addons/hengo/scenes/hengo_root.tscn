@@ -1,4 +1,4 @@
-[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=72 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -8,7 +8,6 @@
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" uid="uid://bojhvy7et13dd" path="res://addons/hengo/scripts/save_load/loader.gd" id="7_rg66s"]
-[ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
 [ext_resource type="Script" uid="uid://2jt18jo67ub8" path="res://addons/hengo/scripts/router.gd" id="8_nqb6j"]
 [ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
 [ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
@@ -20,7 +19,6 @@
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Script" uid="uid://itdfd6vqm34v" path="res://addons/hengo/scripts/global.gd" id="11_3680e"]
 [ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
-[ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
 [ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
 [ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
@@ -71,9 +69,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3584, 2244)
-shader_parameter/offset = Vector2(1778.8501, 204.30106)
-shader_parameter/zoom_factor = 1.4226325
+shader_parameter/screen_size = Vector2(1904, 993)
+shader_parameter/offset = Vector2(586.704, -59.76153)
+shader_parameter/zoom_factor = 0.50659597
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -443,11 +441,9 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar"]
 layout_mode = 2
 alignment = 2
-script = ExtResource("7_sagw0")
-dashboard = NodePath("DashBoard")
 
 [node name="CompileContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 unique_name_in_owner = true
@@ -468,12 +464,6 @@ theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
 text = "Compile"
 icon = ExtResource("18_fdf88")
-
-[node name="DashBoard" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
-layout_mode = 2
-tooltip_text = "Dashboard"
-icon = ExtResource("11_rvhdl")
-flat = true
 
 [node name="TabContainer" type="TabContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
 layout_mode = 2

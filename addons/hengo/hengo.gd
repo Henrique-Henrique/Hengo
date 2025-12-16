@@ -150,27 +150,6 @@ func _enter_tree():
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)
-
-	# getting tabs
-	if global.DOCKS.is_empty():
-		var docks: Array[int] = [
-			EditorPlugin.DOCK_SLOT_LEFT_UL,
-			EditorPlugin.DOCK_SLOT_LEFT_UR,
-			EditorPlugin.DOCK_SLOT_LEFT_BL,
-			EditorPlugin.DOCK_SLOT_LEFT_BR,
-			EditorPlugin.DOCK_SLOT_RIGHT_UL,
-			EditorPlugin.DOCK_SLOT_RIGHT_UR,
-			EditorPlugin.DOCK_SLOT_RIGHT_BL,
-			EditorPlugin.DOCK_SLOT_RIGHT_BR,
-		]
-
-		for dock in docks:
-			var c: Control = Control.new()
-			add_control_to_dock(dock, c)
-			var parent: TabContainer = c.get_parent()
-			global.DOCKS[dock] = DockConfig.new(dock, parent)
-			parent.remove_child(c)
-
 	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
 	global.HENGO_EDITOR_PLUGIN = self
 

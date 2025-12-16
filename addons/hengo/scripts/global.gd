@@ -18,8 +18,6 @@ var SIDE_BAR: HenSideBar
 var SIDE_PANEL: PanelContainer
 var SIDE_BAR_LIST_CACHE: Dictionary = {}
 var TOOLTIP: HenTooltip
-var DOCKS: Dictionary = {}
-var ACTION_BAR: HenCNodeActionBar
 var CODE_PREVIEWER: HenCodePreview
 var GENERATE_PREVIEW_CODE: bool = false
 var SCRIPT_REF_CACHE: Dictionary = {}
