@@ -1,4 +1,4 @@
-[gd_scene load_steps=77 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -40,7 +40,6 @@
 [ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
-[ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="37_33cyo"]
 [ext_resource type="Texture2D" uid="uid://cdltixrky1fo7" path="res://addons/hengo/assets/new_icons/info.svg" id="38_onj4m"]
 [ext_resource type="Texture2D" uid="uid://upmmxrxll8y4" path="res://addons/hengo/assets/new_icons/mouse-pointer-click.svg" id="39_174hx"]
 [ext_resource type="Texture2D" uid="uid://e6883ccr0kd4" path="res://addons/hengo/assets/new_icons/circle-check.svg" id="39_vlu6e"]
@@ -72,9 +71,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 993)
-shader_parameter/offset = Vector2(1999.35, 361.67825)
-shader_parameter/zoom_factor = 0.75024354
+shader_parameter/screen_size = Vector2(3584, 2244)
+shader_parameter/offset = Vector2(1778.8501, 204.30106)
+shader_parameter/zoom_factor = 1.4226325
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -151,20 +150,8 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fdf88"]
-shader = ExtResource("37_33cyo")
-shader_parameter/lod = 2.50000011875
-shader_parameter/color = Color(0.23031488, 0.23031497, 0.2303147, 1)
-shader_parameter/transparency = 0.10000000475
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5c7h0"]
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_33cyo"]
-bg_color = Color(1, 1, 1, 0)
+bg_color = Color(1, 1, 1, 0.039215688)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -668,7 +655,6 @@ visible = false
 
 [node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUpContainer"]
 unique_name_in_owner = true
-material = SubResource("ShaderMaterial_fdf88")
 custom_minimum_size = Vector2(300, 0)
 anchors_preset = -1
 anchor_left = 0.2
@@ -680,7 +666,6 @@ grow_vertical = 2
 size_flags_horizontal = 6
 size_flags_vertical = 6
 theme = ExtResource("1_2muha")
-theme_override_styles/panel = SubResource("StyleBoxFlat_5c7h0")
 
 [node name="VBoxContainer" type="PanelContainer" parent="GeneralPopUpContainer/GeneralPopUp"]
 layout_mode = 2

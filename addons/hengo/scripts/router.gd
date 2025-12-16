@@ -37,10 +37,8 @@ func change_route(_route: HenRouteData) -> void:
 	for line: HenConnectionLine in global.connection_line_pool:
 		line.visible = false
 
-
 	for connection: HenConnectionLine in global.connection_line_pool:
 		connection.visible = false
-
 
 	for flow_connection: HenFlowConnectionLine in global.flow_connection_line_pool:
 		flow_connection.visible = false
@@ -50,6 +48,7 @@ func change_route(_route: HenRouteData) -> void:
 	global.CAM._check_virtual_cnodes()
 	global.SIDE_BAR.update()
 	_centralize_cam()
+	HenFormatter.format_current_route()
 
 
 func _centralize_cam() -> void:

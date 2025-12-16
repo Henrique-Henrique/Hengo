@@ -45,3 +45,7 @@ offset_top = 14.0
 offset_right = 81.0
 offset_bottom = 59.0
 text = "teste"
+
+[node name="SpinBox" type="SpinBox" parent="."]
+offset_right = 86.5625
+offset_bottom = 31.0

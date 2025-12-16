@@ -1,14 +1,14 @@
 [gd_resource type="StyleBoxFlat" format=3 uid="uid://b0ss25v1amkw5"]
 
 [resource]
-bg_color = Color(0.3882353, 0.3882353, 0.3882353, 0.25882354)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
+bg_color = Color(0.14586782, 0.14586785, 0.1458678, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
 border_color = Color(0.8, 0.8, 0.8, 0.09803922)
-corner_radius_top_left = 21
-corner_radius_top_right = 21
-corner_radius_bottom_right = 21
-corner_radius_bottom_left = 21
-metadata/hengo_theme_scale = 1.5
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+metadata/hengo_theme_scale = 2.0
