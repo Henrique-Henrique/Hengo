@@ -13,8 +13,8 @@ func _init(_v_cnode: HenVirtualCNode) -> void:
 func add() -> void:
 	if not v_cnode.state.can_delete:
 		return
-	
-	if not v_cnode.state.is_deleted:
+
+	if v_cnode.state.is_deleted:
 		return
 
 	var list: Array = v_cnode.route_info.route_ref.virtual_cnode_list
@@ -45,6 +45,9 @@ func add() -> void:
 	v_cnode.state.is_deleted = false
 	v_cnode.show()
 	HenFormatter.format_current_route()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	global.RIGHT_SIDE_BAR.update(router.current_route)
 
 
 func remove() -> void:
@@ -97,3 +100,6 @@ func remove() -> void:
 	v_cnode.hide()
 	v_cnode.state.is_deleted = true
 	HenFormatter.format_current_route()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	global.RIGHT_SIDE_BAR.update(router.current_route)

@@ -4,6 +4,6 @@
 
 [resource]
 shader = ExtResource("1_5jr1j")
-shader_parameter/lod = 2.000000095
+shader_parameter/lod = 3.0000001425
 shader_parameter/color = Color(0.15543592, 0.15543732, 0.17403314, 1)
-shader_parameter/transparency = 0.6000000285
+shader_parameter/transparency = 0.70000003325

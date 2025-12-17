@@ -1,4 +1,4 @@
-[gd_scene load_steps=72 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=73 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -38,6 +38,7 @@
 [ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
+[ext_resource type="PackedScene" uid="uid://c2qul21icd6bk" path="res://addons/hengo/scenes/right_side_bar.tscn" id="37_hog2e"]
 [ext_resource type="Texture2D" uid="uid://cdltixrky1fo7" path="res://addons/hengo/assets/new_icons/info.svg" id="38_onj4m"]
 [ext_resource type="Texture2D" uid="uid://upmmxrxll8y4" path="res://addons/hengo/assets/new_icons/mouse-pointer-click.svg" id="39_174hx"]
 [ext_resource type="Texture2D" uid="uid://e6883ccr0kd4" path="res://addons/hengo/assets/new_icons/circle-check.svg" id="39_vlu6e"]
@@ -69,9 +70,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 993)
-shader_parameter/offset = Vector2(586.704, -59.76153)
-shader_parameter/zoom_factor = 0.50659597
+shader_parameter/screen_size = Vector2(3592, 2252)
+shader_parameter/offset = Vector2(2658.376, 741.24524)
+shader_parameter/zoom_factor = 1.4999998
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -256,10 +257,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer"]
 layout_mode = 2
@@ -410,9 +411,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
-split_offset = -2000
+split_offset = -10000
 
-[node name="MarginContainer" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="SideBarMargin" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
@@ -421,38 +423,38 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin"]
 material = ExtResource("19_174hx")
 layout_mode = 2
 theme_override_styles/panel = ExtResource("24_h1p8r")
 
-[node name="SidePanel" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+[node name="SidePanel" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = ExtResource("25_174hx")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 10
 
-[node name="MenuBar" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="MenuBar" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar"]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar"]
 layout_mode = 2
 alignment = 2
 
-[node name="CompileContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="CompileContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
+[node name="Compile" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/CompileContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -465,7 +467,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
 text = "Compile"
 icon = ExtResource("18_fdf88")
 
-[node name="TabContainer" type="TabContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/tab_separation = 12
@@ -479,13 +481,13 @@ theme_override_styles/tab_focus = ExtResource("19_33cyo")
 current_tab = 0
 script = ExtResource("18_hg3xi")
 
-[node name="SideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
+[node name="SideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 metadata/_tab_name = "Props"
 
-[node name="CodePreview" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(0, 0)
@@ -505,13 +507,17 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
-[node name="Control" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer"]
+[node name="HSplitContainer" type="HSplitContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Control" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 4.0
 mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -520,75 +526,76 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer"]
 visible = false
 layout_mode = 2
 
-[node name="Tabs" type="TabBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
+[node name="Tabs" type="TabBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 tab_alignment = 2
 script = ExtResource("11_lxtpw")
 
-[node name="MarginContainer" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
+[node name="ActionBarMargin" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_constants/margin_top = 8
 
-[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
+[node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin"]
 material = ExtResource("19_174hx")
 layout_mode = 2
 theme_override_styles/panel = ExtResource("24_h1p8r")
 
-[node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer"]
+[node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin"]
 layout_mode = 2
 theme_override_styles/panel = ExtResource("25_174hx")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer"]
 layout_mode = 2
 
-[node name="CloseBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="CloseBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("30_hog2e")
 flat = true
 
-[node name="ClassName" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="ClassName" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="Label" type="Label" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="Label" type="Label" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Base > Test"
 
-[node name="OpenDashboard" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="OpenDashboard" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("40_174hx")
 flat = true
 
-[node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
 
-[node name="TerminalBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
+[node name="TerminalBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
 flat = true
 
-[node name="TerminalInfo" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer"]
+[node name="TerminalInfo" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer"]
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
 mouse_filter = 2
 
-[node name="InfoBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+[node name="InfoBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
@@ -603,7 +610,7 @@ disabled = true
 text = "0"
 icon = ExtResource("38_onj4m")
 
-[node name="SuccessBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+[node name="SuccessBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
@@ -618,7 +625,7 @@ disabled = true
 text = "0"
 icon = ExtResource("39_vlu6e")
 
-[node name="ErrorBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
+[node name="ErrorBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo"]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
@@ -633,11 +640,15 @@ disabled = true
 text = "0"
 icon = ExtResource("40_aqok7")
 
-[node name="ActionsBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer2"]
+[node name="ActionsBt" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Actions"
 icon = ExtResource("39_174hx")
+
+[node name="RightSideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer" instance=ExtResource("37_hog2e")]
+unique_name_in_owner = true
+layout_mode = 2
 
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true

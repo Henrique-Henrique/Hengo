@@ -49,11 +49,12 @@ func change_route(_route: HenRouteData) -> void:
 	global.SIDE_BAR.update()
 	_centralize_cam()
 	HenFormatter.format_current_route()
+	global.RIGHT_SIDE_BAR.update(current_route)
 
 
 func _centralize_cam() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var vc: HenVirtualCNode = current_route.virtual_cnode_list[-1]
+	var vc: HenVirtualCNode = current_route.virtual_cnode_list.get(0)
 
 	if not vc:
 		return

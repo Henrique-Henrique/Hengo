@@ -16,11 +16,3 @@ func _init(_name: String, _type: HenRouter.ROUTE_TYPE, _id: String) -> void:
 	name = _name
 	type = _type
 	id = _id
-
-
-func get_ref() -> Variant:
-	return null
-	# if not ref:
-	# 	return null
-	
-	# return ref.get_ref()

@@ -17,6 +17,20 @@ func _ready() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var enums: HenEnums = Engine.get_singleton(&'Enums')
 
+	var margin: int = HenUtils.get_scaled_size(8)
+	var action_bar_margin: MarginContainer = get_node('%ActionBarMargin')
+	var side_bar_margin: MarginContainer = get_node('%SideBarMargin')
+
+	action_bar_margin.add_theme_constant_override('margin_left', margin)
+	action_bar_margin.add_theme_constant_override('margin_right', margin)
+	action_bar_margin.add_theme_constant_override('margin_top', margin)
+	action_bar_margin.add_theme_constant_override('margin_bottom', margin)
+
+	side_bar_margin.add_theme_constant_override('margin_left', margin)
+	side_bar_margin.add_theme_constant_override('margin_right', margin)
+	side_bar_margin.add_theme_constant_override('margin_top', margin)
+	side_bar_margin.add_theme_constant_override('margin_bottom', margin)
+
 	# initializing
 	router.current_route = null
 	router.comment_reference = {}

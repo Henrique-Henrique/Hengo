@@ -2,6 +2,201 @@ class_name HenUtils extends Node
 
 const NONE_ICON = preload('res://addons/hengo/assets/icons/menu/none.svg')
 
+const ICON_FUNCTION = preload("res://addons/hengo/assets/new_icons/square-function.svg")
+const ICON_VARIABLE = preload("res://addons/hengo/assets/new_icons/variable.svg")
+const ICON_IF = preload("res://addons/hengo/assets/new_icons/git-branch.svg")
+const ICON_LOOP = preload("res://addons/hengo/assets/new_icons/repeat.svg")
+const ICON_STATE = preload("res://addons/hengo/assets/new_icons/activity.svg")
+const ICON_SIGNAL = preload("res://addons/hengo/assets/new_icons/signal.svg")
+const ICON_DEBUG = preload("res://addons/hengo/assets/new_icons/bug.svg")
+const ICON_VOID = preload("res://addons/hengo/assets/new_icons/circle-slash.svg")
+const ICON_INVALID = preload("res://addons/hengo/assets/new_icons/triangle.svg")
+const ICON_CODE = preload("res://addons/hengo/assets/new_icons/code.svg")
+const ICON_IMAGE = preload("res://addons/hengo/assets/new_icons/image.svg")
+const ICON_CALCULATOR = preload("res://addons/hengo/assets/new_icons/calculator.svg")
+const ICON_LINK_OFF = preload("res://addons/hengo/assets/new_icons/link-2-off.svg")
+const ICON_INPUT = preload("res://addons/hengo/assets/new_icons/file-input.svg")
+const ICON_OUTPUT = preload("res://addons/hengo/assets/new_icons/file-output.svg")
+const ICON_BOX = preload("res://addons/hengo/assets/new_icons/box.svg")
+const ICON_LAYERS = preload("res://addons/hengo/assets/new_icons/layers.svg")
+const ICON_PLAY = preload("res://addons/hengo/assets/new_icons/play.svg")
+
+
+static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
+	match _sub_type:
+		HenVirtualCNode.SubType.FUNC, \
+		HenVirtualCNode.SubType.USER_FUNC, \
+		HenVirtualCNode.SubType.FUNC_FROM, \
+		HenVirtualCNode.SubType.MACRO:
+			return ICON_FUNCTION
+
+		HenVirtualCNode.SubType.VIRTUAL, \
+		HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
+			return ICON_LAYERS
+
+		HenVirtualCNode.SubType.FUNC_INPUT, \
+		HenVirtualCNode.SubType.MACRO_INPUT:
+			return ICON_INPUT
+
+		HenVirtualCNode.SubType.FUNC_OUTPUT, \
+		HenVirtualCNode.SubType.MACRO_OUTPUT:
+			return ICON_OUTPUT
+
+		HenVirtualCNode.SubType.VAR, \
+		HenVirtualCNode.SubType.LOCAL_VAR, \
+		HenVirtualCNode.SubType.SET_VAR, \
+		HenVirtualCNode.SubType.SET_LOCAL_VAR, \
+		HenVirtualCNode.SubType.VAR_FROM, \
+		HenVirtualCNode.SubType.SET_VAR_FROM, \
+		HenVirtualCNode.SubType.CONST, \
+		HenVirtualCNode.SubType.GET_FROM_PROP, \
+		HenVirtualCNode.SubType.IN_PROP:
+			return ICON_VARIABLE
+
+		HenVirtualCNode.SubType.IF:
+			return ICON_IF
+
+		HenVirtualCNode.SubType.FOR, \
+		HenVirtualCNode.SubType.FOR_ARR, \
+		HenVirtualCNode.SubType.FOR_ITEM:
+			return ICON_LOOP
+
+		HenVirtualCNode.SubType.BREAK, \
+		HenVirtualCNode.SubType.CONTINUE, \
+		HenVirtualCNode.SubType.PASS, \
+		HenVirtualCNode.SubType.GO_TO_VOID, \
+		HenVirtualCNode.SubType.SELF_GO_TO_VOID:
+			return ICON_PLAY
+
+		HenVirtualCNode.SubType.STATE, \
+		HenVirtualCNode.SubType.STATE_START, \
+		HenVirtualCNode.SubType.STATE_EVENT:
+			return ICON_STATE
+
+		HenVirtualCNode.SubType.SIGNAL_ENTER, \
+		HenVirtualCNode.SubType.SIGNAL_CONNECTION, \
+		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			return ICON_SIGNAL
+
+		HenVirtualCNode.SubType.DEBUG, \
+		HenVirtualCNode.SubType.DEBUG_VALUE, \
+		HenVirtualCNode.SubType.DEBUG_PUSH, \
+		HenVirtualCNode.SubType.DEBUG_FLOW_START, \
+		HenVirtualCNode.SubType.START_DEBUG_STATE, \
+		HenVirtualCNode.SubType.DEBUG_STATE:
+			return ICON_DEBUG
+
+		HenVirtualCNode.SubType.VOID:
+			return ICON_VOID
+		
+		HenVirtualCNode.SubType.INVALID:
+			return ICON_INVALID
+		
+		HenVirtualCNode.SubType.RAW_CODE:
+			return ICON_CODE
+
+		HenVirtualCNode.SubType.IMG:
+			return ICON_IMAGE
+
+		HenVirtualCNode.SubType.EXPRESSION:
+			return ICON_CALCULATOR
+
+		HenVirtualCNode.SubType.NOT_CONNECTED:
+			return ICON_LINK_OFF
+
+		HenVirtualCNode.SubType.CAST:
+			return ICON_BOX
+
+	return null
+
+
+static func get_color_for_subtype(_sub_type: int) -> Color:
+	match _sub_type:
+		HenVirtualCNode.SubType.FUNC, \
+		HenVirtualCNode.SubType.USER_FUNC, \
+		HenVirtualCNode.SubType.FUNC_FROM, \
+		HenVirtualCNode.SubType.MACRO:
+			return Color("#54a0ff")
+
+		HenVirtualCNode.SubType.VIRTUAL, \
+		HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
+			return Color("#ff9ff3")
+
+		HenVirtualCNode.SubType.FUNC_INPUT, \
+		HenVirtualCNode.SubType.MACRO_INPUT:
+			return Color("#ff9ff3")
+
+		HenVirtualCNode.SubType.FUNC_OUTPUT, \
+		HenVirtualCNode.SubType.MACRO_OUTPUT:
+			return Color("#ff9ff3")
+
+		HenVirtualCNode.SubType.VAR, \
+		HenVirtualCNode.SubType.LOCAL_VAR, \
+		HenVirtualCNode.SubType.SET_VAR, \
+		HenVirtualCNode.SubType.SET_LOCAL_VAR, \
+		HenVirtualCNode.SubType.VAR_FROM, \
+		HenVirtualCNode.SubType.SET_VAR_FROM, \
+		HenVirtualCNode.SubType.CONST, \
+		HenVirtualCNode.SubType.GET_FROM_PROP, \
+		HenVirtualCNode.SubType.IN_PROP:
+			return Color("#1dd1a1")
+
+		HenVirtualCNode.SubType.IF:
+			return Color("#ff6b6b")
+
+		HenVirtualCNode.SubType.FOR, \
+		HenVirtualCNode.SubType.FOR_ARR, \
+		HenVirtualCNode.SubType.FOR_ITEM:
+			return Color("#ff6b6b")
+
+		HenVirtualCNode.SubType.BREAK, \
+		HenVirtualCNode.SubType.CONTINUE, \
+		HenVirtualCNode.SubType.PASS, \
+		HenVirtualCNode.SubType.GO_TO_VOID, \
+		HenVirtualCNode.SubType.SELF_GO_TO_VOID:
+			return Color("#ff6b6b")
+
+		HenVirtualCNode.SubType.STATE, \
+		HenVirtualCNode.SubType.STATE_START, \
+		HenVirtualCNode.SubType.STATE_EVENT:
+			return Color("#a29bfe")
+
+		HenVirtualCNode.SubType.SIGNAL_ENTER, \
+		HenVirtualCNode.SubType.SIGNAL_CONNECTION, \
+		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			return Color("#ff6b6b")
+
+		HenVirtualCNode.SubType.DEBUG, \
+		HenVirtualCNode.SubType.DEBUG_VALUE, \
+		HenVirtualCNode.SubType.DEBUG_PUSH, \
+		HenVirtualCNode.SubType.DEBUG_FLOW_START, \
+		HenVirtualCNode.SubType.START_DEBUG_STATE, \
+		HenVirtualCNode.SubType.DEBUG_STATE:
+			return Color("#c8d6e5")
+
+		HenVirtualCNode.SubType.VOID:
+			return Color("#576574")
+		
+		HenVirtualCNode.SubType.INVALID:
+			return Color("#e17055")
+		
+		HenVirtualCNode.SubType.RAW_CODE:
+			return Color("#8395a7")
+
+		HenVirtualCNode.SubType.IMG:
+			return Color("#8395a7")
+
+		HenVirtualCNode.SubType.EXPRESSION:
+			return Color("#8395a7")
+
+		HenVirtualCNode.SubType.NOT_CONNECTED:
+			return Color("#8395a7")
+
+		HenVirtualCNode.SubType.CAST:
+			return Color("#8395a7")
+
+	return Color("#343434")
+
 static func move_array_item(_arr: Array, _ref, _factor: int) -> bool:
 	var target_idx: int = _arr.find(_ref) - _factor
 	var can_move: bool = false

@@ -147,6 +147,7 @@ func _enter_tree():
 	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUpContainer')
 	global.CNODE_UI = cnode_ui
 	global.DASHBOARD = main_scene.get_node('%DashBoard')
+	global.RIGHT_SIDE_BAR = main_scene.get_node('%RightSideBar')
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)

@@ -36,6 +36,7 @@ func reset_to_load(_id: StringName, _headless: bool) -> bool:
 
 	global.SIDE_BAR_LIST_CACHE.clear()
 	global.SELECTED_VIRTUAL_CNODE.clear()
+	global.RIGHT_SIDE_BAR.clear()
 
 	# confirming queue free before check errors
 	if not _headless: await global.CAM.get_tree().process_frame

@@ -11,7 +11,6 @@ resource_local_to_scene = true
 colors = PackedColorArray(0.4, 0.2, 0.6, 1, 0.4, 0.2, 0.6, 1)
 
 [node name="ConnectionLine" type="Line2D"]
-z_index = 1
 texture_repeat = 2
 material = SubResource("ShaderMaterial_pxqr5")
 default_color = Color(0.574328, 0.574328, 0.574328, 1)

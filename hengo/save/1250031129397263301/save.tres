@@ -15,7 +15,7 @@
 
 [resource]
 script = ExtResource("4_wifnu")
-counter = 1913
+counter = 2187
 variables = Array[ExtResource("7_53lhb")]([ExtResource("10_hddbd")])
 functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
 identity = ExtResource("2_egb03")
@@ -135,9 +135,11 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Node"
 }, {
 &"category": &"default_value",
+&"code_value": "42.0",
 &"id": 35,
 &"name": "what",
-&"type": &"int"
+&"type": &"int",
+&"value": 42.0
 }],
 &"name": "notify_thread_safe",
 &"position": "Vector2(-52, 150)",
@@ -170,9 +172,11 @@ virtual_cnode_list = Array[Dictionary]([{
 }),
 &"inputs": [{
 &"category": &"default_value",
+&"code_value": "true",
 &"id": 83,
 &"name": "condition",
-&"type": &"bool"
+&"type": &"bool",
+&"value": true
 }],
 &"name": "IF",
 &"position": "Vector2(-49.5, 594)",
@@ -196,9 +200,11 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": &"Object"
 }, {
 &"category": &"default_value",
+&"code_value": "\"haha\"",
 &"id": 102,
 &"name": "name",
-&"type": &"StringName"
+&"type": &"StringName",
+&"value": "haha"
 }, {
 &"category": &"default_value",
 &"id": 103,
@@ -275,9 +281,11 @@ virtual_cnode_list = Array[Dictionary]([{
 &"name": "Node",
 &"type": &"Node"
 }, {
+&"code_value": "\"Testing\"",
 &"id": 511,
 &"name": "path",
-&"type": &"NodePath"
+&"type": &"NodePath",
+&"value": "Testing"
 }],
 &"name": "get_node",
 &"outputs": [{
