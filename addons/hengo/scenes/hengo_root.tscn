@@ -70,9 +70,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3592, 2252)
-shader_parameter/offset = Vector2(2658.376, 741.24524)
-shader_parameter/zoom_factor = 1.4999998
+shader_parameter/screen_size = Vector2(2453, 1514)
+shader_parameter/offset = Vector2(1057.3999, 554.6356)
+shader_parameter/zoom_factor = 1.4999359
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -418,10 +418,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
 
 [node name="Panel" type="Panel" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin"]
 material = ExtResource("19_174hx")
@@ -648,7 +644,12 @@ icon = ExtResource("39_174hx")
 
 [node name="RightSideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer" instance=ExtResource("37_hog2e")]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(375, 0)
 layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true

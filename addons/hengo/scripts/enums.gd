@@ -11,6 +11,14 @@ const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
 const STATE_SELECTED_GROUP: String = 'hen_state_selected'
 const NATIVE_API_PATH: String = 'res://addons/hengo/api/native_api.json'
 
+const FLOW_COLORS: Array[Color] = [
+	Color('#4ac27c18'),
+	Color('#3498db18'),
+	Color('#e74c3c18'),
+	Color('#f1c40f18'),
+	Color('#9b59b618')
+]
+
 enum PROP_TYPE {
     STRING,
     FUNCTION_INPUT,

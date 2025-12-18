@@ -1,21 +1,27 @@
-[gd_resource type="Resource" script_class="HenSaveData" load_steps=11 format=3 uid="uid://pm40opdluhvv"]
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=13 format=3 uid="uid://pm40opdluhvv"]
 
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_hbvhn"]
 [ext_resource type="Resource" uid="uid://buboi5dte1ekp" path="res://hengo/save/6740249256344029370/identity.tres" id="2_ap15p"]
 [ext_resource type="Resource" uid="uid://t4odes4m7q8h" path="res://hengo/save/6740249256344029370/functions/2.tres" id="2_qvewk"]
 [ext_resource type="Resource" uid="uid://coqnduyouyby6" path="res://hengo/save/6740249256344029370/functions/29.tres" id="3_kjcli"]
 [ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_qvewk"]
+[ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="4_ekkwt"]
 [ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_kjcli"]
 [ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_ekkwt"]
 [ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_p25gy"]
 [ext_resource type="Script" uid="uid://dsbf04c1d036i" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_var.gd" id="7_32ml8"]
 [ext_resource type="Resource" uid="uid://c5r0g8rmck6hh" path="res://hengo/save/6740249256344029370/variables/7.tres" id="9_qvewk"]
 
+[sub_resource type="Resource" id="Resource_p25gy"]
+script = ExtResource("1_hbvhn")
+name = "function_40"
+id = 40
+
 [resource]
 script = ExtResource("4_kjcli")
-counter = 38
+counter = 42
 variables = Array[ExtResource("7_32ml8")]([ExtResource("9_qvewk")])
-functions = Array[ExtResource("1_hbvhn")]([ExtResource("2_qvewk"), ExtResource("3_kjcli")])
+functions = Array[ExtResource("1_hbvhn")]([ExtResource("2_qvewk"), ExtResource("3_kjcli"), SubResource("Resource_p25gy")])
 identity = ExtResource("2_ap15p")
 flow_connections = Array[Dictionary]([{
 &"from_id": 0,

@@ -5,28 +5,12 @@ var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 const CATEGORY_FONT = preload('res://addons/hengo/assets/fonts/Inter-Bold.ttf')
-const TREE_ITEM_STYLEBOX = preload('res://addons/hengo/resources/style_box/flat_tree.tres')
 
 enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
 
-const BG_COLOR = {
-	AddType.VAR: Color('#509fa6'),
-	AddType.FUNC: Color('#b05353'),
-	AddType.SIGNAL_CALLBACK: Color('#51a650'),
-	AddType.MACRO: Color('#9f50a6'),
-	AddType.LOCAL_VAR: Color('#a69150'),
-	AddType.SIGNAL: Color('#51a650')
-}
-
-const ICONS = {
-	AddType.VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg'),
-	AddType.MACRO: preload('res://addons/hengo/assets/icons/menu/text.svg'),
-	AddType.FUNC: preload('res://addons/hengo/assets/icons/menu/void.svg'),
-	AddType.SIGNAL_CALLBACK: preload('res://addons/hengo/assets/icons/menu/wifi.svg'),
-	AddType.LOCAL_VAR: preload('res://addons/hengo/assets/icons/menu/cuboid.svg'),
-	AddType.SIGNAL: preload('res://addons/hengo/assets/icons/menu/wifi.svg')
-}
+var BG_COLOR: Dictionary
+var ICONS: Dictionary
 
 const NAME = {
 	AddType.VAR: 'Variables',
@@ -61,6 +45,24 @@ class DeleteItemCache:
 func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
+
+	BG_COLOR = {
+		AddType.VAR: HenEnums.FLOW_COLORS[1],
+		AddType.FUNC: HenEnums.FLOW_COLORS[2],
+		AddType.SIGNAL_CALLBACK: HenEnums.FLOW_COLORS[0],
+		AddType.MACRO: HenEnums.FLOW_COLORS[4],
+		AddType.LOCAL_VAR: HenEnums.FLOW_COLORS[3],
+		AddType.SIGNAL: HenEnums.FLOW_COLORS[0]
+	}
+
+	ICONS = {
+		AddType.VAR: HenUtils.ICON_VARIABLE,
+		AddType.MACRO: HenUtils.ICON_FUNCTION,
+		AddType.FUNC: HenUtils.ICON_FUNCTION,
+		AddType.SIGNAL_CALLBACK: HenUtils.ICON_SIGNAL,
+		AddType.LOCAL_VAR: HenUtils.ICON_VARIABLE,
+		AddType.SIGNAL: HenUtils.ICON_SIGNAL
+	}
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
@@ -142,11 +144,23 @@ func update() -> void:
 	base.set_text(0, 'Base')
 	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).BASE_ROUTE)
 
-	# variables
+	# signals
 	_add_categories(root, 'Signals', AddType.SIGNAL)
+	_add_divider(root)
+	
+	# variables
 	_add_categories(root, 'Variables', AddType.VAR)
+	_add_divider(root)
+	
+	# functions
 	_add_categories(root, 'Functions', AddType.FUNC)
+	_add_divider(root)
+	
+	# signals callback
 	_add_categories(root, 'Signals Callback', AddType.SIGNAL_CALLBACK)
+	_add_divider(root)
+	
+	# macros
 	_add_categories(root, 'Macros', AddType.MACRO)
 
 
@@ -154,14 +168,16 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var category: TreeItem = _root.create_child()
 
+	category.set_icon(0, ICONS[_type])
 	category.set_text(0, _name)
 	category.add_button(0, ADD_ICON)
 	category.set_metadata(0, _type)
 	category.set_selectable(0, false)
-	category.set_icon_modulate(0, BG_COLOR[_type])
-	category.set_custom_color(0, Color(BG_COLOR[_type], .8))
+	category.set_icon_modulate(0, Color(BG_COLOR[_type], 1.0))
+	category.set_custom_color(0, Color('#808e9b'))
 	category.set_custom_font(0, CATEGORY_FONT)
 	category.set_button_color(0, 0, Color('#616161'))
+	# category.set_custom_bg_color(0, BG_COLOR.get(_type))
 
 	match _type:
 		AddType.VAR:
@@ -209,51 +225,28 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 					BG_COLOR[_type]
 				)
 
+
+func _add_divider(_root: TreeItem) -> void:
+	var divider: TreeItem = _root.create_child()
+	divider.set_selectable(0, false)
+	divider.set_metadata(0, -1)
+	divider.set_custom_minimum_height(12) # Spacer height
+	divider.set_custom_bg_color(0, Color.TRANSPARENT)
+
+
 func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
 	var item: TreeItem = _category.create_child()
+
 	item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
 	item.set_metadata(0, _meta)
-	item.set_custom_draw_callback(0, _draw_custom_button.bind(
-		_name,
-		_icon,
-		_icon_color
-	))
-	item.set_custom_color(0, Color.WHITE)
+	item.set_text(0, _name)
+	item.set_icon(0, _icon)
+	item.set_icon_modulate(0, Color(_icon_color, 1))
+	item.set_custom_color(0, Color('#8c9197ff'))
 
-
-func _draw_custom_button(_item: TreeItem, _rect: Rect2, _text: String = "", _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
-	var font: Font = list.get_theme_font(&'font', &'Tree')
-	var font_size: int = list.get_theme_font_size(&'font_size', &'Tree')
-	var text_size: Vector2 = font.get_string_size(_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
-	var padding = HenUtils.get_scaled_size(50)
-	var button_width = text_size.x + padding
-	
-	# add vertical spacing by reducing the height and adding margin
-	var spacing = HenUtils.get_scaled_size(4)
-	var button_height = _rect.size.y - spacing
-	var button_pos = Vector2(_rect.position.x, _rect.position.y + spacing / 2.)
-	
-	# draw the stylebox with reduced height
-	list.draw_style_box(TREE_ITEM_STYLEBOX, Rect2(button_pos, Vector2(button_width, button_height)))
-	
-	if _icon:
-		var size_axis: int = HenUtils.get_scaled_size(14)
-		var icon_size = Vector2(size_axis, size_axis)
-		var icon_pos = Vector2(button_pos.x + HenUtils.get_scaled_size(8), button_pos.y + (button_height - icon_size.y) / 2)
-		list.draw_texture_rect(_icon, Rect2(icon_pos, icon_size), false, _icon_color)
-		
-		# draw text after icon with spacing
-		var text_offset = icon_size.x + spacing
-		var text_pos_x = button_pos.x + text_offset + (button_width - text_offset - text_size.x) / 2
-		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
-		var text_pos = Vector2(text_pos_x, text_pos_y)
-		list.draw_string(font, text_pos, _text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
-	else:
-		# draw text centered when no icon
-		var text_pos_x = button_pos.x + button_width / 2 - text_size.x / 2
-		var text_pos_y = button_pos.y + (button_height + font.get_ascent(font_size)) / 2
-		var text_pos = Vector2(text_pos_x, text_pos_y)
-		list.draw_string(font, text_pos, _text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color('#737278'))
+	var bg_color = _icon_color
+	bg_color.a = 0.05
+	item.set_custom_bg_color(0, bg_color)
 
 
 func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:

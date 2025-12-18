@@ -5,15 +5,6 @@ class_name HenRightSideBar extends MarginContainer
 
 var timer: SceneTreeTimer
  
-const FLOW_COLORS: Array[Color] = [
-	Color('#4ac27c18'),
-	Color('#3498db18'),
-	Color('#e74c3c18'),
-	Color('#f1c40f18'),
-	Color('#9b59b618')
-]
-
- 
 func _ready() -> void:
 	custom_minimum_size = Vector2(HenUtils.get_scaled_size(250), 0)
 	var margin: int = HenUtils.get_scaled_size(8)
@@ -100,7 +91,7 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 		
 		if is_branching or outgoing_nodes.size() > 1:
 			if has_multiple_outputs:
-				next_color = FLOW_COLORS[data.index % FLOW_COLORS.size()]
+				next_color = HenEnums.FLOW_COLORS[data.index % HenEnums.FLOW_COLORS.size()]
 			
 			update_vc_tree(data.node, root, null, next_color)
 		else:

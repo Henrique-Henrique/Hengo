@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://c4qu2ti8efl61"]
 
+[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_k7ch5"]
 [ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_k7ch5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4nava"]
 
@@ -13,36 +13,24 @@
 offset_right = 42.0
 offset_bottom = 42.0
 mouse_filter = 2
+theme = ExtResource("1_k7ch5")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_4nava")
 script = ExtResource("1_y1kkq")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="SearchBar" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+[node name="SearchBar" type="LineEdit" parent="VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 placeholder_text = "Type to search..."
 
-[node name="List" type="Tree" parent="MarginContainer/VBoxContainer"]
+[node name="List" type="Tree" parent="VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 8
-theme_override_constants/draw_guides = 0
-theme_override_constants/draw_relationship_lines = 0
-theme_override_fonts/font = ExtResource("2_k7ch5")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_k7ch5")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_axb3u")
 allow_rmb_select = true

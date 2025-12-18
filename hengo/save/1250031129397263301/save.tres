@@ -1,10 +1,11 @@
-[gd_resource type="Resource" script_class="HenSaveData" load_steps=13 format=3 uid="uid://52vjo2u288lu"]
+[gd_resource type="Resource" script_class="HenSaveData" load_steps=24 format=3 uid="uid://52vjo2u288lu"]
 
 [ext_resource type="Script" uid="uid://dm0cyydxysuwp" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_func.gd" id="1_0rjht"]
 [ext_resource type="Resource" uid="uid://65mky3n66pc0" path="res://hengo/save/1250031129397263301/identity.tres" id="2_egb03"]
 [ext_resource type="Resource" uid="uid://bei6fp2gevho7" path="res://hengo/save/1250031129397263301/functions/6.tres" id="2_xkhiy"]
 [ext_resource type="Resource" uid="uid://behnf80mrge1u" path="res://hengo/save/1250031129397263301/functions/22.tres" id="3_wifnu"]
 [ext_resource type="Script" uid="uid://umsou1drn8oq" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_macro.gd" id="3_xkhiy"]
+[ext_resource type="Script" uid="uid://blv50wg83v7po" path="res://addons/hengo/scripts/save_load/resource/save_param.gd" id="4_53lhb"]
 [ext_resource type="Script" uid="uid://b081mkbwicm2q" path="res://addons/hengo/scripts/save_load/resource/save_data.gd" id="4_wifnu"]
 [ext_resource type="Script" uid="uid://dyjjrm01w42sj" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal.gd" id="5_tinkm"]
 [ext_resource type="Script" uid="uid://debvdoixefubo" path="res://addons/hengo/scripts/save_load/resource/side_bar/save_signal_callback.gd" id="6_hddbd"]
@@ -13,12 +14,66 @@
 [ext_resource type="Resource" uid="uid://c5r0g8rmck6hh" path="res://hengo/save/6740249256344029370/variables/7.tres" id="10_wifnu"]
 [ext_resource type="Resource" uid="uid://t4odes4m7q8h" path="res://hengo/save/6740249256344029370/functions/2.tres" id="11_tinkm"]
 
+[sub_resource type="Resource" id="Resource_bjuar"]
+script = ExtResource("1_0rjht")
+name = "function_2212"
+id = 2212
+
+[sub_resource type="Resource" id="Resource_t4043"]
+script = ExtResource("3_xkhiy")
+name = "macro_2209"
+id = 2209
+
+[sub_resource type="Resource" id="Resource_1ruco"]
+script = ExtResource("3_xkhiy")
+name = "macro_2210"
+id = 2210
+
+[sub_resource type="Resource" id="Resource_bf8kq"]
+script = ExtResource("3_xkhiy")
+name = "macro_2211"
+id = 2211
+
+[sub_resource type="Resource" id="Resource_lxxec"]
+script = ExtResource("3_xkhiy")
+name = "macro_2215"
+id = 2215
+
+[sub_resource type="Resource" id="Resource_3ys3n"]
+script = ExtResource("3_xkhiy")
+name = "macro_2216"
+id = 2216
+
+[sub_resource type="Resource" id="Resource_53lhb"]
+script = ExtResource("3_xkhiy")
+name = "macro_2262"
+id = 2262
+
+[sub_resource type="Resource" id="Resource_0pmn1"]
+script = ExtResource("5_tinkm")
+name = "signal_2360"
+id = 2360
+
+[sub_resource type="Resource" id="Resource_m474i"]
+script = ExtResource("6_hddbd")
+type = &"Variant"
+name = "signal_callback_2217"
+id = 2217
+
+[sub_resource type="Resource" id="Resource_5bw00"]
+script = ExtResource("7_53lhb")
+type = &"Variant"
+name = "variable_2361"
+id = 2361
+
 [resource]
 script = ExtResource("4_wifnu")
-counter = 2187
-variables = Array[ExtResource("7_53lhb")]([ExtResource("10_hddbd")])
-functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu")])
+counter = 2378
+macros = Array[ExtResource("3_xkhiy")]([SubResource("Resource_t4043"), SubResource("Resource_1ruco"), SubResource("Resource_bf8kq"), SubResource("Resource_lxxec"), SubResource("Resource_3ys3n"), SubResource("Resource_53lhb")])
+variables = Array[ExtResource("7_53lhb")]([ExtResource("10_hddbd"), SubResource("Resource_5bw00")])
+functions = Array[ExtResource("1_0rjht")]([ExtResource("2_xkhiy"), ExtResource("3_wifnu"), SubResource("Resource_bjuar")])
 identity = ExtResource("2_egb03")
+signals = Array[ExtResource("5_tinkm")]([SubResource("Resource_0pmn1")])
 connections = Array[Dictionary]([{
 &"from_id": 115,
 &"from_vc_id": 121,
@@ -299,3 +354,4 @@ virtual_cnode_list = Array[Dictionary]([{
 &"type": 0
 }]
 }])
+signals_callback = Array[ExtResource("6_hddbd")]([SubResource("Resource_m474i")])
