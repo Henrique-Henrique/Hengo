@@ -174,7 +174,7 @@ static func _compile_script(_id: StringName) -> void:
 	if not DirAccess.dir_exists_absolute("res://hengo/scripts"):
 		DirAccess.make_dir_absolute("res://hengo/scripts")
 	
-	var script_path: String = "res://hengo/scripts/" + str(_id) + ".gd"
+	var script_path: String = HenEnums.HENGO_SCRIPTS_PATH + str(_id) + ".gd"
 	var file: FileAccess = FileAccess.open(script_path, FileAccess.WRITE)
 	if file:
 		print('Compiled: ', _id)
