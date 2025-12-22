@@ -1,31 +1,36 @@
 class_name HenGeneratorFunc extends RefCounted
 
-static func get_functions_code(_refs: HenTypeReferences) -> String:
+static func get_functions_code(_save_data: HenSaveData) -> String:
 	var func_code: String = ''
 
-	for func_data: HenTypeFunc in _refs.functions:
+	for func_data: HenSaveFunc in _save_data.functions:
 		# generating function
 		func_code += 'func {name}({params}):\n'.format({
 			name = func_data.name.to_snake_case(),
 			params = ', '.join(func_data.inputs.map(
-				func(x: HenTypeParam) -> String:
+				func(x: HenSaveParam) -> String:
 					return x.name.to_snake_case()
 		))
 		})
 		
 		# local variable
-		func_code += '\n'.join(func_data.local_vars.map(func(x: HenTypeVariable):
-			return '\t' + HenGeneratorVariable.get_var_code(x)))
+		func_code += '\n'.join(func_data.local_vars.map(func(x: HenSaveParam):
+			return '\t' + HenGeneratorVariable.get_var_code_from_param(x)))
 
 		# func output (return)
 		var output_code: Array = []
+		var input_ref: HenVirtualCNode = search_input_ref(func_data)
+		var output_ref: HenVirtualCNode = search_output_ref(func_data)
 		
-		for token: Dictionary in func_data.output_ref.get_input_token_list():
+		for token: Dictionary in HenVirtualCNodeCode.get_input_token_list(output_ref):
 			output_code.append(HenGeneratorByToken.get_code_by_token(token))
 
-		if not func_data.input_ref.flow_connections.is_empty() and func_data.input_ref.flow_connections[0].to:
-			var func_tokens: Array = func_data.input_ref.flow_connections[0].get_to().get_flow_tokens(
-				func_data.input_ref.flow_connections[0].to_id
+		var input_flow_connections: Array = _save_data.get_flow_connection_from_vc(input_ref)
+
+		if not input_flow_connections.is_empty() and input_flow_connections[0].to:
+			var func_tokens: Array = HenVirtualCNodeCode.get_flow_tokens(
+				(input_flow_connections[0] as HenVCFlowConnectionData).get_to(),
+				input_flow_connections[0].to_id
 			)
 			var func_block: Array = []
 
@@ -50,3 +55,17 @@ static func get_functions_code(_refs: HenTypeReferences) -> String:
 		# end func output
 	
 	return func_code
+
+
+static func search_input_ref(_func: HenSaveFunc) -> HenVirtualCNode:
+	for vc: HenVirtualCNode in _func.route.virtual_cnode_list:
+		if vc.identity.sub_type == HenVirtualCNode.SubType.FUNC_INPUT:
+			return vc
+	return null
+
+
+static func search_output_ref(_func: HenSaveFunc) -> HenVirtualCNode:
+	for vc: HenVirtualCNode in _func.route.virtual_cnode_list:
+		if vc.identity.sub_type == HenVirtualCNode.SubType.FUNC_OUTPUT:
+			return vc
+	return null

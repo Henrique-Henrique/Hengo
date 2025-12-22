@@ -19,7 +19,6 @@ var flow_connections: Array[HenTypeFlowConnection]
 var virtual_sub_type_vc_list: Array[HenTypeCnode]
 var input_connections: Array[HenTypeInputConnection]
 var route_type: HenRouter.ROUTE_TYPE
-# var ref: WeakRef
 var res: Resource
 var invalid: bool = false
 var singleton_class: String
@@ -83,7 +82,7 @@ func get_macro_token(_flow_id: int, _macro_ref: HenTypeCnode) -> Dictionary:
 	if input_flow and input_flow.to:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		global.USE_MACRO_REF = true
-		global.MACRO_REF = self
+		# global.MACRO_REF = self
 		global.MACRO_USE_SELF = _macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 		global.USE_MACRO_USE_SELF = true
 		flow_tokens = input_flow.get_to().get_flow_tokens(input_flow.to_id)

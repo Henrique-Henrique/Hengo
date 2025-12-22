@@ -1,4 +1,20 @@
-class_name HenVirtualCNodeRoute extends RefCounted
+class_name HenVirtualCNodeRoute extends Resource
 
-var route: HenRouteData # self children virtual cnode route
-var route_ref: HenRouteData # parent virtual cnode route
+@export var route: HenRouteData
+@export var parent_route_id: String
+
+
+func add_virtual_cnode_to_parent_route(_vc: HenVirtualCNode) -> void:
+	if not parent_route_id:
+		return
+	
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.add_virtual_cnode_to_route.emit(parent_route_id, _vc)
+	
+
+func remove_virtual_cnode_from_parent_route(_vc: HenVirtualCNode) -> void:
+	if not parent_route_id:
+		return
+	
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.remove_virtual_cnode_from_route.emit(parent_route_id, _vc)

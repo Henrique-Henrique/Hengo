@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://bidhodani4k31"
-path="res://.godot/imported/Inter-Bold.ttf-779229cf71e005a98dd4e4968b3149b2.fontdata"
+uid="uid://cilbr27ige0dq"
+path="res://.godot/imported/light.ttf-436bf9c07a79e8d2225382681c4dbbad.fontdata"
 
 [deps]
 
-source_file="res://addons/hengo/assets/fonts/Inter-Bold.ttf"
-dest_files=["res://.godot/imported/Inter-Bold.ttf-779229cf71e005a98dd4e4968b3149b2.fontdata"]
+source_file="res://addons/hengo/assets/fonts/light.ttf"
+dest_files=["res://.godot/imported/light.ttf-436bf9c07a79e8d2225382681c4dbbad.fontdata"]
 
 [params]
 

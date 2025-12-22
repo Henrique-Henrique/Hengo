@@ -1,5 +1,5 @@
-class_name HenVirtualCNodeReference extends RefCounted
+class_name HenVirtualCNodeReference extends Resource
 
-var ref: WeakRef
+@export var res: Resource
+
 var cnode_ref: HenCnode
-var res: Resource

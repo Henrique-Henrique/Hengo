@@ -1,31 +1,30 @@
 @tool
-class_name HenVCConnectionData extends RefCounted
+class_name HenVCConnectionData extends Resource
+
+@export var id: int
+@export var from_id: int
+@export var to_id: int
+@export var from: HenVirtualCNode
+@export var to: HenVirtualCNode
+@export var from_type: StringName
+@export var to_type: StringName
+@export var input_ref: HenVCInOutData
+@export var output_ref: HenVCInOutData
 
 var line_ref: HenConnectionLine
-var from_id: int
-var to_id: int
-var from: WeakRef
-var to: WeakRef
-var from_type: StringName
-var to_type: StringName
-var input_ref: HenVCInOutData
-var output_ref: HenVCInOutData
 var from_old_pos: Vector2
 var to_old_pos: Vector2
 
 
+func _init() -> void:
+	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+
 func get_from() -> HenVirtualCNode:
-	if not from:
-		return null
-	
-	return from.get_ref()
+	return from
 
 
 func get_to() -> HenVirtualCNode:
-	if not to:
-		return null
-	
-	return to.get_ref()
+	return to
 
 
 func get_save() -> Dictionary:

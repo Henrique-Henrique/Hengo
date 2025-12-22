@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://cilbr27ige0dq"
-path="res://.godot/imported/Inter-Light.ttf-1cf5184dc56597dc12382d82bef04a95.fontdata"
+uid="uid://c5wxb4esayen3"
+path="res://.godot/imported/semibold.ttf-b74c47cdae1c10b39887d7bf069abe17.fontdata"
 
 [deps]
 
-source_file="res://addons/hengo/assets/fonts/Inter-Light.ttf"
-dest_files=["res://.godot/imported/Inter-Light.ttf-1cf5184dc56597dc12382d82bef04a95.fontdata"]
+source_file="res://addons/hengo/assets/fonts/semibold.ttf"
+dest_files=["res://.godot/imported/semibold.ttf-b74c47cdae1c10b39887d7bf069abe17.fontdata"]
 
 [params]
 

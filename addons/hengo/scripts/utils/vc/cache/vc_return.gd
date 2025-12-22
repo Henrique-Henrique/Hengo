@@ -17,25 +17,21 @@ func add() -> void:
 	if not v_cnode.state.is_deleted:
 		return
 
-	var list: Array = v_cnode.route_info.route_ref.virtual_cnode_list
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	if not list.has(v_cnode):
-		list.append(v_cnode)
+	v_cnode.add_virtual_cnode_to_parent_route()
 
 	# io
 	for connection: HenVCConnectionData in old_connections:
-		connection.get_from().io.connections.append(connection)
-		connection.get_to().io.connections.append(connection)
+		global.SAVE_DATA.add_connection(connection)
 	
 		connection.get_from().update()
 		connection.get_to().update()
 
-
 	# flows
 	for connection: HenVCFlowConnectionData in old_flow_connections:
-		connection.get_from().flow.flow_connections_2.append(connection)
-		connection.get_to().flow.flow_connections_2.append(connection)
-	
+		global.SAVE_DATA.add_flow_connection(connection)
+		
 		connection.get_from().update()
 		connection.get_to().update()
 
@@ -45,7 +41,7 @@ func add() -> void:
 	v_cnode.state.is_deleted = false
 	v_cnode.show()
 	HenFormatter.format_current_route()
-	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if global.RIGHT_SIDE_BAR:
 		var router: HenRouter = Engine.get_singleton(&'Router')
 		global.RIGHT_SIDE_BAR.update(router.current_route)
@@ -58,15 +54,14 @@ func remove() -> void:
 	if v_cnode.state.is_deleted:
 		return
 
-	var list: Array = v_cnode.route_info.route_ref.virtual_cnode_list
-	
-	list.erase(v_cnode)
+	v_cnode.remove_virtual_cnode_from_parent_route()
 
 	var remove_connections: Array = []
 	var remove_flow_connections: Array = []
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
 	# io
-	for connection: HenVCConnectionData in v_cnode.io.connections:
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(v_cnode):
 		if connection.line_ref:
 			connection.line_ref.visible = false
 			connection.line_ref = null
@@ -74,26 +69,25 @@ func remove() -> void:
 		remove_connections.append(connection)
 
 	# flows
-	for connection: HenVCFlowConnectionData in v_cnode.flow.flow_connections_2:
+	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connection_from_vc(v_cnode):
 		if connection.line_ref:
 			connection.line_ref.visible = false
 			connection.line_ref = null
 		
 		remove_flow_connections.append(connection)
 
-
 	# remove io
 	for connection: HenVCConnectionData in remove_connections:
-		connection.get_from().io.connections.erase(connection)
-		connection.get_to().io.connections.erase(connection)
+		global.SAVE_DATA.remove_connection(connection)
+		
 		connection.get_from().update()
 		connection.get_to().update()
 		old_connections.append(connection)
 
 	# remove flow
 	for flow_connection: HenVCFlowConnectionData in remove_flow_connections:
-		flow_connection.get_from().flow.flow_connections_2.erase(flow_connection)
-		flow_connection.get_to().flow.flow_connections_2.erase(flow_connection)
+		global.SAVE_DATA.remove_flow_connection(flow_connection)
+		
 		flow_connection.get_from().update()
 		flow_connection.get_to().update()
 		old_flow_connections.append(flow_connection)
@@ -101,7 +95,7 @@ func remove() -> void:
 	v_cnode.hide()
 	v_cnode.state.is_deleted = true
 	HenFormatter.format_current_route()
-	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if global.RIGHT_SIDE_BAR:
 		var router: HenRouter = Engine.get_singleton(&'Router')
 		global.RIGHT_SIDE_BAR.update(router.current_route)

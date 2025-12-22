@@ -1,10 +1,10 @@
-class_name HenVirtualCNodeState extends RefCounted
+class_name HenVirtualCNodeState extends Resource
 
+@export var can_delete: bool = true
+@export var invalid: bool = false
 
 var is_showing: bool = false
-var can_delete: bool = true
 var is_deleted: bool = false
-var invalid: bool = false
 var showing_action_menu: bool = false
 
 signal cnode_need_update

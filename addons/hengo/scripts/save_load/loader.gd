@@ -129,13 +129,13 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 		if not await reset_to_load(_id, _headless):
 			return false
 
-		var base_route: HenRouteData = HenRouteData.new(
+		var base_route: HenRouteData = HenRouteData.create(
 			'Base',
 			HenRouter.ROUTE_TYPE.BASE,
 			HenUtilsName.get_unique_name(),
 		)
 
-		global.BASE_ROUTE = base_route
+		global.SAVE_DATA.base_route = base_route
 		
 		# loading v_cnodes
 		base_route.virtual_cnode_list = parse_and_get_vc_list_dict(save_data.virtual_cnode_list, base_route)
@@ -169,7 +169,7 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 	# showing current type
 	if not _headless:
 		show_class_name()
-		router.change_route(global.BASE_ROUTE)
+		router.change_route(global.SAVE_DATA.base_route)
 
 	var end: int = Time.get_ticks_usec()
 		

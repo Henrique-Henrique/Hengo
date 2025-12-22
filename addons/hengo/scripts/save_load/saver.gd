@@ -45,7 +45,7 @@ static func save_new() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 
-	var save_data: HenSaveData = get_current_save_data(global)
+	var save_data: HenSaveData = global.SAVE_DATA
 	var script_id: StringName = str(save_data.identity.id)
 	var script_path: StringName = HenEnums.HENGO_SAVE_PATH + script_id
 
@@ -58,39 +58,6 @@ static func save_new() -> void:
 	save_data.take_over_path(script_path + '/save.tres')
 	var result: int = ResourceSaver.save(save_data)
 	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.identity.id)) if result == OK else 'Erro saving' + str(save_data.identity.id))
-
-
-static func get_current_save_data(_global: HenGlobal) -> HenSaveData:
-	var save_data: HenSaveData = _global.SAVE_DATA
-	build_current_virtual_cnode_list(_global)
-	return save_data
-
-
-static func build_current_virtual_cnode_list(_global: HenGlobal) -> void:
-	var save_data: HenSaveData = _global.SAVE_DATA
-
-	save_data.virtual_cnode_list.clear()
-	save_data.connections.clear()
-	save_data.flow_connections.clear()
-	save_data.identity.deps.clear()
-
-	for v_cnode: HenVirtualCNode in _global.BASE_ROUTE.virtual_cnode_list:
-		save_data.virtual_cnode_list.append(v_cnode.get_save(save_data))
-
-		if v_cnode.identity.type == HenVirtualCNode.Type.STATE_EVENT:
-			save_data.state_event_list.append(v_cnode.identity.name)
-
-	generate_vc_list(save_data, save_data.functions)
-	generate_vc_list(save_data, save_data.macros)
-	generate_vc_list(save_data, save_data.signals_callback)
-
-
-static func generate_vc_list(_save_data: HenSaveData, _arr: Array) -> void:
-	for item: HenSaveResTypeWithRoute in _arr:
-		item.virtual_cnode_list.clear()
-
-		for vc: HenVirtualCNode in item.route.virtual_cnode_list:
-			item.virtual_cnode_list.append(vc.get_save(_save_data))
 
 
 static func save_side_bar_item(_arr: Array, _path: StringName) -> void:

@@ -177,7 +177,7 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 
 			return indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
-			return 'null'
+			return HenVirtualCNodeCode.get_default_value_code(_token.input_type)
 		HenVirtualCNode.SubType.CONST:
 			return indent + _token.singleton_class + '.' + _token.name
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:

@@ -14,3 +14,7 @@ signal request_code_search_select(_data: Dictionary)
 
 # dashboard
 signal request_list_update
+
+# route
+signal add_virtual_cnode_to_route(_id: String, _vc: HenVirtualCNode)
+signal remove_virtual_cnode_from_route(_id: String, _vc: HenVirtualCNode)

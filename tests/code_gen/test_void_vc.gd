@@ -1,9 +1,5 @@
 extends GdUnitTestSuite
 
 func test_void_code() -> void:
-    var refs: HenTypeReferences = HenTypeReferences.new()
     var vc: HenVirtualCNode = HenTest.get_void()
-
-    assert_str(HenTest.construct_and_get_code(vc, [], refs)).is_equal(
-        'test_void()'
-    )
+    assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal('test_void()')

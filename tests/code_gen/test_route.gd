@@ -3,15 +3,13 @@ extends GdUnitTestSuite
 
 # Asserts a direct function call for nodes on the base route
 func test_code_generation_with_base_route() -> void:
-	var refs: HenTypeReferences = HenTypeReferences.new()
 	var base_vc: HenVirtualCNode = HenTest.get_void()
 
-	assert_str(HenTest.construct_and_get_code(base_vc, [], refs)).is_equal('test_void()')
+	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(base_vc)).is_equal('test_void()')
 
 
 # Asserts a referenced call for nodes on a different route
 func test_code_generation_with_state_route() -> void:
-	var refs: HenTypeReferences = HenTypeReferences.new()
 	var state_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'State 1',
 		type = HenVirtualCNode.Type.STATE,
@@ -25,4 +23,4 @@ func test_code_generation_with_state_route() -> void:
 		route = state_vc.route_info.route
 	})
 
-	assert_str(HenTest.construct_and_get_code(vc_flow, [], refs, state_vc)).is_equal('_ref.test_void()')
+	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc_flow)).is_equal('_ref.test_void()')

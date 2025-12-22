@@ -4,7 +4,6 @@ class_name HenSideBar extends PanelContainer
 var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
-const CATEGORY_FONT = preload('res://addons/hengo/assets/fonts/Inter-Bold.ttf')
 
 enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO}
 enum ParamType {INPUT, OUTPUT}
@@ -142,25 +141,12 @@ func update() -> void:
 	var base: TreeItem = root.create_child()
 
 	base.set_text(0, 'Base')
-	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).BASE_ROUTE)
+	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.base_route)
 
-	# signals
 	_add_categories(root, 'Signals', AddType.SIGNAL)
-	_add_divider(root)
-	
-	# variables
 	_add_categories(root, 'Variables', AddType.VAR)
-	_add_divider(root)
-	
-	# functions
 	_add_categories(root, 'Functions', AddType.FUNC)
-	_add_divider(root)
-	
-	# signals callback
 	_add_categories(root, 'Signals Callback', AddType.SIGNAL_CALLBACK)
-	_add_divider(root)
-	
-	# macros
 	_add_categories(root, 'Macros', AddType.MACRO)
 
 
@@ -175,9 +161,8 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	category.set_selectable(0, false)
 	category.set_icon_modulate(0, Color(BG_COLOR[_type], 1.0))
 	category.set_custom_color(0, Color('#808e9b'))
-	category.set_custom_font(0, CATEGORY_FONT)
 	category.set_button_color(0, 0, Color('#616161'))
-	# category.set_custom_bg_color(0, BG_COLOR.get(_type))
+	category.set_custom_bg_color(0, BG_COLOR.get(_type))
 
 	match _type:
 		AddType.VAR:
@@ -224,14 +209,6 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 					ICONS[_type],
 					BG_COLOR[_type]
 				)
-
-
-func _add_divider(_root: TreeItem) -> void:
-	var divider: TreeItem = _root.create_child()
-	divider.set_selectable(0, false)
-	divider.set_metadata(0, -1)
-	divider.set_custom_minimum_height(12) # Spacer height
-	divider.set_custom_bg_color(0, Color.TRANSPARENT)
 
 
 func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:

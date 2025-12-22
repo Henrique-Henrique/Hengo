@@ -1,46 +1,26 @@
 @tool
-class_name HenVCFlow extends RefCounted
+class_name HenVCFlow extends Resource
 
-var name: String: set = _on_change_name
-var id: int = -1
-var ref: RefCounted
-var owner: WeakRef
+@export var name: String
+@export var id: int = -1
+@export var owner: Resource # TODO: remove this reference
 
 signal update_changes
 signal data_changed
 signal moved
 signal deleted
 
-func _on_change_name(_name: String) -> void:
-	name = _name
-	data_changed.emit('value', _name)
-	data_changed.emit('code_value', _name)
 
-func _init(_owner: HenVirtualCNode, _data: Dictionary = {}) -> void:
-	owner = weakref(_owner)
-	name = _data.name if _data.has('name') else ''
-	id = _data.id if _data.has('id') else (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
-
-	if _data.has('ref'): set_ref(_data.ref)
-
-func set_ref(_ref) -> void:
-	ref = _ref
-	# when param is moved
-	if ref.has_signal('moved'):
-		ref.moved.connect(_on_move)
-
-	if ref.has_signal('deleted'):
-		ref.deleted.connect(_on_delete)
-	
-	if _ref.has_signal('data_changed'):
-		_ref.data_changed.connect(on_data_changed)
+static func create(_owner: HenVirtualCNode, _data: Dictionary = {}) -> HenVCFlow:
+	var flow: HenVCFlow = HenVCFlow.new()
+	flow.owner = _owner
+	flow.name = _data.name if _data.has('name') else ''
+	flow.id = _data.id if _data.has('id') else (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	return flow
 
 
 func get_owner() -> HenVirtualCNode:
-	if not owner:
-		return null
-	
-	return owner.get_ref()
+	return owner
 
 
 func _on_move(_pos: int) -> void:

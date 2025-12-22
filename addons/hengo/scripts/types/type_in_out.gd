@@ -24,24 +24,7 @@ func reset_input_value() -> void:
 		is_ref = true
 		return
 	
-	match type:
-		'String', 'NodePath', 'StringName':
-			code_value = '""'
-		'int':
-			code_value = '0'
-		'float':
-			code_value = '0.'
-		'Vector2':
-			code_value = 'Vector2(0, 0)'
-		'bool':
-			code_value = 'false'
-		'Variant':
-			code_value = 'null'
-		_:
-			if HenEnums.VARIANT_TYPES.has(type):
-				code_value = type + '()'
-			elif ClassDB.can_instantiate(type):
-				code_value = type + '.new()'
+	code_value = HenVirtualCNodeCode.get_default_value_code(type)
 
 	match type:
 		'String', 'NodePath', 'StringName':

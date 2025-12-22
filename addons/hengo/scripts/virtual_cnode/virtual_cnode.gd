@@ -1,5 +1,5 @@
 @tool
-class_name HenVirtualCNode extends RefCounted
+class_name HenVirtualCNode extends Resource
 
 enum Type {
 	DEFAULT = 0,
@@ -66,13 +66,14 @@ enum SubType {
 }
 
 
-var state: HenVirtualCNodeState
-var identity: HenVirtualCNodeIdentity
-var visual: HenVirtualCNodeVisual
-var route_info: HenVirtualCNodeRoute
-var io: HenVirtualCNodeIO
-var flow: HenVirtualCNodeFlow
-var references: HenVirtualCNodeReference
+@export var identity: HenVirtualCNodeIdentity
+@export var visual: HenVirtualCNodeVisual
+@export var state: HenVirtualCNodeState
+@export var io: HenVirtualCNodeIO
+@export var flow: HenVirtualCNodeFlow
+@export var references: HenVirtualCNodeReference
+@export var route_info: HenVirtualCNodeRoute
+
 var renderer: HenVirtualCNodeRenderer
 var pool: HenPool
 
@@ -94,7 +95,7 @@ func _init() -> void:
 		io,
 		flow,
 		pool,
-		references
+		references,
 	)
 
 	io.cnode_need_update.connect(update)
@@ -130,7 +131,7 @@ func update() -> void:
 	if not cnode_instance:
 		return
 	var router: HenRouter = Engine.get_singleton(&'Router')
-	var should_hide: bool = state.is_deleted or (not route_info.route_ref or not router.current_route or route_info.route_ref.id != router.current_route.id)
+	var should_hide: bool = state.is_deleted or (not route_info.parent_route_id or not router.current_route or route_info.parent_route_id != router.current_route.id)
 
 	hide()
 
@@ -148,6 +149,14 @@ func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlob
 		show()
 	elif not state.is_showing:
 		hide()
+
+
+func add_virtual_cnode_to_parent_route() -> void:
+	route_info.add_virtual_cnode_to_parent_route(self)
+	
+
+func remove_virtual_cnode_from_parent_route() -> void:
+	route_info.remove_virtual_cnode_from_parent_route(self)
 
 
 func get_input(_id: int) -> HenVCInOutData:
@@ -372,13 +381,6 @@ func get_save(_save_data: HenSaveData) -> Dictionary:
 	if state.invalid:
 		data.invalid = state.invalid
 
-	if identity.from_side_bar_id > -1:
-		data.from_side_bar_id = identity.from_side_bar_id
-
-	if identity.from_id > -1:
-		data.from_id = str(identity.from_id)
-		data.side_bar_id = identity.side_bar_id
-
 	if not io.input_code_value_map.is_empty():
 		data.input_code_value_map = io.input_code_value_map
 
@@ -420,19 +422,16 @@ func get_save(_save_data: HenSaveData) -> Dictionary:
 	if identity.category:
 		data.category = identity.category
 
-	if _save_data:
-		for flow_connection: HenVCFlowConnectionData in flow.flow_connections_2:
-			if not flow_connection.get_to(): continue
-			if flow_connection.get_to() == self: continue
+	# if _save_data:
+		# for flow_connection: HenVCFlowConnectionData in get_route_flow_connections():
+		# 	if not flow_connection.get_to(): continue
+		# 	if flow_connection.get_to() == self: continue
+		# 	_save_data.flow_connections.append(flow_connection.get_save())
+		# for input: HenVCConnectionData in io.connections:
+		# 	if input.get_to().identity.id != identity.id:
+		# 		continue
 
-			_save_data.flow_connections.append(flow_connection.get_save())
-
-
-		for input: HenVCConnectionData in io.connections:
-			if input.get_to().identity.id != identity.id:
-				continue
-
-			_save_data.connections.append(input.get_save())
+		# 	_save_data.connections.append(input.get_save())
 
 
 	# these types don't need to save the flow connections, are hengo's native
@@ -491,34 +490,12 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.identity.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.identity.sub_type = _config.sub_type
 	v_cnode.identity.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter() if not _config.has('id') else _config.id
-	v_cnode.route_info.route_ref = route
-	
+	v_cnode.route_info.parent_route_id = route.id
+	v_cnode.identity.route_type = route.type
+
 	if _config.has('name_to_code'): v_cnode.identity.name_to_code = _config.name_to_code
 
-	match route.type:
-		HenRouter.ROUTE_TYPE.BASE, HenRouter.ROUTE_TYPE.STATE:
-			route.virtual_cnode_list.append(v_cnode)
-		HenRouter.ROUTE_TYPE.FUNC:
-			route.virtual_cnode_list.append(v_cnode)
-		
-			match v_cnode.identity.sub_type:
-				SubType.FUNC_INPUT:
-					route.input_ref = weakref(v_cnode)
-				SubType.FUNC_OUTPUT:
-					route.output_ref = weakref(v_cnode)
-		HenRouter.ROUTE_TYPE.SIGNAL:
-			route.virtual_cnode_list.append(v_cnode)
-			match v_cnode.identity.sub_type:
-				SubType.SIGNAL_ENTER:
-					route.signal_enter = v_cnode
-		HenRouter.ROUTE_TYPE.MACRO:
-			route.virtual_cnode_list.append(v_cnode)
-
-			match v_cnode.identity.sub_type:
-				SubType.MACRO_INPUT:
-					route.input_ref = weakref(v_cnode)
-				SubType.MACRO_OUTPUT:
-					route.output_ref = weakref(v_cnode)
+	route.virtual_cnode_list.append(v_cnode)
 
 	if _config.has('input_code_value_map'):
 		v_cnode.io.input_code_value_map = _config.input_code_value_map
@@ -528,13 +505,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	if _config.has('can_delete'):
 		v_cnode.state.can_delete = _config.can_delete
-
-	if _config.has('from_side_bar_id'):
-		v_cnode.identity.from_side_bar_id = _config.from_side_bar_id
-
-	if _config.has('from_id'):
-		v_cnode.identity.from_id = int(_config.from_id)
-		v_cnode.identity.side_bar_id = int(_config.side_bar_id)
 
 	if _config.has('invalid'):
 		v_cnode.state.invalid = _config.invalid
@@ -563,19 +533,19 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match v_cnode.identity.type:
 		HenVirtualCNode.Type.DEFAULT:
-			if not _config.has('to_flow'): v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {id = 0}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			if not _config.has('to_flow'): v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {id = 0}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.IF:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'True', id = 0}))
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'False', id = 1}))
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'Then', id = 2}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'True', id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'False', id = 1}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Then', id = 2}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.FOR:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'Body', id = 0}))
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'Then', id = 1}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Body', id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Then', id = 1}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.STATE:
-			v_cnode.route_info.route = HenRouteData.new(
+			v_cnode.route_info.route = HenRouteData.create(
 				v_cnode.identity.name,
 				HenRouter.ROUTE_TYPE.STATE,
 				HenUtilsName.get_unique_name(),
@@ -602,16 +572,16 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 					can_delete = false
 				})
 
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:
 					v_cnode.flow.on_flow_added(false, _flow, v_cnode)
 		Type.STATE_START:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {name = 'On Start', id = 0}))
-			v_cnode.flow.flow_inputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'On Start', id = 0}))
+			v_cnode.flow.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.STATE_EVENT:
-			v_cnode.flow.flow_outputs.append(HenVCFlow.new(v_cnode, {id = 0}))
+			v_cnode.flow.flow_outputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		_:
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:

@@ -1,7 +1,7 @@
-class_name HenVirtualCNodeVisual extends RefCounted
+class_name HenVirtualCNodeVisual extends Resource
 
-var position: Vector2
-var size: Vector2
+@export var position: Vector2
+@export var size: Vector2
 
 const MOUSE_INSIDE_THRESHOLD = Vector2(25, 25)
 

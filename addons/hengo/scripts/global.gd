@@ -13,7 +13,6 @@ var DOCS_TOOLTIP: HenDocsToolTip
 var ERROR_BT: HenErrorBt
 var CONNECTION_GUIDE: HenConnectionGuide
 var HENGO_ROOT: HenHengoRoot
-var BASE_ROUTE: HenRouteData
 var SIDE_BAR: HenSideBar
 var SIDE_PANEL: PanelContainer
 var SIDE_BAR_LIST_CACHE: Dictionary = {}
@@ -100,7 +99,7 @@ var can_instantiate_pool: bool = true
 
 # macro
 var USE_MACRO_USE_SELF: bool = false
-var MACRO_REF: HenTypeCnode
+var MACRO_REF: HenVirtualCNode
 var USE_MACRO_REF: bool = false
 var MACRO_USE_SELF: bool = false
 

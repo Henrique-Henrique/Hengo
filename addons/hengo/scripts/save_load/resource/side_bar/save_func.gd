@@ -14,7 +14,7 @@ func _init() -> void:
 	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 	name = get_new_name()
 
-	route = HenRouteData.new(
+	route = HenRouteData.create(
 		name,
 		HenRouter.ROUTE_TYPE.FUNC,
 		HenUtilsName.get_unique_name(),

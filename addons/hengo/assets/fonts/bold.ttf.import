@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://c5wxb4esayen3"
-path="res://.godot/imported/Inter-SemiBold.ttf-8195422bae17ed3e51cc8462d6fd165a.fontdata"
+uid="uid://bidhodani4k31"
+path="res://.godot/imported/bold.ttf-4e14e5e893ba308f0dc5603965e64a6e.fontdata"
 
 [deps]
 
-source_file="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf"
-dest_files=["res://.godot/imported/Inter-SemiBold.ttf-8195422bae17ed3e51cc8462d6fd165a.fontdata"]
+source_file="res://addons/hengo/assets/fonts/bold.ttf"
+dest_files=["res://.godot/imported/bold.ttf-4e14e5e893ba308f0dc5603965e64a6e.fontdata"]
 
 [params]
 

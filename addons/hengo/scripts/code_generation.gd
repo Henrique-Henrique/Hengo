@@ -12,77 +12,18 @@ func get_flow_id() -> int:
 
 
 func get_code(_data: HenSaveData, _build_preview: bool = false) -> String:
-	var refs: HenTypeReferences = HenTypeReferences.new(_data)
+	var refs: HenTypeReferences = HenTypeReferences.new()
 	var code: String = ''
 
 	(Engine.get_singleton(&'Global') as HenGlobal).GENERATE_PREVIEW_CODE = _build_preview
 	(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.clear()
 
-	# generating macro references
-	for macro_data: HenSaveMacro in _data.macros:
-		var macro: HenTypeMacro = HenTypeMacro.new()
-
-		macro.id = macro_data.id
-		macro.name = macro_data.name
-
-		refs.side_bar_item_ref[macro.id] = macro
-
-		for input: HenSaveParam in macro_data.inputs:
-			var flow: HenTypeFlow = HenTypeFlow.new()
-			flow.id = input.id
-			flow.name = input.name
-			macro.flow_inputs.append(flow)
-
-		for output: HenSaveParam in macro_data.outputs:
-			var flow: HenTypeFlow = HenTypeFlow.new()
-			flow.id = output.id
-			flow.name = output.name
-			macro.flow_outputs.append(flow)
-
-		for local_var: HenSaveParam in macro_data.local_vars:
-			macro.local_vars.append(HenFactoryVariable.get_variable_from_dict(local_var.get_data(), refs))
-
-		for cnode: Dictionary in macro_data.virtual_cnode_list:
-			macro.virtual_cnode_list.append(HenFactoryCNode.get_cnode_from_dict(cnode, refs, macro))
-
-		refs.macros.append(macro)
-
-	# generating variables references
-	for variable_data: HenSaveVar in _data.variables:
-		# if variable_data.has('invalid') and not variable_data.invalid:
-		# 	continue
-		refs.variables.append(HenFactoryVariable.get_variable_from_dict(variable_data.get_data(), refs))
-
-	# signals
-	for signal_data: HenSaveSignal in _data.signals:
-		HenFactorySignal.get_signal_from_dict(signal_data.get_data(), refs)
-
-	# generating function references
-	for func_data: HenSaveFunc in _data.functions:
-		HenFactoryFunc.get_func_from_dict(func_data.get_data(), refs)
-
-	# generating macro references
-	for signal_data: HenSaveSignalCallback in _data.signals_callback:
-		HenFactorySignalCallback.get_signal_from_dict(signal_data.get_data(), refs)
-
-	# generating cnode references
-	for cnode: Dictionary in _data.virtual_cnode_list:
-		var cn: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(cnode, refs)
-
-		refs.base_route_cnode_list.append(cn)
-
-		if cnode.has(&'virtual_cnode_list'):
-			for cnode_chd: Dictionary in cnode.virtual_cnode_list:
-				cn.virtual_cnode_list.append(HenFactoryCNode.get_cnode_from_dict(cnode_chd, refs, cn))
-
-	HenFactoryCNode.parse_connections(refs)
-
 	code += _get_start(_data)
-	code += HenGeneratorSignal.get_signals_code(refs)
-	code += HenGeneratorVariable.get_variables_code(refs)
-	code += HenGeneratorFunc.get_functions_code(refs)
-	code += HenGeneratorSignalCallback.get_signals_callback_code(refs)
-	code += HenGeneratorBase.get_base_script_code(refs)
+	code += HenGeneratorSignal.get_signals_code(_data)
+	code += HenGeneratorVariable.get_variables_code(_data)
+	code += HenGeneratorFunc.get_functions_code(_data)
+	code += HenGeneratorSignalCallback.get_signals_callback_code(_data)
+	code += HenGeneratorBase.get_base_script_code(_data, refs)
 
 	return code
 

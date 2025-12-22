@@ -15,7 +15,7 @@ func _init(
 	_io: HenVirtualCNodeIO,
 	_flow: HenVirtualCNodeFlow,
 	_pool: HenPool,
-	_refs: HenVirtualCNodeReference
+	_refs: HenVirtualCNodeReference,
 ) -> void:
 	state = _state
 	visual = _visual
@@ -27,6 +27,7 @@ func _init(
 
 
 func configure_cnode_to_show(_cnode: HenCnode) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	_cnode.position = visual.position
 	_cnode.visible = true
 	_cnode.category = identity.category
@@ -110,7 +111,7 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 		idx += 1
 
-	for connection: HenVCConnectionData in io.connections:
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		var from: HenVirtualCNode = connection.get_from()
 		var to: HenVirtualCNode = connection.get_to()
 
@@ -252,8 +253,9 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 
 		idx += 1
 
+	var flow_connections: Array = global.SAVE_DATA.get_flow_connections_by_id(identity.id)
 
-	for connection: HenVCFlowConnectionData in flow.flow_connections_2:
+	for connection: HenVCFlowConnectionData in flow_connections:
 		if connection.line_ref is HenFlowConnectionLine:
 			connection.line_ref = connection.line_ref
 		else:
@@ -301,16 +303,17 @@ func configure_cnode_to_show(_cnode: HenCnode) -> void:
 	# drawing the connections	
 	await RenderingServer.frame_pre_draw
 
-	for connection: HenVCConnectionData in io.connections:
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		if not connection.line_ref: continue
 		connection.line_ref.update_line()
 
-	for connection: HenVCFlowConnectionData in flow.flow_connections_2:
+	for connection: HenVCFlowConnectionData in flow_connections:
 		if not connection.line_ref: continue
 		connection.line_ref.update_line()
 
 
 func configure_cnode_to_hide(_cnode: HenCnode) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	state.is_showing = false
 
 	_cnode.can_follow = false
@@ -320,7 +323,7 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 		_cnode.disconnect('on_move', signal_data.callable as Callable)
 	
 	# io
-	for connection: HenVCConnectionData in io.connections:
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		if not connection.line_ref:
 			continue
 		
@@ -349,7 +352,7 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			connection.line_ref = null
 
 	# flow
-	for connection: HenVCFlowConnectionData in flow.flow_connections_2:
+	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if not connection.line_ref:
 			continue
 

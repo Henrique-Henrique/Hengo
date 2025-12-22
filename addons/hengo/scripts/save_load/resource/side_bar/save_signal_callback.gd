@@ -18,7 +18,7 @@ func _init() -> void:
 	name = get_new_name()
 	type = &'Variant'
 
-	route = HenRouteData.new(
+	route = HenRouteData.create(
 		name,
 		HenRouter.ROUTE_TYPE.SIGNAL,
 		HenUtilsName.get_unique_name(),

@@ -1,13 +1,12 @@
-class_name HenVirtualCNodeIO extends RefCounted
+class_name HenVirtualCNodeIO extends Resource
 
-var inputs: Array[HenVCInOutData]
-var outputs: Array[HenVCInOutData]
-var connections: Array[HenVCConnectionData]
+@export var inputs: Array[HenVCInOutData]
+@export var outputs: Array[HenVCInOutData]
+@export var input_code_value_map: Dictionary = {}
 
 var references: HenVirtualCNodeReference
 var identity: HenVirtualCNodeIdentity
 var state: HenVirtualCNodeState
-var input_code_value_map: Dictionary = {}
 
 signal cnode_need_update
 signal connection_request(_data: Dictionary)
@@ -53,8 +52,8 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 	connection.from_type = output.type
 	connection.from_id = output.id
 	connection.output_ref = output
-	connection.from = weakref(_from)
-	connection.to = weakref(_to)
+	connection.from = _from
+	connection.to = _to
 	connection.to_type = input.type
 	connection.to_id = input.id
 	connection.input_ref = input
@@ -63,7 +62,8 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 
 
 func get_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCConnectionData:
-	for input_connection: HenVCConnectionData in connections:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(_virtual_cnode):
 		if input_connection.get_to() == _virtual_cnode and input_connection.to_id == _id:
 			return input_connection
 
@@ -78,7 +78,8 @@ func clear_in_out(_is_input: bool) -> void:
 
 
 func input_has_connection(_id: int) -> bool:
-	for input_connection: HenVCConnectionData in connections:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		if input_connection.to_id == _id:
 			return true
 
@@ -86,7 +87,8 @@ func input_has_connection(_id: int) -> bool:
 
 
 func output_has_connection(_id: int) -> bool:
-	for output_connection: HenVCConnectionData in connections:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for output_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		if output_connection.from_id == _id:
 			return true
 
@@ -94,7 +96,8 @@ func output_has_connection(_id: int) -> bool:
 
 
 func get_input_connection_command(_id: int) -> HenVCConnectionReturn:
-	for connection: HenVCConnectionData in connections:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		if connection.to_id == _id:
 			return HenVCConnectionReturn.new(connection)
 
@@ -102,15 +105,15 @@ func get_input_connection_command(_id: int) -> HenVCConnectionReturn:
 
 
 func remove_io_connection(_ref: HenVCInOutData) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var connection_remove: Array = []
 
-	for connection: HenVCConnectionData in connections:
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
 		if _ref.id == connection.to_id:
 			connection_remove.append(connection)
 
 	for connection: HenVCConnectionData in connection_remove:
-		connection.get_from().io.connections.erase(connection)
-		connections.erase(connection)
+		global.SAVE_DATA.remove_connection(connection)
 
 		if connection.line_ref:
 			connection.line_ref.visible = false
@@ -195,7 +198,7 @@ func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
 			_data.value = map_value.get(&'value')
 			_data.code_value = map_value.get(&'code_value')
 
-	var in_out: HenVCInOutData = HenVCInOutData.new(_data)
+	var in_out: HenVCInOutData = HenVCInOutData.create(_data)
 
 	in_out.connection_request.connect(connection_request.emit)
 	in_out.io_hovered.connect(io_hovered.emit)

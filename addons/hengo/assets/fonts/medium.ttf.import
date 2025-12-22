@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://wd6my6keapbk"
-path="res://.godot/imported/Inter-Medium.ttf-c691dd588a3416b997bbca229b2187d0.fontdata"
+path="res://.godot/imported/medium.ttf-37a632508308249502a4adc29c083087.fontdata"
 
 [deps]
 
-source_file="res://addons/hengo/assets/fonts/Inter-Medium.ttf"
-dest_files=["res://.godot/imported/Inter-Medium.ttf-c691dd588a3416b997bbca229b2187d0.fontdata"]
+source_file="res://addons/hengo/assets/fonts/medium.ttf"
+dest_files=["res://.godot/imported/medium.ttf-37a632508308249502a4adc29c083087.fontdata"]
 
 [params]
 

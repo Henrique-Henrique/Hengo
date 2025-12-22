@@ -257,7 +257,7 @@ func _on_select(_custom_data: Dictionary = {}) -> void:
 
 	var vc_return: HenVCNodeReturn = HenVirtualCNode.instantiate(data)
 
-	global.history.create_action('Add HenTypeCnode')
+	global.history.create_action('Add CNode')
 	global.history.add_do_method(vc_return.add)
 	global.history.add_do_reference(vc_return)
 	global.history.add_undo_method(vc_return.remove)

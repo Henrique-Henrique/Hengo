@@ -1,8 +1,7 @@
-class_name HenVirtualCNodeFlow extends RefCounted
+class_name HenVirtualCNodeFlow extends Resource
 
-var flow_inputs: Array[HenVCFlow]
-var flow_outputs: Array[HenVCFlow]
-var flow_connections_2: Array[HenVCFlowConnectionData]
+@export var flow_inputs: Array[HenVCFlow]
+@export var flow_outputs: Array[HenVCFlow]
 
 var identity: HenVirtualCNodeIdentity
 
@@ -40,21 +39,23 @@ func add_flow_connection(_id: int, _to_id: int, _from: HenVirtualCNode, _to: Hen
 
 	flow_connection.from_id = flow_output.id
 	flow_connection.to_id = flow_input.id
-	flow_connection.from = weakref(_from)
-	flow_connection.to = weakref(_to)
+	flow_connection.from = _from
+	flow_connection.to = _to
 
 	return HenVCFlowConnectionReturn.new(flow_connection)
 
 
 func get_flow_input_connection_command(_id: int) -> HenVCFlowConnectionReturn:
-	for connection: HenVCFlowConnectionData in flow_connections_2:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if connection.to_id == _id:
 			return HenVCFlowConnectionReturn.new(connection)
 
 	return null
 
 func get_flow_output_connection_command(_id: int) -> HenVCFlowConnectionReturn:
-	for connection: HenVCFlowConnectionData in flow_connections_2:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if connection.from_id == _id:
 			return HenVCFlowConnectionReturn.new(connection)
 
@@ -62,12 +63,14 @@ func get_flow_output_connection_command(_id: int) -> HenVCFlowConnectionReturn:
 
 
 func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
-	flow_outputs.append(HenVCFlow.new(_owner, {name = 'Flow ' + str(flow_connections_2.size())}))
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	flow_outputs.append(HenVCFlow.create(_owner, {name = 'Flow ' + str(global.SAVE_DATA.get_flow_connections_by_id(identity.id).size())}))
 	cnode_need_update.emit()
 
 
 func flow_input_has_connection(_id: int, _input_id: int) -> bool:
-	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if not flow_connection.get_to():
 			continue
 		
@@ -78,7 +81,8 @@ func flow_input_has_connection(_id: int, _input_id: int) -> bool:
 
 
 func flow_output_has_connection(_id: int, _output_id: int) -> bool:
-	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if not flow_connection.get_from():
 			continue
 
@@ -89,7 +93,8 @@ func flow_output_has_connection(_id: int, _output_id: int) -> bool:
 
 
 func get_flow_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
-	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if flow_connection.get_to() == _virtual_cnode and flow_connection.to_id == _id:
 			return flow_connection
 
@@ -97,7 +102,8 @@ func get_flow_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> Hen
 
 
 func get_flow_output_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
-	for flow_connection: HenVCFlowConnectionData in flow_connections_2:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(identity.id):
 		if flow_connection.get_from() == _virtual_cnode and flow_connection.from_id == _id:
 			return flow_connection
 
@@ -114,7 +120,7 @@ func on_flow_added(_is_input: bool, _data: Dictionary, _owner: HenVirtualCNode) 
 			if _is_input: return
 			_is_input = not _is_input
 
-	var flow: HenVCFlow = HenVCFlow.new(_owner, _data)
+	var flow: HenVCFlow = HenVCFlow.create(_owner, _data)
 
 	if _is_input:
 		flow_inputs.append(flow)
@@ -157,16 +163,16 @@ func on_flow_deleted(_is_input: bool, _flow_ref: HenVCFlow) -> void:
 
 
 func remove_flow_connection(_flow_ref: HenVCFlow) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var connection_remove: Array = []
+	var flow_connections: Array = global.SAVE_DATA.get_flow_connections_by_id(identity.id)
 
-	for connection: HenVCFlowConnectionData in flow_connections_2:
+	for connection: HenVCFlowConnectionData in flow_connections:
 		if _flow_ref.id == connection.from_id:
 			connection_remove.append(connection)
 
-
 	for connection: HenVCFlowConnectionData in connection_remove:
-		connection.get_from().flow.flow_connections_2.erase(connection)
-		flow_connections_2.erase(connection)
+		global.SAVE_DATA.remove_flow_connection(connection)
 
 		if connection.line_ref:
 			connection.line_ref.visible = false

@@ -1,17 +1,17 @@
 @tool
-class_name HenVCInOutData extends RefCounted
+class_name HenVCInOutData extends Resource
 
-var id: int = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
-var name: String
-var type: StringName
-var sub_type: StringName
-var category: StringName
-var is_ref: bool
-var code_value: String
-var value: Variant
-var data: Variant
-var is_prop: bool
-var is_static: bool
+@export var id: int
+@export var name: String
+@export var type: StringName
+@export var sub_type: StringName
+@export var category: StringName
+@export var is_ref: bool
+@export var code_value: String
+@export var value: Variant
+@export var data: Variant
+@export var is_prop: bool
+@export var is_static: bool
 
 signal connection_request(_data: Dictionary)
 signal io_hovered(_context: Dictionary)
@@ -20,19 +20,22 @@ signal method_picker_requested(_context: Dictionary)
 signal changed_code_value(_context: Dictionary)
 
 
-func _init(_data: Dictionary) -> void:
-	name = _data.name
-	type = _data.type
+static func create(_data: Dictionary) -> HenVCInOutData:
+	var io: HenVCInOutData = HenVCInOutData.new()
+	io.id = _data.id if _data.has('id') else (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	io.name = _data.name
+	io.type = _data.type
 
-	if _data.has('id'): id = _data.id
-	if _data.has('sub_type'): sub_type = _data.sub_type
-	if _data.has('category'): category = _data.category
-	if _data.has('is_ref'): is_ref = _data.is_ref
-	if _data.has('code_value'): code_value = _data.code_value
-	if _data.has('value'): value = _data.value
-	if _data.has('data'): data = _data.data
-	if _data.has('is_prop'): is_prop = _data.is_prop
-	if _data.has('is_static'): is_static = _data.is_static
+	if _data.has('sub_type'): io.sub_type = _data.sub_type
+	if _data.has('category'): io.category = _data.category
+	if _data.has('is_ref'): io.is_ref = _data.is_ref
+	if _data.has('code_value'): io.code_value = _data.code_value
+	if _data.has('value'): io.value = _data.value
+	if _data.has('data'): io.data = _data.data
+	if _data.has('is_prop'): io.is_prop = _data.is_prop
+	if _data.has('is_static'): io.is_static = _data.is_static
+
+	return io
 
 
 func get_save() -> Dictionary:

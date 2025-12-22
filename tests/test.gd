@@ -24,7 +24,7 @@ class CNodeConnection:
 
 
 static func get_base_route() -> HenRouteData:
-	return HenRouteData.new(
+	return HenRouteData.create(
 		'Base',
 		HenRouter.ROUTE_TYPE.BASE,
 		'0',
@@ -35,31 +35,34 @@ static func set_global_config() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
-	global.SAVE_DATA = HenSaveData.new()
-	global.SAVE_DATA.identity = HenSaveDataIdentity.create(str(ResourceUID.create_id()), 'Node', 'JustTest')
+	var save_data: HenSaveData = HenSaveData.new()
+	var _class: StringName = 'Node'
+	var id: int = ResourceUID.create_id()
+	var identity: HenSaveDataIdentity = HenSaveDataIdentity.create(str(id), _class, 'Test')
 
-	global.BASE_ROUTE = HenRouteData.new(
-		'Base',
-		HenRouter.ROUTE_TYPE.BASE,
-		'0',
+	save_data.identity = identity
+	save_data.counter = 1
+	save_data.virtual_cnode_list.append(
+		{
+			can_delete = false,
+			id = 1,
+			name = 'Stat State',
+			position = 'Vector2(0, 0)',
+			size = 'Vector2(99, 63)',
+			sub_type = 37,
+			type = 6
+		}
 	)
 
-	router.current_route = global.BASE_ROUTE
+	var base_route: HenRouteData = HenRouteData.create(
+		'Base',
+		HenRouter.ROUTE_TYPE.BASE,
+		HenUtilsName.get_unique_name(),
+	)
 
-
-static func construct_and_get_code(_base_vc: HenVirtualCNode, _vc_dependencies: Array[HenVirtualCNode], _refs: HenTypeReferences, _parent_ref = null) -> String:
-	for vc: HenVirtualCNode in _vc_dependencies:
-		HenFactoryCNode.get_cnode_from_dict(vc.get_save(_refs.save_data), _refs, _parent_ref)
-
-	var vc: HenTypeCnode = HenFactoryCNode.get_cnode_from_dict(_base_vc.get_save(_refs.save_data), _refs, _parent_ref)
-	var code: String = ''
-
-	HenFactoryCNode.parse_connections(_refs)
-
-	for token in vc.get_flow_tokens(0):
-		code += HenGeneratorByToken.get_code_by_token(token)
-
-	return code
+	save_data.base_route = base_route
+	global.SAVE_DATA = save_data
+	router.current_route = global.SAVE_DATA.base_route
 
 
 static func get_void(_route: HenRouteData = null) -> HenVirtualCNode:

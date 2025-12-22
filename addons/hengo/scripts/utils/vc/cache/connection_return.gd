@@ -6,16 +6,17 @@ var connection: HenVCConnectionData
 var old_connections: Array
 
 
-func _init(_connection: HenVCConnectionData, _to_id = -1) -> void:
+func _init(_connection: HenVCConnectionData, _to_id=-1) -> void:
     connection = _connection
     to_id = _to_id
 
 
 func add(_update: bool = true) -> void:
     # removing old inputs
+    var global: HenGlobal = Engine.get_singleton(&'Global')
     var remove_connection: Array = []
     
-    for connection_ref: HenVCConnectionData in connection.get_to().io.connections:
+    for connection_ref: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(connection.get_to()):
         if connection_ref.to_id != to_id:
             continue
 
@@ -26,13 +27,11 @@ func add(_update: bool = true) -> void:
         remove_connection.append(connection_ref)
 
     for connection_ref: HenVCConnectionData in remove_connection:
-        connection_ref.get_to().io.connections.erase(connection_ref)
-        connection_ref.get_from().io.connections.erase(connection_ref)
+        global.SAVE_DATA.remove_connection(connection_ref)
 
         old_connections.append(connection_ref)
 
-    connection.get_from().io.connections.append(connection)
-    connection.get_to().io.connections.append(connection)
+    global.SAVE_DATA.add_connection(connection)
 
     if _update:
         connection.get_from().update()
@@ -41,16 +40,15 @@ func add(_update: bool = true) -> void:
 
 
 func remove() -> void:
-    connection.get_from().io.connections.erase(connection)
-    connection.get_to().io.connections.erase(connection)
+    var global: HenGlobal = Engine.get_singleton(&'Global')
+    global.SAVE_DATA.remove_connection(connection)
 
     if connection.line_ref:
         connection.line_ref.visible = false
         connection.line_ref = null
 
     for connection_ref: HenVCConnectionData in old_connections:
-        connection_ref.get_from().io.connections.append(connection_ref)
-        connection_ref.get_to().io.connections.append(connection_ref)
+        global.SAVE_DATA.add_connection(connection_ref)
 
     old_connections.clear()
 

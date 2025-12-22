@@ -1,7 +1,7 @@
 class_name HenFactoryCNode extends RefCounted
 
 
-static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _parent_ref = null) -> HenTypeCnode:
+static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _parent_ref=null) -> HenTypeCnode:
 	var cn: HenTypeCnode = HenTypeCnode.new();
 	var input_code_value_map: Dictionary = _cnode.get(&'input_code_value_map', {})
 
@@ -74,14 +74,14 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 			if cn.sub_type == HenVirtualCNode.SubType.MACRO_OUTPUT:
 				_parent_ref.output_ref = cn
 
-
 	match cn.type:
 		HenVirtualCNode.Type.STATE:
 			cn.route_type = HenRouter.ROUTE_TYPE.BASE
 			_refs.states.append(cn)
 		HenVirtualCNode.Type.MACRO:
-			if not cn.invalid:
-				(cn.ref.get_ref() as HenTypeMacro).macro_ref_list.append(cn)
+			pass
+			# if not cn.invalid:
+			# 	(cn.ref.get_ref() as HenTypeMacro).macro_ref_list.append(cn)
 	
 	match cn.sub_type:
 		HenVirtualCNode.SubType.VIRTUAL:
@@ -97,13 +97,17 @@ static func get_cnode_from_dict(_cnode: Dictionary, _refs: HenTypeReferences, _p
 #
 #
 static func parse_connections(_refs: HenTypeReferences) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	print('- >>>>>>>>>>>>>>>>> ', global.SAVE_DATA)
+
 	# generatin flow connection references
-	for flow_connection_data: Dictionary in _refs.save_data.flow_connections:
-		var flow_connection: HenTypeFlowConnection = HenTypeFlowConnection.new(flow_connection_data, _refs)
-		flow_connection.get_from().flow_connections.append(flow_connection)
+	# for flow_connection_data: HenVCFlowConnectionData in global.SAVE_DATA.get_all_flow_connections():
+	# 	var flow_connection: HenTypeFlowConnection = HenTypeFlowConnection.new(flow_connection_data, _refs)
+	# 	flow_connection.get_from().flow_connections.append(flow_connection)
 
 
 	# generating input connection references
-	for connection: Dictionary in _refs.save_data.connections:
-		var input: HenTypeInputConnection = HenTypeInputConnection.new(connection, _refs)
-		input.get_to().input_connections.append(input)
+	# for connection: Dictionary in global.SAVE_DATA.connections:
+	# 	var input: HenTypeInputConnection = HenTypeInputConnection.new(connection, _refs)
+	# 	input.get_to().input_connections.append(input)

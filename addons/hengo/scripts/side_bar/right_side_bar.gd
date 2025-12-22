@@ -65,8 +65,9 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 	if _color is Color:
 		root.set_custom_bg_color(0, _color)
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var outgoing_nodes: Array[Dictionary] = []
-	for flow_connection: HenVCFlowConnectionData in _vc.flow.flow_connections_2:
+	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connection_from_vc(_vc):
 		var from: HenVirtualCNode = flow_connection.get_from()
 		if from != _vc:
 			continue

@@ -15,6 +15,10 @@ run/main_scene="res://demo.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+HengoDebugger="*res://addons/hengo/scripts/debug/hengo_debugger.gd"
+
 [debug]
 
 gdscript/warnings/exclude_addons=false
@@ -27,7 +31,7 @@ window/size/always_on_top=true
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg", "res://addons/hengo/plugin.cfg")
 
 [file_customization]
 
