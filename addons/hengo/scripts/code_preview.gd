@@ -32,7 +32,7 @@ func set_code(_code: String) -> void:
 
 func show_vc_line_reference() -> void:
 	var idx: int = 0
-	var new_id_list: Array = (Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
+	var new_id_list: Array = (Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.get_id())
 
 	if id_list != new_id_list:
 		id_list.clear()

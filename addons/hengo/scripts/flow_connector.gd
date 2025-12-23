@@ -48,7 +48,7 @@ func _on_gui(_event: InputEvent) -> void:
 		global.TOOLTIP.go_to(get_global_mouse_position(), '{0} {1}'.format([HenEnums.TOOLTIP_TEXT.MOUSE_ICON, 'Left Click And Drag to Connect']))
 
 
-func reset_signals(_flow: HenVCFlow):
+func reset_signals(_vc: HenVirtualCNode, _flow: HenVCFlow):
 	for signal_name: StringName in [
 		'create_flow_connection_request'
 	]:
@@ -56,4 +56,4 @@ func reset_signals(_flow: HenVCFlow):
 			@warning_ignore('unsafe_method_access')
 			connection.signal.disconnect(connection.callable)
 
-	create_flow_connection_request.connect(_flow.on_create_connection_request)
+	create_flow_connection_request.connect(_flow.on_create_connection_request.bind(_vc))

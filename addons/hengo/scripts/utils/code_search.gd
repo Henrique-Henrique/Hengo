@@ -287,8 +287,8 @@ func _on_select(_custom_data: Dictionary = {}) -> void:
 
 
 	# add connection when dragging from connector
-	if config.has(&'from_flow_connector') and not vc_return.v_cnode.flow.flow_inputs.is_empty():
-		var flow_connection := (config.from_flow_connector as HenVirtualCNode).add_flow_connection(config.id, vc_return.v_cnode.flow.flow_inputs[0].id, vc_return.v_cnode)
+	if config.has(&'from_flow_connector') and not vc_return.v_cnode.flow_inputs.is_empty():
+		var flow_connection := (config.from_flow_connector as HenVirtualCNode).add_flow_connection(config.id, vc_return.v_cnode.flow_inputs[0].id, vc_return.v_cnode)
 
 		if flow_connection:
 			flow_connection.add()

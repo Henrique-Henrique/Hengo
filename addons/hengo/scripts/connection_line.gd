@@ -45,8 +45,8 @@ func update_line() -> void:
 	
 	var start_size_y: float = TITLE_SIZE_Y + CNODE_IO_SIZE / 2.
  
-	var start_pos: Vector2 = from_ref.visual.position + Vector2(from_ref.visual.size.x, start_size_y + (CNODE_IO_SIZE * from_idx))
-	var end_pos: Vector2 = to_ref.visual.position + Vector2(0, start_size_y + (CNODE_IO_SIZE * to_idx))
+	var start_pos: Vector2 = from_ref.position + Vector2(from_ref.size.x, start_size_y + (CNODE_IO_SIZE * from_idx))
+	var end_pos: Vector2 = to_ref.position + Vector2(0, start_size_y + (CNODE_IO_SIZE * to_idx))
 
 	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
 	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)

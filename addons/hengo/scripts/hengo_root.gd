@@ -33,7 +33,6 @@ func _ready() -> void:
 
 	# initializing
 	router.current_route = null
-	router.comment_reference = {}
 	# HenGlobal.history = UndoRedo.new()
 	enums.DROPDOWN_STATES = []
 	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.clear()

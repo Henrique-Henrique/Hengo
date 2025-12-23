@@ -1,4 +1,5 @@
-class_name HenVirtualCNodeState extends Resource
+@tool
+class_name HenVirtualCNodeState extends HenVirtualCNodeReference
 
 @export var can_delete: bool = true
 @export var invalid: bool = false

@@ -20,7 +20,7 @@ static func get_flow_tokens(_vc: HenVirtualCNode, _input_id: int, _token_list: A
 		if current.has('flow_id'):
 			token_list = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flows_refs[current.flow_id]
 
-		match vc.identity.sub_type:
+		match vc.sub_type:
 			HenVirtualCNode.SubType.IF:
 				token_list.append(get_if_token(vc, stack))
 			HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
@@ -70,12 +70,12 @@ static func get_if_token(_vc: HenVirtualCNode, _stack: Array) -> Dictionary:
 				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
-		vc_id = _vc.identity.id,
+		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.IF,
 		true_flow_id = true_flow_id,
 		false_flow_id = false_flow_id,
 		then_flow_id = then_flow_id,
-		condition = get_input_token(_vc, _vc.io.inputs[0].id),
+		condition = get_input_token(_vc, _vc.inputs[0].id),
 		use_self = false
 	}
 
@@ -98,13 +98,13 @@ static func get_for_token(_vc: HenVirtualCNode, _stack: Array) -> Dictionary:
 				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
-		id = _vc.identity.id,
-		vc_id = _vc.identity.id,
-		type = _vc.identity.sub_type,
+		id = _vc.id,
+		vc_id = _vc.id,
+		type = _vc.sub_type,
 		body_flow_id = body_flow_id,
 		then_flow_id = then_flow_id,
 		params = get_input_token_list(_vc),
-		index_name = _vc.io.outputs[0].name.to_snake_case(),
+		index_name = _vc.outputs[0].name.to_snake_case(),
 		use_self = false
 	}
 
@@ -119,12 +119,12 @@ static func get_flow_connection(_vc: HenVirtualCNode, _id: int) -> HenVCFlowConn
 
 
 static func get_macro_token(_vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
-	if _vc.state.invalid:
+	if _vc.invalid:
 		return INVALID_TOKEN
 
 	var flow_tokens: Array
 	# var input_flow: HenTypeFlowConnection = (ref.get_ref().input_ref as HenTypeCnode).get_flow_connection(_flow_id)
-	var input_ref: HenVirtualCNode = search_macro_input(_vc.references.res)
+	var input_ref: HenVirtualCNode = search_macro_input(_vc.res)
 
 	if not input_ref:
 		print('Macro input reference not found.')
@@ -136,13 +136,13 @@ static func get_macro_token(_vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		global.USE_MACRO_REF = true
 		global.MACRO_REF = _vc
-		global.MACRO_USE_SELF = _vc.identity.route_type != HenRouter.ROUTE_TYPE.STATE
+		global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
 		global.USE_MACRO_USE_SELF = true
 		flow_tokens = get_flow_tokens(input_flow.get_to(), input_flow.to_id)
 		global.USE_MACRO_USE_SELF = false
 
 	return {
-		vc_id = _vc.identity.id,
+		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.MACRO,
 		flow_tokens = flow_tokens,
 		use_self = false
@@ -151,13 +151,13 @@ static func get_macro_token(_vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
 
 static func search_macro_input(_func: HenSaveMacro) -> HenVirtualCNode:
 	for vc: HenVirtualCNode in _func.route.virtual_cnode_list:
-		if vc.identity.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
+		if vc.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
 			return vc
 	return null
 
 
 static func get_output_token_list(_vc: HenVirtualCNode) -> Array:
-	return _vc.io.outputs.map(
+	return _vc.outputs.map(
 		func(x: HenVCInOutData) -> Dictionary:
 			return {name = x.name, type = x.type}
 	)
@@ -166,7 +166,7 @@ static func get_output_token_list(_vc: HenVirtualCNode) -> Array:
 static func get_input_token_list(_vc: HenVirtualCNode, _get_name: bool = false) -> Array:
 	var input_tokens: Array = []
 
-	for input: HenVCInOutData in _vc.io.inputs:
+	for input: HenVCInOutData in _vc.inputs:
 		input_tokens.append(get_input_token(_vc, input.id))
 
 	return input_tokens
@@ -183,8 +183,8 @@ static func get_input_token(_vc: HenVirtualCNode, _id: int) -> Dictionary:
 
 	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_to_connection_from_vc(_vc):
 		if input_connection.to_id == _id:
-			var output_id_list: Array = input_connection.get_from().io.outputs.map(func(x): return x.id)
-			var input_id_list: Array = input_connection.get_to().io.inputs.map(func(x): return x.id)
+			var output_id_list: Array = input_connection.get_from().outputs.map(func(x): return x.id)
+			var input_id_list: Array = input_connection.get_to().inputs.map(func(x): return x.id)
 
 			if not output_id_list.has(input_connection.from_id) or not input_id_list.has(input_connection.to_id):
 				continue
@@ -193,18 +193,18 @@ static func get_input_token(_vc: HenVirtualCNode, _id: int) -> Dictionary:
 			break
 
 	if connection and connection.get_from():
-		match connection.get_from().identity.sub_type:
+		match connection.get_from().sub_type:
 			HenVirtualCNode.SubType.MACRO_INPUT:
 				if global.USE_MACRO_REF:
 					var data: Dictionary = get_input_token(global.MACRO_REF, connection.from_id)
 					return data
 			HenVirtualCNode.SubType.MACRO:
 				global.USE_MACRO_USE_SELF = true
-				global.MACRO_USE_SELF = _vc.identity.route_type != HenRouter.ROUTE_TYPE.STATE
+				global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
 				var data: Dictionary = {}
 
-				if connection.get_from().references.res:
-					data = get_input_token(connection.get_from().references.res, connection.to_id)
+				if connection.get_from().res:
+					data = get_input_token(connection.get_from().res, connection.to_id)
 				
 				# var data: Dictionary = (connection.get_from().ref.get_ref() as HenTypeMacro).output_ref.get_input_token(connection.to_id)
 				global.USE_MACRO_USE_SELF = false
@@ -217,7 +217,7 @@ static func get_input_token(_vc: HenVirtualCNode, _id: int) -> Dictionary:
 
 				if global.USE_MACRO_REF:
 					if data.has('value'):
-						data.value += '_' + str(global.MACRO_REF.identity.id)
+						data.value += '_' + str(global.MACRO_REF.id)
 
 				if input.is_ref:
 					data.is_ref = input.is_ref
@@ -228,12 +228,12 @@ static func get_input_token(_vc: HenVirtualCNode, _id: int) -> Dictionary:
 			type = HenVirtualCNode.SubType.IN_PROP,
 			prop_name = input.name,
 			value = input.code_value,
-			use_self = (_vc.identity.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
+			use_self = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
 		}
 
 		if global.USE_MACRO_REF:
 			if input.category == 'class_props':
-				data.value += '_' + str(global.MACRO_REF.identity.id)
+				data.value += '_' + str(global.MACRO_REF.id)
 
 		if input.is_ref:
 			data.is_ref = input.is_ref
@@ -271,7 +271,7 @@ static func get_input_token(_vc: HenVirtualCNode, _id: int) -> Dictionary:
 static func get_output_index(_vc: HenVirtualCNode, _id: int) -> int:
 	var idx: int = 0
 
-	for output: HenVCInOutData in _vc.io.outputs:
+	for output: HenVCInOutData in _vc.outputs:
 		if output.id == _id:
 			return idx
 
@@ -284,70 +284,70 @@ static func get_token(_vc: HenVirtualCNode, _id: int = 0) -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	var token: Dictionary = {
-		vc_id = _vc.identity.id,
-		type = _vc.identity.sub_type,
-		use_self = (_vc.identity.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
+		vc_id = _vc.id,
+		type = _vc.sub_type,
+		use_self = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
 	}
 
-	if _vc.identity.category:
-		token.category = _vc.identity.category
+	if _vc.category:
+		token.category = _vc.category
 
-	if _vc.state.invalid:
+	if _vc.invalid:
 		return INVALID_TOKEN
 
-	match _vc.identity.sub_type:
+	match _vc.sub_type:
 		HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
 			token.merge({
-				name = _vc.identity.name.to_snake_case() if not _vc.identity.name_to_code else _vc.identity.name_to_code.to_snake_case(),
+				name = _vc.name.to_snake_case() if not _vc.name_to_code else _vc.name_to_code.to_snake_case(),
 				params = get_input_token_list(_vc),
-				singleton_class = _vc.identity.singleton_class
+				singleton_class = _vc.singleton_class
 			})
 		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
-			if _vc.identity.sub_type == HenVirtualCNode.SubType.FUNC_FROM:
-				if not _vc.io.input_has_connection(_vc.io.inputs[0].id):
+			if _vc.sub_type == HenVirtualCNode.SubType.FUNC_FROM:
+				if not _vc.input_has_connection(_vc.inputs[0].id):
 					(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 					return INVALID_TOKEN
 
 			token.merge({
-				name = _vc.identity.name.to_snake_case() if not _vc.identity.name_to_code else _vc.identity.name_to_code.to_snake_case(),
+				name = _vc.name.to_snake_case() if not _vc.name_to_code else _vc.name_to_code.to_snake_case(),
 				params = get_input_token_list(_vc),
-				id = _id if _vc.io.outputs.size() > 1 else -1,
-				singleton_class = _vc.identity.singleton_class
+				id = _id if _vc.outputs.size() > 1 else -1,
+				singleton_class = _vc.singleton_class
 			})
 		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.LOCAL_VAR:
 			token.merge({
-				name = _vc.io.outputs[0].name.to_snake_case(),
+				name = _vc.outputs[0].name.to_snake_case(),
 			})
 		HenVirtualCNode.SubType.VAR_FROM:
 			token.merge({
 				ref = get_input_token(_vc, 0),
-				name = _vc.io.outputs[0].name.to_snake_case(),
+				name = _vc.outputs[0].name.to_snake_case(),
 			})
 		HenVirtualCNode.SubType.SET_VAR_FROM:
 			token.merge({
-				name = _vc.identity.name_to_code.to_snake_case(),
+				name = _vc.name_to_code.to_snake_case(),
 				ref = get_input_token(_vc, 0),
 				value = get_input_token(_vc, 1)
 			})
 		HenVirtualCNode.SubType.SET_VAR, HenVirtualCNode.SubType.SET_LOCAL_VAR:
 			token.merge({
-				name = _vc.io.inputs[0].name.to_snake_case(),
+				name = _vc.inputs[0].name.to_snake_case(),
 				value = get_input_token_list(_vc)[0],
 			})
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL, HenVirtualCNode.SubType.SIGNAL_ENTER:
 			token.merge({
-				param = _vc.io.outputs[_id].name.to_snake_case(),
+				param = _vc.outputs[_id].name.to_snake_case(),
 			})
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
 			return {
-				id = _vc.identity.id,
+				id = _vc.id,
 				type = HenVirtualCNode.SubType.FOR_ITEM,
-				name = _vc.io.outputs[0].name.to_snake_case(),
+				name = _vc.outputs[0].name.to_snake_case(),
 				use_self = true
 			}
 		HenVirtualCNode.SubType.IMG:
 			token.merge({
-				name = _vc.identity.name.to_snake_case(),
+				name = _vc.name.to_snake_case(),
 				params = get_input_token_list(_vc)
 			})
 		HenVirtualCNode.SubType.RAW_CODE:
@@ -356,39 +356,39 @@ static func get_token(_vc: HenVirtualCNode, _id: int = 0) -> Dictionary:
 			})
 		HenVirtualCNode.SubType.CONST:
 			token.merge({
-				singleton_class = _vc.identity.name,
-				name = _vc.identity.name_to_code
+				singleton_class = _vc.name,
+				name = _vc.name_to_code
 			})
 		HenVirtualCNode.SubType.EXPRESSION:
 			# check inputs
-			for input: HenVCInOutData in _vc.io.inputs.slice(1):
-				if not _vc.io.input_has_connection(input.id):
+			for input: HenVCInOutData in _vc.inputs.slice(1):
+				if not _vc.input_has_connection(input.id):
 					(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 
 			token.merge({
 				params = get_input_token_list(_vc, true),
-				exp = _vc.io.inputs[0].value
+				exp = _vc.inputs[0].value
 			})
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
 			token.merge({
 				params = get_input_token_list(_vc, true),
-				signal_name = (_vc.references.res as HenSaveSignalCallback).signal_name_to_code,
-				name = (_vc.references.res as HenSaveSignalCallback).name
+				signal_name = (_vc.res as HenSaveSignalCallback).signal_name_to_code,
+				name = (_vc.res as HenSaveSignalCallback).name
 			})
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 			token.merge({
 				params = get_input_token_list(_vc, true),
-				signal_name = (_vc.references.res as HenSaveSignalCallback).signal_name_to_code,
-				name = (_vc.references.res as HenSaveSignalCallback).name.to_snake_case()
+				signal_name = (_vc.res as HenSaveSignalCallback).signal_name_to_code,
+				name = (_vc.res as HenSaveSignalCallback).name.to_snake_case()
 			})
 		HenVirtualCNode.SubType.GET_FROM_PROP:
-			if not _vc.io.input_has_connection(_vc.io.inputs[0].id):
+			if not _vc.input_has_connection(_vc.inputs[0].id):
 				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 				return INVALID_TOKEN
 			
 			token.merge({
 				ref = get_input_token(_vc, 0),
-				name = _vc.io.outputs[0].name.to_snake_case(),
+				name = _vc.outputs[0].name.to_snake_case(),
 			})
 
 	return token

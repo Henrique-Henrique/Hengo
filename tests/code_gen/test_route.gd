@@ -20,7 +20,7 @@ func test_code_generation_with_state_route() -> void:
 	var vc_flow: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
-		route = state_vc.route_info.route
+		route = state_vc.route
 	})
 
 	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc_flow)).is_equal('_ref.test_void()')

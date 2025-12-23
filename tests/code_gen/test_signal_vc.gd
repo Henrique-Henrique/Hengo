@@ -73,7 +73,7 @@ func test_generates_signal_handler_with_data_connection() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	# Connect signal output to function input
 	signal_enter.add_flow_connection(0, 0, vc_input).add()
-	var output_param_id = (signal_enter.references.res as HenSaveSignalCallback).get_outputs(signal_enter.identity.sub_type)[0].id
+	var output_param_id = (signal_enter.res as HenSaveSignalCallback).get_outputs(signal_enter.sub_type)[0].id
 	vc_input.get_new_input_connection_command(0, output_param_id, signal_enter).add()
 	var code: String = code_generation.get_code(global.SAVE_DATA)
 

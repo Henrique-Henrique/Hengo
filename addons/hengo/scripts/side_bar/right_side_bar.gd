@@ -39,10 +39,10 @@ func update_elements(_route: HenRouteData) -> void:
 	var vc_root_arr: Array = []
 
 	for item: HenVirtualCNode in _route.virtual_cnode_list:
-		if HenUtils.is_circular_dependent(item.identity.sub_type) \
-		or item.identity.sub_type == HenVirtualCNode.SubType.STATE_START \
-		or item.identity.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL \
-		or item.identity.sub_type == HenVirtualCNode.SubType.VIRTUAL:
+		if HenUtils.is_circular_dependent(item.sub_type) \
+		or item.sub_type == HenVirtualCNode.SubType.STATE_START \
+		or item.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL \
+		or item.sub_type == HenVirtualCNode.SubType.VIRTUAL:
 			vc_root_arr.append(item)
 	
 	for item: HenVirtualCNode in vc_root_arr:
@@ -57,9 +57,9 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 		root = elements_tree.create_item(_parent)
 		_flow_head = root
 
-	root.set_text(0, _vc.identity.name)
-	root.set_icon(0, HenUtils.get_icon_for_subtype(_vc.identity.sub_type))
-	root.set_icon_modulate(0, HenUtils.get_color_for_subtype(_vc.identity.sub_type))
+	root.set_text(0, _vc.name)
+	root.set_icon(0, HenUtils.get_icon_for_subtype(_vc.sub_type))
+	root.set_icon_modulate(0, HenUtils.get_color_for_subtype(_vc.sub_type))
 	root.set_metadata(0, _vc)
 	
 	if _color is Color:
@@ -75,8 +75,8 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 		var to: HenVirtualCNode = flow_connection.get_to()
 		if to:
 			var output_index: int = 0
-			for i: int in range(_vc.flow.flow_outputs.size()):
-				if _vc.flow.flow_outputs[i].id == flow_connection.from_id:
+			for i: int in range(_vc.flow_outputs.size()):
+				if _vc.flow_outputs[i].id == flow_connection.from_id:
 					output_index = i
 					break
 			
@@ -84,8 +84,8 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 	
 	outgoing_nodes.sort_custom(func(a, b): return a.index < b.index)
 
-	var is_branching: bool = _vc.flow.flow_outputs.size() > 1
-	var has_multiple_outputs: bool = _vc.flow.flow_outputs.size() > 1
+	var is_branching: bool = _vc.flow_outputs.size() > 1
+	var has_multiple_outputs: bool = _vc.flow_outputs.size() > 1
 	
 	for data in outgoing_nodes:
 		var next_color: Variant = _color
@@ -114,4 +114,4 @@ func _on_tree_item_selected() -> void:
 
 		vc.select()
 		if global.CAM:
-			global.CAM.go_to_center(vc.visual.position)
+			global.CAM.go_to_center(vc.position)

@@ -41,17 +41,7 @@ func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
 
 	save_data.identity = _identity
 	save_data.counter = 1
-	save_data.virtual_cnode_list.append(
-		{
-			can_delete = false,
-			id = 1,
-			name = 'Stat State',
-			position = 'Vector2(0, 0)',
-			size = 'Vector2(99, 63)',
-			sub_type = 37,
-			type = 6
-		}
-	)
+
 	var base_route: HenRouteData = HenRouteData.create(
 		'Base',
 		HenRouter.ROUTE_TYPE.BASE,
@@ -59,6 +49,19 @@ func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
 	)
 
 	save_data.base_route = base_route
+	
+	HenVirtualCNode.instantiate_virtual_cnode(
+		{
+			can_delete = false,
+			id = 1,
+			name = 'Stat State',
+			position = 'Vector2(0, 0)',
+			size = 'Vector2(99, 63)',
+			sub_type = HenVirtualCNode.SubType.STATE_START,
+			type = HenVirtualCNode.Type.STATE_START,
+			route = base_route
+		}
+	)
 	
 	return save_data
 

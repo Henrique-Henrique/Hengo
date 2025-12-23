@@ -59,13 +59,13 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 
 static func search_input_ref(_func: HenSaveFunc) -> HenVirtualCNode:
 	for vc: HenVirtualCNode in _func.route.virtual_cnode_list:
-		if vc.identity.sub_type == HenVirtualCNode.SubType.FUNC_INPUT:
+		if vc.sub_type == HenVirtualCNode.SubType.FUNC_INPUT:
 			return vc
 	return null
 
 
 static func search_output_ref(_func: HenSaveFunc) -> HenVirtualCNode:
 	for vc: HenVirtualCNode in _func.route.virtual_cnode_list:
-		if vc.identity.sub_type == HenVirtualCNode.SubType.FUNC_OUTPUT:
+		if vc.sub_type == HenVirtualCNode.SubType.FUNC_OUTPUT:
 			return vc
 	return null

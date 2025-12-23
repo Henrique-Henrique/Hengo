@@ -14,7 +14,7 @@ func _on_hover() -> void:
 	hover.emit(id)
 
 
-func reset_signals(_flow: HenVCFlow):
+func reset_signals(_vc: HenVirtualCNode, _flow: HenVCFlow):
 	for signal_name: StringName in [
 		'hover'
 	]:
@@ -22,4 +22,4 @@ func reset_signals(_flow: HenVCFlow):
 			@warning_ignore('unsafe_method_access')
 			connection.signal.disconnect(connection.callable)
 
-	hover.connect(_flow.on_flow_input_hover)
+	hover.connect(_flow.on_flow_input_hover.bind(_vc))

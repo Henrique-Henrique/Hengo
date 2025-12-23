@@ -1,4 +1,5 @@
-class_name HenVirtualCNodeReference extends Resource
+@tool
+class_name HenVirtualCNodeReference extends HenVirtualCNodeIdentity
 
 @export var res: Resource
 

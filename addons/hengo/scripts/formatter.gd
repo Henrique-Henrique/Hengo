@@ -45,13 +45,13 @@ static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Arr
 	var root_boundings: Array[Rect2] = []
 
 	for vc: HenVirtualCNode in _virtual_cnode_list:
-		match vc.identity.sub_type:
+		match vc.sub_type:
 			HenVirtualCNode.SubType.VIRTUAL, \
 			HenVirtualCNode.SubType.STATE_START, \
 			HenVirtualCNode.SubType.STATE_EVENT, \
 			HenVirtualCNode.SubType.FUNC_INPUT, \
 			HenVirtualCNode.SubType.MACRO_INPUT:
-				var format_data: VCFormatData = get_format_data(vc.identity.id, data)
+				var format_data: VCFormatData = get_format_data(vc.id, data)
 				set_position(vc, Vector2.ZERO, data)
 				var bounding: Rect2 = start_format(vc, data, format_data)
 				virtual_roots.append(vc)
@@ -69,20 +69,20 @@ static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Arr
 			root_boundings[i] = calculate_tree_bounding(current_root, data)
 	
 	for vc: HenVirtualCNode in data.list_to_update:
-		vc.follow.call_deferred(vc.visual.position)
+		vc.follow.call_deferred(vc.position)
 
 	global.can_format_again = true
 
 static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_data: VCFormatData) -> Rect2:
-	var min_pos: Vector2 = _vc.visual.position
-	var max_pos: Vector2 = _vc.visual.position + _vc.visual.size
+	var min_pos: Vector2 = _vc.position
+	var max_pos: Vector2 = _vc.position + _vc.size
 
-	if _vc.flow.flow_outputs.size() == 1:
-		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(_vc.flow.flow_outputs[0].id)
+	if _vc.flow_outputs.size() == 1:
+		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(_vc.flow_outputs[0].id)
 		if flow_connection:
 			var from: HenVirtualCNode = flow_connection.get_from()
 			var to: HenVirtualCNode = flow_connection.get_to()
-			var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+			var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 			if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
 				to_format_data.has_multiple_parents = true
@@ -91,10 +91,10 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				set_position(to,
 					Vector2(
 						Vector2(
-							from.visual.position.x + from.visual.size.x / 2.,
-							max(_data.y_limit, from.visual.position.y + from.visual.size.y) + Y_GAP
+							from.position.x + from.size.x / 2.,
+							max(_data.y_limit, from.position.y + from.size.y) + Y_GAP
 						)
-					) + Vector2(-to.visual.size.x / 2., 0),
+					) + Vector2(-to.size.x / 2., 0),
 					_data
 				)
 				var vc_rect: Rect2 = start_map_inputs(to, _data)
@@ -106,16 +106,16 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				to_format_data.moved = true
 				to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 
-	elif _vc.flow.flow_outputs.size() > 1:
-		if _vc.flow.flow_outputs.size() % 2 == 0:
-			var half_size: int = int(_vc.flow.flow_outputs.size() / 2.)
+	elif _vc.flow_outputs.size() > 1:
+		if _vc.flow_outputs.size() % 2 == 0:
+			var half_size: int = int(_vc.flow_outputs.size() / 2.)
 			var flow_boundings: Array[Rect2] = []
 			var flow_nodes: Array[HenVirtualCNode] = []
 			var left_list: Array[HenVCFlow] = []
 			var right_list: Array[HenVCFlow] = []
 			var idx: int = 0
 
-			for flow_output: HenVCFlow in _vc.flow.flow_outputs:
+			for flow_output: HenVCFlow in _vc.flow_outputs:
 				if idx < half_size:
 					left_list.append(flow_output)
 				else:
@@ -124,19 +124,19 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 
 			left_list.reverse()
 			
-			var left_x_limit: float = (_vc.visual.position.x + _vc.visual.size.x / 2.) - MIDDLE_X_GAP
+			var left_x_limit: float = (_vc.position.x + _vc.size.x / 2.) - MIDDLE_X_GAP
 			idx = left_list.size() * -1
 			for flow_output: HenVCFlow in left_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
 					var to: HenVirtualCNode = flow_connection.get_to()
-					var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
 						to_format_data.has_multiple_parents = true
 					
 					if not to_format_data.moved:
-						set_position(to, Vector2(left_x_limit - to.visual.size.x, _vc.visual.position.y + _vc.visual.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
+						set_position(to, Vector2(left_x_limit - to.size.x, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						flow_boundings.append(child_bounding)
 						flow_nodes.append(to)
@@ -153,18 +153,18 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				idx += 1
 			
 			idx = right_list.size() * -1
-			var right_x_limit: float = (_vc.visual.position.x + _vc.visual.size.x / 2.) + MIDDLE_X_GAP
+			var right_x_limit: float = (_vc.position.x + _vc.size.x / 2.) + MIDDLE_X_GAP
 			for flow_output: HenVCFlow in right_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
 					var to: HenVirtualCNode = flow_connection.get_to()
-					var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
 						to_format_data.has_multiple_parents = true
 
 					if not to_format_data.moved:
-						set_position(to, Vector2(right_x_limit, _vc.visual.position.y + _vc.visual.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
+						set_position(to, Vector2(right_x_limit, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						flow_boundings.append(child_bounding)
 						flow_nodes.append(to)
@@ -180,16 +180,16 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 				idx += 1
 		else:
-			var half_size: int = int(_vc.flow.flow_outputs.size() / 2.)
-			var middle_output: HenVCFlow = _vc.flow.flow_outputs[half_size]
-			var max_side_y: float = _vc.visual.position.y + _vc.visual.size.y
+			var half_size: int = int(_vc.flow_outputs.size() / 2.)
+			var middle_output: HenVCFlow = _vc.flow_outputs[half_size]
+			var max_side_y: float = _vc.position.y + _vc.size.y
 			var idx: int = 0
 			var flow_boundings: Array[Rect2] = []
 			var flow_nodes: Array[HenVirtualCNode] = []
 			var left_list: Array[HenVCFlow] = []
 			var right_list: Array[HenVCFlow] = []
 
-			for flow_output: HenVCFlow in _vc.flow.flow_outputs:
+			for flow_output: HenVCFlow in _vc.flow_outputs:
 				if flow_output == middle_output:
 					idx += 1
 					continue
@@ -202,18 +202,18 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 			left_list.reverse()
 			
 			idx = left_list.size() * -1
-			var left_x_limit: float = (_vc.visual.position.x + _vc.visual.size.x / 2.) - MIDDLE_X_GAP
+			var left_x_limit: float = (_vc.position.x + _vc.size.x / 2.) - MIDDLE_X_GAP
 			for flow_output: HenVCFlow in left_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
 					var to: HenVirtualCNode = flow_connection.get_to()
-					var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
 						to_format_data.has_multiple_parents = true
 					
 					if not to_format_data.moved:
-						set_position(to, Vector2(left_x_limit - to.visual.size.x, _vc.visual.position.y + _vc.visual.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
+						set_position(to, Vector2(left_x_limit - to.size.x, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						max_side_y = max(max_side_y, child_bounding.position.y + child_bounding.size.y)
 						flow_boundings.append(child_bounding)
@@ -231,18 +231,18 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				idx += 1
 
 			idx = right_list.size() * -1
-			var right_x_limit: float = (_vc.visual.position.x + _vc.visual.size.x / 2.) + MIDDLE_X_GAP
+			var right_x_limit: float = (_vc.position.x + _vc.size.x / 2.) + MIDDLE_X_GAP
 			for flow_output: HenVCFlow in right_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
 					var to: HenVirtualCNode = flow_connection.get_to()
-					var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
 						to_format_data.has_multiple_parents = true
 
 					if not to_format_data.moved:
-						set_position(to, Vector2(right_x_limit, _vc.visual.position.y + _vc.visual.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
+						set_position(to, Vector2(right_x_limit, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						max_side_y = max(max_side_y, child_bounding.position.y + child_bounding.size.y)
 						flow_boundings.append(child_bounding)
@@ -264,14 +264,14 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 
 			# collect side flows and their boundings
 			idx = 0
-			for flow_output: HenVCFlow in _vc.flow.flow_outputs:
+			for flow_output: HenVCFlow in _vc.flow_outputs:
 				if flow_output == middle_output:
 					idx += 1
 					continue
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
 					var to: HenVirtualCNode = flow_connection.get_to()
-					var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 					if to_format_data.has_multiple_parents:
 						continue
 					side_flows.append(to)
@@ -299,7 +299,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 			var middle_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(middle_output.id)
 			if middle_connection:
 				var middle_to: HenVirtualCNode = middle_connection.get_to()
-				var middle_to_format_data: VCFormatData = get_format_data(middle_to.identity.id, _data)
+				var middle_to_format_data: VCFormatData = get_format_data(middle_to.id, _data)
 
 				if middle_to_format_data.flow_inputs_positioned_ids.has(middle_connection.to_id):
 					middle_to_format_data.has_multiple_parents = true
@@ -307,7 +307,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				if not middle_to_format_data.moved:
 					set_position(middle_to,
 						Vector2(
-							(_vc.visual.position.x + _vc.visual.size.x / 2.) - middle_to.visual.size.x / 2.,
+							(_vc.position.x + _vc.size.x / 2.) - middle_to.size.x / 2.,
 							max_side_y + MIDDLE_Y_GAP
 						),
 						_data
@@ -330,33 +330,33 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 
 
 static func move_flow_tree(_vc: HenVirtualCNode, _offset: Vector2, _data: FormatterData) -> void:
-	set_position(_vc, _vc.visual.position + _offset, _data)
+	set_position(_vc, _vc.position + _offset, _data)
 	start_map_inputs(_vc, _data)
 
-	for flow_output: HenVCFlow in _vc.flow.flow_outputs:
+	for flow_output: HenVCFlow in _vc.flow_outputs:
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
 			var to: HenVirtualCNode = flow_connection.get_to()
-			var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+			var to_format_data: VCFormatData = get_format_data(to.id, _data)
 			if to_format_data.has_multiple_parents:
 				continue
 			move_flow_tree(to, _offset, _data)
 
 
 static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) -> Rect2:
-	var min_pos: Vector2 = _vc.visual.position
-	var max_pos: Vector2 = _vc.visual.position + _vc.visual.size
+	var min_pos: Vector2 = _vc.position
+	var max_pos: Vector2 = _vc.position + _vc.size
 
 	# include inputs in bounding calculation
 	var input_rect: Rect2 = start_map_inputs(_vc, _data)
 	min_pos = min_pos.min(input_rect.position)
 	max_pos = max_pos.max(input_rect.position + input_rect.size)
 
-	for flow_output: HenVCFlow in _vc.flow.flow_outputs:
+	for flow_output: HenVCFlow in _vc.flow_outputs:
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
 			var to: HenVirtualCNode = flow_connection.get_to()
-			var to_format_data: VCFormatData = get_format_data(to.identity.id, _data)
+			var to_format_data: VCFormatData = get_format_data(to.id, _data)
 			if to_format_data.has_multiple_parents:
 				continue
 			var child_bounding: Rect2 = calculate_tree_bounding(to, _data)
@@ -368,31 +368,31 @@ static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) 
 static func start_map_inputs(_vc: HenVirtualCNode, _data: FormatterData, _rect: Rect2 = Rect2()) -> Rect2:
 	var connection_list: Array[HenVCConnectionData] = []
 
-	for input: HenVCInOutData in _vc.io.get_inputs():
-		var connection: HenVCConnectionData = _vc.io.get_input_connection(input.id, _vc)
+	for input: HenVCInOutData in _vc.get_inputs():
+		var connection: HenVCConnectionData = _vc.get_input_connection(input.id, _vc)
 		if connection:
 			connection_list.append(connection)
 
-	_data.y_limit = _vc.visual.position.y
+	_data.y_limit = _vc.position.y
 
-	var min_pos: Vector2 = _vc.visual.position
-	var max_pos: Vector2 = _vc.visual.position + _vc.visual.size
+	var min_pos: Vector2 = _vc.position
+	var max_pos: Vector2 = _vc.position + _vc.size
 
 	var idx = 0
 	for connection: HenVCConnectionData in connection_list:
 		var from: HenVirtualCNode = connection.get_from()
-		set_position(from, Vector2(connection.get_to().visual.position.x - from.visual.size.x - INPUT_X_GAP, _data.y_limit + idx * INPUT_Y_GAP), _data)
+		set_position(from, Vector2(connection.get_to().position.x - from.size.x - INPUT_X_GAP, _data.y_limit + idx * INPUT_Y_GAP), _data)
 		var input_bounding: Rect2 = start_map_inputs(from, _data)
 		min_pos = min_pos.min(input_bounding.position)
 		max_pos = max_pos.max(input_bounding.position + input_bounding.size)
-		_data.y_limit = max(_data.y_limit, from.visual.position.y + from.visual.size.y)
+		_data.y_limit = max(_data.y_limit, from.position.y + from.size.y)
 		idx += 1
 
 	return Rect2(min_pos, max_pos - min_pos)
 
 
 static func set_position(_vc: HenVirtualCNode, _position: Vector2, _data: FormatterData) -> void:
-	_vc.visual.position = _position
+	_vc.position = _position
 	if not _data.list_to_update.has(_vc):
 		_data.list_to_update.append(_vc)
 

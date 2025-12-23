@@ -44,35 +44,35 @@ static func save_new() -> void:
 	
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
-
 	var save_data: HenSaveData = global.SAVE_DATA
-	var script_id: StringName = str(save_data.identity.id)
-	var script_path: StringName = HenEnums.HENGO_SAVE_PATH + script_id
 
-	save_side_bar_item(save_data.variables, get_side_bar_item_path(script_id, SideBarItem.VARIABLES))
-	save_side_bar_item(save_data.functions, get_side_bar_item_path(script_id, SideBarItem.FUNCTIONS))
-	save_side_bar_item(save_data.signals, get_side_bar_item_path(script_id, SideBarItem.SIGNALS))
-	save_side_bar_item(save_data.signals_callback, get_side_bar_item_path(script_id, SideBarItem.SIGNALS_CALLBACK))
-	save_side_bar_item(save_data.macros, get_side_bar_item_path(script_id, SideBarItem.MACROS))
+	# var script_id: StringName = str(save_data.identity.id)
+	# var script_path: StringName = HenEnums.HENGO_SAVE_PATH + script_id
 
-	save_data.take_over_path(script_path + '/save.tres')
+	# save_side_bar_item(save_data.variables, get_side_bar_item_path(script_id, SideBarItem.VARIABLES))
+	# save_side_bar_item(save_data.functions, get_side_bar_item_path(script_id, SideBarItem.FUNCTIONS))
+	# save_side_bar_item(save_data.signals, get_side_bar_item_path(script_id, SideBarItem.SIGNALS))
+	# save_side_bar_item(save_data.signals_callback, get_side_bar_item_path(script_id, SideBarItem.SIGNALS_CALLBACK))
+	# save_side_bar_item(save_data.macros, get_side_bar_item_path(script_id, SideBarItem.MACROS))
+
+	# save_data.take_over_path(script_path + '/save.tres')
 	var result: int = ResourceSaver.save(save_data)
 	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.identity.id)) if result == OK else 'Erro saving' + str(save_data.identity.id))
 
 
-static func save_side_bar_item(_arr: Array, _path: StringName) -> void:
-	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+# static func save_side_bar_item(_arr: Array, _path: StringName) -> void:
+# 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 
-	if not DirAccess.dir_exists_absolute(_path):
-		DirAccess.make_dir_absolute(_path)
+# 	if not DirAccess.dir_exists_absolute(_path):
+# 		DirAccess.make_dir_absolute(_path)
 
-	for item: HenSaveResType in _arr:
-		item.take_over_path(_path + str(item.id) + '.tres')
-		var result: int = ResourceSaver.save(item)
-		toast.notify.call_deferred(
-			('Saved: ' + _path) if result == OK else 'Erro saving' + str(item.id),
-			HenToast.MessageType.SUCCESS if result == OK else HenToast.MessageType.ERROR
-		)
+# 	for item: HenSaveResType in _arr:
+# 		item.take_over_path(_path + str(item.id) + '.tres')
+# 		var result: int = ResourceSaver.save(item)
+# 		toast.notify.call_deferred(
+# 			('Saved: ' + _path) if result == OK else 'Erro saving' + str(item.id),
+# 			HenToast.MessageType.SUCCESS if result == OK else HenToast.MessageType.ERROR
+# 		)
 
 
 static func start_generate(_regenerate: bool = false) -> void:

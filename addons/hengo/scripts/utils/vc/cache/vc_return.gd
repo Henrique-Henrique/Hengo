@@ -11,15 +11,15 @@ func _init(_v_cnode: HenVirtualCNode) -> void:
 
 
 func add() -> void:
-	if not v_cnode.state.can_delete:
+	if not v_cnode.can_delete:
 		return
 
-	if not v_cnode.state.is_deleted:
+	if not v_cnode.is_deleted:
 		return
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	v_cnode.add_virtual_cnode_to_parent_route()
+	v_cnode.add_vc_to_parent_route()
 
 	# io
 	for connection: HenVCConnectionData in old_connections:
@@ -38,7 +38,7 @@ func add() -> void:
 	old_connections.clear()
 	old_flow_connections.clear()
 
-	v_cnode.state.is_deleted = false
+	v_cnode.is_deleted = false
 	v_cnode.show()
 	HenFormatter.format_current_route()
 
@@ -48,13 +48,13 @@ func add() -> void:
 
 
 func remove() -> void:
-	if not v_cnode.state.can_delete:
+	if not v_cnode.can_delete:
 		return
 	
-	if v_cnode.state.is_deleted:
+	if v_cnode.is_deleted:
 		return
 
-	v_cnode.remove_virtual_cnode_from_parent_route()
+	v_cnode.remove_vc_from_parent_route()
 
 	var remove_connections: Array = []
 	var remove_flow_connections: Array = []
@@ -93,7 +93,7 @@ func remove() -> void:
 		old_flow_connections.append(flow_connection)
 
 	v_cnode.hide()
-	v_cnode.state.is_deleted = true
+	v_cnode.is_deleted = true
 	HenFormatter.format_current_route()
 
 	if global.RIGHT_SIDE_BAR:

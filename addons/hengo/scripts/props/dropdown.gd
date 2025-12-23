@@ -22,7 +22,7 @@ func _on_pressed() -> void:
 			pass
 			# all transitions
 			# if router.current_route.type == router.ROUTE_TYPE.STATE:
-				# options = (router.current_route.get_ref() as HenVirtualCNode).flow.flow_outputs.map(func(x: HenVCFlow):
+				# options = (router.current_route.get_ref() as HenVirtualCNode).flow_outputs.map(func(x: HenVCFlow):
 				# 	return {name = x.name, ref = x})
 		'action':
 			var arr: Array = []

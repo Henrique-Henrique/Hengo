@@ -1,4 +1,5 @@
-class_name HenVirtualCNodeRoute extends Resource
+@tool
+class_name HenVirtualCNodeRoute extends HenVirtualCNodeVisual
 
 @export var route: HenRouteData
 @export var parent_route_id: String

@@ -7,18 +7,15 @@ class_name HenSaveData extends Resource
 @export var functions: Array[HenSaveFunc]
 @export var identity: HenSaveDataIdentity
 @export var signals: Array[HenSaveSignal]
-# @export var connections: Array[Dictionary]
-# @export var flow_connections: Array[Dictionary]
-@export var state_event_list: Array[Dictionary]
-@export var virtual_cnode_list: Array[Dictionary]
 @export var signals_callback: Array[HenSaveSignalCallback]
+@export var virtual_cnode_list: Array[Dictionary]
 @export var base_route: HenRouteData
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
 
 
 func get_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: int = _vc.identity.id
+	var node_id: int = _vc.id
 	if not connections.has(node_id):
 		return []
 	
@@ -38,7 +35,7 @@ func add_connection(_connection: HenVCConnectionData) -> void:
 	var nodes: Array = [_connection.get_from(), _connection.get_to()]
 	
 	for _vc: HenVirtualCNode in nodes:
-		var node_id: int = _vc.identity.id
+		var node_id: int = _vc.id
 		
 		if not connections.has(node_id):
 			connections[node_id] = {}
@@ -51,7 +48,7 @@ func remove_connection(_connection: HenVCConnectionData) -> void:
 	var nodes: Array = [_connection.get_from(), _connection.get_to()]
 	
 	for _vc: HenVirtualCNode in nodes:
-		var node_id: int = _vc.identity.id
+		var node_id: int = _vc.id
 		
 		if connections.has(node_id):
 			var vc_dict: Dictionary = connections[node_id]
@@ -59,7 +56,7 @@ func remove_connection(_connection: HenVCConnectionData) -> void:
 
 
 func get_flow_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: int = _vc.identity.id
+	var node_id: int = _vc.id
 	if not flow_connections.has(node_id):
 		return []
 	
@@ -68,7 +65,7 @@ func get_flow_connection_from_vc(_vc: HenVirtualCNode) -> Array:
 
 
 func get_outgoing_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: int = _vc.identity.id
+	var node_id: int = _vc.id
 	if not connections.has(node_id):
 		return []
 	
@@ -83,7 +80,7 @@ func get_outgoing_connection_from_vc(_vc: HenVirtualCNode) -> Array:
 
 
 func get_to_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: int = _vc.identity.id
+	var node_id: int = _vc.id
 	if not connections.has(node_id):
 		return []
 	
@@ -98,7 +95,7 @@ func get_to_connection_from_vc(_vc: HenVirtualCNode) -> Array:
 
 
 func get_outgoing_flow_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: int = _vc.identity.id
+	var node_id: int = _vc.id
 	if not flow_connections.has(node_id):
 		return []
 	
@@ -124,7 +121,7 @@ func add_flow_connection(_connection: HenVCFlowConnectionData) -> void:
 	var nodes: Array = [_connection.get_from(), _connection.get_to()]
 	
 	for _vc: HenVirtualCNode in nodes:
-		var node_id: int = _vc.identity.id
+		var node_id: int = _vc.id
 		
 		if not flow_connections.has(node_id):
 			flow_connections[node_id] = {}
@@ -137,7 +134,7 @@ func remove_flow_connection(_connection: HenVCFlowConnectionData) -> void:
 	var nodes: Array = [_connection.get_from(), _connection.get_to()]
 	
 	for _vc: HenVirtualCNode in nodes:
-		var node_id: int = _vc.identity.id
+		var node_id: int = _vc.id
 		
 		if flow_connections.has(node_id):
 			var vc_dict: Dictionary = flow_connections[node_id]

@@ -12,7 +12,6 @@ enum ROUTE_TYPE {
 }
 
 var current_route: HenRouteData
-var comment_reference: Dictionary = {}
 
 
 func get_current_route_v_cnodes() -> Array:
@@ -26,7 +25,6 @@ func change_route(_route: HenRouteData) -> void:
 	if current_route == _route:
 		_centralize_cam()
 		return
-
 
 	if current_route:
 		for v_cnode: HenVirtualCNode in get_current_route_v_cnodes():
@@ -59,4 +57,4 @@ func _centralize_cam() -> void:
 	if not vc:
 		return
 
-	global.CAM.go_to_center(vc.visual.position)
+	global.CAM.go_to_center(vc.position)

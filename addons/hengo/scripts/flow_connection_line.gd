@@ -108,18 +108,17 @@ func change_debug_line_color(_color: Color) -> void:
 
 
 func get_flow_io_position(_from: HenVirtualCNode, _is_input: bool, _target_idx: int) -> Vector2:
-	var parent_visual: HenVirtualCNodeVisual = _from.visual
-	var flows: Array = _from.flow.flow_inputs if _is_input else _from.flow.flow_outputs
+	var flows: Array = _from.flow_inputs if _is_input else _from.flow_outputs
 	
 	if _target_idx < 0 or _target_idx >= flows.size():
-		return parent_visual.position
+		return _from.position
 	
-	var y_pos: float = 0.0 if _is_input else parent_visual.size.y
+	var y_pos: float = 0.0 if _is_input else _from.size.y
 	
 	if flows.size() == 1:
-		var center_x: float = parent_visual.size.x / 2.0
+		var center_x: float = _from.size.x / 2.0
 		
-		return parent_visual.position + Vector2(center_x, y_pos)
+		return _from.position + Vector2(center_x, y_pos)
 
 	var spacing: float = 10.0
 	var total_flows_width: float = 0.0
@@ -132,13 +131,13 @@ func get_flow_io_position(_from: HenVirtualCNode, _is_input: bool, _target_idx: 
 	
 	total_flows_width += spacing * (flows.size() - 1)
 	
-	var current_x_offset: float = (parent_visual.size.x - total_flows_width) / 2.0
+	var current_x_offset: float = (_from.size.x - total_flows_width) / 2.0
 	
 	for i in range(flows.size()):
 		var current_item_width: float = widths[i]
 		if i == _target_idx:
 			var port_center_x: float = current_x_offset + (current_item_width / 2.0)
-			return parent_visual.position + Vector2(port_center_x, y_pos)
+			return _from.position + Vector2(port_center_x, y_pos)
 		current_x_offset += current_item_width + spacing
 	
-	return parent_visual.position
+	return _from.position

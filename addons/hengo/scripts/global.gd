@@ -15,7 +15,6 @@ var CONNECTION_GUIDE: HenConnectionGuide
 var HENGO_ROOT: HenHengoRoot
 var SIDE_BAR: HenSideBar
 var SIDE_PANEL: PanelContainer
-var SIDE_BAR_LIST_CACHE: Dictionary = {}
 var TOOLTIP: HenTooltip
 var CODE_PREVIEWER: HenCodePreview
 var GENERATE_PREVIEW_CODE: bool = false

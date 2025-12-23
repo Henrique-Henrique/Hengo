@@ -1,7 +1,7 @@
 [gd_resource type="Theme" load_steps=17 format=3 uid="uid://xxj7abqbehjg"]
 
-[ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="1_ghilx"]
-[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_revyj"]
+[ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/semibold.ttf" id="1_ghilx"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/regular.ttf" id="1_revyj"]
 [ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="2_xbr4r"]
 [ext_resource type="StyleBox" uid="uid://1ectx2h3jrw7" path="res://addons/hengo/resources/style_box/string.tres" id="4_el3g6"]
 [ext_resource type="StyleBox" uid="uid://dqrpq6o5w3yhs" path="res://addons/hengo/resources/style_box/panel_blur.tres" id="6_3mdrv"]

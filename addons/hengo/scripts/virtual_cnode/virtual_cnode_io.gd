@@ -1,24 +1,30 @@
-class_name HenVirtualCNodeIO extends Resource
+@tool
+class_name HenVirtualCNodeIO extends HenVirtualCNodeFlow
 
 @export var inputs: Array[HenVCInOutData]
 @export var outputs: Array[HenVCInOutData]
 @export var input_code_value_map: Dictionary = {}
 
-var references: HenVirtualCNodeReference
-var identity: HenVirtualCNodeIdentity
-var state: HenVirtualCNodeState
-
-signal cnode_need_update
 signal connection_request(_data: Dictionary)
 signal io_hovered(_context: Dictionary)
 signal expression_saved(_context: Dictionary)
 signal method_picker_requested(_context: Dictionary)
 
 
-func _init(_identity: HenVirtualCNodeIdentity, _state: HenVirtualCNodeState, _refs: HenVirtualCNodeReference) -> void:
-	identity = _identity
-	state = _state
-	references = _refs
+func my_test() -> void:
+	print(2)
+
+
+# func connect_io_signals(_list: Array[HenVCInOutData], _is_input: bool) -> void:
+# 	print('okok')
+# 	for io: HenVCInOutData in _list:
+# 		if not io.connection_request.is_connected(connection_request.emit): io.connection_request.connect(connection_request.emit)
+# 		if not io.io_hovered.is_connected(io_hovered.emit): io.io_hovered.connect(io_hovered.emit)
+# 		if not io.expression_saved.is_connected(expression_saved.emit): io.expression_saved.connect(expression_saved.emit)
+# 		if not io.method_picker_requested.is_connected(method_picker_requested.emit): io.method_picker_requested.connect(method_picker_requested.emit)
+
+# 		var met: Callable = _on_changed_code_value.bind(_is_input)
+# 		if not io.changed_code_value.is_connected(met): io.changed_code_value.connect(met)
 
 
 func get_input(_id: int) -> HenVCInOutData:
@@ -39,7 +45,7 @@ func get_output(_id: int) -> HenVCInOutData:
 
 func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _from: HenVirtualCNode) -> HenVCConnectionReturn:
 	var input: HenVCInOutData = get_input(_id)
-	var output: HenVCInOutData = _from.io.get_output(_from_id)
+	var output: HenVCInOutData = _from.get_output(_from_id)
 
 	if not input or not output:
 		return
@@ -79,7 +85,7 @@ func clear_in_out(_is_input: bool) -> void:
 
 func input_has_connection(_id: int) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
+	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		if input_connection.to_id == _id:
 			return true
 
@@ -88,7 +94,7 @@ func input_has_connection(_id: int) -> bool:
 
 func output_has_connection(_id: int) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	for output_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
+	for output_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		if output_connection.from_id == _id:
 			return true
 
@@ -97,7 +103,7 @@ func output_has_connection(_id: int) -> bool:
 
 func get_input_connection_command(_id: int) -> HenVCConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		if connection.to_id == _id:
 			return HenVCConnectionReturn.new(connection)
 
@@ -108,7 +114,7 @@ func remove_io_connection(_ref: HenVCInOutData) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var connection_remove: Array = []
 
-	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(identity.id):
+	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		if _ref.id == connection.to_id:
 			connection_remove.append(connection)
 
@@ -118,7 +124,7 @@ func remove_io_connection(_ref: HenVCInOutData) -> void:
 		if connection.line_ref:
 			connection.line_ref.visible = false
 
-		connection.get_from().io.cnode_need_update.emit()
+		connection.get_from().cnode_need_update.emit()
 	
 	cnode_need_update.emit()
 
@@ -127,7 +133,7 @@ func on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: HenVCInOutData) -> 
 	var is_input: bool = _is_input
 	var index_slice: int = 0
 
-	match identity.sub_type:
+	match sub_type:
 		HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.SIGNAL_ENTER, HenVirtualCNode.SubType.MACRO_INPUT:
 			if is_input: is_input = false
 			else: return
@@ -151,7 +157,7 @@ func on_in_out_moved(_is_input: bool, _pos: int, _in_ou_ref: HenVCInOutData) -> 
 func on_in_out_deleted(_is_input: bool, _in_ou_ref: HenVCInOutData) -> void:
 	var is_input: bool = _is_input
 
-	match identity.sub_type:
+	match sub_type:
 		HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.SIGNAL_ENTER, HenVirtualCNode.SubType.MACRO_INPUT:
 			if is_input: is_input = false
 			else: return
@@ -172,7 +178,7 @@ func on_in_out_deleted(_is_input: bool, _in_ou_ref: HenVCInOutData) -> void:
 func on_in_out_added(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
 	# restrict creation by sub_type
 	if _check_types:
-		match identity.sub_type:
+		match sub_type:
 			HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.MACRO_INPUT:
 				if not _is_input: return
 				_is_input = false
@@ -200,12 +206,6 @@ func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
 
 	var in_out: HenVCInOutData = HenVCInOutData.create(_data)
 
-	in_out.connection_request.connect(connection_request.emit)
-	in_out.io_hovered.connect(io_hovered.emit)
-	in_out.expression_saved.connect(expression_saved.emit)
-	in_out.method_picker_requested.connect(method_picker_requested.emit)
-	in_out.changed_code_value.connect(_on_changed_code_value.bind(_is_input))
-
 	if _is_input:
 		inputs.append(in_out)
 	else:
@@ -229,8 +229,8 @@ func on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenV
 
 
 func get_inputs() -> Array[HenVCInOutData]:
-	if references.res and references.res is HenSaveResType:
-		var new_data_list: Array = (references.res as HenSaveResType).get_inputs(identity.sub_type)
+	if res and res is HenSaveResType:
+		var new_data_list: Array = (res as HenSaveResType).get_inputs(sub_type)
 
 		for i: int in new_data_list.size():
 			var data: Dictionary = new_data_list[i]
@@ -251,8 +251,8 @@ func get_inputs() -> Array[HenVCInOutData]:
 
 
 func get_outputs() -> Array[HenVCInOutData]:
-	if references.res and references.res is HenSaveResType:
-		var new_data_list: Array = (references.res as HenSaveResType).get_outputs(identity.sub_type)
+	if res and res is HenSaveResType:
+		var new_data_list: Array = (res as HenSaveResType).get_outputs(sub_type)
 
 		for i: int in new_data_list.size():
 			var data: Dictionary = new_data_list[i]

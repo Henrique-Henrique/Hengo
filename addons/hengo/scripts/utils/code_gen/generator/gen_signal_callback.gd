@@ -48,6 +48,6 @@ static func get_signals_callback_code(_save_data: HenSaveData) -> String:
 
 static func search_signal_enter(_signal_callback: HenSaveSignalCallback) -> HenVirtualCNode:
 	for vc: HenVirtualCNode in _signal_callback.route.virtual_cnode_list:
-		if vc.identity.sub_type == HenVirtualCNode.SubType.SIGNAL_ENTER:
+		if vc.sub_type == HenVirtualCNode.SubType.SIGNAL_ENTER:
 			return vc
 	return null

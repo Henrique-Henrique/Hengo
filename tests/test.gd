@@ -1,15 +1,6 @@
 class_name HenTest extends RefCounted
 
 
-class CNodeDataCode:
-	var data: HenTypeCnode
-	var code: String
-
-	func _init(_data: HenTypeCnode, _code: String) -> void:
-		data = _data
-		code = _code
-
-
 class CNodeConnection:
 	var from: HenVirtualCNode
 	var to: HenVirtualCNode
