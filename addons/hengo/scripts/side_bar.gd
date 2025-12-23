@@ -1,6 +1,14 @@
 @tool
 class_name HenSideBar extends PanelContainer
 
+enum SideBarItem {
+	VARIABLES,
+	FUNCTIONS,
+	SIGNALS,
+	SIGNALS_CALLBACK,
+	MACROS
+}
+
 var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')

@@ -62,10 +62,11 @@ func get_real_ast_size() -> void:
 func _map_project_data(_id: StringName) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 
-	for type: int in HenSaver.SideBarItem.values():
-		var path: String = HenSaver.get_side_bar_item_path(_id, type)
+	for type: int in HenSideBar.SideBarItem.values():
+		var path: String = HenUtils.get_side_bar_item_path(_id, type)
 		
 		if not DirAccess.dir_exists_absolute(path):
+			print(path)
 			continue
 		
 		var dir: DirAccess = DirAccess.open(path)
@@ -82,15 +83,15 @@ func _map_project_data(_id: StringName) -> void:
 				
 				# match type to append resource to the correct ast array
 				match type:
-					HenSaver.SideBarItem.VARIABLES:
+					HenSideBar.SideBarItem.VARIABLES:
 						ast.variables.append(res)
-					HenSaver.SideBarItem.FUNCTIONS:
+					HenSideBar.SideBarItem.FUNCTIONS:
 						ast.functions.append(res)
-					HenSaver.SideBarItem.SIGNALS:
+					HenSideBar.SideBarItem.SIGNALS:
 						ast.signals.append(res)
-					HenSaver.SideBarItem.SIGNALS_CALLBACK:
+					HenSideBar.SideBarItem.SIGNALS_CALLBACK:
 						ast.signals_callback.append(res)
-					HenSaver.SideBarItem.MACROS:
+					HenSideBar.SideBarItem.MACROS:
 						ast.macros.append(res)
 
 	ast_list.set(_id, ast)

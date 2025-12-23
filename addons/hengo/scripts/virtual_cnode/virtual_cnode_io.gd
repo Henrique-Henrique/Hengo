@@ -229,6 +229,9 @@ func on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenV
 
 
 func get_inputs() -> Array[HenVCInOutData]:
+	var res = get_res()
+
+
 	if res and res is HenSaveResType:
 		var new_data_list: Array = (res as HenSaveResType).get_inputs(sub_type)
 
@@ -251,6 +254,7 @@ func get_inputs() -> Array[HenVCInOutData]:
 
 
 func get_outputs() -> Array[HenVCInOutData]:
+	var res = get_res()
 	if res and res is HenSaveResType:
 		var new_data_list: Array = (res as HenSaveResType).get_outputs(sub_type)
 

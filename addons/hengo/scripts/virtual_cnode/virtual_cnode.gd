@@ -66,44 +66,7 @@ enum SubType {
 }
 
 
-# @export var identity: HenVirtualCNodeIdentity
-# @export var visual: HenVirtualCNodeVisual
-# @export var state: HenVirtualCNodeState
-# @export var io: HenVirtualCNodeIO
-# @export var flow: HenVirtualCNodeFlow
-# @export var references: HenVirtualCNodeReference
-# @export var route_info: HenVirtualCNodeRoute
-
-# var renderer: HenVirtualCNodeRenderer
-# var pool: HenPool
-
 var cnode_instance: HenCnode = null
-
-# func _init() -> void:
-	# pool = HenPool.new()
-	# identity = HenVirtualCNodeIdentity.new()
-	# references = HenVirtualCNodeReference.new()
-	# state = HenVirtualCNodeState.new()
-	# visual = HenVirtualCNodeVisual.new()
-	# route_info = HenVirtualCNodeRoute.new()
-	# flow = HenVirtualCNodeFlow.new(identity)
-	# io = HenVirtualCNodeIO.new(identity, state, references)
-	# renderer = HenVirtualCNodeRenderer.new(
-	# 	state,
-	# 	visual,
-	# 	identity,
-	# 	io,
-	# 	flow,
-	# 	pool,
-	# 	references,
-	# )
-	# io.cnode_need_update.connect(update)
-	# flow.cnode_need_update.connect(update)
-	# # state.cnode_need_update.connect(update)
-	# io.connection_request.connect(on_node_connection_command_requested)
-	# io_hovered.connect(on_node_io_hovered)
-	# io.expression_saved.connect(on_expression_saved)
-	# io.method_picker_requested.connect(on_method_picker_requested)
 
 
 func show() -> void:
@@ -417,8 +380,30 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	if _config.has('invalid'):
 		v_cnode.invalid = _config.invalid
 
+	if _config.has('res_data'):
+		v_cnode.res_data = _config.get('res_data')
+
 	if _config.has('res'):
-		v_cnode.res = _config.get('res')
+		var res_obj: Resource = _config.get('res')
+		var res_type: int = -1
+		
+		if "id" in res_obj:
+			if res_obj is HenSaveVar:
+				res_type = HenSideBar.AddType.VAR
+			elif res_obj is HenSaveFunc:
+				res_type = HenSideBar.AddType.FUNC
+			elif res_obj is HenSaveSignalCallback:
+				res_type = HenSideBar.AddType.SIGNAL_CALLBACK
+			elif res_obj is HenSaveSignal:
+				res_type = HenSideBar.AddType.SIGNAL
+			elif res_obj is HenSaveMacro:
+				res_type = HenSideBar.AddType.MACRO
+		
+		if res_type != -1:
+			v_cnode.res_data = {
+				id = res_obj.get(&'id'),
+				type = res_type
+			}
 
 	if _config.has('category'):
 		v_cnode.category = _config.category
@@ -433,11 +418,10 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		SubType.VIRTUAL:
 			_route.virtual_sub_type_vc_list.append(v_cnode)
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
-			if v_cnode.res is HenSaveMacro:
-				var _ref: HenSaveMacro = v_cnode.res
-
-				_config.from_flow = _ref.flow_inputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
-				_config.to_flow = _ref.flow_outputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
+			var res = v_cnode.get_res()
+			if res is HenSaveMacro:
+				_config.from_flow = (res as HenSaveMacro).flow_inputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
+				_config.to_flow = (res as HenSaveMacro).flow_outputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
 
 	match v_cnode.type:
 		HenVirtualCNode.Type.DEFAULT:

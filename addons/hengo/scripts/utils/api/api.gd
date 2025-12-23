@@ -510,11 +510,13 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 		method_list = []
 	}
 
+	var save_data_id: StringName = _ast.identity.id
+
 	for func_data: HenSaveFunc in _ast.functions:
 		(func_category.method_list as Array).append({
 			_class_name = 'Function',
 			name = func_data.name,
-			data = func_data.get_cnode_data(_from_another_script)
+			data = func_data.get_cnode_data(save_data_id, _from_another_script)
 		})
 	
 	for var_data: HenSaveVar in _ast.variables:

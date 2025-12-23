@@ -11,9 +11,9 @@ class_name HenVCConnectionData extends Resource
 @export var input_ref: HenVCInOutData
 @export var output_ref: HenVCInOutData
 
-var line_ref: HenConnectionLine
-var from_old_pos: Vector2
-var to_old_pos: Vector2
+var line_ref: HenConnectionLine = null
+var from_old_pos: Vector2 = Vector2.ZERO
+var to_old_pos: Vector2 = Vector2.ZERO
 
 
 func _init() -> void:

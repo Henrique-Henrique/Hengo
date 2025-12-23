@@ -8,7 +8,6 @@ class_name HenSaveData extends Resource
 @export var identity: HenSaveDataIdentity
 @export var signals: Array[HenSaveSignal]
 @export var signals_callback: Array[HenSaveSignalCallback]
-@export var virtual_cnode_list: Array[Dictionary]
 @export var base_route: HenRouteData
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
@@ -184,6 +183,11 @@ func add_func() -> void:
 	if not f:
 		return
 	
+
+	if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
+		return
+	
+	f.save_data_id = identity.id
 	functions.append(f)
 
 

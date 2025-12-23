@@ -124,7 +124,7 @@ static func get_macro_token(_vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
 
 	var flow_tokens: Array
 	# var input_flow: HenTypeFlowConnection = (ref.get_ref().input_ref as HenTypeCnode).get_flow_connection(_flow_id)
-	var input_ref: HenVirtualCNode = search_macro_input(_vc.res)
+	var input_ref: HenVirtualCNode = search_macro_input(_vc.get_res())
 
 	if not input_ref:
 		print('Macro input reference not found.')
@@ -149,8 +149,11 @@ static func get_macro_token(_vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
 	}
 
 
-static func search_macro_input(_func: HenSaveMacro) -> HenVirtualCNode:
-	for vc: HenVirtualCNode in _func.route.virtual_cnode_list:
+static func search_macro_input(_macro: HenSaveMacro) -> HenVirtualCNode:
+	if not _macro:
+		return null
+
+	for vc: HenVirtualCNode in _macro.route.virtual_cnode_list:
 		if vc.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
 			return vc
 	return null
@@ -202,9 +205,10 @@ static func get_input_token(_vc: HenVirtualCNode, _id: int) -> Dictionary:
 				global.USE_MACRO_USE_SELF = true
 				global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
 				var data: Dictionary = {}
+				var res = connection.get_from().get_res()
 
-				if connection.get_from().res:
-					data = get_input_token(connection.get_from().res, connection.to_id)
+				if res:
+					data = get_input_token(res, connection.to_id)
 				
 				# var data: Dictionary = (connection.get_from().ref.get_ref() as HenTypeMacro).output_ref.get_input_token(connection.to_id)
 				global.USE_MACRO_USE_SELF = false
@@ -370,16 +374,26 @@ static func get_token(_vc: HenVirtualCNode, _id: int = 0) -> Dictionary:
 				exp = _vc.inputs[0].value
 			})
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION:
+			var res = _vc.get_res()
+
+			if not res:
+				return INVALID_TOKEN
+
 			token.merge({
 				params = get_input_token_list(_vc, true),
-				signal_name = (_vc.res as HenSaveSignalCallback).signal_name_to_code,
-				name = (_vc.res as HenSaveSignalCallback).name
+				signal_name = (res as HenSaveSignalCallback).signal_name_to_code,
+				name = (res as HenSaveSignalCallback).name
 			})
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			var res = _vc.get_res()
+
+			if not res:
+				return INVALID_TOKEN
+
 			token.merge({
 				params = get_input_token_list(_vc, true),
-				signal_name = (_vc.res as HenSaveSignalCallback).signal_name_to_code,
-				name = (_vc.res as HenSaveSignalCallback).name.to_snake_case()
+				signal_name = (res as HenSaveSignalCallback).signal_name_to_code,
+				name = (res as HenSaveSignalCallback).name.to_snake_case()
 			})
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			if not _vc.input_has_connection(_vc.inputs[0].id):

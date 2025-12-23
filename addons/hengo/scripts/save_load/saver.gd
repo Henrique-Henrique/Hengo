@@ -1,38 +1,10 @@
 @tool
 class_name HenSaver extends Node
 
-enum SideBarItem {
-	VARIABLES,
-	FUNCTIONS,
-	SIGNALS,
-	SIGNALS_CALLBACK,
-	MACROS
-}
-
 
 static func save() -> void:
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_started.emit()
 	(Engine.get_singleton(&'ThreadHelper') as HenThreadHelper).add_task(start_generate.bind(true))
-
-
-# returns the specific path based on the provided enum type
-static func get_side_bar_item_path(_id: StringName, type: SideBarItem) -> StringName:
-	var base_path: StringName = HenEnums.HENGO_SAVE_PATH + str(_id)
-	var suffix: String = ''
-
-	match type:
-		SideBarItem.VARIABLES:
-			suffix = '/variables/'
-		SideBarItem.FUNCTIONS:
-			suffix = '/functions/'
-		SideBarItem.SIGNALS:
-			suffix = '/signals/'
-		SideBarItem.SIGNALS_CALLBACK:
-			suffix = '/signals_callback/'
-		SideBarItem.MACROS:
-			suffix = '/macros/'
-
-	return base_path + suffix
 
 
 static func save_new() -> void:
@@ -45,34 +17,9 @@ static func save_new() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	var save_data: HenSaveData = global.SAVE_DATA
-
-	# var script_id: StringName = str(save_data.identity.id)
-	# var script_path: StringName = HenEnums.HENGO_SAVE_PATH + script_id
-
-	# save_side_bar_item(save_data.variables, get_side_bar_item_path(script_id, SideBarItem.VARIABLES))
-	# save_side_bar_item(save_data.functions, get_side_bar_item_path(script_id, SideBarItem.FUNCTIONS))
-	# save_side_bar_item(save_data.signals, get_side_bar_item_path(script_id, SideBarItem.SIGNALS))
-	# save_side_bar_item(save_data.signals_callback, get_side_bar_item_path(script_id, SideBarItem.SIGNALS_CALLBACK))
-	# save_side_bar_item(save_data.macros, get_side_bar_item_path(script_id, SideBarItem.MACROS))
-
-	# save_data.take_over_path(script_path + '/save.tres')
 	var result: int = ResourceSaver.save(save_data)
+	
 	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.identity.id)) if result == OK else 'Erro saving' + str(save_data.identity.id))
-
-
-# static func save_side_bar_item(_arr: Array, _path: StringName) -> void:
-# 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
-
-# 	if not DirAccess.dir_exists_absolute(_path):
-# 		DirAccess.make_dir_absolute(_path)
-
-# 	for item: HenSaveResType in _arr:
-# 		item.take_over_path(_path + str(item.id) + '.tres')
-# 		var result: int = ResourceSaver.save(item)
-# 		toast.notify.call_deferred(
-# 			('Saved: ' + _path) if result == OK else 'Erro saving' + str(item.id),
-# 			HenToast.MessageType.SUCCESS if result == OK else HenToast.MessageType.ERROR
-# 		)
 
 
 static func start_generate(_regenerate: bool = false) -> void:
@@ -127,7 +74,7 @@ static func _compile_script(_id: StringName) -> void:
 		push_error("Failed to load save data for compilation: " + save_path)
 		return
 	
-	recalculate_dependencies(save_data)
+	# recalculate_dependencies(save_data)
 	
 	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity.tres')
 	ResourceSaver.save(save_data.identity, identity_path)
@@ -155,22 +102,22 @@ static func recalculate_dependencies(save_data: HenSaveData) -> void:
 	save_data.identity.deps.clear()
 	save_data.identity.detailed_deps.clear()
 	
-	_process_cnodes_for_deps(save_data, save_data.virtual_cnode_list)
+	_process_cnodes_for_deps(save_data, save_data.base_route.virtual_cnode_list)
 	
 	for func_data: HenSaveFunc in save_data.functions:
-		_process_cnodes_for_deps(save_data, func_data.get_data().virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, func_data.route.virtual_cnode_list)
 		
 	for macro_data: HenSaveMacro in save_data.macros:
-		_process_cnodes_for_deps(save_data, macro_data.get_data().virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, macro_data.route.virtual_cnode_list)
 		
 	for sc_data: HenSaveSignalCallback in save_data.signals_callback:
-		_process_cnodes_for_deps(save_data, sc_data.get_data().virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, sc_data.route.virtual_cnode_list)
 
 
 static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) -> void:
-	for cnode_data: Dictionary in cnode_list:
-		if cnode_data.has('res') and cnode_data.res:
-			var res = cnode_data.res
+	for cnode: HenVirtualCNode in cnode_list:
+		var res = cnode.get_res()
+		if res:
 			var parent_id: String = HenUtils.get_res_parent_id(res)
 			save_data.add_dep(parent_id)
 			
@@ -183,5 +130,5 @@ static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) 
 					hash = dep_hash
 				})
 		
-		if cnode_data.has('virtual_cnode_list'):
-			_process_cnodes_for_deps(save_data, cnode_data.virtual_cnode_list)
+		if cnode.route and not cnode.route.virtual_cnode_list.is_empty():
+			_process_cnodes_for_deps(save_data, cnode.route.virtual_cnode_list)

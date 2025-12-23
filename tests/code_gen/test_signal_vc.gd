@@ -37,7 +37,7 @@ func test_generates_empty_signal_handler() -> void:
 # tests signal handler generation with a connected void function call
 func test_generates_signal_handler_with_flow_connection() -> void:
 	var signal_data: HenSaveSignalCallback = base_signal()
-	# Create a virtual node for a void function call
+	# Createavirtualnode for a void functioncall
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
@@ -57,7 +57,7 @@ func test_generates_signal_handler_with_flow_connection() -> void:
 	assert_bool(code.contains(expected_code)).is_true()
 
 
-# tests signal handler with data flow to a function parameter
+# # tests signal handler with data flow to a function parameter
 func test_generates_signal_handler_with_data_connection() -> void:
 	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
 	var signal_data: HenSaveSignalCallback = base_signal()
@@ -73,7 +73,7 @@ func test_generates_signal_handler_with_data_connection() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	# Connect signal output to function input
 	signal_enter.add_flow_connection(0, 0, vc_input).add()
-	var output_param_id = (signal_enter.res as HenSaveSignalCallback).get_outputs(signal_enter.sub_type)[0].id
+	var output_param_id = (signal_enter.get_res() as HenSaveSignalCallback).get_outputs(signal_enter.sub_type)[0].id
 	vc_input.get_new_input_connection_command(0, output_param_id, signal_enter).add()
 	var code: String = code_generation.get_code(global.SAVE_DATA)
 

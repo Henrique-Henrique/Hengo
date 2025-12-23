@@ -4,12 +4,12 @@ class_name HenVCFlowConnectionData extends Resource
 @export var id: int
 @export var from_id: int
 @export var to_id: int
-@export var from: Resource
-@export var to: Resource
+@export var from: HenVirtualCNode
+@export var to: HenVirtualCNode
 
-var line_ref: HenFlowConnectionLine
-var from_old_pos: Vector2
-var to_old_pos: Vector2
+var line_ref: HenFlowConnectionLine = null
+var from_old_pos: Vector2 = Vector2.ZERO
+var to_old_pos: Vector2 = Vector2.ZERO
 
 
 func _init() -> void:

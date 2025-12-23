@@ -390,3 +390,34 @@ static func is_circular_dependent(_sub_type: HenVirtualCNode.SubType) -> bool:
 			return true
 		
 	return false
+
+
+# returns the specific path based on the provided enum type
+static func get_side_bar_item_path(_save_data_id: StringName, _type: HenSideBar.SideBarItem) -> StringName:
+	var base_path: StringName = HenEnums.HENGO_SAVE_PATH + _save_data_id
+	var suffix: String = ''
+
+	match _type:
+		HenSideBar.SideBarItem.VARIABLES:
+			suffix = '/variables/'
+		HenSideBar.SideBarItem.FUNCTIONS:
+			suffix = '/functions/'
+		HenSideBar.SideBarItem.SIGNALS:
+			suffix = '/signals/'
+		HenSideBar.SideBarItem.SIGNALS_CALLBACK:
+			suffix = '/signals_callback/'
+		HenSideBar.SideBarItem.MACROS:
+			suffix = '/macros/'
+
+	return base_path + suffix
+
+
+static func save_side_bar_item(_res: Resource, _save_data_id: StringName, _type: HenSideBar.SideBarItem) -> bool:
+	var path: StringName = get_side_bar_item_path(_save_data_id, _type)
+
+	if not DirAccess.dir_exists_absolute(path):
+		DirAccess.make_dir_absolute(path)
+	
+	_res.take_over_path(path + str(_res.get(&'id')) + '.tres')
+	var result: int = ResourceSaver.save(_res)
+	return result == OK

@@ -33,17 +33,17 @@ static func set_global_config() -> void:
 
 	save_data.identity = identity
 	save_data.counter = 1
-	save_data.virtual_cnode_list.append(
-		{
-			can_delete = false,
-			id = 1,
-			name = 'Stat State',
-			position = 'Vector2(0, 0)',
-			size = 'Vector2(99, 63)',
-			sub_type = 37,
-			type = 6
-		}
-	)
+	# save_data.virtual_cnode_list.append(
+	# 	{
+	# 		can_delete = false,
+	# 		id = 1,
+	# 		name = 'Stat State',
+	# 		position = 'Vector2(0, 0)',
+	# 		size = 'Vector2(99, 63)',
+	# 		sub_type = 37,
+	# 		type = 6
+	# 	}
+	# )
 
 	var base_route: HenRouteData = HenRouteData.create(
 		'Base',

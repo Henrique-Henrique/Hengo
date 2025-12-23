@@ -25,9 +25,8 @@ func _init() -> void:
 		sub_type = HenVirtualCNode.SubType.FUNC_INPUT,
 		route = route,
 		position = Vector2.ZERO,
-		ref = self,
 		can_delete = false,
-		res = self,
+		res_data = get_res_data()
 	})
 
 	HenVirtualCNode.instantiate_virtual_cnode({
@@ -35,46 +34,31 @@ func _init() -> void:
 		sub_type = HenVirtualCNode.SubType.FUNC_OUTPUT,
 		route = route,
 		position = Vector2(400, 0),
-		ref = self,
 		can_delete = false,
-		res = self,
+		res_data = get_res_data()
 	})
+
+
+func get_res_data(_save_data_id: StringName = '') -> Dictionary:
+	var dt: Dictionary = {
+		id = id,
+		type = HenSideBar.AddType.FUNC,
+	}
+
+	if _save_data_id:
+		dt.save_data_id = _save_data_id
+
+	return dt
 
 
 func get_new_name() -> String:
 	return 'function_' + str(id)
 
 
-func get_data() -> Dictionary:
-	var input_data: Array[Dictionary] = []
-	var output_data: Array[Dictionary] = []
-	var lvars: Array[Dictionary] = []
-	var vc_list: Array[Dictionary] = []
-
-	for param: HenSaveParam in inputs:
-		input_data.append(param.get_data())
-
-	for param: HenSaveParam in outputs:
-		output_data.append(param.get_data())
-
-	for lv: HenSaveParam in local_vars:
-		lvars.append(lv.get_data())
-
-	for cnode: HenVirtualCNode in route.virtual_cnode_list:
-		vc_list.append(cnode.get_save(null))
-
-	return {
-		name = name,
-		id = id,
-		inputs = input_data,
-		outputs = output_data,
-		local_vars = lvars,
-		virtual_cnode_list = vc_list,
-	}
-
-
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
+
+	print(983)
 
 	match _type:
 		HenVirtualCNode.SubType.FUNC_OUTPUT:
@@ -115,12 +99,12 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	return arr
 
 
-func get_cnode_data(_from_another_script: bool = false) -> Dictionary:
+func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return {
 		name = name,
 		sub_type = HenVirtualCNode.SubType.USER_FUNC if not _from_another_script else HenVirtualCNode.SubType.FUNC_FROM,
 		route = router.current_route,
-		res = self,
+		res_data = get_res_data(_save_data_id)
 	}
