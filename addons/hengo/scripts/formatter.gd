@@ -403,5 +403,5 @@ static func format_current_route() -> void:
 	if not router.current_route:
 		return
 
-	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
-	thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind(router.get_current_route_v_cnodes()))
+	# thread_helper.add_task(HenFormatter.format_virtual_cnode_list.bind(router.get_current_route_v_cnodes()))
+	(func(): HenFormatter.format_virtual_cnode_list(router.get_current_route_v_cnodes())).call_deferred()

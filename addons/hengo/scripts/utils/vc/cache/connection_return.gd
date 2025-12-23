@@ -6,7 +6,7 @@ var connection: HenVCConnectionData
 var old_connections: Array
 
 
-func _init(_connection: HenVCConnectionData, _to_id=-1) -> void:
+func _init(_connection: HenVCConnectionData, _to_id = -1) -> void:
     connection = _connection
     to_id = _to_id
 
@@ -36,7 +36,6 @@ func add(_update: bool = true) -> void:
     if _update:
         connection.get_from().update()
         connection.get_to().update()
-    HenFormatter.format_current_route()
 
 
 func remove() -> void:
@@ -54,4 +53,3 @@ func remove() -> void:
 
     connection.get_from().update()
     connection.get_to().update()
-    HenFormatter.format_current_route()
