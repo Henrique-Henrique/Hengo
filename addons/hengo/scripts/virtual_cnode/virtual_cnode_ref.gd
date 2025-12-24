@@ -2,12 +2,11 @@
 class_name HenVirtualCNodeReference extends HenVirtualCNodeIdentity
 
 @export var res_data: Dictionary
-var cnode_ref: HenCnode
+
+var cnode_instance: HenCnode = null
 
 
 func get_res() -> Resource:
-	print(res_data)
-
 	if res_data.has('id') and res_data.has('type'):
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		var list: Array = []

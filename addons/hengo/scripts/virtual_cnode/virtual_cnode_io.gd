@@ -11,10 +11,6 @@ signal expression_saved(_context: Dictionary)
 signal method_picker_requested(_context: Dictionary)
 
 
-func my_test() -> void:
-	print(2)
-
-
 # func connect_io_signals(_list: Array[HenVCInOutData], _is_input: bool) -> void:
 # 	print('okok')
 # 	for io: HenVCInOutData in _list:

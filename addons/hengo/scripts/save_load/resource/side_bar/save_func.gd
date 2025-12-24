@@ -58,8 +58,6 @@ func get_new_name() -> String:
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
 
-	print(983)
-
 	match _type:
 		HenVirtualCNode.SubType.FUNC_OUTPUT:
 			for param: HenSaveParam in outputs:

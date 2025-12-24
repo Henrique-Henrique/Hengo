@@ -66,7 +66,6 @@ func _map_project_data(_id: StringName) -> void:
 		var path: String = HenUtils.get_side_bar_item_path(_id, type)
 		
 		if not DirAccess.dir_exists_absolute(path):
-			print(path)
 			continue
 		
 		var dir: DirAccess = DirAccess.open(path)

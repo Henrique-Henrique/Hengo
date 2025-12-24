@@ -163,7 +163,7 @@ func check_vc_action_menu() -> void:
 
 	if router.current_route and is_instance_valid(router.current_route.get('ref')):
 		for vc: HenVirtualCNode in router.get_current_route_v_cnodes():
-			if not vc.is_showing:
+			if not vc.is_showing_on_screen():
 				continue
 
 			var mouse_inside: bool = vc.check_mouse_inside()
@@ -173,5 +173,5 @@ func check_vc_action_menu() -> void:
 
 			vc.showing_action_menu = mouse_inside
 
-			if vc.showing_action_menu:
-				HenVCActionButtons.get_singleton().show_action(vc.cnode_ref)
+			# if vc.showing_action_menu:
+			# 	HenVCActionButtons.get_singleton().show_action(vc.cnode_ref)

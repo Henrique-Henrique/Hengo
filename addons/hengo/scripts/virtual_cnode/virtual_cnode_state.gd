@@ -13,3 +13,7 @@ signal cnode_need_update
 func on_side_bar_deleted(_deleted: bool) -> void:
 	invalid = _deleted
 	cnode_need_update.emit()
+
+
+func is_showing_on_screen() -> bool:
+	return is_showing and is_instance_valid(cnode_instance)

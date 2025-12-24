@@ -65,10 +65,6 @@ enum SubType {
 	SET_VAR_FROM = 51
 }
 
-
-var cnode_instance: HenCnode = null
-
-
 func show() -> void:
 	var cnode: HenCnode = HenPool.get_cnode_from_pool()
 	connect_signals()
@@ -102,21 +98,15 @@ func update() -> void:
 
 
 func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_rect()) -> void:
-	if not is_instance_valid(cnode_instance):
-		cnode_instance = null
-
 	is_showing = _rect.intersects(Rect2(
 		position,
 		size
 	))
-	if is_showing and cnode_instance == null:
+
+	if is_showing and not is_instance_valid(cnode_instance):
 		show()
 	elif not is_showing:
 		hide()
-
-
-func my_test() -> void:
-	print(4)
 
 
 func connect_signals() -> void:
@@ -293,7 +283,6 @@ func on_node_connection_command_requested(_context: Dictionary) -> void:
 
 
 func on_method_picker_requested(context: Dictionary) -> void:
-	print(444)
 	# triggers the internal logic to open the connection menu
 	request_io_connection(
 		context.io_type,
