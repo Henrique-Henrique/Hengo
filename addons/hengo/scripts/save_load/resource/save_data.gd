@@ -187,7 +187,6 @@ func add_func() -> void:
 	if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
 		return
 	
-	f.save_data_id = identity.id
 	functions.append(f)
 
 

@@ -8,13 +8,13 @@ var cnode_instance: HenCnode = null
 
 func get_res() -> Resource:
 	if res_data.has('id') and res_data.has('type'):
-		var global: HenGlobal = Engine.get_singleton(&'Global')
 		var list: Array = []
 
 		if res_data.has('save_data_id'):
 			var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+			
 			if map_deps.ast_list.has(res_data.save_data_id):
-				var ast = map_deps.ast_list[res_data.save_data_id]
+				var ast: HenMapDependencies.ProjectAST = map_deps.ast_list[res_data.save_data_id]
 				
 				match res_data.type:
 					HenSideBar.AddType.VAR:
@@ -28,6 +28,8 @@ func get_res() -> Resource:
 					HenSideBar.AddType.MACRO:
 						list = ast.macros
 		else:
+			var global: HenGlobal = Engine.get_singleton(&'Global')
+
 			match res_data.type:
 				HenSideBar.AddType.VAR:
 					list = global.SAVE_DATA.variables
