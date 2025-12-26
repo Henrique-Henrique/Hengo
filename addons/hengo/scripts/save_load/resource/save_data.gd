@@ -51,6 +51,11 @@ func remove_connection(_connection: HenVCConnectionData) -> void:
 		
 		if connections.has(node_id):
 			var vc_dict: Dictionary = connections[node_id]
+
+			if _connection.line_ref:
+				_connection.line_ref.visible = false
+				_connection.line_ref = null
+
 			vc_dict.erase(_connection.id)
 
 
@@ -137,6 +142,11 @@ func remove_flow_connection(_connection: HenVCFlowConnectionData) -> void:
 		
 		if flow_connections.has(node_id):
 			var vc_dict: Dictionary = flow_connections[node_id]
+			
+			if _connection.line_ref:
+				_connection.line_ref.visible = false
+				_connection.line_ref = null
+			
 			vc_dict.erase(_connection.id)
 
 

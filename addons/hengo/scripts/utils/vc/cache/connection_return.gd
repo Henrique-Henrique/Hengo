@@ -20,15 +20,10 @@ func add(_update: bool = true) -> void:
         if connection_ref.to_id != to_id:
             continue
 
-        if connection_ref.line_ref:
-            connection_ref.line_ref.visible = false
-            connection_ref.line_ref = null
-        
         remove_connection.append(connection_ref)
 
     for connection_ref: HenVCConnectionData in remove_connection:
         global.SAVE_DATA.remove_connection(connection_ref)
-
         old_connections.append(connection_ref)
 
     global.SAVE_DATA.add_connection(connection)
@@ -41,10 +36,6 @@ func add(_update: bool = true) -> void:
 func remove() -> void:
     var global: HenGlobal = Engine.get_singleton(&'Global')
     global.SAVE_DATA.remove_connection(connection)
-
-    if connection.line_ref:
-        connection.line_ref.visible = false
-        connection.line_ref = null
 
     for connection_ref: HenVCConnectionData in old_connections:
         global.SAVE_DATA.add_connection(connection_ref)

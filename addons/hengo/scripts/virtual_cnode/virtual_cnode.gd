@@ -65,9 +65,16 @@ enum SubType {
 	SET_VAR_FROM = 51
 }
 
+
+func _init() -> void:
+	if not cnode_need_update.is_connected(update): cnode_need_update.connect(update)
+	if not io_hovered.is_connected(on_node_io_hovered): io_hovered.connect(on_node_io_hovered)
+	if not expression_saved.is_connected(on_expression_saved): expression_saved.connect(on_expression_saved)
+	if not method_picker_requested.is_connected(on_method_picker_requested): method_picker_requested.connect(on_method_picker_requested)
+
+
 func show() -> void:
 	var cnode: HenCnode = HenPool.get_cnode_from_pool()
-	connect_signals()
 	if not cnode:
 		return
 
@@ -107,15 +114,6 @@ func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlob
 		show()
 	elif not is_showing:
 		hide()
-
-
-func connect_signals() -> void:
-	if not cnode_need_update.is_connected(update): cnode_need_update.connect(update)
-	if not connection_request.is_connected(on_node_connection_command_requested): connection_request.connect(on_node_connection_command_requested)
-	if not io_hovered.is_connected(on_node_io_hovered): io_hovered.connect(on_node_io_hovered)
-	if not expression_saved.is_connected(on_expression_saved): expression_saved.connect(on_expression_saved)
-	if not method_picker_requested.is_connected(on_method_picker_requested):
-		method_picker_requested.connect(on_method_picker_requested)
 
 
 func add_vc_to_parent_route() -> void:
@@ -251,35 +249,6 @@ func on_expression_saved(context: Dictionary) -> void:
 
 	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
 	update()
-
-
-func on_node_connection_command_requested(_context: Dictionary) -> void:
-	var connection: HenVCConnectionReturn
-	var r_data: CNodeInOutConnectionData = _context.remote_data
-	
-	# determines creation direction based on type
-	if _context.type == "in":
-		connection = get_new_input_connection_command(
-			_context.local_port_id,
-			r_data.in_out.id,
-			r_data.vc
-		)
-	else:
-		connection = (r_data.vc as HenVirtualCNode).get_new_input_connection_command(
-			r_data.in_out.id,
-			_context.local_port_id,
-			self
-		)
-
-	# executes history logic if connection command is valid
-	if connection:
-		var global: HenGlobal = Engine.get_singleton(&'Global')
-		
-		global.history.create_action('Add Connection')
-		global.history.add_do_method(connection.add)
-		global.history.add_do_reference(connection)
-		global.history.add_undo_method(connection.remove)
-		global.history.commit_action()
 
 
 func on_method_picker_requested(context: Dictionary) -> void:

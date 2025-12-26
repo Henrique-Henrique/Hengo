@@ -1,26 +1,25 @@
 @tool
 class_name HenVirtualCNodeIO extends HenVirtualCNodeFlow
 
-@export var inputs: Array[HenVCInOutData]
-@export var outputs: Array[HenVCInOutData]
+@export var inputs: Array[HenVCInOutData]:
+	set(value):
+		inputs = value
+		for io in inputs:
+			_connect_io(io, true)
+
+@export var outputs: Array[HenVCInOutData]:
+	set(value):
+		outputs = value
+		for io in outputs:
+			_connect_io(io, false)
+
 @export var input_code_value_map: Dictionary = {}
 
-signal connection_request(_data: Dictionary)
+# signal connection_request(_data: Dictionary)
 signal io_hovered(_context: Dictionary)
 signal expression_saved(_context: Dictionary)
 signal method_picker_requested(_context: Dictionary)
-
-
-# func connect_io_signals(_list: Array[HenVCInOutData], _is_input: bool) -> void:
-# 	print('okok')
-# 	for io: HenVCInOutData in _list:
-# 		if not io.connection_request.is_connected(connection_request.emit): io.connection_request.connect(connection_request.emit)
-# 		if not io.io_hovered.is_connected(io_hovered.emit): io.io_hovered.connect(io_hovered.emit)
-# 		if not io.expression_saved.is_connected(expression_saved.emit): io.expression_saved.connect(expression_saved.emit)
-# 		if not io.method_picker_requested.is_connected(method_picker_requested.emit): io.method_picker_requested.connect(method_picker_requested.emit)
-
-# 		var met: Callable = _on_changed_code_value.bind(_is_input)
-# 		if not io.changed_code_value.is_connected(met): io.changed_code_value.connect(met)
+signal changed_code_value(_id: int, _context: Dictionary)
 
 
 func get_input(_id: int) -> HenVCInOutData:
@@ -37,6 +36,37 @@ func get_output(_id: int) -> HenVCInOutData:
 			return output
 	
 	return null
+
+
+func on_connection_command_requested(_context: Dictionary) -> void:
+	var connection: HenVCConnectionReturn
+	var r_data: CNodeInOutConnectionData = _context.remote_data
+
+	# determines creation direction based on type
+	if _context.type == "in":
+		connection = create_input_connection(
+			_context.local_port_id,
+			r_data.in_out.id,
+			self,
+			r_data.vc
+		)
+	else:
+		connection = (r_data.vc as HenVirtualCNode).create_input_connection(
+			r_data.in_out.id,
+			_context.local_port_id,
+			r_data.vc,
+			self
+		)
+
+	# executes history logic if connection command is valid
+	if connection:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		
+		global.history.create_action('Add Connection')
+		global.history.add_do_method(connection.add)
+		global.history.add_do_reference(connection)
+		global.history.add_undo_method(connection.remove)
+		global.history.commit_action()
 
 
 func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _from: HenVirtualCNode) -> HenVCConnectionReturn:
@@ -202,10 +232,13 @@ func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
 
 	var in_out: HenVCInOutData = HenVCInOutData.create(_data)
 
+
 	if _is_input:
 		inputs.append(in_out)
 	else:
 		outputs.append(in_out)
+
+	_connect_io(in_out, _is_input)
 
 	return in_out
 
@@ -213,6 +246,8 @@ func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
 func _on_changed_code_value(_id: int, _context: Dictionary, _is_input: bool) -> void:
 	if _is_input:
 		input_code_value_map.set(_id, _context)
+	
+	changed_code_value.emit(_id, _context)
 
 
 func on_need_update() -> void:
@@ -271,3 +306,11 @@ func get_outputs() -> Array[HenVCInOutData]:
 			outputs.resize(new_data_list.size())
 	
 	return outputs
+
+
+func _connect_io(_io: HenVCInOutData, _is_input: bool) -> void:
+	if not _io.connection_request.is_connected(on_connection_command_requested): _io.connection_request.connect(on_connection_command_requested)
+	if not _io.io_hovered.is_connected(io_hovered.emit): _io.io_hovered.connect(io_hovered.emit)
+	if not _io.expression_saved.is_connected(expression_saved.emit): _io.expression_saved.connect(expression_saved.emit)
+	if not _io.method_picker_requested.is_connected(method_picker_requested.emit): _io.method_picker_requested.connect(method_picker_requested.emit)
+	if not _io.changed_code_value.is_connected(_on_changed_code_value): _io.changed_code_value.connect(_on_changed_code_value.bind(_is_input))

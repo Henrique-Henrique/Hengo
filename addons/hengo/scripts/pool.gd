@@ -18,6 +18,8 @@ static func get_line_from_pool() -> HenConnectionLine:
 
     for line: HenConnectionLine in (Engine.get_singleton(&'Global') as HenGlobal).connection_line_pool:
         if not line.visible:
+            line.from = null
+            line.to = null
             line.points = []
             line.position = Vector2.ZERO
             line.visible = true
@@ -36,6 +38,8 @@ static func get_flow_line_from_pool() -> HenFlowConnectionLine:
 
     for line: HenFlowConnectionLine in (Engine.get_singleton(&'Global') as HenGlobal).flow_connection_line_pool:
         if not line.visible:
+            line.from = null
+            line.to = null
             line.points = []
             line.position = Vector2.ZERO
             line.visible = true
