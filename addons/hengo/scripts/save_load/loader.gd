@@ -65,7 +65,7 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 	# showing current type
 	if not _headless:
 		show_class_name()
-		router.change_route(global.SAVE_DATA.base_route)
+		router.change_route(global.SAVE_DATA.get_base_route())
 
 	var end: int = Time.get_ticks_usec()
 		

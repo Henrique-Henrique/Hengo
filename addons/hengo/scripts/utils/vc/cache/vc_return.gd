@@ -19,7 +19,7 @@ func add() -> void:
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	v_cnode.add_vc_to_parent_route()
+	v_cnode.add_virtual_cnode_to_parent_route()
 
 	# io
 	for connection: HenVCConnectionData in old_connections:
@@ -33,6 +33,10 @@ func add() -> void:
 	old_flow_connections.clear()
 
 	v_cnode.is_deleted = false
+
+	if global.IS_HEADLESS:
+		return
+
 	global.CAM._check_virtual_cnodes()
 
 	if global.RIGHT_SIDE_BAR:
@@ -47,7 +51,7 @@ func remove() -> void:
 	if v_cnode.is_deleted:
 		return
 
-	v_cnode.remove_vc_from_parent_route()
+	v_cnode.remove_virtual_cnode_from_parent_route()
 
 	var remove_connections: Array = []
 	var remove_flow_connections: Array = []
@@ -71,8 +75,12 @@ func remove() -> void:
 		global.SAVE_DATA.remove_flow_connection(flow_connection)
 		old_flow_connections.append(flow_connection)
 
-	v_cnode.hide()
 	v_cnode.is_deleted = true
+
+	if global.IS_HEADLESS:
+		return
+	
+	v_cnode.hide()
 
 	global.CAM._check_virtual_cnodes()
 

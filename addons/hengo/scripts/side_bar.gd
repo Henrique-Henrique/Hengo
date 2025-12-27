@@ -134,7 +134,7 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 			await RenderingServer.frame_pre_draw
 
 			if obj is HenSaveResTypeWithRoute:
-				(Engine.get_singleton(&'Router') as HenRouter).change_route((obj as HenSaveResTypeWithRoute).route)
+				(Engine.get_singleton(&'Router') as HenRouter).change_route((obj as HenSaveResTypeWithRoute).get_route())
 			elif obj is HenRouteData:
 				(Engine.get_singleton(&'Router') as HenRouter).change_route(obj as HenRouteData)
 		2:
@@ -149,7 +149,7 @@ func update() -> void:
 	var base: TreeItem = root.create_child()
 
 	base.set_text(0, 'Base')
-	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.base_route)
+	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.get_base_route())
 
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Variables', AddType.VAR)

@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeRenderer extends HenVirtualCNodeIO
 
 

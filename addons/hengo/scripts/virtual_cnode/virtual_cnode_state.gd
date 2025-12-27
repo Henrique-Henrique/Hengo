@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeState extends HenVirtualCNodeReference
 
 @export var can_delete: bool = true

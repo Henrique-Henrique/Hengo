@@ -9,64 +9,28 @@ class_name HenSaveSignalCallback extends HenSaveResTypeWithRoute
 
 
 static func create() -> HenSaveSignalCallback:
-	var v: HenSaveSignalCallback = HenSaveSignalCallback.new()
-	return v
+	var signal_callback: HenSaveSignalCallback = HenSaveSignalCallback.new()
 
+	signal_callback.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	signal_callback.name = signal_callback.get_new_name()
+	signal_callback.type = &'Variant'
 
-func _init() -> void:
-	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
-	name = get_new_name()
-	type = &'Variant'
-
-	route = HenRouteData.create(
-		name,
-		HenRouter.ROUTE_TYPE.SIGNAL,
-		HenUtilsName.get_unique_name(),
-	)
+	var route: HenRouteData = signal_callback.create_route(HenRouter.ROUTE_TYPE.SIGNAL)
 
 	HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'signal',
 		sub_type = HenVirtualCNode.SubType.SIGNAL_ENTER,
 		route = route,
 		position = Vector2.ZERO,
-		res = self,
+		res_data = signal_callback.get_res_data(HenSideBar.AddType.SIGNAL_CALLBACK),
 		can_delete = false
 	})
+
+	return signal_callback
 
 
 func get_new_name() -> String:
 	return 'signal_callback_' + str(id)
-
-
-func get_data() -> Dictionary:
-	var param_data: Array[Dictionary] = []
-	var bind_param_data: Array[Dictionary] = []
-	var lvars: Array[Dictionary] = []
-	var vc_list: Array[Dictionary] = []
-
-	for param: HenSaveParam in params:
-		param_data.append(param.get_data())
-
-	for param: HenSaveParam in bind_params:
-		bind_param_data.append(param.get_data())
-
-	for lv: HenSaveParam in local_vars:
-		lvars.append(lv.get_data())
-
-	for cnode: HenVirtualCNode in route.virtual_cnode_list:
-		vc_list.append(cnode.get_save(null))
-
-	return {
-		name = name,
-		id = id,
-		params = param_data,
-		bind_params = bind_param_data,
-		type = type,
-		signal_name = signal_name,
-		signal_name_to_code = signal_name_to_code,
-		local_vars = lvars,
-		virtual_cnode_list = vc_list,
-	}
 
 
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
@@ -113,7 +77,7 @@ func get_connect_cnode_data() -> Dictionary:
 		fantasy_name = 'Signal -> ' + name,
 		sub_type = HenVirtualCNode.SubType.SIGNAL_CONNECTION,
 		route = router.current_route,
-		res = self
+		res_data = get_res_data(HenSideBar.AddType.SIGNAL_CALLBACK)
 	}
 
 
@@ -125,5 +89,5 @@ func get_diconnect_cnode_data() -> Dictionary:
 			fantasy_name = 'Dis Signal -> ' + name,
 			sub_type = HenVirtualCNode.SubType.SIGNAL_DISCONNECTION,
 			route = router.current_route,
-			res = self
+			res_data = get_res_data(HenSideBar.AddType.SIGNAL_CALLBACK)
 	}

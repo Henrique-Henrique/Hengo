@@ -15,11 +15,8 @@ class CNodeConnection:
 
 
 static func get_base_route() -> HenRouteData:
-	return HenRouteData.create(
-		'Base',
-		HenRouter.ROUTE_TYPE.BASE,
-		'0',
-	)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	return global.SAVE_DATA.get_route(global.SAVE_DATA.identity.id)
 
 
 static func set_global_config() -> void:
@@ -33,27 +30,18 @@ static func set_global_config() -> void:
 
 	save_data.identity = identity
 	save_data.counter = 1
-	# save_data.virtual_cnode_list.append(
-	# 	{
-	# 		can_delete = false,
-	# 		id = 1,
-	# 		name = 'Stat State',
-	# 		position = 'Vector2(0, 0)',
-	# 		size = 'Vector2(99, 63)',
-	# 		sub_type = 37,
-	# 		type = 6
-	# 	}
-	# )
 
 	var base_route: HenRouteData = HenRouteData.create(
 		'Base',
 		HenRouter.ROUTE_TYPE.BASE,
-		HenUtilsName.get_unique_name(),
+		save_data.identity.id,
 	)
 
-	save_data.base_route = base_route
+	save_data.add_route(save_data.identity.id, base_route)
+
 	global.SAVE_DATA = save_data
-	router.current_route = global.SAVE_DATA.base_route
+	global.IS_HEADLESS = true
+	router.current_route = global.SAVE_DATA.get_base_route()
 
 
 static func get_void(_route: HenRouteData = null) -> HenVirtualCNode:

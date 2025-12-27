@@ -35,7 +35,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 
 
 	# getting states
-	for _vc: HenVirtualCNode in _save_data.base_route.virtual_cnode_list:
+	for _vc: HenVirtualCNode in _save_data.get_base_route().virtual_cnode_list:
 		var flow_connections: Array = _save_data.get_flow_connection_from_vc(_vc)
 		
 		match _vc.sub_type:
@@ -55,7 +55,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 						})
 
 				_refs.states_data[_vc.name.to_snake_case()] = {
-					virtual_tokens = _parse_virtual_cnode(_vc.route.virtual_sub_type_vc_list),
+					virtual_tokens = _parse_virtual_cnode(_vc.get_route().virtual_sub_type_vc_list),
 					transitions = transitions
 				}
 			HenVirtualCNode.SubType.STATE_EVENT:
@@ -78,7 +78,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 	# search for override virtual inside macros
 	for macro: HenSaveMacro in _save_data.macros:
 		# TODO: this needs to map all macros??
-		map_vc(macro.route.virtual_cnode_list, _refs)
+		map_vc(macro.get_route().virtual_cnode_list, _refs)
 
 		# macro variables
 		for macro_var: HenSaveParam in macro.local_vars:
@@ -86,7 +86,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 				code += HenGeneratorVariable.get_var_code_from_param(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}), str(macro_ref.id))
 
 		# macro override virtuals
-		for v_cnode: HenVirtualCNode in macro.route.virtual_cnode_list:
+		for v_cnode: HenVirtualCNode in macro.get_route().virtual_cnode_list:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				for macro_ref: HenVirtualCNode in _refs.macro_vc_list:
 					global.USE_MACRO_REF = true

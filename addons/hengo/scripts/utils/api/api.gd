@@ -553,7 +553,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 		(macro_category.method_list as Array).append({
 			_class_name = 'Macro',
 			name = macro_data.name,
-			data = macro_data.get_cnode_data()
+			data = macro_data.get_cnode_data(save_data_id, _from_another_script)
 		})
 
 	arr.append(func_category)

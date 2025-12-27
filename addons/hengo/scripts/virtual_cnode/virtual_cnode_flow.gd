@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeFlow extends HenVirtualCNodeRoute
 
 @export var flow_inputs: Array[HenVCFlow]

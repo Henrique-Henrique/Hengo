@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeIdentity extends Resource
 
 @export var id: int

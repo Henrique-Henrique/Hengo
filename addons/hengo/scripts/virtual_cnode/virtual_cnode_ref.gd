@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeReference extends HenVirtualCNodeIdentity
 
 @export var res_data: Dictionary

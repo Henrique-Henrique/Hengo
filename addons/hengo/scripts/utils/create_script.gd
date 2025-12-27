@@ -42,14 +42,8 @@ func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
 	save_data.identity = _identity
 	save_data.counter = 1
 
-	var base_route: HenRouteData = HenRouteData.create(
-		'Base',
-		HenRouter.ROUTE_TYPE.BASE,
-		HenUtilsName.get_unique_name(),
-	)
+	var base_route: HenRouteData = save_data.create_route(save_data.identity.id, 'Base', HenRouter.ROUTE_TYPE.BASE)
 
-	save_data.base_route = base_route
-	
 	HenVirtualCNode.instantiate_virtual_cnode(
 		{
 			can_delete = false,

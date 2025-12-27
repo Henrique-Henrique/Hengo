@@ -96,7 +96,8 @@ func update() -> void:
 	if not cnode_instance:
 		return
 	var router: HenRouter = Engine.get_singleton(&'Router')
-	var should_hide: bool = is_deleted or (not parent_route_id or not router.current_route or parent_route_id != router.current_route.id)
+	var route: HenRouteData = get_route()
+	var should_hide: bool = is_deleted or (not route or not router.current_route or route.id != router.current_route.id)
 
 	hide()
 
@@ -114,14 +115,6 @@ func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlob
 		show()
 	elif not is_showing:
 		hide()
-
-
-func add_vc_to_parent_route() -> void:
-	add_virtual_cnode_to_parent_route(self)
-	
-
-func remove_vc_from_parent_route() -> void:
-	remove_virtual_cnode_from_parent_route(self)
 
 
 func get_input_by_idx(_idx: int) -> HenVCInOutData:
@@ -205,6 +198,8 @@ func request_io_connection(_io_type: StringName, _id: int, _mouse_pos: Vector2, 
 
 func on_cnode_double_click() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	var route: HenRouteData = get_route()
 
 	if route:
 		router.change_route(route)
@@ -395,17 +390,14 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Then', id = 1}))
 			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.STATE:
-			v_cnode.route = HenRouteData.create(
-				v_cnode.name,
-				HenRouter.ROUTE_TYPE.STATE,
-				HenUtilsName.get_unique_name(),
-			)
+			var global: HenGlobal = Engine.get_singleton(&'Global')
+			var route: HenRouteData = global.SAVE_DATA.create_route(str(v_cnode.id), v_cnode.name, HenRouter.ROUTE_TYPE.STATE)
 
 			if not _config.has('virtual_cnode_list'):
 				HenVirtualCNode.instantiate_virtual_cnode({
 					name = 'enter',
 					sub_type = HenVirtualCNode.SubType.VIRTUAL,
-					route = v_cnode.route,
+					route = route,
 					position = Vector2.ZERO,
 					can_delete = false
 				})
@@ -417,7 +409,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 						name = 'delta',
 						type = 'float'
 					}],
-					route = v_cnode.route,
+					route = route,
 					position = Vector2(400, 0),
 					can_delete = false
 				})

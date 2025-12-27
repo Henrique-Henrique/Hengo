@@ -3,7 +3,29 @@
 class_name HenSaveResTypeWithRoute extends HenSaveResType
 
 @export var local_vars: Array[HenSaveParam]
-@export var route: HenRouteData
+# @export var route: HenRouteData
+
+
+func get_route() -> HenRouteData:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	return global.SAVE_DATA.get_route(str(id))
+
+
+func create_route(_type: HenRouter.ROUTE_TYPE) -> HenRouteData:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	return global.SAVE_DATA.create_route(str(id), name, _type)
+
+
+func get_res_data(_type: HenSideBar.AddType, _save_data_id: StringName = '') -> Dictionary:
+	var dt: Dictionary = {
+		id = id,
+		type = _type,
+	}
+
+	if _save_data_id:
+		dt.save_data_id = _save_data_id
+
+	return dt
 
 
 # hides the default resource section properties

@@ -8,19 +8,12 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 
 
 static func create() -> HenSaveMacro:
-	var v: HenSaveMacro = HenSaveMacro.new()
-	return v
+	var macro: HenSaveMacro = HenSaveMacro.new()
 
+	macro.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	macro.name = macro.get_new_name()
 
-func _init() -> void:
-	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
-	name = get_new_name()
-
-	route = HenRouteData.create(
-        name,
-        HenRouter.ROUTE_TYPE.MACRO,
-        HenUtilsName.get_unique_name(),
-    )
+	var route: HenRouteData = macro.create_route(HenRouter.ROUTE_TYPE.MACRO)
 
 	HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'input',
@@ -28,7 +21,7 @@ func _init() -> void:
 		sub_type = HenVirtualCNode.SubType.MACRO_INPUT,
 		route = route,
 		position = Vector2.ZERO,
-		res = self,
+		res_data = macro.get_res_data(HenSideBar.AddType.MACRO),
 		can_delete = false
 	})
 
@@ -38,13 +31,11 @@ func _init() -> void:
 		sub_type = HenVirtualCNode.SubType.MACRO_OUTPUT,
 		route = route,
 		position = Vector2(400, 0),
-		res = self,
+		res_data = macro.get_res_data(HenSideBar.AddType.MACRO),
 		can_delete = false
 	})
 
-
-func get_data() -> Dictionary:
-	return {}
+	return macro
 
 
 func get_new_name() -> String:
@@ -73,7 +64,7 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	return arr
 
 
-func get_cnode_data() -> Dictionary:
+func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return {
@@ -81,5 +72,5 @@ func get_cnode_data() -> Dictionary:
 			type = HenVirtualCNode.Type.MACRO,
 			sub_type = HenVirtualCNode.SubType.MACRO,
 			route = router.current_route,
-			res = self
+			res_data = get_res_data(HenSideBar.AddType.MACRO, _save_data_id)
 	}

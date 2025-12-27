@@ -8,9 +8,33 @@ class_name HenSaveData extends Resource
 @export var identity: HenSaveDataIdentity
 @export var signals: Array[HenSaveSignal]
 @export var signals_callback: Array[HenSaveSignalCallback]
-@export var base_route: HenRouteData
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
+@export var routes: Dictionary
+
+
+func create_route(_id: StringName, _name: String, _type: HenRouter.ROUTE_TYPE) -> HenRouteData:
+	var route: HenRouteData = HenRouteData.create(
+		_name,
+		_type,
+		_id
+	)
+
+	add_route(_id, route)
+	return route
+
+
+func get_base_route() -> HenRouteData:
+	return routes.get(identity.id)
+
+
+func add_route(_id: StringName, _route: HenRouteData) -> void:
+	if not routes.has(_id):
+		routes.set(_id, _route)
+
+
+func get_route(_id: StringName) -> HenRouteData:
+	return routes.get(_id)
 
 
 func get_connection_from_vc(_vc: HenVirtualCNode) -> Array:

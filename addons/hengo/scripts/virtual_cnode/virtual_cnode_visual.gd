@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeVisual extends HenVirtualCNodeState
 
 @export var position: Vector2

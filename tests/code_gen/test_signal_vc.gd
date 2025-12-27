@@ -42,7 +42,7 @@ func test_generates_signal_handler_with_flow_connection() -> void:
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
 		inputs = [],
-		route = signal_data.route
+		route = signal_data.get_route()
 	})
 	
 	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(signal_data)
@@ -66,7 +66,7 @@ func test_generates_signal_handler_with_data_connection() -> void:
 		name = 'test_func',
 		sub_type = HenVirtualCNode.SubType.FUNC,
 		inputs = [ {id = 0, name = 'content', type = 'Variant'}],
-		route = signal_data.route
+		route = signal_data.get_route()
 	})
 	
 	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(signal_data)

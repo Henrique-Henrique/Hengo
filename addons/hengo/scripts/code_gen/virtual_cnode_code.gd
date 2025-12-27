@@ -153,9 +153,10 @@ static func search_macro_input(_macro: HenSaveMacro) -> HenVirtualCNode:
 	if not _macro:
 		return null
 
-	for vc: HenVirtualCNode in _macro.route.virtual_cnode_list:
+	for vc: HenVirtualCNode in _macro.get_route().virtual_cnode_list:
 		if vc.sub_type == HenVirtualCNode.SubType.MACRO_INPUT:
 			return vc
+
 	return null
 
 

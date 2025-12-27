@@ -6,19 +6,13 @@ class_name HenSaveFunc extends HenSaveResTypeWithRoute
 
 
 static func create() -> HenSaveFunc:
-	var v: HenSaveFunc = HenSaveFunc.new()
-	return v
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var my_func: HenSaveFunc = HenSaveFunc.new()
 
+	my_func.id = global.get_new_node_counter()
+	my_func.name = my_func.get_new_name()
 
-func _init() -> void:
-	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
-	name = get_new_name()
-
-	route = HenRouteData.create(
-		name,
-		HenRouter.ROUTE_TYPE.FUNC,
-		HenUtilsName.get_unique_name(),
-	)
+	var route: HenRouteData = my_func.create_route(HenRouter.ROUTE_TYPE.FUNC)
 
 	HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'input',
@@ -26,7 +20,7 @@ func _init() -> void:
 		route = route,
 		position = Vector2.ZERO,
 		can_delete = false,
-		res_data = get_res_data()
+		res_data = my_func.get_res_data(HenSideBar.AddType.FUNC)
 	})
 
 	HenVirtualCNode.instantiate_virtual_cnode({
@@ -35,20 +29,10 @@ func _init() -> void:
 		route = route,
 		position = Vector2(400, 0),
 		can_delete = false,
-		res_data = get_res_data()
+		res_data = my_func.get_res_data(HenSideBar.AddType.FUNC)
 	})
 
-
-func get_res_data(_save_data_id: StringName = '') -> Dictionary:
-	var dt: Dictionary = {
-		id = id,
-		type = HenSideBar.AddType.FUNC,
-	}
-
-	if _save_data_id:
-		dt.save_data_id = _save_data_id
-
-	return dt
+	return my_func
 
 
 func get_new_name() -> String:
@@ -104,5 +88,5 @@ func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = fals
 		name = name,
 		sub_type = HenVirtualCNode.SubType.USER_FUNC if not _from_another_script else HenVirtualCNode.SubType.FUNC_FROM,
 		route = router.current_route,
-		res_data = get_res_data(_save_data_id)
+		res_data = get_res_data(HenSideBar.AddType.FUNC, _save_data_id)
 	}

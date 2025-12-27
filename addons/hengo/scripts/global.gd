@@ -28,6 +28,9 @@ var CURRENT_INSPECTOR: HenInspector
 var RIGHT_SIDE_BAR: HenRightSideBar
 
 
+# CONFIG
+var IS_HEADLESS: bool = false
+
 # cnodes
 var can_make_connection: bool = false
 var connection_to_data: CNodeInOutConnectionData

@@ -102,21 +102,21 @@ static func recalculate_dependencies(save_data: HenSaveData) -> void:
 	save_data.identity.deps.clear()
 	save_data.identity.detailed_deps.clear()
 	
-	_process_cnodes_for_deps(save_data, save_data.base_route.virtual_cnode_list)
+	_process_cnodes_for_deps(save_data, save_data.get_base_route().virtual_cnode_list)
 	
 	for func_data: HenSaveFunc in save_data.functions:
-		_process_cnodes_for_deps(save_data, func_data.route.virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, func_data.get_route().virtual_cnode_list)
 		
 	for macro_data: HenSaveMacro in save_data.macros:
-		_process_cnodes_for_deps(save_data, macro_data.route.virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, macro_data.get_route().virtual_cnode_list)
 		
 	for sc_data: HenSaveSignalCallback in save_data.signals_callback:
-		_process_cnodes_for_deps(save_data, sc_data.route.virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, sc_data.get_route().virtual_cnode_list)
 
 
 static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) -> void:
-	for cnode: HenVirtualCNode in cnode_list:
-		var res = cnode.get_res()
+	for vc: HenVirtualCNode in cnode_list:
+		var res = vc.get_res()
 		if res:
 			var parent_id: String = HenUtils.get_res_parent_id(res)
 			save_data.add_dep(parent_id)
@@ -130,5 +130,7 @@ static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) 
 					hash = dep_hash
 				})
 		
-		if cnode.route and not cnode.route.virtual_cnode_list.is_empty():
-			_process_cnodes_for_deps(save_data, cnode.route.virtual_cnode_list)
+		var route: HenRouteData = vc.get_route()
+		
+		if route and not route.virtual_cnode_list.is_empty():
+			_process_cnodes_for_deps(save_data, route.virtual_cnode_list)

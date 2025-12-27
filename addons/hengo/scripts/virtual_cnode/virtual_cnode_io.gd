@@ -1,4 +1,5 @@
 @tool
+@abstract
 class_name HenVirtualCNodeIO extends HenVirtualCNodeFlow
 
 @export var inputs: Array[HenVCInOutData]:
