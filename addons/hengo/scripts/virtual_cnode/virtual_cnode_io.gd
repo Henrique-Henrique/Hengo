@@ -16,7 +16,6 @@ class_name HenVirtualCNodeIO extends HenVirtualCNodeFlow
 
 @export var input_code_value_map: Dictionary = {}
 
-# signal connection_request(_data: Dictionary)
 signal io_hovered(_context: Dictionary)
 signal expression_saved(_context: Dictionary)
 signal method_picker_requested(_context: Dictionary)

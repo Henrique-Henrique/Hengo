@@ -9,7 +9,7 @@ func _init(_connection: HenVCFlowConnectionData) -> void:
 	connection = _connection
 
 
-func add(_update: bool = true) -> void:
+func add() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var from_connections: Array = global.SAVE_DATA.get_flow_connection_from_vc(connection.get_from())
 	var remove_connection: Array = []
@@ -29,9 +29,11 @@ func add(_update: bool = true) -> void:
 
 	global.SAVE_DATA.add_flow_connection(connection)
 
-	if _update:
-		connection.get_from().update()
-		connection.get_to().update()
+	if global.IS_HEADLESS:
+		return
+	
+	connection.get_to().update()
+	connection.get_from().update()
 
 
 func remove() -> void:
@@ -43,5 +45,8 @@ func remove() -> void:
 
 	old_connections.clear()
 
-	connection.get_from().update()
+	if global.IS_HEADLESS:
+		return
+	
 	connection.get_to().update()
+	connection.get_from().update()

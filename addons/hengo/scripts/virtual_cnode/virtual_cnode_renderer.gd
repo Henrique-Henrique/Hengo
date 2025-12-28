@@ -14,12 +14,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 	_cnode.selected = false
 	_cnode.moving = false
 
-	var res = _vc.get_res()
-
-	if res:
-		_cnode.change_name(res.get(&'name'))
-	else:
-		_cnode.change_name(name)
+	_cnode.change_name(_vc.get_vc_name())
 
 	var idx: int = 0
 

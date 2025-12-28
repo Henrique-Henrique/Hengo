@@ -11,7 +11,7 @@ func _init(_connection: HenVCConnectionData, _to_id = -1) -> void:
     to_id = _to_id
 
 
-func add(_update: bool = true) -> void:
+func add() -> void:
     # removing old inputs
     var global: HenGlobal = Engine.get_singleton(&'Global')
     var remove_connection: Array = []
@@ -28,9 +28,11 @@ func add(_update: bool = true) -> void:
 
     global.SAVE_DATA.add_connection(connection)
 
-    if _update:
-        connection.get_from().update()
-        connection.get_to().update()
+    if global.IS_HEADLESS:
+        return
+    
+    connection.get_to().update()
+    connection.get_from().update()
 
 
 func remove() -> void:
@@ -42,5 +44,8 @@ func remove() -> void:
 
     old_connections.clear()
 
-    connection.get_from().update()
+    if global.IS_HEADLESS:
+        return
+    
     connection.get_to().update()
+    connection.get_from().update()

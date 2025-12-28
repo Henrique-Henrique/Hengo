@@ -96,7 +96,7 @@ func update() -> void:
 	if not cnode_instance:
 		return
 	var router: HenRouter = Engine.get_singleton(&'Router')
-	var route: HenRouteData = get_route()
+	var route: HenRouteData = get_parent_route()
 	var should_hide: bool = is_deleted or (not route or not router.current_route or route.id != router.current_route.id)
 
 	hide()
@@ -283,6 +283,15 @@ func set_position_transition(_position: Vector2) -> void:
 
 func get_id() -> int:
 	return id
+
+
+func get_vc_name() -> String:
+	var res = get_res()
+
+	if res:
+		return res.get(&'name')
+	else:
+		return name
 
 
 func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:

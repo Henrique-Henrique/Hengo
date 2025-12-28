@@ -48,13 +48,13 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 
 				# getting transition
 				for flow_connection: HenVCFlowConnectionData in flow_connections:
-					if flow_connection.to:
+					if flow_connection.get_to():
 						transitions.append({
-							name = 'flow_connection.name',
-							to_state_name = flow_connection.get_to().name
+							name = flow_connection.get_to().get_vc_name(),
+							to_state_name = flow_connection.get_to().get_vc_name()
 						})
 
-				_refs.states_data[_vc.name.to_snake_case()] = {
+				_refs.states_data[_vc.get_vc_name().to_snake_case()] = {
 					virtual_tokens = _parse_virtual_cnode(_vc.get_route().virtual_sub_type_vc_list),
 					transitions = transitions
 				}

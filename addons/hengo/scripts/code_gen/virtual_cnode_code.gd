@@ -314,7 +314,7 @@ static func get_token(_vc: HenVirtualCNode, _id: int = 0) -> Dictionary:
 					return INVALID_TOKEN
 
 			token.merge({
-				name = _vc.name.to_snake_case() if not _vc.name_to_code else _vc.name_to_code.to_snake_case(),
+				name = _vc.get_vc_name().to_snake_case() if not _vc.name_to_code else _vc.name_to_code.to_snake_case(),
 				params = get_input_token_list(_vc),
 				id = _id if _vc.outputs.size() > 1 else -1,
 				singleton_class = _vc.singleton_class

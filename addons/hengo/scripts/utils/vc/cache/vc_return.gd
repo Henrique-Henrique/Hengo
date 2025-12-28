@@ -29,19 +29,26 @@ func add() -> void:
 	for connection: HenVCFlowConnectionData in old_flow_connections:
 		global.SAVE_DATA.add_flow_connection(connection)
 
-	old_connections.clear()
-	old_flow_connections.clear()
-
 	v_cnode.is_deleted = false
 
-	if global.IS_HEADLESS:
-		return
 
-	global.CAM._check_virtual_cnodes()
+	if not global.IS_HEADLESS:
+		v_cnode.check_visibility()
 
-	if global.RIGHT_SIDE_BAR:
-		var router: HenRouter = Engine.get_singleton(&'Router')
-		global.RIGHT_SIDE_BAR.update(router.current_route)
+		for connection: HenVCConnectionData in old_connections:
+			connection.get_to().update()
+			connection.get_from().update()
+		
+		for flow_connection: HenVCFlowConnectionData in old_flow_connections:
+			flow_connection.get_to().update()
+			flow_connection.get_from().update()
+		
+		if global.RIGHT_SIDE_BAR:
+			var router: HenRouter = Engine.get_singleton(&'Router')
+			global.RIGHT_SIDE_BAR.update(router.current_route)
+
+	old_connections.clear()
+	old_flow_connections.clear()
 
 
 func remove() -> void:
@@ -82,7 +89,13 @@ func remove() -> void:
 	
 	v_cnode.hide()
 
-	global.CAM._check_virtual_cnodes()
+	for connection: HenVCConnectionData in remove_connections:
+		connection.get_to().update()
+		connection.get_from().update()
+	
+	for flow_connection: HenVCFlowConnectionData in remove_flow_connections:
+		flow_connection.get_to().update()
+		flow_connection.get_from().update()
 
 	if global.RIGHT_SIDE_BAR:
 		var router: HenRouter = Engine.get_singleton(&'Router')

@@ -9,8 +9,8 @@ class_name HenSaveDataIdentity extends Resource
 
 
 static func create(_id: StringName, _type: StringName, _name: String) -> HenSaveDataIdentity:
-    var identity: HenSaveDataIdentity = HenSaveDataIdentity.new()
-    identity.id = _id
-    identity.type = _type
-    identity.name = _name
-    return identity
+	var identity: HenSaveDataIdentity = HenSaveDataIdentity.new()
+	identity.id = _id
+	identity.type = _type
+	identity.name = _name
+	return identity
