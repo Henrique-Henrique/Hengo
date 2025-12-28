@@ -21,8 +21,8 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 	_cnode.update_title_color(sub_type)
 
 	# sync
-	var _inputs: Array[HenVCInOutData] = get_inputs()
-	var _outputs: Array[HenVCInOutData] = get_outputs()
+	var _inputs: Array[HenVCInOutData] = get_inputs(global.SAVE_DATA)
+	var _outputs: Array[HenVCInOutData] = get_outputs(global.SAVE_DATA)
 
 
 	# clearing inputs and change to new
@@ -97,11 +97,11 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 			connection.line_ref = null
 			continue
 
-		var output_arr: Array[HenVCInOutData] = from.get_outputs()
-		var input_arr: Array[HenVCInOutData] = to.get_inputs()
+		var output_arr: Array[HenVCInOutData] = from.get_outputs(global.SAVE_DATA)
+		var input_arr: Array[HenVCInOutData] = to.get_inputs(global.SAVE_DATA)
 
-		var output_ref: HenVCInOutData = from.get_output(connection.from_id)
-		var input_ref: HenVCInOutData = to.get_input(connection.to_id)
+		var output_ref: HenVCInOutData = from.get_output(connection.from_id, global.SAVE_DATA)
+		var input_ref: HenVCInOutData = to.get_input(connection.to_id, global.SAVE_DATA)
 
 		var from_idx: int = output_arr.find(output_ref)
 		var to_idx: int = input_arr.find(input_ref)

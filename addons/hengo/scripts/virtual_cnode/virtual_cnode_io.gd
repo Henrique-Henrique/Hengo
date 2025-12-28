@@ -22,16 +22,16 @@ signal method_picker_requested(_context: Dictionary)
 signal changed_code_value(_id: int, _context: Dictionary)
 
 
-func get_input(_id: int) -> HenVCInOutData:
-	for input: HenVCInOutData in get_inputs():
+func get_input(_id: int, _save_data: HenSaveData) -> HenVCInOutData:
+	for input: HenVCInOutData in get_inputs(_save_data):
 		if input.id == _id:
 			return input
 	
 	return null
 
 
-func get_output(_id: int) -> HenVCInOutData:
-	for output: HenVCInOutData in get_outputs():
+func get_output(_id: int, _save_data: HenSaveData) -> HenVCInOutData:
+	for output: HenVCInOutData in get_outputs(_save_data):
 		if output.id == _id:
 			return output
 	
@@ -70,8 +70,9 @@ func on_connection_command_requested(_context: Dictionary) -> void:
 
 
 func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _from: HenVirtualCNode) -> HenVCConnectionReturn:
-	var input: HenVCInOutData = get_input(_id)
-	var output: HenVCInOutData = _from.get_output(_from_id)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var input: HenVCInOutData = get_input(_id, global.SAVE_DATA)
+	var output: HenVCInOutData = _from.get_output(_from_id, global.SAVE_DATA)
 
 	if not input or not output:
 		return
@@ -109,25 +110,23 @@ func clear_in_out(_is_input: bool) -> void:
 		outputs.clear()
 
 
-func input_has_connection(_id: int) -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
+func input_has_connection(_id: int, _save_data: HenSaveData) -> bool:
+	for input_connection: HenVCConnectionData in _save_data.get_connections_by_id(id):
 		if input_connection.to_id == _id:
 			return true
 
 	return false
 
 
-func output_has_connection(_id: int) -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	for output_connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
+func output_has_connection(_id: int, _save_data: HenSaveData) -> bool:
+	for output_connection: HenVCConnectionData in _save_data.get_connections_by_id(id):
 		if output_connection.from_id == _id:
 			return true
 
 	return false
 
 
-func get_input_connection_command(_id: int) -> HenVCConnectionReturn:
+func get_input_connection_command(_id: int, _save_data: HenSaveData) -> HenVCConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		if connection.to_id == _id:
@@ -259,8 +258,8 @@ func on_in_out_type_changed(_old_type: StringName, _type: StringName, _ref: HenV
 		remove_io_connection(_ref)
 
 
-func get_inputs() -> Array[HenVCInOutData]:
-	var res = get_res()
+func get_inputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
+	var res = get_res(_save_data)
 
 
 	if res and res is HenSaveResType:
@@ -284,8 +283,8 @@ func get_inputs() -> Array[HenVCInOutData]:
 	return inputs
 
 
-func get_outputs() -> Array[HenVCInOutData]:
-	var res = get_res()
+func get_outputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
+	var res = get_res(_save_data)
 	if res and res is HenSaveResType:
 		var new_data_list: Array = (res as HenSaveResType).get_outputs(sub_type)
 

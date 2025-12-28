@@ -17,7 +17,7 @@ func test_single_output_function_call() -> void:
 		{id = 0, name = 'output', type = 'Variant'}
 	])
 
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(func_node)).is_equal('test_func()')
+	assert_str(HenTest.get_vc_code(func_node)).is_equal('test_func()')
 
 
 # using the first output from a multi-return func should add a [0]
@@ -31,7 +31,7 @@ func test_multi_output_function_first_return_as_input() -> void:
 	# connect the func's first output to the void's input
 	void_node.get_new_input_connection_command(0, 0, func_node).add()
 
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(void_node)).is_equal('test_void(test_func()[0])')
+	assert_str(HenTest.get_vc_code(void_node)).is_equal('test_void(test_func()[0])')
 
 
 # using the second output from a multi-return func should add a [1]
@@ -45,4 +45,4 @@ func test_multi_output_function_second_return_as_input() -> void:
 	# connect the func's second output to the void's input
 	void_node.get_new_input_connection_command(0, 1, func_node).add()
 
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(void_node)).is_equal('test_void(test_func()[1])')
+	assert_str(HenTest.get_vc_code(void_node)).is_equal('test_void(test_func()[1])')

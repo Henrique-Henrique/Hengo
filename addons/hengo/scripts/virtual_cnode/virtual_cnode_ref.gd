@@ -7,7 +7,7 @@ class_name HenVirtualCNodeReference extends HenVirtualCNodeIdentity
 var cnode_instance: HenCnode = null
 
 
-func get_res() -> Resource:
+func get_res(_save_data: HenSaveData) -> Resource:
 	if res_data.has('id') and res_data.has('type'):
 		var list: Array = []
 
@@ -29,22 +29,20 @@ func get_res() -> Resource:
 					HenSideBar.AddType.MACRO:
 						list = ast.macros
 		else:
-			var global: HenGlobal = Engine.get_singleton(&'Global')
-
 			match res_data.type:
 				HenSideBar.AddType.VAR:
-					list = global.SAVE_DATA.variables
+					list = _save_data.variables
 				HenSideBar.AddType.FUNC:
-					list = global.SAVE_DATA.functions
+					list = _save_data.functions
 				HenSideBar.AddType.SIGNAL_CALLBACK:
-					list = global.SAVE_DATA.signals_callback
+					list = _save_data.signals_callback
 				HenSideBar.AddType.SIGNAL:
-					list = global.SAVE_DATA.signals
+					list = _save_data.signals
 				HenSideBar.AddType.MACRO:
-					list = global.SAVE_DATA.macros
+					list = _save_data.macros
 		
 		for item in list:
 			if item.id == res_data.id:
 				return item
-				
+		
 	return null

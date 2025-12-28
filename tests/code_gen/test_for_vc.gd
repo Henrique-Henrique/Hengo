@@ -29,7 +29,7 @@ func test_for_range_default_code() -> void:
 	var for_vc: HenVirtualCNode = _create_for_range_node()
 	
 	var expected_code = 'for index_2 in range(0, 0, 1):\n\tpass'
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(for_vc)).is_equal(expected_code)
+	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)
 
 
 # # tests a FOR node with the body flow connected.
@@ -40,7 +40,7 @@ func test_for_range_with_body_flow() -> void:
 	for_vc.add_flow_connection(0, 0, vc_flow_body).add()
 
 	var expected_code = 'for index_2 in range(0, 0, 1):\n\ttest_void()'
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(for_vc)).is_equal(expected_code)
+	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)
 
 
 # # tests connecting the 'index' data output of the FOR to another node's input.
@@ -54,7 +54,7 @@ func test_for_range_with_index_output_connected() -> void:
 	vc_with_input.get_new_input_connection_command(0, 0, for_vc).add()
 
 	var expected_code = 'for index_2 in range(0, 0, 1):\n\ttest_void(index_2)'
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(for_vc)).is_equal(expected_code)
+	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)
 
 
 # # tests a FOR node with both the body and "after" flows connected.
@@ -69,4 +69,4 @@ func test_for_range_with_after_flow() -> void:
 	for_vc.add_flow_connection(1, 0, vc_flow_after).add()
 
 	var expected_code = 'for index_2 in range(0, 0, 1):\n\ttest_void()\ntest_void()'
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(for_vc)).is_equal(expected_code)
+	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)

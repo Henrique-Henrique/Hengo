@@ -23,62 +23,54 @@ func base_signal() -> HenSaveSignalCallback:
 
 # tests generation of an empty signal handler function with correct signature
 func test_generates_empty_signal_handler() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
 	base_signal()
-
-	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
-	var code: String = code_generation.get_code(global.SAVE_DATA)
 
 	var expected_code = 'func _on_my_signal_signal_(toggled_on):\n\tpass'
 
-	assert_bool(code.contains(expected_code)).is_true()
+	assert_bool(HenTest.get_all_code().contains(expected_code)).is_true()
 
 
 # tests signal handler generation with a connected void function call
 func test_generates_signal_handler_with_flow_connection() -> void:
 	var signal_data: HenSaveSignalCallback = base_signal()
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
 	# Createavirtualnode for a void functioncall
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
 		inputs = [],
-		route = signal_data.get_route()
+		route = signal_data.get_route(save_data)
 	})
 	
-	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(signal_data)
+	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(save_data, signal_data)
 	signal_enter.add_flow_connection(0, 0, vc).add()
-
-	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var code: String = code_generation.get_code(global.SAVE_DATA)
 
 	var expected_code = '\nfunc _on_my_signal_signal_(toggled_on):\n\ttest_void()'
 
-	assert_bool(code.contains(expected_code)).is_true()
+	assert_bool(HenTest.get_all_code().contains(expected_code)).is_true()
 
 
 # # tests signal handler with data flow to a function parameter
 func test_generates_signal_handler_with_data_connection() -> void:
-	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
 	var signal_data: HenSaveSignalCallback = base_signal()
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
 	# Create a virtual function node that accepts parameters
 	var vc_input: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
 		name = 'test_func',
 		sub_type = HenVirtualCNode.SubType.FUNC,
 		inputs = [ {id = 0, name = 'content', type = 'Variant'}],
-		route = signal_data.get_route()
+		route = signal_data.get_route(save_data)
 	})
 	
-	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(signal_data)
-	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(save_data, signal_data)
 	# Connect signal output to function input
 	signal_enter.add_flow_connection(0, 0, vc_input).add()
-	var output_param_id = (signal_enter.get_res() as HenSaveSignalCallback).get_outputs(signal_enter.sub_type)[0].id
+	var output_param_id = (signal_enter.get_res(save_data) as HenSaveSignalCallback).get_outputs(signal_enter.sub_type)[0].id
 	vc_input.get_new_input_connection_command(0, output_param_id, signal_enter).add()
-	var code: String = code_generation.get_code(global.SAVE_DATA)
+
 
 	var expected_code = '\nfunc _on_my_signal_signal_(toggled_on):\n\ttest_func(toggled_on)'
-	assert_bool(code.contains(expected_code)).is_true()
+	assert_bool(HenTest.get_all_code().contains(expected_code)).is_true()
 
 
 # tests the code generation for a simple signal connection without extra parameters.
@@ -97,7 +89,7 @@ func test_generates_basic_signal_connection_code() -> void:
 	vc.get_new_input_connection_command(0, 0, vc_input).add()
 
 	var expected_code = 'test_func().connect("toggled_on", _on_my_signal_signal_)'
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal(expected_code)
+	assert_str(HenTest.get_vc_code(vc)).is_equal(expected_code)
 
 
 # tests the code generation for a signal connection that uses 'bind'
@@ -121,7 +113,7 @@ func test_generates_signal_connection_code_with_bind() -> void:
 	signal_data.bind_params.append(param)
 
 	var expected_code = 'test_func().connect("toggled_on", _on_my_signal_signal_.bind(null))'
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal(expected_code)
+	assert_str(HenTest.get_vc_code(vc)).is_equal(expected_code)
 
 
 # tests the code generation for disconnecting a signal connection
@@ -140,4 +132,4 @@ func test_disconnection_code() -> void:
 	
 	vc.get_new_input_connection_command(0, 0, vc_input).add()
 
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal('test_func().disconnect("toggled_on", _on_my_signal_signal_)')
+	assert_str(HenTest.get_vc_code(vc)).is_equal('test_func().disconnect("toggled_on", _on_my_signal_signal_)')

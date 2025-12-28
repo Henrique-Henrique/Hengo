@@ -134,7 +134,8 @@ func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> vo
 			await RenderingServer.frame_pre_draw
 
 			if obj is HenSaveResTypeWithRoute:
-				(Engine.get_singleton(&'Router') as HenRouter).change_route((obj as HenSaveResTypeWithRoute).get_route())
+				var global: HenGlobal = Engine.get_singleton(&'Global')
+				(Engine.get_singleton(&'Router') as HenRouter).change_route((obj as HenSaveResTypeWithRoute).get_route(global.SAVE_DATA))
 			elif obj is HenRouteData:
 				(Engine.get_singleton(&'Router') as HenRouter).change_route(obj as HenRouteData)
 		2:

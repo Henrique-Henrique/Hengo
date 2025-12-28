@@ -4,8 +4,8 @@ class_name HenVCConnectionData extends Resource
 @export var id: int
 @export var from_id: int
 @export var to_id: int
-@export var from: HenVirtualCNode
-@export var to: HenVirtualCNode
+@export var from: Resource
+@export var to: Resource
 @export var from_type: StringName
 @export var to_type: StringName
 @export var input_ref: HenVCInOutData

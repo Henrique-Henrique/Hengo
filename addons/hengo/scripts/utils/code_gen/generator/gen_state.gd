@@ -72,5 +72,5 @@ static func get_states_code(_refs: HenTypeReferences) -> String:
 
 		code += base
 		idx += 1
-
+	
 	return code

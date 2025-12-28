@@ -62,6 +62,17 @@ func get_real_ast_size() -> void:
 func _map_project_data(_id: StringName) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 
+	var identity_path = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity.tres')
+	if FileAccess.file_exists(identity_path):
+		var res_identity: HenSaveDataIdentity = load(identity_path)
+
+		if res_identity:
+			ast.identity = res_identity
+		else:
+			push_error('Error loading AST identity: ' + identity_path)
+	else:
+		push_error('Identity file not found: ' + identity_path)
+
 	for type: int in HenSideBar.SideBarItem.values():
 		var path: String = HenUtils.get_side_bar_item_path(_id, type)
 		
@@ -69,12 +80,6 @@ func _map_project_data(_id: StringName) -> void:
 			continue
 		
 		var dir: DirAccess = DirAccess.open(path)
-		var res_identity: HenSaveDataIdentity = load(HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity.tres'))
-
-		if res_identity:
-			ast.identity = res_identity
-		else:
-			push_error('Error loading AST identity')
 
 		for file: String in dir.get_files():
 			if file.get_extension() == 'tres':
@@ -133,6 +138,7 @@ func check_dependencies(_updated_script_id: StringName) -> Array[StringName]:
 	var scripts_to_recompile: Array[StringName] = []
 	var updated_ast: ProjectAST = ast_list.get(_updated_script_id)
 	
+
 	if not updated_ast:
 		return []
 		
@@ -141,6 +147,7 @@ func check_dependencies(_updated_script_id: StringName) -> Array[StringName]:
 			continue
 			
 		var ast: ProjectAST = ast_list[script_id]
+
 		if not ast.identity or not ast.identity.detailed_deps.has(_updated_script_id):
 			if ast.identity and ast.identity.deps.has(_updated_script_id):
 				scripts_to_recompile.append(script_id)

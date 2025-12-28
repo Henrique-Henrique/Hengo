@@ -14,7 +14,7 @@ func test_get_var_code() -> void:
         route = HenTest.get_base_route()
     })
 
-    assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(var_vc)).is_equal('var_name')
+    assert_str(HenTest.get_vc_code(var_vc)).is_equal('var_name')
 
 
 func test_set_var_code() -> void:
@@ -30,4 +30,4 @@ func test_set_var_code() -> void:
         route = HenTest.get_base_route()
     })
 
-    assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(var_vc)).is_equal('var_name = Vector2(0, 0)')
+    assert_str(HenTest.get_vc_code(var_vc)).is_equal('var_name = Vector2(0, 0)')

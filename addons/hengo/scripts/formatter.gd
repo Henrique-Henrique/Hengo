@@ -368,7 +368,7 @@ static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) 
 static func start_map_inputs(_vc: HenVirtualCNode, _data: FormatterData, _rect: Rect2 = Rect2()) -> Rect2:
 	var connection_list: Array[HenVCConnectionData] = []
 
-	for input: HenVCInOutData in _vc.get_inputs():
+	for input: HenVCInOutData in _vc.get_inputs((Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA):
 		var connection: HenVCConnectionData = _vc.get_input_connection(input.id, _vc)
 		if connection:
 			connection_list.append(connection)

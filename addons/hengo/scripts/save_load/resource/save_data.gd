@@ -2,15 +2,15 @@
 class_name HenSaveData extends Resource
 
 @export var counter: int
+@export var identity: HenSaveDataIdentity
+@export var routes: Dictionary
 @export var macros: Array[HenSaveMacro]
 @export var variables: Array[HenSaveVar]
 @export var functions: Array[HenSaveFunc]
-@export var identity: HenSaveDataIdentity
 @export var signals: Array[HenSaveSignal]
 @export var signals_callback: Array[HenSaveSignalCallback]
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
-@export var routes: Dictionary
 
 
 func create_route(_id: StringName, _name: String, _type: HenRouter.ROUTE_TYPE) -> HenRouteData:

@@ -35,8 +35,7 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 		if _parent_id:
 			preview_id += '#ID:' + _parent_id
 
-
-	if _token.use_self == true or (_token.has('category') and _token.get('category') == 'native'):
+	if _token.get('use_self', false) == true or (_token.has('category') and _token.get('category') == 'native'):
 		prefix = ''
 
 

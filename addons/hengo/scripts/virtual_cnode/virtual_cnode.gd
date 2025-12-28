@@ -118,10 +118,12 @@ func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlob
 
 
 func get_input_by_idx(_idx: int) -> HenVCInOutData:
-	return get_inputs().get(_idx)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	return get_inputs(global.SAVE_DATA).get(_idx)
 
 func get_output_by_idx(_idx: int) -> HenVCInOutData:
-	return get_outputs().get(_idx)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	return get_outputs(global.SAVE_DATA).get(_idx)
 
 
 func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
@@ -198,8 +200,8 @@ func request_io_connection(_io_type: StringName, _id: int, _mouse_pos: Vector2, 
 
 func on_cnode_double_click() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	var route: HenRouteData = get_route()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var route: HenRouteData = get_route(global.SAVE_DATA)
 
 	if route:
 		router.change_route(route)
@@ -229,7 +231,8 @@ func on_node_io_hovered(context: Dictionary) -> void:
 
 
 func on_expression_saved(context: Dictionary) -> void:
-	var _inputs: Array[HenVCInOutData] = get_inputs()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var _inputs: Array[HenVCInOutData] = get_inputs(global.SAVE_DATA)
 	_inputs[0].value = context.code
 	
 	# for input: HenVCInOutData in _inputs.slice(1):
@@ -286,7 +289,8 @@ func get_id() -> int:
 
 
 func get_vc_name() -> String:
-	var res = get_res()
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var res = get_res(save_data)
 
 	if res:
 		return res.get(&'name')
@@ -380,7 +384,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		SubType.VIRTUAL:
 			_route.virtual_sub_type_vc_list.append(v_cnode)
 		SubType.MACRO, SubType.MACRO_INPUT, SubType.MACRO_OUTPUT:
-			var res = v_cnode.get_res()
+			var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+			var res = v_cnode.get_res(save_data)
 			if res is HenSaveMacro:
 				_config.from_flow = (res as HenSaveMacro).flow_inputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
 				_config.to_flow = (res as HenSaveMacro).flow_outputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())

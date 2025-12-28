@@ -55,7 +55,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 						})
 
 				_refs.states_data[_vc.get_vc_name().to_snake_case()] = {
-					virtual_tokens = _parse_virtual_cnode(_vc.get_route().virtual_sub_type_vc_list),
+					virtual_tokens = _parse_virtual_cnode(_vc.get_route(_save_data).virtual_sub_type_vc_list, _save_data),
 					transitions = transitions
 				}
 			HenVirtualCNode.SubType.STATE_EVENT:
@@ -72,13 +72,13 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 							tokens = []
 						}
 
-				(override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens((flow_connections[0] as HenVCFlowConnectionData).get_to(), 0))
+				(override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections[0] as HenVCFlowConnectionData).get_to(), 0))
 
 
 	# search for override virtual inside macros
 	for macro: HenSaveMacro in _save_data.macros:
 		# TODO: this needs to map all macros??
-		map_vc(macro.get_route().virtual_cnode_list, _refs)
+		map_vc(macro.get_route(_save_data).virtual_cnode_list, _refs)
 
 		# macro variables
 		for macro_var: HenSaveParam in macro.local_vars:
@@ -86,7 +86,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 				code += HenGeneratorVariable.get_var_code_from_param(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}), str(macro_ref.id))
 
 		# macro override virtuals
-		for v_cnode: HenVirtualCNode in macro.get_route().virtual_cnode_list:
+		for v_cnode: HenVirtualCNode in macro.get_route(_save_data).virtual_cnode_list:
 			if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				for macro_ref: HenVirtualCNode in _refs.macro_vc_list:
 					global.USE_MACRO_REF = true
@@ -103,7 +103,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 								tokens = []
 							}
 
-						for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens((flow_connections[0] as HenVCFlowConnectionData).get_to(), 0):
+						for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections[0] as HenVCFlowConnectionData).get_to(), 0):
 							token.vc_id = macro_ref.id
 							(override_virtual_data[v_cnode.name].tokens as Array).append(token)
 
@@ -148,21 +148,20 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 	})
 
 
-static func _parse_virtual_cnode(_cnode_list: Array[HenVirtualCNode]) -> Dictionary:
+static func _parse_virtual_cnode(_cnode_list: Array, _save_data: HenSaveData) -> Dictionary:
 	var data: Dictionary = {}
-	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	for vc: HenVirtualCNode in _cnode_list:
-		var flow_connections: Array = global.SAVE_DATA.get_flow_connection_from_vc(vc)
+		var flow_connections: Array = _save_data.get_flow_connection_from_vc(vc)
 		if flow_connections.is_empty():
 			continue
 		
 		var cnode_name: String = vc.name
 		var from_flow: HenVCFlowConnectionData = flow_connections[0]
 
-		if from_flow.to:
+		if from_flow.get_to():
 			pass
-			var token_list = HenVirtualCNodeCode.get_flow_tokens(from_flow.get_to(), from_flow.to_id)
+			var token_list = HenVirtualCNodeCode.get_flow_tokens(_save_data, from_flow.get_to(), from_flow.to_id)
 
 			data[cnode_name] = {
 				tokens = token_list,

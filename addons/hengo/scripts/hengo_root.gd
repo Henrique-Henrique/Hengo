@@ -124,9 +124,6 @@ func _input(event: InputEvent) -> void:
 					print(
 						code_generation.get_code(global.SAVE_DATA)
 					)
-				
-			elif e.keycode == KEY_F8:
-				(Engine.get_singleton(&'Router') as HenRouter).change_route(global.SAVE_DATA.base_route)
 			elif e.keycode == KEY_F10:
 				for line: HenConnectionLine in global.connection_line_pool:
 					if line.visible:

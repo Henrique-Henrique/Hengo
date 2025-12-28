@@ -74,7 +74,7 @@ static func _compile_script(_id: StringName) -> void:
 		push_error("Failed to load save data for compilation: " + save_path)
 		return
 	
-	# recalculate_dependencies(save_data)
+	recalculate_dependencies(save_data)
 	
 	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity.tres')
 	ResourceSaver.save(save_data.identity, identity_path)
@@ -105,18 +105,18 @@ static func recalculate_dependencies(save_data: HenSaveData) -> void:
 	_process_cnodes_for_deps(save_data, save_data.get_base_route().virtual_cnode_list)
 	
 	for func_data: HenSaveFunc in save_data.functions:
-		_process_cnodes_for_deps(save_data, func_data.get_route().virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, func_data.get_route(save_data).virtual_cnode_list)
 		
 	for macro_data: HenSaveMacro in save_data.macros:
-		_process_cnodes_for_deps(save_data, macro_data.get_route().virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, macro_data.get_route(save_data).virtual_cnode_list)
 		
 	for sc_data: HenSaveSignalCallback in save_data.signals_callback:
-		_process_cnodes_for_deps(save_data, sc_data.get_route().virtual_cnode_list)
+		_process_cnodes_for_deps(save_data, sc_data.get_route(save_data).virtual_cnode_list)
 
 
 static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) -> void:
 	for vc: HenVirtualCNode in cnode_list:
-		var res = vc.get_res()
+		var res = vc.get_res(save_data)
 		if res:
 			var parent_id: String = HenUtils.get_res_parent_id(res)
 			save_data.add_dep(parent_id)
@@ -130,7 +130,7 @@ static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) 
 					hash = dep_hash
 				})
 		
-		var route: HenRouteData = vc.get_route()
+		var route: HenRouteData = vc.get_route(save_data)
 		
 		if route and not route.virtual_cnode_list.is_empty():
 			_process_cnodes_for_deps(save_data, route.virtual_cnode_list)

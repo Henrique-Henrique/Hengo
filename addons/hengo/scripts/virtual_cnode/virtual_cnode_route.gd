@@ -5,9 +5,8 @@ class_name HenVirtualCNodeRoute extends HenVirtualCNodeVisual
 @export var parent_route_id: Variant
 
 
-func get_route() -> HenRouteData:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	return global.SAVE_DATA.get_route(str(id))
+func get_route(_save_data: HenSaveData) -> HenRouteData:
+	return _save_data.get_route(str(id))
 
 
 func get_parent_route() -> HenRouteData:

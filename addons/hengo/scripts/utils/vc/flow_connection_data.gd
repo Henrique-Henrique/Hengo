@@ -4,8 +4,8 @@ class_name HenVCFlowConnectionData extends Resource
 @export var id: int
 @export var from_id: int
 @export var to_id: int
-@export var from: HenVirtualCNode
-@export var to: HenVirtualCNode
+@export var from: Resource
+@export var to: Resource
 
 var line_ref: HenFlowConnectionLine = null
 var from_old_pos: Vector2 = Vector2.ZERO

@@ -89,3 +89,26 @@ static func get_const(_id: int = -1) -> HenVirtualCNode:
 		type = 0,
 		route = HenTest.get_base_route()
 	})
+
+
+static func get_vc_code(_vc: HenVirtualCNode) -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var save_data: HenSaveData = global.SAVE_DATA
+
+	# this is a hack to make the tests errors accurate only for code generation
+	global.SAVE_DATA = null
+	var code: String = HenVirtualCNodeCode.get_virtual_cnode_code(save_data, _vc)
+	global.SAVE_DATA = save_data
+	return code
+
+
+static func get_all_code() -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+	var save_data: HenSaveData = global.SAVE_DATA
+
+	# this is a hack to make the tests errors accurate only for code generation
+	global.SAVE_DATA = null
+	var code: String = code_generation.get_code(save_data)
+	global.SAVE_DATA = save_data
+	return code

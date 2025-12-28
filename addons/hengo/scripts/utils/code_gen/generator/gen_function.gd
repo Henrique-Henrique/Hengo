@@ -19,19 +19,16 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 
 		# func output (return)
 		var output_code: Array = []
-		var input_ref: HenVirtualCNode = search_input_ref(func_data)
-		var output_ref: HenVirtualCNode = search_output_ref(func_data)
+		var input_ref: HenVirtualCNode = search_input_ref(_save_data, func_data)
+		var output_ref: HenVirtualCNode = search_output_ref(_save_data, func_data)
 		
-		for token: Dictionary in HenVirtualCNodeCode.get_input_token_list(output_ref):
+		for token: Dictionary in HenVirtualCNodeCode.get_input_token_list(_save_data, output_ref):
 			output_code.append(HenGeneratorByToken.get_code_by_token(token))
 
 		var input_flow_connections: Array = _save_data.get_flow_connection_from_vc(input_ref)
 
 		if not input_flow_connections.is_empty() and input_flow_connections[0].to:
-			var func_tokens: Array = HenVirtualCNodeCode.get_flow_tokens(
-				(input_flow_connections[0] as HenVCFlowConnectionData).get_to(),
-				input_flow_connections[0].to_id
-			)
+			var func_tokens: Array = HenVirtualCNodeCode.get_flow_tokens(_save_data, (input_flow_connections[0] as HenVCFlowConnectionData).get_to(), input_flow_connections[0].to_id)
 			var func_block: Array = []
 
 			for token in func_tokens:
@@ -57,15 +54,15 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 	return func_code
 
 
-static func search_input_ref(_func: HenSaveFunc) -> HenVirtualCNode:
-	for vc: HenVirtualCNode in _func.get_route().virtual_cnode_list:
+static func search_input_ref(_save_data: HenSaveData, _func: HenSaveFunc) -> HenVirtualCNode:
+	for vc: HenVirtualCNode in _func.get_route(_save_data).virtual_cnode_list:
 		if vc.sub_type == HenVirtualCNode.SubType.FUNC_INPUT:
 			return vc
 	return null
 
 
-static func search_output_ref(_func: HenSaveFunc) -> HenVirtualCNode:
-	for vc: HenVirtualCNode in _func.get_route().virtual_cnode_list:
+static func search_output_ref(_save_data: HenSaveData, _func: HenSaveFunc) -> HenVirtualCNode:
+	for vc: HenVirtualCNode in _func.get_route(_save_data).virtual_cnode_list:
 		if vc.sub_type == HenVirtualCNode.SubType.FUNC_OUTPUT:
 			return vc
 	return null

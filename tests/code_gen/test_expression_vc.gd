@@ -37,7 +37,7 @@ func test_expression_with_no_inputs() -> void:
 	var vc: HenVirtualCNode = _create_expression_node()
 	
 	# Inputs should default to null when not connected
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal('null + null')
+	assert_str(HenTest.get_vc_code(vc)).is_equal('null + null')
 
 
 # Tests an expression with a single connected input
@@ -47,7 +47,7 @@ func test_expression_with_one_input() -> void:
 
 	# The first input is connected to a constant value
 	vc.get_new_input_connection_command(1, 0, value_node).add()
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal('Test.CONST + null')
+	assert_str(HenTest.get_vc_code(vc)).is_equal('Test.CONST + null')
 
 
 # Tests an expression with all inputs connected
@@ -59,4 +59,4 @@ func test_expression_with_two_inputs() -> void:
 	vc.get_new_input_connection_command(1, 0, value_node).add()
 	vc.get_new_input_connection_command(2, 0, value_node).add()
 
-	assert_str(HenVirtualCNodeCode.get_virtual_cnode_code(vc)).is_equal('Test.CONST + Test.CONST')
+	assert_str(HenTest.get_vc_code(vc)).is_equal('Test.CONST + Test.CONST')

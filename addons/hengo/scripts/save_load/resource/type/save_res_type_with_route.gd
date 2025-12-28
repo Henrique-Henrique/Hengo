@@ -3,12 +3,10 @@
 class_name HenSaveResTypeWithRoute extends HenSaveResType
 
 @export var local_vars: Array[HenSaveParam]
-# @export var route: HenRouteData
 
 
-func get_route() -> HenRouteData:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	return global.SAVE_DATA.get_route(str(id))
+func get_route(_save_data: HenSaveData) -> HenRouteData:
+	return _save_data.get_route(str(id))
 
 
 func create_route(_type: HenRouter.ROUTE_TYPE) -> HenRouteData:

@@ -4,8 +4,8 @@ class_name HenRouteData extends Resource
 @export var id: StringName
 @export var name: String
 @export var type: HenRouter.ROUTE_TYPE
-@export var virtual_cnode_list: Array[HenVirtualCNode]
-@export var virtual_sub_type_vc_list: Array[HenVirtualCNode]
+@export var virtual_cnode_list: Array
+@export var virtual_sub_type_vc_list: Array
 
 
 static func create(_name: String, _type: HenRouter.ROUTE_TYPE, _id: StringName) -> HenRouteData:
