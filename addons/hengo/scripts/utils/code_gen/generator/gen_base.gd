@@ -26,7 +26,7 @@ func _physics_process(delta: float) -> void:
 {states}"""
 
 
-static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
+static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferences) -> String:
 	var code: String = ''
 	var start_state: HenVirtualCNode
 	var override_virtual_data: Dictionary = {}
@@ -55,10 +55,13 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 							to_state_name = to.get_vc_name()
 						})
 
-				_refs.states_data[_vc.get_vc_name().to_snake_case()] = {
-					virtual_tokens = _parse_virtual_cnode(_vc.get_route(_save_data).virtual_sub_type_vc_list, _save_data),
-					transitions = transitions
-				}
+				var state_res: HenSaveState = _vc.get_res(_save_data)
+
+				if state_res:
+					_refs.states_data[_vc.get_vc_name().to_snake_case()] = {
+						virtual_tokens = _parse_virtual_cnode(state_res.get_route(_save_data).virtual_sub_type_vc_list, _save_data),
+						transitions = transitions
+					}
 			HenVirtualCNode.SubType.STATE_EVENT:
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					events.append({

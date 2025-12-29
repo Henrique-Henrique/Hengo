@@ -28,6 +28,8 @@ func get_res(_save_data: HenSaveData) -> Resource:
 						list = ast.signals
 					HenSideBar.AddType.MACRO:
 						list = ast.macros
+					HenSideBar.AddType.STATE:
+						list = ast.states
 		else:
 			match res_data.type:
 				HenSideBar.AddType.VAR:
@@ -40,6 +42,8 @@ func get_res(_save_data: HenSaveData) -> Resource:
 					list = _save_data.signals
 				HenSideBar.AddType.MACRO:
 					list = _save_data.macros
+				HenSideBar.AddType.STATE:
+					list = _save_data.states
 		
 		for item in list:
 			if item.id == res_data.id:

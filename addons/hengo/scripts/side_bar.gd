@@ -13,20 +13,11 @@ var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 
-enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO}
+enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO, STATE}
 enum ParamType {INPUT, OUTPUT}
 
 var BG_COLOR: Dictionary
 var ICONS: Dictionary
-
-const NAME = {
-	AddType.VAR: 'Variables',
-	AddType.FUNC: 'Functions',
-	AddType.SIGNAL_CALLBACK: 'Signal Callback',
-	AddType.LOCAL_VAR: 'Local Variables',
-	AddType.MACRO: 'Macro',
-	AddType.SIGNAL: 'Signal'
-}
 
 
 class DeleteItemCache:
@@ -54,6 +45,7 @@ func _ready() -> void:
 		return
 
 	BG_COLOR = {
+		AddType.STATE: HenEnums.FLOW_COLORS[5],
 		AddType.VAR: HenEnums.FLOW_COLORS[1],
 		AddType.FUNC: HenEnums.FLOW_COLORS[2],
 		AddType.SIGNAL_CALLBACK: HenEnums.FLOW_COLORS[0],
@@ -63,6 +55,7 @@ func _ready() -> void:
 	}
 
 	ICONS = {
+		AddType.STATE: HenUtils.ICON_STATE,
 		AddType.VAR: HenUtils.ICON_VARIABLE,
 		AddType.MACRO: HenUtils.ICON_FUNCTION,
 		AddType.FUNC: HenUtils.ICON_FUNCTION,
@@ -152,6 +145,7 @@ func update() -> void:
 	base.set_text(0, 'Base')
 	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.get_base_route())
 
+	_add_categories(root, 'States', AddType.STATE)
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Variables', AddType.VAR)
 	_add_categories(root, 'Functions', AddType.FUNC)
@@ -174,6 +168,15 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	category.set_custom_bg_color(0, BG_COLOR.get(_type))
 
 	match _type:
+		AddType.STATE:
+			for state_data: HenSaveState in global.SAVE_DATA.states:
+				create_item(
+					category,
+					state_data.name,
+					state_data,
+					ICONS[_type],
+					BG_COLOR[_type]
+				)
 		AddType.VAR:
 			for var_data: HenSaveVar in global.SAVE_DATA.variables:
 				create_item(
@@ -240,6 +243,8 @@ func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_but
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
 	match _type:
+		AddType.STATE:
+			global.SAVE_DATA.add_state()
 		AddType.VAR:
 			global.SAVE_DATA.add_var()
 		AddType.FUNC:

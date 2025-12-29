@@ -104,6 +104,9 @@ static func recalculate_dependencies(save_data: HenSaveData) -> void:
 	
 	_process_cnodes_for_deps(save_data, save_data.get_base_route().virtual_cnode_list)
 	
+	for state_data: HenSaveState in save_data.states:
+		_process_cnodes_for_deps(save_data, state_data.get_route(save_data).virtual_cnode_list)
+	
 	for func_data: HenSaveFunc in save_data.functions:
 		_process_cnodes_for_deps(save_data, func_data.get_route(save_data).virtual_cnode_list)
 		
@@ -129,8 +132,3 @@ static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) 
 					id = res.id,
 					hash = dep_hash
 				})
-		
-		var route: HenRouteData = vc.get_route(save_data)
-		
-		if route and not route.virtual_cnode_list.is_empty():
-			_process_cnodes_for_deps(save_data, route.virtual_cnode_list)

@@ -16,7 +16,8 @@ const FLOW_COLORS: Array[Color] = [
 	Color('#3498db18'),
 	Color('#e74c3c18'),
 	Color('#f1c40f18'),
-	Color('#9b59b618')
+	Color('#9b59b618'),
+	Color('#ff9ff318'),
 ]
 
 enum PROP_TYPE {

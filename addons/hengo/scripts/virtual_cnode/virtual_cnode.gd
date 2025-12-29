@@ -201,10 +201,12 @@ func request_io_connection(_io_type: StringName, _id: int, _mouse_pos: Vector2, 
 func on_cnode_double_click() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var route: HenRouteData = get_route(global.SAVE_DATA)
+	var res: HenSaveResTypeWithRoute = get_res(global.SAVE_DATA)
 
-	if route:
-		router.change_route(route)
+	if res:
+		var route: HenRouteData = res.get_route(global.SAVE_DATA)
+		if route:
+			router.change_route(route)
 
 
 func on_cnode_right_click(_mouse_pos: Vector2) -> void:
@@ -364,6 +366,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				res_type = HenSideBar.AddType.SIGNAL
 			elif res_obj is HenSaveMacro:
 				res_type = HenSideBar.AddType.MACRO
+			elif res_obj is HenSaveState:
+				res_type = HenSideBar.AddType.STATE
 		
 		if res_type != -1:
 			v_cnode.res_data = {
@@ -405,35 +409,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Then', id = 1}))
 			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.STATE:
-			var global: HenGlobal = Engine.get_singleton(&'Global')
-			var route: HenRouteData = global.SAVE_DATA.create_route(str(v_cnode.id), v_cnode.name, HenRouter.ROUTE_TYPE.STATE)
-
-			if not _config.has('virtual_cnode_list'):
-				HenVirtualCNode.instantiate_virtual_cnode({
-					name = 'enter',
-					sub_type = HenVirtualCNode.SubType.VIRTUAL,
-					route = route,
-					position = Vector2.ZERO,
-					can_delete = false
-				})
-
-				HenVirtualCNode.instantiate_virtual_cnode({
-					name = 'update',
-					sub_type = HenVirtualCNode.SubType.VIRTUAL,
-					outputs = [ {
-						name = 'delta',
-						type = 'float'
-					}],
-					route = route,
-					position = Vector2(400, 0),
-					can_delete = false
-				})
-
 			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
-
-			if _config.has('to_flow'):
-				for _flow: Dictionary in _config.to_flow:
-					v_cnode.on_flow_added(false, _flow, v_cnode)
 		Type.STATE_START:
 			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'On Start', id = 0}))
 			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))

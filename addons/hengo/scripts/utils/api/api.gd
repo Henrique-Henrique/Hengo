@@ -476,7 +476,7 @@ func get_side_bar_list() -> Dictionary:
 	ast.functions = global.SAVE_DATA.functions
 	ast.signals = global.SAVE_DATA.signals
 	ast.signals_callback = global.SAVE_DATA.signals_callback
-
+	ast.states = global.SAVE_DATA.states
 
 	return {_class_name = 'Hengo', categories = get_side_bar_categories(ast)}
 
@@ -485,6 +485,12 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	var arr: Array = []
 	
 	# datas
+	var state_category: Dictionary = {
+		name = 'States',
+		icon = 'activity',
+		color = '#ff9ff3',
+		method_list = []
+	}
 	var func_category: Dictionary = {
 		name = 'Functions',
 		icon = 'braces',
@@ -512,6 +518,16 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 
 	var save_data_id: StringName = _ast.identity.id
 
+	if _ast.identity.id == (Engine.get_singleton('Global') as HenGlobal).SAVE_DATA.identity.id:
+		save_data_id = ''
+
+	for state_data: HenSaveState in _ast.states:
+		(state_category.method_list as Array).append({
+			_class_name = 'State',
+			name = state_data.name,
+			data = state_data.get_cnode_data(save_data_id, _from_another_script)
+		})
+	
 	for func_data: HenSaveFunc in _ast.functions:
 		(func_category.method_list as Array).append({
 			_class_name = 'Function',
@@ -556,6 +572,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 			data = macro_data.get_cnode_data(save_data_id, _from_another_script)
 		})
 
+	arr.append(state_category)
 	arr.append(func_category)
 	arr.append(var_category)
 	arr.append(signal_category)
@@ -568,18 +585,18 @@ func get_native_list_raw() -> Array:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return [
-	{
-		name = 'State',
-		icon = 'circle-dot',
-		color = '#3b82f6',
-		is_native = true,
-		data = {
-			name = 'State 1',
-			type = HenVirtualCNode.Type.STATE,
-			sub_type = HenVirtualCNode.SubType.STATE,
-			route = router.current_route,
-		}
-	},
+	# {
+	# 	name = 'State',
+	# 	icon = 'circle-dot',
+	# 	color = '#3b82f6',
+	# 	is_native = true,
+	# 	data = {
+	# 		name = 'State 1',
+	# 		type = HenVirtualCNode.Type.STATE,
+	# 		sub_type = HenVirtualCNode.SubType.STATE,
+	# 		route = router.current_route,
+	# 	}
+	# },
 	{
 		name = 'State Event',
 		icon = 'activity',

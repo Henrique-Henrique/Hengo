@@ -8,6 +8,7 @@ class_name HenSaveData extends Resource
 @export var variables: Array[HenSaveVar]
 @export var functions: Array[HenSaveFunc]
 @export var signals: Array[HenSaveSignal]
+@export var states: Array[HenSaveState]
 @export var signals_callback: Array[HenSaveSignalCallback]
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
@@ -231,13 +232,21 @@ func add_var() -> void:
 	variables.append(v)
 
 
+func add_state() -> void:
+	var s: HenSaveState = HenSaveState.create()
+
+	if not s:
+		return
+	
+	states.append(s)
+
+
 func add_func() -> void:
 	var f: HenSaveFunc = HenSaveFunc.create()
 
 	if not f:
 		return
 	
-
 	if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
 		return
 	
