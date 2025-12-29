@@ -152,10 +152,10 @@ func unselect() -> void:
 func on_cnode_mouse_enter() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	if global.can_make_flow_connection and not flow_inputs.is_empty():
+	if global.can_make_flow_connection and not get_flow_inputs(global.SAVE_DATA).is_empty():
 		global.flow_connection_to_data = {
 			to_cnode = self,
-			to_id = flow_inputs[0].id
+			to_id = get_flow_inputs(global.SAVE_DATA)[0].id
 		}
 
 func on_cnode_selected(_selected: bool) -> void:
@@ -322,13 +322,14 @@ func get_flow_output_connection(_id: int) -> HenVCFlowConnectionData:
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	# adding virtual cnode to list
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 	var _route: HenRouteData = _config.route
 
 	v_cnode.name = _config.name
 	v_cnode.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.sub_type = _config.sub_type
-	v_cnode.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter() if not _config.has('id') else _config.id
+	v_cnode.id = global.get_new_node_counter() if not _config.has('id') else _config.id
 	v_cnode.parent_route_id = _route.id
 	v_cnode.route_type = _route.type
 
@@ -397,24 +398,22 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 
 	match v_cnode.type:
 		HenVirtualCNode.Type.DEFAULT:
-			if not _config.has('to_flow'): v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {id = 0}))
-			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
+			if not _config.has('to_flow'): v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
+			v_cnode.get_flow_inputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.IF:
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'True', id = 0}))
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'False', id = 1}))
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Then', id = 2}))
-			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'True', id = 0}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'False', id = 1}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'Then', id = 2}))
+			v_cnode.get_flow_inputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.FOR:
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Body', id = 0}))
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'Then', id = 1}))
-			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
-		Type.STATE:
-			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'Body', id = 0}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'Then', id = 1}))
+			v_cnode.get_flow_inputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.STATE_START:
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {name = 'On Start', id = 0}))
-			v_cnode.flow_inputs.append(HenVCFlow.create(v_cnode, {id = 0}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'On Start', id = 0}))
+			v_cnode.get_flow_inputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
 		Type.STATE_EVENT:
-			v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {id = 0}))
+			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
 		_:
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:

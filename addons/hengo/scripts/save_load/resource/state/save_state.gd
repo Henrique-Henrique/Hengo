@@ -40,12 +40,11 @@ func get_new_name() -> String:
 	return 'state_' + str(id)
 
 
-func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	return []
-
-
-func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	return []
+func get_flow_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	var arr: Array[Dictionary] = []
+	for flow_output: HenSaveParam in flow_outputs:
+		arr.append({id = flow_output.id, name = flow_output.name})
+	return arr
 
 
 func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:

@@ -79,8 +79,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	if _vc.flow_outputs.size() == 1:
-		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(_vc.flow_outputs[0].id)
+	if _vc.get_flow_outputs(global.SAVE_DATA).size() == 1:
+		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(_vc.get_flow_outputs(global.SAVE_DATA)[0].id)
 		if flow_connection:
 			var from: HenVirtualCNode = flow_connection.get_from(global.SAVE_DATA)
 			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
@@ -108,16 +108,16 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				to_format_data.moved = true
 				to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 
-	elif _vc.flow_outputs.size() > 1:
-		if _vc.flow_outputs.size() % 2 == 0:
-			var half_size: int = int(_vc.flow_outputs.size() / 2.)
+	elif _vc.get_flow_outputs(global.SAVE_DATA).size() > 1:
+		if _vc.get_flow_outputs(global.SAVE_DATA).size() % 2 == 0:
+			var half_size: int = int(_vc.get_flow_outputs(global.SAVE_DATA).size() / 2.)
 			var flow_boundings: Array[Rect2] = []
 			var flow_nodes: Array[HenVirtualCNode] = []
 			var left_list: Array[HenVCFlow] = []
 			var right_list: Array[HenVCFlow] = []
 			var idx: int = 0
 
-			for flow_output: HenVCFlow in _vc.flow_outputs:
+			for flow_output: HenVCFlow in _vc.get_flow_outputs(global.SAVE_DATA):
 				if idx < half_size:
 					left_list.append(flow_output)
 				else:
@@ -182,8 +182,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 				idx += 1
 		else:
-			var half_size: int = int(_vc.flow_outputs.size() / 2.)
-			var middle_output: HenVCFlow = _vc.flow_outputs[half_size]
+			var half_size: int = int(_vc.get_flow_outputs(global.SAVE_DATA).size() / 2.)
+			var middle_output: HenVCFlow = _vc.get_flow_outputs(global.SAVE_DATA)[half_size]
 			var max_side_y: float = _vc.position.y + _vc.size.y
 			var idx: int = 0
 			var flow_boundings: Array[Rect2] = []
@@ -191,7 +191,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 			var left_list: Array[HenVCFlow] = []
 			var right_list: Array[HenVCFlow] = []
 
-			for flow_output: HenVCFlow in _vc.flow_outputs:
+			for flow_output: HenVCFlow in _vc.get_flow_outputs(global.SAVE_DATA):
 				if flow_output == middle_output:
 					idx += 1
 					continue
@@ -266,7 +266,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 
 			# collect side flows and their boundings
 			idx = 0
-			for flow_output: HenVCFlow in _vc.flow_outputs:
+			for flow_output: HenVCFlow in _vc.get_flow_outputs(global.SAVE_DATA):
 				if flow_output == middle_output:
 					idx += 1
 					continue
@@ -337,7 +337,7 @@ static func move_flow_tree(_vc: HenVirtualCNode, _offset: Vector2, _data: Format
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	for flow_output: HenVCFlow in _vc.flow_outputs:
+	for flow_output: HenVCFlow in _vc.get_flow_outputs(global.SAVE_DATA):
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
 			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
@@ -358,7 +358,7 @@ static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) 
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	for flow_output: HenVCFlow in _vc.flow_outputs:
+	for flow_output: HenVCFlow in _vc.get_flow_outputs(global.SAVE_DATA):
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
 			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)

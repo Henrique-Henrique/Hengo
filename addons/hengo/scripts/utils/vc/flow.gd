@@ -4,30 +4,12 @@ class_name HenVCFlow extends Resource
 @export var name: String
 @export var id: int = -1
 
-signal update_changes
-signal data_changed
-signal moved
-signal deleted
-
 
 static func create(_owner: HenVirtualCNode, _data: Dictionary = {}) -> HenVCFlow:
 	var flow: HenVCFlow = HenVCFlow.new()
 	flow.name = _data.name if _data.has('name') else ''
 	flow.id = _data.id if _data.has('id') else (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 	return flow
-
-
-func _on_move(_pos: int) -> void:
-	moved.emit(self, _pos, self)
-
-
-func _on_delete(_is_input: bool) -> void:
-	deleted.emit(_is_input, self)
-
-
-func on_data_changed(_name: String, _value) -> void:
-	set(_name, _value)
-	update_changes.emit()
 
 
 func create_virtual_connection(_vc: HenVirtualCNode, _config: Dictionary) -> HenVCFlowConnectionReturn:

@@ -75,8 +75,8 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 		var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 		if to:
 			var output_index: int = 0
-			for i: int in range(_vc.flow_outputs.size()):
-				if _vc.flow_outputs[i].id == flow_connection.from_id:
+			for i: int in range(_vc.get_flow_outputs(global.SAVE_DATA).size()):
+				if _vc.get_flow_outputs(global.SAVE_DATA)[i].id == flow_connection.from_id:
 					output_index = i
 					break
 			
@@ -84,8 +84,8 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 	
 	outgoing_nodes.sort_custom(func(a, b): return a.index < b.index)
 
-	var is_branching: bool = _vc.flow_outputs.size() > 1
-	var has_multiple_outputs: bool = _vc.flow_outputs.size() > 1
+	var is_branching: bool = _vc.get_flow_outputs(global.SAVE_DATA).size() > 1
+	var has_multiple_outputs: bool = _vc.get_flow_outputs(global.SAVE_DATA).size() > 1
 	
 	for data in outgoing_nodes:
 		var next_color: Variant = _color

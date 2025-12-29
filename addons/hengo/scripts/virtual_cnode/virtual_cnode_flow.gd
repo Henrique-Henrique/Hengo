@@ -6,16 +6,16 @@ class_name HenVirtualCNodeFlow extends HenVirtualCNodeRoute
 @export var flow_outputs: Array[HenVCFlow]
 
 
-func get_flow_input(_id: int) -> HenVCFlow:
-	for flow: HenVCFlow in flow_inputs:
+func get_flow_input(_id: int, _save_data: HenSaveData) -> HenVCFlow:
+	for flow: HenVCFlow in get_flow_inputs(_save_data):
 		if flow.id == _id:
 			return flow
 	
 	return null
 
 
-func get_flow_output(_id: int) -> HenVCFlow:
-	for flow: HenVCFlow in flow_outputs:
+func get_flow_output(_id: int, _save_data: HenSaveData) -> HenVCFlow:
+	for flow: HenVCFlow in get_flow_outputs(_save_data):
 		if flow.id == _id:
 			return flow
 	
@@ -23,8 +23,9 @@ func get_flow_output(_id: int) -> HenVCFlow:
 
 
 func add_flow_connection_with_return(_id: int, _to_id: int, _from: HenVirtualCNode, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
-	var flow_input: HenVCFlow = _to.get_flow_input(_to_id)
-	var flow_output: HenVCFlow = get_flow_output(_id)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var flow_input: HenVCFlow = _to.get_flow_input(_to_id, global.SAVE_DATA)
+	var flow_output: HenVCFlow = get_flow_output(_id, global.SAVE_DATA)
 
 	if not flow_input or not flow_output:
 		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Not Found HenTypeFlow Connections: Id -> " + str(_id) + " or To Id -> " + str(_to_id), HenToast.MessageType.ERROR)
@@ -71,7 +72,10 @@ func flow_input_has_connection(_id: int, _input_id: int) -> bool:
 			continue
 		
 		if flow_connection.to_id == _id and flow_connection.get_to(global.SAVE_DATA).id == _input_id:
-			return true
+			var from_node: HenVirtualCNode = flow_connection.get_from(global.SAVE_DATA)
+			
+			if from_node and from_node.get_flow_output(flow_connection.from_id, global.SAVE_DATA):
+				return true
 
 	return false
 
@@ -122,10 +126,6 @@ func on_flow_added(_is_input: bool, _data: Dictionary, _owner: HenVirtualCNode) 
 		flow_inputs.append(flow)
 	else:
 		flow_outputs.append(flow)
-	
-	flow.moved.connect(on_flow_moved)
-	flow.deleted.connect(on_flow_deleted)
-	flow.update_changes.connect(on_need_update)
 
 	cnode_need_update.emit()
 
@@ -182,3 +182,59 @@ func on_delete_flow_state(_ref: HenVCFlow) -> void:
 func change_flow_name(_name: String, _ref: HenVCFlow) -> void:
 	_ref.name = _name
 	cnode_need_update.emit()
+
+
+func get_flow_inputs(_save_data: HenSaveData) -> Array[HenVCFlow]:
+	var res = get_res(_save_data)
+
+	if res and res is HenSaveResType:
+		var new_data_list: Array = (res as HenSaveResType).get_flow_inputs(sub_type)
+
+		for i: int in new_data_list.size():
+			var data: Dictionary = new_data_list[i]
+
+			if i < flow_inputs.size():
+				var existing: HenVCFlow = flow_inputs[i]
+				if existing.id != data.get('id'): existing.id = data.get('id')
+				if data.has('name') and existing.name != data.get('name'): existing.name = data.get('name')
+			else:
+				create_flow(true, data)
+		
+		if flow_inputs.size() > new_data_list.size():
+			flow_inputs.resize(new_data_list.size())
+			
+	return flow_inputs
+
+
+func get_flow_outputs(_save_data: HenSaveData) -> Array[HenVCFlow]:
+	var res = get_res(_save_data)
+
+	if res and res is HenSaveResType:
+		var new_data_list: Array = (res as HenSaveResType).get_flow_outputs(sub_type)
+
+		for i: int in new_data_list.size():
+			var data: Dictionary = new_data_list[i]
+
+			if i < flow_outputs.size():
+				var existing: HenVCFlow = flow_outputs[i]
+				if existing.id != data.get('id'): existing.id = data.get('id')
+				if data.has('name') and existing.name != data.get('name'): existing.name = data.get('name')
+			else:
+				create_flow(false, data)
+		
+		if flow_outputs.size() > new_data_list.size():
+			flow_outputs.resize(new_data_list.size())
+	
+	return flow_outputs
+
+
+func create_flow(_is_input: bool, _data: Dictionary) -> HenVCFlow:
+	var flow: HenVCFlow = HenVCFlow.create(self, _data)
+
+	if _is_input:
+		flow_inputs.append(flow)
+	else:
+		flow_outputs.append(flow)
+	
+	cnode_need_update.emit()
+	return flow

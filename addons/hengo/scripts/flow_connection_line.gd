@@ -108,7 +108,8 @@ func change_debug_line_color(_color: Color) -> void:
 
 
 func get_flow_io_position(_from: HenVirtualCNode, _is_input: bool, _target_idx: int) -> Vector2:
-	var flows: Array = _from.flow_inputs if _is_input else _from.flow_outputs
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var flows: Array = _from.get_flow_inputs(global.SAVE_DATA) if _is_input else _from.get_flow_outputs(global.SAVE_DATA)
 	
 	if _target_idx < 0 or _target_idx >= flows.size():
 		return _from.position

@@ -188,7 +188,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 			
 	idx = 0
 
-	for flow_input: HenVCFlow in flow_inputs:
+	for flow_input: HenVCFlow in get_flow_inputs(global.SAVE_DATA):
 		# showing from flow connections
 		var flow_input_instance: HenFromFlow = from_flow_container.get_child(idx)
 		var label: Label = flow_input_instance.get_node('%Label')
@@ -210,7 +210,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 	idx = 0
 
 	
-	for flow_output: HenVCFlow in flow_outputs:
+	for flow_output: HenVCFlow in get_flow_outputs(global.SAVE_DATA):
 		# showing flow connections
 		var my_flow_container = flow_container.get_child(idx)
 		var connector: HenFlowConnector = my_flow_container.get_node('FlowSlot/Control/Connector')
@@ -242,16 +242,33 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
 		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
+		if not from or not to:
+			if not connection.line_ref: continue
+
+			connection.line_ref.visible = false
+			connection.line_ref = null
+			continue
+
+		var from_idx: int = from.get_flow_outputs(global.SAVE_DATA).find(from.get_flow_output(connection.from_id, global.SAVE_DATA))
+		var to_idx: int = to.get_flow_inputs(global.SAVE_DATA).find(to.get_flow_input(connection.to_id, global.SAVE_DATA))
+
+		if from_idx < 0 or to_idx < 0:
+			if not connection.line_ref: continue
+
+			connection.line_ref.visible = false
+			connection.line_ref = null
+			continue
+
 		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
 		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
 		connection.line_ref.from = weakref(from)
 		connection.line_ref.to = weakref(to)
-		connection.line_ref.from_idx = from.flow_outputs.find(from.get_flow_output(connection.from_id))
-		connection.line_ref.to_idx = to.flow_inputs.find(to.get_flow_input(connection.to_id))
+		connection.line_ref.from_idx = from_idx
+		connection.line_ref.to_idx = to_idx
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:
-			var flow_idx = to.flow_inputs.find(to.get_flow_input(connection.to_id))
+			var flow_idx = to.get_flow_inputs(global.SAVE_DATA).find(to.get_flow_input(connection.to_id, global.SAVE_DATA))
 			connection.line_ref.output = to.cnode_instance.get_node('%FromFlowContainer').get_child(flow_idx).get_node('%Arrow')
 
 			if not to.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
@@ -259,7 +276,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 		# drawing outputs
 		if connection.line_ref.from_pool_visible:
-			var flow_idx = from.flow_outputs.find(from.get_flow_output(connection.from_id))
+			var flow_idx = from.get_flow_outputs(global.SAVE_DATA).find(from.get_flow_output(connection.from_id, global.SAVE_DATA))
 			connection.line_ref.input = from.cnode_instance.get_node('%FlowContainer').get_child(flow_idx).get_node('FlowSlot/Control/Connector')
 
 			if not from.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
