@@ -7,45 +7,45 @@ var old_connections: Array
 
 
 func _init(_connection: HenVCConnectionData, _to_id = -1) -> void:
-    connection = _connection
-    to_id = _to_id
+	connection = _connection
+	to_id = _to_id
 
 
 func add() -> void:
-    # removing old inputs
-    var global: HenGlobal = Engine.get_singleton(&'Global')
-    var remove_connection: Array = []
-    
-    for connection_ref: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(connection.get_to()):
-        if connection_ref.to_id != to_id:
-            continue
+	# removing old inputs
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var remove_connection: Array = []
+	
+	for connection_ref: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(connection.get_to(global.SAVE_DATA)):
+		if connection_ref.to_id != to_id:
+			continue
 
-        remove_connection.append(connection_ref)
+		remove_connection.append(connection_ref)
 
-    for connection_ref: HenVCConnectionData in remove_connection:
-        global.SAVE_DATA.remove_connection(connection_ref)
-        old_connections.append(connection_ref)
+	for connection_ref: HenVCConnectionData in remove_connection:
+		global.SAVE_DATA.remove_connection(connection_ref)
+		old_connections.append(connection_ref)
 
-    global.SAVE_DATA.add_connection(connection)
+	global.SAVE_DATA.add_connection(connection)
 
-    if global.IS_HEADLESS:
-        return
-    
-    connection.get_to().update()
-    connection.get_from().update()
+	if global.IS_HEADLESS:
+		return
+	
+	connection.get_to(global.SAVE_DATA).update()
+	connection.get_from(global.SAVE_DATA).update()
 
 
 func remove() -> void:
-    var global: HenGlobal = Engine.get_singleton(&'Global')
-    global.SAVE_DATA.remove_connection(connection)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.SAVE_DATA.remove_connection(connection)
 
-    for connection_ref: HenVCConnectionData in old_connections:
-        global.SAVE_DATA.add_connection(connection_ref)
+	for connection_ref: HenVCConnectionData in old_connections:
+		global.SAVE_DATA.add_connection(connection_ref)
 
-    old_connections.clear()
+	old_connections.clear()
 
-    if global.IS_HEADLESS:
-        return
-    
-    connection.get_to().update()
-    connection.get_from().update()
+	if global.IS_HEADLESS:
+		return
+	
+	connection.get_to(global.SAVE_DATA).update()
+	connection.get_from(global.SAVE_DATA).update()

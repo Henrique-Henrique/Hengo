@@ -27,8 +27,8 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 
 		var input_flow_connections: Array = _save_data.get_flow_connection_from_vc(input_ref)
 
-		if not input_flow_connections.is_empty() and input_flow_connections[0].to:
-			var func_tokens: Array = HenVirtualCNodeCode.get_flow_tokens(_save_data, (input_flow_connections[0] as HenVCFlowConnectionData).get_to(), input_flow_connections[0].to_id)
+		if not input_flow_connections.is_empty() and (input_flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
+			var func_tokens: Array = HenVirtualCNodeCode.get_flow_tokens(_save_data, (input_flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), (input_flow_connections.get(0) as HenVCFlowConnectionData).to_id)
 			var func_block: Array = []
 
 			for token in func_tokens:

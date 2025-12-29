@@ -5,7 +5,6 @@ extends GdUnitTestSuite
 # this removes duplication and cleans up the tests.
 func _create_for_range_node() -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		id = 2,
 		name = 'For -> Range',
 		type = HenVirtualCNode.Type.FOR,
 		sub_type = HenVirtualCNode.SubType.FOR,
@@ -27,8 +26,8 @@ func _create_for_range_node() -> HenVirtualCNode:
 # tests the default code generation for an unconnected FOR node.
 func test_for_range_default_code() -> void:
 	var for_vc: HenVirtualCNode = _create_for_range_node()
-	
-	var expected_code = 'for index_2 in range(0, 0, 1):\n\tpass'
+	var var_name: String = 'index_' + str(for_vc.id)
+	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\tpass'
 	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)
 
 
@@ -39,21 +38,24 @@ func test_for_range_with_body_flow() -> void:
 
 	for_vc.add_flow_connection(0, 0, vc_flow_body).add()
 
-	var expected_code = 'for index_2 in range(0, 0, 1):\n\ttest_void()'
+	var var_name: String = 'index_' + str(for_vc.id)
+	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\ttest_void()'
 	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)
 
 
 # # tests connecting the 'index' data output of the FOR to another node's input.
 func test_for_range_with_index_output_connected() -> void:
 	var for_vc: HenVirtualCNode = _create_for_range_node()
-	var vc_with_input: HenVirtualCNode = HenTest.get_void_with_input(3)
+	var vc_with_input: HenVirtualCNode = HenTest.get_void_with_input()
 
 	# Connect the execution flow (loop body -> function)
 	for_vc.add_flow_connection(0, 0, vc_with_input).add()
 	# Connect the data flow ('index' output from the loop -> function input)
 	vc_with_input.get_new_input_connection_command(0, 0, for_vc).add()
 
-	var expected_code = 'for index_2 in range(0, 0, 1):\n\ttest_void(index_2)'
+	var var_name: String = 'index_' + str(for_vc.id)
+	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\ttest_void(' + var_name + ')'
+
 	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)
 
 
@@ -68,5 +70,6 @@ func test_for_range_with_after_flow() -> void:
 	# "After" connection
 	for_vc.add_flow_connection(1, 0, vc_flow_after).add()
 
-	var expected_code = 'for index_2 in range(0, 0, 1):\n\ttest_void()\ntest_void()'
+	var var_name: String = 'index_' + str(for_vc.id)
+	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\ttest_void()\ntest_void()'
 	assert_str(HenTest.get_vc_code(for_vc)).is_equal(expected_code)

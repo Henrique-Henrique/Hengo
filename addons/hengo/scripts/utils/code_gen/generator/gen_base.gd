@@ -42,16 +42,17 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 			# getting start state cnode
 			HenVirtualCNode.SubType.STATE_START:
 				if not flow_connections.is_empty():
-					start_state = (flow_connections[0] as HenVCFlowConnectionData).get_to()
+					start_state = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data)
 			HenVirtualCNode.SubType.STATE:
 				var transitions: Array = []
 
 				# getting transition
 				for flow_connection: HenVCFlowConnectionData in flow_connections:
-					if flow_connection.get_to():
+					var to: HenVirtualCNode = flow_connection.get_to(_save_data)
+					if to:
 						transitions.append({
-							name = flow_connection.get_to().get_vc_name(),
-							to_state_name = flow_connection.get_to().get_vc_name()
+							name = to.get_vc_name(),
+							to_state_name = to.get_vc_name()
 						})
 
 				_refs.states_data[_vc.get_vc_name().to_snake_case()] = {
@@ -59,20 +60,20 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 					transitions = transitions
 				}
 			HenVirtualCNode.SubType.STATE_EVENT:
-				if not flow_connections.is_empty() and flow_connections[0].to:
+				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					events.append({
 						name = _vc.name,
-						to_state_name = (flow_connections[0] as HenVCFlowConnectionData).get_to().name
+						to_state_name = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data).name
 					})
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-				if not flow_connections.is_empty() and flow_connections[0].to:
+				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					if not override_virtual_data.has(_vc.name):
 						override_virtual_data[_vc.name] = {
 							params = HenVirtualCNodeCode.get_output_token_list(_vc),
 							tokens = []
 						}
 
-				(override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections[0] as HenVCFlowConnectionData).get_to(), 0))
+				(override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0))
 
 
 	# search for override virtual inside macros
@@ -96,14 +97,14 @@ static func get_base_script_code(_save_data: HenSaveData, _refs) -> String:
 
 					var flow_connections: Array = _save_data.get_flow_connection_from_vc(v_cnode)
 					
-					if flow_connections[0].to:
+					if (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 						if not override_virtual_data.has(v_cnode.name):
 							override_virtual_data[v_cnode.name] = {
 								params = HenVirtualCNodeCode.get_output_token_list(v_cnode),
 								tokens = []
 							}
 
-						for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections[0] as HenVCFlowConnectionData).get_to(), 0):
+						for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0):
 							token.vc_id = macro_ref.id
 							(override_virtual_data[v_cnode.name].tokens as Array).append(token)
 
@@ -157,11 +158,11 @@ static func _parse_virtual_cnode(_cnode_list: Array, _save_data: HenSaveData) ->
 			continue
 		
 		var cnode_name: String = vc.name
-		var from_flow: HenVCFlowConnectionData = flow_connections[0]
+		var from_flow: HenVCFlowConnectionData = flow_connections.get(0)
+		var from_flow_to: HenVirtualCNode = from_flow.get_to(_save_data)
 
-		if from_flow.get_to():
-			pass
-			var token_list = HenVirtualCNodeCode.get_flow_tokens(_save_data, from_flow.get_to(), from_flow.to_id)
+		if from_flow_to:
+			var token_list = HenVirtualCNodeCode.get_flow_tokens(_save_data, from_flow_to, from_flow.to_id)
 
 			data[cnode_name] = {
 				tokens = token_list,

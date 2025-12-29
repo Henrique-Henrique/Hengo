@@ -84,12 +84,10 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 
 	connection.from_type = output.type
 	connection.from_id = output.id
-	connection.output_ref = output
-	connection.from = _from
-	connection.to = _to
+	connection.from_node_id = _from.id
+	connection.to_node_id = _to.id
 	connection.to_type = input.type
 	connection.to_id = input.id
-	connection.input_ref = input
 
 	return HenVCConnectionReturn.new(connection, _id)
 
@@ -97,7 +95,7 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 func get_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCConnectionData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(_virtual_cnode):
-		if input_connection.get_to() == _virtual_cnode and input_connection.to_id == _id:
+		if input_connection.get_to(global.SAVE_DATA) == _virtual_cnode and input_connection.to_id == _id:
 			return input_connection
 
 	return null
@@ -149,7 +147,7 @@ func remove_io_connection(_ref: HenVCInOutData) -> void:
 		if connection.line_ref:
 			connection.line_ref.visible = false
 
-		connection.get_from().cnode_need_update.emit()
+		connection.get_from(global.SAVE_DATA).cnode_need_update.emit()
 	
 	cnode_need_update.emit()
 

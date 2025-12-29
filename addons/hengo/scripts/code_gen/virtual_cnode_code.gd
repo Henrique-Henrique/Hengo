@@ -32,17 +32,17 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 				if global.USE_MACRO_REF:
 					var flow: HenVCFlowConnectionData = get_flow_connection(_save_data, global.MACRO_REF, _id) if not _save_data.get_outgoing_flow_connection_from_vc(global.MACRO_REF).is_empty() else null
 
-					if flow and flow.get_to():
-						stack.append({node = flow.get_to(), id = flow.to_id})
+					if flow and flow.get_to(_save_data):
+						stack.append({node = flow.get_to(_save_data), id = flow.to_id})
 					
 					global.USE_MACRO_REF = false
 			_:
 				token_list.append(get_token(_save_data, vc))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
 
-				if not flow_connections.is_empty() and (flow_connections[0] as HenVCFlowConnectionData).get_to():
-					var first: HenVCFlowConnectionData = flow_connections[0]
-					stack.append({node = first.get_to(), id = first.to_id})
+				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
+					var first: HenVCFlowConnectionData = flow_connections.get(0)
+					stack.append({node = first.get_to(_save_data), id = first.to_id})
 
 	return _token_list
 
@@ -61,11 +61,11 @@ static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: 
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
 			0:
-				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = true_flow_id})
+				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = true_flow_id})
 			1:
-				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = false_flow_id})
+				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = false_flow_id})
 			2:
-				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = then_flow_id})
+				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
 		vc_id = _vc.id,
@@ -89,9 +89,9 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
 			0:
-				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = body_flow_id})
+				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = body_flow_id})
 			1:
-				_stack.append({node = flow.get_to(), id = flow.to_id, flow_id = then_flow_id})
+				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
 		id = _vc.id,
@@ -126,14 +126,16 @@ static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow
 		return INVALID_TOKEN
 	
 	var input_flow: HenVCFlowConnectionData = get_flow_connection(_save_data, input_ref, _flow_id)
+	var input_flow_to: HenVirtualCNode = input_flow.get_to(_save_data)
 
-	if input_flow.get_to():
+
+	if input_flow_to:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		global.USE_MACRO_REF = true
 		global.MACRO_REF = _vc
 		global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
 		global.USE_MACRO_USE_SELF = true
-		flow_tokens = get_flow_tokens(_save_data, input_flow.get_to(), input_flow.to_id)
+		flow_tokens = get_flow_tokens(_save_data, input_flow_to, input_flow.to_id)
 		global.USE_MACRO_USE_SELF = false
 
 	return {
@@ -182,8 +184,8 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 
 	for input_connection: HenVCConnectionData in _save_data.get_to_connection_from_vc(_vc):
 		if input_connection.to_id == _id:
-			var output_id_list: Array = input_connection.get_from().outputs.map(func(x): return x.id)
-			var input_id_list: Array = input_connection.get_to().inputs.map(func(x): return x.id)
+			var output_id_list: Array = input_connection.get_from(_save_data).outputs.map(func(x): return x.id)
+			var input_id_list: Array = input_connection.get_to(_save_data).inputs.map(func(x): return x.id)
 
 			if not output_id_list.has(input_connection.from_id) or not input_id_list.has(input_connection.to_id):
 				continue
@@ -191,8 +193,8 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 			connection = input_connection
 			break
 
-	if connection and connection.get_from():
-		match connection.get_from().sub_type:
+	if connection and connection.get_from(_save_data):
+		match connection.get_from(_save_data).sub_type:
 			HenVirtualCNode.SubType.MACRO_INPUT:
 				if global.USE_MACRO_REF:
 					var data: Dictionary = get_input_token(_save_data, global.MACRO_REF, connection.from_id)
@@ -201,7 +203,7 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 				global.USE_MACRO_USE_SELF = true
 				global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
 				var data: Dictionary = {}
-				var res = connection.get_from().get_res(_save_data)
+				var res = connection.get_from(_save_data).get_res(_save_data)
 
 				if res:
 					data = get_input_token(_save_data, res, connection.to_id)
@@ -210,7 +212,7 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 				global.USE_MACRO_USE_SELF = false
 				return data
 			_:
-				var data: Dictionary = get_token(_save_data, connection.get_from(), get_output_index(connection.get_from(), connection.from_id))
+				var data: Dictionary = get_token(_save_data, connection.get_from(_save_data), get_output_index(connection.get_from(_save_data), connection.from_id))
 				
 				if not data.type == HenVirtualCNode.SubType.INVALID:
 					data.prop_name = input.name

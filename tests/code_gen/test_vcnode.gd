@@ -46,8 +46,8 @@ func test_vcnode_io() -> void:
 	assert_int((global.SAVE_DATA.get_connection_from_vc(vc) as Array[HenVCConnectionData]).size()).is_equal(1)
 	assert_int((global.SAVE_DATA.get_connection_from_vc(vc2) as Array[HenVCConnectionData]).size()).is_equal(1)
 
-	assert_int((global.SAVE_DATA.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_from().id).is_equal(vc2.id)
-	assert_int((global.SAVE_DATA.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_to().id).is_equal(vc.id)
+	assert_int((global.SAVE_DATA.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_from(global.SAVE_DATA).id).is_equal(vc2.id)
+	assert_int((global.SAVE_DATA.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_to(global.SAVE_DATA).id).is_equal(vc.id)
 
 	connection_return.remove()
 
@@ -77,7 +77,7 @@ func test_vcnode_flow() -> void:
 	flow_connection_return.add()
 
 	assert_bool((global.SAVE_DATA.get_flow_connection_from_vc(vc) as Array[HenVCFlowConnectionData]).size() == 1).is_true()
-	assert_bool((global.SAVE_DATA.get_flow_connection_from_vc(vc)[0] as HenVCFlowConnectionData).get_from().id == vc.id).is_true()
+	assert_bool((global.SAVE_DATA.get_flow_connection_from_vc(vc)[0] as HenVCFlowConnectionData).get_from(global.SAVE_DATA).id == vc.id).is_true()
 	flow_connection_return.remove()
 	assert_bool((global.SAVE_DATA.get_flow_connection_from_vc(vc) as Array[HenVCFlowConnectionData]).is_empty()).is_true()
 

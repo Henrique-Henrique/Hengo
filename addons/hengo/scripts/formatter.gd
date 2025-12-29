@@ -77,11 +77,13 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 	var min_pos: Vector2 = _vc.position
 	var max_pos: Vector2 = _vc.position + _vc.size
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if _vc.flow_outputs.size() == 1:
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(_vc.flow_outputs[0].id)
 		if flow_connection:
-			var from: HenVirtualCNode = flow_connection.get_from()
-			var to: HenVirtualCNode = flow_connection.get_to()
+			var from: HenVirtualCNode = flow_connection.get_from(global.SAVE_DATA)
+			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 			var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 			if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
@@ -129,7 +131,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 			for flow_output: HenVCFlow in left_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
-					var to: HenVirtualCNode = flow_connection.get_to()
+					var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
@@ -151,13 +153,13 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						left_x_limit = min(left_x_limit, child_bounding.position.x - MIDDLE_X_GAP)
 						to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 				idx += 1
-			
+
 			idx = right_list.size() * -1
 			var right_x_limit: float = (_vc.position.x + _vc.size.x / 2.) + MIDDLE_X_GAP
 			for flow_output: HenVCFlow in right_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
-					var to: HenVirtualCNode = flow_connection.get_to()
+					var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
@@ -206,7 +208,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 			for flow_output: HenVCFlow in left_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
-					var to: HenVirtualCNode = flow_connection.get_to()
+					var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
@@ -235,7 +237,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 			for flow_output: HenVCFlow in right_list:
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
-					var to: HenVirtualCNode = flow_connection.get_to()
+					var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 
 					if to_format_data.flow_inputs_positioned_ids.has(flow_connection.to_id):
@@ -270,7 +272,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 					continue
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
-					var to: HenVirtualCNode = flow_connection.get_to()
+					var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 					var to_format_data: VCFormatData = get_format_data(to.id, _data)
 					if to_format_data.has_multiple_parents:
 						continue
@@ -298,7 +300,7 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 
 			var middle_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(middle_output.id)
 			if middle_connection:
-				var middle_to: HenVirtualCNode = middle_connection.get_to()
+				var middle_to: HenVirtualCNode = middle_connection.get_to(global.SAVE_DATA)
 				var middle_to_format_data: VCFormatData = get_format_data(middle_to.id, _data)
 
 				if middle_to_format_data.flow_inputs_positioned_ids.has(middle_connection.to_id):
@@ -333,10 +335,12 @@ static func move_flow_tree(_vc: HenVirtualCNode, _offset: Vector2, _data: Format
 	set_position(_vc, _vc.position + _offset, _data)
 	start_map_inputs(_vc, _data)
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	for flow_output: HenVCFlow in _vc.flow_outputs:
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
-			var to: HenVirtualCNode = flow_connection.get_to()
+			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 			var to_format_data: VCFormatData = get_format_data(to.id, _data)
 			if to_format_data.has_multiple_parents:
 				continue
@@ -352,10 +356,12 @@ static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) 
 	min_pos = min_pos.min(input_rect.position)
 	max_pos = max_pos.max(input_rect.position + input_rect.size)
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	for flow_output: HenVCFlow in _vc.flow_outputs:
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
-			var to: HenVirtualCNode = flow_connection.get_to()
+			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 			var to_format_data: VCFormatData = get_format_data(to.id, _data)
 			if to_format_data.has_multiple_parents:
 				continue
@@ -380,8 +386,8 @@ static func start_map_inputs(_vc: HenVirtualCNode, _data: FormatterData, _rect: 
 
 	var idx = 0
 	for connection: HenVCConnectionData in connection_list:
-		var from: HenVirtualCNode = connection.get_from()
-		set_position(from, Vector2(connection.get_to().position.x - from.size.x - INPUT_X_GAP, _data.y_limit + idx * INPUT_Y_GAP), _data)
+		var from: HenVirtualCNode = connection.get_from((Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA)
+		set_position(from, Vector2(connection.get_to((Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA).position.x - from.size.x - INPUT_X_GAP, _data.y_limit + idx * INPUT_Y_GAP), _data)
 		var input_bounding: Rect2 = start_map_inputs(from, _data)
 		min_pos = min_pos.min(input_bounding.position)
 		max_pos = max_pos.max(input_bounding.position + input_bounding.size)

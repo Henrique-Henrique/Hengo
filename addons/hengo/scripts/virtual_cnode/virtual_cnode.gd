@@ -390,6 +390,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 				_config.from_flow = (res as HenSaveMacro).flow_inputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
 				_config.to_flow = (res as HenSaveMacro).flow_outputs.map(func(x: HenSaveParam) -> Dictionary: return x.get_data())
 
+
 	match v_cnode.type:
 		HenVirtualCNode.Type.DEFAULT:
 			if not _config.has('to_flow'): v_cnode.flow_outputs.append(HenVCFlow.create(v_cnode, {id = 0}))

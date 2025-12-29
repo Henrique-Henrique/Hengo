@@ -73,8 +73,8 @@ func create_script(_name: String, _class: StringName) -> Dictionary:
 	identity.take_over_path(id_path.path_join('identity.tres'))
 	res.take_over_path(id_path.path_join('save.tres'))
 
-	var result: int = ResourceSaver.save(res, id_path.path_join('save.tres'))
-	var result_identity: int = ResourceSaver.save(identity, id_path.path_join('identity.tres'))
+	var result_identity: int = ResourceSaver.save(identity)
+	var result: int = ResourceSaver.save(res)
 
 	if result == OK and result_identity == OK:
 		print('Success saving')

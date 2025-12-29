@@ -68,11 +68,11 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var outgoing_nodes: Array[Dictionary] = []
 	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connection_from_vc(_vc):
-		var from: HenVirtualCNode = flow_connection.get_from()
+		var from: HenVirtualCNode = flow_connection.get_from(global.SAVE_DATA)
 		if from != _vc:
 			continue
 		
-		var to: HenVirtualCNode = flow_connection.get_to()
+		var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
 		if to:
 			var output_index: int = 0
 			for i: int in range(_vc.flow_outputs.size()):

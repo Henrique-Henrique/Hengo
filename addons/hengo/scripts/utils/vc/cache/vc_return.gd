@@ -36,12 +36,12 @@ func add() -> void:
 		v_cnode.check_visibility()
 
 		for connection: HenVCConnectionData in old_connections:
-			connection.get_to().update()
-			connection.get_from().update()
+			connection.get_to(global.SAVE_DATA).update()
+			connection.get_from(global.SAVE_DATA).update()
 		
 		for flow_connection: HenVCFlowConnectionData in old_flow_connections:
-			flow_connection.get_to().update()
-			flow_connection.get_from().update()
+			flow_connection.get_to(global.SAVE_DATA).update()
+			flow_connection.get_from(global.SAVE_DATA).update()
 		
 		if global.RIGHT_SIDE_BAR:
 			var router: HenRouter = Engine.get_singleton(&'Router')
@@ -90,12 +90,12 @@ func remove() -> void:
 	v_cnode.hide()
 
 	for connection: HenVCConnectionData in remove_connections:
-		connection.get_to().update()
-		connection.get_from().update()
+		connection.get_to(global.SAVE_DATA).update()
+		connection.get_from(global.SAVE_DATA).update()
 	
 	for flow_connection: HenVCFlowConnectionData in remove_flow_connections:
-		flow_connection.get_to().update()
-		flow_connection.get_from().update()
+		flow_connection.get_to(global.SAVE_DATA).update()
+		flow_connection.get_from(global.SAVE_DATA).update()
 
 	if global.RIGHT_SIDE_BAR:
 		var router: HenRouter = Engine.get_singleton(&'Router')

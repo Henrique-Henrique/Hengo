@@ -56,7 +56,6 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 
 	# loading hengo script data
 	if save_data:
-		ResourceSaver.save(global.SAVE_DATA)
 		global.SAVE_DATA = save_data
 		reset_to_load(_id, _headless)
 	else:

@@ -87,8 +87,8 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 		idx += 1
 
 	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
-		var from: HenVirtualCNode = connection.get_from()
-		var to: HenVirtualCNode = connection.get_to()
+		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
+		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
 		if not from or not to:
 			if not connection.line_ref: continue
@@ -239,8 +239,8 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 			if not connection.line_ref:
 				continue
 
-		var from: HenVirtualCNode = connection.get_from()
-		var to: HenVirtualCNode = connection.get_to()
+		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
+		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
 		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
 		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
@@ -303,9 +303,9 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 		if not is_instance_valid(connection.line_ref):
 			connection.line_ref = null
 			continue
-		
-		var from: HenVirtualCNode = connection.get_from()
-		var to: HenVirtualCNode = connection.get_to()
+
+		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
+		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
 		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
 		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
@@ -334,8 +334,8 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			connection.line_ref = null
 			continue
 
-		var from: HenVirtualCNode = connection.get_from()
-		var to: HenVirtualCNode = connection.get_to()
+		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
+		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
 		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
 		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
