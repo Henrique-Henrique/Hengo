@@ -52,7 +52,7 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				value = get_code_by_token(_token.value)
 			})
 		HenVirtualCNode.SubType.SET_VAR_FROM:
-			return indent + get_code_by_token(_token.ref) + '{name} = {value}'.format({
+			return indent + get_prefix_with_dot(get_code_by_token(_token.ref)) + '{name} = {value}'.format({
 				name = _token.name,
 				value = get_code_by_token(_token.value)
 			})

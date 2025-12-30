@@ -223,7 +223,7 @@ func add_detailed_dep(_id: StringName, _dep_info: Dictionary) -> void:
 	(identity.detailed_deps[_id] as Array).append(_dep_info)
 
 
-func add_var() -> void:
+func add_var(_save: bool = true) -> void:
 	var v: HenSaveVar = HenSaveVar.create()
 
 	if not v:
@@ -241,14 +241,15 @@ func add_state() -> void:
 	states.append(s)
 
 
-func add_func() -> void:
+func add_func(_save: bool = true) -> void:
 	var f: HenSaveFunc = HenSaveFunc.create()
 
 	if not f:
 		return
 	
-	if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
-		return
+	if _save:
+		if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
+			return
 	
 	functions.append(f)
 
@@ -262,7 +263,7 @@ func add_signal() -> void:
 	signals.append(s)
 
 
-func add_signals_callback() -> void:
+func add_signals_callback(_save: bool = true) -> void:
 	var sc: HenSaveSignalCallback = HenSaveSignalCallback.create()
 
 	if not sc:

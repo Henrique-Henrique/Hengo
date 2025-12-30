@@ -22,7 +22,7 @@ static func get_var_code_base(_type: StringName, _export: bool, _custom_name: St
 		type_value = _type + '.new()'
 
 	var_code += '{export_var}var {name} = {value} {id} \n'.format({
-		name = _custom_name,
+		name = _custom_name.to_snake_case(),
 		value = type_value,
 		export_var = '@export ' if _export else '',
 		id = '#ID:' + _preview_id if _preview_id else ''
@@ -35,5 +35,5 @@ static func get_var_code_from_param(_var_data: HenSaveParam, _custom_name: Strin
 	return get_var_code_base(_var_data.type, false, _custom_name, _preview_id)
 
 
-static func get_var_code_from_var(_var_data: HenSaveVar, _custom_name: String = '', _preview_id: String = '') -> String:
-	return get_var_code_base(_var_data.type, _var_data.is_export, _custom_name, _preview_id)
+static func get_var_code_from_var(_var_data: HenSaveVar) -> String:
+	return get_var_code_base(_var_data.type, _var_data.is_export, _var_data.name)

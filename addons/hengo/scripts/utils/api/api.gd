@@ -467,18 +467,7 @@ func decompress_and_get_data(compressed_data: CompressedData) -> Variant:
 
 
 func get_side_bar_list() -> Dictionary:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
-
-	ast.identity = global.SAVE_DATA.identity
-	ast.macros = global.SAVE_DATA.macros
-	ast.variables = global.SAVE_DATA.variables
-	ast.functions = global.SAVE_DATA.functions
-	ast.signals = global.SAVE_DATA.signals
-	ast.signals_callback = global.SAVE_DATA.signals_callback
-	ast.states = global.SAVE_DATA.states
-
-	return {_class_name = 'Hengo', categories = get_side_bar_categories(ast)}
+	return {_class_name = 'Hengo', categories = get_side_bar_categories(HenUtils.get_current_ast_list())}
 
 
 func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_script: bool = false) -> Array:
@@ -542,12 +531,12 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 		(var_category.method_list as Array).append({
 			_class_name = 'Variable',
 			name = getter_name,
-			data = var_data.get_getter_cnode_data(_from_another_script)
+			data = var_data.get_getter_cnode_data(save_data_id, _from_another_script)
 		})
 		(var_category.method_list as Array).append({
 			_class_name = 'Variable',
 			name = setter_name,
-			data = var_data.get_setter_cnode_data(_from_another_script)
+			data = var_data.get_setter_cnode_data(save_data_id, _from_another_script)
 		})
 
 	for signal_data: HenSaveSignalCallback in _ast.signals_callback:

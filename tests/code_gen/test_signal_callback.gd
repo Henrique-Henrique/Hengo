@@ -3,22 +3,23 @@ extends GdUnitTestSuite
 
 # helper function that sets up and returns a basic signal configuration for testing
 func base_signal() -> HenSaveSignalCallback:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var first_signal_callback: HenSaveSignalCallback = HenSaveSignalCallback.create()
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	save_data.signals_callback.clear()
+	save_data.add_signals_callback(false)
+	var signal_callback_data: HenSaveSignalCallback = save_data.signals_callback.get(0)
 
-	first_signal_callback.name = 'my signal'
-	first_signal_callback.type = &'BaseButton'
-	first_signal_callback.signal_name = 'toggled_on'
-	first_signal_callback.signal_name_to_code = 'toggled_on'
+	signal_callback_data.name = 'my signal'
+	signal_callback_data.type = &'BaseButton'
+	signal_callback_data.signal_name = 'toggled_on'
+	signal_callback_data.signal_name_to_code = 'toggled_on'
 
 	var param4: HenSaveParam = HenSaveParam.create()
 
-	param4.name = first_signal_callback.signal_name
+	param4.name = signal_callback_data.signal_name
 
-	first_signal_callback.params.append(param4)
-	global.SAVE_DATA.signals_callback.append(first_signal_callback)
+	signal_callback_data.params.append(param4)
 
-	return first_signal_callback
+	return signal_callback_data
 
 
 # tests generation of an empty signal handler function with correct signature

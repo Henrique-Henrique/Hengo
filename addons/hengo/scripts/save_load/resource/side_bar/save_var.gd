@@ -79,23 +79,23 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	return []
 
 
-func get_getter_cnode_data(_from_another_script: bool = false) -> Dictionary:
+func get_getter_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return {
 		name = 'Get ' + name,
 		sub_type = HenVirtualCNode.SubType.VAR if not _from_another_script else HenVirtualCNode.SubType.VAR_FROM,
 		route = router.current_route,
-		res = self,
+		res_data = get_res_data(HenSideBar.AddType.VAR, _save_data_id)
 	}
 
 
-func get_setter_cnode_data(_from_another_script: bool = false) -> Dictionary:
+func get_setter_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return {
 		name = 'Set ' + name,
 		sub_type = HenVirtualCNode.SubType.SET_VAR if not _from_another_script else HenVirtualCNode.SubType.SET_VAR_FROM,
 		route = router.current_route,
-		res = self,
+		res_data = get_res_data(HenSideBar.AddType.VAR, _save_data_id)
 	}

@@ -421,3 +421,18 @@ static func save_side_bar_item(_res: Resource, _save_data_id: StringName, _type:
 	_res.take_over_path(path + str(_res.get(&'id')) + '.tres')
 	var result: int = ResourceSaver.save(_res)
 	return result == OK
+
+
+static func get_current_ast_list() -> HenMapDependencies.ProjectAST:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
+
+	ast.identity = global.SAVE_DATA.identity
+	ast.macros = global.SAVE_DATA.macros
+	ast.variables = global.SAVE_DATA.variables
+	ast.functions = global.SAVE_DATA.functions
+	ast.signals = global.SAVE_DATA.signals
+	ast.signals_callback = global.SAVE_DATA.signals_callback
+	ast.states = global.SAVE_DATA.states
+
+	return ast

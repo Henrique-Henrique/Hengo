@@ -43,6 +43,9 @@ static func set_global_config() -> void:
 	global.IS_HEADLESS = true
 	router.current_route = global.SAVE_DATA.get_base_route()
 
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	map_deps.ast_list.set(save_data.identity.id, HenUtils.get_current_ast_list())
+
 
 static func get_void(_route: HenRouteData = null) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({

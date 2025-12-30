@@ -81,7 +81,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					if not override_virtual_data.has(_vc.name):
 						override_virtual_data[_vc.name] = {
-							params = HenVirtualCNodeCode.get_output_token_list(_vc),
+							params = HenVirtualCNodeCode.get_output_token_list(_save_data, _vc),
 							tokens = []
 						}
 
@@ -112,7 +112,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 					if (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 						if not override_virtual_data.has(v_cnode.name):
 							override_virtual_data[v_cnode.name] = {
-								params = HenVirtualCNodeCode.get_output_token_list(v_cnode),
+								params = HenVirtualCNodeCode.get_output_token_list(_save_data, v_cnode),
 								tokens = []
 							}
 
@@ -178,7 +178,7 @@ static func _parse_virtual_cnode(_cnode_list: Array, _save_data: HenSaveData) ->
 
 			data[cnode_name] = {
 				tokens = token_list,
-				params = HenVirtualCNodeCode.get_output_token_list(vc)
+				params = HenVirtualCNodeCode.get_output_token_list(_save_data, vc)
 			}
 		else:
 			if cnode_name == 'enter':

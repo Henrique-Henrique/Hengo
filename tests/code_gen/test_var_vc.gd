@@ -1,33 +1,39 @@
 extends GdUnitTestSuite
 
 
-func test_get_var_code() -> void:
-    var var_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-        name = 'Get HenTypeVariable',
-        sub_type = HenVirtualCNode.SubType.VAR,
-        outputs = [
-            {
-                name = 'var name',
-                type = 'Variant',
-            }
-        ],
-        route = HenTest.get_base_route()
-    })
+func get_var_data() -> HenSaveVar:
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	save_data.variables.clear()
+	save_data.add_var(false)
 
-    assert_str(HenTest.get_vc_code(var_vc)).is_equal('var_name')
+	var var_data: HenSaveVar = save_data.variables.get(0)
+
+	var_data.name = 'test var'
+	var_data.type = &'int'
+
+	return var_data
 
 
-func test_set_var_code() -> void:
-    var var_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-        name = 'Set HenTypeVariable',
-        sub_type = HenVirtualCNode.SubType.SET_VAR,
-        inputs = [
-            {
-                name = 'var name',
-                type = 'Vector2',
-            }
-        ],
-        route = HenTest.get_base_route()
-    })
+func test_get_var_code_generation() -> void:
+	get_var_data()
 
-    assert_str(HenTest.get_vc_code(var_vc)).is_equal('var_name = Vector2(0, 0)')
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('var test_var = int()')
+
+
+func test_var_getter() -> void:
+	var var_data: HenSaveVar = get_var_data()
+	var var_get_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(var_data.get_getter_cnode_data(''))
+	var code: String = HenTest.get_vc_code(var_get_vc)
+
+	assert_str(code).is_equal('test_var')
+
+
+func test_var_setter() -> void:
+	var var_data: HenSaveVar = get_var_data()
+	
+	var var_get_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(var_data.get_setter_cnode_data(''))
+	var code: String = HenTest.get_vc_code(var_get_vc)
+
+	assert_str(code).is_equal('test_var = 0')
