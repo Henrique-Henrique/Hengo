@@ -30,7 +30,7 @@ static func get_states_code(_refs: HenTypeReferences) -> String:
 	for state_name in _refs.states_data.keys():
 		var item = _refs.states_data[state_name]
 
-		var base = '{new_line}class {name} extends HengoState:\n'.format({
+		var base = '\n{new_line}class {name} extends HengoState:\n'.format({
 			name = state_name.to_pascal_case(),
 			new_line = '\n\n' if idx > 0 else ''
 		})

@@ -290,9 +290,8 @@ func get_id() -> int:
 	return id
 
 
-func get_vc_name() -> String:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	var res = get_res(save_data)
+func get_vc_name(_save_data: HenSaveData) -> String:
+	var res = get_res(_save_data)
 
 	if res:
 		return res.get(&'name')

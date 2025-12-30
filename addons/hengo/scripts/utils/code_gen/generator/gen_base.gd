@@ -36,7 +36,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 
 	# getting states
 	for _vc: HenVirtualCNode in _save_data.get_base_route().virtual_cnode_list:
-		var flow_connections: Array = _save_data.get_flow_connection_from_vc(_vc)
+		var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(_vc)
 		
 		match _vc.sub_type:
 			# getting start state cnode
@@ -48,17 +48,26 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 
 				# getting transition
 				for flow_connection: HenVCFlowConnectionData in flow_connections:
-					var to: HenVirtualCNode = flow_connection.get_to(_save_data)
-					if to:
-						transitions.append({
-							name = to.get_vc_name(),
-							to_state_name = to.get_vc_name()
-						})
+					var state: HenSaveState = _vc.get_res(_save_data)
+
+					if state:
+						var to: HenVirtualCNode = flow_connection.get_to(_save_data)
+
+						if to:
+							var flow_output_id_list: Array = _vc.get_flow_outputs(_save_data).map(func(x: HenVCFlow): return x.id)
+
+							prints(flow_output_id_list, flow_connection.from_id)
+
+							if flow_output_id_list.has(flow_connection.from_id):
+								transitions.append({
+									name = to.get_vc_name(_save_data),
+									to_state_name = to.get_vc_name(_save_data)
+								})
 
 				var state_res: HenSaveState = _vc.get_res(_save_data)
 
 				if state_res:
-					_refs.states_data[_vc.get_vc_name().to_snake_case()] = {
+					_refs.states_data[_vc.get_vc_name(_save_data).to_snake_case()] = {
 						virtual_tokens = _parse_virtual_cnode(state_res.get_route(_save_data).virtual_sub_type_vc_list, _save_data),
 						transitions = transitions
 					}
