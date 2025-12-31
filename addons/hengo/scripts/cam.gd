@@ -6,7 +6,7 @@ class_name HenCam extends Node2D
 var target_zoom: float = 1.
 
 const MIN_ZOOM: float = .2
-const MAX_ZOOM: float = 1.5
+var MAX_ZOOM: float = 1.5
 const ZOOM_INCREMENT: float = .15
 const ZOOM_RATE: float = 12.
 
@@ -27,6 +27,8 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 	
+	MAX_ZOOM = MAX_ZOOM * EditorInterface.get_editor_scale()
+
 	can_scroll = false
 	var parent: Control = get_parent()
 

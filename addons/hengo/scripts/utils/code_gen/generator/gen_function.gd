@@ -23,7 +23,7 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 		var output_ref: HenVirtualCNode = search_output_ref(_save_data, func_data)
 		
 		for token: Dictionary in HenVirtualCNodeCode.get_input_token_list(_save_data, output_ref):
-			output_code.append(HenGeneratorByToken.get_code_by_token(token))
+			output_code.append(HenGeneratorByToken.get_code_by_token(_save_data, token))
 
 		var input_flow_connections: Array = _save_data.get_flow_connection_from_vc(input_ref)
 
@@ -32,7 +32,7 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 			var func_block: Array = []
 
 			for token in func_tokens:
-				func_block.append(HenGeneratorByToken.get_code_by_token(token, 1))
+				func_block.append(HenGeneratorByToken.get_code_by_token(_save_data, token, 1))
 
 			func_code += '\n'.join(func_block) + '\n' if func_block.size() > 0 else ''
 		else:

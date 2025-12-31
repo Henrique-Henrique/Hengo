@@ -100,7 +100,7 @@ func on_expression_save(_code_value: String, _word_list: Array) -> void:
 		code = _code_value,
 		words = _word_list
 	}
-	
+
 	expression_saved.emit(context)
 
 

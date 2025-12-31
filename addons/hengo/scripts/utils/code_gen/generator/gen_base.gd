@@ -96,15 +96,15 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 		match key:
 			&'_ready':
 				for token: Dictionary in item.tokens:
-					var _code: String = HenGeneratorByToken.get_code_by_token(token, 1)
+					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
 					if _code: ready_code.append(_code)
 			&'_process':
 				for token: Dictionary in item.tokens:
-					var _code: String = HenGeneratorByToken.get_code_by_token(token, 1)
+					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
 					if _code: process_code.append(_code)
 			&'_physics_process':
 				for token: Dictionary in item.tokens:
-					var _code: String = HenGeneratorByToken.get_code_by_token(token, 1)
+					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
 					if _code: physics_process_code.append(_code)
 
 	return code + TEXT_BASE.format({
@@ -120,7 +120,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 		_process = '\n'.join(process_code),
 		_physics_process = '\n'.join(physics_process_code),
 		states_dict = HenGeneratorState.get_states_start_code(_refs),
-		states = HenGeneratorState.get_states_code(_refs)
+		states = HenGeneratorState.get_states_code(_save_data, _refs)
 	})
 
 

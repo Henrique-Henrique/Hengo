@@ -237,15 +237,29 @@ func on_expression_saved(context: Dictionary) -> void:
 	var _inputs: Array[HenVCInOutData] = get_inputs(global.SAVE_DATA)
 	_inputs[0].value = context.code
 	
-	# for input: HenVCInOutData in _inputs.slice(1):
-	# 	input._on_delete(true)
-
+	var current_inputs_map := {}
+	var inputs_to_remove: Array[HenVCInOutData] = []
+	
+	for i in range(1, _inputs.size()):
+		var input = _inputs[i]
+		current_inputs_map[input.name] = input
+	
+	var new_words_set := {}
 	for word in context.words:
-		# adds new inputs based on the word list
-		add_io(true, {
-			name = word,
-			type = 'Variant'
-		})
+		new_words_set[word] = true
+		
+		if not current_inputs_map.has(word):
+			add_io(true, {
+				name = word,
+				type = 'Variant'
+			})
+	
+	for input_name in current_inputs_map:
+		if not new_words_set.has(input_name):
+			inputs_to_remove.append(current_inputs_map[input_name])
+	
+	for input in inputs_to_remove:
+		on_in_out_deleted(true, input)
 
 	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
 	update()

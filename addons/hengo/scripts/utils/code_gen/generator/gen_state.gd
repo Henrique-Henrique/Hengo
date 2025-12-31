@@ -23,7 +23,7 @@ static func get_states_start_code(_refs: HenTypeReferences) -> String:
 	return code
 
 
-static func get_states_code(_refs: HenTypeReferences) -> String:
+static func get_states_code(_save_data: HenSaveData, _refs: HenTypeReferences) -> String:
 	var code: String = ''
 	var idx: int = 0
 	# generating classes implementation
@@ -63,7 +63,7 @@ static func get_states_code(_refs: HenTypeReferences) -> String:
 
 			for token in func_tokens:
 				func_codes.append(
-					HenGeneratorByToken.get_code_by_token(token, 2)
+					HenGeneratorByToken.get_code_by_token(_save_data, token, 2)
 				)
 		
 			func_base += '\n'.join(func_codes)

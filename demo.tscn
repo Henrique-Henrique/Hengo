@@ -1,51 +1,20 @@
 [gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="3_m0rpm"]
+[ext_resource type="Script" uid="uid://b8be568omsm45" path="res://hengo/scripts/6607437375804039193.gd" id="2_0bhed"]
 
 [node name="Node" type="Node"]
+
+[node name="Button" type="Button" parent="."]
+offset_left = 267.0
+offset_top = 373.0
+offset_right = 453.0
+offset_bottom = 531.0
+text = "CLICK TO TEST"
+metadata/_edit_use_anchors_ = true
 
 [node name="Icon" type="Sprite2D" parent="."]
 position = Vector2(261, 153)
 texture = ExtResource("1_wvpun")
-
-[node name="Button" type="Button" parent="Icon"]
-offset_left = 6.0
-offset_top = 220.0
-offset_right = 192.0
-offset_bottom = 378.0
-text = "CLICK TO TEST"
-metadata/_edit_use_anchors_ = true
-
-[node name="Node" type="Node" parent="Icon"]
-
-[node name="Icon2" type="Sprite2D" parent="."]
-modulate = Color(0.898675, 0.199437, 7.70092e-07, 1)
-position = Vector2(550, 303)
-texture = ExtResource("1_wvpun")
-
-[node name="Button2" type="Button" parent="."]
-visible = false
-offset_left = 576.0
-offset_top = 418.0
-offset_right = 762.0
-offset_bottom = 576.0
-
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 169.0
-offset_bottom = 178.0
-theme = ExtResource("3_m0rpm")
-
-[node name="Button" type="Button" parent="Control"]
-layout_mode = 0
-offset_left = 13.0
-offset_top = 14.0
-offset_right = 81.0
-offset_bottom = 59.0
-text = "teste"
-
-[node name="SpinBox" type="SpinBox" parent="."]
-offset_right = 86.5625
-offset_bottom = 31.0
+script = ExtResource("2_0bhed")
+velocity = 21.54

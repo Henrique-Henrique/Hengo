@@ -34,7 +34,7 @@ static func get_signals_callback_code(_save_data: HenSaveData) -> String:
 			var signal_block: Array = []
 
 			for token in signal_tokens:
-				signal_block.append(HenGeneratorByToken.get_code_by_token(token, 1))
+				signal_block.append(HenGeneratorByToken.get_code_by_token(_save_data, token, 1))
 			
 			signal_code += '\n'.join(signal_block) + '\n\n' if signal_block.size() > 0 else ''
 		else:

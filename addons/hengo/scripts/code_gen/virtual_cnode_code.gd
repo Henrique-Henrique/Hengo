@@ -439,12 +439,12 @@ static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode
 	var code: String = ''
 
 	for token in HenVirtualCNodeCode.get_flow_tokens(_save_data, _vc, _flow_id):
-		code += HenGeneratorByToken.get_code_by_token(token)
+		code += HenGeneratorByToken.get_code_by_token(_save_data, token)
 
 	return code
 
 
-static func get_default_value_code(_type: String) -> String:
+static func get_default_value_code(_save_data: HenSaveData, _type: String) -> String:
 	match _type:
 		'String', 'NodePath', 'StringName':
 			return '""'
@@ -462,6 +462,12 @@ static func get_default_value_code(_type: String) -> String:
 			if HenEnums.VARIANT_TYPES.has(_type):
 				return _type + '()'
 			elif ClassDB.can_instantiate(_type):
+				if HenUtils.is_type_relation_valid(
+					_save_data.identity.type,
+					_type,
+				):
+					return '_ref'
+				
 				return _type + '.new()'
 	
 	return 'null'
