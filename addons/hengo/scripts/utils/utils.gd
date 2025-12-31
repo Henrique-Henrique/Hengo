@@ -177,23 +177,11 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.VOID:
 			return Color("#576574")
 		
-		HenVirtualCNode.SubType.INVALID:
-			return Color("#e17055")
-		
 		HenVirtualCNode.SubType.RAW_CODE:
-			return Color("#8395a7")
-
-		HenVirtualCNode.SubType.IMG:
-			return Color("#8395a7")
+			return Color("#feca57")
 
 		HenVirtualCNode.SubType.EXPRESSION:
-			return Color("#8395a7")
-
-		HenVirtualCNode.SubType.NOT_CONNECTED:
-			return Color("#8395a7")
-
-		HenVirtualCNode.SubType.CAST:
-			return Color("#8395a7")
+			return Color("#ff9f43")
 
 	return Color("#343434")
 
