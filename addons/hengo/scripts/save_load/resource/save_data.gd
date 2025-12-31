@@ -272,7 +272,7 @@ func add_signals_callback(_save: bool = true) -> void:
 	signals_callback.append(sc)
 
 
-func add_macro() -> void:
+func add_macro(_save: bool = true) -> void:
 	var m: HenSaveMacro = HenSaveMacro.create()
 
 	if not m:

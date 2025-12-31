@@ -31,7 +31,7 @@ static func get_var_code_base(_type: StringName, _export: bool, _custom_name: St
 	return var_code
 
 
-static func get_var_code_from_param(_var_data: HenSaveParam, _custom_name: String = '', _preview_id: String = '') -> String:
+static func get_var_code_from_param(_var_data: HenSaveParam, _custom_name: String, _preview_id: String = '') -> String:
 	return get_var_code_base(_var_data.type, false, _custom_name, _preview_id)
 
 

@@ -49,6 +49,9 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 		HenVirtualCNode.SubType.MACRO_OUTPUT:
 			for param: HenSaveParam in outputs:
 				arr.append(param.get_data())
+		HenVirtualCNode.SubType.MACRO:
+			for param: HenSaveParam in inputs:
+				arr.append(param.get_data())
 
 	return arr
 
@@ -59,6 +62,37 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	match _type:
 		HenVirtualCNode.SubType.MACRO_INPUT:
 			for param: HenSaveParam in inputs:
+				arr.append(param.get_data())
+		HenVirtualCNode.SubType.MACRO:
+			for param: HenSaveParam in outputs:
+				arr.append(param.get_data())
+
+	return arr
+
+
+func get_flow_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	var arr: Array[Dictionary] = []
+
+	match _type:
+		HenVirtualCNode.SubType.MACRO_OUTPUT:
+			for param: HenSaveParam in flow_outputs:
+				arr.append(param.get_data())
+		HenVirtualCNode.SubType.MACRO:
+			for param: HenSaveParam in flow_inputs:
+				arr.append(param.get_data())
+
+	return arr
+
+
+func get_flow_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	var arr: Array[Dictionary] = []
+
+	match _type:
+		HenVirtualCNode.SubType.MACRO_INPUT:
+			for param: HenSaveParam in flow_inputs:
+				arr.append(param.get_data())
+		HenVirtualCNode.SubType.MACRO:
+			for param: HenSaveParam in flow_outputs:
 				arr.append(param.get_data())
 
 	return arr

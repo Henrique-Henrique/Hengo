@@ -48,7 +48,7 @@ func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
 		{
 			can_delete = false,
 			id = 1,
-			name = 'Stat State',
+			name = 'Start State',
 			position = 'Vector2(0, 0)',
 			size = 'Vector2(99, 63)',
 			sub_type = HenVirtualCNode.SubType.STATE_START,

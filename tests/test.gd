@@ -47,11 +47,11 @@ static func set_global_config() -> void:
 	map_deps.ast_list.set(save_data.identity.id, HenUtils.get_current_ast_list())
 
 
-static func get_void(_route: HenRouteData = null) -> HenVirtualCNode:
+static func get_void(_name: String = 'test_void') -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'test_void',
+		name = _name,
 		sub_type = HenVirtualCNode.SubType.VOID,
-		route = HenTest.get_base_route() if not _route else _route
+		route = HenTest.get_base_route()
 	})
 
 
@@ -94,13 +94,13 @@ static func get_const(_id: int = -1) -> HenVirtualCNode:
 	})
 
 
-static func get_vc_code(_vc: HenVirtualCNode) -> String:
+static func get_vc_code(_vc: HenVirtualCNode, _flow_id: int = 0) -> String:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var save_data: HenSaveData = global.SAVE_DATA
 
 	# this is a hack to make the tests errors accurate only for code generation
 	global.SAVE_DATA = null
-	var code: String = HenVirtualCNodeCode.get_virtual_cnode_code(save_data, _vc)
+	var code: String = HenVirtualCNodeCode.get_virtual_cnode_code(save_data, _vc, _flow_id)
 	global.SAVE_DATA = save_data
 	return code
 
@@ -115,3 +115,13 @@ static func get_all_code() -> String:
 	var code: String = code_generation.get_code(save_data)
 	global.SAVE_DATA = save_data
 	return code
+
+
+static func get_if_vc() -> HenVirtualCNode:
+	return HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'IF',
+		type = HenVirtualCNode.Type.IF,
+		sub_type = HenVirtualCNode.SubType.IF,
+		inputs = [ {id = 0, name = 'condition', type = 'bool'}],
+		route = HenTest.get_base_route()
+	})

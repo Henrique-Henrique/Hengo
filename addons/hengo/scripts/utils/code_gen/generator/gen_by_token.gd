@@ -38,7 +38,6 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 	if _token.get('use_self', false) == true or (_token.has('category') and _token.get('category') == 'native'):
 		prefix = ''
 
-
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
 			return indent + 'HengoState.INVALID_PLACEHOLDER'
@@ -278,7 +277,8 @@ static func get_code_by_token(_token: Dictionary, _level: int = 0, _parent_id: S
 				callable = HenGeneratorSignalCallback.get_signal_call_name(_token.name)
 			})
 		HenVirtualCNode.SubType.MACRO:
-			return '\n'.join(_token.flow_tokens.map(func(x: Dictionary) -> String: return get_code_by_token(x, _level, preview_id)))
+			var macro_code: String = '\n'.join((_token.flow_tokens as Array).map(func(x: Dictionary) -> String: return get_code_by_token(x, _level, preview_id)))
+			return macro_code if not macro_code.is_empty() else indent + 'pass'
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			return indent + get_code_by_token(_token.ref) + '.' + _token.name
 		_:

@@ -27,7 +27,7 @@ static func get_signals_callback_code(_save_data: HenSaveData) -> String:
 
 		# local variable
 		signal_code += '\n'.join(signal_item.local_vars.map(func(x: HenSaveParam):
-			return '\t' + HenGeneratorVariable.get_var_code_from_param(x)))
+			return '\t' + HenGeneratorVariable.get_var_code_from_param(x, x.name.to_snake_case())))
 
 		if not signal_enter_connections.is_empty() and (signal_enter_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 			var signal_tokens: Array = HenVirtualCNodeCode.get_flow_tokens(_save_data, (signal_enter_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), (signal_enter_connections.get(0) as HenVCFlowConnectionData).to_id)

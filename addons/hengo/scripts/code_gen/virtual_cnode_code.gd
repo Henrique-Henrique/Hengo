@@ -30,7 +30,7 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 			HenVirtualCNode.SubType.MACRO_OUTPUT:
 				var global: HenGlobal = Engine.get_singleton(&'Global')
 				if global.USE_MACRO_REF:
-					var flow: HenVCFlowConnectionData = get_flow_connection(_save_data, global.MACRO_REF, _id) if not _save_data.get_outgoing_flow_connection_from_vc(global.MACRO_REF).is_empty() else null
+					var flow: HenVCFlowConnectionData = get_macro_flow_connection(_save_data, global.MACRO_REF, _id) if not _save_data.get_outgoing_flow_connection_from_vc(global.MACRO_REF).is_empty() else null
 
 					if flow and flow.get_to(_save_data):
 						stack.append({node = flow.get_to(_save_data), id = flow.to_id})
@@ -105,7 +105,7 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 	}
 
 
-static func get_flow_connection(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int) -> HenVCFlowConnectionData:
+static func get_macro_flow_connection(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int) -> HenVCFlowConnectionData:
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		if flow.from_id == _id:
 			return flow
@@ -118,16 +118,14 @@ static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow
 		return INVALID_TOKEN
 
 	var flow_tokens: Array
-	# var input_flow: HenTypeFlowConnection = (ref.get_ref().input_ref as HenTypeCnode).get_flow_connection(_flow_id)
 	var input_ref: HenVirtualCNode = search_macro_input(_save_data, _vc.get_res(_save_data))
 
 	if not input_ref:
 		print('Macro input reference not found.')
 		return INVALID_TOKEN
 	
-	var input_flow: HenVCFlowConnectionData = get_flow_connection(_save_data, input_ref, _flow_id)
-	var input_flow_to: HenVirtualCNode = input_flow.get_to(_save_data)
-
+	var input_flow: HenVCFlowConnectionData = get_macro_flow_connection(_save_data, input_ref, _flow_id)
+	var input_flow_to: HenVirtualCNode = input_flow.get_to(_save_data) if input_flow else null
 
 	if input_flow_to:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -173,6 +171,16 @@ static func get_input_token_list(_save_data: HenSaveData, _vc: HenVirtualCNode, 
 	return input_tokens
 
 
+static func search_macro_output(_save_data: HenSaveData, _macro: HenSaveMacro) -> HenVirtualCNode:
+	if not _macro:
+		return null
+
+	for vc: HenVirtualCNode in _macro.get_route(_save_data).virtual_cnode_list:
+		if vc.sub_type == HenVirtualCNode.SubType.MACRO_OUTPUT:
+			return vc
+	return null
+
+
 static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int) -> Dictionary:
 	var connection: HenVCConnectionData
 	var input: HenVCInOutData = _vc.get_input(_id, _save_data)
@@ -202,13 +210,20 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 			HenVirtualCNode.SubType.MACRO:
 				global.USE_MACRO_USE_SELF = true
 				global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
-				var data: Dictionary = {}
-				var res = connection.get_from(_save_data).get_res(_save_data)
-
-				if res:
-					data = get_input_token(_save_data, res, connection.to_id)
+				var vc: HenVirtualCNode = connection.get_from(_save_data)
 				
-				# var data: Dictionary = (connection.get_from().ref.get_ref() as HenTypeMacro).output_ref.get_input_token(connection.to_id)
+				var macro_res: HenSaveMacro = vc.get_res(_save_data)
+
+				if not macro_res:
+					return INVALID_TOKEN
+
+				var macro_route: HenRouteData = macro_res.get_route(_save_data)
+
+				if not macro_route:
+					return INVALID_TOKEN
+
+				var macro_output: HenVirtualCNode = search_macro_output(_save_data, macro_res)
+				var data: Dictionary = get_input_token(_save_data, macro_output, connection.from_id)
 				global.USE_MACRO_USE_SELF = false
 				return data
 			_:
@@ -420,10 +435,10 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 	return token
 
 
-static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode) -> String:
+static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> String:
 	var code: String = ''
 
-	for token in HenVirtualCNodeCode.get_flow_tokens(_save_data, _vc, 0):
+	for token in HenVirtualCNodeCode.get_flow_tokens(_save_data, _vc, _flow_id):
 		code += HenGeneratorByToken.get_code_by_token(token)
 
 	return code

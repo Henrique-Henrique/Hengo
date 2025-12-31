@@ -15,7 +15,7 @@ static func get_functions_code(_save_data: HenSaveData) -> String:
 		
 		# local variable
 		func_code += '\n'.join(func_data.local_vars.map(func(x: HenSaveParam):
-			return '\t' + HenGeneratorVariable.get_var_code_from_param(x)))
+			return '\t' + HenGeneratorVariable.get_var_code_from_param(x, x.name.to_snake_case())))
 
 		# func output (return)
 		var output_code: Array = []
