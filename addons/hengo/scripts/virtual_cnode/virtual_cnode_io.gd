@@ -225,7 +225,7 @@ func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
 
 		if map_value.get(&'type') == _data.get(&'type'):
 			_data.value = map_value.get(&'value')
-			_data.code_value = map_value.get(&'code_value')
+			_data.code_value = map_value.get(&'code_value', '')
 
 	var in_out: HenVCInOutData = HenVCInOutData.create(_data)
 

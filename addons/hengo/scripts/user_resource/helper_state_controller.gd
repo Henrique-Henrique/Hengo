@@ -12,6 +12,10 @@ func set_states(_states: Dictionary) -> void:
 	states = _states
 
 func change_state(_state: String) -> void:
+	if not states.has(_state):
+		print('State not found: ', _state)
+		return
+		
 	print('S -> ', _state)
 	
 	var state = states[_state]

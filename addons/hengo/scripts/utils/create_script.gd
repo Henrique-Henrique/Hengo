@@ -44,18 +44,7 @@ func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
 
 	var base_route: HenRouteData = save_data.create_route(save_data.identity.id, 'Base', HenRouter.ROUTE_TYPE.BASE)
 
-	HenVirtualCNode.instantiate_virtual_cnode(
-		{
-			can_delete = false,
-			id = 1,
-			name = 'Start State',
-			position = 'Vector2(0, 0)',
-			size = 'Vector2(99, 63)',
-			sub_type = HenVirtualCNode.SubType.STATE_START,
-			type = HenVirtualCNode.Type.STATE_START,
-			route = base_route
-		}
-	)
+	HenCreateScript.get_start_state(base_route)
 	
 	return save_data
 
@@ -85,3 +74,18 @@ func create_script(_name: String, _class: StringName) -> Dictionary:
 		result = result,
 		id = id
 	}
+
+
+static func get_start_state(_route: HenRouteData) -> HenVirtualCNode:
+	return HenVirtualCNode.instantiate_virtual_cnode(
+		{
+			can_delete = false,
+			id = 1,
+			name = 'Start State',
+			position = 'Vector2(0, 0)',
+			size = 'Vector2(99, 63)',
+			sub_type = HenVirtualCNode.SubType.STATE_START,
+			type = HenVirtualCNode.Type.STATE_START,
+			route = _route
+		}
+	)

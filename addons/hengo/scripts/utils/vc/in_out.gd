@@ -12,6 +12,7 @@ class_name HenVCInOutData extends Resource
 @export var data: Variant
 @export var is_prop: bool
 @export var is_static: bool
+@export var res_data: Dictionary
 
 signal connection_request(_data: Dictionary)
 signal io_hovered(_context: Dictionary)
@@ -36,23 +37,6 @@ static func create(_data: Dictionary) -> HenVCInOutData:
 	if _data.has('is_static'): io.is_static = _data.is_static
 
 	return io
-
-
-func get_save() -> Dictionary:
-	var dt: Dictionary = {
-		id = id,
-		name = name,
-		type = type
-	}
-
-	if sub_type: dt.sub_type = sub_type
-	if category: dt.category = category
-	if is_ref: dt.is_ref = is_ref
-	if data: dt.data = data
-	if is_prop: dt.is_prop = is_prop
-	if is_static: dt.is_static = is_static
-
-	return dt
 
 
 func get_type_color() -> Color:
@@ -160,3 +144,11 @@ func on_inprop_config_request(_dropdown: HenDropdown) -> void:
 		'get_prop', 'set_prop':
 			_dropdown.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			_dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+
+func set_res_data(_data: Dictionary) -> void:
+	res_data = _data
+
+
+func get_res(_save_data: HenSaveData) -> Resource:
+	return HenUtils.get_res(res_data, _save_data)

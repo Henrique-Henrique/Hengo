@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://b8be568omsm45" path="res://hengo/scripts/6607437375804039193.gd" id="2_0bhed"]
+[ext_resource type="Script" uid="uid://dc6m41a6t5byi" path="res://hengo/scripts/6475086390373832676.gd" id="2_0bhed"]
 
 [node name="Node" type="Node"]
 
@@ -17,4 +17,3 @@ metadata/_edit_use_anchors_ = true
 position = Vector2(261, 153)
 texture = ExtResource("1_wvpun")
 script = ExtResource("2_0bhed")
-velocity = 21.54

@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 
 
 func get_func_data() -> HenSaveFunc:
+	HenTest.clear_save_data()
 	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
 	save_data.functions.clear()
 	save_data.add_func(false)

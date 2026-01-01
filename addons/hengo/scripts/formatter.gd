@@ -23,6 +23,7 @@ class VCFormatData:
 	var moved: bool = false
 	var flow_inputs_positioned_ids: Array[int] = []
 	var has_multiple_parents: bool = false
+	var tree_children: Array[HenVirtualCNode] = []
 
 
 static func get_format_data(id: int, _data: FormatterData) -> VCFormatData:
@@ -52,6 +53,7 @@ static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Arr
 			HenVirtualCNode.SubType.FUNC_INPUT, \
 			HenVirtualCNode.SubType.MACRO_INPUT:
 				var format_data: VCFormatData = get_format_data(vc.id, data)
+				format_data.moved = true
 				set_position(vc, Vector2.ZERO, data)
 				var bounding: Rect2 = start_format(vc, data, format_data)
 				virtual_roots.append(vc)
@@ -90,6 +92,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				to_format_data.has_multiple_parents = true
 
 			if not to_format_data.moved:
+				to_format_data.moved = true
+				_format_data.tree_children.append(to)
 				set_position(to,
 					Vector2(
 						Vector2(
@@ -102,10 +106,10 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				var vc_rect: Rect2 = start_map_inputs(to, _data)
 				min_pos = min_pos.min(vc_rect.position)
 				max_pos = max_pos.max(vc_rect.position + vc_rect.size)
-				var child_bounding: Rect2 = start_format(to, _data, to_format_data)
+				start_format(to, _data, to_format_data)
+				var child_bounding: Rect2 = calculate_tree_bounding(to, _data)
 				min_pos = min_pos.min(child_bounding.position)
 				max_pos = max_pos.max(child_bounding.position + child_bounding.size)
-				to_format_data.moved = true
 				to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 
 	elif _vc.get_flow_outputs(global.SAVE_DATA).size() > 1:
@@ -138,6 +142,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						to_format_data.has_multiple_parents = true
 					
 					if not to_format_data.moved:
+						to_format_data.moved = true
+						_format_data.tree_children.append(to)
 						set_position(to, Vector2(left_x_limit - to.size.x, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						flow_boundings.append(child_bounding)
@@ -166,6 +172,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						to_format_data.has_multiple_parents = true
 
 					if not to_format_data.moved:
+						to_format_data.moved = true
+						_format_data.tree_children.append(to)
 						set_position(to, Vector2(right_x_limit, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						flow_boundings.append(child_bounding)
@@ -177,7 +185,6 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						var right_rect: Rect2 = start_map_inputs(to, _data)
 						min_pos = min_pos.min(right_rect.position)
 						max_pos = max_pos.max(right_rect.position + right_rect.size)
-						to_format_data.moved = true
 						right_x_limit = max(right_x_limit, child_bounding.position.x + child_bounding.size.x + MIDDLE_X_GAP)
 						to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 				idx += 1
@@ -215,6 +222,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						to_format_data.has_multiple_parents = true
 					
 					if not to_format_data.moved:
+						to_format_data.moved = true
+						_format_data.tree_children.append(to)
 						set_position(to, Vector2(left_x_limit - to.size.x, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						max_side_y = max(max_side_y, child_bounding.position.y + child_bounding.size.y)
@@ -227,7 +236,6 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						var left_rect: Rect2 = start_map_inputs(to, _data)
 						min_pos = min_pos.min(left_rect.position)
 						max_pos = max_pos.max(left_rect.position + left_rect.size)
-						to_format_data.moved = true
 						left_x_limit = min(left_x_limit, child_bounding.position.x - MIDDLE_X_GAP)
 						to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 				idx += 1
@@ -244,6 +252,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						to_format_data.has_multiple_parents = true
 
 					if not to_format_data.moved:
+						to_format_data.moved = true
+						_format_data.tree_children.append(to)
 						set_position(to, Vector2(right_x_limit, _vc.position.y + _vc.size.y + FIRST_LEVEL_Y_GAP * (idx * -1)), _data)
 						var child_bounding: Rect2 = start_format(to, _data, to_format_data)
 						max_side_y = max(max_side_y, child_bounding.position.y + child_bounding.size.y)
@@ -256,7 +266,6 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 						var right_rect: Rect2 = start_map_inputs(to, _data)
 						min_pos = min_pos.min(right_rect.position)
 						max_pos = max_pos.max(right_rect.position + right_rect.size)
-						to_format_data.moved = true
 						right_x_limit = max(right_x_limit, child_bounding.position.x + child_bounding.size.x + MIDDLE_X_GAP)
 						to_format_data.flow_inputs_positioned_ids.append(flow_connection.to_id)
 				idx += 1
@@ -273,8 +282,9 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 				var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 				if flow_connection:
 					var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
-					var to_format_data: VCFormatData = get_format_data(to.id, _data)
-					if to_format_data.has_multiple_parents:
+					# var to_format_data: VCFormatData = get_format_data(to.id, _data)
+					
+					if not _format_data.tree_children.has(to):
 						continue
 					side_flows.append(to)
 					side_boundings.append(calculate_tree_bounding(to, _data))
@@ -307,6 +317,8 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 					middle_to_format_data.has_multiple_parents = true
 
 				if not middle_to_format_data.moved:
+					middle_to_format_data.moved = true
+					_format_data.tree_children.append(middle_to)
 					set_position(middle_to,
 						Vector2(
 							(_vc.position.x + _vc.size.x / 2.) - middle_to.size.x / 2.,
@@ -317,7 +329,6 @@ static func start_format(_vc: HenVirtualCNode, _data: FormatterData, _format_dat
 					var middle_rect: Rect2 = start_map_inputs(middle_to, _data)
 					min_pos = min_pos.min(middle_rect.position)
 					max_pos = max_pos.max(middle_rect.position + middle_rect.size)
-					middle_to_format_data.moved = true
 					middle_to_format_data.flow_inputs_positioned_ids.append(middle_connection.to_id)
 					var middle_bounding: Rect2 = start_format(middle_to, _data, middle_to_format_data)
 					min_pos = min_pos.min(middle_bounding.position)
@@ -341,9 +352,10 @@ static func move_flow_tree(_vc: HenVirtualCNode, _offset: Vector2, _data: Format
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
 			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
-			var to_format_data: VCFormatData = get_format_data(to.id, _data)
-			if to_format_data.has_multiple_parents:
+			var format_data: VCFormatData = get_format_data(_vc.id, _data)
+			if not format_data.tree_children.has(to):
 				continue
+
 			move_flow_tree(to, _offset, _data)
 
 
@@ -362,8 +374,8 @@ static func calculate_tree_bounding(_vc: HenVirtualCNode, _data: FormatterData) 
 		var flow_connection: HenVCFlowConnectionData = _vc.get_flow_output_connection(flow_output.id)
 		if flow_connection:
 			var to: HenVirtualCNode = flow_connection.get_to(global.SAVE_DATA)
-			var to_format_data: VCFormatData = get_format_data(to.id, _data)
-			if to_format_data.has_multiple_parents:
+			var format_data: VCFormatData = get_format_data(_vc.id, _data)
+			if not format_data.tree_children.has(to):
 				continue
 			var child_bounding: Rect2 = calculate_tree_bounding(to, _data)
 			min_pos = min_pos.min(child_bounding.position)

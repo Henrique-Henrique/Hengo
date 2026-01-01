@@ -100,7 +100,7 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 						return get_code_by_token(_save_data, x)
 			))
 			})
-		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
+		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM, HenVirtualCNode.SubType.MAKE_TRANSITION:
 			var values: Array = _provide_params_ref(_save_data, _token.params, prefix)
 			var params: Array = values[0]
 			

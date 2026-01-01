@@ -265,8 +265,6 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 					data.use_value = true
 				'class_props':
 					data.use_value = true
-				'state_transition':
-					data.value = '&"{0}"'.format([(data.value as String).to_snake_case()])
 
 		if data.get('is_ref', false) and not data.get('use_self', false):
 			if HenUtils.is_type_relation_valid(
@@ -319,17 +317,51 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				params = get_input_token_list(_save_data, _vc),
 				singleton_class = _vc.singleton_class
 			})
-		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM:
-			if _vc.sub_type == HenVirtualCNode.SubType.FUNC_FROM:
-				var inputs: Array = _vc.get_inputs(_save_data)
-				
-				if not inputs.is_empty() and not _vc.input_has_connection(inputs[0].id, _save_data):
-					(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
-					return INVALID_TOKEN
+		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM, HenVirtualCNode.SubType.MAKE_TRANSITION:
+			var params: Array
+
+			match _vc.sub_type:
+				HenVirtualCNode.SubType.FUNC_FROM:
+					var inputs: Array = _vc.get_inputs(_save_data)
+					
+					if not inputs.is_empty() and not _vc.input_has_connection(inputs[0].id, _save_data):
+						(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
+						return INVALID_TOKEN
+					
+					params = get_input_token_list(_save_data, _vc)
+				HenVirtualCNode.SubType.MAKE_TRANSITION:
+					var inputs: Array[HenVCInOutData] = _vc.get_inputs(_save_data)
+					if inputs.is_empty(): return INVALID_TOKEN
+					
+					var first_input: HenVCInOutData = inputs[0]
+					var state: HenSaveState = first_input.get_res(_save_data)
+
+					if not state: return INVALID_TOKEN
+					
+					var flow: HenSaveParam
+
+					for param: HenSaveParam in state.flow_outputs:
+						if param.id == first_input.res_data.get('flow_id'):
+							flow = param
+							break
+
+					if not flow:
+						return INVALID_TOKEN
+
+					params = [
+						{
+							type = HenVirtualCNode.SubType.IN_PROP,
+							prop_name = 'name',
+							value = "&\"{0}\"".format([flow.name.to_snake_case()]),
+							use_self = false
+						}
+					]
+				_:
+					params = get_input_token_list(_save_data, _vc)
 
 			token.merge({
 				name = _vc.get_vc_name(_save_data).to_snake_case() if not _vc.name_to_code else _vc.name_to_code.to_snake_case(),
-				params = get_input_token_list(_save_data, _vc),
+				params = params,
 				id = _id if _vc.get_outputs(_save_data).size() > 1 else -1,
 				singleton_class = _vc.singleton_class
 			})

@@ -13,6 +13,7 @@ signal request_method_picker
 signal on_mouse_enter
 signal request_create_connection
 signal on_value_change
+signal on_set_res_data
 signal on_outprop_value_change
 signal outprop_config_request
 signal inprop_config_request
@@ -178,9 +179,16 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 
 		if prop and prop.has_signal('value_changed'):
 			prop.value_changed.connect(_on_value.bind(prop))
+		
+		if prop and prop.has_signal('on_set_res_data'):
+			prop.on_set_res_data.connect(_on_set_res_data)
 
 		# props ref
 		if _add_prop_ref: add_prop_ref()
+
+
+func _on_set_res_data(_data: Dictionary) -> void:
+	on_set_res_data.emit(_data)
 
 
 func _on_value(_value, _prop) -> void:
@@ -313,7 +321,8 @@ func reset_signals(_inout: HenVCInOutData):
 		'on_outprop_value_change',
 		'outprop_config_request',
 		'inprop_config_request',
-		'on_expression_save'
+		'on_expression_save',
+		'on_set_res_data'
 	]:
 		for connection: Dictionary in get_signal_connection_list(signal_name):
 			@warning_ignore('unsafe_method_access')
@@ -328,3 +337,4 @@ func reset_signals(_inout: HenVCInOutData):
 	outprop_config_request.connect(_inout.on_outprop_config_request)
 	inprop_config_request.connect(_inout.on_inprop_config_request)
 	on_expression_save.connect(_inout.on_expression_save)
+	on_set_res_data.connect(_inout.on_set_res_data.emit)

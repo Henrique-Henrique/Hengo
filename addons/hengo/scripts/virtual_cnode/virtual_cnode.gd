@@ -62,7 +62,8 @@ enum SubType {
 	FUNC_FROM = 46,
 	INVALID = 47,
 	VAR_FROM = 50,
-	SET_VAR_FROM = 51
+	SET_VAR_FROM = 51,
+	MAKE_TRANSITION = 52
 }
 
 

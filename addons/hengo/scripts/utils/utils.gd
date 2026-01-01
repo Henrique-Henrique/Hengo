@@ -20,6 +20,7 @@ const ICON_OUTPUT = preload("res://addons/hengo/assets/new_icons/file-output.svg
 const ICON_BOX = preload("res://addons/hengo/assets/new_icons/box.svg")
 const ICON_LAYERS = preload("res://addons/hengo/assets/new_icons/layers.svg")
 const ICON_PLAY = preload("res://addons/hengo/assets/new_icons/play.svg")
+const ICON_TRANSITION = preload("res://addons/hengo/assets/new_icons/arrow-right-left.svg")
 
 
 static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
@@ -107,6 +108,9 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.CAST:
 			return ICON_BOX
 
+		HenVirtualCNode.SubType.MAKE_TRANSITION:
+			return ICON_TRANSITION
+
 	return null
 
 
@@ -182,6 +186,9 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 
 		HenVirtualCNode.SubType.EXPRESSION:
 			return Color("#ff9f43")
+
+		HenVirtualCNode.SubType.MAKE_TRANSITION:
+			return Color("#6c5ce7")
 
 	return Color("#343434")
 
@@ -424,3 +431,48 @@ static func get_current_ast_list() -> HenMapDependencies.ProjectAST:
 	ast.states = global.SAVE_DATA.states
 
 	return ast
+
+
+static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
+	if _res_data.has('id') and _res_data.has('type'):
+		var list: Array = []
+
+		if _res_data.has('save_data_id'):
+			var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+			
+			if map_deps.ast_list.has(_res_data.save_data_id):
+				var ast: HenMapDependencies.ProjectAST = map_deps.ast_list[_res_data.save_data_id]
+				
+				match _res_data.type:
+					HenSideBar.AddType.VAR:
+						list = ast.variables
+					HenSideBar.AddType.FUNC:
+						list = ast.functions
+					HenSideBar.AddType.SIGNAL_CALLBACK:
+						list = ast.signals_callback
+					HenSideBar.AddType.SIGNAL:
+						list = ast.signals
+					HenSideBar.AddType.MACRO:
+						list = ast.macros
+					HenSideBar.AddType.STATE:
+						list = ast.states
+		else:
+			match _res_data.type:
+				HenSideBar.AddType.VAR:
+					list = _save_data.variables
+				HenSideBar.AddType.FUNC:
+					list = _save_data.functions
+				HenSideBar.AddType.SIGNAL_CALLBACK:
+					list = _save_data.signals_callback
+				HenSideBar.AddType.SIGNAL:
+					list = _save_data.signals
+				HenSideBar.AddType.MACRO:
+					list = _save_data.macros
+				HenSideBar.AddType.STATE:
+					list = _save_data.states
+		
+		for item in list:
+			if item.id == _res_data.id:
+				return item
+		
+	return null

@@ -46,10 +46,14 @@ func update_elements(_route: HenRouteData) -> void:
 			vc_root_arr.append(item)
 	
 	for item: HenVirtualCNode in vc_root_arr:
-		update_vc_tree(item, root)
+		update_vc_tree(item, root, null, null, {})
 	
 
-func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: TreeItem = null, _color: Variant = null) -> void:
+func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: TreeItem = null, _color: Variant = null, _visited: Dictionary = {}) -> void:
+	if _visited.has(_vc):
+		return
+	_visited[_vc] = true
+
 	var root: TreeItem
 	if _flow_head:
 		root = elements_tree.create_item(_flow_head)
@@ -94,11 +98,11 @@ func update_vc_tree(_vc: HenVirtualCNode, _parent: TreeItem = null, _flow_head: 
 			if has_multiple_outputs:
 				next_color = HenEnums.FLOW_COLORS[data.index % HenEnums.FLOW_COLORS.size()]
 			
-			update_vc_tree(data.node, root, null, next_color)
+			update_vc_tree(data.node, root, null, next_color, _visited)
 		else:
 			if next_color is Color:
 				next_color.a = 0.05
-			update_vc_tree(data.node, root, _flow_head, next_color)
+			update_vc_tree(data.node, root, _flow_head, next_color, _visited)
 
 
 func _on_tree_item_selected() -> void:

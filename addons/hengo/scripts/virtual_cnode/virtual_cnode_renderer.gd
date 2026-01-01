@@ -39,14 +39,24 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 			input.io_type = input_data.type
 			input.sub_type = input_data.sub_type
-
 			if input_data.type:
 				if input_data.is_prop:
 					input.reset_in_props()
 					input.add_prop_ref(input_data.value if input_data.value else null, 0)
 				else:
+					var default_value
+
+					if _vc.sub_type == HenVirtualCNode.SubType.MAKE_TRANSITION:
+						var res: HenSaveState = input_data.get_res(global.SAVE_DATA)
+
+						if res:
+							if res.flow_outputs.size() > 0:
+								default_value = res.flow_outputs[0].name
+							else:
+								default_value = 'INVALID'
+
 					input.change_type(
-						input_data.type, input_data.value if input_data.value else null,
+						input_data.type, input_data.value if input_data.value else default_value,
 						'',
 						not input_data.is_static
 					)

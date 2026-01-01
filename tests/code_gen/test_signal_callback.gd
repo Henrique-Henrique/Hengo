@@ -3,6 +3,7 @@ extends GdUnitTestSuite
 
 # helper function that sets up and returns a basic signal configuration for testing
 func base_signal() -> HenSaveSignalCallback:
+	HenTest.clear_save_data()
 	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
 	save_data.signals_callback.clear()
 	save_data.add_signals_callback(false)

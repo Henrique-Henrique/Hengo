@@ -8,6 +8,7 @@ var custom_value: String = ''
 var input_ref: HenVCInOutData
 
 signal value_changed
+signal on_set_res_data
 
 func _ready() -> void:
 	button_down.connect(_on_pressed)
@@ -19,11 +20,28 @@ func _on_pressed() -> void:
 
 	match type:
 		'state_transition':
-			pass
-			# all transitions
-			# if router.current_route.type == router.ROUTE_TYPE.STATE:
-				# options = (router.current_route.get_ref() as HenVirtualCNode).flow_outputs.map(func(x: HenVCFlow):
-				# 	return {name = x.name, ref = x})
+			var arr: Array = []
+			var state_id: StringName
+
+			for state_key: StringName in global.SAVE_DATA.routes.keys():
+				var route: HenRouteData = global.SAVE_DATA.routes.get(state_key)
+
+				if route == router.current_route:
+					state_id = state_key
+					break
+
+			if state_id:
+				for state: HenSaveState in global.SAVE_DATA.states:
+					if str(state.id) == state_id:
+						for flow: HenSaveParam in state.flow_outputs:
+							arr.append({
+								name = flow.name,
+								id = state.id,
+								type = HenSideBar.AddType.STATE,
+								flow_id = flow.id
+							})
+			
+			options = arr
 		'action':
 			var arr: Array = []
 
@@ -118,8 +136,8 @@ func _selected(_item: Dictionary) -> void:
 		'hengo_states':
 			text = (_item.name as String).to_snake_case()
 		'state_transition':
-			emit_signal('value_changed', text)
-			# input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+			_item.erase('name')
+			on_set_res_data.emit(_item)
 			return
 		'enum_list':
 			text = _item.name

@@ -37,6 +37,8 @@ static func set_global_config() -> void:
 		save_data.identity.id,
 	)
 
+	HenCreateScript.get_start_state(base_route)
+
 	save_data.add_route(save_data.identity.id, base_route)
 
 	global.SAVE_DATA = save_data
@@ -125,3 +127,21 @@ static func get_if_vc() -> HenVirtualCNode:
 		inputs = [ {id = 0, name = 'condition', type = 'bool'}],
 		route = HenTest.get_base_route()
 	})
+
+
+static func clear_save_data() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var base_route: HenRouteData = HenTest.get_base_route()
+
+	for route_keys in global.SAVE_DATA.routes.keys():
+		var route: HenRouteData = global.SAVE_DATA.routes.get(route_keys)
+		if route != base_route:
+			global.SAVE_DATA.routes.erase(route)
+
+	global.SAVE_DATA.states.clear()
+	global.SAVE_DATA.macros.clear()
+	global.SAVE_DATA.functions.clear()
+	global.SAVE_DATA.signals.clear()
+	global.SAVE_DATA.signals_callback.clear()
+	global.SAVE_DATA.connections.clear()
+	global.SAVE_DATA.flow_connections.clear()

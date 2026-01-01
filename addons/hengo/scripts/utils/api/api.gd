@@ -632,7 +632,7 @@ func get_native_list_raw() -> Array:
 		is_native = true,
 		data = {
 			name = 'make_transition',
-			sub_type = HenVirtualCNode.SubType.FUNC,
+			sub_type = HenVirtualCNode.SubType.MAKE_TRANSITION,
 			category = 'native',
 			inputs = [
 				{

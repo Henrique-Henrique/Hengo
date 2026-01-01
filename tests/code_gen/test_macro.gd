@@ -2,8 +2,8 @@ extends GdUnitTestSuite
 
 
 func get_macro_data() -> HenSaveMacro:
+    HenTest.clear_save_data()
     var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-    save_data.macros.clear()
     save_data.add_macro(false)
     var macro_data: HenSaveMacro = save_data.macros.get(0)
     return macro_data

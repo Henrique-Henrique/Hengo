@@ -34,7 +34,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 	# getting states
 	for _vc: HenVirtualCNode in _save_data.get_base_route().virtual_cnode_list:
 		var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(_vc)
-		
+
 		match _vc.sub_type:
 			# getting start state cnode
 			HenVirtualCNode.SubType.STATE_START:
@@ -51,13 +51,14 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 						var to: HenVirtualCNode = flow_connection.get_to(_save_data)
 
 						if to:
-							var flow_output_id_list: Array = _vc.get_flow_outputs(_save_data).map(func(x: HenVCFlow): return x.id)
-
-							prints(flow_output_id_list, flow_connection.from_id)
+							var flow_list: Dictionary = {}
+							var flow_output_id_list: Array = _vc.get_flow_outputs(_save_data).map(func(x: HenVCFlow):
+								flow_list[x.id] = x
+								return x.id)
 
 							if flow_output_id_list.has(flow_connection.from_id):
 								transitions.append({
-									name = to.get_vc_name(_save_data),
+									name = flow_list.get(flow_connection.from_id).name,
 									to_state_name = to.get_vc_name(_save_data)
 								})
 
@@ -115,7 +116,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 				to_state_name = (ev.to_state_name as String).to_snake_case()
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
-		start_state_name = (start_state as HenVirtualCNode).name.to_snake_case() if start_state else '',
+		start_state_name = (start_state as HenVirtualCNode).get_vc_name(_save_data).to_snake_case() if start_state else '',
 		_ready = ' \n'.join(ready_code),
 		_process = '\n'.join(process_code),
 		_physics_process = '\n'.join(physics_process_code),
