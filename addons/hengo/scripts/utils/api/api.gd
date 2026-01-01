@@ -474,6 +474,12 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	var arr: Array = []
 	
 	# datas
+	var state_event_category: Dictionary = {
+		name = 'State Events',
+		icon = 'activity',
+		color = '#ff9ff3',
+		method_list = []
+	}
 	var state_category: Dictionary = {
 		name = 'States',
 		icon = 'activity',
@@ -515,6 +521,19 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 			_class_name = 'State',
 			name = state_data.name,
 			data = state_data.get_cnode_data(save_data_id, _from_another_script)
+		})
+	
+	for state_event_data: HenSaveStateEvent in _ast.state_events:
+		(state_event_category.method_list as Array).append({
+			_class_name = 'State Event',
+			name = state_event_data.name,
+			data = state_event_data.get_cnode_data()
+		})
+		
+		(state_event_category.method_list as Array).append({
+			_class_name = 'State Event Transition',
+			name = 'Transition: ' + state_event_data.name,
+			data = state_event_data.get_event_transition_cnode_data(save_data_id, _from_another_script)
 		})
 	
 	for func_data: HenSaveFunc in _ast.functions:
@@ -562,6 +581,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 		})
 
 	arr.append(state_category)
+	arr.append(state_event_category)
 	arr.append(func_category)
 	arr.append(var_category)
 	arr.append(signal_category)
@@ -586,18 +606,18 @@ func get_native_list_raw() -> Array:
 	# 		route = router.current_route,
 	# 	}
 	# },
-	{
-		name = 'State Event',
-		icon = 'activity',
-		color = '#f59e0b',
-		is_native = true,
-		data = {
-			name = 'State Event 1',
-			type = HenVirtualCNode.Type.STATE_EVENT,
-			sub_type = HenVirtualCNode.SubType.STATE_EVENT,
-			route = router.current_route,
-		}
-	},
+	# {
+	# 	name = 'State Event',
+	# 	icon = 'activity',
+	# 	color = '#f59e0b',
+	# 	is_native = true,
+	# 	data = {
+	# 		name = 'State Event 1',
+	# 		type = HenVirtualCNode.Type.STATE_EVENT,
+	# 		sub_type = HenVirtualCNode.SubType.STATE_EVENT,
+	# 		route = router.current_route,
+	# 	}
+	# },
 	{
 		name = 'Expression',
 		icon = 'calculator',

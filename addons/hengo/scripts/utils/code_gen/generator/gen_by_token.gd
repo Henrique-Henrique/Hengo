@@ -41,6 +41,8 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
 			return indent + 'HengoState.INVALID_PLACEHOLDER'
+		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION:
+			return indent + prefix + 'trigger_event(&"{0}")'.format([_token.name])
 		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.VAR_FROM:
 			if _token.has('ref'):
 				return indent + get_prefix_with_dot(get_code_by_token(_save_data, _token.ref)) + _token.name

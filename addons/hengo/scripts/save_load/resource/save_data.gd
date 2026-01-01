@@ -9,6 +9,7 @@ class_name HenSaveData extends Resource
 @export var functions: Array[HenSaveFunc]
 @export var signals: Array[HenSaveSignal]
 @export var states: Array[HenSaveState]
+@export var state_events: Array[HenSaveStateEvent]
 @export var signals_callback: Array[HenSaveSignalCallback]
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
@@ -279,3 +280,12 @@ func add_macro(_save: bool = true) -> void:
 		return
 	
 	macros.append(m)
+
+
+func add_state_event(_save: bool = true) -> void:
+	var se: HenSaveStateEvent = HenSaveStateEvent.create()
+
+	if not se:
+		return
+	
+	state_events.append(se)

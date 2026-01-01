@@ -13,7 +13,7 @@ func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("{start_state_name}")
 {_ready}
-func trigger_event(_event: String) -> void:
+func trigger_event(_event: StringName) -> void:
 	if _EVENTS.has(_event):
 		_STATE_CONTROLLER.change_state(_EVENTS[_event])
 
@@ -71,10 +71,13 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 					}
 			HenVirtualCNode.SubType.STATE_EVENT:
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
-					events.append({
-						name = _vc.name,
-						to_state_name = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data).name
-					})
+					var res: HenSaveStateEvent = _vc.get_res(_save_data)
+
+					if res:
+						events.append({
+							name = res.name,
+							to_state_name = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data).get_vc_name(_save_data)
+						})
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					if not _refs.override_virtual_data.has(_vc.name):
@@ -109,7 +112,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 					if _code: physics_process_code.append(_code)
 
 	return code + TEXT_BASE.format({
-		events = ' { \n\t' + ',\n\t'.join(events.map(
+		events = ' {\n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
 			return '{event_name}="{to_state_name}"'.format({
 				event_name = (ev.name as String).to_snake_case(),

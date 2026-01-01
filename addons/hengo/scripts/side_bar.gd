@@ -13,7 +13,7 @@ var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 
-enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO, STATE}
+enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO, STATE, STATE_EVENT}
 enum ParamType {INPUT, OUTPUT}
 
 var BG_COLOR: Dictionary
@@ -46,6 +46,7 @@ func _ready() -> void:
 
 	BG_COLOR = {
 		AddType.STATE: HenEnums.FLOW_COLORS[5],
+		AddType.STATE_EVENT: HenEnums.FLOW_COLORS[6],
 		AddType.VAR: HenEnums.FLOW_COLORS[1],
 		AddType.FUNC: HenEnums.FLOW_COLORS[2],
 		AddType.SIGNAL_CALLBACK: HenEnums.FLOW_COLORS[0],
@@ -56,6 +57,7 @@ func _ready() -> void:
 
 	ICONS = {
 		AddType.STATE: HenUtils.ICON_STATE,
+		AddType.STATE_EVENT: HenUtils.ICON_EVENT,
 		AddType.VAR: HenUtils.ICON_VARIABLE,
 		AddType.MACRO: HenUtils.ICON_FUNCTION,
 		AddType.FUNC: HenUtils.ICON_FUNCTION,
@@ -146,6 +148,7 @@ func update() -> void:
 	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.get_base_route())
 
 	_add_categories(root, 'States', AddType.STATE)
+	_add_categories(root, 'State Events', AddType.STATE_EVENT)
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Variables', AddType.VAR)
 	_add_categories(root, 'Functions', AddType.FUNC)
@@ -174,6 +177,15 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 					category,
 					state_data.name,
 					state_data,
+					ICONS[_type],
+					BG_COLOR[_type]
+				)
+		AddType.STATE_EVENT:
+			for state_event_data: HenSaveStateEvent in global.SAVE_DATA.state_events:
+				create_item(
+					category,
+					state_event_data.name,
+					state_event_data,
 					ICONS[_type],
 					BG_COLOR[_type]
 				)
@@ -245,6 +257,8 @@ func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_but
 	match _type:
 		AddType.STATE:
 			global.SAVE_DATA.add_state()
+		AddType.STATE_EVENT:
+			global.SAVE_DATA.add_state_event()
 		AddType.VAR:
 			global.SAVE_DATA.add_var()
 		AddType.FUNC:

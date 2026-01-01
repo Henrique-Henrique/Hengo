@@ -19,6 +19,7 @@ signal io_hovered(_context: Dictionary)
 signal expression_saved(_context: Dictionary)
 signal method_picker_requested(_context: Dictionary)
 signal changed_code_value(_id: int, _context: Dictionary)
+signal on_set_res_data(_data: Dictionary)
 
 
 static func create(_data: Dictionary) -> HenVCInOutData:

@@ -145,3 +145,4 @@ static func clear_save_data() -> void:
 	global.SAVE_DATA.signals_callback.clear()
 	global.SAVE_DATA.connections.clear()
 	global.SAVE_DATA.flow_connections.clear()
+	global.SAVE_DATA.state_events.clear()
