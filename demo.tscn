@@ -1,10 +1,11 @@
 [gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
-[ext_resource type="Script" uid="uid://c6st7gba824mk" path="res://hengo/scripts/1196580548789024384.gd" id="1_0bhed"]
+[ext_resource type="Script" uid="uid://bxjau43ii34od" path="res://hengo/scripts/8591063958848624836.gd" id="1_0bhed"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 
-[node name="Node" type="Node"]
+[node name="Node" type="Node2D" node_paths=PackedStringArray("spr")]
 script = ExtResource("1_0bhed")
+spr = NodePath("Icon")
 
 [node name="Button" type="Button" parent="."]
 offset_left = 267.0

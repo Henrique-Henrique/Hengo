@@ -11,7 +11,6 @@ class ProjectAST:
 	var signals: Array[HenSaveSignal]
 	var signals_callback: Array[HenSaveSignalCallback]
 	var states: Array[HenSaveState]
-	var state_events: Array[HenSaveStateEvent]
 
 
 # iterates over project directories to build the dependency map

@@ -13,7 +13,7 @@ var list: Tree
 
 const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
 
-enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO, STATE, STATE_EVENT}
+enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO, STATE}
 enum ParamType {INPUT, OUTPUT}
 
 var BG_COLOR: Dictionary
@@ -44,9 +44,10 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 
+	print(1234)
+
 	BG_COLOR = {
 		AddType.STATE: HenEnums.FLOW_COLORS[5],
-		AddType.STATE_EVENT: HenEnums.FLOW_COLORS[6],
 		AddType.VAR: HenEnums.FLOW_COLORS[1],
 		AddType.FUNC: HenEnums.FLOW_COLORS[2],
 		AddType.SIGNAL_CALLBACK: HenEnums.FLOW_COLORS[0],
@@ -57,7 +58,6 @@ func _ready() -> void:
 
 	ICONS = {
 		AddType.STATE: HenUtils.ICON_STATE,
-		AddType.STATE_EVENT: HenUtils.ICON_EVENT,
 		AddType.VAR: HenUtils.ICON_VARIABLE,
 		AddType.MACRO: HenUtils.ICON_FUNCTION,
 		AddType.FUNC: HenUtils.ICON_FUNCTION,
@@ -148,7 +148,6 @@ func update() -> void:
 	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.get_base_route())
 
 	_add_categories(root, 'States', AddType.STATE)
-	_add_categories(root, 'State Events', AddType.STATE_EVENT)
 	_add_categories(root, 'Signals', AddType.SIGNAL)
 	_add_categories(root, 'Variables', AddType.VAR)
 	_add_categories(root, 'Functions', AddType.FUNC)
@@ -173,22 +172,14 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	match _type:
 		AddType.STATE:
 			for state_data: HenSaveState in global.SAVE_DATA.states:
-				create_item(
+				var item: TreeItem = create_item(
 					category,
 					state_data.name,
 					state_data,
 					ICONS[_type],
 					BG_COLOR[_type]
 				)
-		AddType.STATE_EVENT:
-			for state_event_data: HenSaveStateEvent in global.SAVE_DATA.state_events:
-				create_item(
-					category,
-					state_event_data.name,
-					state_event_data,
-					ICONS[_type],
-					BG_COLOR[_type]
-				)
+				_add_sub_states(item, state_data, _type)
 		AddType.VAR:
 			for var_data: HenSaveVar in global.SAVE_DATA.variables:
 				create_item(
@@ -235,7 +226,22 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 				)
 
 
-func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> void:
+func _add_sub_states(parent: TreeItem, state: HenSaveState, type: AddType) -> void:
+	if state.sub_states.is_empty():
+		return
+
+	for sub_state: HenSaveState in state.sub_states:
+		var item: TreeItem = create_item(
+			parent,
+			sub_state.name,
+			sub_state,
+			ICONS[type],
+			BG_COLOR[type]
+		)
+		_add_sub_states(item, sub_state, type)
+
+
+func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> TreeItem:
 	var item: TreeItem = _category.create_child()
 
 	item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
@@ -248,26 +254,32 @@ func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _ico
 	var bg_color = _icon_color
 	bg_color.a = 0.05
 	item.set_custom_bg_color(0, bg_color)
+	
+	if _meta is HenSaveState:
+		item.add_button(0, ADD_ICON)
+
+	return item
 
 
 func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:
-	var _type: AddType = _item.get_metadata(0)
+	var meta = _item.get_metadata(0)
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
-	match _type:
-		AddType.STATE:
-			global.SAVE_DATA.add_state()
-		AddType.STATE_EVENT:
-			global.SAVE_DATA.add_state_event()
-		AddType.VAR:
-			global.SAVE_DATA.add_var()
-		AddType.FUNC:
-			global.SAVE_DATA.add_func()
-		AddType.SIGNAL:
-			global.SAVE_DATA.add_signal()
-		AddType.SIGNAL_CALLBACK:
-			global.SAVE_DATA.add_signals_callback()
-		AddType.MACRO:
-			global.SAVE_DATA.add_macro()
+	if meta is int:
+		match meta:
+			AddType.STATE:
+				global.SAVE_DATA.add_state()
+			AddType.VAR:
+				global.SAVE_DATA.add_var()
+			AddType.FUNC:
+				global.SAVE_DATA.add_func()
+			AddType.SIGNAL:
+				global.SAVE_DATA.add_signal()
+			AddType.SIGNAL_CALLBACK:
+				global.SAVE_DATA.add_signals_callback()
+			AddType.MACRO:
+				global.SAVE_DATA.add_macro()
+	elif meta is HenSaveState:
+		(meta as HenSaveState).add_state()
 		
 	update()

@@ -112,13 +112,6 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.MAKE_TRANSITION:
 			return ICON_TRANSITION
 
-		HenVirtualCNode.SubType.STATE_EVENT:
-			return ICON_EVENT
-
-		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION, \
-		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION_FROM:
-			return ICON_ROUTE
-
 	return null
 
 
@@ -195,13 +188,6 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 			return Color("#ff9f43")
 
 		HenVirtualCNode.SubType.MAKE_TRANSITION:
-			return Color("#6c5ce7")
-
-		HenVirtualCNode.SubType.STATE_EVENT:
-			return Color("#e056fd")
-
-		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION, \
-		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION_FROM:
 			return Color("#6c5ce7")
 
 	return Color("#343434")
@@ -443,7 +429,6 @@ static func get_current_ast_list() -> HenMapDependencies.ProjectAST:
 	ast.signals = global.SAVE_DATA.signals
 	ast.signals_callback = global.SAVE_DATA.signals_callback
 	ast.states = global.SAVE_DATA.states
-	ast.state_events = global.SAVE_DATA.state_events
 
 	return ast
 
@@ -471,8 +456,6 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 						list = ast.macros
 					HenSideBar.AddType.STATE:
 						list = ast.states
-					HenSideBar.AddType.STATE_EVENT:
-						list = ast.state_events
 		else:
 			match _res_data.type:
 				HenSideBar.AddType.VAR:
@@ -487,11 +470,14 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 					list = _save_data.macros
 				HenSideBar.AddType.STATE:
 					list = _save_data.states
-				HenSideBar.AddType.STATE_EVENT:
-					list = _save_data.state_events
 		
 		for item in list:
 			if item.id == _res_data.id:
 				return item
+			
+			if item is HenSaveState:
+				for sub_state in item.sub_states:
+					if sub_state.id == _res_data.id:
+						return sub_state
 		
 	return null

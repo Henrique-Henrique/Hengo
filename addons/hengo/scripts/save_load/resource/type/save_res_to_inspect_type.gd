@@ -7,6 +7,9 @@ class_name HenSaveResToInspectType extends Resource
 
 @abstract func get_new_name() -> String
 
+func get_vc_name(_type: HenVirtualCNode.SubType) -> String:
+	return name
+
 # hides the default resource section properties
 func _validate_property(_property: Dictionary) -> void:
 	if _property.name == &'id':

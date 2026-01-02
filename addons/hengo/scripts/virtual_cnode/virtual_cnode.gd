@@ -9,11 +9,9 @@ enum Type {
 	EXPRESSION = 4,
 	STATE = 5,
 	STATE_START = 6,
-	STATE_EVENT = 7,
 	MACRO = 8,
 	MACRO_INPUT = 9,
 	MACRO_OUTPUT = 10,
-	STATE_EVENT_TRANSITION = 11
 }
 
 enum SubType {
@@ -52,7 +50,6 @@ enum SubType {
 	PASS = 35,
 	STATE = 36,
 	STATE_START = 37,
-	STATE_EVENT = 38,
 	SIGNAL_ENTER = 39,
 	SIGNAL_CONNECTION = 40,
 	SIGNAL_DISCONNECTION = 41,
@@ -65,8 +62,8 @@ enum SubType {
 	VAR_FROM = 50,
 	SET_VAR_FROM = 51,
 	MAKE_TRANSITION = 52,
-	STATE_EVENT_TRANSITION = 53,
-	STATE_EVENT_TRANSITION_FROM = 54
+	STATE_TRANSITION = 53,
+	STATE_TRANSITION_FROM = 54
 }
 
 
@@ -309,10 +306,10 @@ func get_id() -> int:
 
 
 func get_vc_name(_save_data: HenSaveData) -> String:
-	var res = get_res(_save_data)
-
+	var res: HenSaveResToInspectType = get_res(_save_data)
+	
 	if res:
-		return res.get(&'name')
+		return res.get_vc_name(sub_type)
 	else:
 		return name
 
@@ -423,8 +420,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		Type.STATE_START:
 			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {name = 'On Start', id = 0}))
 			v_cnode.get_flow_inputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
-		Type.STATE_EVENT:
-			v_cnode.get_flow_outputs(global.SAVE_DATA).append(HenVCFlow.create(v_cnode, {id = 0}))
 		_:
 			if _config.has('to_flow'):
 				for _flow: Dictionary in _config.to_flow:

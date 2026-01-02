@@ -474,8 +474,8 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	var arr: Array = []
 	
 	# datas
-	var state_event_category: Dictionary = {
-		name = 'State Events',
+	var state_transitions: Dictionary = {
+		name = 'State Transitions',
 		icon = 'activity',
 		color = '#ff9ff3',
 		method_list = []
@@ -522,19 +522,19 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 			name = state_data.name,
 			data = state_data.get_cnode_data(save_data_id, _from_another_script)
 		})
-	
-	for state_event_data: HenSaveStateEvent in _ast.state_events:
-		(state_event_category.method_list as Array).append({
-			_class_name = 'State Event',
-			name = state_event_data.name,
-			data = state_event_data.get_cnode_data()
+
+		(state_transitions.method_list as Array).append({
+			_class_name = 'State Transitions',
+			name = 'transition: ' + state_data.name,
+			data = state_data.get_transition_cnode_data(save_data_id, _from_another_script)
 		})
-		
-		(state_event_category.method_list as Array).append({
-			_class_name = 'State Event Transition',
-			name = 'Transition: ' + state_event_data.name,
-			data = state_event_data.get_event_transition_cnode_data(save_data_id, _from_another_script)
-		})
+
+		for sub_state: HenSaveState in state_data.sub_states:
+			(state_transitions.method_list as Array).append({
+				_class_name = 'State Transitions',
+				name = 'sub state transition: ' + sub_state.name,
+				data = sub_state.get_transition_cnode_data(save_data_id, _from_another_script)
+			})
 	
 	for func_data: HenSaveFunc in _ast.functions:
 		(func_category.method_list as Array).append({
@@ -581,7 +581,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 		})
 
 	arr.append(state_category)
-	arr.append(state_event_category)
+	arr.append(state_transitions)
 	arr.append(func_category)
 	arr.append(var_category)
 	arr.append(signal_category)
@@ -594,30 +594,6 @@ func get_native_list_raw() -> Array:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	return [
-	# {
-	# 	name = 'State',
-	# 	icon = 'circle-dot',
-	# 	color = '#3b82f6',
-	# 	is_native = true,
-	# 	data = {
-	# 		name = 'State 1',
-	# 		type = HenVirtualCNode.Type.STATE,
-	# 		sub_type = HenVirtualCNode.SubType.STATE,
-	# 		route = router.current_route,
-	# 	}
-	# },
-	# {
-	# 	name = 'State Event',
-	# 	icon = 'activity',
-	# 	color = '#f59e0b',
-	# 	is_native = true,
-	# 	data = {
-	# 		name = 'State Event 1',
-	# 		type = HenVirtualCNode.Type.STATE_EVENT,
-	# 		sub_type = HenVirtualCNode.SubType.STATE_EVENT,
-	# 		route = router.current_route,
-	# 	}
-	# },
 	{
 		name = 'Expression',
 		icon = 'calculator',

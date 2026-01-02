@@ -3,20 +3,19 @@ extends GdUnitTestSuite
 
 func test_vcnode_instantiation() -> void:
 	var vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-			name = 'print',
-			sub_type = HenVirtualCNode.SubType.VOID,
-			category = 'native',
-			inputs = [
-				{
-					id = 0,
-					name = 'content',
-					type = 'Variant'
-				}
-			],
-			route = HenTest.get_base_route()
-		})
+		name = 'print',
+		sub_type = HenVirtualCNode.SubType.VOID,
+		category = 'native',
+		inputs = [
+			{
+				id = 0,
+				name = 'content',
+				type = 'Variant'
+			}
+		],
+		route = HenTest.get_base_route()
+	})
 
-	print('count -> ', vc.get_reference_count())
 	assert_bool(vc is HenVirtualCNode).is_true()
 	assert_int((vc.inputs as Array[HenVCInOutData]).size()).is_equal(1)
 	assert_int((vc.outputs as Array[HenVCInOutData]).size()).is_equal(0)

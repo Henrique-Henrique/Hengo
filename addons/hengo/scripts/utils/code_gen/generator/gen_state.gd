@@ -1,70 +1,89 @@
 class_name HenGeneratorState extends RefCounted
 
-static func get_states_start_code(_refs: HenTypeReferences) -> String:
+static func get_states_start_code(_save_data: HenSaveData) -> String:
 	var code: String = ''
-
-	# parsing dictionaries
-	if not _refs.states_data.is_empty():
-		code += ',\n'.join(_refs.states_data.keys().map(
-				func(state_name: String) -> String:
-					return '\t\t{key}={c_name}.new(self{transitions})'.format({
-						key = state_name,
-						c_name = state_name.to_pascal_case(),
-						transitions = ', {\n\t\t\t' + ',\n\t\t\t'.join(_refs.states_data[state_name].transitions.map(
-						func(trans: Dictionary) -> String:
-						return '{state_name}="{to_state_name}"'.format({
-							state_name = trans.name.to_snake_case(),
-							to_state_name = trans.to_state_name.to_snake_case()
-						})
-						)) + '\n\t\t}' if _refs.states_data[state_name].transitions.size() > 0 else ''
-					})
-		))
+	var idx: int = 0
+	for state: HenSaveState in _save_data.states:
+		code += ('\n' if idx > 0 else '') + '\t\t{key}={c_name}.new(self),'.format({
+			key = state.name.to_snake_case(),
+			c_name = state.name.to_pascal_case()
+		})
+		idx += 1
 	
 	return code
 
 
-static func get_states_code(_save_data: HenSaveData, _refs: HenTypeReferences) -> String:
+static func get_states_code(_save_data: HenSaveData) -> String:
+	return get_states_code_with_arr(_save_data, _save_data.states)
+
+
+static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array, _level: int = 0) -> String:
 	var code: String = ''
 	var idx: int = 0
 	# generating classes implementation
-	for state_name in _refs.states_data.keys():
-		var item = _refs.states_data[state_name]
+	for state: HenSaveState in _state_arr:
+		var virtual_tokens: Dictionary = HenGeneratorBase.parse_virtual_cnode(state.get_route(_save_data).virtual_sub_type_vc_list, _save_data)
 
-		var base = '\n{new_line}class {name} extends HengoState:\n'.format({
-			name = state_name.to_pascal_case(),
-			new_line = '\n\n' if idx > 0 else ''
+		var base = '{new_line}{indent}class {name} extends HengoState:\n'.format({
+			name = state.name.to_pascal_case(),
+			new_line = '\n\n' if idx > 0 else '',
+			indent = '\t'.repeat(_level)
 		})
 
-		if item.virtual_tokens.is_empty():
-			base += '\tpass'
-			code += base
-			continue
+		if not state.sub_states.is_empty():
+			base += get_states_code_with_arr(_save_data, state.sub_states, _level + 1)
+			var sub_state_tokens: Array = []
+
+			for sub_state: HenSaveState in state.sub_states:
+				sub_state_tokens.append('add_sub_state("{name_key}", {name}.new(_p))'.format(({
+					name_key = sub_state.name.to_snake_case(),
+					name = sub_state.name.to_pascal_case()
+				})))
+			
+			virtual_tokens.set('_init', {
+				tokens = sub_state_tokens,
+				params = [ {name = '_p'}]
+			})
+		else:
+			if virtual_tokens.is_empty():
+				base += '\t'.repeat(_level + 1) + 'pass'
+				code += base
+				idx += 1
+				continue
 
 		var idx_1: int = 0
 
-		for virtual_name in item.virtual_tokens.keys():
-			var func_tokens = item.virtual_tokens[virtual_name].tokens
-			var func_params = item.virtual_tokens[virtual_name].params
+		for virtual_name in virtual_tokens.keys():
+			var func_tokens: Array = virtual_tokens[virtual_name].tokens
+			var func_params: Array = virtual_tokens[virtual_name].params
 
 			if func_tokens.is_empty():
 				continue
-
-			var func_base: String = '{new_line}\tfunc {name}({params}) -> void:\n'.format({
-				name = virtual_name,
-				new_line = '\n\n' if idx_1 > 0 else '',
-				params = ', '.join(func_params.map(
-					func(x: Dictionary) -> String:
-						return x.name
-				
+			
+			var params_str: String = ', '.join(func_params.map(
+				func(x: Dictionary) -> String:
+					return (x.name as String).to_snake_case()
 			))
+
+			var func_base: String = '{new_line}{indent}func {name}({params}) -> void:\n{super_call}'.format({
+				name = virtual_name,
+				new_line = '\n\n' if idx_1 > 0 or not state.sub_states.is_empty() else '',
+				indent = '\t'.repeat(_level + 1),
+				super_call = '\t'.repeat(_level + 2) + 'super({params})\n'.format({
+					params = params_str
+				}) if virtual_name != 'enter' and _level < 1 else '',
+				params = params_str
 			})
 
 			var func_codes: Array = []
 
 			for token in func_tokens:
-				func_codes.append(
-					HenGeneratorByToken.get_code_by_token(_save_data, token, 2)
-				)
+				if token is String:
+					func_codes.append('\t'.repeat(_level + 2) + token)
+				elif token is Dictionary:
+					func_codes.append(
+						HenGeneratorByToken.get_code_by_token(_save_data, token, _level + 2)
+					)
 		
 			func_base += '\n'.join(func_codes)
 			base += func_base

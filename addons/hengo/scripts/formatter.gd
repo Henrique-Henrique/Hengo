@@ -49,7 +49,6 @@ static func format_virtual_cnode_list(_virtual_cnode_list: Array) -> void: # Arr
 		match vc.sub_type:
 			HenVirtualCNode.SubType.VIRTUAL, \
 			HenVirtualCNode.SubType.STATE_START, \
-			HenVirtualCNode.SubType.STATE_EVENT, \
 			HenVirtualCNode.SubType.FUNC_INPUT, \
 			HenVirtualCNode.SubType.MACRO_INPUT:
 				var format_data: VCFormatData = get_format_data(vc.id, data)

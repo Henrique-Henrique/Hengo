@@ -11,7 +11,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
-		_STATE_CONTROLLER.change_state("{start_state_name}")
+		_STATE_CONTROLLER.change_state("{start_state_name}"{start_state_data})
 {_ready}
 func trigger_event(_event: StringName) -> void:
 	if _EVENTS.has(_event):
@@ -40,44 +40,35 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 			HenVirtualCNode.SubType.STATE_START:
 				if not flow_connections.is_empty():
 					start_state = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data)
-			HenVirtualCNode.SubType.STATE:
-				var transitions: Array = []
+			# HenVirtualCNode.SubType.STATE:
+			# 	var transitions: Array = []
 
-				# getting transition
-				for flow_connection: HenVCFlowConnectionData in flow_connections:
-					var state: HenSaveState = _vc.get_res(_save_data)
+			# 	# getting transition
+			# 	for flow_connection: HenVCFlowConnectionData in flow_connections:
+			# 		var state: HenSaveState = _vc.get_res(_save_data)
 
-					if state:
-						var to: HenVirtualCNode = flow_connection.get_to(_save_data)
+			# 		if state:
+			# 			var to: HenVirtualCNode = flow_connection.get_to(_save_data)
 
-						if to:
-							var flow_list: Dictionary = {}
-							var flow_output_id_list: Array = _vc.get_flow_outputs(_save_data).map(func(x: HenVCFlow):
-								flow_list[x.id] = x
-								return x.id)
+			# 			if to:
+			# 				var flow_list: Dictionary = {}
+			# 				var flow_output_id_list: Array = _vc.get_flow_outputs(_save_data).map(func(x: HenVCFlow):
+			# 					flow_list[x.id] = x
+			# 					return x.id)
 
-							if flow_output_id_list.has(flow_connection.from_id):
-								transitions.append({
-									name = flow_list.get(flow_connection.from_id).name,
-									to_state_name = to.get_vc_name(_save_data)
-								})
+			# 				if flow_output_id_list.has(flow_connection.from_id):
+			# 					transitions.append({
+			# 						name = flow_list.get(flow_connection.from_id).name,
+			# 						to_state_name = to.get_vc_name(_save_data)
+			# 					})
 
-				var state_res: HenSaveState = _vc.get_res(_save_data)
+			# 	var state_res: HenSaveState = _vc.get_res(_save_data)
 
-				if state_res:
-					_refs.states_data[_vc.get_vc_name(_save_data).to_snake_case()] = {
-						virtual_tokens = _parse_virtual_cnode(state_res.get_route(_save_data).virtual_sub_type_vc_list, _save_data),
-						transitions = transitions
-					}
-			HenVirtualCNode.SubType.STATE_EVENT:
-				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
-					var res: HenSaveStateEvent = _vc.get_res(_save_data)
-
-					if res:
-						events.append({
-							name = res.name,
-							to_state_name = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data).get_vc_name(_save_data)
-						})
+			# 	if state_res:
+			# 		_refs.states_data[_vc.get_vc_name(_save_data).to_snake_case()] = {
+			# 			virtual_tokens = parse_virtual_cnode(state_res.get_route(_save_data).virtual_sub_type_vc_list, _save_data),
+			# 			transitions = transitions
+			# 		}
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					if not _refs.override_virtual_data.has(_vc.name):
@@ -111,6 +102,17 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
 					if _code: physics_process_code.append(_code)
 
+	var start_state_data: String = ''
+
+	# start state params generation
+	if start_state:
+		var res: HenSaveState = start_state.get_res(_save_data)
+		for virtual_vc: HenVirtualCNode in res.get_route(_save_data).virtual_sub_type_vc_list:
+			if virtual_vc.get_vc_name(_save_data) == 'enter':
+				var flow_tokens: Array = HenVirtualCNodeCode.get_output_token_list(_save_data, virtual_vc)
+				start_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String: return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type)))
+				break
+
 	return code + TEXT_BASE.format({
 		events = ' {\n\t' + ',\n\t'.join(events.map(
 			func(ev: Dictionary) -> String:
@@ -120,15 +122,16 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
 		start_state_name = (start_state as HenVirtualCNode).get_vc_name(_save_data).to_snake_case() if start_state else '',
+		start_state_data = start_state_data,
 		_ready = ' \n'.join(ready_code),
 		_process = '\n'.join(process_code),
 		_physics_process = '\n'.join(physics_process_code),
-		states_dict = HenGeneratorState.get_states_start_code(_refs),
-		states = HenGeneratorState.get_states_code(_save_data, _refs)
+		states_dict = HenGeneratorState.get_states_start_code(_save_data),
+		states = HenGeneratorState.get_states_code(_save_data)
 	})
 
 
-static func _parse_virtual_cnode(_cnode_list: Array, _save_data: HenSaveData) -> Dictionary:
+static func parse_virtual_cnode(_cnode_list: Array, _save_data: HenSaveData) -> Dictionary:
 	var data: Dictionary = {}
 
 	for vc: HenVirtualCNode in _cnode_list:

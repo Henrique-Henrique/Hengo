@@ -2,14 +2,17 @@
 class_name HenSaveState extends HenSaveResTypeWithRoute
 
 @export var flow_outputs: Array[HenSaveParam]
+@export var sub_states: Array[HenSaveState]
+@export var transition_data: Array[HenSaveParam]
+@export var is_sub_state: bool
 
-
-static func create() -> HenSaveState:
+static func create(_is_sub_state: bool = false) -> HenSaveState:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var state: HenSaveState = HenSaveState.new()
 
 	state.id = global.get_new_node_counter()
 	state.name = state.get_new_name()
+	state.is_sub_state = _is_sub_state
 
 	var route: HenRouteData = state.create_route(HenRouter.ROUTE_TYPE.STATE)
 
@@ -18,7 +21,8 @@ static func create() -> HenSaveState:
 		sub_type = HenVirtualCNode.SubType.VIRTUAL,
 		route = route,
 		position = Vector2.ZERO,
-		can_delete = false
+		can_delete = false,
+		res_data = state.get_res_data(HenSideBar.AddType.STATE)
 	})
 
 	HenVirtualCNode.instantiate_virtual_cnode({
@@ -40,10 +44,50 @@ func get_new_name() -> String:
 	return 'state_' + str(id)
 
 
+func get_vc_name(_type: HenVirtualCNode.SubType) -> String:
+	if _type == HenVirtualCNode.SubType.VIRTUAL:
+		return 'enter'
+	
+	return name
+
+
+func add_state() -> void:
+	var s: HenSaveState = HenSaveState.create(true)
+
+	if not s:
+		return
+	
+	sub_states.append(s)
+
+
+func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	var arr: Array[Dictionary] = []
+
+	if _type == HenVirtualCNode.SubType.STATE_TRANSITION:
+		for param: HenSaveParam in transition_data:
+			arr.append(param.get_data())
+
+	return arr
+
+
+func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	var arr: Array[Dictionary] = []
+
+	if _type == HenVirtualCNode.SubType.VIRTUAL:
+		for param: HenSaveParam in transition_data:
+			arr.append(param.get_data())
+
+	return arr
+
+
 func get_flow_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
-	for flow_output: HenSaveParam in flow_outputs:
-		arr.append({id = flow_output.id, name = flow_output.name})
+
+	if _type == HenVirtualCNode.SubType.STATE:
+		for flow_output: HenSaveParam in flow_outputs:
+			arr.append({id = flow_output.id, name = flow_output.name})
+	else:
+		arr.append({id = 0})
 	return arr
 
 
@@ -57,3 +101,21 @@ func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = fals
 		route = router.current_route,
 		res_data = get_res_data(HenSideBar.AddType.STATE, _save_data_id)
 	}
+
+
+func get_transition_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	
+	return {
+		name = name,
+		sub_type = HenVirtualCNode.SubType.STATE_TRANSITION if not _from_another_script else HenVirtualCNode.SubType.STATE_TRANSITION_FROM,
+		route = router.current_route,
+		res_data = get_res_data(HenSideBar.AddType.STATE, _save_data_id)
+	}
+
+
+# hides the default resource section properties
+func _validate_property(_property: Dictionary) -> void:
+	super (_property)
+	if _property.name in [&'sub_states', &'is_sub_state']:
+		_property.usage = PROPERTY_USAGE_STORAGE

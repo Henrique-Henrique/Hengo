@@ -41,8 +41,6 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
 			return indent + 'HengoState.INVALID_PLACEHOLDER'
-		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION:
-			return indent + prefix + 'trigger_event(&"{0}")'.format([_token.name])
 		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.VAR_FROM:
 			if _token.has('ref'):
 				return indent + get_prefix_with_dot(get_code_by_token(_save_data, _token.ref)) + _token.name
@@ -269,7 +267,6 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 			})
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
 			var values: Array = _provide_params_ref(_save_data, _token.params, prefix)
-			var params: Array = values[0]
 			var my_prefix = values[1]
 
 			return indent + '{ref}disconnect("{signal_name}", {call_ref}{callable})'.format({
@@ -283,5 +280,11 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 			return macro_code if not macro_code.is_empty() else indent + 'pass'
 		HenVirtualCNode.SubType.GET_FROM_PROP:
 			return indent + get_code_by_token(_save_data, _token.ref) + '.' + _token.name
+		HenVirtualCNode.SubType.STATE_TRANSITION:
+			return indent + prefix + '_STATE_CONTROLLER.{func_name}("{state_name}"{params})'.format({
+				func_name = 'change_state' if not _token.is_sub_state else 'current_state.change_sub_state',
+				state_name = _token.name,
+				params = (', ' if not (_token.params as Array).is_empty() else '') + ', '.join((_token.params as Array).map(func(x: Dictionary) -> String: return get_code_by_token(_save_data, x)))
+			})
 		_:
 			return ''

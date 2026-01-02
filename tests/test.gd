@@ -49,11 +49,11 @@ static func set_global_config() -> void:
 	map_deps.ast_list.set(save_data.identity.id, HenUtils.get_current_ast_list())
 
 
-static func get_void(_name: String = 'test_void') -> HenVirtualCNode:
+static func get_void(_name: String = 'test_void', _route: HenRouteData = null) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
 		name = _name,
 		sub_type = HenVirtualCNode.SubType.VOID,
-		route = HenTest.get_base_route()
+		route = HenTest.get_base_route() if not _route else _route
 	})
 
 
@@ -129,14 +129,17 @@ static func get_if_vc() -> HenVirtualCNode:
 	})
 
 
-static func clear_save_data() -> void:
+static func clear_save_data(_all_routes: bool = false) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var base_route: HenRouteData = HenTest.get_base_route()
 
-	for route_keys in global.SAVE_DATA.routes.keys():
-		var route: HenRouteData = global.SAVE_DATA.routes.get(route_keys)
-		if route != base_route:
-			global.SAVE_DATA.routes.erase(route)
+	if not _all_routes:
+		for route_keys in global.SAVE_DATA.routes.keys():
+			var route: HenRouteData = global.SAVE_DATA.routes.get(route_keys)
+			if route != base_route:
+				global.SAVE_DATA.routes.erase(route)
+	else:
+		global.SAVE_DATA.routes.clear()
 
 	global.SAVE_DATA.states.clear()
 	global.SAVE_DATA.macros.clear()
@@ -145,4 +148,6 @@ static func clear_save_data() -> void:
 	global.SAVE_DATA.signals_callback.clear()
 	global.SAVE_DATA.connections.clear()
 	global.SAVE_DATA.flow_connections.clear()
-	global.SAVE_DATA.state_events.clear()
+
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	router.current_route = base_route

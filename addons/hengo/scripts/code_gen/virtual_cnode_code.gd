@@ -317,15 +317,6 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				params = get_input_token_list(_save_data, _vc),
 				singleton_class = _vc.singleton_class
 			})
-		HenVirtualCNode.SubType.STATE_EVENT_TRANSITION:
-			var res: HenSaveStateEvent = _vc.get_res(_save_data)
-
-			if not res:
-				return INVALID_TOKEN
-
-			token.merge({
-				name = res.name.to_snake_case()
-			})
 		HenVirtualCNode.SubType.FUNC, HenVirtualCNode.SubType.USER_FUNC, HenVirtualCNode.SubType.FUNC_FROM, HenVirtualCNode.SubType.MAKE_TRANSITION:
 			var params: Array
 
@@ -471,6 +462,17 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			token.merge({
 				ref = get_input_token(_save_data, _vc, 0),
 				name = _vc.get_outputs(_save_data)[0].name.to_snake_case(),
+			})
+		HenVirtualCNode.SubType.STATE_TRANSITION:
+			var res: HenSaveState = _vc.get_res(_save_data)
+
+			if not res:
+				return INVALID_TOKEN
+			
+			token.merge({
+				is_sub_state = res.is_sub_state,
+				name = res.name.to_snake_case(),
+				params = get_input_token_list(_save_data, _vc, true),
 			})
 
 	return token

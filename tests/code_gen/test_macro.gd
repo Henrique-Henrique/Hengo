@@ -27,7 +27,7 @@ func test_macro_flow_input_connection() -> void:
 
     var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_data.get_cnode_data(''))
     var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, macro_data)
-    var macro_flow_vc: HenVirtualCNode = HenTest.get_void()
+    var macro_flow_vc: HenVirtualCNode = HenTest.get_void('test void', macro_data.get_route(save_data))
 
     macro_input.add_flow_connection(first_flow_input.id, 0, macro_flow_vc).add()
 

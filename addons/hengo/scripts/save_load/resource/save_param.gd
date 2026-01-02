@@ -19,7 +19,7 @@ func get_data() -> Dictionary:
 	return {
 		name = name,
 		type = type,
-		id = id
+		id = id,
 	}
 
 
