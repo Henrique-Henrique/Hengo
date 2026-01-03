@@ -227,10 +227,13 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 
 
 func _add_sub_states(parent: TreeItem, state: HenSaveState, type: AddType) -> void:
-	if state.sub_states.is_empty():
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var sub_states: Array = state.get_sub_states(global.SAVE_DATA)
+
+	if sub_states.is_empty():
 		return
 
-	for sub_state: HenSaveState in state.sub_states:
+	for sub_state: HenSaveState in sub_states:
 		var item: TreeItem = create_item(
 			parent,
 			sub_state.name,
@@ -280,6 +283,6 @@ func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_but
 			AddType.MACRO:
 				global.SAVE_DATA.add_macro()
 	elif meta is HenSaveState:
-		(meta as HenSaveState).add_state()
+		(meta as HenSaveState).add_sub_state(global.SAVE_DATA)
 		
 	update()

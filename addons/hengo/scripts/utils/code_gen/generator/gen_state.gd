@@ -30,11 +30,13 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 			indent = '\t'.repeat(_level)
 		})
 
-		if not state.sub_states.is_empty():
-			base += get_states_code_with_arr(_save_data, state.sub_states, _level + 1)
+		var sub_states: Array = state.get_sub_states(_save_data)
+
+		if not sub_states.is_empty():
+			base += get_states_code_with_arr(_save_data, sub_states, _level + 1)
 			var sub_state_tokens: Array = []
 
-			for sub_state: HenSaveState in state.sub_states:
+			for sub_state: HenSaveState in sub_states:
 				sub_state_tokens.append('add_sub_state("{name_key}", {name}.new(_p))'.format(({
 					name_key = sub_state.name.to_snake_case(),
 					name = sub_state.name.to_pascal_case()
@@ -67,7 +69,7 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 
 			var func_base: String = '{new_line}{indent}func {name}({params}) -> void:\n{super_call}'.format({
 				name = virtual_name,
-				new_line = '\n\n' if idx_1 > 0 or not state.sub_states.is_empty() else '',
+				new_line = '\n\n' if idx_1 > 0 or not state.get_sub_states(_save_data).is_empty() else '',
 				indent = '\t'.repeat(_level + 1),
 				super_call = '\t'.repeat(_level + 2) + 'super({params})\n'.format({
 					params = params_str

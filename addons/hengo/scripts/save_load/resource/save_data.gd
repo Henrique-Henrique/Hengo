@@ -12,6 +12,7 @@ class_name HenSaveData extends Resource
 @export var signals_callback: Array[HenSaveSignalCallback]
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
+@export var sub_states: Dictionary
 
 var _node_cache: Dictionary = {}
 

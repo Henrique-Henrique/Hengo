@@ -109,7 +109,9 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.CAST:
 			return ICON_BOX
 
-		HenVirtualCNode.SubType.MAKE_TRANSITION:
+		HenVirtualCNode.SubType.MAKE_TRANSITION, \
+		HenVirtualCNode.SubType.STATE_TRANSITION, \
+		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
 			return ICON_TRANSITION
 
 	return null
@@ -187,7 +189,9 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.EXPRESSION:
 			return Color("#ff9f43")
 
-		HenVirtualCNode.SubType.MAKE_TRANSITION:
+		HenVirtualCNode.SubType.MAKE_TRANSITION, \
+		HenVirtualCNode.SubType.STATE_TRANSITION, \
+		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
 			return Color("#6c5ce7")
 
 	return Color("#343434")
@@ -476,7 +480,7 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 				return item
 			
 			if item is HenSaveState:
-				for sub_state in item.sub_states:
+				for sub_state in (item as HenSaveState).get_sub_states(_save_data):
 					if sub_state.id == _res_data.id:
 						return sub_state
 		

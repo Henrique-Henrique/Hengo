@@ -199,6 +199,7 @@ func test_state_transition_data() -> void:
 
 	var code: String = HenTest.get_all_code()
 
+	router.current_route = HenTest.get_base_route()
 	assert_str(code).contains('class StateTest extends HengoState:\n\tfunc enter() -> void:\n\t\t_ref._STATE_CONTROLLER.change_state("state_test_2")')
 
 
@@ -209,8 +210,8 @@ func test_state_transition_sub_state() -> void:
 
 	var state: HenSaveState = save_data.states.get(0)
 
-	state.add_state()
-	var state2: HenSaveState = state.sub_states.get(0)
+	state.add_sub_state(save_data)
+	var state2: HenSaveState = state.get_sub_states(save_data).get(0)
 
 	state.name = 'state test'
 	state2.name = 'state test 2'
@@ -229,5 +230,5 @@ func test_state_transition_sub_state() -> void:
 	enter_vc.add_flow_connection(0, 0, transition_state_vc).add()
 
 	var code: String = HenTest.get_all_code()
-
+	router.current_route = HenTest.get_base_route()
 	assert_str(code).contains('func enter() -> void:\n\t\t_ref._STATE_CONTROLLER.current_state.change_sub_state("state_test_2")')

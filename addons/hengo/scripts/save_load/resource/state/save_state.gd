@@ -2,7 +2,6 @@
 class_name HenSaveState extends HenSaveResTypeWithRoute
 
 @export var flow_outputs: Array[HenSaveParam]
-@export var sub_states: Array[HenSaveState]
 @export var transition_data: Array[HenSaveParam]
 @export var is_sub_state: bool
 
@@ -45,19 +44,36 @@ func get_new_name() -> String:
 
 
 func get_vc_name(_type: HenVirtualCNode.SubType) -> String:
-	if _type == HenVirtualCNode.SubType.VIRTUAL:
-		return 'enter'
+	match _type:
+		HenVirtualCNode.SubType.VIRTUAL:
+			return 'enter'
+		HenVirtualCNode.SubType.STATE_TRANSITION:
+			return 'Transition -> ' + name
+	
 	
 	return name
 
 
-func add_state() -> void:
+func add_sub_state(_save_data: HenSaveData) -> void:
 	var s: HenSaveState = HenSaveState.create(true)
 
 	if not s:
 		return
-	
-	sub_states.append(s)
+
+	if not _save_data.sub_states.has(id):
+		_save_data.sub_states.set(id, [])
+
+	var states_list: Array = _save_data.sub_states.get(id)
+
+	if not states_list.has(s):
+		states_list.append(s)
+
+
+func get_sub_states(_save_data: HenSaveData) -> Array:
+	if not _save_data.sub_states.has(id):
+		return []
+
+	return _save_data.sub_states.get(id)
 
 
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:

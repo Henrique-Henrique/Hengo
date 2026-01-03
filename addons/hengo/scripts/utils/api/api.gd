@@ -529,7 +529,9 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 			data = state_data.get_transition_cnode_data(save_data_id, _from_another_script)
 		})
 
-		for sub_state: HenSaveState in state_data.sub_states:
+		var sub_states: Array = state_data.get_sub_states((Engine.get_singleton('Global') as HenGlobal).SAVE_DATA)
+		
+		for sub_state: HenSaveState in sub_states:
 			(state_transitions.method_list as Array).append({
 				_class_name = 'State Transitions',
 				name = 'sub state transition: ' + sub_state.name,
