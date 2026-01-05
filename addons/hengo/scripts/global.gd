@@ -26,7 +26,7 @@ var DASHBOARD: HenDashboard
 var SAVE_DATA: HenSaveData
 var CURRENT_INSPECTOR: HenInspector
 var RIGHT_SIDE_BAR: HenRightSideBar
-
+var CODE_SEARCH: HenCodeSearch
 
 # CONFIG
 var IS_HEADLESS: bool = false

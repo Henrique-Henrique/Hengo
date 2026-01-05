@@ -15,6 +15,7 @@ var _layout_cache: Array[Dictionary] = []
 var _is_updating: bool = false
 var _pending_update: bool = false
 var _heights_calculated: Dictionary = {}
+var _last_width: float = 0.0
 
 
 func _ready() -> void:
@@ -33,6 +34,10 @@ func _on_scroll_changed(_value: float = 0.0) -> void:
 		_pending_update = true
 		return
 	_update_visible_items()
+
+
+func update() -> void:
+	_on_scroll_changed()
 
 
 func set_data(data: Array) -> void:
@@ -124,6 +129,10 @@ func _update_visible_items() -> void:
 	var v_scroll: VScrollBar = scroll_container.get_v_scroll_bar()
 	if v_scroll and v_scroll.visible:
 		available_width -= v_scroll.size.x
+	
+	if abs(available_width - _last_width) > 0.1:
+		_last_width = available_width
+		_heights_calculated.clear()
 	
 	# buffer logic
 	var buffer: float = default_item_height * 2.0

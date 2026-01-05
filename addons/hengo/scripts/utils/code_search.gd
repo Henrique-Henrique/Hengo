@@ -8,6 +8,7 @@ const CODE_SEARCH_ITEM = preload('res://addons/hengo/scenes/code_search_item.tsc
 
 @export var first_list_virtual_list_item: PackedScene
 
+var current_tab: int = 0
 var config: Dictionary
 var start_pos: Vector2
 var categories: Dictionary
@@ -71,12 +72,33 @@ func _open_categories() -> void:
 func set_data(_virtual_list_id: int, _api_list: Array) -> void:
 	var virtual_list: HenVirtualList
 
+	var first_list: ScrollContainer = get_node('%FirstList')
+	var second_list: ScrollContainer = get_node('%SecondList')
+	var third_list: ScrollContainer = get_node('%ThirdList')
+
 	match _virtual_list_id:
-		0: virtual_list = get_node('%FirstList').get_node('%VirtualList')
-		1: virtual_list = get_node('%SecondList').get_node('%VirtualList')
-		2: virtual_list = get_node('%ThirdList').get_node('%VirtualList')
+		0:
+			virtual_list = first_list.get_node('%VirtualList')
+			first_list.visible = true
+			second_list.visible = false
+			third_list.visible = false
+		1:
+			virtual_list = second_list.get_node('%VirtualList')
+			first_list.visible = true
+			second_list.visible = not _api_list.is_empty()
+			third_list.visible = false
+		2:
+			virtual_list = third_list.get_node('%VirtualList')
+			first_list.visible = true
+			second_list.visible = true
+			third_list.visible = not _api_list.is_empty()
 
 	if virtual_list: virtual_list.set_data(_api_list)
+
+	match _virtual_list_id:
+		1, 2:
+			await get_tree().process_frame
+			(first_list.get_node('%VirtualList') as HenVirtualList).update()
 
 
 func update() -> void:
@@ -105,7 +127,7 @@ func update() -> void:
 		elif io_type == 'in':
 			getter_dt.set(&'is_setter', true)
 
-		var getter_list = api.get_native_props_as_data(getter_dt)
+		var getter_list = get_native_props_as_data(getter_dt)
 
 		if not getter_list.is_empty():
 			api_list.append({
@@ -175,6 +197,13 @@ func update() -> void:
 			api_list.append(item)
 
 	set_data.call_deferred(0, api_list)
+
+
+func get_native_props_as_data(_data: Dictionary) -> Array:
+	var io_type: StringName = config.get(&'io_type', &'')
+	var type: StringName = config.get(&'type', &'')
+	var api: HenApi = Engine.get_singleton(&'API')
+	return api.get_native_props_as_data(_data, io_type, type)
 
 
 func get_class_name_categories(_class_name: StringName) -> Array[Dictionary]:
@@ -270,8 +299,15 @@ func _on_select(_data: Dictionary) -> void:
 	await RenderingServer.frame_pre_draw
 	HenFormatter.format_current_route()
 
+
 static func load(_start_pos: Vector2, _config: Dictionary = {}) -> HenCodeSearch:
 	var code_search: HenCodeSearch = CODE_SEARCH.instantiate()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	code_search.current_tab = 0
 	code_search.start_pos = _start_pos
 	code_search.config = _config
+
+	global.CODE_SEARCH = code_search
+
 	return code_search

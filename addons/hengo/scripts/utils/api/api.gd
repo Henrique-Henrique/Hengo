@@ -4,6 +4,7 @@ class_name HenApi extends Node
 const HENGO_CACHE_PATH = 'res://.godot/hengo/'
 const EXTENSION_API_PATH = 'res://.godot/hengo/extension_api.json'
 const EXTENSION_API_COMPRESSED_PATH = 'res://.godot/hengo/api_compressed.bin'
+const API_VERSION: int = 1
 
 var compressed_api: CompressedData
 var timer: SceneTreeTimer
@@ -46,7 +47,9 @@ func _generate_compressed_data() -> void:
 
 func _get_compressed_api() -> CompressedData:
 	if FileAccess.file_exists(EXTENSION_API_COMPRESSED_PATH):
-		return load_compressed_data(EXTENSION_API_COMPRESSED_PATH)
+		var data = load_compressed_data(EXTENSION_API_COMPRESSED_PATH)
+		if data:
+			return data
 	
 	return await _map_api()
 
@@ -365,7 +368,6 @@ func map_methods(_list: Array, _prop_data: Dictionary = {}) -> Dictionary:
 				elif prop.has(&'is_setter'):
 					method_dt.is_setter = true
 
-
 			if method_data.has(&'description'):
 				dsc = method_data.get(&'description')
 			else:
@@ -485,6 +487,7 @@ func save_and_get_compressed_data(data: Variant, path_out: String) -> Compressed
 		return null
 	
 	f.store_8(FileAccess.COMPRESSION_ZSTD)
+	f.store_32(API_VERSION)
 	f.store_32(size)
 	f.store_buffer(compressed)
 	f.close()
@@ -500,8 +503,13 @@ func load_compressed_data(path_in: String) -> CompressedData:
 	
 	var file_size = f.get_length()
 	f.get_8()
+	var version = f.get_32()
+	
+	if version != API_VERSION:
+		return null
+
 	var original_size = f.get_32()
-	var compressed_bytes = f.get_buffer(file_size - 5)
+	var compressed_bytes = f.get_buffer(file_size - 9)
 	f.close()
 
 	return CompressedData.new(compressed_bytes, original_size)
@@ -532,21 +540,17 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	return arr
 
 
-func get_native_props_as_data(_data: Dictionary) -> Array:
-	var arr: Array = []
-	
-	if not compressed_api:
-		print('Erro open compressed api')
-		return arr
-
-	var data: Dictionary = decompress_and_get_data(compressed_api)
+func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _type: StringName = '') -> Array:
+	var data: Dictionary = get_decompressed_data()
 
 	if not data:
 		print('Not data')
-		return arr
+		return []
 
 	if not data.has(&'native_props'):
-		return arr
+		return []
+	
+	var arr: Array = []
 
 	var native_props: Dictionary = data.get(&'native_props', {})
 	var type: StringName = _data.get(&'return_type', '')
@@ -557,6 +561,7 @@ func get_native_props_as_data(_data: Dictionary) -> Array:
 
 		if not inputs.size() < 2:
 			type = (inputs.get(1) as Dictionary).get(&'type', '')
+
 
 	if native_props.has(type):
 		var router: HenRouter = Engine.get_singleton(&'Router')
@@ -592,8 +597,8 @@ func get_native_props_as_data(_data: Dictionary) -> Array:
 					}
 				}
 
-				if _data.get(&'io_type', '') == 'out':
-					dt.input_io_idx = 0
+				if _io_type == 'in':
+					dt.output_io_idx = 0
 				
 				arr.append(dt)
 			elif _data.has('is_setter'):
@@ -624,6 +629,9 @@ func get_native_props_as_data(_data: Dictionary) -> Array:
 					}
 				}
 
+				if _io_type == 'out':
+					dt.input_io_idx = 0
+				
 				arr.append(dt)
 
 	return arr
