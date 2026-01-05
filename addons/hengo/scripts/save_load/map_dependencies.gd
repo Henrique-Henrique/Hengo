@@ -102,7 +102,7 @@ func _map_project_data(_id: StringName) -> void:
 	ast_list.set(_id, ast)
 
 
-func get_code_search_list() -> Dictionary:
+func get_code_search_list(_io_type: StringName = '', _type: StringName = '') -> Dictionary:
 	var api: HenApi = Engine.get_singleton(&'API')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
@@ -120,14 +120,18 @@ func get_code_search_list() -> Dictionary:
 			if v.identity.id == global.SAVE_DATA.identity.id:
 				continue
 			
-			(all_scripts.method_list as Array).append(
-				{
-					_class_name = v.identity.name.to_pascal_case(),
-					categories = api.get_side_bar_categories(v, true)
-				}
-			)
+			var categories: Array = api.get_side_bar_categories(v, true, _io_type, _type)
+			
+			if not categories.is_empty():
+				(all_scripts.method_list as Array).append(
+					{
+						_class_name = v.identity.name.to_pascal_case(),
+						categories = categories
+					}
+				)
 
-	(dt.categories as Array).append(all_scripts)
+	if not (all_scripts.method_list as Array).is_empty():
+		(dt.categories as Array).append(all_scripts)
 
 	# categories
 	# TODO

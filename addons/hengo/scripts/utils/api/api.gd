@@ -119,7 +119,6 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 	# map native classes
 	for _class_name: StringName in (data.native_classes as Dictionary).keys():
 		var class_data: Dictionary = data.native_classes[_class_name]
-
 		search_method_data(_class_name, class_data, results, text, _io_type, _type)
 		# search_enum_data(_class_name, class_data, results, text, _io_type, _type)
 
@@ -135,6 +134,8 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 			util_data.score = score
 			util_data.is_utility = true
 			util_data.data = HenApiSerialize.get_func_void_hengo_data(util_data)
+
+			util_data.data.category = &'native'
 			
 			if not check_type_validity(util_data, _io_type, _type):
 				continue
@@ -162,6 +163,9 @@ func search_method_data(_class_name: StringName, _class_data: Dictionary, _resul
 				method_data.name = method_name
 				method_data.score = score
 				method_data.data = HenApiSerialize.get_func_void_hengo_data(method_data)
+
+				if _class_data.get(&'is_native', false):
+					method_data.category = &'native'
 
 				if not check_type_validity(method_data, _io_type, _type):
 					continue
@@ -192,34 +196,39 @@ func check_type_validity(_data: Dictionary, _io_type: StringName = '', _type: St
 			_type
 		):
 			var params: Array = (_data.data as Dictionary).get(&'outputs', [])
-			var idx: int = 0
-			for param: Dictionary in params:
-				if HenUtils.is_type_relation_valid(
-					_type,
-					param.get(&'type', &'')
-				):
-					_data.output_io_idx = idx
-					has_type = true
-					break
+			var idx: int = HenAPIProcessors.check_param_validity(params, _type, false)
 
-				idx += 1
+			if idx != -1:
+				_data.output_io_idx = idx
+				has_type = true
 	elif _io_type == &'out':
 		var params: Array = (_data.data as Dictionary).get(&'inputs', [])
-		var idx: int = 0
-		for param: Dictionary in params:
-			if HenUtils.is_type_relation_valid(
-				_type,
-				param.get(&'type', &'')
-			):
-				_data.input_io_idx = idx
-				has_type = true
-				break
+		var idx: int = HenAPIProcessors.check_param_validity(params, _type, true)
 
-			idx += 1
+		if idx != -1:
+			_data.input_io_idx = idx
+			has_type = true
 	else:
 		has_type = true
 	
 	return has_type
+
+
+func check_param_validity(_params: Array, _type: StringName, _is_input: bool) -> int:
+	var idx: int = 0
+	
+	for param: Dictionary in _params:
+		var type: StringName = param.get(&'type', &'')
+		
+		# if is input: _type -> type
+		# if is output: type -> _type
+		if (_is_input and HenUtils.is_type_relation_valid(_type, type)) or \
+			(not _is_input and HenUtils.is_type_relation_valid(type, _type)):
+			return idx
+
+		idx += 1
+		
+	return -1
 
 
 func debounce_search(delay: float, callback: Callable) -> void:
@@ -245,7 +254,8 @@ func _map_api() -> CompressedData:
 		utilities = map_utilities(data),
 		global_enums = map_global_enums(data),
 		singletons = map_singletons(data),
-		native_classes = map_native_classes(data)
+		native_classes = map_native_classes(data),
+		native_props = map_native_props(data)
 	}
 
 	return save_and_get_compressed_data(new_api_data.duplicate(true), EXTENSION_API_COMPRESSED_PATH)
@@ -270,6 +280,27 @@ func get_api_file() -> FileAccess:
 	
 	print('Not Found extension_api.json.')
 	return null
+
+
+func map_native_props(_data: Dictionary) -> Dictionary:
+	var dict: Dictionary = {}
+
+	if _data.has(&'builtin_class_member_offsets'):
+		for conf: Dictionary in _data.get(&'builtin_class_member_offsets'):
+			if conf.has(&'classes'):
+				for cls: Dictionary in conf.get(&'classes'):
+					if not dict.has(cls.name):
+						var members: Array = []
+						
+						for member: Dictionary in cls.get(&'members'):
+							members.append({
+								name = member.member,
+								type = member.meta
+							})
+						
+						dict[cls.name] = members
+
+	return dict
 
 
 func map_native_classes(_data: Dictionary) -> Dictionary:
@@ -323,6 +354,17 @@ func map_methods(_list: Array, _prop_data: Dictionary = {}) -> Dictionary:
 			method_dt.description = method_data.description
 		elif not _prop_data.is_empty():
 			var dsc: String = ''
+
+			if _prop_data.has(method_data.name):
+				var prop: Dictionary = _prop_data.get(method_data.name)
+
+				method_dt.prop_name = prop.get(&'prop_name')
+
+				if prop.has(&'is_getter'):
+					method_dt.is_getter = true
+				elif prop.has(&'is_setter'):
+					method_dt.is_setter = true
+
 
 			if method_data.has(&'description'):
 				dsc = method_data.get(&'description')
@@ -411,11 +453,15 @@ func map_classes(_data: Dictionary) -> Dictionary:
 			for prop_dict: Dictionary in class_data.get(&'properties'):
 				if prop_dict.has(&'setter'):
 					prop_data.set(prop_dict.setter, {
+						prop_name = prop_dict.name,
+						is_setter = true,
 						description = prop_dict.description if prop_dict.has(&'description') else "",
 					})
 
 				if prop_dict.has(&'getter'):
 					prop_data.set(prop_dict.getter, {
+						prop_name = prop_dict.name,
+						is_getter = true,
 						description = prop_dict.description if prop_dict.has(&'description') else "",
 					})
 		
@@ -466,136 +512,126 @@ func decompress_and_get_data(compressed_data: CompressedData) -> Variant:
 	return bytes_to_var(decompressed)
 
 
-func get_side_bar_list() -> Dictionary:
-	return {_class_name = 'Hengo', categories = get_side_bar_categories(HenUtils.get_current_ast_list())}
+func get_side_bar_list(_io_type: StringName = '', _type: StringName = '') -> Dictionary:
+	return {_class_name = 'Hengo', categories = get_side_bar_categories(HenUtils.get_current_ast_list(), false, _io_type, _type)}
 
 
-func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_script: bool = false) -> Array:
+func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_script: bool = false, _io_type: StringName = '', _type: StringName = '') -> Array:
 	var arr: Array = []
-	
-	# datas
-	var state_transitions: Dictionary = {
-		name = 'State Transitions',
-		icon = 'activity',
-		color = '#ff9ff3',
-		method_list = []
-	}
-	var state_category: Dictionary = {
-		name = 'States',
-		icon = 'activity',
-		color = '#ff9ff3',
-		method_list = []
-	}
-	var func_category: Dictionary = {
-		name = 'Functions',
-		icon = 'braces',
-		color = '#b05353',
-		method_list = []
-	}
-	var var_category: Dictionary = {
-		name = 'Variables',
-		icon = 'variable',
-		color = '#509fa6',
-		method_list = []
-	}
-	var signal_category: Dictionary = {
-		name = 'Signals',
-		icon = 'radio-tower',
-		color = '#51a650',
-		method_list = []
-	}
-	var macro_category: Dictionary = {
-		name = 'Macros',
-		icon = 'wand-sparkles',
-		color = '#9f50a6',
-		method_list = []
-	}
-
 	var save_data_id: StringName = _ast.identity.id
 
 	if _ast.identity.id == (Engine.get_singleton('Global') as HenGlobal).SAVE_DATA.identity.id:
 		save_data_id = ''
 
-	for state_data: HenSaveState in _ast.states:
-		(state_category.method_list as Array).append({
-			_class_name = 'State',
-			name = state_data.name,
-			data = state_data.get_cnode_data(save_data_id, _from_another_script)
-		})
-
-		(state_transitions.method_list as Array).append({
-			_class_name = 'State Transitions',
-			name = 'transition: ' + state_data.name,
-			data = state_data.get_transition_cnode_data(save_data_id, _from_another_script)
-		})
-
-		var sub_states: Array = state_data.get_sub_states((Engine.get_singleton('Global') as HenGlobal).SAVE_DATA)
-		
-		for sub_state: HenSaveState in sub_states:
-			(state_transitions.method_list as Array).append({
-				_class_name = 'State Transitions',
-				name = 'sub state transition: ' + sub_state.name,
-				data = sub_state.get_transition_cnode_data(save_data_id, _from_another_script)
-			})
-	
-	for func_data: HenSaveFunc in _ast.functions:
-		(func_category.method_list as Array).append({
-			_class_name = 'Function',
-			name = func_data.name,
-			data = func_data.get_cnode_data(save_data_id, _from_another_script)
-		})
-	
-	for var_data: HenSaveVar in _ast.variables:
-		var getter_name: String = 'get: ' + var_data.name
-		var setter_name: String = 'set: ' + var_data.name
-
-		(var_category.method_list as Array).append({
-			_class_name = 'Variable',
-			name = getter_name,
-			data = var_data.get_getter_cnode_data(save_data_id, _from_another_script)
-		})
-		(var_category.method_list as Array).append({
-			_class_name = 'Variable',
-			name = setter_name,
-			data = var_data.get_setter_cnode_data(save_data_id, _from_another_script)
-		})
-
-	for signal_data: HenSaveSignalCallback in _ast.signals_callback:
-		var connect_name: String = 'connect: ' + signal_data.name
-		var disconnect_name: String = 'disconnect: ' + signal_data.name
-
-		(signal_category.method_list as Array).append({
-			_class_name = 'Signal',
-			name = connect_name,
-			data = signal_data.get_connect_cnode_data()
-		})
-		(signal_category.method_list as Array).append({
-			_class_name = 'Signal',
-			name = disconnect_name,
-			data = signal_data.get_diconnect_cnode_data()
-		})
-
-	for macro_data: HenSaveMacro in _ast.macros:
-		(macro_category.method_list as Array).append({
-			_class_name = 'Macro',
-			name = macro_data.name,
-			data = macro_data.get_cnode_data(save_data_id, _from_another_script)
-		})
-
-	arr.append(state_category)
-	arr.append(state_transitions)
-	arr.append(func_category)
-	arr.append(var_category)
-	arr.append(signal_category)
-	arr.append(macro_category)
+	HenAPIProcessors.process_states(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
+	HenAPIProcessors.process_functions(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
+	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
+	HenAPIProcessors.process_signals(_ast, _io_type, _type, arr)
+	HenAPIProcessors.process_macros(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
 
 	return arr
 
 
-func get_native_list_raw() -> Array:
-	var router: HenRouter = Engine.get_singleton(&'Router')
+func get_native_props_as_data(_data: Dictionary) -> Array:
+	var arr: Array = []
+	
+	if not compressed_api:
+		print('Erro open compressed api')
+		return arr
 
-	return [
+	var data: Dictionary = decompress_and_get_data(compressed_api)
+
+	if not data:
+		print('Not data')
+		return arr
+
+	if not data.has(&'native_props'):
+		return arr
+
+	var native_props: Dictionary = data.get(&'native_props', {})
+	var type: StringName = _data.get(&'return_type', '')
+	var prop_class_name: StringName = _data.get(&'_class_name')
+
+	if not type:
+		var inputs: Array = (_data.get(&'data', {}) as Dictionary).get(&'inputs', [])
+
+		if not inputs.size() < 2:
+			type = (inputs.get(1) as Dictionary).get(&'type', '')
+
+	if native_props.has(type):
+		var router: HenRouter = Engine.get_singleton(&'Router')
+
+		for prop_data: Dictionary in native_props.get(type):
+			if _data.has('is_getter'):
+				var prop_name: String = _data.get(&'prop_name', '')
+				var value_name: String = (prop_name + '.' + prop_data.get(&'name')) if prop_name else prop_data.get(&'name')
+				var middle_name: String = prop_name + ' -> ' if prop_name else ''
+				var vc_name: String = 'Get -> ' + middle_name + prop_data.get(&'name')
+
+				var dt: Dictionary = {
+					_class_name = 'Getter',
+					name = vc_name,
+					data = {
+						name = vc_name,
+						sub_type = HenVirtualCNode.SubType.GET_PROP,
+						category = 'native',
+						inputs = [
+							{
+								is_ref = true,
+								name = prop_class_name,
+								type = prop_class_name
+							}
+						],
+						outputs = [
+							{
+								name = value_name,
+								type = prop_data.get(&'type')
+							}
+						],
+						route = router.current_route
+					}
+				}
+
+				if _data.get(&'io_type', '') == 'out':
+					dt.input_io_idx = 0
+				
+				arr.append(dt)
+			elif _data.has('is_setter'):
+				var prop_name: String = _data.get(&'prop_name', '')
+				var value_name: String = prop_name + '.' + prop_data.get(&'name')
+				var middle_name: String = prop_name + ' -> ' if prop_name else prop_data.get(&'name')
+				var vc_name: String = 'Set -> ' + middle_name + prop_data.get(&'name')
+
+				var dt: Dictionary = {
+					_class_name = 'Setter',
+					name = vc_name,
+					data = {
+						name = vc_name,
+						sub_type = HenVirtualCNode.SubType.SET_PROP,
+						category = 'native',
+						inputs = [
+							{
+								is_ref = true,
+								name = prop_class_name,
+								type = prop_class_name
+							},
+							{
+								name = value_name,
+								type = prop_data.get(&'type')
+							}
+						],
+						route = router.current_route
+					}
+				}
+
+				arr.append(dt)
+
+	return arr
+
+
+func get_native_list_raw(_io_type: StringName = '', _type: StringName = '') -> Array:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var list: Array = [
 	{
 		name = 'Expression',
 		icon = 'calculator',
@@ -639,6 +675,54 @@ func get_native_list_raw() -> Array:
 					sub_type = '@dropdown',
 					code_value = '',
 					category = 'state_transition'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Get Prop',
+		icon = 'arrow-right-left',
+		color = '#06b6d4',
+		is_native = true,
+		data = {
+			name = 'get -> x',
+			sub_type = HenVirtualCNode.SubType.GET_PROP,
+			category = 'native',
+			inputs = [
+				{
+					is_ref = true,
+					name = 'Vector2',
+					type = 'Vector2'
+				}
+			],
+			outputs = [
+				{
+					name = 'x',
+					type = 'float'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Set Prop',
+		icon = 'arrow-right-left',
+		color = '#06b6d4',
+		is_native = true,
+		data = {
+			name = 'set -> x',
+			sub_type = HenVirtualCNode.SubType.SET_PROP,
+			category = 'native',
+			inputs = [
+				{
+					is_ref = true,
+					name = 'Vector2',
+					type = 'Vector2'
+				},
+				{
+					name = 'x',
+					type = 'float'
 				}
 			],
 			route = router.current_route
@@ -806,3 +890,28 @@ func get_native_list_raw() -> Array:
 		}
 	},
 ]
+	var arr: Array = []
+
+	for item: Dictionary in list:
+		var has_valid_connection: bool = false
+		var input_idx: int = -1
+		var output_idx: int = -1
+
+		if not _io_type:
+			has_valid_connection = true
+		elif _io_type == 'in':
+			var params: Array = (item.data as Dictionary).get('outputs', [])
+			output_idx = HenAPIProcessors.check_param_validity(params, _type, false)
+			if output_idx != -1: has_valid_connection = true
+
+		elif _io_type == 'out':
+			var params: Array = (item.data as Dictionary).get('inputs', [])
+			input_idx = HenAPIProcessors.check_param_validity(params, _type, true)
+			if input_idx != -1: has_valid_connection = true
+
+		if has_valid_connection:
+			if input_idx != -1: item.input_io_idx = input_idx
+			if output_idx != -1: item.output_io_idx = output_idx
+			arr.append(item)
+
+	return arr

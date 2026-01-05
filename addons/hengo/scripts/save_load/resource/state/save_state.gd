@@ -133,5 +133,5 @@ func get_transition_cnode_data(_save_data_id: StringName, _from_another_script: 
 # hides the default resource section properties
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
-	if _property.name in [&'sub_states', &'is_sub_state']:
+	if _property.name in [&'is_sub_state']:
 		_property.usage = PROPERTY_USAGE_STORAGE

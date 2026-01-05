@@ -18,6 +18,9 @@ var _heights_calculated: Dictionary = {}
 
 
 func _ready() -> void:
+	if HenUtils.disable_scene_with_owner(self):
+		return
+
 	var v_scroll_bar = scroll_container.get_v_scroll_bar()
 	if v_scroll_bar:
 		v_scroll_bar.value_changed.connect(_on_scroll_changed)

@@ -110,7 +110,8 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 		for virtual_vc: HenVirtualCNode in res.get_route(_save_data).virtual_sub_type_vc_list:
 			if virtual_vc.get_vc_name(_save_data) == 'enter':
 				var flow_tokens: Array = HenVirtualCNodeCode.get_output_token_list(_save_data, virtual_vc)
-				start_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String: return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type)))
+				start_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
+					return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type, false)))
 				break
 
 	return code + TEXT_BASE.format({

@@ -16,7 +16,3 @@ text = "Class Name"
 unique_name_in_owner = true
 layout_mode = 2
 last_wrap_alignment = 1
-
-[node name="Button" type="Button" parent="Categories"]
-layout_mode = 2
-text = "test"

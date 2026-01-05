@@ -304,6 +304,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 		use_self = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
 	}
 
+
 	if _vc.category:
 		token.category = _vc.category
 
@@ -454,15 +455,6 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				signal_name = (res as HenSaveSignalCallback).signal_name_to_code,
 				name = (res as HenSaveSignalCallback).name.to_snake_case()
 			})
-		HenVirtualCNode.SubType.GET_FROM_PROP:
-			if not _vc.input_has_connection(_vc.get_inputs(_save_data)[0].id, _save_data):
-				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
-				return INVALID_TOKEN
-			
-			token.merge({
-				ref = get_input_token(_save_data, _vc, 0),
-				name = _vc.get_outputs(_save_data)[0].name.to_snake_case(),
-			})
 		HenVirtualCNode.SubType.STATE_TRANSITION:
 			var res: HenSaveState = _vc.get_res(_save_data)
 
@@ -473,6 +465,19 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				is_sub_state = res.is_sub_state,
 				name = res.name.to_snake_case(),
 				params = get_input_token_list(_save_data, _vc, true),
+			})
+		HenVirtualCNode.SubType.GET_PROP:
+			token.merge({
+				ref = get_input_token(_save_data, _vc, _vc.get_inputs(_save_data)[0].id),
+				name = _vc.get_outputs(_save_data)[0].name.to_snake_case(),
+			})
+		HenVirtualCNode.SubType.SET_PROP:
+			var value_input: HenVCInOutData = _vc.get_inputs(_save_data)[1]
+			
+			token.merge({
+				ref = get_input_token(_save_data, _vc, _vc.get_inputs(_save_data)[0].id),
+				value = get_input_token(_save_data, _vc, value_input.id),
+				name = value_input.name.to_snake_case(),
 			})
 
 	return token
@@ -487,7 +492,7 @@ static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode
 	return code
 
 
-static func get_default_value_code(_save_data: HenSaveData, _type: String) -> String:
+static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool) -> String:
 	match _type:
 		'String', 'NodePath', 'StringName':
 			return '""'
@@ -509,7 +514,7 @@ static func get_default_value_code(_save_data: HenSaveData, _type: String) -> St
 					_save_data.identity.type,
 					_type,
 				):
-					return '_ref'
+					return '_ref' if not _use_self else 'self'
 				
 				return _type + '.new()'
 	

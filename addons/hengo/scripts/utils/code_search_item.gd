@@ -32,4 +32,4 @@ func _on_press(_class_name: StringName, _data: Dictionary) -> void:
 		signal_bus.request_code_search_show_categories.emit(_data.get(&'method_list', []))
 		return
 
-	signal_bus.request_code_search_show_list.emit(_class_name, _data.get(&'method_list', []), _data.name)
+	signal_bus.request_code_search_show_list.emit(_data.get(&'method_list', []))

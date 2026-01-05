@@ -1,7 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://bihfp8yx5bhak"]
+[gd_scene load_steps=6 format=3 uid="uid://bihfp8yx5bhak"]
 
 [ext_resource type="Script" uid="uid://wlu45tx3jnix" path="res://addons/hengo/scripts/utils/code_search.gd" id="1_lav8o"]
-[ext_resource type="PackedScene" uid="uid://6urv5rx15yye" path="res://addons/hengo/scenes/utils/virtual_list.tscn" id="2_fvg77"]
+[ext_resource type="PackedScene" uid="uid://b3e2x7vlh05ft" path="res://addons/hengo/scenes/utils/api_search_item.tscn" id="2_fvg77"]
 [ext_resource type="PackedScene" uid="uid://uku58hykbu48" path="res://addons/hengo/scenes/code_search_item.tscn" id="3_ogmfe"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ogmfe"]
@@ -20,13 +20,6 @@ bg_color = Color(0.6, 0.6, 0.6, 0)
 border_width_bottom = 1
 border_color = Color(0.8, 0.8, 0.8, 0.08627451)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ogmfe"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6fpm2"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xop2f"]
-bg_color = Color(0, 0, 0, 0.19607843)
-
 [node name="Code Search" type="VBoxContainer"]
 anchors_preset = 15
 anchor_right = 1.0
@@ -34,6 +27,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_lav8o")
+first_list_virtual_list_item = ExtResource("3_ogmfe")
 
 [node name="Search" type="LineEdit" parent="."]
 unique_name_in_owner = true
@@ -42,66 +36,18 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_ogmfe")
 theme_override_styles/focus = SubResource("StyleBoxFlat_6fpm2")
 placeholder_text = "Type to search..."
 
-[node name="Navigation" type="HBoxContainer" parent="."]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="Button" type="Button" parent="Navigation"]
-layout_mode = 2
-text = "Classes"
-flat = true
-
-[node name="Button2" type="Button" parent="Navigation"]
-process_mode = 4
-visible = false
-layout_mode = 2
-disabled = true
-text = "Class"
-flat = true
-
-[node name="Button3" type="Button" parent="Navigation"]
-process_mode = 4
-visible = false
-layout_mode = 2
-disabled = true
-text = "Category"
-flat = true
-
-[node name="TabContainer" type="TabContainer" parent="."]
-unique_name_in_owner = true
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_ogmfe")
-current_tab = 1
-tabs_visible = false
 
-[node name="CodeSearch" type="VBoxContainer" parent="TabContainer"]
-visible = false
-layout_mode = 2
-theme_override_constants/separation = 0
-metadata/_tab_index = 0
-
-[node name="VirtualList" parent="TabContainer/CodeSearch" instance=ExtResource("2_fvg77")]
+[node name="FirstList" parent="HBoxContainer" instance=ExtResource("2_fvg77")]
 unique_name_in_owner = true
 layout_mode = 2
-item_scene = ExtResource("3_ogmfe")
 
-[node name="ListContainer" type="HBoxContainer" parent="TabContainer"]
+[node name="SecondList" parent="HBoxContainer" instance=ExtResource("2_fvg77")]
 unique_name_in_owner = true
 layout_mode = 2
-metadata/_tab_index = 1
 
-[node name="ItemList" type="Tree" parent="TabContainer/ListContainer"]
+[node name="ThirdList" parent="HBoxContainer" instance=ExtResource("2_fvg77")]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_6fpm2")
-hide_root = true
-
-[node name="Info" type="RichTextLabel" parent="TabContainer/ListContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/normal = SubResource("StyleBoxFlat_xop2f")
-bbcode_enabled = true
-shortcut_keys_enabled = false

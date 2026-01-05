@@ -1,19 +1,20 @@
 [gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
-[ext_resource type="Script" uid="uid://5qpuv52t2oxy" path="res://hengo/scripts/7267979482426702835.gd" id="1_0bhed"]
+[ext_resource type="Script" uid="uid://jfetfaeg1ka2" path="res://hengo/scripts/1149561466813345520.gd" id="1_0bhed"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 
-[node name="Node" type="Node2D"]
+[node name="Node" type="Node2D" node_paths=PackedStringArray("spr", "minha_label")]
 script = ExtResource("1_0bhed")
-
-[node name="Button" type="Button" parent="."]
-offset_left = 267.0
-offset_top = 373.0
-offset_right = 453.0
-offset_bottom = 531.0
-text = "CLICK TO TEST"
-metadata/_edit_use_anchors_ = true
+spr = NodePath("Icon")
+minha_label = NodePath("Label")
 
 [node name="Icon" type="Sprite2D" parent="."]
-position = Vector2(261, 153)
+position = Vector2(313, 179)
+scale = Vector2(1.21875, 1.21875)
 texture = ExtResource("1_wvpun")
+
+[node name="Label" type="Label" parent="."]
+offset_right = 17.0
+offset_bottom = 57.0
+theme_override_font_sizes/font_size = 80
+text = "test"

@@ -6,6 +6,8 @@ static func _provide_params_ref(_save_data: HenSaveData, _params: Array, _prefix
 		var first: Dictionary = _params[0]
 
 		if first.has('is_ref'):
+			first.use_self = _prefix == ''
+			
 			var new_prefix: StringName = get_code_by_token(_save_data, first)
 
 			return [
@@ -35,8 +37,11 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 		if _parent_id:
 			preview_id += '#ID:' + _parent_id
 
-	if _token.get('use_self', false) == true or (_token.has('category') and _token.get('category') == 'native'):
+	var use_self: bool = _token.get('use_self', false) == true or (_token.has('category') and _token.get('category') == 'native')
+
+	if use_self:
 		prefix = ''
+
 
 	match _token.type as HenVirtualCNode.SubType:
 		HenVirtualCNode.SubType.INVALID:
@@ -106,11 +111,6 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 			
 			prefix = values[1]
 
-			if _token.type == HenVirtualCNode.SubType.FUNC_FROM:
-				if prefix == '_ref.':
-					# TODO
-					return indent + 'Vector2.ZERO'
-
 			if _token.singleton_class:
 				prefix = _token.singleton_class + '.'
 
@@ -175,7 +175,7 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 
 			return indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
-			return HenVirtualCNodeCode.get_default_value_code(_save_data, _token.input_type)
+			return HenVirtualCNodeCode.get_default_value_code(_save_data, _token.input_type, use_self)
 		HenVirtualCNode.SubType.CONST:
 			return indent + _token.singleton_class + '.' + _token.name
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:
@@ -286,5 +286,9 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 				state_name = _token.name,
 				params = (', ' if not (_token.params as Array).is_empty() else '') + ', '.join((_token.params as Array).map(func(x: Dictionary) -> String: return get_code_by_token(_save_data, x)))
 			})
+		HenVirtualCNode.SubType.GET_PROP:
+			return indent + get_code_by_token(_save_data, _token.ref) + '.' + _token.name
+		HenVirtualCNode.SubType.SET_PROP:
+			return indent + get_code_by_token(_save_data, _token.ref) + '.' + _token.name + ' = ' + get_code_by_token(_save_data, _token.value)
 		_:
 			return ''
