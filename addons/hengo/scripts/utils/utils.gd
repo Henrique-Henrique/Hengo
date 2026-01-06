@@ -488,9 +488,10 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 			if item.id == _res_data.id:
 				return item
 			
-			if item is HenSaveState:
-				for sub_state in (item as HenSaveState).get_sub_states(_save_data):
-					if sub_state.id == _res_data.id:
-						return sub_state
-		
+		if not _res_data.has('save_data_id') and _res_data.type == HenSideBar.AddType.STATE:
+			for sub_states in _save_data.sub_states.values():
+				for s: HenSaveState in sub_states:
+					if s.id == _res_data.id:
+						return s
+
 	return null

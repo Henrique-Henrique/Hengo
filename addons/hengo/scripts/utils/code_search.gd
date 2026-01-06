@@ -113,6 +113,7 @@ func update() -> void:
 	var type: StringName = config.get(&'type', &'')
 	var api_list: Array[Dictionary] = []
 	var map_list: Dictionary = map_dep.get_code_search_list(io_type, type)
+
 	var native_props: Dictionary = data.get(&'native_props')
 
 	if type and io_type == 'out':

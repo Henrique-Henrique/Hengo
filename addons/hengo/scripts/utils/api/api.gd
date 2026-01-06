@@ -586,6 +586,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	if _ast.identity.id == (Engine.get_singleton('Global') as HenGlobal).SAVE_DATA.identity.id:
 		save_data_id = ''
 
+
 	HenAPIProcessors.process_states(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_functions(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)

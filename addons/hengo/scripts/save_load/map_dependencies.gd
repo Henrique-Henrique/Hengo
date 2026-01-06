@@ -121,7 +121,7 @@ func get_code_search_list(_io_type: StringName = '', _type: StringName = '') -> 
 				continue
 			
 			var categories: Array = api.get_side_bar_categories(v, true, _io_type, _type)
-			
+
 			if not categories.is_empty():
 				(all_scripts.method_list as Array).append(
 					{

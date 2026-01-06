@@ -8,7 +8,6 @@ extends PanelContainer
 var data: Dictionary
 
 func _ready() -> void:
-	# bt.pressed.connect(_on_bt_gui_input)
 	bt.gui_input.connect(_on_bt_gui_input)
 
 
@@ -35,7 +34,12 @@ func _on_press() -> void:
 		prop_arr = global.CODE_SEARCH.get_native_props_as_data(data)
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	signal_bus.request_code_search_show_list.emit(prop_arr, 2)
+
+	if prop_arr.size() == 1:
+		signal_bus.request_code_search_select.emit(prop_arr[0])
+	else:
+		signal_bus.request_code_search_show_list.emit(prop_arr, 2)
+
 
 func _select() -> void:
 	if not data.is_empty():

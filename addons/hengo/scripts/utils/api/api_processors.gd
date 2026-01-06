@@ -98,8 +98,16 @@ static func get_valid_recursive_props(_root_type: StringName, _target_type: Stri
 	return arr
 
 static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: StringName, _io_type: StringName, _type: StringName, _from_another_script: bool, _arr: Array, _native_props: Dictionary = {}) -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var state_transitions: Dictionary = {
 		name = 'State Transitions',
+		icon = 'activity',
+		color = '#ff9ff3',
+		method_list = []
+	}
+	var sub_state_transitions: Dictionary = {
+		name = 'Sub State Transitions',
 		icon = 'activity',
 		color = '#ff9ff3',
 		method_list = []
@@ -143,7 +151,8 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 			(state_category.method_list as Array).append({
 					_class_name = 'State',
 					name = state_data.name,
-					data = state_data.get_cnode_data(_save_data_id, _from_another_script)
+					data = state_data.get_cnode_data(_save_data_id, _from_another_script),
+					force_valid = true
 				})
 		
 		var res_main = check_transition_validity.call(state_data)
@@ -156,30 +165,59 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 			}
 			
 			if res_main.idx != -1: dt.input_io_idx = res_main.idx
+			if not _io_type: dt.force_valid = true
 			
 			(state_transitions.method_list as Array).append(dt)
 
-		var sub_states: Array = state_data.get_sub_states((Engine.get_singleton('Global') as HenGlobal).SAVE_DATA)
-		
-		for sub_state: HenSaveState in sub_states:
-			var res_sub = check_transition_validity.call(sub_state)
-			if res_sub.valid:
-				var name_suffix: String = ('.' + res_sub.prop_data.name) if res_sub.is_prop else ''
-				var dt_sub: Dictionary = {
-					_class_name = 'State Transitions',
-					name = 'sub state transition: ' + sub_state.name + name_suffix,
-					data = sub_state.get_transition_cnode_data(_save_data_id, _from_another_script)
-				}
-				
-				if res_sub.idx != -1: dt_sub.input_io_idx = res_sub.idx
+	var target_sub_states: Array = []
+	var current_state: HenSaveState = null
+	var current_route_id: StringName = router.current_route.id
+	
+	for s: HenSaveState in global.SAVE_DATA.states:
+		if str(s.id) == current_route_id:
+			current_state = s
+			break
+			
+	if not current_state:
+		for subs: Array in global.SAVE_DATA.sub_states.values():
+			for s: HenSaveState in subs:
+				if str(s.id) == current_route_id:
+					current_state = s
+					break
+			if current_state: break
+	
+	if current_state:
+		if current_state.is_sub_state:
+			for subs: Array in global.SAVE_DATA.sub_states.values():
+				if subs.has(current_state):
+					target_sub_states = subs
+					break
+		else:
+			target_sub_states = current_state.get_sub_states(global.SAVE_DATA)
 
-				(state_transitions.method_list as Array).append(dt_sub)
+	for sub_state: HenSaveState in target_sub_states:
+		var res_sub = check_transition_validity.call(sub_state)
+		if res_sub.valid:
+			var name_suffix: String = ('.' + res_sub.prop_data.name) if res_sub.is_prop else ''
+			var dt_sub: Dictionary = {
+				_class_name = 'Sub State Transitions',
+				name = 'sub state transition: ' + sub_state.name + name_suffix,
+				data = sub_state.get_transition_cnode_data(_save_data_id, _from_another_script)
+			}
+			
+			if res_sub.idx != -1: dt_sub.input_io_idx = res_sub.idx
+			if not _io_type: dt_sub.force_valid = true
+
+			(sub_state_transitions.method_list as Array).append(dt_sub)
 
 	if not (state_category.method_list as Array).is_empty():
 		_arr.append(state_category)
 	
 	if not (state_transitions.method_list as Array).is_empty():
 		_arr.append(state_transitions)
+
+	if not (sub_state_transitions.method_list as Array).is_empty():
+		_arr.append(sub_state_transitions)
 
 
 static func process_functions(_ast: HenMapDependencies.ProjectAST, _save_data_id: StringName, _io_type: StringName, _type: StringName, _from_another_script: bool, _arr: Array, _native_props: Dictionary = {}) -> void:
