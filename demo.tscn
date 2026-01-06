@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
+[ext_resource type="Script" uid="uid://bvjcuanjvi0u5" path="res://hengo/scripts/2616132333804961877.gd" id="1_0bhed"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 
 [node name="Node" type="Node2D"]
+script = ExtResource("1_0bhed")
 
 [node name="Icon" type="Sprite2D" parent="."]
 position = Vector2(313, 179)
@@ -14,3 +16,4 @@ offset_right = 17.0
 offset_bottom = 57.0
 theme_override_font_sizes/font_size = 80
 text = "test"
+metadata/_edit_use_anchors_ = true

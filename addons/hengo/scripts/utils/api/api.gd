@@ -76,6 +76,7 @@ func map_category_data(_class_name: StringName, _item: Dictionary, _io_type: Str
 	var class_data: Dictionary = data.classes[_class_name]
 	var method_list_name: Array = _item.get(&'method_list', [])
 	var arr: Array = []
+	var native_props: Dictionary = data.get(&'native_props')
 
 	if class_data.has(&"methods"):
 		for method_name: StringName in (class_data.methods as Dictionary).keys():
@@ -86,10 +87,13 @@ func map_category_data(_class_name: StringName, _item: Dictionary, _io_type: Str
 				new_data._class_name = _class_name
 				new_data.data = HenApiSerialize.get_func_void_hengo_data(new_data)
 
-				if not check_type_validity(new_data, _io_type, _type):
+				if not check_type_validity(new_data, _io_type, _type, native_props):
 					continue
 				
-				arr.append(new_data)
+				if new_data.get(&'use_props_only', false):
+					arr.append_array(get_native_props_as_data(new_data, _io_type, _type, native_props))
+				else:
+					arr.append(new_data)
 	
 	return arr
 
@@ -108,6 +112,7 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 
 	var text: String = _search_text.strip_edges().to_lower()
 	var results: Array = []
+	var native_props: Dictionary = data.get(&'native_props')
 
 	print("Query: '%s'" % text)
 	print("Query length: %d" % text.length())
@@ -116,14 +121,14 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 	for _class_name: StringName in (data.classes as Dictionary).keys():
 		var class_data: Dictionary = data.classes[_class_name]
 
-		search_method_data(_class_name, class_data, results, text, _io_type, _type)
-		# search_enum_data(_class_name, class_data, results, text, _io_type, _type)
+		search_method_data(_class_name, class_data, results, text, _io_type, _type, native_props)
+		# search_enum_data(_class_name, class_data, results, text, _io_type, _type, native_props)
 	
 	# map native classes
 	for _class_name: StringName in (data.native_classes as Dictionary).keys():
 		var class_data: Dictionary = data.native_classes[_class_name]
-		search_method_data(_class_name, class_data, results, text, _io_type, _type)
-		# search_enum_data(_class_name, class_data, results, text, _io_type, _type)
+		search_method_data(_class_name, class_data, results, text, _io_type, _type, native_props)
+		# search_enum_data(_class_name, class_data, results, text, _io_type, _type, native_props)
 
 	# Utilities
 	for util_name: StringName in (data.utilities as Dictionary).keys():
@@ -140,10 +145,33 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 
 			util_data.data.category = &'native'
 			
-			if not check_type_validity(util_data, _io_type, _type):
+			if not check_type_validity(util_data, _io_type, _type, native_props):
 				continue
 			
-			results.append(util_data)
+			var sub_items: Array = []
+			var is_strict_match: bool = not util_data.get(&'use_props_only', false)
+
+			if is_strict_match:
+				var data_copy: Dictionary = util_data.duplicate()
+				if not _io_type:
+					data_copy.force_valid = true
+				sub_items.append(data_copy)
+			
+			var props_list: Array = get_native_props_as_data(util_data, _io_type, _type, native_props)
+
+			for item: Dictionary in props_list:
+				item.score = score
+				if not _io_type:
+					item.force_valid = true
+
+			sub_items.append_array(props_list)
+
+			if not sub_items.is_empty():
+				var folder_item: Dictionary = util_data.duplicate()
+				folder_item.recursive_props = sub_items
+				folder_item.is_match = is_strict_match if _type else true
+				
+				results.append(folder_item)
 	
 	results.sort_custom(func(a, b): return a.score > b.score)
 
@@ -154,7 +182,7 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 	prints((end - start) / 1000., 'ms')
 
 
-func search_method_data(_class_name: StringName, _class_data: Dictionary, _results: Array, _search_text: String, _io_type: StringName = '', _type: StringName = '') -> void:
+func search_method_data(_class_name: StringName, _class_data: Dictionary, _results: Array, _search_text: String, _io_type: StringName = '', _type: StringName = '', _native_props: Dictionary = {}) -> void:
 	if _class_data.has(&"methods"):
 		for method_name: StringName in (_class_data.methods as Dictionary).keys():
 			var method_lower = method_name.to_lower()
@@ -170,13 +198,36 @@ func search_method_data(_class_name: StringName, _class_data: Dictionary, _resul
 				if _class_data.get(&'is_native', false):
 					method_data.category = &'native'
 
-				if not check_type_validity(method_data, _io_type, _type):
+				if not check_type_validity(method_data, _io_type, _type, _native_props):
 					continue
 				
-				_results.append(method_data)
+				var sub_items: Array = []
+				var is_strict_match: bool = not method_data.get(&'use_props_only', false)
+
+				if is_strict_match:
+					var data_copy: Dictionary = method_data.duplicate()
+					if not _io_type:
+						data_copy.force_valid = true
+					sub_items.append(data_copy)
+				
+				var props_list: Array = get_native_props_as_data(method_data, _io_type, _type, _native_props)
+
+				for item: Dictionary in props_list:
+					item.score = score
+					if not _io_type:
+						item.force_valid = true
+				
+				sub_items.append_array(props_list)
+
+				if not sub_items.is_empty():
+					var folder_item: Dictionary = method_data.duplicate()
+					folder_item.recursive_props = sub_items
+					folder_item.is_match = is_strict_match if _type else true
+					
+					_results.append(folder_item)
 
 
-func search_enum_data(_class_name: StringName, _class_data: Dictionary, _results: Array, _search_text: String, _io_type: StringName = '', _type: StringName = '') -> void:
+func search_enum_data(_class_name: StringName, _class_data: Dictionary, _results: Array, _search_text: String, _io_type: StringName = '', _type: StringName = '', _native_props: Dictionary = {}) -> void:
 	if _class_data.has(&"enums"):
 		for enum_name: StringName in (_class_data.enums as Dictionary).keys():
 			var enum_lower = enum_name.to_lower()
@@ -190,7 +241,7 @@ func search_enum_data(_class_name: StringName, _class_data: Dictionary, _results
 				_results.append(enum_data)
 
 
-func check_type_validity(_data: Dictionary, _io_type: StringName = '', _type: StringName = '') -> bool:
+func check_type_validity(_data: Dictionary, _io_type: StringName = '', _type: StringName = '', _native_props: Dictionary = {}) -> bool:
 	var has_type: bool = false
 
 	if _io_type == &'in':
@@ -204,6 +255,15 @@ func check_type_validity(_data: Dictionary, _io_type: StringName = '', _type: St
 			if idx != -1:
 				_data.output_io_idx = idx
 				has_type = true
+		elif not _native_props.is_empty():
+			var type: StringName = _data.get(&'return_type', &'')
+
+			if _native_props.has(type):
+				for prop: Dictionary in _native_props[type]:
+					if HenUtils.is_type_relation_valid(prop.type, _type):
+						has_type = true
+						_data.use_props_only = true
+						break
 	elif _io_type == &'out':
 		var params: Array = (_data.data as Dictionary).get(&'inputs', [])
 		var idx: int = HenAPIProcessors.check_param_validity(params, _type, true)
@@ -211,27 +271,21 @@ func check_type_validity(_data: Dictionary, _io_type: StringName = '', _type: St
 		if idx != -1:
 			_data.input_io_idx = idx
 			has_type = true
+		elif not _native_props.is_empty():
+			for param: Dictionary in params:
+				var type: StringName = param.get(&'type', &'')
+				if _native_props.has(type):
+					for prop: Dictionary in _native_props[type]:
+						if HenUtils.is_type_relation_valid(_type, prop.type):
+							has_type = true
+							_data.use_props_only = true
+							break
+				if has_type: break
+
 	else:
 		has_type = true
 	
 	return has_type
-
-
-func check_param_validity(_params: Array, _type: StringName, _is_input: bool) -> int:
-	var idx: int = 0
-	
-	for param: Dictionary in _params:
-		var type: StringName = param.get(&'type', &'')
-		
-		# if is input: _type -> type
-		# if is output: type -> _type
-		if (_is_input and HenUtils.is_type_relation_valid(_type, type)) or \
-			(not _is_input and HenUtils.is_type_relation_valid(type, _type)):
-			return idx
-
-		idx += 1
-		
-	return -1
 
 
 func debounce_search(delay: float, callback: Callable) -> void:
@@ -527,32 +581,39 @@ func get_side_bar_list(_io_type: StringName = '', _type: StringName = '') -> Dic
 func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_script: bool = false, _io_type: StringName = '', _type: StringName = '') -> Array:
 	var arr: Array = []
 	var save_data_id: StringName = _ast.identity.id
+	var native_props: Dictionary = get_decompressed_data().get(&'native_props', {})
 
 	if _ast.identity.id == (Engine.get_singleton('Global') as HenGlobal).SAVE_DATA.identity.id:
 		save_data_id = ''
 
-	HenAPIProcessors.process_states(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
-	HenAPIProcessors.process_functions(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
-	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
+	HenAPIProcessors.process_states(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
+	HenAPIProcessors.process_functions(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
+	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_signals(_ast, _io_type, _type, arr)
-	HenAPIProcessors.process_macros(_ast, save_data_id, _io_type, _type, _from_another_script, arr)
+	HenAPIProcessors.process_macros(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 
 	return arr
 
 
-func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _type: StringName = '') -> Array:
-	var data: Dictionary = get_decompressed_data()
+func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _type: StringName = '', _native_props_cache: Dictionary = {}) -> Array:
+	var native_props: Dictionary
 
-	if not data:
-		print('Not data')
-		return []
+	if _native_props_cache.is_empty():
+		var data: Dictionary = get_decompressed_data()
 
-	if not data.has(&'native_props'):
+		if not data:
+			print('Not data')
+			return []
+
+		native_props = data.get(&'native_props', {})
+	else:
+		native_props = _native_props_cache
+
+	if native_props.is_empty():
 		return []
 	
 	var arr: Array = []
 
-	var native_props: Dictionary = data.get(&'native_props', {})
 	var type: StringName = _data.get(&'return_type', '')
 	var prop_class_name: StringName = _data.get(&'_class_name')
 
@@ -563,76 +624,54 @@ func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _typ
 			type = (inputs.get(1) as Dictionary).get(&'type', '')
 
 
-	if native_props.has(type):
-		var router: HenRouter = Engine.get_singleton(&'Router')
+	var props: Array = HenAPIProcessors.get_valid_recursive_props(type, _type, _io_type, native_props)
+	
+	for prop: Dictionary in props:
+		if _data.has('is_getter'):
+			var prop_name: String = _data.get(&'prop_name', '')
+			var middle_name: String = prop_name + ' -> ' if prop_name else ''
+			var vc_name: String = 'Get -> ' + middle_name + prop.name
+			
+			var prop_modified: Dictionary = prop.duplicate()
+			if prop_name:
+				prop_modified.name = prop_name + '.' + prop.name
 
-		for prop_data: Dictionary in native_props.get(type):
-			if _data.has('is_getter'):
-				var prop_name: String = _data.get(&'prop_name', '')
-				var value_name: String = (prop_name + '.' + prop_data.get(&'name')) if prop_name else prop_data.get(&'name')
-				var middle_name: String = prop_name + ' -> ' if prop_name else ''
-				var vc_name: String = 'Get -> ' + middle_name + prop_data.get(&'name')
+			var dt: Dictionary = {
+				_class_name = 'Getter',
+				name = vc_name,
+				data = HenAPIProcessors.get_prop_get_data(prop_modified, prop_class_name)
+			}
+			dt.data.name = vc_name
 
-				var dt: Dictionary = {
-					_class_name = 'Getter',
-					name = vc_name,
-					data = {
-						name = vc_name,
-						sub_type = HenVirtualCNode.SubType.GET_PROP,
-						category = 'native',
-						inputs = [
-							{
-								is_ref = true,
-								name = prop_class_name,
-								type = prop_class_name
-							}
-						],
-						outputs = [
-							{
-								name = value_name,
-								type = prop_data.get(&'type')
-							}
-						],
-						route = router.current_route
-					}
-				}
+			if _io_type == 'in':
+				dt.output_io_idx = 0
+			elif _io_type == 'out':
+				dt.input_io_idx = 0
+			
+			arr.append(dt)
+		if _data.has('is_setter'):
+			var prop_name: String = _data.get(&'prop_name', '')
+			var middle_name: String = prop_name + ' -> ' if prop_name else ''
+			var vc_name: String = 'Set -> ' + middle_name + prop.name
 
-				if _io_type == 'in':
-					dt.output_io_idx = 0
-				
-				arr.append(dt)
-			elif _data.has('is_setter'):
-				var prop_name: String = _data.get(&'prop_name', '')
-				var value_name: String = prop_name + '.' + prop_data.get(&'name')
-				var middle_name: String = prop_name + ' -> ' if prop_name else prop_data.get(&'name')
-				var vc_name: String = 'Set -> ' + middle_name + prop_data.get(&'name')
+			var prop_modified: Dictionary = prop.duplicate()
+			if prop_name:
+				prop_modified.name = prop_name + '.' + prop.name
 
-				var dt: Dictionary = {
-					_class_name = 'Setter',
-					name = vc_name,
-					data = {
-						name = vc_name,
-						sub_type = HenVirtualCNode.SubType.SET_PROP,
-						category = 'native',
-						inputs = [
-							{
-								is_ref = true,
-								name = prop_class_name,
-								type = prop_class_name
-							},
-							{
-								name = value_name,
-								type = prop_data.get(&'type')
-							}
-						],
-						route = router.current_route
-					}
-				}
-
-				if _io_type == 'out':
+			var dt: Dictionary = {
+				_class_name = 'Setter',
+				name = vc_name,
+				data = HenAPIProcessors.get_prop_set_data(prop_modified, prop_class_name)
+			}
+			dt.data.name = vc_name
+			
+			if _io_type == 'out':
+				if _type and HenUtils.is_type_relation_valid(_type, prop.type):
+					dt.input_io_idx = 1
+				else:
 					dt.input_io_idx = 0
-				
-				arr.append(dt)
+			
+			arr.append(dt)
 
 	return arr
 
@@ -683,54 +722,6 @@ func get_native_list_raw(_io_type: StringName = '', _type: StringName = '') -> A
 					sub_type = '@dropdown',
 					code_value = '',
 					category = 'state_transition'
-				}
-			],
-			route = router.current_route
-		}
-	},
-	{
-		name = 'Get Prop',
-		icon = 'arrow-right-left',
-		color = '#06b6d4',
-		is_native = true,
-		data = {
-			name = 'get -> x',
-			sub_type = HenVirtualCNode.SubType.GET_PROP,
-			category = 'native',
-			inputs = [
-				{
-					is_ref = true,
-					name = 'Vector2',
-					type = 'Vector2'
-				}
-			],
-			outputs = [
-				{
-					name = 'x',
-					type = 'float'
-				}
-			],
-			route = router.current_route
-		}
-	},
-	{
-		name = 'Set Prop',
-		icon = 'arrow-right-left',
-		color = '#06b6d4',
-		is_native = true,
-		data = {
-			name = 'set -> x',
-			sub_type = HenVirtualCNode.SubType.SET_PROP,
-			category = 'native',
-			inputs = [
-				{
-					is_ref = true,
-					name = 'Vector2',
-					type = 'Vector2'
-				},
-				{
-					name = 'x',
-					type = 'float'
 				}
 			],
 			route = router.current_route

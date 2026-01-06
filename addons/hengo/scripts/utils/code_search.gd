@@ -50,7 +50,6 @@ func _search(_text: String) -> void:
 
 	api.on_search_change(_text, io_type, type)
 
-
 func _on_search_result(_list: Array) -> void:
 	set_data.call_deferred(1, _list)
 
@@ -114,29 +113,27 @@ func update() -> void:
 	var type: StringName = config.get(&'type', &'')
 	var api_list: Array[Dictionary] = []
 	var map_list: Dictionary = map_dep.get_code_search_list(io_type, type)
+	var native_props: Dictionary = data.get(&'native_props')
 
-	if type:
+	if type and io_type == 'out':
 		var getter_dt: Dictionary = {
 			_class_name = type,
 			return_type = type,
-			io_type = io_type
+			io_type = io_type,
+			is_getter = true,
+			is_setter = true
 		}
 
-		if io_type == 'out':
-			getter_dt.set(&'is_getter', true)
-		elif io_type == 'in':
-			getter_dt.set(&'is_setter', true)
-
-		var getter_list = get_native_props_as_data(getter_dt)
+		var getter_list = api.get_native_props_as_data(getter_dt, io_type, '', native_props)
 
 		if not getter_list.is_empty():
 			api_list.append({
-				_class_name = 'Getters',
+				_class_name = 'Properties',
 				categories = [
 					{
 						_class_name = type,
 						method_list = getter_list,
-						name = 'Getters',
+						name = 'Properties',
 						icon = 'activity',
 						color = '#ff9ff3'
 					}
@@ -183,10 +180,32 @@ func update() -> void:
 				new_data._class_name = item._class_name
 				new_data.data = HenApiSerialize.get_func_void_hengo_data(new_data)
 
-				if not api.check_type_validity(new_data, io_type, type):
+				if not api.check_type_validity(new_data, io_type, type, native_props):
 					continue
 				
-				new_methods.append(new_data)
+				var sub_items: Array = []
+				var is_strict_match: bool = not new_data.get(&'use_props_only', false)
+
+				if is_strict_match:
+					var data_copy: Dictionary = new_data.duplicate()
+					if not io_type:
+						data_copy.force_valid = true
+					sub_items.append(data_copy)
+				
+				var props: Array = api.get_native_props_as_data(new_data, io_type, type, native_props)
+
+				if not io_type:
+					for prop: Dictionary in props:
+						prop.force_valid = true
+
+				sub_items.append_array(props)
+
+				if not sub_items.is_empty():
+					var folder_item: Dictionary = new_data.duplicate()
+					folder_item.recursive_props = sub_items
+					folder_item.is_match = is_strict_match if type else true
+					
+					new_methods.append(folder_item)
 
 			if not new_methods.is_empty():
 				category.set(&'method_list', new_methods)
@@ -199,13 +218,11 @@ func update() -> void:
 	set_data.call_deferred(0, api_list)
 
 
-func get_native_props_as_data(_data: Dictionary) -> Array:
+func get_native_props_as_data(_data: Dictionary, _native_props: Dictionary = {}) -> Array:
 	var io_type: StringName = config.get(&'io_type', &'')
 	var type: StringName = config.get(&'type', &'')
 	var api: HenApi = Engine.get_singleton(&'API')
-	return api.get_native_props_as_data(_data, io_type, type)
-
-
+	return api.get_native_props_as_data(_data, io_type, type, _native_props)
 func get_class_name_categories(_class_name: StringName) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
 	var class_categories: Dictionary = categories.get(_class_name, {})
@@ -254,13 +271,42 @@ func _on_select(_data: Dictionary) -> void:
 	global.history.add_do_reference(vc_return)
 	global.history.add_undo_method(vc_return.remove)
 
+	if _data.has(&'linked_prop'):
+		var prop_data: Dictionary = _data.linked_prop
+		var offset: Vector2 = Vector2(250, 0)
+		prop_data.position = data.position + offset
+		
+		var prop_return: HenVCNodeReturn = HenVirtualCNode.instantiate(prop_data)
+		global.history.add_do_method(prop_return.add)
+		global.history.add_do_reference(prop_return)
+		global.history.add_undo_method(prop_return.remove)
+		
+		if prop_return.v_cnode and vc_return.v_cnode:
+			var source_idx: int = _data.get(&'linked_prop_source_idx', 0)
+			var var_output = vc_return.v_cnode.get_output_by_idx(source_idx)
+			var prop_input = prop_return.v_cnode.get_input_by_idx(0)
+			
+			if var_output and prop_input:
+				var connection: HenVCConnectionReturn = prop_return.v_cnode.get_new_input_connection_command(
+					prop_input.id,
+					var_output.id,
+					vc_return.v_cnode
+				)
+				if connection:
+					global.history.add_do_method(connection.add)
+					global.history.add_do_reference(connection)
+					global.history.add_undo_method(connection.remove)
+			
+			# update vc_return to point to the property node for subsequent connections
+			vc_return = prop_return
+
 	if not vc_return.v_cnode:
 		return
 
 	if _data.has(&'input_io_idx'):
 		var input_ref: HenVCInOutData = vc_return.v_cnode.get_input_by_idx(_data.get(&'input_io_idx'))
 
-		if input_ref:
+		if input_ref and config.get(&'id') != null and config.get(&'vc_ref'):
 			var connection: HenVCConnectionReturn = vc_return.v_cnode.get_new_input_connection_command(
 				input_ref.id,
 				config.get(&'id'),
@@ -274,16 +320,14 @@ func _on_select(_data: Dictionary) -> void:
 		if output_ref:
 			var ref: HenVirtualCNode = config.get(&'vc_ref')
 
-			if not ref:
-				return
+			if ref and config.get(&'id') != null:
+				var connection: HenVCConnectionReturn = ref.get_new_input_connection_command(
+					config.get(&'id'),
+					output_ref.id,
+					vc_return.v_cnode
+				)
 
-			var connection: HenVCConnectionReturn = ref.get_new_input_connection_command(
-				config.get(&'id'),
-				output_ref.id,
-				vc_return.v_cnode
-			)
-
-			if connection: connection.add()
+				if connection: connection.add()
 
 	# add connection when dragging from connector
 	if config.has(&'from_flow_connector') and not vc_return.v_cnode.get_flow_inputs(global.SAVE_DATA).is_empty():

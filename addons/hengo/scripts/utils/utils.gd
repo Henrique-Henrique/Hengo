@@ -23,6 +23,7 @@ const ICON_PLAY = preload("res://addons/hengo/assets/new_icons/play.svg")
 const ICON_TRANSITION = preload("res://addons/hengo/assets/new_icons/arrow-right-left.svg")
 const ICON_EVENT = preload("res://addons/hengo/assets/new_icons/sparkles.svg")
 const ICON_ROUTE = preload("res://addons/hengo/assets/new_icons/route.svg")
+const ICON_PROPERTY = preload("res://addons/hengo/assets/new_icons/sliders-horizontal.svg")
 
 
 static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
@@ -55,6 +56,10 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.GET_FROM_PROP, \
 		HenVirtualCNode.SubType.IN_PROP:
 			return ICON_VARIABLE
+
+		HenVirtualCNode.SubType.GET_PROP, \
+		HenVirtualCNode.SubType.SET_PROP:
+			return ICON_PROPERTY
 
 		HenVirtualCNode.SubType.IF:
 			return ICON_IF
@@ -147,6 +152,10 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.GET_FROM_PROP, \
 		HenVirtualCNode.SubType.IN_PROP:
 			return Color("#1dd1a1")
+
+		HenVirtualCNode.SubType.GET_PROP, \
+		HenVirtualCNode.SubType.SET_PROP:
+			return Color("#00d2d3")
 
 		HenVirtualCNode.SubType.IF:
 			return Color("#ff6b6b")
