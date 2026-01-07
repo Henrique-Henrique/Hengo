@@ -80,7 +80,11 @@ func map_category_data(_class_name: StringName, _item: Dictionary, _io_type: Str
 		for method_name: StringName in (class_data.methods as Dictionary).keys():
 			var method_lower = method_name.to_lower()
 			if method_list_name.has(method_lower):
-				var new_data: Dictionary = class_data.methods[method_name]
+				var new_data: Dictionary = (class_data.methods[method_name] as Dictionary).duplicate()
+				new_data.erase(&'use_props_only')
+				new_data.erase(&'input_io_idx')
+				new_data.erase(&'output_io_idx')
+				
 				new_data.name = method_lower
 				new_data._class_name = _class_name
 				new_data.data = HenApiSerialize.get_func_void_hengo_data(new_data)
@@ -175,7 +179,11 @@ func _worker_search_task(idx: int, thread_data: Dictionary) -> void:
 			for util_name: StringName in (data.utilities as Dictionary).keys():
 				var util_lower = util_name.to_lower()
 				var score = HenSearch.score_only(text, util_lower)
-				var util_data: Dictionary = data.utilities[util_name] as Dictionary
+				var util_data: Dictionary = (data.utilities[util_name] as Dictionary).duplicate()
+				
+				util_data.erase(&'use_props_only')
+				util_data.erase(&'input_io_idx')
+				util_data.erase(&'output_io_idx')
 
 				if score > 0:
 					util_data._class_name = &''
@@ -254,7 +262,11 @@ func search_method_data(_class_name: StringName, _class_data: Dictionary, _resul
 		for method_name: StringName in (_class_data.methods as Dictionary).keys():
 			var method_lower = method_name.to_lower()
 			var score = HenSearch.score_only(_search_text, method_lower)
-			var method_data: Dictionary = _class_data.methods[method_name] as Dictionary
+			var method_data: Dictionary = (_class_data.methods[method_name] as Dictionary).duplicate()
+
+			method_data.erase(&'use_props_only')
+			method_data.erase(&'input_io_idx')
+			method_data.erase(&'output_io_idx')
 			
 			if score > 0:
 				method_data._class_name = _class_name

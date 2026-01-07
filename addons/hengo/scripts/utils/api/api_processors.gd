@@ -97,9 +97,84 @@ static func get_valid_recursive_props(_root_type: StringName, _target_type: Stri
 				
 	return arr
 
+
+static func _process_param_items(_arr: Array, _params: Array, _io_type: StringName, _target_type: StringName, _native_props: Dictionary, _config: Dictionary) -> int:
+	var valid_idx: int = -1
+	var current_idx: int = 0
+	
+	# expected config structure: { _class_name, base_name, data, is_inputs, idx_offset }
+	# avoids reserved keyword collision
+	var is_inputs: bool = _config.is_inputs
+	var offset: int = _config.get(&'idx_offset', 0)
+	var target_class: String = _config._class_name
+	
+	for param: HenSaveParam in _params:
+		if is_inputs:
+			# shows individual inputs only when dragging out wire
+			if _io_type == 'out':
+				if not _target_type or HenUtils.is_type_relation_valid(_target_type, param.type):
+					var real_idx: int = current_idx + offset
+					if valid_idx == -1: valid_idx = real_idx
+					
+					var dt_input: Dictionary = {
+						_class_name = target_class,
+						name = _config.base_name + ' (' + param.name + ')',
+						data = _config.data,
+						input_io_idx = real_idx
+					}
+					_arr.append(dt_input)
+		
+		else:
+			# shows direct outputs only when dragging in wire
+			if _io_type == 'in':
+				if not _target_type or HenUtils.is_type_relation_valid(param.type, _target_type):
+					if valid_idx == -1: valid_idx = current_idx
+					
+					var dt_direct: Dictionary = {
+						_class_name = target_class,
+						name = _config.base_name + '().' + param.name,
+						data = _config.data,
+						output_io_idx = current_idx
+					}
+					_arr.append(dt_direct)
+
+			# recursive getters
+			if not _io_type or _io_type == 'in':
+				var props: Array = get_valid_recursive_props(param.type, _target_type, 'in', _native_props)
+				for prop: Dictionary in props:
+					var dt: Dictionary = {
+						_class_name = target_class,
+						name = _config.base_name + '().' + param.name + '.' + prop.name,
+						data = _config.data,
+						linked_prop = get_prop_get_data(prop, param.type),
+						linked_prop_source_idx = current_idx,
+						output_io_idx = 0
+					}
+					_arr.append(dt)
+
+			# recursive setters on outputs
+			if not _io_type or _io_type == 'out':
+				var props: Array = get_valid_recursive_props(param.type, _target_type, 'out', _native_props)
+				for prop: Dictionary in props:
+					var dt: Dictionary = {
+						_class_name = target_class,
+						name = 'set: ' + _config.base_name + '().' + param.name + '.' + prop.name,
+						data = _config.data,
+						linked_prop = get_prop_set_data(prop, param.type),
+						linked_prop_source_idx = current_idx,
+						input_io_idx = 1
+					}
+					_arr.append(dt)
+		
+		current_idx += 1
+		
+	return valid_idx
+
+
 static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: StringName, _io_type: StringName, _type: StringName, _from_another_script: bool, _arr: Array, _native_props: Dictionary = {}) -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
 	var state_transitions: Dictionary = {
 		name = 'State Transitions',
 		icon = 'activity',
@@ -119,32 +194,51 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 		method_list = []
 	}
 	
-	var check_transition_validity = func(data_source: HenSaveState) -> Dictionary:
-		var result = {valid = false, idx = -1, is_prop = false, prop_data = {}}
-		if not _io_type:
-			result.valid = true
-			return result
-		
-		if _io_type == 'out':
-			var idx: int = 0
-			for param: HenSaveParam in data_source.transition_data:
-				if HenUtils.is_type_relation_valid(_type, param.type):
-					result.idx = idx
-					result.valid = true
-					break
-				
-				var props: Array = get_valid_recursive_props(param.type, _type, 'out', _native_props)
-				if not props.is_empty():
-					result.idx = idx
-					result.valid = true
-					result.is_prop = true
-					result.prop_data = props[0]
-					break
-				
-				if result.valid: break
+	var process_state_list = func(list: Array, category: Dictionary, label_prefix: String):
+		for state_data: HenSaveState in list:
+			var sub_items: Array = []
+			var input_idx: int = -1
+			
+			var cnode_data: Dictionary = state_data.get_transition_cnode_data(_save_data_id, _from_another_script)
+			
+			input_idx = _process_param_items(
+				sub_items,
+				state_data.transition_data,
+				_io_type,
+				_type,
+				_native_props,
+				{
+					_class_name = category.name,
+					base_name = label_prefix + state_data.name,
+					data = cnode_data,
+					is_inputs = true,
+					idx_offset = 0
+				}
+			)
 
-				idx += 1
-		return result
+			var is_main_valid: bool = false
+			
+			if not _io_type:
+				is_main_valid = true
+			elif _io_type == 'out':
+				if input_idx != -1: is_main_valid = true
+				
+			var dt_main: Dictionary = {
+				_class_name = category.name,
+				name = label_prefix + state_data.name,
+				data = cnode_data
+			}
+			
+			if is_main_valid and input_idx != -1:
+				dt_main.input_io_idx = input_idx
+			
+			if not _io_type: dt_main.force_valid = true
+
+			if not _io_type:
+				sub_items.append(dt_main)
+
+			if not sub_items.is_empty():
+				(category.method_list as Array).append_array(sub_items)
 
 	for state_data: HenSaveState in _ast.states:
 		if not _io_type:
@@ -155,19 +249,7 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 					force_valid = true
 				})
 		
-		var res_main = check_transition_validity.call(state_data)
-		if res_main.valid:
-			var name_suffix: String = ('.' + res_main.prop_data.name) if res_main.is_prop else ''
-			var dt = {
-				_class_name = 'State Transitions',
-				name = 'transition: ' + state_data.name + name_suffix,
-				data = state_data.get_transition_cnode_data(_save_data_id, _from_another_script)
-			}
-			
-			if res_main.idx != -1: dt.input_io_idx = res_main.idx
-			if not _io_type: dt.force_valid = true
-			
-			(state_transitions.method_list as Array).append(dt)
+	process_state_list.call(_ast.states, state_transitions, 'transition: ')
 
 	var target_sub_states: Array = []
 	var current_state: HenSaveState = null
@@ -195,20 +277,8 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 		else:
 			target_sub_states = current_state.get_sub_states(global.SAVE_DATA)
 
-	for sub_state: HenSaveState in target_sub_states:
-		var res_sub = check_transition_validity.call(sub_state)
-		if res_sub.valid:
-			var name_suffix: String = ('.' + res_sub.prop_data.name) if res_sub.is_prop else ''
-			var dt_sub: Dictionary = {
-				_class_name = 'Sub State Transitions',
-				name = 'sub state transition: ' + sub_state.name + name_suffix,
-				data = sub_state.get_transition_cnode_data(_save_data_id, _from_another_script)
-			}
-			
-			if res_sub.idx != -1: dt_sub.input_io_idx = res_sub.idx
-			if not _io_type: dt_sub.force_valid = true
-
-			(sub_state_transitions.method_list as Array).append(dt_sub)
+	if not target_sub_states.is_empty():
+		process_state_list.call(target_sub_states, sub_state_transitions, 'sub state transition: ')
 
 	if not (state_category.method_list as Array).is_empty():
 		_arr.append(state_category)
@@ -230,92 +300,50 @@ static func process_functions(_ast: HenMapDependencies.ProjectAST, _save_data_id
 
 	for func_data: HenSaveFunc in _ast.functions:
 		var sub_items: Array = []
-		var is_main_valid: bool = false
-		var input_idx: int = -1
-		var output_idx: int = -1
+		var cnode_data: Dictionary = func_data.get_cnode_data(_save_data_id, _from_another_script)
 		
-		var has_valid_connection: bool = false
+		var output_idx: int = _process_param_items(
+			sub_items, func_data.outputs, _io_type, _type, _native_props,
+			{
+				_class_name = 'Function', base_name = func_data.name, data = cnode_data,
+				is_inputs = false
+			}
+		)
 
-		if not _io_type:
-			has_valid_connection = true
-		elif _io_type == 'in':
-			var params: Array = []
-			for param: HenSaveParam in func_data.outputs: params.append(param.get_data())
-			
-			output_idx = check_param_validity(params, _type, false)
-			if output_idx != -1:
-				has_valid_connection = true
+		var input_idx: int = _process_param_items(
+			sub_items, func_data.inputs, _io_type, _type, _native_props,
+			{
+				_class_name = 'Function', base_name = func_data.name, data = cnode_data,
+				is_inputs = true,
+				idx_offset = 1 if _from_another_script else 0
+			}
+		)
 
-		elif _io_type == 'out':
-			if not has_valid_connection:
-				var params: Array = []
-				for param: HenSaveParam in func_data.inputs: params.append(param.get_data())
-				
-				var idx: int = check_param_validity(params, _type, true)
-				
-				if idx != -1:
-					input_idx = idx + 1 if _from_another_script else idx
-					has_valid_connection = true
-
-		is_main_valid = has_valid_connection
-
+		var is_main_valid: bool = false
+		if not _io_type: is_main_valid = true
+		elif _io_type == 'in' and output_idx != -1: is_main_valid = true
+		elif _io_type == 'out' and input_idx != -1: is_main_valid = true
+		
 		var dt_main: Dictionary = {
 			_class_name = 'Function',
 			name = func_data.name,
-			data = func_data.get_cnode_data(_save_data_id, _from_another_script)
+			data = cnode_data
 		}
 		
-		if not _io_type:
-			dt_main.force_valid = true
-
+		if not _io_type: dt_main.force_valid = true
 		if is_main_valid:
 			if input_idx != -1: dt_main.input_io_idx = input_idx
 			if output_idx != -1: dt_main.output_io_idx = output_idx
 
-		sub_items.append(dt_main)
-
-		if not _io_type or _io_type == 'in':
-			var out_idx: int = 0
-			for param: HenSaveParam in func_data.outputs:
-				var props: Array = get_valid_recursive_props(param.type, _type, 'in', _native_props)
-				for prop: Dictionary in props:
-					var getter_name: String = func_data.name + '().' + param.name + '.' + prop.name
-					
-					var dt: Dictionary = {
-						_class_name = 'Function',
-						name = getter_name,
-						data = func_data.get_cnode_data(_save_data_id, _from_another_script),
-						linked_prop = get_prop_get_data(prop, param.type),
-						linked_prop_source_idx = out_idx,
-						output_io_idx = 0
-					}
-					sub_items.append(dt)
-				out_idx += 1
-		
-		if not _io_type or _io_type == 'out':
-			var out_idx: int = 0
-			for param: HenSaveParam in func_data.outputs:
-				var props: Array = get_valid_recursive_props(param.type, _type, 'out', _native_props)
-				for prop: Dictionary in props:
-					var setter_name: String = 'set: ' + func_data.name + '().' + param.name + '.' + prop.name
-					
-					var dt: Dictionary = {
-						_class_name = 'Function',
-						name = setter_name,
-						data = func_data.get_cnode_data(_save_data_id, _from_another_script),
-						linked_prop = get_prop_set_data(prop, param.type),
-						linked_prop_source_idx = out_idx,
-						input_io_idx = 1
-					}
-
-					sub_items.append(dt)
-				out_idx += 1
+		# adds main node only if not filtering by wire
+		if not _io_type:
+			sub_items.append(dt_main)
 
 		if not sub_items.is_empty():
 			var dt_folder: Dictionary = {
 				_class_name = 'Function',
 				name = func_data.name,
-				data = func_data.get_cnode_data(_save_data_id, _from_another_script),
+				data = cnode_data,
 				recursive_props = sub_items,
 				is_match = is_main_valid if _type else true
 			}
@@ -377,7 +405,7 @@ static func process_variables(_ast: HenMapDependencies.ProjectAST, _save_data_id
 				data = var_data.get_setter_cnode_data(_save_data_id, _from_another_script),
 			}
 			if is_main_set_valid:
-				dt_set.input_io_idx = 0
+				dt_set.input_io_idx = 0 if not _from_another_script else 1
 
 			sub_items.append(dt_set)
 
@@ -481,87 +509,43 @@ static func process_macros(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 
 	for macro_data: HenSaveMacro in _ast.macros:
 		var sub_items: Array = []
-		var is_main_valid: bool = false
-		var input_idx: int = -1
-		var output_idx: int = -1
+		var cnode_data: Dictionary = macro_data.get_cnode_data(_save_data_id, _from_another_script)
 		
-		var has_valid_connection: bool = false
+		var output_idx: int = _process_param_items(
+			sub_items, macro_data.outputs, _io_type, _type, _native_props,
+			{_class_name = 'Macro', base_name = macro_data.name, data = cnode_data, is_inputs = false}
+		)
 
-		if not _io_type:
-			has_valid_connection = true
-		elif _io_type == 'in':
-			var params: Array = []
-			for param: HenSaveParam in macro_data.outputs: params.append(param.get_data())
+		var input_idx: int = _process_param_items(
+			sub_items, macro_data.inputs, _io_type, _type, _native_props,
+			{_class_name = 'Macro', base_name = macro_data.name, data = cnode_data, is_inputs = true, idx_offset = 1 if _from_another_script else 0}
+		)
 
-			output_idx = check_param_validity(params, _type, false)
-			if output_idx != -1:
-				has_valid_connection = true
-
-		elif _io_type == 'out':
-			var params: Array = []
-			for param: HenSaveParam in macro_data.inputs: params.append(param.get_data())
-
-			input_idx = check_param_validity(params, _type, true)
-			if input_idx != -1: has_valid_connection = true
-
-		is_main_valid = has_valid_connection
+		var is_main_valid: bool = false
+		if not _io_type: is_main_valid = true
+		elif _io_type == 'in' and output_idx != -1: is_main_valid = true
+		elif _io_type == 'out' and input_idx != -1: is_main_valid = true
 
 		var dt_main: Dictionary = {
 			_class_name = 'Macro',
 			name = macro_data.name,
-			data = macro_data.get_cnode_data(_save_data_id, _from_another_script)
+			data = cnode_data
 		}
 		
-		if not _io_type:
-			dt_main.force_valid = true
-
+		if not _io_type: dt_main.force_valid = true
 		if is_main_valid:
 			if input_idx != -1: dt_main.input_io_idx = input_idx
 			if output_idx != -1: dt_main.output_io_idx = output_idx
 		
-		sub_items.append(dt_main)
-		
-		if not _io_type or _io_type == 'in':
-			var out_idx: int = 0
-			for param: HenSaveParam in macro_data.outputs:
-				var props: Array = get_valid_recursive_props(param.type, _type, 'in', _native_props)
-				for prop: Dictionary in props:
-					var getter_name: String = macro_data.name + '().' + param.name + '.' + prop.name
-					
-					var dt: Dictionary = {
-						_class_name = 'Macro',
-						name = getter_name,
-						data = macro_data.get_cnode_data(_save_data_id, _from_another_script),
-						linked_prop = get_prop_get_data(prop, param.type),
-						linked_prop_source_idx = out_idx,
-						output_io_idx = 0
-					}
-					sub_items.append(dt)
-				out_idx += 1
-		
-		if not _io_type or _io_type == 'out':
-			var out_idx: int = 0
-			for param: HenSaveParam in macro_data.outputs:
-				var props: Array = get_valid_recursive_props(param.type, _type, 'out', _native_props)
-				for prop: Dictionary in props:
-					var setter_name: String = 'set: ' + macro_data.name + '().' + param.name + '.' + prop.name
-					
-					var dt: Dictionary = {
-						_class_name = 'Macro',
-						name = setter_name,
-						data = macro_data.get_cnode_data(_save_data_id, _from_another_script),
-						linked_prop = get_prop_set_data(prop, param.type),
-						linked_prop_source_idx = out_idx,
-						input_io_idx = 1
-					}
-					sub_items.append(dt)
-				out_idx += 1
+		# adds main node only if not filtering by wire
+		if not _io_type:
+			sub_items.append(dt_main)
 		
 		if not sub_items.is_empty():
 			var dt_folder: Dictionary = {
 				_class_name = 'Macro',
 				name = macro_data.name,
-				data = macro_data.get_cnode_data(_save_data_id, _from_another_script),
+				data = cnode_data,
 				recursive_props = sub_items,
 				is_match = is_main_valid if _type else true
 			}

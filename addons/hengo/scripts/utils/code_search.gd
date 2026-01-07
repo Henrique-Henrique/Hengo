@@ -124,9 +124,7 @@ func _update_loading(loading: bool) -> void:
 		first_list.visible = false
 		second_list.visible = false
 		third_list.visible = false
-	else:
-		# Restoration of visibility is handled by set_data
-		pass
+
 
 func update() -> void:
 	_update_loading(true)
@@ -255,10 +253,10 @@ func _worker_task(idx: int, thread_data: Dictionary) -> void:
 						if not (class_data.methods as Dictionary).has(method_name):
 							continue
 						
-						var new_data: Dictionary = (class_data.methods as Dictionary).get(method_name)
-
-						if not new_data:
-							continue
+						var new_data: Dictionary = ((class_data.methods as Dictionary).get(method_name) as Dictionary).duplicate()
+						new_data.erase(&'use_props_only')
+						new_data.erase(&'input_io_idx')
+						new_data.erase(&'output_io_idx')
 
 						new_data.name = method_name
 						new_data._class_name = item._class_name
