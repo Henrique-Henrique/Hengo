@@ -12,6 +12,7 @@ var current_tab: int = 0
 var config: Dictionary
 var start_pos: Vector2
 var categories: Dictionary
+var loading_label: Label
 
 func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
@@ -65,7 +66,7 @@ func _on_list_request(_list: Array, _list_id: int = 1) -> void:
 func _open_categories() -> void:
 	var json: JSON = load('res://addons/hengo/resources/json/api_categories.json')
 	categories = json.data
-	update()
+	call_deferred("update")
 
 
 func set_data(_virtual_list_id: int, _api_list: Array) -> void:
@@ -97,126 +98,210 @@ func set_data(_virtual_list_id: int, _api_list: Array) -> void:
 	match _virtual_list_id:
 		1, 2:
 			await get_tree().process_frame
-			(first_list.get_node('%VirtualList') as HenVirtualList).update()
+			(first_list.get_node('%VirtualList') as HenVirtualList).update(true)
+			(second_list.get_node('%VirtualList') as HenVirtualList).update(true)
+			(third_list.get_node('%VirtualList') as HenVirtualList).update(true)
 
+
+func _update_loading(loading: bool) -> void:
+	if not loading_label:
+		loading_label = Label.new()
+		loading_label.text = "Loading..."
+		loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		loading_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		loading_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		loading_label.add_theme_color_override("font_color", Color(1, 1, 1, 0.5))
+		add_child(loading_label)
+		move_child(loading_label, 1)
+
+	loading_label.visible = loading
+	
+	var first_list: ScrollContainer = get_node('%FirstList')
+	var second_list: ScrollContainer = get_node('%SecondList')
+	var third_list: ScrollContainer = get_node('%ThirdList')
+	
+	if loading:
+		first_list.visible = false
+		second_list.visible = false
+		third_list.visible = false
+	else:
+		# Restoration of visibility is handled by set_data
+		pass
 
 func update() -> void:
+	_update_loading(true)
+	
+	var global: HenGlobal = Engine.get_singleton('Global')
+	
+	var input_data: Dictionary = {
+		"config": config.duplicate(true),
+		"global_identity_type": global.SAVE_DATA.identity.type,
+		"categories": categories.duplicate(true)
+	}
+	
+	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
+	thread_helper.add_task(_threaded_update.bind(input_data))
+
+func _threaded_update(input_data: Dictionary) -> void:
 	var api: HenApi = Engine.get_singleton(&'API')
 	var data: Dictionary = api.get_decompressed_data()
 
 	if not data:
+		call_deferred("_on_update_completed", [])
 		return
 	
-	var global: HenGlobal = Engine.get_singleton('Global')
 	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-	var io_type: StringName = config.get(&'io_type', &'')
-	var type: StringName = config.get(&'type', &'')
-	var api_list: Array[Dictionary] = []
-	var map_list: Dictionary = map_dep.get_code_search_list(io_type, type)
-
+	var io_type: StringName = (input_data.config as Dictionary).get(&'io_type', &'')
+	var type: StringName = (input_data.config as Dictionary).get(&'type', &'')
 	var native_props: Dictionary = data.get(&'native_props')
-
-	if type and io_type == 'out':
-		var getter_dt: Dictionary = {
-			_class_name = type,
-			return_type = type,
-			io_type = io_type,
-			is_getter = true,
-			is_setter = true
-		}
-
-		var getter_list = api.get_native_props_as_data(getter_dt, io_type, '', native_props)
-
-		if not getter_list.is_empty():
-			api_list.append({
-				_class_name = 'Properties',
-				categories = [
-					{
-						_class_name = type,
-						method_list = getter_list,
-						name = 'Properties',
-						icon = 'activity',
-						color = '#ff9ff3'
-					}
-				]
-			})
-
-	if not (map_list.categories as Array).is_empty():
-		api_list.append(map_list)
-
-	var hengo_list: Dictionary = api.get_side_bar_list(io_type, type)
-
-	if not (hengo_list.categories as Array).is_empty():
-		api_list.append(hengo_list)
 	
-	var native_list: Array = api.get_native_list_raw(io_type, type)
-	if not native_list.is_empty():
-		api_list.append({_class_name = 'Native', categories = native_list, is_native = true})
+	# results container: properties, map list, hengo list, native, inheritance
+	var results: Array = [[], null, null, null, []]
 	
-	var _class: StringName = global.SAVE_DATA.identity.type
-	var item_list: Array = get_class_parent_recursively(_class)
-
-	# filter categories with API data
-	# this is necessary because category only has method name
-	for item: Dictionary in item_list:
-		if item.get(&'is_native', false): continue
-
-		var class_data: Dictionary = data.classes[item._class_name]
-		var new_categories: Array = []
+	var thread_data: Dictionary = {
+		"results": results,
+		"api": api,
+		"map_dep": map_dep,
+		"io_type": io_type,
+		"type": type,
+		"native_props": native_props,
+		"data": data,
+		"input_data": input_data
+	}
 	
-		for category: Dictionary in item.get(&'categories', []):
-			var new_methods: Array = []
-
-			for method_name: StringName in category.get(&'method_list', []):
-				if not (class_data.methods as Dictionary).has(method_name):
-					print('Category method not found: %s' % method_name)
-					continue
-				
-				var new_data: Dictionary = (class_data.methods as Dictionary).get(method_name)
-
-				if not new_data:
-					continue
-
-				new_data.name = method_name
-				new_data._class_name = item._class_name
-				new_data.data = HenApiSerialize.get_func_void_hengo_data(new_data)
-
-				if not api.check_type_validity(new_data, io_type, type, native_props):
-					continue
-				
-				var sub_items: Array = []
-				var is_strict_match: bool = not new_data.get(&'use_props_only', false)
-
-				if is_strict_match:
-					var data_copy: Dictionary = new_data.duplicate()
-					if not io_type:
-						data_copy.force_valid = true
-					sub_items.append(data_copy)
-				
-				var props: Array = api.get_native_props_as_data(new_data, io_type, type, native_props)
-
-				if not io_type:
-					for prop: Dictionary in props:
-						prop.force_valid = true
-
-				sub_items.append_array(props)
-
-				if not sub_items.is_empty():
-					var folder_item: Dictionary = new_data.duplicate()
-					folder_item.recursive_props = sub_items
-					folder_item.is_match = is_strict_match if type else true
-					
-					new_methods.append(folder_item)
-
-			if not new_methods.is_empty():
-				category.set(&'method_list', new_methods)
-				new_categories.append(category)
+	var group_id: int = WorkerThreadPool.add_group_task(_worker_task.bind(thread_data), 5, -1, true, "CodeSearchContext")
+	WorkerThreadPool.wait_for_group_task_completion(group_id)
+	
+	var api_list: Array[Dictionary] = []
+	
+	# assemble the final list in order
+	api_list.append_array(results[0])
+	
+	if results[1] and not (results[1].categories as Array).is_empty():
+		api_list.append(results[1])
 		
-		if not new_categories.is_empty():
-			item.set(&'categories', new_categories)
-			api_list.append(item)
+	if results[2] and not (results[2].categories as Array).is_empty():
+		api_list.append(results[2])
+		
+	if results[3] and not (results[3].categories as Array).is_empty():
+		api_list.append(results[3])
+		
+	api_list.append_array(results[4])
 
-	set_data.call_deferred(0, api_list)
+	call_deferred("_on_update_completed", api_list)
+
+
+func _worker_task(idx: int, thread_data: Dictionary) -> void:
+	var api: HenApi = thread_data.api
+	var map_dep: HenMapDependencies = thread_data.map_dep
+	var io_type: StringName = thread_data.io_type
+	var type: StringName = thread_data.type
+	var native_props: Dictionary = thread_data.native_props
+	var data: Dictionary = thread_data.data
+	
+	match idx:
+		0:
+			if type and io_type == 'out':
+				var getter_dt: Dictionary = {
+					_class_name = type,
+					return_type = type,
+					io_type = io_type,
+					is_getter = true,
+					is_setter = true
+				}
+
+				var getter_list = api.get_native_props_as_data(getter_dt, io_type, '', native_props)
+
+				if not getter_list.is_empty():
+					(thread_data.results[0] as Array).append({
+						_class_name = 'Properties',
+						categories = [
+							{
+								_class_name = type,
+								method_list = getter_list,
+								name = 'Properties',
+								icon = 'activity',
+								color = '#ff9ff3'
+							}
+						]
+					})
+		
+		1:
+			thread_data.results[1] = map_dep.get_code_search_list(io_type, type)
+			
+		2:
+			thread_data.results[2] = api.get_side_bar_list(io_type, type)
+			
+		3:
+			var native_list: Array = api.get_native_list_raw(io_type, type)
+			if not native_list.is_empty():
+				thread_data.results[3] = {_class_name = 'Native', categories = native_list, is_native = true}
+				
+		4:
+			var _class: StringName = thread_data.input_data.global_identity_type
+			var item_list: Array = get_class_parent_recursively(_class)
+
+			# filter categories with api data
+			for item: Dictionary in item_list:
+				if item.get(&'is_native', false): continue
+
+				var class_data: Dictionary = data.classes[item._class_name]
+				var new_categories: Array = []
+			
+				for category: Dictionary in item.get(&'categories', []):
+					var new_methods: Array = []
+
+					for method_name: StringName in category.get(&'method_list', []):
+						if not (class_data.methods as Dictionary).has(method_name):
+							continue
+						
+						var new_data: Dictionary = (class_data.methods as Dictionary).get(method_name)
+
+						if not new_data:
+							continue
+
+						new_data.name = method_name
+						new_data._class_name = item._class_name
+						new_data.data = HenApiSerialize.get_func_void_hengo_data(new_data)
+
+						if not api.check_type_validity(new_data, io_type, type, native_props):
+							continue
+						
+						var sub_items: Array = []
+						var is_strict_match: bool = not new_data.get(&'use_props_only', false)
+
+						if is_strict_match:
+							var data_copy: Dictionary = new_data.duplicate()
+							if not io_type:
+								data_copy.force_valid = true
+							sub_items.append(data_copy)
+						
+						var props: Array = api.get_native_props_as_data(new_data, io_type, type, native_props)
+
+						if not io_type:
+							for prop: Dictionary in props:
+								prop.force_valid = true
+
+						sub_items.append_array(props)
+
+						if not sub_items.is_empty():
+							var folder_item: Dictionary = new_data.duplicate()
+							folder_item.recursive_props = sub_items
+							folder_item.is_match = is_strict_match if type else true
+							
+							new_methods.append(folder_item)
+
+					if not new_methods.is_empty():
+						category.set(&'method_list', new_methods)
+						new_categories.append(category)
+				
+				if not new_categories.is_empty():
+					item.set(&'categories', new_categories)
+					(thread_data.results[4] as Array).append(item)
+
+func _on_update_completed(api_list: Array) -> void:
+	_update_loading(false)
+	set_data(0, api_list)
 
 
 func get_native_props_as_data(_data: Dictionary, _native_props: Dictionary = {}) -> Array:

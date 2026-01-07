@@ -1,15 +1,29 @@
-[gd_scene load_steps=3 format=3 uid="uid://bx3caej844dt8"]
+[gd_scene load_steps=4 format=3 uid="uid://bx3caej844dt8"]
 
 [ext_resource type="Script" uid="uid://b8hxqbnubekug" path="res://addons/hengo/scripts/utils/api_list_item.gd" id="1_bt5uw"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bt5uw"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bt5uw"]
+bg_color = Color(0.14081398, 0.07749111, 0.33319244, 1)
+
 [node name="APIListItem" type="PanelContainer"]
-offset_right = 24.0
-offset_bottom = 20.0
+offset_right = 120.0
+offset_bottom = 57.0
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bt5uw")
 script = ExtResource("1_bt5uw")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="Bt" type="Button" parent="MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_bt5uw")
+text = " "
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 process_mode = 4
@@ -20,12 +34,8 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Name of something"
+text = "Name"
 
 [node name="Type" type="Label" parent="HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="Bt" type="Button" parent="."]
 unique_name_in_owner = true
 layout_mode = 2

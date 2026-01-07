@@ -2,12 +2,12 @@
 class_name HenVirtualList extends Control
 
 @export var item_scene: PackedScene
-@export var default_item_height: int = 70
 
 @export var scroll_container: ScrollContainer
 @export var content: Control
 
 const Y_PADDING = 20
+var default_item_height: float = 50.0
 
 var _full_data: Array = []
 var _item_nodes: Array[Control] = []
@@ -21,6 +21,8 @@ var _last_width: float = 0.0
 func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
+	
+	default_item_height = HenUtils.get_scaled_size(50)
 
 	var v_scroll_bar = scroll_container.get_v_scroll_bar()
 	if v_scroll_bar:
@@ -28,15 +30,19 @@ func _ready() -> void:
 	scroll_container.resized.connect(_on_scroll_changed)
 
 
+# prevent race conditions by marking pending update
 func _on_scroll_changed(_value: float = 0.0) -> void:
-	# prevent race conditions by marking pending update
 	if _is_updating:
 		_pending_update = true
 		return
 	_update_visible_items()
 
 
-func update() -> void:
+func update(force_recalc: bool = false) -> void:
+	if force_recalc:
+		_heights_calculated.clear()
+		_last_width = 0.0
+
 	_on_scroll_changed()
 
 
@@ -44,6 +50,8 @@ func set_data(data: Array) -> void:
 	_full_data = data
 	_heights_calculated.clear()
 	_build_layout_cache()
+	
+	modulate.a = 0.0
 	
 	var total_height: float = 0.0
 	if not _layout_cache.is_empty():
@@ -61,6 +69,7 @@ func set_data(data: Array) -> void:
 	_update_visible_items()
 
 
+# build cache for fast scroll access
 func _build_layout_cache() -> void:
 	_layout_cache.clear()
 	var current_y: float = 0.0
@@ -75,8 +84,8 @@ func _build_layout_cache() -> void:
 		current_y += item_height
 
 
+# binary search for better performance
 func _find_first_visible_item_index(scroll_y: float) -> int:
-	# binary search for better performance
 	var left = 0
 	var right = _layout_cache.size() - 1
 	
@@ -182,28 +191,47 @@ func _update_visible_items() -> void:
 			item_node.size.y = cache_info.height
 
 	if needs_recalculation:
-		await get_tree().process_frame
-		if _item_nodes.is_empty():
-			_is_updating = false
-			return
-
-		var correction_offset: float = 0.0
+		var max_retries: int = 5
 		
-		for i in range(visible_items.size()):
-			var item_node: Control = _item_nodes[i]
-			var data_idx: int = visible_items[i].data_idx
+		for attempt in range(max_retries):
+			await get_tree().process_frame
 			
-			if correction_offset > 0.0:
-				item_node.position.y += correction_offset
+			if _item_nodes.is_empty() or _pending_update:
+				_is_updating = false
+				if _pending_update:
+					call_deferred('_update_visible_items')
+				return
 
-			var real_height: float = item_node.get_combined_minimum_size().y + Y_PADDING
-			var cached_height: float = _layout_cache[data_idx].height
+			var correction_offset: float = 0.0
+			var all_calculated: bool = true
 			
-			if abs(real_height - cached_height) > 0.1:
-				_update_item_height(data_idx, real_height)
-				item_node.size.y = real_height
-				correction_offset += (real_height - cached_height)
+			for i in range(visible_items.size()):
+				var item_node: Control = _item_nodes[i]
+				var data_idx: int = visible_items[i].data_idx
+				
+				if correction_offset > 0.0:
+					item_node.position.y += correction_offset
+
+				var real_height: float = item_node.get_combined_minimum_size().y + Y_PADDING
+				var cached_height: float = _layout_cache[data_idx].height
+				
+				if abs(real_height - cached_height) > 0.1:
+					_update_item_height(data_idx, real_height)
+					item_node.size.y = real_height
+					correction_offset += (real_height - cached_height)
+				elif not _heights_calculated.has(data_idx):
+					if attempt == max_retries - 1:
+						_heights_calculated[data_idx] = true
+					else:
+						all_calculated = false
+			
+			if all_calculated:
+				break
 	
+	if modulate.a == 0.0:
+		var tween: Tween = create_tween()
+		tween.tween_property(self, "modulate:a", 1.0, 0.1)
+
 	_is_updating = false
 	if _pending_update:
 		call_deferred('_update_visible_items')

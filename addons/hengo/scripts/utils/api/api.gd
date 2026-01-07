@@ -6,7 +6,7 @@ const EXTENSION_API_PATH = 'res://.godot/hengo/extension_api.json'
 const EXTENSION_API_COMPRESSED_PATH = 'res://.godot/hengo/api_compressed.bin'
 const API_VERSION: int = 1
 
-var compressed_api: CompressedData
+var api_data: Dictionary = {}
 var timer: SceneTreeTimer
 
 
@@ -42,7 +42,9 @@ func check_hengo_folder() -> void:
 func _generate_compressed_data() -> void:
 	check_hengo_folder()
 
-	compressed_api = await _get_compressed_api()
+	var compressed_api = await _get_compressed_api()
+	if compressed_api:
+		api_data = decompress_and_get_data(compressed_api)
 	
 
 func _get_compressed_api() -> CompressedData:
@@ -55,20 +57,16 @@ func _get_compressed_api() -> CompressedData:
 
 
 func get_decompressed_data() -> Dictionary:
-	if not compressed_api:
+	if api_data.is_empty():
 		print('Erro open compressed api')
 		return {}
 
-	return decompress_and_get_data(compressed_api)
+	return api_data
 
 
 func map_category_data(_class_name: StringName, _item: Dictionary, _io_type: StringName = '', _type: StringName = '') -> Array:
-	if not compressed_api:
-		print('Erro open compressed api')
-		return []
-
-	var data: Dictionary = decompress_and_get_data(compressed_api)
-
+	var data: Dictionary = get_decompressed_data()
+	
 	if not data:
 		print('Not data')
 		return []
@@ -99,12 +97,17 @@ func map_category_data(_class_name: StringName, _item: Dictionary, _io_type: Str
 
 
 func search_api(_search_text: String, _io_type: StringName = '', _type: StringName = '') -> void:
+	# offload to thread to verify performance and avoid blocking
+	WorkerThreadPool.add_task(_threaded_search_api.bind(_search_text, _io_type, _type))
+
+
+func _threaded_search_api(_search_text: String, _io_type: StringName, _type: StringName) -> void:
 	var start: int = Time.get_ticks_usec()
-	if not compressed_api:
+	if api_data.is_empty():
 		print('Erro open compressed api')
 		return
 
-	var data: Dictionary = decompress_and_get_data(compressed_api)
+	var data: Dictionary = api_data
 
 	if not data:
 		print('Not data')
@@ -113,101 +116,137 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 	var text: String = _search_text.strip_edges().to_lower()
 	var results: Array = []
 	var native_props: Dictionary = data.get(&'native_props')
+	var mutex: Mutex = Mutex.new()
 
 	print("Query: '%s'" % text)
 	print("Query length: %d" % text.length())
-
-	# map classes
-	for _class_name: StringName in (data.classes as Dictionary).keys():
-		var class_data: Dictionary = data.classes[_class_name]
-
-		search_method_data(_class_name, class_data, results, text, _io_type, _type, native_props)
-		# search_enum_data(_class_name, class_data, results, text, _io_type, _type, native_props)
 	
-	# map native classes
-	for _class_name: StringName in (data.native_classes as Dictionary).keys():
-		var class_data: Dictionary = data.native_classes[_class_name]
-		search_method_data(_class_name, class_data, results, text, _io_type, _type, native_props)
-		# search_enum_data(_class_name, class_data, results, text, _io_type, _type, native_props)
-
-	# Utilities
-	for util_name: StringName in (data.utilities as Dictionary).keys():
-		var util_lower = util_name.to_lower()
-		var score = HenSearch.score_only(text, util_lower)
-		var util_data: Dictionary = data.utilities[util_name] as Dictionary
-
-		if score > 0:
-			util_data._class_name = &''
-			util_data.name = util_name
-			util_data.score = score
-			util_data.is_utility = true
-			util_data.data = HenApiSerialize.get_func_void_hengo_data(util_data)
-
-			util_data.data.category = &'native'
-			
-			if not check_type_validity(util_data, _io_type, _type, native_props):
-				continue
-			
-			var sub_items: Array = []
-			var is_strict_match: bool = not util_data.get(&'use_props_only', false)
-
-			if is_strict_match:
-				var data_copy: Dictionary = util_data.duplicate()
-				if not _io_type:
-					data_copy.force_valid = true
-				sub_items.append(data_copy)
-			
-			var props_list: Array = get_native_props_as_data(util_data, _io_type, _type, native_props)
-
-			for item: Dictionary in props_list:
-				item.score = score
-				if not _io_type:
-					item.force_valid = true
-
-			sub_items.append_array(props_list)
-
-			if not sub_items.is_empty():
-				var folder_item: Dictionary = util_data.duplicate()
-				folder_item.recursive_props = sub_items
-				folder_item.is_match = is_strict_match if _type else true
-				
-				results.append(folder_item)
+	var thread_data: Dictionary = {
+		"results": results,
+		"text": text,
+		"io_type": _io_type,
+		"type": _type,
+		"native_props": native_props,
+		"data": data,
+		"mutex": mutex
+	}
 	
-	# map processors
-	var sidebar_categories: Array = get_side_bar_categories(HenUtils.get_current_ast_list(), false, _io_type, _type)
-	for category: Dictionary in sidebar_categories:
-		for item: Dictionary in category.get(&'method_list', []):
-			var item_name: String = item.get(&'name', '')
-			var score: float = HenSearch.score_only(text, item_name.to_lower())
-			
-			if score > 0:
-				item.score = score
-				results.append(item)
-
-	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-	if map_deps:
-		var deps_list: Dictionary = map_deps.get_code_search_list(_io_type, _type)
-		for category: Dictionary in deps_list.get(&'categories', []):
-			for script_data: Dictionary in category.get(&'method_list', []):
-				var script_name: String = script_data.get(&'_class_name', '')
-				for sub_category: Dictionary in script_data.get(&'categories', []):
-					for item: Dictionary in sub_category.get(&'method_list', []):
-						var item_name: String = item.get(&'name', '')
-						var score: float = HenSearch.score_only(text, item_name.to_lower())
-						
-						if score > 0:
-							var item_copy: Dictionary = item.duplicate()
-							item_copy.score = score
-							item_copy._class_name = script_name + ' -> ' + item.get(&'_class_name', '')
-							results.append(item_copy)
+	# task groups: classes, native classes, utilities, processors, map dependencies
+	var group_id: int = WorkerThreadPool.add_group_task(_worker_search_task.bind(thread_data), 5, -1, true, "ApiSearch")
+	WorkerThreadPool.wait_for_group_task_completion(group_id)
 
 	results.sort_custom(func(a, b): return a.score > b.score)
 
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	signal_bus.request_code_search_type_result.emit(results)
+	call_deferred("_emit_search_results", results)
 
 	var end: int = Time.get_ticks_usec()
 	prints((end - start) / 1000., 'ms')
+
+
+func _emit_search_results(results: Array) -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.request_code_search_type_result.emit(results)
+
+
+func _worker_search_task(idx: int, thread_data: Dictionary) -> void:
+	var data: Dictionary = thread_data.data
+	var text: String = thread_data.text
+	var io_type: StringName = thread_data.io_type
+	var type: StringName = thread_data.type
+	var native_props: Dictionary = thread_data.native_props
+	var mutex: Mutex = thread_data.mutex
+	
+	var local_results: Array = []
+
+	match idx:
+		0:
+			for _class_name: StringName in (data.classes as Dictionary).keys():
+				var class_data: Dictionary = data.classes[_class_name]
+				search_method_data(_class_name, class_data, local_results, text, io_type, type, native_props)
+				# search_enum_data(_class_name, class_data, local_results, text, io_type, type, native_props)
+				
+		1:
+			for _class_name: StringName in (data.native_classes as Dictionary).keys():
+				var class_data: Dictionary = data.native_classes[_class_name]
+				search_method_data(_class_name, class_data, local_results, text, io_type, type, native_props)
+				# search_enum_data(_class_name, class_data, local_results, text, io_type, type, native_props)
+				
+		2:
+			for util_name: StringName in (data.utilities as Dictionary).keys():
+				var util_lower = util_name.to_lower()
+				var score = HenSearch.score_only(text, util_lower)
+				var util_data: Dictionary = data.utilities[util_name] as Dictionary
+
+				if score > 0:
+					util_data._class_name = &''
+					util_data.name = util_name
+					util_data.score = score
+					util_data.is_utility = true
+					util_data.data = HenApiSerialize.get_func_void_hengo_data(util_data)
+
+					util_data.data.category = &'native'
+					
+					if not check_type_validity(util_data, io_type, type, native_props):
+						continue
+					
+					var sub_items: Array = []
+					var is_strict_match: bool = not util_data.get(&'use_props_only', false)
+
+					if is_strict_match:
+						var data_copy: Dictionary = util_data.duplicate()
+						if not io_type:
+							data_copy.force_valid = true
+						sub_items.append(data_copy)
+					
+					var props_list: Array = get_native_props_as_data(util_data, io_type, type, native_props)
+
+					for item: Dictionary in props_list:
+						item.score = score
+						if not io_type:
+							item.force_valid = true
+
+					sub_items.append_array(props_list)
+
+					if not sub_items.is_empty():
+						var folder_item: Dictionary = util_data.duplicate()
+						folder_item.recursive_props = sub_items
+						folder_item.is_match = is_strict_match if type else true
+						
+						local_results.append(folder_item)
+						
+		3:
+			var sidebar_categories: Array = get_side_bar_categories(HenUtils.get_current_ast_list(), false, io_type, type)
+			for category: Dictionary in sidebar_categories:
+				for item: Dictionary in category.get(&'method_list', []):
+					var item_name: String = item.get(&'name', '')
+					var score: float = HenSearch.score_only(text, item_name.to_lower())
+					
+					if score > 0:
+						item.score = score
+						local_results.append(item)
+						
+		4:
+			var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+			if map_deps:
+				var deps_list: Dictionary = map_deps.get_code_search_list(io_type, type)
+				for category: Dictionary in deps_list.get(&'categories', []):
+					for script_data: Dictionary in category.get(&'method_list', []):
+						var script_name: String = script_data.get(&'_class_name', '')
+						for sub_category: Dictionary in script_data.get(&'categories', []):
+							for item: Dictionary in sub_category.get(&'method_list', []):
+								var item_name: String = item.get(&'name', '')
+								var score: float = HenSearch.score_only(text, item_name.to_lower())
+								
+								if score > 0:
+									var item_copy: Dictionary = item.duplicate()
+									item_copy.score = score
+									item_copy._class_name = script_name + ' -> ' + item.get(&'_class_name', '')
+									local_results.append(item_copy)
+									
+	if not local_results.is_empty():
+		mutex.lock()
+		(thread_data.results as Array).append_array(local_results)
+		mutex.unlock()
 
 
 func search_method_data(_class_name: StringName, _class_data: Dictionary, _results: Array, _search_text: String, _io_type: StringName = '', _type: StringName = '', _native_props: Dictionary = {}) -> void:
@@ -231,7 +270,7 @@ func search_method_data(_class_name: StringName, _class_data: Dictionary, _resul
 				
 				var sub_items: Array = []
 				var is_strict_match: bool = not method_data.get(&'use_props_only', false)
-
+				
 				if is_strict_match:
 					var data_copy: Dictionary = method_data.duplicate()
 					if not _io_type:
@@ -244,7 +283,7 @@ func search_method_data(_class_name: StringName, _class_data: Dictionary, _resul
 					item.score = score
 					if not _io_type:
 						item.force_valid = true
-				
+
 				sub_items.append_array(props_list)
 
 				if not sub_items.is_empty():

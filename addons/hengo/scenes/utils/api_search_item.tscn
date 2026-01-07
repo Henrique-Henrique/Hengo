@@ -37,6 +37,7 @@ size_flags_vertical = 3
 unique_name_in_owner = true
 layout_mode = 2
 item_scene = ExtResource("2_ypr0m")
+default_item_height = 10
 
 [node name="Search" type="LineEdit" parent="APISearchItem"]
 visible = false
