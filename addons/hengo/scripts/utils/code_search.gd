@@ -98,9 +98,9 @@ func set_data(_virtual_list_id: int, _api_list: Array) -> void:
 	match _virtual_list_id:
 		1, 2:
 			await get_tree().process_frame
-			(first_list.get_node('%VirtualList') as HenVirtualList).update(true)
-			(second_list.get_node('%VirtualList') as HenVirtualList).update(true)
-			(third_list.get_node('%VirtualList') as HenVirtualList).update(true)
+			(first_list.get_node('%VirtualList') as HenVirtualList).update.call_deferred(true)
+			(second_list.get_node('%VirtualList') as HenVirtualList).update.call_deferred(true)
+			(third_list.get_node('%VirtualList') as HenVirtualList).update.call_deferred(true)
 
 
 func _update_loading(loading: bool) -> void:

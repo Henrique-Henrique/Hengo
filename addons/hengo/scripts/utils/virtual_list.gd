@@ -24,7 +24,7 @@ func _ready() -> void:
 	
 	default_item_height = HenUtils.get_scaled_size(50)
 
-	var v_scroll_bar = scroll_container.get_v_scroll_bar()
+	var v_scroll_bar: VScrollBar = scroll_container.get_v_scroll_bar()
 	if v_scroll_bar:
 		v_scroll_bar.value_changed.connect(_on_scroll_changed)
 	scroll_container.resized.connect(_on_scroll_changed)
@@ -35,6 +35,7 @@ func _on_scroll_changed(_value: float = 0.0) -> void:
 	if _is_updating:
 		_pending_update = true
 		return
+	
 	_update_visible_items()
 
 
@@ -42,7 +43,9 @@ func update(force_recalc: bool = false) -> void:
 	if force_recalc:
 		_heights_calculated.clear()
 		_last_width = 0.0
-
+		# rebuild cache to ensure fresh positions
+		_build_layout_cache()
+	
 	_on_scroll_changed()
 
 
@@ -55,7 +58,7 @@ func set_data(data: Array) -> void:
 	
 	var total_height: float = 0.0
 	if not _layout_cache.is_empty():
-		var last_item_cache = _layout_cache[-1]
+		var last_item_cache: Dictionary = _layout_cache[-1]
 		total_height = last_item_cache.y_pos + last_item_cache.height
 		
 	content.custom_minimum_size.y = total_height
@@ -74,7 +77,7 @@ func _build_layout_cache() -> void:
 	_layout_cache.clear()
 	var current_y: float = 0.0
 	for i in range(_full_data.size()):
-		var item_data = _full_data[i]
+		var item_data: Dictionary = _full_data[i]
 		var item_height: float = item_data.get('custom_height', default_item_height)
 		
 		_layout_cache.append({
@@ -86,12 +89,12 @@ func _build_layout_cache() -> void:
 
 # binary search for better performance
 func _find_first_visible_item_index(scroll_y: float) -> int:
-	var left = 0
-	var right = _layout_cache.size() - 1
+	var left: int = 0
+	var right: int = _layout_cache.size() - 1
 	
 	while left <= right:
-		var mid = (left + right) / 2
-		var item_cache = _layout_cache[mid]
+		var mid: int = (left + right) / 2
+		var item_cache: Dictionary = _layout_cache[mid]
 		
 		if item_cache.y_pos + item_cache.height <= scroll_y:
 			left = mid + 1
@@ -105,8 +108,8 @@ func _update_item_height(index: int, new_height: float) -> void:
 	if index >= _layout_cache.size():
 		return
 	
-	var old_height = _layout_cache[index].height
-	var height_diff = new_height - old_height
+	var old_height: float = _layout_cache[index].height
+	var height_diff: float = new_height - old_height
 	
 	if abs(height_diff) < 0.01:
 		return
@@ -119,7 +122,7 @@ func _update_item_height(index: int, new_height: float) -> void:
 		_layout_cache[i].y_pos += height_diff
 	
 	if not _layout_cache.is_empty():
-		var last_item_cache = _layout_cache[-1]
+		var last_item_cache: Dictionary = _layout_cache[-1]
 		content.custom_minimum_size.y = last_item_cache.y_pos + last_item_cache.height
 
 
@@ -139,20 +142,23 @@ func _update_visible_items() -> void:
 	if v_scroll and v_scroll.visible:
 		available_width -= v_scroll.size.x
 	
+	# detect significant width change (resize)
 	if abs(available_width - _last_width) > 0.1:
 		_last_width = available_width
 		_heights_calculated.clear()
+		_build_layout_cache()
+		modulate.a = 0.0
 	
 	# buffer logic
 	var buffer: float = default_item_height * 2.0
-	var render_start = max(0, scroll_y - buffer)
-	var render_end = scroll_y + viewport_height + buffer
+	var render_start: float = max(0, scroll_y - buffer)
+	var render_end: float = scroll_y + viewport_height + buffer
 
 	var first_idx: int = _find_first_visible_item_index(render_start)
 	var visible_items: Array[Dictionary] = []
 	
 	for i in range(first_idx, _full_data.size()):
-		var cache_info = _layout_cache[i]
+		var cache_info: Dictionary = _layout_cache[i]
 		if cache_info.y_pos > render_end:
 			break
 		visible_items.append({'data_idx': i, 'cache': cache_info})
@@ -172,7 +178,7 @@ func _update_visible_items() -> void:
 	
 	for i in range(visible_items.size()):
 		var item_node: Control = _item_nodes[i]
-		var cache_info = visible_items[i].cache
+		var cache_info: Dictionary = visible_items[i].cache
 		var data_idx: int = visible_items[i].data_idx
 		
 		item_node.visible = true
@@ -194,7 +200,7 @@ func _update_visible_items() -> void:
 		var max_retries: int = 5
 		
 		for attempt in range(max_retries):
-			await get_tree().process_frame
+			await RenderingServer.frame_pre_draw
 			
 			if _item_nodes.is_empty() or _pending_update:
 				_is_updating = false
@@ -228,9 +234,10 @@ func _update_visible_items() -> void:
 			if all_calculated:
 				break
 	
-	if modulate.a == 0.0:
+	# only fade in if we are not pending another immediate update
+	if modulate.a < 1.0 and not _pending_update:
 		var tween: Tween = create_tween()
-		tween.tween_property(self, "modulate:a", 1.0, 0.1)
+		tween.tween_property(self, 'modulate:a', 1.0, 0.2)
 
 	_is_updating = false
 	if _pending_update:
