@@ -247,11 +247,6 @@ static func process_functions(_ast: HenMapDependencies.ProjectAST, _save_data_id
 				has_valid_connection = true
 
 		elif _io_type == 'out':
-			if _from_another_script:
-				if HenUtils.is_type_relation_valid(_type, 'Variant'):
-					input_idx = 0
-					has_valid_connection = true
-			
 			if not has_valid_connection:
 				var params: Array = []
 				for param: HenSaveParam in func_data.inputs: params.append(param.get_data())

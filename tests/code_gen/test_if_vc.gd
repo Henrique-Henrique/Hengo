@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 
 # tests the default code generation for an unconnected IF node

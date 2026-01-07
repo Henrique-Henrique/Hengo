@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 
 # Creates and returns a default expression node for testing

@@ -37,7 +37,7 @@ func _ready() -> void:
 
 func _show_custom_categories(_list: Array) -> void:
 	clear_list()
-	set_data.call_deferred(_list)
+	set_data.call_deferred(0, _list)
 
 
 func _search(_text: String) -> void:

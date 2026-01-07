@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 
 # helper to create the base FOR node (equivalent to _create_if_node).

@@ -1,22 +1,16 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 
-func get_func_data() -> HenSaveFunc:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.functions.clear()
-	save_data.add_func(false)
+var func_data: HenSaveFunc
 
-	var func_data: HenSaveFunc = save_data.functions.get(0)
 
+func before_test() -> void:
+	super ()
+	func_data = save_data.add_func(false)
 	func_data.name = 'my func'
-
-	return func_data
 
 
 func test_func_from_without_io() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	var func_data: HenSaveFunc = get_func_data()
-
 	var func_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(
 		func_data.get_cnode_data(save_data.identity.id, true)
 	)
@@ -27,9 +21,6 @@ func test_func_from_without_io() -> void:
 
 
 func test_func_from_with_io() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	var func_data: HenSaveFunc = get_func_data()
-
 	func_data.inputs.append(HenSaveParam.new())
 	func_data.outputs.append(HenSaveParam.new())
 
@@ -42,9 +33,6 @@ func test_func_from_with_io() -> void:
 
 
 func test_func_from_without_ref_connections() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	var func_data: HenSaveFunc = get_func_data()
-
 	func_data.inputs.append(HenSaveParam.new())
 	func_data.outputs.append(HenSaveParam.new())
 
@@ -58,9 +46,6 @@ func test_func_from_without_ref_connections() -> void:
 
 
 func test_func_from_with_ref_connection() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	var func_data: HenSaveFunc = get_func_data()
-
 	func_data.inputs.append(HenSaveParam.new())
 	func_data.outputs.append(HenSaveParam.new())
 

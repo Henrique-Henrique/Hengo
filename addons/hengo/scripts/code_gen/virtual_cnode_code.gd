@@ -1,9 +1,10 @@
 class_name HenVirtualCNodeCode extends RefCounted
 
-const INVALID_TOKEN: Dictionary = {
-	type = HenVirtualCNode.SubType.INVALID,
-	use_self = false
-}
+static func get_invalid_token() -> Dictionary:
+	return {
+		type = HenVirtualCNode.SubType.INVALID,
+		use_self = false
+	}
 
 
 static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _input_id: int, _token_list: Array = []) -> Array:
@@ -115,14 +116,14 @@ static func get_macro_flow_connection(_save_data: HenSaveData, _vc: HenVirtualCN
 
 static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
 	if _vc.invalid:
-		return INVALID_TOKEN
+		return get_invalid_token()
 
 	var flow_tokens: Array
 	var input_ref: HenVirtualCNode = search_macro_input(_save_data, _vc.get_res(_save_data))
 
 	if not input_ref:
 		print('Macro input reference not found.')
-		return INVALID_TOKEN
+		return get_invalid_token()
 	
 	var input_flow: HenVCFlowConnectionData = get_macro_flow_connection(_save_data, input_ref, _flow_id)
 	var input_flow_to: HenVirtualCNode = input_flow.get_to(_save_data) if input_flow else null
@@ -201,6 +202,8 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 			connection = input_connection
 			break
 
+	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
+
 	if connection and connection.get_from(_save_data):
 		match connection.get_from(_save_data).sub_type:
 			HenVirtualCNode.SubType.MACRO_INPUT:
@@ -215,12 +218,12 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 				var macro_res: HenSaveMacro = vc.get_res(_save_data)
 
 				if not macro_res:
-					return INVALID_TOKEN
+					return get_invalid_token()
 
 				var macro_route: HenRouteData = macro_res.get_route(_save_data)
 
 				if not macro_route:
-					return INVALID_TOKEN
+					return get_invalid_token()
 
 				var macro_output: HenVirtualCNode = search_macro_output(_save_data, macro_res)
 				var data: Dictionary = get_input_token(_save_data, macro_output, connection.from_id)
@@ -245,7 +248,7 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 			type = HenVirtualCNode.SubType.IN_PROP,
 			prop_name = input.name,
 			value = input.code_value,
-			use_self = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF,
+			use_self = use_self,
 		}
 
 		if global.USE_MACRO_REF:
@@ -275,7 +278,12 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 
 		return data
 
-	var not_connected: Dictionary = {type = HenVirtualCNode.SubType.NOT_CONNECTED, input_type = input.type, use_self = true, prop_name = input.name}
+	var not_connected: Dictionary = {
+		type = HenVirtualCNode.SubType.NOT_CONNECTED,
+		input_type = input.type,
+		use_self = use_self,
+		prop_name = input.name
+	}
 
 	if input.is_ref:
 		not_connected.set('is_ref', true)
@@ -309,7 +317,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 		token.category = _vc.category
 
 	if _vc.invalid:
-		return INVALID_TOKEN
+		return get_invalid_token()
 
 	match _vc.sub_type:
 		HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
@@ -327,17 +335,17 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 					
 					if not inputs.is_empty() and not _vc.input_has_connection(inputs[0].id, _save_data):
 						(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
-						return INVALID_TOKEN
+						return get_invalid_token()
 					
 					params = get_input_token_list(_save_data, _vc)
 				HenVirtualCNode.SubType.MAKE_TRANSITION:
 					var inputs: Array[HenVCInOutData] = _vc.get_inputs(_save_data)
-					if inputs.is_empty(): return INVALID_TOKEN
+					if inputs.is_empty(): return get_invalid_token()
 					
 					var first_input: HenVCInOutData = inputs[0]
 					var state: HenSaveState = first_input.get_res(_save_data)
 
-					if not state: return INVALID_TOKEN
+					if not state: return get_invalid_token()
 					
 					var flow: HenSaveParam
 
@@ -347,7 +355,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 							break
 
 					if not flow:
-						return INVALID_TOKEN
+						return get_invalid_token()
 
 					params = [
 						{
@@ -375,7 +383,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			
 			if not inputs.is_empty() and not _vc.input_has_connection(inputs[0].id, _save_data):
 				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
-				return INVALID_TOKEN
+				return get_invalid_token()
 			
 			token.merge({
 				ref = get_input_token(_save_data, _vc, 0),
@@ -386,7 +394,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			
 			if not inputs.is_empty() and not _vc.input_has_connection(inputs[0].id, _save_data):
 				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
-				return INVALID_TOKEN
+				return get_invalid_token()
 			
 			token.merge({
 				name = _vc.get_vc_name(_save_data).to_snake_case(),
@@ -437,7 +445,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			var res = _vc.get_res(_save_data)
 
 			if not res:
-				return INVALID_TOKEN
+				return get_invalid_token()
 
 			token.merge({
 				params = get_input_token_list(_save_data, _vc, true),
@@ -448,7 +456,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			var res = _vc.get_res(_save_data)
 
 			if not res:
-				return INVALID_TOKEN
+				return get_invalid_token()
 
 			token.merge({
 				params = get_input_token_list(_save_data, _vc, true),
@@ -459,7 +467,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			var res: HenSaveState = _vc.get_res(_save_data)
 
 			if not res:
-				return INVALID_TOKEN
+				return get_invalid_token()
 			
 			token.merge({
 				is_sub_state = res.is_sub_state,

@@ -1,21 +1,15 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 
-func get_func_data() -> HenSaveFunc:
-	HenTest.clear_save_data()
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.functions.clear()
-	save_data.add_func(false)
+var func_data: HenSaveFunc
 
-	var func_data: HenSaveFunc = save_data.functions.get(0)
-
+func before_test() -> void:
+	super ()
+	func_data = save_data.add_func(false)
 	func_data.name = 'test func'
-
-	return func_data
 
 
 func test_func_code() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	var func_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 	var code: String = HenTest.get_vc_code(func_vc)
 
@@ -23,7 +17,6 @@ func test_func_code() -> void:
 
 
 func test_func_code_with_output() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	var func_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 	var void_vc: HenVirtualCNode = HenTest.get_void_with_input()
 
@@ -41,7 +34,6 @@ func test_func_code_with_output() -> void:
 
 
 func test_func_code_with_output_index() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	var func_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 	var void_vc: HenVirtualCNode = HenTest.get_void_with_input()
 
@@ -59,7 +51,6 @@ func test_func_code_with_output_index() -> void:
 
 
 func test_func_code_with_input() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	var func_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 	var first_input: HenSaveParam = HenSaveParam.new()
 	
@@ -72,14 +63,12 @@ func test_func_code_with_input() -> void:
 
 
 func test_func_body_generation() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 	var code: String = HenTest.get_all_code()
 	assert_str(code).contains('func test_func():\n\tpass')
 
 
 func test_func_body_generation_with_local_var() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 
 	var local_var: HenSaveParam = HenSaveParam.new()
@@ -93,7 +82,6 @@ func test_func_body_generation_with_local_var() -> void:
 
 
 func test_func_generation_with_one_output() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 
 	var output: HenSaveParam = HenSaveParam.new()
@@ -105,7 +93,6 @@ func test_func_generation_with_one_output() -> void:
 
 
 func test_func_generation_with_more_than_one_output() -> void:
-	var func_data: HenSaveFunc = get_func_data()
 	HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 
 	var output: HenSaveParam = HenSaveParam.new()
@@ -121,8 +108,6 @@ func test_func_generation_with_more_than_one_output() -> void:
 
 
 func test_func_generation_with_more_than_one_output_and_connections() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	var func_data: HenSaveFunc = get_func_data()
 	HenVirtualCNode.instantiate_virtual_cnode(func_data.get_cnode_data(''))
 
 	var output: HenSaveParam = HenSaveParam.new()

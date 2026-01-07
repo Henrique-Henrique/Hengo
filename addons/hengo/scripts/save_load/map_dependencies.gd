@@ -119,7 +119,7 @@ func get_code_search_list(_io_type: StringName = '', _type: StringName = '') -> 
 		if v.identity:
 			if v.identity.id == global.SAVE_DATA.identity.id:
 				continue
-			
+
 			var categories: Array = api.get_side_bar_categories(v, true, _io_type, _type)
 
 			if not categories.is_empty():

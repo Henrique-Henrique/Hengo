@@ -416,6 +416,8 @@ static func get_side_bar_item_path(_save_data_id: StringName, _type: HenSideBar.
 			suffix = '/signals_callback/'
 		HenSideBar.SideBarItem.MACROS:
 			suffix = '/macros/'
+		HenSideBar.SideBarItem.STATES:
+			suffix = '/states/'
 
 	return base_path + suffix
 

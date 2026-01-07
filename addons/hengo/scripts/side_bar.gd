@@ -6,7 +6,8 @@ enum SideBarItem {
 	FUNCTIONS,
 	SIGNALS,
 	SIGNALS_CALLBACK,
-	MACROS
+	MACROS,
+	STATES
 }
 
 var list: Tree

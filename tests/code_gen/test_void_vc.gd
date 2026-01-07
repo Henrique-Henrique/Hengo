@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 func test_void_code() -> void:
     var vc: HenVirtualCNode = HenTest.get_void()

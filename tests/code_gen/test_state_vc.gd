@@ -1,34 +1,28 @@
-extends GdUnitTestSuite
+extends HenTestSuite
+
+
+var state: HenSaveState
+
+
+func before_test() -> void:
+	super ()
+	state = save_data.add_state(false)
+	state.name = 'state test'
 
 
 func test_state_init_generation() -> void:
-	pass
-	HenTest.clear_save_data()
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.add_state()
-
-	var state: HenSaveState = save_data.states.get(0)
-
-	state.name = 'state test'
-
 	var code: String = HenTest.get_all_code()
 
 	assert_str(code).contains('func _init() -> void:\n\t_STATE_CONTROLLER.set_states({\n\t\tstate_test=StateTest.new(self),\n\t})')
 
 
 func test_state_start_state() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	HenTest.clear_save_data()
-	save_data.add_state()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-	var state2: HenSaveState = save_data.states.get(1)
+	var state2: HenSaveState = save_data.add_state(false)
 
 	var first_output: HenSaveParam = HenSaveParam.new()
 	first_output.name = 'first output'
 	state.flow_outputs.append(first_output)
 
-	state.name = 'state test'
 	state2.name = 'state test 2'
 
 	var start_state: HenVirtualCNode = HenTest.get_base_route().virtual_cnode_list.get(0)
@@ -44,15 +38,10 @@ func test_state_start_state() -> void:
 
 
 func test_state_double_state() -> void:
-	HenTest.clear_save_data()
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.add_state()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-	var state2: HenSaveState = save_data.states.get(1)
+	var state2: HenSaveState = save_data.add_state(false)
 
-	state.name = 'state test'
 	state2.name = 'state test 2'
+
 
 	var code: String = HenTest.get_all_code()
 	assert_str(code).contains('func _init() -> void:\n\t_STATE_CONTROLLER.set_states({\n\t\tstate_test=StateTest.new(self),\n\t\tstate_test_2=StateTest2.new(self),\n\t})')
@@ -60,15 +49,10 @@ func test_state_double_state() -> void:
 
 # checks if new line and tab is corret for more than one state
 func test_state_double_state_implementation() -> void:
-	HenTest.clear_save_data()
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.add_state()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-	var state2: HenSaveState = save_data.states.get(1)
+	var state2: HenSaveState = save_data.add_state(false)
 
-	state.name = 'state test'
 	state2.name = 'state test 2'
+
 
 	var code: String = HenTest.get_all_code()
 
@@ -76,26 +60,13 @@ func test_state_double_state_implementation() -> void:
 
 
 func test_state_implementation_without_body() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.states.clear()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-
-	state.name = 'state test'
-
 	var code: String = HenTest.get_all_code()
+
 
 	assert_str(code).contains('class StateTest extends HengoState:\n\tpass')
 
 
 func test_state_implementation_with_body_enter() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.states.clear()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-
-	state.name = 'state test'
-
 	var state_route: HenRouteData = state.get_route(save_data)
 
 	var enter_vc: HenVirtualCNode = state_route.virtual_cnode_list.get(0)
@@ -109,13 +80,6 @@ func test_state_implementation_with_body_enter() -> void:
 
 
 func test_state_implementation_with_body_update() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.states.clear()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-
-	state.name = 'state test'
-
 	var state_route: HenRouteData = state.get_route(save_data)
 
 	var update_vc: HenVirtualCNode = state_route.virtual_cnode_list.get(1)
@@ -129,14 +93,8 @@ func test_state_implementation_with_body_update() -> void:
 
 
 func test_state_implementation_with_body_enter_and_update() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	HenTest.clear_save_data()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-
-	state.name = 'state test'
-
 	var state_route: HenRouteData = state.get_route(save_data)
+
 
 	var enter_vc: HenVirtualCNode = state_route.virtual_cnode_list.get(0)
 	var void_enter_vc: HenVirtualCNode = HenTest.get_void('test void', state_route)
@@ -153,13 +111,6 @@ func test_state_implementation_with_body_enter_and_update() -> void:
 
 
 func test_state_with_transition_data() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.states.clear()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-
-	state.name = 'state test'
-
 	var transition_data: HenSaveParam = HenSaveParam.create()
 	transition_data.name = 'transition data'
 	transition_data.type = &'int'
@@ -177,15 +128,10 @@ func test_state_with_transition_data() -> void:
 
 
 func test_state_transition_data() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.states.clear()
-	save_data.add_state()
-	save_data.add_state()
-	var state: HenSaveState = save_data.states.get(0)
-	var state2: HenSaveState = save_data.states.get(1)
+	var state2: HenSaveState = save_data.add_state(false)
 
-	state.name = 'state test'
 	state2.name = 'state test 2'
+
 
 	var state_route: HenRouteData = state.get_route(save_data)
 	var enter_vc: HenVirtualCNode = state_route.virtual_cnode_list.get(0)
@@ -204,16 +150,9 @@ func test_state_transition_data() -> void:
 
 
 func test_state_transition_sub_state() -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
-	save_data.states.clear()
-	save_data.add_state()
-
-	var state: HenSaveState = save_data.states.get(0)
-
 	state.add_sub_state(save_data)
 	var state2: HenSaveState = state.get_sub_states(save_data).get(0)
 
-	state.name = 'state test'
 	state2.name = 'state test 2'
 
 	var state_route: HenRouteData = state.get_route(save_data)

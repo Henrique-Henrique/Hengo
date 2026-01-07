@@ -39,11 +39,13 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 				}
 			]
 		HenVirtualCNode.SubType.SET_VAR_FROM:
+			var info: Dictionary = _get_resource_info()
+
 			return [
 				{
 					id = 0,
-					name = type,
-					type = &'Variant',
+					name = info.name,
+					type = info.type,
 					is_ref = true
 				},
 				{
@@ -53,11 +55,13 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 				}
 			]
 		HenVirtualCNode.SubType.VAR_FROM:
+			var info: Dictionary = _get_resource_info()
+
 			return [
 				{
 					id = 0,
-					name = type,
-					type = &'Variant',
+					name = info.name,
+					type = info.type,
 					is_ref = true
 				}
 			]
@@ -99,3 +103,19 @@ func get_setter_cnode_data(_save_data_id: StringName, _from_another_script: bool
 		route = router.current_route,
 		res_data = get_res_data(HenSideBar.AddType.VAR, _save_data_id)
 	}
+
+
+func _get_resource_info() -> Dictionary:
+	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	
+	if not map_dep:
+		return {name = name, type = &'Variant'}
+	
+	for project_ast: HenMapDependencies.ProjectAST in map_dep.ast_list.values():
+		for var_res: HenSaveVar in project_ast.variables:
+			if var_res.id == id:
+				if project_ast.identity:
+					return {name = project_ast.identity.name, type = project_ast.identity.type}
+				break
+	
+	return {name = name, type = &'Variant'}

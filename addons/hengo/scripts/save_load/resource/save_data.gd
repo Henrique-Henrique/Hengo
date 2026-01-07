@@ -45,9 +45,10 @@ func get_base_route() -> HenRouteData:
 	return routes.get(identity.id)
 
 
-func add_route(_id: StringName, _route: HenRouteData) -> void:
+func add_route(_id: StringName, _route: HenRouteData) -> HenRouteData:
 	if not routes.has(_id):
 		routes.set(_id, _route)
+	return _route
 
 
 func get_route(_id: StringName) -> HenRouteData:
@@ -224,59 +225,81 @@ func add_detailed_dep(_id: StringName, _dep_info: Dictionary) -> void:
 	(identity.detailed_deps[_id] as Array).append(_dep_info)
 
 
-func add_var(_save: bool = true) -> void:
+func add_var(_save: bool = true) -> HenSaveVar:
 	var v: HenSaveVar = HenSaveVar.create()
 
 	if not v:
-		return
+		return null
 	
+	if _save:
+		if not HenUtils.save_side_bar_item(v, identity.id, HenSideBar.SideBarItem.VARIABLES):
+			return null
+
 	variables.append(v)
+	return v
 
 
-func add_state() -> void:
+func add_state(_save: bool = true) -> HenSaveState:
 	var s: HenSaveState = HenSaveState.create()
 
 	if not s:
-		return
+		return null
+	
+	if _save:
+		if not HenUtils.save_side_bar_item(s, identity.id, HenSideBar.SideBarItem.STATES):
+			return
 	
 	states.append(s)
+	return s
 
 
-func add_func(_save: bool = true) -> void:
+func add_func(_save: bool = true) -> HenSaveFunc:
 	var f: HenSaveFunc = HenSaveFunc.create()
 
 	if not f:
-		return
+		return null
 	
 	if _save:
 		if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
-			return
+			return null
 	
 	functions.append(f)
+	return f
 
 
-func add_signal() -> void:
+func add_signal(_save: bool = true) -> HenSaveSignal:
 	var s: HenSaveSignal = HenSaveSignal.create()
 
 	if not s:
-		return
+		return null
+	
+	if _save:
+		if not HenUtils.save_side_bar_item(s, identity.id, HenSideBar.SideBarItem.SIGNALS):
+			return null
 	
 	signals.append(s)
+	return s
 
 
-func add_signals_callback(_save: bool = true) -> void:
+func add_signals_callback(_save: bool = true) -> HenSaveSignalCallback:
 	var sc: HenSaveSignalCallback = HenSaveSignalCallback.create()
 
 	if not sc:
-		return
+		return null
 	
+	if _save:
+		if not HenUtils.save_side_bar_item(sc, identity.id, HenSideBar.SideBarItem.SIGNALS_CALLBACK):
+			return null
+
 	signals_callback.append(sc)
+	return sc
 
 
-func add_macro(_save: bool = true) -> void:
+func add_macro() -> HenSaveMacro:
 	var m: HenSaveMacro = HenSaveMacro.create()
 
 	if not m:
-		return
-	
+		return null
+
 	macros.append(m)
+	return m

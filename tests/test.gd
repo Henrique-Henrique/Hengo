@@ -19,36 +19,6 @@ static func get_base_route() -> HenRouteData:
 	return global.SAVE_DATA.get_route(global.SAVE_DATA.identity.id)
 
 
-static func set_global_config() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	var save_data: HenSaveData = HenSaveData.new()
-	var _class: StringName = 'Node'
-	var id: int = ResourceUID.create_id()
-	var identity: HenSaveDataIdentity = HenSaveDataIdentity.create(str(id), _class, 'Test')
-
-	save_data.identity = identity
-	save_data.counter = 1
-
-	var base_route: HenRouteData = HenRouteData.create(
-		'Base',
-		HenRouter.ROUTE_TYPE.BASE,
-		save_data.identity.id,
-	)
-
-	HenCreateScript.get_start_state(base_route)
-
-	save_data.add_route(save_data.identity.id, base_route)
-
-	global.SAVE_DATA = save_data
-	global.IS_HEADLESS = true
-	router.current_route = global.SAVE_DATA.get_base_route()
-
-	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-	map_deps.ast_list.set(save_data.identity.id, HenUtils.get_current_ast_list())
-
-
 static func get_void(_name: String = 'test_void', _route: HenRouteData = null) -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
 		name = _name,
@@ -127,27 +97,3 @@ static func get_if_vc() -> HenVirtualCNode:
 		inputs = [ {id = 0, name = 'condition', type = 'bool'}],
 		route = HenTest.get_base_route()
 	})
-
-
-static func clear_save_data(_all_routes: bool = false) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var base_route: HenRouteData = HenTest.get_base_route()
-
-	if not _all_routes:
-		for route_keys in global.SAVE_DATA.routes.keys():
-			var route: HenRouteData = global.SAVE_DATA.routes.get(route_keys)
-			if route != base_route:
-				global.SAVE_DATA.routes.erase(route)
-	else:
-		global.SAVE_DATA.routes.clear()
-
-	global.SAVE_DATA.states.clear()
-	global.SAVE_DATA.macros.clear()
-	global.SAVE_DATA.functions.clear()
-	global.SAVE_DATA.signals.clear()
-	global.SAVE_DATA.signals_callback.clear()
-	global.SAVE_DATA.connections.clear()
-	global.SAVE_DATA.flow_connections.clear()
-
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	router.current_route = base_route

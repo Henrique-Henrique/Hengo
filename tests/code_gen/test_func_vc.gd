@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends HenTestSuite
 
 
 # helper to make func nodes with any number of outputs
