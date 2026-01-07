@@ -173,6 +173,34 @@ func search_api(_search_text: String, _io_type: StringName = '', _type: StringNa
 				
 				results.append(folder_item)
 	
+	# map processors
+	var sidebar_categories: Array = get_side_bar_categories(HenUtils.get_current_ast_list(), false, _io_type, _type)
+	for category: Dictionary in sidebar_categories:
+		for item: Dictionary in category.get(&'method_list', []):
+			var item_name: String = item.get(&'name', '')
+			var score: float = HenSearch.score_only(text, item_name.to_lower())
+			
+			if score > 0:
+				item.score = score
+				results.append(item)
+
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	if map_deps:
+		var deps_list: Dictionary = map_deps.get_code_search_list(_io_type, _type)
+		for category: Dictionary in deps_list.get(&'categories', []):
+			for script_data: Dictionary in category.get(&'method_list', []):
+				var script_name: String = script_data.get(&'_class_name', '')
+				for sub_category: Dictionary in script_data.get(&'categories', []):
+					for item: Dictionary in sub_category.get(&'method_list', []):
+						var item_name: String = item.get(&'name', '')
+						var score: float = HenSearch.score_only(text, item_name.to_lower())
+						
+						if score > 0:
+							var item_copy: Dictionary = item.duplicate()
+							item_copy.score = score
+							item_copy._class_name = script_name + ' -> ' + item.get(&'_class_name', '')
+							results.append(item_copy)
+
 	results.sort_custom(func(a, b): return a.score > b.score)
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
