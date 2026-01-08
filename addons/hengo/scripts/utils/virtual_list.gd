@@ -237,7 +237,9 @@ func _update_visible_items() -> void:
 	# only fade in if we are not pending another immediate update
 	if modulate.a < 1.0 and not _pending_update:
 		var tween: Tween = create_tween()
-		tween.tween_property(self, 'modulate:a', 1.0, 0.2)
+		tween.tween_property(self, 'modulate:a', 1.0, 0.25)
+		tween.set_ease(Tween.EASE_OUT)
+		tween.set_trans(Tween.TRANS_CUBIC)
 
 	_is_updating = false
 	if _pending_update:

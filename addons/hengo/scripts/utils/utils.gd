@@ -327,6 +327,50 @@ static func get_icon_texture(_type: StringName) -> Texture2D:
 	return NONE_ICON
 
 
+static func get_type_parent_color(_type: StringName, _alpha: float = 1.0, _default: Color = Color('#0000004a')) -> Color:
+	# returns color based on specific type or class inheritance
+	match _type:
+		&'Getter':
+			return Color('#1ABC9C', _alpha)
+		&'Setter':
+			return Color('#FF7675', _alpha)
+		&'Function':
+			return Color('#3498DB', _alpha)
+		&'Variable':
+			return Color('#2ECC71', _alpha)
+		&'State':
+			return Color('#E74C3C', _alpha)
+		&'State Transition', &'Sub State Transition':
+			return Color('#E67E22', _alpha)
+		&'Signal':
+			return Color('#F1C40F', _alpha)
+		&'Macro':
+			return Color('#9B59B6', _alpha)
+		&'String':
+			return Color('#8eef97', _alpha)
+		&'float':
+			return Color('#FFDD65', _alpha)
+		&'int':
+			return Color('#5ABBEF', _alpha)
+		&'bool':
+			return Color('#FC7F7F', _alpha)
+		&'Variant':
+			return Color('#72788a', _alpha)
+
+	if ClassDB.is_parent_class(_type, 'Node2D'):
+		return Color('#6E90E7', _alpha)
+	elif ClassDB.is_parent_class(_type, 'Node3D'):
+		return Color('#E96266', _alpha)
+	elif ClassDB.is_parent_class(_type, 'Control'):
+		return Color('#67DE7A', _alpha)
+	elif ClassDB.is_parent_class(_type, 'AnimationMixer'):
+		return Color('#AC76E5', _alpha)
+	elif ClassDB.is_parent_class(_type, 'CanvasLayer'):
+		return Color('#E0BF48', _alpha)
+
+	return _default
+
+
 # extracts the id directly from the resource object
 static func get_res_parent_id(res: HenSaveResType) -> String:
 	var path: String = res.resource_path

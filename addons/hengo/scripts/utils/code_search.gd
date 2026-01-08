@@ -302,11 +302,17 @@ func _on_update_completed(api_list: Array) -> void:
 	set_data(0, api_list)
 
 
+func get_connection_type() -> StringName:
+	return config.get(&'type', &'')
+
+
 func get_native_props_as_data(_data: Dictionary, _native_props: Dictionary = {}) -> Array:
 	var io_type: StringName = config.get(&'io_type', &'')
 	var type: StringName = config.get(&'type', &'')
 	var api: HenApi = Engine.get_singleton(&'API')
 	return api.get_native_props_as_data(_data, io_type, type, _native_props)
+
+
 func get_class_name_categories(_class_name: StringName) -> Array[Dictionary]:
 	var arr: Array[Dictionary] = []
 	var class_categories: Dictionary = categories.get(_class_name, {})

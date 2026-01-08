@@ -248,7 +248,7 @@ func _worker_search_task(idx: int, thread_data: Dictionary) -> void:
 								if score > 0:
 									var item_copy: Dictionary = item.duplicate()
 									item_copy.score = score
-									item_copy._class_name = script_name + ' -> ' + item.get(&'_class_name', '')
+									item_copy._class_name = script_name + ' :: ' + item.get(&'_class_name', '')
 									local_results.append(item_copy)
 									
 	if not local_results.is_empty():
@@ -709,8 +709,8 @@ func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _typ
 	for prop: Dictionary in props:
 		if _data.has('is_getter'):
 			var prop_name: String = _data.get(&'prop_name', '')
-			var middle_name: String = prop_name + ' -> ' if prop_name else ''
-			var vc_name: String = 'Get -> ' + middle_name + prop.name
+			var middle_name: String = prop_name + '.' if prop_name else ''
+			var vc_name: String = '[Get] ' + middle_name + prop.name
 			
 			var prop_modified: Dictionary = prop.duplicate()
 			if prop_name:
@@ -731,8 +731,8 @@ func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _typ
 			arr.append(dt)
 		if _data.has('is_setter'):
 			var prop_name: String = _data.get(&'prop_name', '')
-			var middle_name: String = prop_name + ' -> ' if prop_name else ''
-			var vc_name: String = 'Set -> ' + middle_name + prop.name
+			var middle_name: String = prop_name + '.' if prop_name else ''
+			var vc_name: String = '[Set] ' + middle_name + prop.name
 
 			var prop_modified: Dictionary = prop.duplicate()
 			if prop_name:

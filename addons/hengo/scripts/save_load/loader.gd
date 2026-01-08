@@ -89,17 +89,7 @@ func show_class_name() -> void:
 	cl_label.visible = true
 	cl_label.text = type
 	cl_label.icon = HenUtils.get_icon_texture(type)
-
-	if ClassDB.is_parent_class(type, 'Node2D'):
-		sb.bg_color = Color('#6E90E7', .2)
-	elif ClassDB.is_parent_class(type, 'Node3D'):
-		sb.bg_color = Color('#E96266', .2)
-	elif ClassDB.is_parent_class(type, 'Control'):
-		sb.bg_color = Color('#67DE7A', .2)
-	elif ClassDB.is_parent_class(type, 'AnimationMixer'):
-		sb.bg_color = Color('#AC76E5', .2)
-	else:
-		sb.bg_color = Color('#0000004a')
+	sb.bg_color = HenUtils.get_type_parent_color(type, .2)
 
 
 func get_data_path(_id: int) -> StringName:

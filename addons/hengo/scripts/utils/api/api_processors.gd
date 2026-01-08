@@ -20,7 +20,7 @@ static func check_param_validity(_params: Array, _type: StringName, _is_input: b
 static func get_prop_get_data(_prop: Dictionary, _type: StringName) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	return {
-		name = 'Get -> ' + _prop.name,
+		name = '[Get] ' + _prop.name,
 		sub_type = HenVirtualCNode.SubType.GET_PROP,
 		category = 'native',
 		inputs = [
@@ -43,7 +43,7 @@ static func get_prop_get_data(_prop: Dictionary, _type: StringName) -> Dictionar
 static func get_prop_set_data(_prop: Dictionary, _type: StringName) -> Dictionary:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	return {
-		name = 'Set -> ' + _prop.name,
+		name = '[Set] ' + _prop.name,
 		sub_type = HenVirtualCNode.SubType.SET_PROP,
 		category = 'native',
 		inputs = [
@@ -118,7 +118,7 @@ static func _process_param_items(_arr: Array, _params: Array, _io_type: StringNa
 					
 					var dt_input: Dictionary = {
 						_class_name = target_class,
-						name = _config.base_name + ' (' + param.name + ')',
+						name = _config.base_name + ' :: ' + param.name,
 						data = _config.data,
 						input_io_idx = real_idx
 					}
@@ -132,7 +132,7 @@ static func _process_param_items(_arr: Array, _params: Array, _io_type: StringNa
 					
 					var dt_direct: Dictionary = {
 						_class_name = target_class,
-						name = _config.base_name + '().' + param.name,
+						name = _config.base_name + ' :: ' + param.name,
 						data = _config.data,
 						output_io_idx = current_idx
 					}
@@ -144,7 +144,7 @@ static func _process_param_items(_arr: Array, _params: Array, _io_type: StringNa
 				for prop: Dictionary in props:
 					var dt: Dictionary = {
 						_class_name = target_class,
-						name = _config.base_name + '().' + param.name + '.' + prop.name,
+						name = '[Get] ' + _config.base_name + ' :: ' + param.name + '.' + prop.name,
 						data = _config.data,
 						linked_prop = get_prop_get_data(prop, param.type),
 						linked_prop_source_idx = current_idx,
@@ -158,7 +158,7 @@ static func _process_param_items(_arr: Array, _params: Array, _io_type: StringNa
 				for prop: Dictionary in props:
 					var dt: Dictionary = {
 						_class_name = target_class,
-						name = 'set: ' + _config.base_name + '().' + param.name + '.' + prop.name,
+						name = '[Set] ' + _config.base_name + ' :: ' + param.name + '.' + prop.name,
 						data = _config.data,
 						linked_prop = get_prop_set_data(prop, param.type),
 						linked_prop_source_idx = current_idx,
@@ -208,7 +208,7 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 				_type,
 				_native_props,
 				{
-					_class_name = category.name,
+					_class_name = (category.name as String).trim_suffix('s'),
 					base_name = label_prefix + state_data.name,
 					data = cnode_data,
 					is_inputs = true,
@@ -224,7 +224,7 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 				if input_idx != -1: is_main_valid = true
 				
 			var dt_main: Dictionary = {
-				_class_name = category.name,
+				_class_name = (category.name as String).trim_suffix('s'),
 				name = label_prefix + state_data.name,
 				data = cnode_data
 			}
@@ -249,7 +249,7 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 					force_valid = true
 				})
 		
-	process_state_list.call(_ast.states, state_transitions, 'transition: ')
+	process_state_list.call(_ast.states, state_transitions, '[Transition] ')
 
 	var target_sub_states: Array = []
 	var current_state: HenSaveState = null
@@ -278,7 +278,7 @@ static func process_states(_ast: HenMapDependencies.ProjectAST, _save_data_id: S
 			target_sub_states = current_state.get_sub_states(global.SAVE_DATA)
 
 	if not target_sub_states.is_empty():
-		process_state_list.call(target_sub_states, sub_state_transitions, 'sub state transition: ')
+		process_state_list.call(target_sub_states, sub_state_transitions, '[Sub Transition] ')
 
 	if not (state_category.method_list as Array).is_empty():
 		_arr.append(state_category)
@@ -373,7 +373,7 @@ static func process_variables(_ast: HenMapDependencies.ProjectAST, _save_data_id
 
 			var dt_get: Dictionary = {
 				_class_name = 'Variable',
-				name = 'get: ' + var_data.name,
+				name = '[Get] ' + var_data.name,
 				data = var_data.get_getter_cnode_data(_save_data_id, _from_another_script),
 			}
 			if is_main_get_valid:
@@ -383,7 +383,7 @@ static func process_variables(_ast: HenMapDependencies.ProjectAST, _save_data_id
 			
 			var props: Array = get_valid_recursive_props(var_data.type, _type, 'in', _native_props)
 			for prop: Dictionary in props:
-				var getter_name: String = 'get: ' + var_data.name + '.' + prop.name
+				var getter_name: String = '[Get] ' + var_data.name + '.' + prop.name
 				var dt: Dictionary = {
 					_class_name = 'Variable',
 					name = getter_name,
@@ -401,7 +401,7 @@ static func process_variables(_ast: HenMapDependencies.ProjectAST, _save_data_id
 
 			var dt_set: Dictionary = {
 				_class_name = 'Variable',
-				name = 'set: ' + var_data.name,
+				name = '[Set] ' + var_data.name,
 				data = var_data.get_setter_cnode_data(_save_data_id, _from_another_script),
 			}
 			if is_main_set_valid:
@@ -411,7 +411,7 @@ static func process_variables(_ast: HenMapDependencies.ProjectAST, _save_data_id
 
 			var props: Array = get_valid_recursive_props(var_data.type, _type, 'out', _native_props)
 			for prop: Dictionary in props:
-				var setter_name: String = 'set: ' + var_data.name + '.' + prop.name
+				var setter_name: String = '[Set] ' + var_data.name + '.' + prop.name
 				var dt: Dictionary = {
 					_class_name = 'Variable',
 					name = setter_name,
@@ -443,8 +443,8 @@ static func process_signals(_ast: HenMapDependencies.ProjectAST, _io_type: Strin
 	}
 
 	for signal_data: HenSaveSignalCallback in _ast.signals_callback:
-		var connect_name: String = 'connect: ' + signal_data.name
-		var disconnect_name: String = 'disconnect: ' + signal_data.name
+		var connect_name: String = '[Connect] ' + signal_data.name
+		var disconnect_name: String = '[Disconnect] ' + signal_data.name
 		
 		
 		var connect_valid: bool = false
