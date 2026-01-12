@@ -49,6 +49,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_dbigx")
+theme_override_font_sizes/font_size = 30
 text = "Name"
 
 [node name="Type" type="Button" parent="Container/HBoxContainer/VBoxContainer"]
@@ -59,7 +60,7 @@ size_flags_vertical = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("2_dbigx")
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = ExtResource("3_vwr0l")
 text = "Type"
 icon = ExtResource("2_87wgy")

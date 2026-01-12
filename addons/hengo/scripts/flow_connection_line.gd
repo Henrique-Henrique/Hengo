@@ -32,6 +32,7 @@ var last_from_pos: Vector2
 var last_to_pos: Vector2
 
 
+# generates a smooth vertical cubic bezier for flow connections
 func update_line() -> void:
 	var from_ref: HenVirtualCNode = from.get_ref()
 	var to_ref: HenVirtualCNode = to.get_ref()
@@ -41,39 +42,24 @@ func update_line() -> void:
 
 	var start_pos: Vector2 = get_flow_io_position(from_ref, false, from_idx) + Vector2(0, 20)
 	var end_pos: Vector2 = get_flow_io_position(to_ref, true, to_idx) - Vector2(0, 20)
-	var first_point: Vector2 = start_pos + Vector2(0, POINT_WIDTH)
-	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)
+	
+	# calculate vertical curvature
+	var distance_y: float = abs(end_pos.y - start_pos.y)
+	var tangent_offset: float = clamp(distance_y / 2.0, 30.0, 150.0)
 
-	if (first_point.distance_to(last_point) / POINT_WIDTH) >= 1.5:
-		# creating last point here because after_first_point need him
-		# creating first bezier curve
-		var before_first_point: Vector2 = first_point - Vector2(0, POINT_WIDTH_BEZIER)
-		var after_first_point: Vector2 = (
-			first_point + first_point.direction_to(last_point) * POINT_WIDTH_BEZIER
-		)
+	# control points aligned vertically
+	var control_1: Vector2 = start_pos + Vector2(0, tangent_offset)
+	var control_2: Vector2 = end_pos - Vector2(0, tangent_offset)
 
-		var first_bezier: Curve2D = Curve2D.new()
+	var curve_points: PackedVector2Array = PackedVector2Array()
+	var steps: int = 24 # slightly more steps for vertical flow smoothness
+	
+	for i in range(steps + 1):
+		var t: float = i / float(steps)
+		var point: Vector2 = start_pos.bezier_interpolate(control_1, control_2, end_pos, t)
+		curve_points.append(point)
 
-		first_bezier.add_point(before_first_point, Vector2.ZERO, first_point - before_first_point)
-		first_bezier.add_point(after_first_point, first_point - after_first_point, Vector2.ZERO)
-
-		# creating second bezier curve
-		var before_last_point: Vector2 = last_point + Vector2(0, POINT_WIDTH_BEZIER)
-		var after_last_point: Vector2 = (
-			last_point - last_point.direction_to(after_first_point) * POINT_WIDTH_BEZIER * -1
-		)
-
-		var last_bezier: Curve2D = Curve2D.new()
-
-		last_bezier.add_point(after_last_point, Vector2.ZERO, last_point - after_last_point)
-		last_bezier.add_point(before_last_point, last_point - before_last_point, Vector2.ZERO)
-
-		points = [start_pos]
-		points += first_bezier.get_baked_points()
-		points += last_bezier.get_baked_points()
-		points += PackedVector2Array([end_pos])
-	else:
-		points = [start_pos, end_pos]
+	points = curve_points
 
 
 func show_debug() -> void:

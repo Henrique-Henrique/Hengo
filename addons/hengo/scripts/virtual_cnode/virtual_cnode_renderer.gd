@@ -146,6 +146,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 			connection.line_ref.output = input.get_node('%Connector')
 			input.remove_in_prop()
+
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
 
 			if not to.cnode_instance.is_connected('on_move', connection.line_ref.update_line):

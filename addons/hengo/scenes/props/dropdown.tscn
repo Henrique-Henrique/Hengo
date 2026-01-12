@@ -7,7 +7,7 @@
 [node name="DropDown" type="Button"]
 offset_right = 8.0
 offset_bottom = 8.0
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = ExtResource("1_jd8h6")
 text = "Variant"
 icon = ExtResource("1_kf6tg")

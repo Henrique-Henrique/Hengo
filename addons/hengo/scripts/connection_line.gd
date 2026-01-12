@@ -1,9 +1,15 @@
 @tool
 class_name HenConnectionLine extends Line2D
 
+
+@onready var from_icon: TextureRect = $FromIcon
+@onready var remote_container: PanelContainer = $Remote
+
+
 # debug imports
 const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.gdshader')
 const normal_texture = preload('res://addons/hengo/assets/images/line.png')
+const dashed_texture = preload('res://addons/hengo/assets/images/line_dashed_big.png')
 const debug_texture = preload('res://addons/hengo/assets/images/line_debug.svg')
 
 var input
@@ -13,7 +19,7 @@ var conn_size: Vector2
 var deleted: bool = false
 
 const POINT_WIDTH: int = 50
-const POINT_WIDTH_BEZIER: int = POINT_WIDTH / 2
+const POINT_WIDTH_BEZIER: int = int(POINT_WIDTH / 2.)
 
 # debug
 const DEBUG_TIMER_TIME = .15
@@ -36,6 +42,7 @@ var last_from_pos: Vector2
 var last_to_pos: Vector2
 
 
+# generates a smooth cubic bezier curve between two points
 func update_line() -> void:
 	var from_ref: HenVirtualCNode = from.get_ref()
 	var to_ref: HenVirtualCNode = to.get_ref()
@@ -44,37 +51,50 @@ func update_line() -> void:
 		return
 	
 	var start_size_y: float = TITLE_SIZE_Y + CNODE_IO_SIZE / 2.
- 
 	var start_pos: Vector2 = from_ref.position + Vector2(from_ref.size.x, start_size_y + (CNODE_IO_SIZE * from_idx))
 	var end_pos: Vector2 = to_ref.position + Vector2(0, start_size_y + (CNODE_IO_SIZE * to_idx))
 
-	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
-	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)
+	# dynamic curvature based on distance
+	var distance: float = abs(end_pos.x - start_pos.x)
+	var tangent_offset: float = clamp(distance / 2.0, 20.0, 100.0)
 
-	if (first_point.distance_to(last_point) / POINT_WIDTH) >= .7:
-		var before_first_point: Vector2 = first_point - Vector2(POINT_WIDTH_BEZIER, 0)
-		var after_first_point: Vector2 = first_point + first_point.direction_to(last_point) * POINT_WIDTH_BEZIER
+	var control_1: Vector2 = start_pos + Vector2(tangent_offset, 0)
+	var control_2: Vector2 = end_pos - Vector2(tangent_offset, 0)
 
-		var first_bezier: Curve2D = Curve2D.new()
+	var curve_points: PackedVector2Array = PackedVector2Array()
+	var steps: int = 20 # adjust for smoothness
+	
+	for i in range(steps + 1):
+		var t: float = i / float(steps)
+		var point: Vector2 = start_pos.bezier_interpolate(control_1, control_2, end_pos, t)
+		curve_points.append(point)
 
-		first_bezier.add_point(before_first_point, Vector2.ZERO, first_point - before_first_point)
-		first_bezier.add_point(after_first_point, first_point - after_first_point, Vector2.ZERO)
+	points = curve_points
+	
+	_update_visual_style(start_pos, end_pos)
 
-		# creating second bezier curve
-		var before_last_point: Vector2 = last_point + Vector2(POINT_WIDTH_BEZIER, 0)
-		var after_last_point: Vector2 = last_point - last_point.direction_to(after_first_point) * POINT_WIDTH_BEZIER * -1
+# handles the line visual state
+func _update_visual_style(start_pos: Vector2, end_pos: Vector2) -> void:
+	if start_pos.y + 200 < end_pos.y:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		from_icon.visible = true
+		from_icon.position = start_pos + Vector2(18, 0)
+		remote_container.visible = true
+		remote_container.position = end_pos - Vector2(remote_container.size.x + 18, 0)
+		if from.get_ref():
+			var from_vc: HenVirtualCNode = from.get_ref()
+			var icon: TextureRect = remote_container.get_node('%VCIcon') as TextureRect
 
-		var last_bezier: Curve2D = Curve2D.new()
+			icon.texture = HenUtils.get_icon_for_subtype(from_vc.sub_type)
+			icon.modulate = HenUtils.get_color_for_subtype(from_vc.sub_type)
 
-		last_bezier.add_point(after_last_point, Vector2.ZERO, last_point - after_last_point)
-		last_bezier.add_point(before_last_point, last_point - before_last_point, Vector2.ZERO)
-
-		points = [start_pos]
-		points += first_bezier.get_baked_points()
-		points += last_bezier.get_baked_points()
-		points += PackedVector2Array([end_pos])
+			(remote_container.get_node('%VCName') as Label).text = from_vc.get_vc_name(global.SAVE_DATA)
+			remote_container.reset_size()
+		self_modulate = Color.TRANSPARENT
 	else:
-		points = [start_pos, end_pos]
+		from_icon.visible = false
+		remote_container.visible = false
+		self_modulate = Color.WHITE
 
 
 func set_color(_color: Color) -> void:

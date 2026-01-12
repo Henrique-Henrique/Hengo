@@ -19,7 +19,7 @@
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Script" uid="uid://itdfd6vqm34v" path="res://addons/hengo/scripts/global.gd" id="11_3680e"]
 [ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="12_wtrk7"]
 [ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
 [ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
 [ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="17_lxtpw"]
@@ -28,9 +28,9 @@
 [ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="19_33cyo"]
 [ext_resource type="Material" uid="uid://ck0pfs2wsnaeo" path="res://addons/hengo/assets/shaders/panels.tres" id="19_174hx"]
 [ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
-[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/regular.ttf" id="20_y63ss"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
-[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
 [ext_resource type="StyleBox" uid="uid://dqrpq6o5w3yhs" path="res://addons/hengo/resources/style_box/panel_blur.tres" id="24_h1p8r"]
 [ext_resource type="StyleBox" uid="uid://bwa35533sur43" path="res://addons/hengo/resources/style_box/blur_transparent.tres" id="25_174hx"]
@@ -70,9 +70,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(2453, 1514)
-shader_parameter/offset = Vector2(1057.3999, 554.6356)
-shader_parameter/zoom_factor = 1.4999359
+shader_parameter/screen_size = Vector2(3592, 2070)
+shader_parameter/offset = Vector2(1606.3864, 598.1915)
+shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -122,7 +122,7 @@ corner_radius_bottom_left = 12
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_right = 8.0
-bg_color = Color(0, 0, 0, 0.2901961)
+bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -350,6 +350,16 @@ position = Vector2(289, 313)
 
 [node name="Lines" type="Node2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 
+[node name="ConnectionGuide" type="Line2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
+unique_name_in_owner = true
+visible = false
+z_index = 2
+width = 6.0
+gradient = SubResource("Gradient_rg8iy")
+texture = ExtResource("7_6jref")
+texture_mode = 1
+script = ExtResource("7_gj1gq")
+
 [node name="CommentContainer" type="Control" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 unique_name_in_owner = true
 layout_mode = 3
@@ -367,16 +377,6 @@ offset_right = 1.0
 offset_bottom = 1.0
 theme = ExtResource("1_2muha")
 metadata/_edit_use_anchors_ = true
-
-[node name="ConnectionGuide" type="Line2D" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
-unique_name_in_owner = true
-visible = false
-z_index = 2
-width = 6.0
-gradient = SubResource("Gradient_rg8iy")
-texture = ExtResource("7_6jref")
-texture_mode = 1
-script = ExtResource("7_gj1gq")
 
 [node name="SelectionRect" type="ReferenceRect" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam"]
 process_mode = 4
@@ -644,12 +644,11 @@ icon = ExtResource("39_174hx")
 
 [node name="RightSideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer" instance=ExtResource("37_hog2e")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(375, 0)
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true

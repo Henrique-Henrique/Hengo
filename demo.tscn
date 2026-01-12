@@ -1,8 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://cecxlhrb3et2l"]
+[gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
+[ext_resource type="Script" uid="uid://jfetfaeg1ka2" path="res://hengo/scripts/1149561466813345520.gd" id="1_0bhed"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 
-[node name="Node" type="Node2D"]
+[node name="Node" type="Node2D" node_paths=PackedStringArray("spr", "minha_label")]
+script = ExtResource("1_0bhed")
+spr = NodePath("Icon")
+minha_label = NodePath("Label")
 
 [node name="Icon" type="Sprite2D" parent="."]
 position = Vector2(313, 179)

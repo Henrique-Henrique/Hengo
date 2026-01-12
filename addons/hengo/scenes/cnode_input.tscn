@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://uonpw41c3fb5" path="res://addons/hengo/scripts/cnode_in_out.gd" id="1_mmpja"]
 [ext_resource type="Texture2D" uid="uid://bkpxhruw65avd" path="res://addons/hengo/assets/icons/circle.svg" id="2_k1cv3"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="3_ldyji"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_ldyji"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w25o5"]
 resource_local_to_scene = true
@@ -59,4 +59,4 @@ process_mode = 4
 modulate = Color(1, 1, 1, 0.54902)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_ldyji")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18

@@ -3,7 +3,7 @@
 [ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="1_b2gmx"]
 [ext_resource type="Script" uid="uid://c1reshk0q8buo" path="res://addons/hengo/scripts/cnode.gd" id="1_onkoy"]
 [ext_resource type="PackedScene" uid="uid://1s3a6exjgyym" path="res://addons/hengo/scenes/from_flow.tscn" id="3_348vq"]
-[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="5_aoylj"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="5_aoylj"]
 [ext_resource type="Texture2D" uid="uid://y2r1pbqqjjvr" path="res://addons/hengo/assets/icons/menu/cuboid.svg" id="5_b2gmx"]
 [ext_resource type="Texture2D" uid="uid://cylhib6cbd4jj" path="res://addons/hengo/assets/images/cnode_title.png" id="5_fqo7n"]
 [ext_resource type="PackedScene" uid="uid://cfwcyd5bthd1j" path="res://addons/hengo/scenes/flow_slot.tscn" id="5_t32p4"]
@@ -139,7 +139,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("5_aoylj")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 20
 text = "Title"
 horizontal_alignment = 1
 
