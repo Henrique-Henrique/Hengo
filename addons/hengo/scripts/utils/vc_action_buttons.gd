@@ -1,40 +1,236 @@
 @tool
 class_name HenVCActionButtons extends Control
 
-enum Type {
-	INPUT,
-	OUTPUT,
-	FROM_FLOW,
-	FLOW
-}
+const BUTTON_SCENE = preload('res://addons/hengo/scenes/utils/connection_action_button.tscn')
+const POOL_SIZE: int = 30
+const ENTER_MARGIN: float = 50.0
+const EXIT_MARGIN: float = 40.0
 
-enum ActionType {
-	CONNECT,
-	DISCONNECT,
-}
-
-class ActionInfo:
-	var type: Type
-	var action_type: ActionType
-
-	func _init(_type: Type, _action_type: ActionType) -> void:
-		type = _type
-		action_type = _action_type
+var button_pool: Array[HenConnectionActionButton] = []
+var active_buttons: Array[HenConnectionActionButton] = []
+var current_vc: HenVirtualCNode
+var current_cnode: HenCnode
+var is_showing: bool = false
 
 
-func show_action(_vc: HenCnode) -> void:
+func _ready() -> void:
+	_instantiate_pool()
+	set_process(true)
+
+
+# creates pool of action buttons
+func _instantiate_pool() -> void:
+	for i in POOL_SIZE:
+		var btn: HenConnectionActionButton = BUTTON_SCENE.instantiate()
+		btn.visible = false
+		button_pool.append(btn)
+		add_child(btn)
+
+
+# gets a button from the pool
+func _get_button_from_pool() -> HenConnectionActionButton:
+	for btn in button_pool:
+		if not btn.visible:
+			return btn
+	return null
+
+
+# checks mouse position against bounding boxes
+func _process(_delta: float) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.CAM or not global.HENGO_ROOT or not global.HENGO_ROOT.visible:
+		return
+	
+	var mouse_pos: Vector2 = global.CAM.get_relative_vec2(get_global_mouse_position())
+	
+	# if showing, check if mouse left the extended bounding box
+	if is_showing and current_cnode:
+		var extended_rect = Rect2(
+			current_cnode.position - Vector2(EXIT_MARGIN, EXIT_MARGIN),
+			current_cnode.size + Vector2(EXIT_MARGIN * 2, EXIT_MARGIN * 2)
+		)
+		if not extended_rect.has_point(mouse_pos):
+			hide_action()
+			return
+	
+	# if not showing, check if mouse entered any cnode bounding box (with margin)
+	if not is_showing:
+		var router: HenRouter = Engine.get_singleton(&'Router')
+		if not router or not router.current_route:
+			return
+		
+		for vc: HenVirtualCNode in router.current_route.virtual_cnode_list:
+			if not vc.cnode_instance:
+				continue
+			
+			var cnode: HenCnode = vc.cnode_instance
+			var rect = Rect2(
+				cnode.position - Vector2(ENTER_MARGIN, ENTER_MARGIN),
+				cnode.size + Vector2(ENTER_MARGIN * 2, ENTER_MARGIN * 2)
+			)
+			
+			if rect.has_point(mouse_pos):
+				show_action(cnode)
+				return
+
+
+# shows action buttons for all ports of the cnode
+func show_action(_cnode: HenCnode) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	# find the virtual cnode by id
+	var vc: HenVirtualCNode = _find_vc_by_cnode_id(_cnode.id)
+	if not vc:
+		return
+
+	# hide previous buttons if showing for different node
+	if current_vc and current_vc != vc:
+		hide_action()
+
+	current_vc = vc
+	current_cnode = _cnode
 	visible = true
+	is_showing = true
+
+	# get container references with their positions
+	var center_container: HBoxContainer = _cnode.get_node('%CenterContainer')
+	var input_container: VBoxContainer = _cnode.get_node('%InputContainer')
+	var output_container: VBoxContainer = _cnode.get_node('%OutputContainer')
+	var from_flow_container: HBoxContainer = _cnode.get_node('%FromFlowContainer')
+	var flow_container: HBoxContainer = _cnode.get_node('%FlowContainer')
+
+	# show buttons for inputs
+	var inputs: Array[HenVCInOutData] = vc.get_inputs(global.SAVE_DATA)
+	
+	for i in inputs.size():
+		var input: HenVCInOutData = inputs[i]
+		if input.is_static:
+			continue
+		
+		if i >= input_container.get_child_count():
+			break
+		
+		var input_node: HenCnodeInOut = input_container.get_child(i)
+		if not input_node or not input_node.visible:
+			continue
+		
+		var btn = _get_button_from_pool()
+		if not btn:
+			break
+
+		var has_connection: bool = vc.input_has_connection(input.id, global.SAVE_DATA)
+		btn.configure(vc, HenConnectionActionButton.PortType.INPUT, input.id, has_connection, input.type)
+		
+		var connector: TextureRect = input_node.get_node('%Connector')
+		# full offset: center_container.y + input_container.y (relative to center) + input_node.y + connector.y
+		var y_offset: float = center_container.position.y + input_node.position.y + connector.position.y + connector.size.y / 2 - btn.size.y / 2
+		btn.position = _cnode.position + Vector2(-btn.size.x - 4, y_offset)
+		btn.visible = true
+		active_buttons.append(btn)
+
+	# show buttons for outputs
+	var outputs: Array[HenVCInOutData] = vc.get_outputs(global.SAVE_DATA)
+	
+	for i in outputs.size():
+		var output: HenVCInOutData = outputs[i]
+		
+		if i >= output_container.get_child_count():
+			break
+		
+		var output_node: HenCnodeInOut = output_container.get_child(i)
+		if not output_node or not output_node.visible:
+			continue
+		
+		var btn = _get_button_from_pool()
+		if not btn:
+			break
+
+		# outputs can have multiple connections, always show connect option
+		btn.configure(vc, HenConnectionActionButton.PortType.OUTPUT, output.id, false, output.type)
+		
+		var connector: TextureRect = output_node.get_node('%Connector')
+		var y_offset: float = center_container.position.y + output_node.position.y + connector.position.y + connector.size.y / 2 - btn.size.y / 2
+		btn.position = _cnode.position + Vector2(_cnode.size.x + 4, y_offset)
+		btn.visible = true
+		active_buttons.append(btn)
+
+	# show buttons for flow inputs
+	var flow_inputs: Array[HenVCFlow] = vc.get_flow_inputs(global.SAVE_DATA)
+	
+	for i in flow_inputs.size():
+		var flow_input: HenVCFlow = flow_inputs[i]
+		
+		if i >= from_flow_container.get_child_count():
+			break
+		
+		var flow_node = from_flow_container.get_child(i)
+		if not flow_node or not flow_node.visible:
+			continue
+		
+		var btn = _get_button_from_pool()
+		if not btn:
+			break
+
+		var has_connection: bool = vc.flow_input_has_connection(flow_input.id, _cnode.id)
+		btn.configure(vc, HenConnectionActionButton.PortType.FLOW_INPUT, flow_input.id, has_connection)
+		
+		# flow inputs at top - center horizontally on flow_node
+		var x_offset: float = from_flow_container.position.x + flow_node.position.x + flow_node.size.x / 2 - btn.size.x / 2
+		btn.position = _cnode.position + Vector2(x_offset, -btn.size.y - 4)
+		btn.visible = true
+		active_buttons.append(btn)
+
+	# show buttons for flow outputs
+	var flow_outputs: Array[HenVCFlow] = vc.get_flow_outputs(global.SAVE_DATA)
+	
+	for i in flow_outputs.size():
+		var flow_output: HenVCFlow = flow_outputs[i]
+		
+		if i >= flow_container.get_child_count():
+			break
+		
+		var flow_node = flow_container.get_child(i)
+		if not flow_node or not flow_node.visible:
+			continue
+		
+		var btn = _get_button_from_pool()
+		if not btn:
+			break
+
+		var has_connection: bool = vc.flow_output_has_connection(flow_output.id, _cnode.id)
+		btn.configure(vc, HenConnectionActionButton.PortType.FLOW_OUTPUT, flow_output.id, has_connection)
+		
+		# flow outputs at bottom - center horizontally on flow_node
+		var parent_panel = flow_container.get_parent()
+		var x_offset: float = parent_panel.position.x + flow_container.position.x + flow_node.position.x + flow_node.size.x / 2 - btn.size.x / 2
+		btn.position = _cnode.position + Vector2(x_offset, _cnode.size.y + 40)
+		btn.visible = true
+		active_buttons.append(btn)
 
 
 func hide_action() -> void:
+	for btn in active_buttons:
+		btn.visible = false
+	
+	active_buttons.clear()
+	current_vc = null
+	current_cnode = null
 	visible = false
+	is_showing = false
 
 
-func set_bt_config(_action: ActionInfo, _bt: HenActionButton, _pos: Vector2) -> void:
-	_bt.visible = true
-	_bt.action = _action
-	_bt.global_position = _pos
-	_bt.set_icon()
+# finds virtual cnode by cnode id
+func _find_vc_by_cnode_id(_id: int) -> HenVirtualCNode:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	if not router.current_route:
+		return null
+
+	for vc: HenVirtualCNode in router.current_route.virtual_cnode_list:
+		if vc.id == _id:
+			return vc
+
+	return null
 
 
 static func get_singleton() -> HenVCActionButtons:

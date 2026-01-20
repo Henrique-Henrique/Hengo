@@ -40,6 +40,7 @@ signal changed_position(_pos: Vector2)
 signal request_flow_connection
 signal on_select
 signal on_unselect
+signal on_mouse_exit
 
 
 func _ready():
@@ -78,6 +79,7 @@ func _on_exit() -> void:
 	global.flow_connection_to_data.clear()
 	if not selected: exit_animation()
 	global.TOOLTIP.close()
+	on_mouse_exit.emit()
 
 
 func hover_animation() -> void:
@@ -239,6 +241,7 @@ func reset_signals(_vc: HenVirtualCNode = null):
 		'on_right_click',
 		'changed_position',
 		'on_mouse_enter',
+		'on_mouse_exit',
 		'request_flow_connection',
 		'on_select',
 		'on_unselect'
