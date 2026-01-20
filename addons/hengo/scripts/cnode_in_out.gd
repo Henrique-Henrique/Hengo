@@ -152,6 +152,26 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						var prop_vec2 = preload('res://addons/hengo/scenes/props/vec2.tscn').instantiate()
 						prop_container.add_child(prop_vec2)
 						prop = prop_vec2
+					'Vector2i':
+						var prop_vec2i = preload('res://addons/hengo/scenes/props/vec2i.tscn').instantiate()
+						prop_container.add_child(prop_vec2i)
+						prop = prop_vec2i
+					'Vector3':
+						var prop_vec3 = preload('res://addons/hengo/scenes/props/vec3.tscn').instantiate()
+						prop_container.add_child(prop_vec3)
+						prop = prop_vec3
+					'Vector3i':
+						var prop_vec3i = preload('res://addons/hengo/scenes/props/vec3i.tscn').instantiate()
+						prop_container.add_child(prop_vec3i)
+						prop = prop_vec3i
+					'Vector4':
+						var prop_vec4 = preload('res://addons/hengo/scenes/props/vec4.tscn').instantiate()
+						prop_container.add_child(prop_vec4)
+						prop = prop_vec4
+					'Color':
+						var prop_color = preload('res://addons/hengo/scenes/props/color.tscn').instantiate()
+						prop_container.add_child(prop_color)
+						prop = prop_color
 					'bool':
 						var prop_bool = preload('res://addons/hengo/scenes/props/boolean.tscn').instantiate()
 						prop_container.add_child(prop_bool)

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://v3o10jyfk4hy"]
+
+[ext_resource type="Script" uid="uid://cmy8c7as2hrv" path="res://addons/hengo/scripts/props/prop_color.gd" id="1_color"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_e6cef"]
+
+[node name="Color" type="ColorPickerButton"]
+custom_minimum_size = Vector2(50, 24)
+offset_right = 91.0
+offset_bottom = 51.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_e6cef")
+color = Color(0.84739923, 0.2866004, 0.6666381, 1)
+script = ExtResource("1_color")
