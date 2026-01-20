@@ -30,11 +30,24 @@ func configure(_vc: HenVirtualCNode, _port_type: PortType, _port_id: int, _is_co
 	if _is_connected:
 		action_type = ActionType.DISCONNECT
 		icon_node.texture = ICON_UNPLUG
-		icon_node.modulate = Color(1.0, 0.4, 0.4)
+		modulate = Color.WHITE
+		self_modulate = Color(0.75, 0.35, 0.35)
+		icon_node.modulate = Color(1.0, 0.9, 0.9)
 	else:
 		action_type = ActionType.CONNECT
 		icon_node.texture = ICON_PLUG
-		icon_node.modulate = Color(0.4, 1.0, 0.6)
+		modulate = Color.WHITE
+		self_modulate = Color(0.35, 0.75, 0.45)
+		icon_node.modulate = Color(0.9, 1.0, 0.9)
+
+
+func animate_show() -> void:
+	scale = Vector2(0.8, 0.8)
+	modulate.a = 0.0
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(self, 'scale', Vector2.ONE, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, 'modulate:a', 1.0, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 func _on_gui(_event: InputEvent) -> void:

@@ -5,7 +5,7 @@ func _ready() -> void:
 	var line_edit: LineEdit = get_line_edit()
 
 	line_edit.expand_to_text_length = true
-	step = 0.00000001
+	step = 0.000001
 	line_edit.add_theme_font_size_override('font_size', 18)
 	line_edit.expand_to_text_length = true
 

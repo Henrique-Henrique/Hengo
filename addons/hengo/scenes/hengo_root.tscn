@@ -1,4 +1,4 @@
-[gd_scene load_steps=73 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=74 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
@@ -36,6 +36,7 @@
 [ext_resource type="StyleBox" uid="uid://bwa35533sur43" path="res://addons/hengo/resources/style_box/blur_transparent.tres" id="25_174hx"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
 [ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
+[ext_resource type="Texture2D" uid="uid://c6f7xyoyth505" path="res://addons/hengo/assets/new_icons/user-round-cog.svg" id="32_h1p8r"]
 [ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
 [ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
 [ext_resource type="PackedScene" uid="uid://c2qul21icd6bk" path="res://addons/hengo/scenes/right_side_bar.tscn" id="37_hog2e"]
@@ -71,7 +72,7 @@ corner_radius_bottom_left = 12
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(3592, 2070)
-shader_parameter/offset = Vector2(1606.3864, 598.1915)
+shader_parameter/offset = Vector2(0, -6.4)
 shader_parameter/zoom_factor = 1.0
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
@@ -562,6 +563,11 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
+
+[node name="Config" type="Button" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("32_h1p8r")
 
 [node name="Label" type="Label" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2"]
 layout_mode = 2

@@ -70,6 +70,10 @@ hooks/session_hooks=Dictionary[String, bool]({
 "res://addons/gdUnit4/src/core/hooks/GdUnitXMLReporterTestSessionHook.gd": true
 })
 
+[hengo]
+
+settings/auto_zoom=true
+
 [input]
 
 seila={

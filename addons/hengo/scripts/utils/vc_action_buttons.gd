@@ -3,8 +3,8 @@ class_name HenVCActionButtons extends Control
 
 const BUTTON_SCENE = preload('res://addons/hengo/scenes/utils/connection_action_button.tscn')
 const POOL_SIZE: int = 30
-const ENTER_MARGIN: float = 50.0
-const EXIT_MARGIN: float = 40.0
+const ENTER_MARGIN: float = 65.
+const EXIT_MARGIN: float = 65.
 
 var button_pool: Array[HenConnectionActionButton] = []
 var active_buttons: Array[HenConnectionActionButton] = []
@@ -14,6 +14,9 @@ var is_showing: bool = false
 
 
 func _ready() -> void:
+	if HenUtils.disable_scene_with_owner(self):
+		return
+
 	_instantiate_pool()
 	set_process(true)
 
@@ -121,11 +124,11 @@ func show_action(_cnode: HenCnode) -> void:
 		var has_connection: bool = vc.input_has_connection(input.id, global.SAVE_DATA)
 		btn.configure(vc, HenConnectionActionButton.PortType.INPUT, input.id, has_connection, input.type)
 		
-		var connector: TextureRect = input_node.get_node('%Connector')
-		# full offset: center_container.y + input_container.y (relative to center) + input_node.y + connector.y
-		var y_offset: float = center_container.position.y + input_node.position.y + connector.position.y + connector.size.y / 2 - btn.size.y / 2
+
+		var y_offset: float = center_container.position.y + input_container.position.y + input_node.position.y + input_node.size.y / 2 - btn.size.y / 2
 		btn.position = _cnode.position + Vector2(-btn.size.x - 4, y_offset)
 		btn.visible = true
+		btn.animate_show()
 		active_buttons.append(btn)
 
 	# show buttons for outputs
@@ -145,13 +148,12 @@ func show_action(_cnode: HenCnode) -> void:
 		if not btn:
 			break
 
-		# outputs can have multiple connections, always show connect option
 		btn.configure(vc, HenConnectionActionButton.PortType.OUTPUT, output.id, false, output.type)
 		
-		var connector: TextureRect = output_node.get_node('%Connector')
-		var y_offset: float = center_container.position.y + output_node.position.y + connector.position.y + connector.size.y / 2 - btn.size.y / 2
+		var y_offset: float = center_container.position.y + output_container.position.y + output_node.position.y + output_node.size.y / 2 - btn.size.y / 2
 		btn.position = _cnode.position + Vector2(_cnode.size.x + 4, y_offset)
 		btn.visible = true
+		btn.animate_show()
 		active_buttons.append(btn)
 
 	# show buttons for flow inputs
@@ -174,10 +176,11 @@ func show_action(_cnode: HenCnode) -> void:
 		var has_connection: bool = vc.flow_input_has_connection(flow_input.id, _cnode.id)
 		btn.configure(vc, HenConnectionActionButton.PortType.FLOW_INPUT, flow_input.id, has_connection)
 		
-		# flow inputs at top - center horizontally on flow_node
-		var x_offset: float = from_flow_container.position.x + flow_node.position.x + flow_node.size.x / 2 - btn.size.x / 2
+		var parent_panel = from_flow_container.get_parent()
+		var x_offset: float = parent_panel.position.x + from_flow_container.position.x + flow_node.position.x + flow_node.size.x / 2 - btn.size.x / 2
 		btn.position = _cnode.position + Vector2(x_offset, -btn.size.y - 4)
 		btn.visible = true
+		btn.animate_show()
 		active_buttons.append(btn)
 
 	# show buttons for flow outputs
@@ -200,11 +203,11 @@ func show_action(_cnode: HenCnode) -> void:
 		var has_connection: bool = vc.flow_output_has_connection(flow_output.id, _cnode.id)
 		btn.configure(vc, HenConnectionActionButton.PortType.FLOW_OUTPUT, flow_output.id, has_connection)
 		
-		# flow outputs at bottom - center horizontally on flow_node
 		var parent_panel = flow_container.get_parent()
 		var x_offset: float = parent_panel.position.x + flow_container.position.x + flow_node.position.x + flow_node.size.x / 2 - btn.size.x / 2
 		btn.position = _cnode.position + Vector2(x_offset, _cnode.size.y + 40)
 		btn.visible = true
+		btn.animate_show()
 		active_buttons.append(btn)
 
 

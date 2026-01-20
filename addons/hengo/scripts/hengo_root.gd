@@ -62,6 +62,12 @@ func _ready() -> void:
 	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
 	(get_node('%OpenDashboard') as Button).pressed.connect(_on_open_dashboard)
 	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
+	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
+
+
+func _on_config_pressed() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	HenInspector.edit_resource(global.SETTINGS)
 
 
 func _on_open_terminal() -> void:

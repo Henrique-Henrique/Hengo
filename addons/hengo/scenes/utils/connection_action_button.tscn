@@ -7,22 +7,24 @@ content_margin_left = 8.0
 content_margin_top = 8.0
 content_margin_right = 8.0
 content_margin_bottom = 8.0
-bg_color = Color(0.07683582, 0.07683582, 0.07683582, 1)
+bg_color = Color(0.7666196, 0.76661956, 0.76661944, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.52906644, 0.5290668, 0.52906656, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 shadow_size = 5
 shadow_offset = Vector2(0, 2)
 
 [node name="ConnectionActionButton" type="PanelContainer"]
 z_index = 101
-custom_minimum_size = Vector2(24, 24)
+custom_minimum_size = Vector2(20, 20)
+offset_right = 36.0
+offset_bottom = 36.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 script = ExtResource("1_action")
 

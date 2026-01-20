@@ -29,6 +29,7 @@ var RIGHT_SIDE_BAR: HenRightSideBar
 var CODE_SEARCH: HenCodeSearch
 
 # CONFIG
+var SETTINGS: HenSettings = HenSettings.new()
 var IS_HEADLESS: bool = false
 
 # cnodes
