@@ -9,6 +9,7 @@ func _init(_connection: HenVCFlowConnectionData) -> void:
 	connection = _connection
 
 
+# adds flow connection and removes conflicting ones
 func add() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var from_connections: Array = global.SAVE_DATA.get_flow_connection_from_vc(connection.get_from(global.SAVE_DATA))
@@ -34,6 +35,8 @@ func add() -> void:
 	
 	connection.get_to(global.SAVE_DATA).update()
 	connection.get_from(global.SAVE_DATA).update()
+	
+	global.AUTO_CAMERA.on_connection_changed(connection.get_to(global.SAVE_DATA))
 
 
 func remove() -> void:

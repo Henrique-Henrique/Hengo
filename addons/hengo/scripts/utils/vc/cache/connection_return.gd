@@ -6,13 +6,13 @@ var connection: HenVCConnectionData
 var old_connections: Array
 
 
-func _init(_connection: HenVCConnectionData, _to_id = -1) -> void:
+func _init(_connection: HenVCConnectionData, _to_id: int = -1) -> void:
 	connection = _connection
 	to_id = _to_id
 
 
+# adds connection and removes conflicting ones
 func add() -> void:
-	# removing old inputs
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var remove_connection: Array = []
 	
@@ -33,6 +33,8 @@ func add() -> void:
 	
 	connection.get_to(global.SAVE_DATA).update()
 	connection.get_from(global.SAVE_DATA).update()
+	
+	global.AUTO_CAMERA.on_connection_changed(connection.get_to(global.SAVE_DATA))
 
 
 func remove() -> void:

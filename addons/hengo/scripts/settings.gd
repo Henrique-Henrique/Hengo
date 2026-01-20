@@ -5,6 +5,10 @@ const DEVELOPMENT_MODE_PATH = 'hengo/settings/development_mode'
 const AUTO_LAYOUT_PATH = 'hengo/settings/auto_layout'
 const AUTO_MOVE_PATH = 'hengo/settings/auto_move'
 const AUTO_ZOOM_PATH = 'hengo/settings/auto_zoom'
+const AUTO_MOVE_ON_ADD_PATH = 'hengo/settings/auto_move_on_add'
+const AUTO_MOVE_ON_REMOVE_PATH = 'hengo/settings/auto_move_on_remove'
+const AUTO_MOVE_ON_CONNECTION_PATH = 'hengo/settings/auto_move_on_connection'
+const AUTO_ZOOM_LEVEL_PATH = 'hengo/settings/auto_zoom_level'
 
 
 @export var development_mode: bool:
@@ -31,6 +35,30 @@ const AUTO_ZOOM_PATH = 'hengo/settings/auto_zoom'
 	get:
 		return _get_value(AUTO_ZOOM_PATH, true)
 
+@export var auto_move_on_add: bool:
+	set(value):
+		_set_value(AUTO_MOVE_ON_ADD_PATH, value)
+	get:
+		return _get_value(AUTO_MOVE_ON_ADD_PATH, true)
+
+@export var auto_move_on_remove: bool:
+	set(value):
+		_set_value(AUTO_MOVE_ON_REMOVE_PATH, value)
+	get:
+		return _get_value(AUTO_MOVE_ON_REMOVE_PATH, true)
+
+@export var auto_move_on_connection: bool:
+	set(value):
+		_set_value(AUTO_MOVE_ON_CONNECTION_PATH, value)
+	get:
+		return _get_value(AUTO_MOVE_ON_CONNECTION_PATH, true)
+
+@export_range(0.5, 1.5, 0.1) var auto_zoom_level: float:
+	set(value):
+		_set_value(AUTO_ZOOM_LEVEL_PATH, value)
+	get:
+		return _get_value(AUTO_ZOOM_LEVEL_PATH, 1.0)
+
 
 # sets a value in project settings and saves it
 func _set_value(path: String, value: Variant) -> void:
@@ -51,7 +79,11 @@ func _property_can_revert(property: StringName) -> bool:
 		&'development_mode',
 		&'auto_layout',
 		&'auto_move',
-		&'auto_zoom'
+		&'auto_zoom',
+		&'auto_move_on_add',
+		&'auto_move_on_remove',
+		&'auto_move_on_connection',
+		&'auto_zoom_level'
 	]
 
 
@@ -65,6 +97,14 @@ func _property_get_revert(property: StringName) -> Variant:
 			return true
 		&'auto_zoom':
 			return true
+		&'auto_move_on_add':
+			return true
+		&'auto_move_on_remove':
+			return true
+		&'auto_move_on_connection':
+			return true
+		&'auto_zoom_level':
+			return 1.0
 	return null
 
 

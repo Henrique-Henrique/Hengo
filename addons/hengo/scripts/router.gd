@@ -26,6 +26,8 @@ func change_route(_route: HenRouteData) -> void:
 		_centralize_cam()
 		return
 
+	var old_route: HenRouteData = current_route
+
 	if current_route:
 		for v_cnode: HenVirtualCNode in get_current_route_v_cnodes():
 			v_cnode.hide()
@@ -45,14 +47,16 @@ func change_route(_route: HenRouteData) -> void:
 
 	global.CAM._check_virtual_cnodes()
 	global.SIDE_BAR.update()
-	_centralize_cam()
+	
+	global.AUTO_CAMERA.on_route_changed(old_route, _route)
+	
 	HenFormatter.format_current_route()
 	global.RIGHT_SIDE_BAR.update(current_route)
 
 
-func _centralize_cam() -> void:
+func _centralize_cam(_vc: HenVirtualCNode = null) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var vc: HenVirtualCNode = current_route.virtual_cnode_list.get(0)
+	var vc: HenVirtualCNode = _vc if _vc else current_route.virtual_cnode_list.get(0)
 
 	if not vc:
 		return

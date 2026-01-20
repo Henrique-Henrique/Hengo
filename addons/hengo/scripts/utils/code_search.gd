@@ -432,6 +432,9 @@ func _on_select(_data: Dictionary) -> void:
 	global.CAM._check_virtual_cnodes()
 	await RenderingServer.frame_pre_draw
 	HenFormatter.format_current_route()
+	
+	if vc_return.v_cnode:
+		global.AUTO_CAMERA.on_vc_added(vc_return.v_cnode)
 
 
 static func load(_start_pos: Vector2, _config: Dictionary = {}) -> HenCodeSearch:

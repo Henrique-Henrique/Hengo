@@ -160,6 +160,22 @@ func go_to_center(_pos: Vector2) -> void:
 	set_physics_process(true)
 
 
+# moves camera to center with optional zoom
+func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
+	var zoom_to_use: float = _target_zoom if _target_zoom > 0 else transform.x.x
+	zoom_to_use = clamp(zoom_to_use, MIN_ZOOM, MAX_ZOOM)
+	
+	pos = (_pos * (-zoom_to_use)) + (get_parent().size / 2)
+	
+	if _target_zoom > 0:
+		target_zoom = zoom_to_use
+		t_x = Vector2(target_zoom, 0)
+		t_y = Vector2(0, target_zoom)
+	
+	ignore_process = true
+	set_physics_process(true)
+
+
 func check_vc_action_menu() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 

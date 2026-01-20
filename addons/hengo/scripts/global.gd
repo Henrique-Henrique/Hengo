@@ -30,6 +30,7 @@ var CODE_SEARCH: HenCodeSearch
 
 # CONFIG
 var SETTINGS: HenSettings = HenSettings.new()
+var AUTO_CAMERA: HenAutoCamera = HenAutoCamera.new()
 var IS_HEADLESS: bool = false
 
 # cnodes
