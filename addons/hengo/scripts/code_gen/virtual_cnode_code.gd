@@ -501,6 +501,42 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				value = get_input_token(_save_data, _vc, value_input.id),
 				name = value_input.name.to_snake_case(),
 			})
+		HenVirtualCNode.SubType.INPUT_EVENT_CHECK:
+			var inputs: Array[HenVCInOutData] = _vc.get_inputs(_save_data)
+			
+			if inputs.is_empty() or not _vc.input_has_connection(inputs[0].id, _save_data):
+				return get_invalid_token()
+			
+			var value_code: String = inputs[1].code_value if inputs.size() > 1 else ''
+			
+			token.merge({
+				event_param = get_input_token(_save_data, _vc, inputs[0].id),
+				event_type = _vc.input_code_value_map.get('event_type', ''),
+				check_pressed = _vc.input_code_value_map.get('check_pressed', true),
+				property = _vc.input_code_value_map.get('property', ''),
+				value = value_code
+			})
+		HenVirtualCNode.SubType.INPUT_ACTION_CHECK:
+			var inputs: Array[HenVCInOutData] = _vc.get_inputs(_save_data)
+			
+			if inputs.is_empty() or not _vc.input_has_connection(inputs[0].id, _save_data):
+				return get_invalid_token()
+			
+			var action_code: String = inputs[1].code_value if inputs.size() > 1 else ''
+			
+			token.merge({
+				event_param = get_input_token(_save_data, _vc, inputs[0].id),
+				method = _vc.input_code_value_map.get('method', 'is_action_pressed'),
+				action = action_code
+			})
+		HenVirtualCNode.SubType.INPUT_POLLING:
+			var inputs: Array[HenVCInOutData] = _vc.get_inputs(_save_data)
+			var action_code: String = inputs[0].code_value if not inputs.is_empty() else ''
+			
+			token.merge({
+				method = _vc.input_code_value_map.get('method', 'is_action_pressed'),
+				action = action_code
+			})
 
 	return token
 

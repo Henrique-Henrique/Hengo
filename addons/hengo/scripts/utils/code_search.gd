@@ -350,7 +350,6 @@ func _on_select(_data: Dictionary) -> void:
 		print('Not has data')
 		return
 
-
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	data.position = global.CAM.get_relative_vec2(start_pos)
 

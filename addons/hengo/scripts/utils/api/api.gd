@@ -969,6 +969,302 @@ func get_native_list_raw(_io_type: StringName = '', _type: StringName = '') -> A
 			route = router.current_route
 		}
 	},
+	# input event check nodes with dropdowns
+	{
+		name = 'On Key Pressed',
+		icon = 'keyboard',
+		color = '#22c55e',
+		is_native = true,
+		data = {
+			name = 'On Key Pressed',
+			sub_type = HenVirtualCNode.SubType.INPUT_EVENT_CHECK,
+			category = 'native',
+			input_code_value_map = {
+				event_type = 'InputEventKey',
+				check_pressed = true,
+				property = 'keycode'
+			},
+			inputs = [
+				{
+					name = 'event',
+					type = 'InputEvent'
+				},
+				{
+					name = 'key',
+					type = 'int',
+					sub_type = '@dropdown',
+					category = 'key_code'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'On Key Released',
+		icon = 'keyboard',
+		color = '#ef4444',
+		is_native = true,
+		data = {
+			name = 'On Key Released',
+			sub_type = HenVirtualCNode.SubType.INPUT_EVENT_CHECK,
+			category = 'native',
+			input_code_value_map = {
+				event_type = 'InputEventKey',
+				check_pressed = false,
+				property = 'keycode'
+			},
+			inputs = [
+				{
+					name = 'event',
+					type = 'InputEvent'
+				},
+				{
+					name = 'key',
+					type = 'int',
+					sub_type = '@dropdown',
+					category = 'key_code'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'On Mouse Button Pressed',
+		icon = 'mouse-pointer-click',
+		color = '#3b82f6',
+		is_native = true,
+		data = {
+			name = 'On Mouse Button Pressed',
+			sub_type = HenVirtualCNode.SubType.INPUT_EVENT_CHECK,
+			category = 'native',
+			input_code_value_map = {
+				event_type = 'InputEventMouseButton',
+				check_pressed = true,
+				property = 'button_index'
+			},
+			inputs = [
+				{
+					name = 'event',
+					type = 'InputEvent'
+				},
+				{
+					name = 'button',
+					type = 'int',
+					sub_type = '@dropdown',
+					category = 'mouse_button'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'On Mouse Button Released',
+		icon = 'mouse-pointer-click',
+		color = '#ef4444',
+		is_native = true,
+		data = {
+			name = 'On Mouse Button Released',
+			sub_type = HenVirtualCNode.SubType.INPUT_EVENT_CHECK,
+			category = 'native',
+			input_code_value_map = {
+				event_type = 'InputEventMouseButton',
+				check_pressed = false,
+				property = 'button_index'
+			},
+			inputs = [
+				{
+					name = 'event',
+					type = 'InputEvent'
+				},
+				{
+					name = 'button',
+					type = 'int',
+					sub_type = '@dropdown',
+					category = 'mouse_button'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	# action check nodes with dropdown
+	{
+		name = 'On Action Pressed',
+		icon = 'gamepad-2',
+		color = '#f97316',
+		is_native = true,
+		data = {
+			name = 'On Action Pressed',
+			sub_type = HenVirtualCNode.SubType.INPUT_ACTION_CHECK,
+			category = 'native',
+			input_code_value_map = {
+				method = 'is_action_pressed'
+			},
+			inputs = [
+				{
+					name = 'event',
+					type = 'InputEvent'
+				},
+				{
+					name = 'action',
+					type = 'StringName',
+					sub_type = '@dropdown',
+					category = 'action'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'On Action Released',
+		icon = 'gamepad-2',
+		color = '#f97316',
+		is_native = true,
+		data = {
+			name = 'On Action Released',
+			sub_type = HenVirtualCNode.SubType.INPUT_ACTION_CHECK,
+			category = 'native',
+			input_code_value_map = {
+				method = 'is_action_released'
+			},
+			inputs = [
+				{
+					name = 'event',
+					type = 'InputEvent'
+				},
+				{
+					name = 'action',
+					type = 'StringName',
+					sub_type = '@dropdown',
+					category = 'action'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	# input singleton polling nodes
+	{
+		name = 'Input Action Pressed',
+		icon = 'gamepad-2',
+		color = '#06b6d4',
+		is_native = true,
+		data = {
+			name = 'Input Action Pressed',
+			sub_type = HenVirtualCNode.SubType.INPUT_POLLING,
+			category = 'native',
+			input_code_value_map = {
+				method = 'is_action_pressed'
+			},
+			inputs = [
+				{
+					name = 'action',
+					type = 'StringName',
+					sub_type = '@dropdown',
+					category = 'action'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Input Action Just Pressed',
+		icon = 'gamepad-2',
+		color = '#06b6d4',
+		is_native = true,
+		data = {
+			name = 'Input Action Just Pressed',
+			sub_type = HenVirtualCNode.SubType.INPUT_POLLING,
+			category = 'native',
+			input_code_value_map = {
+				method = 'is_action_just_pressed'
+			},
+			inputs = [
+				{
+					name = 'action',
+					type = 'StringName',
+					sub_type = '@dropdown',
+					category = 'action'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
+	{
+		name = 'Input Action Just Released',
+		icon = 'gamepad-2',
+		color = '#06b6d4',
+		is_native = true,
+		data = {
+			name = 'Input Action Just Released',
+			sub_type = HenVirtualCNode.SubType.INPUT_POLLING,
+			category = 'native',
+			input_code_value_map = {
+				method = 'is_action_just_released'
+			},
+			inputs = [
+				{
+					name = 'action',
+					type = 'StringName',
+					sub_type = '@dropdown',
+					category = 'action'
+				}
+			],
+			outputs = [
+				{
+					name = 'result',
+					type = 'bool'
+				}
+			],
+			route = router.current_route
+		}
+	},
 ]
 	var arr: Array = []
 

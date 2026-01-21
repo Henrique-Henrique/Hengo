@@ -290,5 +290,32 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 			return indent + get_code_by_token(_save_data, _token.ref) + '.' + _token.name
 		HenVirtualCNode.SubType.SET_PROP:
 			return indent + get_code_by_token(_save_data, _token.ref) + '.' + _token.name + ' = ' + get_code_by_token(_save_data, _token.value)
+		HenVirtualCNode.SubType.INPUT_EVENT_CHECK:
+			# generates: event is InputEventKey and event.pressed and event.keycode == KEY_SPACE
+			var event_code: String = get_code_by_token(_save_data, _token.event_param)
+			var pressed_check: String = event_code + '.pressed' if _token.check_pressed else 'not ' + event_code + '.pressed'
+			
+			return '{event} is {type} and {pressed} and {event}.{prop} == {value}'.format({
+				event = event_code,
+				type = _token.event_type,
+				pressed = pressed_check,
+				prop = _token.property,
+				value = _token.value
+			})
+		HenVirtualCNode.SubType.INPUT_ACTION_CHECK:
+			# generates: event.is_action_pressed("action")
+			var event_code: String = get_code_by_token(_save_data, _token.event_param)
+			
+			return '{event}.{method}("{action}")'.format({
+				event = event_code,
+				method = _token.method,
+				action = _token.action
+			})
+		HenVirtualCNode.SubType.INPUT_POLLING:
+			# generates: Input.is_action_pressed("action")
+			return 'Input.{method}("{action}")'.format({
+				method = _token.method,
+				action = _token.action
+			})
 		_:
 			return ''
