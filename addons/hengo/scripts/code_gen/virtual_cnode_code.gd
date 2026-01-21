@@ -375,8 +375,15 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				singleton_class = _vc.singleton_class
 			})
 		HenVirtualCNode.SubType.VAR, HenVirtualCNode.SubType.LOCAL_VAR:
+			var name: String = _vc.get_outputs(_save_data)[0].name.to_snake_case()
+
+			if _vc.sub_type == HenVirtualCNode.SubType.LOCAL_VAR:
+				if global.USE_MACRO_REF:
+					name += '_' + str(global.MACRO_REF.id)
+
 			token.merge({
-				name = _vc.get_outputs(_save_data)[0].name.to_snake_case(),
+				name = name,
+				use_self = true if _vc.sub_type == HenVirtualCNode.SubType.LOCAL_VAR else token.use_self
 			})
 		HenVirtualCNode.SubType.VAR_FROM:
 			var inputs: Array = _vc.get_inputs(_save_data)
@@ -402,9 +409,16 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				value = get_input_token(_save_data, _vc, 1)
 			})
 		HenVirtualCNode.SubType.SET_VAR, HenVirtualCNode.SubType.SET_LOCAL_VAR:
+			var name: String = _vc.get_inputs(_save_data)[0].name.to_snake_case()
+
+			if _vc.sub_type == HenVirtualCNode.SubType.SET_LOCAL_VAR:
+				if global.USE_MACRO_REF:
+					name += '_' + str(global.MACRO_REF.id)
+
 			token.merge({
-				name = _vc.get_inputs(_save_data)[0].name.to_snake_case(),
+				name = name,
 				value = get_input_token_list(_save_data, _vc)[0],
+				use_self = true if _vc.sub_type == HenVirtualCNode.SubType.SET_LOCAL_VAR else token.use_self
 			})
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL, HenVirtualCNode.SubType.SIGNAL_ENTER:
 			token.merge({

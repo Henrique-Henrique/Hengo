@@ -61,12 +61,12 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 				value = get_code_by_token(_save_data, _token.value)
 			})
 		HenVirtualCNode.SubType.SET_LOCAL_VAR:
-			return indent + '{name} = {value}'.format({
+			return indent + prefix + '{name} = {value}'.format({
 				name = _token.name,
 				value = get_code_by_token(_save_data, _token.value)
 			})
 		HenVirtualCNode.SubType.LOCAL_VAR:
-			return indent + _token.name
+			return indent + prefix + _token.name
 		HenVirtualCNode.SubType.IN_PROP:
 			if _token.has('use_value'):
 				if _token.has('ref_value'):
