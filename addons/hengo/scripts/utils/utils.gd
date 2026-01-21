@@ -529,6 +529,24 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 					list = _save_data.macros
 				HenSideBar.AddType.STATE:
 					list = _save_data.states
+				HenSideBar.AddType.LOCAL_VAR:
+					var check_list = func(l: Array) -> HenSaveParam:
+						for item in l:
+							if item is HenSaveResTypeWithRoute:
+								for lv: HenSaveParam in item.local_vars:
+									if lv.id == _res_data.id:
+										return lv
+						return null
+
+					var found: HenSaveParam = check_list.call(_save_data.functions)
+					if not found: found = check_list.call(_save_data.macros)
+					if not found: found = check_list.call(_save_data.states)
+					if not found:
+						for sub_list: Array in _save_data.sub_states.values():
+							found = check_list.call(sub_list)
+							if found: break
+					
+					if found: return found
 		
 		for item in list:
 			if item.id == _res_data.id:

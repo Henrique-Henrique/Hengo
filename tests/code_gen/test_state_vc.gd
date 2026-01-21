@@ -171,3 +171,14 @@ func test_state_transition_sub_state() -> void:
 	var code: String = HenTest.get_all_code()
 	router.current_route = HenTest.get_base_route()
 	assert_str(code).contains('func enter() -> void:\n\t\t_ref._STATE_CONTROLLER.current_state.change_sub_state("state_test_2")')
+
+
+func test_state_with_local_var() -> void:
+	var local_var: HenSaveParam = HenSaveParam.new()
+	local_var.name = 'my var'
+	local_var.type = &'int'
+	state.local_vars.append(local_var)
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('class StateTest extends HengoState:\n\tvar my_var = int()')

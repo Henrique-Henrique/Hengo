@@ -1,5 +1,5 @@
 @tool
-class_name HenSaveParam extends HenSaveResToInspectType
+class_name HenSaveParam extends HenSaveResType
 
 @export var type: StringName = &'Variant'
 
@@ -25,3 +25,29 @@ func get_data() -> Dictionary:
 
 func get_new_name() -> String:
 	return 'param_' + str(id)
+
+
+func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	match _type:
+		HenVirtualCNode.SubType.SET_LOCAL_VAR:
+			return [
+				{
+					id = 0,
+					name = name,
+					type = type,
+				}
+			]
+	return []
+
+
+func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
+	match _type:
+		HenVirtualCNode.SubType.LOCAL_VAR:
+			return [
+				{
+					id = 0,
+					name = name,
+					type = type,
+				}
+			]
+	return []

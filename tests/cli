@@ -1,5 +1,6 @@
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_if_vc.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_for_vc.gd" --ignoreHeadlessMode
+godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_state_vc.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_vcnode.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_signal_vc.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests" --ignoreHeadlessMode

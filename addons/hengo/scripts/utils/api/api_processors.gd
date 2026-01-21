@@ -2,6 +2,162 @@
 class_name HenAPIProcessors extends RefCounted
 
 
+static func process_local_variables(_ast: HenMapDependencies.ProjectAST, _save_data_id: StringName, _io_type: StringName, _type: StringName, _from_another_script: bool, _arr: Array, _native_props: Dictionary = {}) -> void:
+	if _from_another_script:
+		return
+
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	if not router.current_route:
+		return
+
+	var current_route_id_str: String = router.current_route.id
+	var res_with_route: HenSaveResTypeWithRoute = null
+
+	for f: HenSaveFunc in _ast.functions:
+		if str(f.id) == current_route_id_str:
+			res_with_route = f
+			break
+			
+	if not res_with_route:
+		for m: HenSaveMacro in _ast.macros:
+			if str(m.id) == current_route_id_str:
+				res_with_route = m
+				break
+				
+	if not res_with_route:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		for s: HenSaveState in _ast.states:
+			if str(s.id) == current_route_id_str:
+				res_with_route = s
+				break
+				
+		if not res_with_route:
+			for sub_list: Array in global.SAVE_DATA.sub_states.values():
+				for s: HenSaveState in sub_list:
+					if str(s.id) == current_route_id_str:
+						res_with_route = s
+						break
+				if res_with_route: break
+
+	if not res_with_route:
+		return
+
+	var local_vars: Array[HenSaveParam] = res_with_route.local_vars
+	if local_vars.is_empty():
+		return
+
+	var local_var_category: Dictionary = {
+		name = 'Local Variables',
+		icon = 'variable',
+		color = '#ff9ff3',
+		method_list = []
+	}
+	
+	for var_data: HenSaveParam in local_vars:
+		var sub_items: Array = []
+		var is_variable_valid_source: bool = false
+		
+		# Getter
+		if not _io_type or _io_type == 'in':
+			var is_main_get_valid: bool = false
+			if not _type or HenUtils.is_type_relation_valid(var_data.type, _type):
+				is_main_get_valid = true
+				if _type: is_variable_valid_source = true
+			
+			var getter_data: Dictionary = {
+				name = 'Get ' + var_data.name,
+				sub_type = HenVirtualCNode.SubType.LOCAL_VAR,
+				route = router.current_route,
+				res_data = {
+					id = var_data.id,
+					type = HenSideBar.AddType.LOCAL_VAR
+				}
+			}
+
+			var dt_get: Dictionary = {
+				_class_name = 'Local Variable',
+				name = '[Get] ' + var_data.name,
+				data = getter_data,
+			}
+			if is_main_get_valid:
+				dt_get.output_io_idx = 0
+				
+			sub_items.append(dt_get)
+			
+			var props: Array = get_valid_recursive_props(var_data.type, _type, 'in', _native_props)
+			for prop: Dictionary in props:
+				var getter_name: String = '[Get] ' + var_data.name + '.' + prop.name
+				var dt: Dictionary = {
+					_class_name = 'Local Variable',
+					name = getter_name,
+					data = getter_data,
+					linked_prop = get_prop_get_data(prop, var_data.type),
+					output_io_idx = 0
+				}
+				sub_items.append(dt)
+
+		# Setter
+		if not _io_type or _io_type == 'out':
+			var is_main_set_valid: bool = false
+			if not _type or HenUtils.is_type_relation_valid(_type, var_data.type):
+				is_main_set_valid = true
+				if _type: is_variable_valid_source = true
+
+			var setter_data: Dictionary = {
+				name = 'Set ' + var_data.name,
+				sub_type = HenVirtualCNode.SubType.SET_LOCAL_VAR,
+				route = router.current_route,
+				res_data = {
+					id = var_data.id,
+					type = HenSideBar.AddType.LOCAL_VAR
+				}
+			}
+
+			var dt_set: Dictionary = {
+				_class_name = 'Local Variable',
+				name = '[Set] ' + var_data.name,
+				data = setter_data,
+			}
+			if is_main_set_valid:
+				dt_set.input_io_idx = 0
+
+			sub_items.append(dt_set)
+
+			var props: Array = get_valid_recursive_props(var_data.type, _type, 'out', _native_props)
+			for prop: Dictionary in props:
+				var setter_name: String = '[Set] ' + var_data.name + '.' + prop.name
+				var getter_for_prop: Dictionary = {
+					name = 'Get ' + var_data.name,
+					sub_type = HenVirtualCNode.SubType.LOCAL_VAR,
+					route = router.current_route,
+					res_data = {
+						id = var_data.id,
+						type = HenSideBar.AddType.LOCAL_VAR
+					}
+				}
+
+				var dt: Dictionary = {
+					_class_name = 'Local Variable',
+					name = setter_name,
+					data = getter_for_prop,
+					linked_prop = get_prop_set_data(prop, var_data.type),
+					input_io_idx = 1
+				}
+				sub_items.append(dt)
+
+		if not sub_items.is_empty():
+			var dt: Dictionary = {
+				_class_name = 'Local Variable',
+				name = var_data.name,
+				recursive_props = sub_items,
+				is_match = is_variable_valid_source if _type else true
+			}
+			(local_var_category.method_list as Array).append(dt)
+
+	if not (local_var_category.get(&'method_list', []) as Array).is_empty():
+		_arr.append(local_var_category)
+
+
 static func check_param_validity(_params: Array, _type: StringName, _is_input: bool) -> int:
 	var idx: int = 0
 	

@@ -667,6 +667,7 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 
 
 	HenAPIProcessors.process_states(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
+	HenAPIProcessors.process_local_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_functions(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_signals(_ast, _io_type, _type, arr)

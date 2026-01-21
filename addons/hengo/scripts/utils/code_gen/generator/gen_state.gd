@@ -30,6 +30,13 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 			indent = '\t'.repeat(_level)
 		})
 
+		# local variable
+		base += '\n'.join(state.local_vars.map(func(x: HenSaveParam):
+			return '\t'.repeat(_level + 1) + HenGeneratorVariable.get_var_code_from_param(x, x.name.to_snake_case())))
+		
+		# add new line if local var is not empty
+		base += '\n' if not state.local_vars.is_empty() else ''
+
 		var sub_states: Array = state.get_sub_states(_save_data)
 
 		if not sub_states.is_empty():
