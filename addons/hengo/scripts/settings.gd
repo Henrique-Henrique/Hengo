@@ -8,7 +8,7 @@ const AUTO_ZOOM_PATH = 'hengo/settings/auto_zoom'
 const AUTO_MOVE_ON_ADD_PATH = 'hengo/settings/auto_move_on_add'
 const AUTO_MOVE_ON_REMOVE_PATH = 'hengo/settings/auto_move_on_remove'
 const AUTO_MOVE_ON_CONNECTION_PATH = 'hengo/settings/auto_move_on_connection'
-const AUTO_ZOOM_LEVEL_PATH = 'hengo/settings/auto_zoom_level'
+const AUTO_ZOOM_LEVEL_PATH = 'hengo/settings/auto_zoom_level_v2'
 
 
 @export var development_mode: bool:
@@ -53,11 +53,11 @@ const AUTO_ZOOM_LEVEL_PATH = 'hengo/settings/auto_zoom_level'
 	get:
 		return _get_value(AUTO_MOVE_ON_CONNECTION_PATH, true)
 
-@export_range(0.5, 1.5, 0.1) var auto_zoom_level: float:
+@export_range(HenCam.MIN_ZOOM, 2, 0.1) var auto_zoom_level: float:
 	set(value):
 		_set_value(AUTO_ZOOM_LEVEL_PATH, value)
 	get:
-		return _get_value(AUTO_ZOOM_LEVEL_PATH, 1.0)
+		return _get_value(AUTO_ZOOM_LEVEL_PATH, 1.7)
 
 
 # sets a value in project settings and saves it
@@ -104,7 +104,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&'auto_move_on_connection':
 			return true
 		&'auto_zoom_level':
-			return 1.0
+			return 1.7
 	return null
 
 

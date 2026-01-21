@@ -431,9 +431,17 @@ func _on_select(_data: Dictionary) -> void:
 
 	global.CAM._check_virtual_cnodes()
 	await RenderingServer.frame_pre_draw
-	HenFormatter.format_current_route()
-	
 	if vc_return.v_cnode:
+		HenFormatter.format_current_route()
+		
+		# async formatting sync
+		await get_tree().process_frame
+		
+		while not global.can_format_again:
+			await get_tree().process_frame
+		
+		await get_tree().process_frame
+
 		global.AUTO_CAMERA.on_vc_added(vc_return.v_cnode)
 
 

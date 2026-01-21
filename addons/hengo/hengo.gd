@@ -220,6 +220,14 @@ func _make_visible(_visible: bool):
 		(main_scene.get_node('%Content') as CanvasLayer).visible = _visible
 		(main_scene.get_node('%DashboardCanvas') as CanvasLayer).visible = _visible
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
+	if global and global.CAM:
+		global.CAM.set_process_input(_visible)
+
+		if not _visible:
+			global.CAM.set_physics_process(false)
+
 
 func _get_plugin_name():
 	return PLUGIN_NAME
@@ -227,27 +235,3 @@ func _get_plugin_name():
 
 func _has_main_screen() -> bool:
 	return true
-
-
-func _handles(object: Object) -> bool:
-	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var loader: HenLoader = Engine.get_singleton(&'Loader')
-
-	# if object is GDScript and (object as GDScript).resource_path.begins_with('res://hengo/'):
-	# 	if not await loader.load((object as GDScript).resource_path):
-	# 		toast.notify.call_deferred("Failed to load script: " + (object as GDScript).resource_path, HenToast.MessageType.ERROR)
-	# 		return true
-		
-	# 	global.CAM.can_scroll = true
-	# 	return true
-
-	# if object is Resource and (object as Resource).resource_path.begins_with(HenEnums.HENGO_SAVE_PATH):
-	# 	if not await loader.load((object as Resource).resource_path):
-	# 		toast.notify.call_deferred("Failed to load save file: " + (object as Resource).resource_path, HenToast.MessageType.ERROR)
-	# 		return true
-		
-	# 	global.CAM.can_scroll = true
-	# 	return true
-
-	return false

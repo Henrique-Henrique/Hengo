@@ -73,6 +73,7 @@ hooks/session_hooks=Dictionary[String, bool]({
 [hengo]
 
 settings/auto_zoom=true
+settings/auto_zoom_level_v2=1.7
 
 [input]
 
