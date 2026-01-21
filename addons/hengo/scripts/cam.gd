@@ -5,10 +5,10 @@ class_name HenCam extends Node2D
 
 var target_zoom: float = 1.
 
-const MIN_ZOOM: float = 1
+var MIN_ZOOM: float = 1
 var MAX_ZOOM: float = 2
-const ZOOM_INCREMENT: float = .15
-const ZOOM_RATE: float = 12.
+var ZOOM_INCREMENT: float = .15
+var ZOOM_RATE: float = 12.
 
 var t_x: Vector2 = Vector2(1, 0)
 var t_y: Vector2 = Vector2(0, 1)
@@ -21,13 +21,11 @@ var can_scroll: bool = true
 @onready var ref_point: Marker2D = get_node('RefPoint')
 var initial: Vector2 = Vector2.ZERO
 
-# private
-#
+
 func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
-	
-	MAX_ZOOM = MAX_ZOOM * EditorInterface.get_editor_scale()
+	update_settings()
 
 	can_scroll = false
 	var parent: Control = get_parent()
@@ -40,6 +38,15 @@ func _ready() -> void:
 	
 func _on_ui_size_changed() -> void:
 	(grid.material as ShaderMaterial).set_shader_parameter('screen_size', get_parent().size)
+
+
+func update_settings() -> void:
+	MIN_ZOOM = ProjectSettings.get_setting(HenSettings.MIN_ZOOM_PATH, 1.0)
+	MAX_ZOOM = ProjectSettings.get_setting(HenSettings.MAX_ZOOM_PATH, 2.0)
+	ZOOM_INCREMENT = ProjectSettings.get_setting(HenSettings.ZOOM_INCREMENT_PATH, 0.15)
+	ZOOM_RATE = ProjectSettings.get_setting(HenSettings.ZOOM_RATE_PATH, 12.0)
+
+	MAX_ZOOM = MAX_ZOOM * EditorInterface.get_editor_scale()
 
 
 func _input(event: InputEvent) -> void:
@@ -125,7 +132,7 @@ func _physics_process(_delta: float) -> void:
 			ignore_process = false
 
 
-# checking virtual cnodes positions
+# checks virtual cnodes visibility
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom, # position
@@ -143,8 +150,7 @@ func get_rect() -> Rect2:
 		(get_parent() as Control).size / transform.x.x
 	)
 
-# public
-#
+
 func get_relative_vec2(_pos: Vector2) -> Vector2:
 	return (_pos - global_position) / transform.x.x
 
@@ -160,7 +166,7 @@ func go_to_center(_pos: Vector2) -> void:
 	set_physics_process(true)
 
 
-# moves camera to center with optional zoom
+# centers camera with optional zoom
 func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
 	var zoom_to_use: float = _target_zoom if _target_zoom > 0 else transform.x.x
 	zoom_to_use = clamp(zoom_to_use, MIN_ZOOM, MAX_ZOOM)
