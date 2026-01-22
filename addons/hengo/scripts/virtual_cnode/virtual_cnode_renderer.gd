@@ -11,7 +11,12 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 	_cnode.id = id
 	_cnode.can_follow = false
 	_cnode.set_process(false)
-	_cnode.selected = false
+
+	if _vc.selected:
+		_cnode.select()
+	else:
+		_cnode.unselect(0)
+		
 	_cnode.moving = false
 
 	_cnode.change_name(_vc.get_vc_name(global.SAVE_DATA))

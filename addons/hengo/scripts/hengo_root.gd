@@ -150,7 +150,27 @@ func _input(event: InputEvent) -> void:
 					else:
 						global.history.redo()
 				elif e.keycode == KEY_C:
-					global.history.clear_history()
+					get_tree().root.set_input_as_handled()
+					var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+					var count: int = HenClipboard.copy(global.SELECTED_VIRTUAL_CNODE)
+					if count > 0:
+						toast.notify.call_deferred('copied ' + str(count) + ' node(s)', HenToast.MessageType.SUCCESS)
+					else:
+						toast.notify.call_deferred('no nodes selected to copy', HenToast.MessageType.INFO)
+				elif e.keycode == KEY_V:
+					get_tree().root.set_input_as_handled()
+					var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+					var mouse_pos: Vector2 = get_global_mouse_position()
+					var cam: HenCam = global.CAM
+					
+					if cam:
+						mouse_pos = cam.get_relative_vec2(mouse_pos)
+						
+					var count: int = HenClipboard.paste(mouse_pos)
+					if count > 0:
+						toast.notify.call_deferred('pasted ' + str(count) + ' node(s)', HenToast.MessageType.SUCCESS)
+					else:
+						toast.notify.call_deferred('nothing to paste', HenToast.MessageType.INFO)
 				elif e.keycode == KEY_F:
 					get_tree().root.set_input_as_handled()
 					HenFormatter.format_current_route()

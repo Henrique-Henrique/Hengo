@@ -8,6 +8,7 @@ class_name HenVirtualCNodeState extends HenVirtualCNodeReference
 var is_showing: bool = false
 var is_deleted: bool = false
 var showing_action_menu: bool = false
+var selected: bool = false
 
 signal cnode_need_update
 

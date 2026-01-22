@@ -111,6 +111,9 @@ var MACRO_USE_SELF: bool = false
 # terminal
 var terminal_content: String = ''
 
+# clipboard for copy/paste
+var clipboard: Dictionary = {}
+
 
 func _ready() -> void:
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
