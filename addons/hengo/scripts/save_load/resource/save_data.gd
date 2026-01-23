@@ -84,6 +84,8 @@ func add_connection(_connection: HenVCConnectionData) -> void:
 		var vc_dict: Dictionary = connections[node_id]
 		vc_dict[_connection.id] = _connection
 
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).connection_added.emit(_connection)
+
 
 func remove_connection(_connection: HenVCConnectionData) -> void:
 	var nodes: Array = [_connection.get_from(self), _connection.get_to(self)]
@@ -102,6 +104,8 @@ func remove_connection(_connection: HenVCConnectionData) -> void:
 			
 			if vc_dict.is_empty():
 				connections.erase(node_id)
+	
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).connection_removed.emit(_connection)
 
 
 func get_flow_connection_from_vc(_vc: HenVirtualCNode) -> Array:
@@ -177,6 +181,8 @@ func add_flow_connection(_connection: HenVCFlowConnectionData) -> void:
 		
 		var vc_dict: Dictionary = flow_connections[node_id]
 		vc_dict[_connection.id] = _connection
+	
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).flow_connection_added.emit(_connection)
 
 
 func remove_flow_connection(_connection: HenVCFlowConnectionData) -> void:
@@ -195,6 +201,8 @@ func remove_flow_connection(_connection: HenVCFlowConnectionData) -> void:
 			vc_dict.erase(_connection.id)
 			if vc_dict.is_empty():
 				flow_connections.erase(node_id)
+	
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).flow_connection_removed.emit(_connection)
 
 
 func add_dep(_id: StringName) -> void:

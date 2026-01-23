@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5y1qj2k4l3m"]
+
+[ext_resource type="Script" uid="uid://c6vomtj0ka1dm" path="res://addons/hengo/scripts/utils/error_list_popup.gd" id="1_r4t5y"]
+
+[node name="ErrorListPopup" type="VBoxContainer"]
+offset_right = 300.0
+offset_bottom = 300.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_r4t5y")

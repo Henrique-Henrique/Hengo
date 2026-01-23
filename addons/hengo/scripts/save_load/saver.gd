@@ -26,7 +26,7 @@ static func start_generate(_regenerate: bool = false) -> void:
 	var start_time: int = Time.get_ticks_msec()
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 
-	# check if save dierctory exists
+	# check if save directory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
 
@@ -42,6 +42,13 @@ static func start_generate(_regenerate: bool = false) -> void:
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 	map_deps.update_project_data(current_id)
 	
+	# validates compilation
+	var hengo_root: HenHengoRoot = global.HENGO_ROOT
+	if hengo_root and not hengo_root.check_errors(true):
+		toast.notify.call_deferred("Compilation blocked due to errors.", HenToast.MessageType.ERROR)
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_finished.emit.call_deferred()
+		return
+
 	_compile_script(current_id)
 	
 	var scripts_to_recompile: Array[StringName] = map_deps.check_dependencies(current_id)
@@ -85,8 +92,8 @@ static func _compile_script(_id: StringName) -> void:
 	var code_gen: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
 	var code: String = code_gen.get_code(save_data)
 	
-	if not DirAccess.dir_exists_absolute("res://hengo/scripts"):
-		DirAccess.make_dir_absolute("res://hengo/scripts")
+	if not DirAccess.dir_exists_absolute('res://hengo/scripts'):
+		DirAccess.make_dir_absolute('res://hengo/scripts')
 	
 	var script_path: String = HenEnums.HENGO_SCRIPTS_PATH + str(_id) + ".gd"
 	var file: FileAccess = FileAccess.open(script_path, FileAccess.WRITE)
@@ -95,7 +102,7 @@ static func _compile_script(_id: StringName) -> void:
 		file.store_string(code)
 		file.close()
 	else:
-		push_error("Failed to write compiled script: " + script_path)
+		push_error('Failed to write compiled script: ' + script_path)
 
 
 static func recalculate_dependencies(save_data: HenSaveData) -> void:

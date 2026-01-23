@@ -27,17 +27,13 @@ const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 	get:
 		return _get_value(AUTO_LAYOUT_PATH, true)
 
+@export_group('Move')
+
 @export var auto_move: bool:
 	set(value):
 		_set_value(AUTO_MOVE_PATH, value)
 	get:
 		return _get_value(AUTO_MOVE_PATH, true)
-
-@export var auto_zoom: bool:
-	set(value):
-		_set_value(AUTO_ZOOM_PATH, value)
-	get:
-		return _get_value(AUTO_ZOOM_PATH, true)
 
 @export var auto_move_on_add: bool:
 	set(value):
@@ -49,7 +45,7 @@ const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 	set(value):
 		_set_value(AUTO_MOVE_ON_REMOVE_PATH, value)
 	get:
-		return _get_value(AUTO_MOVE_ON_REMOVE_PATH, true)
+		return _get_value(AUTO_MOVE_ON_REMOVE_PATH, false)
 
 @export var auto_move_on_connection: bool:
 	set(value):
@@ -57,7 +53,13 @@ const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 	get:
 		return _get_value(AUTO_MOVE_ON_CONNECTION_PATH, true)
 
-@export_group("Zoom")
+@export_group('Zoom')
+
+@export var auto_zoom: bool:
+	set(value):
+		_set_value(AUTO_ZOOM_PATH, value)
+	get:
+		return _get_value(AUTO_ZOOM_PATH, true)
 
 @export_range(1, 2, 0.1) var auto_zoom_level: float:
 	set(value):
@@ -138,7 +140,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&'auto_move_on_add':
 			return true
 		&'auto_move_on_remove':
-			return true
+			return false
 		&'auto_move_on_connection':
 			return true
 		&'auto_zoom_level':

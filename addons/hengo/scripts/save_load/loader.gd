@@ -73,6 +73,7 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 	global.CAM.can_scroll = true
 	global.DASHBOARD.hide_dashboard()
 
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_list_update.emit()
 	return true
 
 

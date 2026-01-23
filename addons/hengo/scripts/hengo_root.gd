@@ -37,7 +37,6 @@ func _ready() -> void:
 	enums.DROPDOWN_STATES = []
 	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.clear()
 
-	# defining types
 	var object_list = ClassDB.get_inheriters_from_class('Object')
 	object_list.sort()
 	enums.OBJECT_TYPES = object_list
@@ -63,6 +62,48 @@ func _ready() -> void:
 	(get_node('%OpenDashboard') as Button).pressed.connect(_on_open_dashboard)
 	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
 	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
+	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
+	
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.add_virtual_cnode_to_route.connect(_on_graph_changed_no_args)
+	signal_bus.remove_virtual_cnode_from_route.connect(_on_graph_changed_no_args)
+	signal_bus.request_list_update.connect(_on_graph_changed)
+	signal_bus.connection_added.connect(_on_graph_changed_no_args)
+	signal_bus.connection_removed.connect(_on_graph_changed_no_args)
+	signal_bus.flow_connection_added.connect(_on_graph_changed_no_args)
+	signal_bus.flow_connection_removed.connect(_on_graph_changed_no_args)
+	
+	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.closed.connect(schedule_check_errors)
+
+
+func _on_graph_changed() -> void:
+	schedule_check_errors()
+
+
+func _on_graph_changed_no_args(_a = null, _b = null) -> void:
+	schedule_check_errors()
+
+
+var _time: float = 0.0
+var _debounce_time: float = 0.0
+var _dirty: bool = false
+const DEBOUNCE_DELAY: float = 0.2
+
+
+func _process(delta: float) -> void:
+	_time += delta
+	
+	if _dirty:
+		_debounce_time += delta
+		if _debounce_time >= DEBOUNCE_DELAY:
+			check_errors(false)
+			_dirty = false
+			_time = 0.0
+
+ 
+func schedule_check_errors() -> void:
+	_dirty = true
+	_debounce_time = 0.0
 
 
 func _on_config_pressed() -> void:
@@ -175,3 +216,86 @@ func _input(event: InputEvent) -> void:
 					get_tree().root.set_input_as_handled()
 					HenFormatter.format_current_route()
 					print('FORMATTED')
+
+
+# checks for errors in current script and dependents
+func check_errors(_compile: bool = false) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	var loader: HenLoader = Engine.get_singleton(&'Loader')
+	var save_data: HenSaveData = global.SAVE_DATA
+	
+	if not save_data:
+		return false
+		
+	var all_errors: Array = []
+	
+	all_errors.append_array(_validate_script_errors(save_data))
+	
+	var deps: Array[StringName] = map_deps.check_dependencies(save_data.identity.id)
+	for dep_id in deps:
+		var dep_save_data: HenSaveData = loader.load_res(dep_id)
+		if dep_save_data:
+			var dep_errors = _validate_script_errors(dep_save_data)
+			for err in dep_errors:
+				err['description'] = '[{0}] {1}'.format([dep_save_data.identity.name, err.description])
+				err['script_id'] = dep_id
+			all_errors.append_array(dep_errors)
+	
+	call_deferred('_update_ui_state', all_errors)
+	
+	if _compile and not all_errors.is_empty():
+		call_deferred('_show_error_popup', all_errors)
+		return false
+
+	return true
+
+
+func _update_ui_state(all_errors: Array) -> void:
+	var actions_bt: Button = get_node_or_null('%ActionsBt')
+	if not actions_bt: return
+
+	if all_errors.is_empty():
+		actions_bt.text = 'Actions'
+		actions_bt.icon = preload('res://addons/hengo/assets/new_icons/circle-check.svg')
+		actions_bt.modulate = Color.WHITE
+	else:
+		actions_bt.text = 'Actions ({0})'.format([all_errors.size()])
+		actions_bt.icon = preload('res://addons/hengo/assets/new_icons/shield-alert.svg')
+		actions_bt.modulate = Color('ef4444')
+
+
+func _show_error_popup(all_errors: Array) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var error_popup = preload('res://addons/hengo/scenes/utils/error_list_popup.tscn').instantiate()
+	error_popup.errors = all_errors
+	global.GENERAL_POPUP.show_content(error_popup, 'Compilation Errors')
+
+
+func _validate_script_errors(_save_data: HenSaveData) -> Array:
+	var errors: Array = []
+	
+	var routes: Array = [_save_data.get_base_route()]
+	for state in _save_data.states:
+		routes.append(state.get_route(_save_data))
+	for func_data in _save_data.functions:
+		routes.append(func_data.get_route(_save_data))
+	for macro in _save_data.macros:
+		routes.append(macro.get_route(_save_data))
+	for sc in _save_data.signals_callback:
+		routes.append(sc.get_route(_save_data))
+		
+	for route in routes:
+		if not route: continue
+		for vc: HenVirtualCNode in route.virtual_cnode_list:
+			var node_errors = vc.validate_errors(_save_data)
+			for err in node_errors:
+				err['route_id'] = route.id
+			errors.append_array(node_errors)
+			
+	return errors
+
+
+func _on_actions_bt_pressed() -> void:
+	# force check and show
+	check_errors(true)

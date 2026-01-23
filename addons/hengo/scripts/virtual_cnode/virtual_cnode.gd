@@ -72,6 +72,8 @@ enum SubType {
 }
 
 
+var current_errors: Array[Dictionary] = []
+
 func _init() -> void:
 	if not cnode_need_update.is_connected(update): cnode_need_update.connect(update)
 	if not io_hovered.is_connected(on_node_io_hovered): io_hovered.connect(on_node_io_hovered)
@@ -104,6 +106,9 @@ func update() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var route: HenRouteData = get_parent_route()
 	var should_hide: bool = is_deleted or (not route or not router.current_route or route.id != router.current_route.id)
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	current_errors = check_errors(global.SAVE_DATA)
 
 	hide()
 
@@ -181,6 +186,11 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 
 	if invalid:
 		global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
+	elif not current_errors.is_empty():
+		var desc: String = ""
+		for err in current_errors:
+			desc += "- " + err.description + "\n"
+		global.TOOLTIP.go_to(_mouse_pos, desc)
 	else:
 		match type:
 			HenVirtualCNode.Type.STATE:
@@ -453,3 +463,211 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 static func instantiate(_config: Dictionary) -> HenVCNodeReturn:
 	var v_cnode: HenVirtualCNode = instantiate_virtual_cnode(_config)
 	return HenVCNodeReturn.new(v_cnode)
+
+
+func validate_errors(_save_data: HenSaveData) -> Array[Dictionary]:
+	var new_errors: Array[Dictionary] = check_errors(_save_data)
+	
+	if current_errors != new_errors:
+		current_errors = new_errors
+		if is_showing and is_instance_valid(cnode_instance):
+			if invalid:
+				cnode_instance.modulate = Color(1, 1, 1, .3)
+			elif not current_errors.is_empty():
+				cnode_instance.modulate = Color('ef4444')
+			else:
+				cnode_instance.modulate = Color.WHITE
+				
+	return current_errors
+
+
+func check_errors(_save_data: HenSaveData) -> Array[Dictionary]:
+	# validates input, output, and flow connections for errors
+	var errors: Array[Dictionary] = []
+	var res
+
+	var my_connections: Array[HenVCConnectionData] = []
+	my_connections.assign(_save_data.get_connections_by_id(id))
+	
+	var my_inputs: Array[HenVCInOutData] = get_inputs(_save_data)
+	var my_outputs: Array[HenVCInOutData] = get_outputs(_save_data)
+	
+	
+	for conn in my_connections:
+		if conn.to_node_id == id:
+			var found_input = false
+			for input in my_inputs:
+				if input.id == conn.to_id:
+					found_input = true
+					break
+			if not found_input:
+				errors.append({
+					id = id,
+					description = 'Lost connection on input port (ID: {0}).'.format([conn.to_id]),
+					type = 'error'
+				})
+		
+		if conn.from_node_id == id:
+			var found_output = false
+			for output in my_outputs:
+				if output.id == conn.from_id:
+					found_output = true
+					break
+			if not found_output:
+				errors.append({
+					id = id,
+					description = 'Lost connection on output port (ID: {0}).'.format([conn.from_id]),
+					type = 'error'
+				})
+	
+	var my_flow_connections: Array[HenVCFlowConnectionData] = []
+	my_flow_connections.assign(_save_data.get_flow_connections_by_id(id))
+	
+	var my_flow_inputs: Array[HenVCFlow] = get_flow_inputs(_save_data)
+	var my_flow_outputs: Array[HenVCFlow] = get_flow_outputs(_save_data)
+	
+	for conn in my_flow_connections:
+		if conn.to_node_id == id:
+			var found_input = false
+			for input in my_flow_inputs:
+				if input.id == conn.to_id:
+					found_input = true
+					break
+			if not found_input:
+				errors.append({
+					id = id,
+					description = 'Lost connection on flow input port (ID: {0}).'.format([conn.to_id]),
+					type = 'error'
+				})
+				
+		if conn.from_node_id == id:
+			var found_output = false
+			for output in my_flow_outputs:
+				if output.id == conn.from_id:
+					found_output = true
+					break
+			if not found_output:
+				errors.append({
+					id = id,
+					description = 'Lost connection on flow output port (ID: {0}).'.format([conn.from_id]),
+					type = 'error'
+				})
+
+	match sub_type:
+		HenVirtualCNode.SubType.EXPRESSION:
+			var _inputs: Array = get_inputs(_save_data)
+			if _inputs.size() > 1:
+				for input: HenVCInOutData in _inputs.slice(1):
+					if not input_has_connection(input.id, _save_data):
+						errors.append({
+							id = id,
+							description = 'Missing connection for input \'{0}\'.'.format([input.name]),
+							type = 'error'
+						})
+		
+		HenVirtualCNode.SubType.FUNC_FROM:
+			var _inputs: Array = get_inputs(_save_data)
+			if not _inputs.is_empty() and not input_has_connection(_inputs[0].id, _save_data):
+				errors.append({
+					id = id,
+					description = 'Missing target instance connection.',
+					type = 'error'
+				})
+
+		HenVirtualCNode.SubType.VAR_FROM:
+			var _inputs: Array = get_inputs(_save_data)
+			if not _inputs.is_empty() and not input_has_connection(_inputs[0].id, _save_data):
+				errors.append({
+					id = id,
+					description = 'Missing target instance connection.',
+					type = 'error'
+				})
+
+		HenVirtualCNode.SubType.SET_VAR_FROM:
+			var _inputs: Array = get_inputs(_save_data)
+			if not _inputs.is_empty() and not input_has_connection(_inputs[0].id, _save_data):
+				errors.append({
+					id = id,
+					description = 'Missing target instance connection.',
+					type = 'error'
+				})
+
+		HenVirtualCNode.SubType.INPUT_EVENT_CHECK, HenVirtualCNode.SubType.INPUT_ACTION_CHECK:
+			var _inputs: Array = get_inputs(_save_data)
+			if _inputs.is_empty() or not input_has_connection(_inputs[0].id, _save_data):
+				errors.append({
+					id = id,
+					description = 'Missing event input connection.',
+					type = 'error'
+				})
+
+		HenVirtualCNode.SubType.MAKE_TRANSITION:
+			var _inputs: Array = get_inputs(_save_data)
+			if not _inputs.is_empty():
+				var first_input: HenVCInOutData = _inputs[0]
+				var state: HenSaveState = first_input.get_res(_save_data)
+				
+				if not state:
+					errors.append({
+						id = id,
+						description = 'Target State resource is missing.',
+						type = 'error'
+					})
+				else:
+					var flow_found: bool = false
+					for param: HenSaveParam in state.flow_outputs:
+						if param.id == first_input.res_data.get('flow_id'):
+							flow_found = true
+							break
+					
+					if not flow_found:
+						errors.append({
+							id = id,
+							description = 'Selected State Flow not found.',
+							type = 'error'
+						})
+
+		HenVirtualCNode.SubType.SIGNAL_CONNECTION, HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
+			res = get_res(_save_data)
+			if not res:
+				errors.append({
+					id = id,
+					description = 'Signal resource is missing.',
+					type = 'error'
+				})
+		
+		HenVirtualCNode.SubType.STATE_TRANSITION:
+			res = get_res(_save_data)
+			if not res:
+				errors.append({
+					id = id,
+					description = 'State resource is missing.',
+					type = 'error'
+				})
+				
+		HenVirtualCNode.SubType.MACRO:
+			res = get_res(_save_data)
+			if not res:
+				errors.append({
+					id = id,
+					description = 'Macro resource is missing.',
+					type = 'error'
+				})
+			else:
+				var macro_route: HenRouteData = (res as HenSaveMacro).get_route(_save_data)
+				if not macro_route:
+					errors.append({
+						id = id,
+						description = 'Macro route not found.',
+						type = 'error'
+					})
+				else:
+					var input_ref = HenVirtualCNodeCode.search_macro_input(_save_data, res)
+					if not input_ref:
+						errors.append({
+							id = id,
+							description = 'Macro has no Input node.',
+							type = 'error'
+						})
+
+	return errors

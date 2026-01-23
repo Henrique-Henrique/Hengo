@@ -18,3 +18,9 @@ signal request_list_update
 # route
 signal add_virtual_cnode_to_route(_id: String, _vc: HenVirtualCNode)
 signal remove_virtual_cnode_from_route(_id: String, _vc: HenVirtualCNode)
+
+# connections
+signal connection_added(_connection: HenVCConnectionData)
+signal connection_removed(_connection: HenVCConnectionData)
+signal flow_connection_added(_connection: HenVCFlowConnectionData)
+signal flow_connection_removed(_connection: HenVCFlowConnectionData)

@@ -4,6 +4,7 @@ class_name HenVirtualCNodeRenderer extends HenVirtualCNodeIO
 
 
 func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
+	# configures the cnode visual state, connections, and flows
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	_cnode.position = position
 	_cnode.visible = true
@@ -186,7 +187,6 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 		(flow_c.get_node('FlowSlot/Label') as Label).visible = false
 
-	# Showing Flows
 	match type:
 		HenVirtualCNode.Type.DEFAULT:
 			var container = flow_container.get_child(0)
@@ -305,10 +305,11 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 	if invalid:
 		_cnode.modulate = Color(1, 1, 1, .3)
+	elif not _vc.current_errors.is_empty():
+		_cnode.modulate = Color('ef4444')
 	else:
 		_cnode.modulate = Color.WHITE
 
-	# drawing the connections	
 	await RenderingServer.frame_pre_draw
 
 	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
@@ -321,6 +322,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 
 func configure_cnode_to_hide(_cnode: HenCnode) -> void:
+	# hides the cnode and cleans up connections
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	is_showing = false
 
