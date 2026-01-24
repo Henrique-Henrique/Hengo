@@ -110,7 +110,7 @@ func clear_in_out(_is_input: bool) -> void:
 
 func input_has_connection(_id: int, _save_data: HenSaveData) -> bool:
 	for input_connection: HenVCConnectionData in _save_data.get_connections_by_id(id):
-		if input_connection.to_id == _id:
+		if input_connection.to_id == _id and input_connection.to_node_id == id:
 			return true
 
 	return false
@@ -118,7 +118,7 @@ func input_has_connection(_id: int, _save_data: HenSaveData) -> bool:
 
 func output_has_connection(_id: int, _save_data: HenSaveData) -> bool:
 	for output_connection: HenVCConnectionData in _save_data.get_connections_by_id(id):
-		if output_connection.from_id == _id:
+		if output_connection.from_id == _id and output_connection.from_node_id == id:
 			return true
 
 	return false
