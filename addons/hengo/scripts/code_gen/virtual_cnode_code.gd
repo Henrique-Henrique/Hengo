@@ -33,10 +33,9 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 				if global.USE_MACRO_REF:
 					var flow: HenVCFlowConnectionData = get_macro_flow_connection(_save_data, global.MACRO_REF, _id) if not _save_data.get_outgoing_flow_connection_from_vc(global.MACRO_REF).is_empty() else null
 
+
 					if flow and flow.get_to(_save_data):
 						stack.append({node = flow.get_to(_save_data), id = flow.to_id})
-					
-					global.USE_MACRO_REF = false
 			_:
 				token_list.append(get_token(_save_data, vc))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
@@ -130,12 +129,22 @@ static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow
 
 	if input_flow_to:
 		var global: HenGlobal = Engine.get_singleton(&'Global')
+		var prev_use_macro_ref: bool = global.USE_MACRO_REF
+		var prev_macro_ref: HenVirtualCNode = global.MACRO_REF
+		var prev_macro_use_self: bool = global.MACRO_USE_SELF
+		var prev_use_macro_use_self: bool = global.USE_MACRO_USE_SELF
+
 		global.USE_MACRO_REF = true
 		global.MACRO_REF = _vc
 		global.MACRO_USE_SELF = _vc.route_type != HenRouter.ROUTE_TYPE.STATE
 		global.USE_MACRO_USE_SELF = true
+		
 		flow_tokens = get_flow_tokens(_save_data, input_flow_to, input_flow.to_id)
-		global.USE_MACRO_USE_SELF = false
+		
+		global.USE_MACRO_REF = prev_use_macro_ref
+		global.MACRO_REF = prev_macro_ref
+		global.MACRO_USE_SELF = prev_macro_use_self
+		global.USE_MACRO_USE_SELF = prev_use_macro_use_self
 
 	return {
 		vc_id = _vc.id,
