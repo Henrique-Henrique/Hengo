@@ -523,7 +523,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				event_type = _vc.input_code_value_map.get('event_type', ''),
 				check_pressed = _vc.input_code_value_map.get('check_pressed', true),
 				property = _vc.input_code_value_map.get('property', ''),
-				value = value_code
+				compare_value = value_code
 			})
 		HenVirtualCNode.SubType.INPUT_ACTION_CHECK:
 			var inputs: Array[HenVCInOutData] = _vc.get_inputs(_save_data)

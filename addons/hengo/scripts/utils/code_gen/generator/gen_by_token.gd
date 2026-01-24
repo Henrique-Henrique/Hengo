@@ -300,7 +300,7 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 				type = _token.event_type,
 				pressed = pressed_check,
 				prop = _token.property,
-				value = _token.value
+				value = _token.compare_value
 			})
 		HenVirtualCNode.SubType.INPUT_ACTION_CHECK:
 			# generates: event.is_action_pressed("action")
