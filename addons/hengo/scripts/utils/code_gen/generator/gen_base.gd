@@ -50,6 +50,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 
 				(_refs.override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0))
 
+
 	code += map_all_macros(_save_data, _refs)
 
 	var ready_code: Array = []
@@ -164,33 +165,84 @@ static func map_all_macros(_save_data: HenSaveData, _refs: HenTypeReferences) ->
 
 	for route: HenRouteData in _save_data.routes.values():
 		for macro_ref: HenVirtualCNode in route.virtual_cnode_list:
-			if macro_ref.type == HenVirtualCNode.Type.MACRO:
-				var macro: HenSaveMacro = macro_ref.get_res(_save_data)
+			match macro_ref.sub_type:
+				HenVirtualCNode.SubType.MACRO:
+					var macro: HenSaveMacro = macro_ref.get_res(_save_data)
 
-				if macro:
-					for macro_var: HenSaveParam in macro.local_vars:
-						code += HenGeneratorVariable.get_var_code_from_param(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}))
+					if macro:
+						for macro_var: HenSaveParam in macro.local_vars:
+							code += HenGeneratorVariable.get_var_code_from_param(macro_var, '{name}_{id}'.format({name = macro_var.name.to_snake_case(), id = macro_ref.id}))
 
-					for v_cnode: HenVirtualCNode in macro.get_route(_save_data).virtual_cnode_list:
-						if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-							global.USE_MACRO_REF = true
-							global.MACRO_REF = macro_ref
-							global.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
-							global.USE_MACRO_USE_SELF = true
+						for v_cnode: HenVirtualCNode in macro.get_route(_save_data).virtual_cnode_list:
+							if v_cnode.sub_type == HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
+								global.USE_MACRO_REF = true
+								global.MACRO_REF = macro_ref
+								global.MACRO_USE_SELF = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
+								global.USE_MACRO_USE_SELF = true
 
-							var flow_connections: Array = _save_data.get_flow_connection_from_vc(v_cnode)
-							
-							if (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
-								if not _refs.override_virtual_data.has(v_cnode.name):
-									_refs.override_virtual_data[v_cnode.name] = {
-										params = HenVirtualCNodeCode.get_output_token_list(_save_data, v_cnode),
-										tokens = []
-									}
+								var flow_connections: Array = _save_data.get_flow_connection_from_vc(v_cnode)
+								
+								if (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
+									if not _refs.override_virtual_data.has(v_cnode.name):
+										_refs.override_virtual_data[v_cnode.name] = {
+											params = HenVirtualCNodeCode.get_output_token_list(_save_data, v_cnode),
+											tokens = []
+										}
 
-								for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0):
-									token.vc_id = macro_ref.id
-									(_refs.override_virtual_data[v_cnode.name].tokens as Array).append(token)
+									for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0):
+										token.vc_id = macro_ref.id
+										(_refs.override_virtual_data[v_cnode.name].tokens as Array).append(token)
 
-							global.USE_MACRO_REF = false
+								global.USE_MACRO_REF = false
+
+				HenVirtualCNode.SubType.SCRIPT_MACRO:
+					var res: HenSaveMacro = macro_ref.get_res(_save_data)
+					if res and FileAccess.file_exists(res.script_path):
+						var script: GDScript = load(res.script_path)
+						if script:
+							var instance: HenScriptMacroBase = script.new()
+							if instance:
+								var overrides: Array[Dictionary] = instance.get_function_overrides()
+								for override: Dictionary in overrides:
+									var func_name: String = override.get('name', '')
+									if func_name.is_empty(): continue
+									
+									if not _refs.override_virtual_data.has(func_name):
+										_refs.override_virtual_data[func_name] = {
+											params = override.get('params', []),
+											tokens = []
+										}
+									
+									var body: Variant = override.get('body', 'pass')
+									
+									if body is Callable:
+										var method_name: String = (body as Callable).get_method()
+										var object: Object = (body as Callable).get_object()
+										var script_source: String = ''
+										
+										if object and object.get_script():
+											script_source = object.get_script().source_code
+										
+										var parsed: Dictionary = HenVirtualCNodeCode.parse_script_function(script_source, method_name)
+										if parsed.has('body'):
+											body = parsed.body
+										else:
+											body = '# error: could not find body for callable ' + method_name
+									
+									var body_str: String = str(body)
+									var use_self: bool = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
+									
+									if use_self:
+										var regex: RegEx = RegEx.new()
+										regex.compile('\\b_ref\\b')
+										body_str = regex.sub(body_str, 'self', true)
+									
+									# add raw_code token
+									(_refs.override_virtual_data[func_name].tokens as Array).append({
+										vc_id = macro_ref.id,
+										type = HenVirtualCNode.SubType.RAW_CODE,
+										code = {value = body_str},
+										use_self = false
+									})
 
 	return code

@@ -5,6 +5,8 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 @export var outputs: Array[HenSaveParam]
 @export var flow_inputs: Array[HenSaveParam]
 @export var flow_outputs: Array[HenSaveParam]
+@export var script_path: String
+@export var is_script_macro: bool = false
 
 
 static func create() -> HenSaveMacro:
@@ -49,7 +51,7 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 		HenVirtualCNode.SubType.MACRO_OUTPUT:
 			for param: HenSaveParam in outputs:
 				arr.append(param.get_data())
-		HenVirtualCNode.SubType.MACRO:
+		HenVirtualCNode.SubType.MACRO, HenVirtualCNode.SubType.SCRIPT_MACRO:
 			for param: HenSaveParam in inputs:
 				arr.append(param.get_data())
 
@@ -63,7 +65,7 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 		HenVirtualCNode.SubType.MACRO_INPUT:
 			for param: HenSaveParam in inputs:
 				arr.append(param.get_data())
-		HenVirtualCNode.SubType.MACRO:
+		HenVirtualCNode.SubType.MACRO, HenVirtualCNode.SubType.SCRIPT_MACRO:
 			for param: HenSaveParam in outputs:
 				arr.append(param.get_data())
 
@@ -77,7 +79,7 @@ func get_flow_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 		HenVirtualCNode.SubType.MACRO_OUTPUT:
 			for param: HenSaveParam in flow_outputs:
 				arr.append(param.get_data())
-		HenVirtualCNode.SubType.MACRO:
+		HenVirtualCNode.SubType.MACRO, HenVirtualCNode.SubType.SCRIPT_MACRO:
 			for param: HenSaveParam in flow_inputs:
 				arr.append(param.get_data())
 
@@ -91,7 +93,7 @@ func get_flow_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 		HenVirtualCNode.SubType.MACRO_INPUT:
 			for param: HenSaveParam in flow_inputs:
 				arr.append(param.get_data())
-		HenVirtualCNode.SubType.MACRO:
+		HenVirtualCNode.SubType.MACRO, HenVirtualCNode.SubType.SCRIPT_MACRO:
 			for param: HenSaveParam in flow_outputs:
 				arr.append(param.get_data())
 
@@ -104,7 +106,7 @@ func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = fals
 	return {
 			name = name,
 			type = HenVirtualCNode.Type.MACRO,
-			sub_type = HenVirtualCNode.SubType.MACRO,
+			sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO if is_script_macro else HenVirtualCNode.SubType.MACRO,
 			route = router.current_route,
 			res_data = get_res_data(HenSideBar.AddType.MACRO, _save_data_id)
 	}

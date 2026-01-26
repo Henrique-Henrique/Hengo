@@ -10,8 +10,12 @@ func _init() -> void:
 	type = &'Variant'
 
 
-static func create() -> HenSaveParam:
+static func create(data: Dictionary = {}) -> HenSaveParam:
 	var p: HenSaveParam = HenSaveParam.new()
+	if data:
+		if data.has('name'): p.name = data.name
+		if data.has('type'): p.type = data.type
+		if data.has('id'): p.id = data.id
 	return p
 
 

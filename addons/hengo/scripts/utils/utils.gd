@@ -482,7 +482,7 @@ static func get_current_ast_list() -> HenMapDependencies.ProjectAST:
 	var ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
 
 	ast.identity = global.SAVE_DATA.identity
-	ast.macros = global.SAVE_DATA.macros
+	ast.macros = global.SAVE_DATA.macros + global.script_macros
 	ast.variables = global.SAVE_DATA.variables
 	ast.functions = global.SAVE_DATA.functions
 	ast.signals = global.SAVE_DATA.signals
@@ -526,11 +526,12 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 				HenSideBar.AddType.SIGNAL:
 					list = _save_data.signals
 				HenSideBar.AddType.MACRO:
-					list = _save_data.macros
+					list = _save_data.macros.duplicate()
+					list.append_array((Engine.get_singleton(&'Global') as HenGlobal).script_macros)
 				HenSideBar.AddType.STATE:
 					list = _save_data.states
 				HenSideBar.AddType.LOCAL_VAR:
-					var check_list = func(l: Array) -> HenSaveParam:
+					var check_list: Callable = func(l: Array) -> HenSaveParam:
 						for item in l:
 							if item is HenSaveResTypeWithRoute:
 								for lv: HenSaveParam in item.local_vars:

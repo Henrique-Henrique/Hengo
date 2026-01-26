@@ -57,6 +57,15 @@ func load(_id: StringName, _headless: bool = false) -> bool:
 	# loading hengo script data
 	if save_data:
 		global.SAVE_DATA = save_data
+		
+		# clean up script macros from save data
+		for i: int in range(save_data.macros.size() - 1, -1, -1):
+			if save_data.macros[i].is_script_macro:
+				save_data.macros.remove_at(i)
+		
+		# load script macros
+		HenScriptMacroLoader.load_script_macros()
+		
 		reset_to_load(_id, _headless)
 	else:
 		return false

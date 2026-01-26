@@ -36,6 +36,8 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 
 					if flow and flow.get_to(_save_data):
 						stack.append({node = flow.get_to(_save_data), id = flow.to_id})
+			HenVirtualCNode.SubType.SCRIPT_MACRO:
+				token_list.append(get_script_macro_token(_save_data, vc, _id))
 			_:
 				token_list.append(get_token(_save_data, vc))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
@@ -45,6 +47,173 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 					stack.append({node = first.get_to(_save_data), id = first.to_id})
 
 	return _token_list
+
+
+static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
+	# handles script macro token generation and argument injection
+	var res: HenSaveMacro = _vc.get_res(_save_data)
+	if not res or not FileAccess.file_exists(res.script_path):
+		return get_invalid_token()
+	
+	var flow_input_idx: int = -1
+	var flow_inputs: Array = _vc.get_flow_inputs(_save_data)
+	var target_flow_input: HenVCFlow = null
+
+	for i: int in range(flow_inputs.size()):
+		if flow_inputs[i].id == _flow_id:
+			flow_input_idx = i
+			target_flow_input = flow_inputs[i]
+			break
+	
+	if flow_input_idx == -1:
+		return get_invalid_token()
+	
+	var script_content: String = FileAccess.get_file_as_string(res.script_path)
+	var func_name: String
+	
+	if target_flow_input:
+		func_name = 'get_flow_' + str(target_flow_input.id)
+	else:
+		func_name = 'get_flow_' + str(flow_input_idx)
+	
+	var parsed: Dictionary = parse_script_function(script_content, func_name)
+	if parsed.is_empty():
+		return {
+			vc_id = _vc.id,
+			type = HenVirtualCNode.SubType.RAW_CODE,
+			code = {value = '# error: function ' + func_name + ' not found in script macro.'},
+			use_self = false
+		}
+	
+	var code_body: String = parsed.body
+	var args: Array = parsed.args
+	var available_flow_outputs: Array = _vc.get_flow_outputs(_save_data)
+	var available_inputs: Array = _vc.get_inputs(_save_data)
+	var flow_output_idx: int = 0
+	
+	# maps arguments to inputs or flow outputs based on availability
+	for arg_name: String in args:
+		var matched_input: HenVCInOutData = null
+		
+		for input: HenVCInOutData in available_inputs:
+			if input.name == arg_name:
+				matched_input = input
+				break
+		
+		if matched_input:
+			var input_token: Dictionary = get_input_token(_save_data, _vc, matched_input.id)
+			var input_code: String = HenGeneratorByToken.get_code_by_token(_save_data, input_token)
+			
+			code_body = _inject_code_into_body(code_body, arg_name, input_code)
+			continue
+		
+		if flow_output_idx < available_flow_outputs.size():
+			var flow_output: HenVCFlow = available_flow_outputs[flow_output_idx]
+			var generated_flow_code: String = 'pass'
+			var connections: Array = _save_data.get_outgoing_flow_connection_from_vc(_vc)
+			var connection: HenVCFlowConnectionData = null
+			
+			for conn: HenVCFlowConnectionData in connections:
+				if conn.from_id == flow_output.id:
+					connection = conn
+					break
+			
+			if connection:
+				var target_node: HenVirtualCNode = connection.get_to(_save_data)
+				if target_node:
+					generated_flow_code = get_virtual_cnode_code(_save_data, target_node, connection.to_id, '\n')
+			
+			code_body = _inject_code_into_body(code_body, arg_name, generated_flow_code)
+			flow_output_idx += 1
+		
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
+	
+	if use_self:
+		var regex: RegEx = RegEx.new()
+		regex.compile('\\b_ref\\b')
+		code_body = regex.sub(code_body, 'self', true)
+
+	return {
+		vc_id = _vc.id,
+		type = HenVirtualCNode.SubType.RAW_CODE,
+		code = {value = code_body},
+		use_self = use_self
+	}
+
+
+static func parse_script_function(script: String, func_name: String) -> Dictionary:
+	# parses script text to extract args and body for a specific function
+	var lines: PackedStringArray = script.split('\n')
+	var found: bool = false
+	var args: Array = []
+	var body: String = ''
+	var base_indent: int = 0
+	
+	for i: int in range(lines.size()):
+		var line: String = lines[i]
+		if not found:
+			var stripped: String = line.strip_edges()
+			if stripped.begins_with('func ' + func_name + '('):
+				found = true
+				var start: int = stripped.find('(') + 1
+				var end: int = stripped.find(')')
+				var args_str: String = stripped.substr(start, end - start)
+				var raw_args: PackedStringArray = args_str.split(',')
+				for arg: String in raw_args:
+					var a: String = arg.strip_edges()
+					if not a.is_empty():
+						args.append(a)
+				
+				for j: int in range(i + 1, lines.size()):
+					var next_line: String = lines[j]
+					if not next_line.strip_edges().is_empty():
+						base_indent = next_line.length() - next_line.strip_edges(true, false).length()
+						break
+		else:
+			if line.strip_edges().is_empty():
+				body += '\n'
+				continue
+				
+			var current_indent: int = line.length() - line.strip_edges(true, false).length()
+			if current_indent < base_indent:
+				break
+			
+			body += line.substr(base_indent) + '\n'
+			
+	if not found:
+		return {}
+		
+	return {args = args, body = body.strip_edges(false, true)}
+
+
+static func _inject_code_into_body(body: String, placeholder: String, injection: String) -> String:
+	# replaces placeholder with injected code preserving indentation
+	var lines: PackedStringArray = body.split('\n')
+	var result: String = ''
+	
+	for line: String in lines:
+		var pos: int = line.find(placeholder)
+		if pos != -1:
+			var regex: RegEx = RegEx.new()
+			regex.compile('\\b' + placeholder + '\\b')
+			if regex.search(line):
+				var injection_lines: PackedStringArray = injection.split('\n')
+				var indented_injection: String = injection_lines[0]
+				var line_indent: String = line.substr(0, line.length() - line.strip_edges(true, false).length())
+				
+				if injection_lines.size() > 1:
+					for j: int in range(1, injection_lines.size()):
+						indented_injection += '\n' + line_indent + injection_lines[j]
+				
+				var new_line: String = regex.sub(line, indented_injection, true)
+				result += new_line + '\n'
+			else:
+				result += line + '\n'
+		else:
+			result += line + '\n'
+			
+	return result
 
 
 static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: Array) -> Dictionary:
@@ -550,13 +719,15 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 	return token
 
 
-static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> String:
-	var code: String = ''
+static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int, _separator: String = '') -> String:
+	var codes: PackedStringArray = []
 
 	for token in HenVirtualCNodeCode.get_flow_tokens(_save_data, _vc, _flow_id):
-		code += HenGeneratorByToken.get_code_by_token(_save_data, token)
+		var next_code: String = HenGeneratorByToken.get_code_by_token(_save_data, token)
+		if not next_code.is_empty():
+			codes.append(next_code)
 
-	return code
+	return _separator.join(codes)
 
 
 static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool) -> String:
@@ -576,13 +747,17 @@ static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_
 		_:
 			if HenEnums.VARIANT_TYPES.has(_type):
 				return _type + '()'
-			elif ClassDB.can_instantiate(_type):
+			elif ClassDB.class_exists(_type):
+				if not _use_self:
+					return '_ref'
+
 				if HenUtils.is_type_relation_valid(
 					_save_data.identity.type,
 					_type,
 				):
-					return '_ref' if not _use_self else 'self'
+					return 'self'
 				
-				return _type + '.new()'
+				if ClassDB.can_instantiate(_type):
+					return _type + '.new()'
 	
 	return 'null'

@@ -106,6 +106,7 @@ var USE_MACRO_USE_SELF: bool = false
 var MACRO_REF: HenVirtualCNode
 var USE_MACRO_REF: bool = false
 var MACRO_USE_SELF: bool = false
+var script_macros: Array[HenSaveMacro] = []
 
 
 # terminal
