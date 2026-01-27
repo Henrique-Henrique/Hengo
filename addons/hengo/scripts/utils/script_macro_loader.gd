@@ -45,6 +45,7 @@ static func _load_macro_script(path: String, global: HenGlobal) -> void:
 	macro.name = path.get_file().get_basename()
 	macro.is_script_macro = true
 	macro.script_path = path
+	macro.id = instance.get_id()
 	
 	for input: Dictionary in instance.get_inputs():
 		var param: HenSaveParam = HenSaveParam.create(input)
