@@ -7,10 +7,7 @@ const TEMP_MACRO_PATH: String = 'res://hengo/macros/temp_test_macro_gen.gd'
 func test_generate_script_macro_from_file() -> void:
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
-
-func get_script_id() -> int:
-	return 0
+extends HenScriptMacroBase
 
 func get_inputs() -> Array:
 	return []
@@ -98,12 +95,9 @@ func get_function_overrides() -> Array[Dictionary]:
 func test_macro_generation_with_base_route() -> void:
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
+extends HenScriptMacroBase
 
 var _ref: Node
-
-func get_script_id() -> int:
-	return 0
 
 func get_inputs() -> Array:
 	return []
@@ -161,12 +155,9 @@ func get_flow_0(out) -> void:
 func test_macro_generation_with_state_route() -> void:
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
+extends HenScriptMacroBase
 
 var _ref: Node
-
-func get_script_id() -> int:
-	return 0
 
 func get_inputs() -> Array:
 	return []
@@ -222,12 +213,9 @@ func test_macro_override_ref_replacement_with_callable() -> void:
 	const TEMP_MACRO_CALLABLE_PATH: String = 'res://hengo/macros/temp_test_macro_callable_ref.gd'
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
+extends HenScriptMacroBase
 
 var _ref: Node
-
-func get_script_id() -> int:
-	return 0
 
 func get_inputs() -> Array:
 	return []
@@ -298,12 +286,9 @@ func test_macro_id_replacement() -> void:
 	const TEMP_MACRO_ID_PATH: String = 'res://hengo/macros/temp_test_macro_id.gd'
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
+extends HenScriptMacroBase
 
 var _ref: Node
-
-func get_script_id() -> int:
-	return 12345
 
 func get_inputs() -> Array:
 	return []
@@ -368,12 +353,9 @@ func test_macro_id_replacement_negative() -> void:
 	const TEMP_MACRO_NEG_ID_PATH: String = 'res://hengo/macros/temp_test_macro_neg_id.gd'
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
+extends HenScriptMacroBase
 
 var _ref: Node
-
-func get_script_id() -> int:
-	return -999
 
 func get_inputs() -> Array:
 	return []
@@ -434,7 +416,7 @@ func test_macro_input_collision_with_string_literal() -> void:
 	const TEMP_MACRO_COLLISION_PATH: String = 'res://hengo/macros/temp_test_macro_collision.gd'
 	var script_source: String = """
 @tool
-extends 'res://addons/hengo/scripts/utils/script_macro_base.gd'
+extends HenScriptMacroBase
 
 var _ref: Node
 
