@@ -184,7 +184,6 @@ func on_cnode_selected(_selected: bool) -> void:
 func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-
 	if invalid:
 		global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
 	elif not current_errors.is_empty():

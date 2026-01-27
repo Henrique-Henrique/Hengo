@@ -52,9 +52,11 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
 	# handles script macro token generation and argument injection
 	var res: HenSaveMacro = _vc.get_res(_save_data)
+
 	if not res or not FileAccess.file_exists(res.script_path):
 		return get_invalid_token()
-	
+
+
 	var flow_input_idx: int = -1
 	var flow_inputs: Array = _vc.get_flow_inputs(_save_data)
 	var target_flow_input: HenVCFlow = null
@@ -129,10 +131,7 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
 	
-	if use_self:
-		var regex: RegEx = RegEx.new()
-		regex.compile('\\b_ref\\b')
-		code_body = regex.sub(code_body, 'self', true)
+	code_body = process_script_macro_body(code_body, use_self, _vc.id)
 
 	return {
 		vc_id = _vc.id,
@@ -140,6 +139,24 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 		code = {value = code_body},
 		use_self = use_self
 	}
+
+
+static func process_script_macro_body(body: String, use_self: bool, macro_id: Variant = null) -> String:
+	if use_self:
+		var regex: RegEx = RegEx.new()
+		regex.compile('\\b_ref\\b')
+		body = regex.sub(body, 'self', true)
+	
+	if macro_id != null:
+		var regex: RegEx = RegEx.new()
+		regex.compile('%([a-zA-Z0-9_]+)%')
+		
+		# replace all occurrences
+		for result: RegExMatch in regex.search_all(body):
+			var property: String = result.get_string(1)
+			body = body.replace(result.get_string(), (property + '_' + str(macro_id)).to_snake_case())
+	
+	return body
 
 
 static func parse_script_function(script: String, func_name: String) -> Dictionary:
@@ -184,7 +201,38 @@ static func parse_script_function(script: String, func_name: String) -> Dictiona
 	if not found:
 		return {}
 		
-	return {args = args, body = body.strip_edges(false, true)}
+	body = body.strip_edges(false, true)
+	var body_lines: PackedStringArray = body.split('\n')
+	
+	var indent_size: int = 4
+	if Engine.is_editor_hint():
+		var settings = EditorInterface.get_editor_settings()
+		if settings:
+			indent_size = settings.get_setting("text_editor/behavior/indent/size")
+	
+	if indent_size <= 0: indent_size = 4
+	
+	var spaces_str: String = " ".repeat(indent_size)
+	
+	for k: int in range(body_lines.size()):
+		var line: String = body_lines[k]
+		var prefix_len: int = 0
+		
+		for c_idx: int in range(line.length()):
+			if line[c_idx] != ' ' and line[c_idx] != '\t':
+				break
+			prefix_len += 1
+			
+		var prefix: String = line.substr(0, prefix_len)
+		var remainder: String = line.substr(prefix_len)
+		
+		var new_prefix: String = prefix.replace(spaces_str, '\t')
+		
+		body_lines[k] = new_prefix + remainder
+	
+	body = '\n'.join(body_lines)
+	
+	return {args = args, body = body}
 
 
 static func _inject_code_into_body(body: String, placeholder: String, injection: String) -> String:
@@ -196,7 +244,7 @@ static func _inject_code_into_body(body: String, placeholder: String, injection:
 		var pos: int = line.find(placeholder)
 		if pos != -1:
 			var regex: RegEx = RegEx.new()
-			regex.compile('\\b' + placeholder + '\\b')
+			regex.compile('(?<!%)' + '\\b' + placeholder + '\\b' + '(?!%)')
 			if regex.search(line):
 				var injection_lines: PackedStringArray = injection.split('\n')
 				var indented_injection: String = injection_lines[0]

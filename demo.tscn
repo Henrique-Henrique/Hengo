@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://b4m4hqgoiaonj" path="res://hengo/scripts/4990885773792649780.gd" id="2_0bhed"]
+[ext_resource type="Script" uid="uid://cwsxc8uyw1nm4" path="res://hengo/scripts/4849947087703845787.gd" id="2_0bhed"]
 
 [node name="Node" type="Node2D"]
 
@@ -13,6 +13,6 @@ text = "test"
 metadata/_edit_use_anchors_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(510, 307)
+position = Vector2(161, 305)
 texture = ExtResource("1_wvpun")
 script = ExtResource("2_0bhed")

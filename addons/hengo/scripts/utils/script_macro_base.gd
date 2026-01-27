@@ -1,6 +1,6 @@
 @tool
+@abstract
 class_name HenScriptMacroBase extends RefCounted
-
 
 # returns an array of dictionary with { name: string, type: string, id: int }
 func get_inputs() -> Array[Dictionary]:

@@ -33,10 +33,10 @@ static func _clear_existing_script_macros(global: HenGlobal) -> void:
 
 static func _load_macro_script(path: String, global: HenGlobal) -> void:
 	# instantiates the macro script to parse its metadata into a hensavemacro
-	var script: GDScript = load(path) as GDScript
+	var script: GDScript = load(path)
 	if not script:
 		return
-		
+
 	var instance: HenScriptMacroBase = script.new() as HenScriptMacroBase
 	if not instance:
 		return
@@ -45,8 +45,6 @@ static func _load_macro_script(path: String, global: HenGlobal) -> void:
 	macro.name = path.get_file().get_basename()
 	macro.is_script_macro = true
 	macro.script_path = path
-
-	macro.id = ResourceLoader.get_resource_uid(path)
 	
 	for input: Dictionary in instance.get_inputs():
 		var param: HenSaveParam = HenSaveParam.create(input)

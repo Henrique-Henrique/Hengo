@@ -232,10 +232,7 @@ static func map_all_macros(_save_data: HenSaveData, _refs: HenTypeReferences) ->
 									var body_str: String = str(body)
 									var use_self: bool = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 									
-									if use_self:
-										var regex: RegEx = RegEx.new()
-										regex.compile('\\b_ref\\b')
-										body_str = regex.sub(body_str, 'self', true)
+									body_str = HenVirtualCNodeCode.process_script_macro_body(body_str, use_self, macro_ref.id)
 									
 									# add raw_code token
 									(_refs.override_virtual_data[func_name].tokens as Array).append({
