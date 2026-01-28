@@ -129,12 +129,12 @@ static func paste(_target_pos: Vector2) -> int:
 		if has_res_data:
 			var inputs_data: Array = node_data.get('inputs', [])
 			for input: Dictionary in inputs_data:
-				var input_id: int = input.get('id', 0)
+				var input_id: StringName = input.get('id', 0)
 				io_id_map[input_id] = input_id
 
 			var outputs_data: Array = node_data.get('outputs', [])
 			for output: Dictionary in outputs_data:
-				var output_id: int = output.get('id', 0)
+				var output_id: StringName = output.get('id', 0)
 				io_id_map[output_id] = output_id
 		else:
 			# process inputs with new ids
@@ -172,9 +172,8 @@ static func paste(_target_pos: Vector2) -> int:
 				var old_map: Dictionary = node_data.get('input_code_value_map')
 				var new_map: Dictionary = {}
 				for old_key: Variant in old_map:
-					var old_key_int: int = int(old_key)
-					if io_id_map.has(old_key_int):
-						new_map[io_id_map[old_key_int]] = old_map[old_key]
+					if io_id_map.has(old_key):
+						new_map[io_id_map[old_key]] = old_map[old_key]
 				config.input_code_value_map = new_map
 
 		var v_cnode: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(config)
@@ -183,10 +182,10 @@ static func paste(_target_pos: Vector2) -> int:
 
 	# second pass: create connections
 	for conn_data: Dictionary in connections_data:
-		var old_from_node_id: int = conn_data.get('from_node_id', 0)
-		var old_to_node_id: int = conn_data.get('to_node_id', 0)
-		var old_from_id: int = conn_data.get('from_id', 0)
-		var old_to_id: int = conn_data.get('to_id', 0)
+		var old_from_node_id: StringName = conn_data.get('from_node_id', 0)
+		var old_to_node_id: StringName = conn_data.get('to_node_id', 0)
+		var old_from_id: StringName = conn_data.get('from_id', 0)
+		var old_to_id: StringName = conn_data.get('to_id', 0)
 
 		if not node_id_map.has(old_from_node_id) or not node_id_map.has(old_to_node_id):
 			continue

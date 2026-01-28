@@ -1,7 +1,6 @@
 extends HenTestSuite
 
-
-# Creates and returns a default expression node for testing
+# creates and returns a default expression node for testing
 func _create_expression_node() -> HenVirtualCNode:
 	return HenVirtualCNode.instantiate_virtual_cnode({
 		type = HenVirtualCNode.Type.EXPRESSION,
@@ -32,30 +31,30 @@ func _create_expression_node() -> HenVirtualCNode:
 	})
 
 
-# Tests an expression node with no connected inputs
+# tests an expression node with no connected inputs
 func test_expression_with_no_inputs() -> void:
 	var vc: HenVirtualCNode = _create_expression_node()
-	
-	# Inputs should default to null when not connected
+
+	# inputs should default to null when not connected
 	assert_str(HenTest.get_vc_code(vc)).is_equal('null + null')
 
 
-# Tests an expression with a single connected input
+# tests an expression with a single connected input
 func test_expression_with_one_input() -> void:
 	var vc: HenVirtualCNode = _create_expression_node()
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
-	# The first input is connected to a constant value
+	# the first input is connected to a constant value
 	vc.get_new_input_connection_command(StringName('1'), StringName('0'), value_node).add()
 	assert_str(HenTest.get_vc_code(vc)).is_equal('Test.CONST + null')
 
 
-# Tests an expression with all inputs connected
+# tests an expression with all inputs connected
 func test_expression_with_two_inputs() -> void:
 	var vc: HenVirtualCNode = _create_expression_node()
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
-	# Both inputs are connected to the same constant
+	# both inputs are connected to the same constant
 	vc.get_new_input_connection_command(StringName('1'), StringName('0'), value_node).add()
 	vc.get_new_input_connection_command(StringName('2'), StringName('0'), value_node).add()
 

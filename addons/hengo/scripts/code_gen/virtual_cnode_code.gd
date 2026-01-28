@@ -91,14 +91,14 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 	var args: Array = parsed.args
 	var available_flow_outputs: Array = _vc.get_flow_outputs(_save_data)
 	var available_inputs: Array = _vc.get_inputs(_save_data)
-	var flow_output_idx: int = 0
+
 	
 	# maps arguments to inputs or flow outputs based on availability
 	for arg_name: String in args:
 		var matched_input: HenVCInOutData = null
 		
 		for input: HenVCInOutData in available_inputs:
-			if input.name == arg_name:
+			if input.id == arg_name:
 				matched_input = input
 				break
 		
@@ -109,14 +109,20 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 			code_body = _inject_code_into_body(code_body, arg_name, input_code)
 			continue
 		
-		if flow_output_idx < available_flow_outputs.size():
-			var flow_output: HenVCFlow = available_flow_outputs[flow_output_idx]
+		# checks if arg matches any available flow output by ID
+		var matched_flow_output: HenVCFlow = null
+		for flow_out: HenVCFlow in available_flow_outputs:
+			if flow_out.id == arg_name:
+				matched_flow_output = flow_out
+				break
+		
+		if matched_flow_output:
 			var generated_flow_code: String = 'pass'
 			var connections: Array = _save_data.get_outgoing_flow_connection_from_vc(_vc)
 			var connection: HenVCFlowConnectionData = null
 			
 			for conn: HenVCFlowConnectionData in connections:
-				if conn.from_id == flow_output.id:
+				if conn.from_id == matched_flow_output.id:
 					connection = conn
 					break
 			
@@ -126,13 +132,91 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 					generated_flow_code = get_virtual_cnode_code(_save_data, target_node, connection.to_id, '\n')
 			
 			code_body = _inject_code_into_body(code_body, arg_name, generated_flow_code)
-			flow_output_idx += 1
+			continue
 		
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
 	
 	code_body = process_script_macro_body(code_body, use_self, _vc.id)
 
+	return {
+		vc_id = _vc.id,
+		type = HenVirtualCNode.SubType.RAW_CODE,
+		code = {value = code_body},
+		use_self = use_self
+	}
+
+
+static func get_script_macro_output_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _output_id: StringName) -> Dictionary:
+	var res: HenSaveMacro = _vc.get_res(_save_data)
+
+	if not res or not FileAccess.file_exists(res.script_path):
+		return get_invalid_token()
+
+	var output_idx: int = -1
+	var outputs: Array = _vc.get_outputs(_save_data)
+	var target_output: HenVCInOutData = null
+
+	for i: int in range(outputs.size()):
+		if outputs[i].id == _output_id:
+			output_idx = i
+			target_output = outputs[i]
+			break
+	
+	if output_idx == -1:
+		return get_invalid_token()
+	
+	var script_content: String = FileAccess.get_file_as_string(res.script_path)
+	var func_name: String
+	
+	if target_output:
+		func_name = 'get_output_' + str(target_output.id)
+	else:
+		func_name = 'get_output_' + str(output_idx)
+	
+	var parsed: Dictionary = parse_script_function(script_content, func_name)
+
+	# if default function is not found, try to find by index
+	if parsed.is_empty():
+		func_name = 'get_output_' + str(output_idx)
+		parsed = parse_script_function(script_content, func_name)
+
+	if parsed.is_empty():
+		return {
+			vc_id = _vc.id,
+			type = HenVirtualCNode.SubType.RAW_CODE,
+			code = {value = 'null # error: function ' + func_name + ' not found in script macro.'},
+			use_self = false
+		}
+	
+	var code_body: String = parsed.body
+	var args: Array = parsed.args
+	var available_inputs: Array = _vc.get_inputs(_save_data)
+	
+	# maps arguments to inputs based on availability
+	for arg_name: String in args:
+		var matched_input: HenVCInOutData = null
+		
+		for input: HenVCInOutData in available_inputs:
+			if input.id == arg_name:
+				matched_input = input
+				break
+		
+		if matched_input:
+			var input_token: Dictionary = get_input_token(_save_data, _vc, matched_input.id)
+			var input_code: String = HenGeneratorByToken.get_code_by_token(_save_data, input_token)
+			
+			code_body = _inject_code_into_body(code_body, arg_name, input_code)
+			continue
+		
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
+	
+	code_body = process_script_macro_body(code_body, use_self, _vc.id)
+
+	if code_body.strip_edges().begins_with('return '):
+		code_body = code_body.strip_edges().trim_prefix('return ')
+	
 	return {
 		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
@@ -454,6 +538,11 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 				var macro_output: HenVirtualCNode = search_macro_output(_save_data, macro_res)
 				var data: Dictionary = get_input_token(_save_data, macro_output, connection.from_id)
 				global.USE_MACRO_USE_SELF = false
+				return data
+			HenVirtualCNode.SubType.SCRIPT_MACRO:
+				var data: Dictionary = get_script_macro_output_token(_save_data, connection.get_from(_save_data), connection.from_id)
+				if not data.type == HenVirtualCNode.SubType.INVALID:
+					data.prop_name = input.name
 				return data
 			_:
 				var data: Dictionary = get_token(_save_data, connection.get_from(_save_data), get_output_index(_save_data, connection.get_from(_save_data), connection.from_id))
