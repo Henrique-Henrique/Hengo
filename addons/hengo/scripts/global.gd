@@ -74,12 +74,12 @@ var state_references: Dictionary = {}
 # counter
 var node_counter: int = 0
 
-func get_new_node_counter() -> int:
+func get_new_node_counter() -> StringName:
 	if not SAVE_DATA:
-		return 0
+		return ""
 
 	SAVE_DATA.counter += 1
-	return SAVE_DATA.counter
+	return StringName(str(SAVE_DATA.counter))
 
 
 # debug

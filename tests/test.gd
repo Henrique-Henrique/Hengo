@@ -1,19 +1,6 @@
 class_name HenTest extends RefCounted
 
 
-class CNodeConnection:
-	var from: HenVirtualCNode
-	var to: HenVirtualCNode
-	var from_id: int
-	var to_id: int
-
-	func _init(_from: HenVirtualCNode, _to: HenVirtualCNode, _from_id: int = 0, _to_id: int = 0) -> void:
-		from = _from
-		to = _to
-		from_id = _from_id
-		to_id = _to_id
-
-
 static func get_base_route() -> HenRouteData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	return global.SAVE_DATA.get_route(global.SAVE_DATA.identity.id)
@@ -27,11 +14,11 @@ static func get_void(_name: String = 'test_void', _route: HenRouteData = null) -
 	})
 
 
-static func get_void_with_input(_id: int = -1) -> HenVirtualCNode:
+static func get_void_with_input(_id: StringName = '') -> HenVirtualCNode:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		id = _id if _id >= 0 else global.get_new_node_counter(),
+		id = _id if _id else global.get_new_node_counter(),
 		name = 'test_void',
 		sub_type = HenVirtualCNode.SubType.VOID,
 		category = 'native',
@@ -46,11 +33,11 @@ static func get_void_with_input(_id: int = -1) -> HenVirtualCNode:
 	})
 
 
-static func get_const(_id: int = -1) -> HenVirtualCNode:
+static func get_const(_id: StringName = '') -> HenVirtualCNode:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	return HenVirtualCNode.instantiate_virtual_cnode({
-		id = _id if _id >= 0 else global.get_new_node_counter(),
+		id = _id if _id else global.get_new_node_counter(),
 		name = 'Test',
 		name_to_code = 'CONST',
 		outputs = [
@@ -66,7 +53,7 @@ static func get_const(_id: int = -1) -> HenVirtualCNode:
 	})
 
 
-static func get_vc_code(_vc: HenVirtualCNode, _flow_id: int = 0) -> String:
+static func get_vc_code(_vc: HenVirtualCNode, _flow_id: StringName = '') -> String:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var save_data: HenSaveData = global.SAVE_DATA
 

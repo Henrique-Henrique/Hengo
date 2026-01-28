@@ -9,6 +9,9 @@ func test_generate_script_macro_from_file() -> void:
 @tool
 extends HenScriptMacroBase
 
+func get_id() -> StringName:
+	return "test_macro_gen"
+
 func get_inputs() -> Array:
 	return []
 
@@ -16,10 +19,10 @@ func get_outputs() -> Array:
 	return []
 
 func get_flow_inputs() -> Array:
-	return [{ name = 'Exec', id = 0 }]
+	return [{ name = 'Exec', id = '0' }]
 
 func get_flow_outputs() -> Array:
-	return [{ name = 'A', id = 0 }, { name = 'B', id = 1 }]
+	return [{ name = 'A', id = '0' }, { name = 'B', id = '1' }]
 
 func get_flow_0(out_a, out_b) -> void:
 	if true:
@@ -73,8 +76,8 @@ func get_function_overrides() -> Array[Dictionary]:
 	var out_b_node: HenVirtualCNode = HenTest.get_void('func_b')
 	
 	var flow_outputs: Array = macro_vc.get_flow_outputs(save_data)
-	macro_vc.add_flow_connection(flow_outputs[0].id, 0, out_a_node).add()
-	macro_vc.add_flow_connection(flow_outputs[1].id, 0, out_b_node).add()
+	macro_vc.add_flow_connection(flow_outputs[0].id, StringName('0'), out_a_node).add()
+	macro_vc.add_flow_connection(flow_outputs[1].id, StringName('0'), out_b_node).add()
 	
 	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
 	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
@@ -99,6 +102,9 @@ extends HenScriptMacroBase
 
 var _ref: Node
 
+func get_id() -> StringName:
+	return "test_macro_gen"
+
 func get_inputs() -> Array:
 	return []
 
@@ -106,10 +112,10 @@ func get_outputs() -> Array:
 	return []
 
 func get_flow_inputs() -> Array:
-	return [{ name = 'Exec', id = 0 }]
+	return [{ name = 'Exec', id = '0' }]
 
 func get_flow_outputs() -> Array:
-	return [{ name = 'Out', id = 0 }]
+	return [{ name = 'Out', id = '0' }]
 
 func get_flow_0(out) -> void:
 	_ref.call_method()
@@ -159,6 +165,9 @@ extends HenScriptMacroBase
 
 var _ref: Node
 
+func get_id() -> StringName:
+	return "test_macro_gen"
+
 func get_inputs() -> Array:
 	return []
 
@@ -166,10 +175,10 @@ func get_outputs() -> Array:
 	return []
 
 func get_flow_inputs() -> Array:
-	return [{ name = 'Exec', id = 0 }]
+	return [{ name = 'Exec', id = '0' }]
 
 func get_flow_outputs() -> Array:
-	return [{ name = 'Out', id = 0 }]
+	return [{ name = 'Out', id = '0' }]
 
 func get_flow_0(out) -> void:
 	_ref.call_method()
@@ -216,6 +225,9 @@ func test_macro_override_ref_replacement_with_callable() -> void:
 extends HenScriptMacroBase
 
 var _ref: Node
+
+func get_id() -> StringName:
+	return "test_macro_gen"
 
 func get_inputs() -> Array:
 	return []
@@ -290,6 +302,9 @@ extends HenScriptMacroBase
 
 var _ref: Node
 
+func get_id() -> StringName:
+	return "test_macro_gen"
+
 func get_inputs() -> Array:
 	return []
 
@@ -297,10 +312,10 @@ func get_outputs() -> Array:
 	return []
 
 func get_flow_inputs() -> Array:
-	return [{ name = 'Exec', id = 0 }]
+	return [{ name = 'Exec', id = '0' }]
 
 func get_flow_outputs() -> Array:
-	return [{ name = 'Out', id = 0 }]
+	return [{ name = 'Out', id = '0' }]
 
 func get_flow_0(out) -> void:
 	_ref.set_meta('%test_prop%', 10)
@@ -357,6 +372,9 @@ extends HenScriptMacroBase
 
 var _ref: Node
 
+func get_id() -> StringName:
+	return "test_macro_gen"
+
 func get_inputs() -> Array:
 	return []
 
@@ -364,10 +382,10 @@ func get_outputs() -> Array:
 	return []
 
 func get_flow_inputs() -> Array:
-	return [{ name = 'Exec', id = 0 }]
+	return [{ name = 'Exec', id = '0' }]
 
 func get_flow_outputs() -> Array:
-	return [{ name = 'Out', id = 0 }]
+	return [{ name = 'Out', id = '0' }]
 
 func get_flow_0(out) -> void:
 	_ref.set_meta('%neg_prop%', 20)
@@ -420,6 +438,9 @@ extends HenScriptMacroBase
 
 var _ref: Node
 
+func get_id() -> StringName:
+	return "test_macro_gen"
+
 func get_inputs() -> Array:
 	return [ {name = 'duration', type = 'float'}]
 
@@ -427,10 +448,10 @@ func get_outputs() -> Array:
 	return []
 
 func get_flow_inputs() -> Array:
-	return [ {name = 'Exec', id = 0}]
+	return [ {name = 'Exec', id = '0'}]
 
 func get_flow_outputs() -> Array:
-	return [ {name = 'Out', id = 0}]
+	return [ {name = 'Out', id = '0'}]
 
 func get_flow_0(duration, out) -> void:
 	_ref.set_meta('%duration%', duration)

@@ -6,7 +6,7 @@ class_name HenVirtualCNodeFlow extends HenVirtualCNodeRoute
 @export var flow_outputs: Array[HenVCFlow]
 
 
-func get_flow_input(_id: int, _save_data: HenSaveData) -> HenVCFlow:
+func get_flow_input(_id: StringName, _save_data: HenSaveData) -> HenVCFlow:
 	for flow: HenVCFlow in get_flow_inputs(_save_data):
 		if flow.id == _id:
 			return flow
@@ -14,7 +14,7 @@ func get_flow_input(_id: int, _save_data: HenSaveData) -> HenVCFlow:
 	return null
 
 
-func get_flow_output(_id: int, _save_data: HenSaveData) -> HenVCFlow:
+func get_flow_output(_id: StringName, _save_data: HenSaveData) -> HenVCFlow:
 	for flow: HenVCFlow in get_flow_outputs(_save_data):
 		if flow.id == _id:
 			return flow
@@ -22,7 +22,7 @@ func get_flow_output(_id: int, _save_data: HenSaveData) -> HenVCFlow:
 	return null
 
 
-func add_flow_connection_with_return(_id: int, _to_id: int, _from: HenVirtualCNode, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
+func add_flow_connection_with_return(_id: StringName, _to_id: StringName, _from: HenVirtualCNode, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var flow_input: HenVCFlow = _to.get_flow_input(_to_id, global.SAVE_DATA)
 	var flow_output: HenVCFlow = get_flow_output(_id, global.SAVE_DATA)
@@ -41,7 +41,7 @@ func add_flow_connection_with_return(_id: int, _to_id: int, _from: HenVirtualCNo
 	return HenVCFlowConnectionReturn.new(flow_connection)
 
 
-func get_flow_input_connection_command(_id: int) -> HenVCFlowConnectionReturn:
+func get_flow_input_connection_command(_id: StringName) -> HenVCFlowConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
 		if connection.to_id == _id:
@@ -50,7 +50,7 @@ func get_flow_input_connection_command(_id: int) -> HenVCFlowConnectionReturn:
 	return null
 
 
-func get_flow_output_connection_command(_id: int) -> HenVCFlowConnectionReturn:
+func get_flow_output_connection_command(_id: StringName) -> HenVCFlowConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
 		if connection.from_id == _id:
@@ -65,7 +65,7 @@ func create_input_flow_connection(_owner: HenVirtualCNode) -> void:
 	cnode_need_update.emit()
 
 
-func flow_input_has_connection(_id: int, _input_id: int) -> bool:
+func flow_input_has_connection(_id: StringName, _input_id: StringName) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
 		if not flow_connection.get_to(global.SAVE_DATA):
@@ -80,7 +80,7 @@ func flow_input_has_connection(_id: int, _input_id: int) -> bool:
 	return false
 
 
-func flow_output_has_connection(_id: int, _output_id: int) -> bool:
+func flow_output_has_connection(_id: StringName, _output_id: StringName) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
 		if not flow_connection.get_from(global.SAVE_DATA):
@@ -92,7 +92,7 @@ func flow_output_has_connection(_id: int, _output_id: int) -> bool:
 	return false
 
 
-func get_flow_input_connection_data(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
+func get_flow_input_connection_data(_id: StringName, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
 		if flow_connection.get_to(global.SAVE_DATA) == _virtual_cnode and flow_connection.to_id == _id:
@@ -101,7 +101,7 @@ func get_flow_input_connection_data(_id: int, _virtual_cnode: HenVirtualCNode) -
 	return null
 
 
-func get_flow_output_connection_data(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
+func get_flow_output_connection_data(_id: StringName, _virtual_cnode: HenVirtualCNode) -> HenVCFlowConnectionData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for flow_connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
 		if flow_connection.get_from(global.SAVE_DATA) == _virtual_cnode and flow_connection.from_id == _id:
@@ -195,7 +195,7 @@ func get_flow_inputs(_save_data: HenSaveData) -> Array[HenVCFlow]:
 
 			if i < flow_inputs.size():
 				var existing: HenVCFlow = flow_inputs[i]
-				if existing.id != data.get('id'): existing.id = data.get('id')
+				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if data.has('name') and existing.name != data.get('name'): existing.name = data.get('name')
 			else:
 				create_flow(true, data)
@@ -217,7 +217,7 @@ func get_flow_outputs(_save_data: HenSaveData) -> Array[HenVCFlow]:
 
 			if i < flow_outputs.size():
 				var existing: HenVCFlow = flow_outputs[i]
-				if existing.id != data.get('id'): existing.id = data.get('id')
+				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if data.has('name') and existing.name != data.get('name'): existing.name = data.get('name')
 			else:
 				create_flow(false, data)

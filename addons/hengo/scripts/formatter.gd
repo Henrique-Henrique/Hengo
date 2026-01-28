@@ -21,14 +21,14 @@ class FormatterData:
 class VCFormatData:
 	var flow_boudings: Dictionary = {}
 	var moved: bool = false
-	var flow_inputs_positioned_ids: Array[int] = []
+	var flow_inputs_positioned_ids: Array[StringName] = []
 	var has_multiple_parents: bool = false
 	var tree_children: Array[HenVirtualCNode] = []
-	var input_owner_id: int = -1
+	var input_owner_id: StringName = ""
 
 
 # gets or creates format data for a specific node
-static func get_format_data(id: int, _data: FormatterData) -> VCFormatData:
+static func get_format_data(id: StringName, _data: FormatterData) -> VCFormatData:
 	if _data.vc_map.has(id):
 		return _data.vc_map[id]
 

@@ -13,7 +13,7 @@ func test_override_virtual_draw() -> void:
 
 	var virtual_flow_vc: HenVirtualCNode = HenTest.get_void('test_void')
 
-	virtual_vc.add_flow_connection(0, 0, virtual_flow_vc).add()
+	virtual_vc.add_flow_connection(StringName('0'), StringName('0'), virtual_flow_vc).add()
 
 	var code: String = HenTest.get_all_code()
 
@@ -32,7 +32,7 @@ func test_override_virtual_enter_tree() -> void:
 
 	var virtual_flow_vc: HenVirtualCNode = HenTest.get_void('my_enter_func')
 
-	virtual_vc.add_flow_connection(0, 0, virtual_flow_vc).add()
+	virtual_vc.add_flow_connection(StringName('0'), StringName('0'), virtual_flow_vc).add()
 
 	var code: String = HenTest.get_all_code()
 
@@ -54,7 +54,7 @@ func test_override_virtual_with_params() -> void:
 
 	var virtual_flow_vc: HenVirtualCNode = HenTest.get_void('handle_input')
 
-	virtual_vc.add_flow_connection(0, 0, virtual_flow_vc).add()
+	virtual_vc.add_flow_connection(StringName('0'), StringName('0'), virtual_flow_vc).add()
 
 	var code: String = HenTest.get_all_code()
 

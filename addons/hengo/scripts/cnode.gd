@@ -11,7 +11,7 @@ const FLOW_CONNECTION_LINE = preload('res://addons/hengo/scenes/flow_connection_
 var flow_to: Dictionary = {}
 var data: Dictionary = {}
 var category: String
-var id: int
+var id: StringName
 
 # behavior
 var moving: bool = false
@@ -261,7 +261,7 @@ func reset_signals(_vc: HenVirtualCNode = null):
 		on_unselect.connect(_vc.unselect)
 
 
-func request_flow_connetor_connection(_id: int, _mouse_pos: Vector2) -> void:
+func request_flow_connetor_connection(_id: StringName, _mouse_pos: Vector2) -> void:
 	request_flow_connection.emit(_id, _mouse_pos)
 
 

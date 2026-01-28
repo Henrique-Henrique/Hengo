@@ -130,6 +130,7 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 			var true_flow = code_generation.flows_refs[_token.true_flow_id]
 			var false_flow = code_generation.flows_refs[_token.false_flow_id]
 			var then_flow = code_generation.flows_refs[_token.then_flow_id]
+
 			var code_list: Array = []
 			var only_false: bool = true_flow.is_empty() and not false_flow.is_empty()
 			var if_code: String = 'if {condition}:{id}\n'

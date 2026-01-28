@@ -7,7 +7,7 @@ static func get_invalid_token() -> Dictionary:
 	}
 
 
-static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _input_id: int, _token_list: Array = []) -> Array:
+static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _input_id: StringName, _token_list: Array = []) -> Array:
 	var stack: Array = []
 	var token_list: Array = _token_list
 
@@ -16,7 +16,7 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 	while not stack.is_empty():
 		var current: Dictionary = stack.pop_back()
 		var vc: HenVirtualCNode = current.node
-		var _id: int = current.id
+		var _id: StringName = current.id
 
 		if current.has('flow_id'):
 			token_list = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flows_refs[current.flow_id]
@@ -49,7 +49,7 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 	return _token_list
 
 
-static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
+static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: StringName) -> Dictionary:
 	# handles script macro token generation and argument injection
 	var res: HenSaveMacro = _vc.get_res(_save_data)
 
@@ -277,11 +277,11 @@ static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: 
 
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
-			0:
+			StringName('0'):
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = true_flow_id})
-			1:
+			StringName('1'):
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = false_flow_id})
-			2:
+			StringName('2'):
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
@@ -305,9 +305,9 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
-			0:
+			StringName('0'):
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = body_flow_id})
-			1:
+			StringName('1'):
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
@@ -322,7 +322,7 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 	}
 
 
-static func get_macro_flow_connection(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int) -> HenVCFlowConnectionData:
+static func get_macro_flow_connection(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: StringName) -> HenVCFlowConnectionData:
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		if flow.from_id == _id:
 			return flow
@@ -330,7 +330,7 @@ static func get_macro_flow_connection(_save_data: HenSaveData, _vc: HenVirtualCN
 	return null
 
 
-static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int) -> Dictionary:
+static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: StringName) -> Dictionary:
 	if _vc.invalid:
 		return get_invalid_token()
 
@@ -408,7 +408,7 @@ static func search_macro_output(_save_data: HenSaveData, _macro: HenSaveMacro) -
 	return null
 
 
-static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int) -> Dictionary:
+static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: StringName) -> Dictionary:
 	var connection: HenVCConnectionData
 	var input: HenVCInOutData = _vc.get_input(_id, _save_data)
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -517,7 +517,7 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 	return not_connected
 
 
-static func get_output_index(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int) -> int:
+static func get_output_index(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: StringName) -> int:
 	var idx: int = 0
 
 	for output: HenVCInOutData in _vc.get_outputs(_save_data):
@@ -619,7 +619,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				return get_invalid_token()
 			
 			token.merge({
-				ref = get_input_token(_save_data, _vc, 0),
+				ref = get_input_token(_save_data, _vc, StringName(str(0))),
 				name = _vc.get_outputs(_save_data)[0].name.to_snake_case(),
 			})
 		HenVirtualCNode.SubType.SET_VAR_FROM:
@@ -631,8 +631,8 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			
 			token.merge({
 				name = _vc.get_vc_name(_save_data).to_snake_case(),
-				ref = get_input_token(_save_data, _vc, 0),
-				value = get_input_token(_save_data, _vc, 1)
+				ref = get_input_token(_save_data, _vc, StringName(str(0))),
+				value = get_input_token(_save_data, _vc, StringName(str(1)))
 			})
 		HenVirtualCNode.SubType.SET_VAR, HenVirtualCNode.SubType.SET_LOCAL_VAR:
 			var name: String = _vc.get_inputs(_save_data)[0].name.to_snake_case()
@@ -767,7 +767,7 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 	return token
 
 
-static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: int, _separator: String = '') -> String:
+static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: StringName, _separator: String = '') -> String:
 	var codes: PackedStringArray = []
 
 	for token in HenVirtualCNodeCode.get_flow_tokens(_save_data, _vc, _flow_id):

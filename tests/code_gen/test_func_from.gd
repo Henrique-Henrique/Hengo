@@ -68,7 +68,7 @@ func test_func_from_with_ref_connection() -> void:
 		route = HenTest.get_base_route()
 	})
 
-	func_vc.get_new_input_connection_command(0, 0, ref_func_vc).add()
+	func_vc.get_new_input_connection_command(StringName('0'), StringName('0'), ref_func_vc).add()
 
 	var code: String = HenTest.get_vc_code(func_vc)
 

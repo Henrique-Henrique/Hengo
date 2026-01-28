@@ -36,7 +36,7 @@ func test_for_range_with_body_flow() -> void:
 	var for_vc: HenVirtualCNode = _create_for_range_node()
 	var vc_flow_body: HenVirtualCNode = HenTest.get_void()
 
-	for_vc.add_flow_connection(0, 0, vc_flow_body).add()
+	for_vc.add_flow_connection(StringName('0'), StringName('0'), vc_flow_body).add()
 
 	var var_name: String = 'index_' + str(for_vc.id)
 	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\ttest_void()'
@@ -49,9 +49,9 @@ func test_for_range_with_index_output_connected() -> void:
 	var vc_with_input: HenVirtualCNode = HenTest.get_void_with_input()
 
 	# Connect the execution flow (loop body -> function)
-	for_vc.add_flow_connection(0, 0, vc_with_input).add()
+	for_vc.add_flow_connection(StringName('0'), StringName('0'), vc_with_input).add()
 	# Connect the data flow ('index' output from the loop -> function input)
-	vc_with_input.get_new_input_connection_command(0, 0, for_vc).add()
+	vc_with_input.get_new_input_connection_command(StringName('0'), StringName('0'), for_vc).add()
 
 	var var_name: String = 'index_' + str(for_vc.id)
 	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\ttest_void(' + var_name + ')'
@@ -66,9 +66,9 @@ func test_for_range_with_after_flow() -> void:
 	var vc_flow_after: HenVirtualCNode = HenTest.get_void()
 
 	# Body connection
-	for_vc.add_flow_connection(0, 0, vc_flow_body).add()
+	for_vc.add_flow_connection(StringName('0'), StringName('0'), vc_flow_body).add()
 	# "After" connection
-	for_vc.add_flow_connection(1, 0, vc_flow_after).add()
+	for_vc.add_flow_connection(StringName('1'), StringName('0'), vc_flow_after).add()
 
 	var var_name: String = 'index_' + str(for_vc.id)
 	var expected_code = 'for ' + var_name + ' in range(0, 0, 1):\n\ttest_void()\ntest_void()'

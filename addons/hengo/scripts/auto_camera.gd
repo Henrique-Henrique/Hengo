@@ -125,7 +125,7 @@ func on_route_changed(_old_route: HenRouteData, _new_route: HenRouteData) -> voi
 	var target_vc: HenVirtualCNode = null
 	
 	if focused_vc_by_route.has(_new_route.id):
-		var saved_vc_id: int = focused_vc_by_route[_new_route.id]
+		var saved_vc_id: StringName = focused_vc_by_route[_new_route.id]
 		target_vc = find_vc_by_id(saved_vc_id, _new_route)
 	
 	if not target_vc and not _new_route.virtual_cnode_list.is_empty():
@@ -195,7 +195,7 @@ func get_next_focus_target_from_list(_removed_vc: HenVirtualCNode, _route: HenRo
 	return null
 
 
-func find_vc_by_id(_id: int, _route: HenRouteData) -> HenVirtualCNode:
+func find_vc_by_id(_id: StringName, _route: HenRouteData) -> HenVirtualCNode:
 	if not _route:
 		return null
 	

@@ -2,13 +2,13 @@
 class_name HenVCFlow extends Resource
 
 @export var name: String
-@export var id: int = -1
+@export var id: StringName
 
 
 static func create(_owner: HenVirtualCNode, _data: Dictionary = {}) -> HenVCFlow:
 	var flow: HenVCFlow = HenVCFlow.new()
 	flow.name = _data.name if _data.has('name') else ''
-	flow.id = _data.id if _data.has('id') else (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	flow.id = str(_data.id) if _data.has('id') else str((Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter())
 	return flow
 
 

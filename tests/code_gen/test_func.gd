@@ -26,7 +26,7 @@ func test_func_code_with_output() -> void:
 	func_data.outputs.append(first_output)
 	func_data.outputs.append(first_output_2)
 
-	void_vc.get_new_input_connection_command(0, first_output.id, func_vc).add()
+	void_vc.get_new_input_connection_command(StringName('0'), first_output.id, func_vc).add()
 
 	var code: String = HenTest.get_vc_code(void_vc)
 
@@ -43,7 +43,7 @@ func test_func_code_with_output_index() -> void:
 	func_data.outputs.append(first_output)
 	func_data.outputs.append(first_output_2)
 
-	void_vc.get_new_input_connection_command(0, first_output_2.id, func_vc).add()
+	void_vc.get_new_input_connection_command(StringName('0'), first_output_2.id, func_vc).add()
 
 	var code: String = HenTest.get_vc_code(void_vc)
 
@@ -123,8 +123,8 @@ func test_func_generation_with_more_than_one_output_and_connections() -> void:
 
 	var output_ref = HenGeneratorFunc.search_output_ref(save_data, func_data)
 
-	output_ref.get_new_input_connection_command(output.id, 0, first_con_vc).add()
-	output_ref.get_new_input_connection_command(output_2.id, 0, second_con_vc).add()
+	output_ref.get_new_input_connection_command(output.id, StringName('0'), first_con_vc).add()
+	output_ref.get_new_input_connection_command(output_2.id, StringName('0'), second_con_vc).add()
 	
 	var code: String = HenTest.get_all_code()
 	assert_str(code).contains('func test_func():\n\treturn [Test.CONST, Test.CONST]')

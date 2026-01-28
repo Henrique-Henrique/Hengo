@@ -1,7 +1,7 @@
 @tool
 class_name HenFlowConnector extends TextureRect
 
-var id: int = 0
+var id: StringName
 var is_connected: bool = false
 
 signal create_flow_connection_request

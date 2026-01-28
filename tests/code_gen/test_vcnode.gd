@@ -37,15 +37,15 @@ func test_vcnode_io() -> void:
 		})
 
 	var vc2 = HenTest.get_const()
-	var connection_return = vc.get_new_input_connection_command(0, 0, vc2)
+	var connection_return = vc.get_new_input_connection_command(StringName('0'), StringName('0'), vc2)
 
 	connection_return.add()
 
 	assert_int((save_data.get_connection_from_vc(vc) as Array[HenVCConnectionData]).size()).is_equal(1)
 	assert_int((save_data.get_connection_from_vc(vc2) as Array[HenVCConnectionData]).size()).is_equal(1)
 
-	assert_int((save_data.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_from(save_data).id).is_equal(vc2.id)
-	assert_int((save_data.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_to(save_data).id).is_equal(vc.id)
+	assert_that((save_data.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_from(save_data).id).is_equal(vc2.id)
+	assert_that((save_data.get_connection_from_vc(vc)[0] as HenVCConnectionData).get_to(save_data).id).is_equal(vc.id)
 
 	connection_return.remove()
 
@@ -69,7 +69,7 @@ func test_vcnode_flow() -> void:
 	})
 
 	var vc2: HenVirtualCNode = HenTest.get_void()
-	var flow_connection_return = vc.add_flow_connection(0, 0, vc2)
+	var flow_connection_return = vc.add_flow_connection(StringName('0'), StringName('0'), vc2)
 
 
 	flow_connection_return.add()
@@ -98,8 +98,8 @@ func test_vcnode_add_delete() -> void:
 	var vc2: HenVirtualCNode = HenTest.get_const()
 	var vc3: HenVirtualCNode = HenTest.get_void()
 
-	vc.get_new_input_connection_command(0, 0, vc2).add()
-	vc.add_flow_connection(0, 0, vc3).add()
+	vc.get_new_input_connection_command(StringName('0'), StringName('0'), vc2).add()
+	vc.add_flow_connection(StringName('0'), StringName('0'), vc3).add()
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var vc_return = vc.get_history_obj()

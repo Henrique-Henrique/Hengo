@@ -38,7 +38,7 @@ func test_generates_signal_handler_with_flow_connection() -> void:
 	})
 	
 	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(save_data, signal_callback_data)
-	signal_enter.add_flow_connection(0, 0, vc).add()
+	signal_enter.add_flow_connection(StringName('0'), StringName('0'), vc).add()
 
 	var expected_code = '\nfunc _on_my_signal_signal_(toggled_on):\n\ttest_void()'
 
@@ -57,9 +57,9 @@ func test_generates_signal_handler_with_data_connection() -> void:
 	
 	var signal_enter: HenVirtualCNode = HenGeneratorSignalCallback.search_signal_enter(save_data, signal_callback_data)
 	# Connect signal output to function input
-	signal_enter.add_flow_connection(0, 0, vc_input).add()
+	signal_enter.add_flow_connection(StringName('0'), StringName('0'), vc_input).add()
 	var output_param_id = (signal_enter.get_res(save_data) as HenSaveSignalCallback).get_outputs(signal_enter.sub_type)[0].id
-	vc_input.get_new_input_connection_command(0, output_param_id, signal_enter).add()
+	vc_input.get_new_input_connection_command(StringName('0'), output_param_id, signal_enter).add()
 
 
 	var expected_code = '\nfunc _on_my_signal_signal_(toggled_on):\n\ttest_func(toggled_on)'
@@ -78,7 +78,7 @@ func test_generates_basic_signal_connection_code() -> void:
 		route = HenTest.get_base_route()
 	})
 	
-	vc.get_new_input_connection_command(0, 0, vc_input).add()
+	vc.get_new_input_connection_command(StringName('0'), StringName('0'), vc_input).add()
 
 	var expected_code = 'test_func().connect("toggled_on", _on_my_signal_signal_)'
 	assert_str(HenTest.get_vc_code(vc)).is_equal(expected_code)
@@ -96,7 +96,7 @@ func test_generates_signal_connection_code_with_bind() -> void:
 		route = HenTest.get_base_route()
 	})
 	
-	vc.get_new_input_connection_command(0, 0, vc_input).add()
+	vc.get_new_input_connection_command(StringName('0'), StringName('0'), vc_input).add()
 
 	var param: HenSaveParam = HenSaveParam.create()
 	param.name = 'a'
@@ -120,6 +120,6 @@ func test_disconnection_code() -> void:
 		route = HenTest.get_base_route()
 	})
 	
-	vc.get_new_input_connection_command(0, 0, vc_input).add()
+	vc.get_new_input_connection_command(StringName('0'), StringName('0'), vc_input).add()
 
 	assert_str(HenTest.get_vc_code(vc)).is_equal('test_func().disconnect("toggled_on", _on_my_signal_signal_)')

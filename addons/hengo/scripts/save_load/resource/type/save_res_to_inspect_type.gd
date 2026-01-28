@@ -3,7 +3,7 @@
 class_name HenSaveResToInspectType extends Resource
 
 @export var name: String
-@export var id: int
+@export var id: StringName
 
 @abstract func get_new_name() -> String
 

@@ -106,8 +106,8 @@ static func paste(_target_pos: Vector2) -> int:
 
 	# first pass: create all nodes
 	for node_data: Dictionary in nodes_data:
-		var old_id: int = node_data.get('id')
-		var new_id: int = global.get_new_node_counter()
+		var old_id: StringName = node_data.get('id')
+		var new_id: StringName = global.get_new_node_counter()
 		node_id_map[old_id] = new_id
 
 		var old_pos: Vector2 = _deserialize_value(node_data.get('position'), TYPE_VECTOR2)
@@ -141,8 +141,8 @@ static func paste(_target_pos: Vector2) -> int:
 			var inputs_data: Array = node_data.get('inputs', [])
 			var new_inputs: Array = []
 			for input: Dictionary in inputs_data:
-				var old_input_id: int = input.get('id', 0)
-				var new_input_id: int = global.get_new_node_counter()
+				var old_input_id: StringName = input.get('id', 0)
+				var new_input_id: StringName = global.get_new_node_counter()
 				io_id_map[old_input_id] = new_input_id
 
 				var new_input: Dictionary = input.duplicate()
@@ -153,8 +153,8 @@ static func paste(_target_pos: Vector2) -> int:
 			var outputs_data: Array = node_data.get('outputs', [])
 			var new_outputs: Array = []
 			for output: Dictionary in outputs_data:
-				var old_output_id: int = output.get('id', 0)
-				var new_output_id: int = global.get_new_node_counter()
+				var old_output_id: StringName = output.get('id', 0)
+				var new_output_id: StringName = global.get_new_node_counter()
 				io_id_map[old_output_id] = new_output_id
 
 				var new_output: Dictionary = output.duplicate()
@@ -206,10 +206,10 @@ static func paste(_target_pos: Vector2) -> int:
 
 	# third pass: create flow connections
 	for flow_conn_data: Dictionary in flow_connections_data:
-		var old_from_node_id: int = flow_conn_data.get('from_node_id', 0)
-		var old_to_node_id: int = flow_conn_data.get('to_node_id', 0)
-		var old_from_id: int = flow_conn_data.get('from_id', 0)
-		var old_to_id: int = flow_conn_data.get('to_id', 0)
+		var old_from_node_id: StringName = flow_conn_data.get('from_node_id', 0)
+		var old_to_node_id: StringName = flow_conn_data.get('to_node_id', 0)
+		var old_from_id: StringName = flow_conn_data.get('from_id', 0)
+		var old_to_id: StringName = flow_conn_data.get('to_id', 0)
 
 		if not node_id_map.has(old_from_node_id) or not node_id_map.has(old_to_node_id):
 			continue

@@ -48,7 +48,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 							tokens = []
 						}
 
-				(_refs.override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0))
+				(_refs.override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), StringName(str(0))))
 
 
 	code += map_all_macros(_save_data, _refs)
@@ -189,7 +189,7 @@ static func map_all_macros(_save_data: HenSaveData, _refs: HenTypeReferences) ->
 											tokens = []
 										}
 
-									for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), 0):
+									for token: Dictionary in HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), StringName(str(0))):
 										token.vc_id = macro_ref.id
 										(_refs.override_virtual_data[v_cnode.name].tokens as Array).append(token)
 

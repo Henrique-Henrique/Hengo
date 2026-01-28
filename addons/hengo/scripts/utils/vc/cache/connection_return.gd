@@ -1,12 +1,12 @@
 @tool
 class_name HenVCConnectionReturn
 
-var to_id: int
+var to_id: StringName
 var connection: HenVCConnectionData
 var old_connections: Array
 
 
-func _init(_connection: HenVCConnectionData, _to_id: int = -1) -> void:
+func _init(_connection: HenVCConnectionData, _to_id: StringName = "") -> void:
 	connection = _connection
 	to_id = _to_id
 

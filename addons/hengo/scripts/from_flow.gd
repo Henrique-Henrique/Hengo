@@ -1,7 +1,7 @@
 @tool
 class_name HenFromFlow extends PanelContainer
 
-var id: int
+var id: StringName
 
 signal hover
 

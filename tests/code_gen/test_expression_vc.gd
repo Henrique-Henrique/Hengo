@@ -46,7 +46,7 @@ func test_expression_with_one_input() -> void:
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
 	# The first input is connected to a constant value
-	vc.get_new_input_connection_command(1, 0, value_node).add()
+	vc.get_new_input_connection_command(StringName('1'), StringName('0'), value_node).add()
 	assert_str(HenTest.get_vc_code(vc)).is_equal('Test.CONST + null')
 
 
@@ -56,7 +56,7 @@ func test_expression_with_two_inputs() -> void:
 	var value_node: HenVirtualCNode = HenTest.get_const()
 
 	# Both inputs are connected to the same constant
-	vc.get_new_input_connection_command(1, 0, value_node).add()
-	vc.get_new_input_connection_command(2, 0, value_node).add()
+	vc.get_new_input_connection_command(StringName('1'), StringName('0'), value_node).add()
+	vc.get_new_input_connection_command(StringName('2'), StringName('0'), value_node).add()
 
 	assert_str(HenTest.get_vc_code(vc)).is_equal('Test.CONST + Test.CONST')

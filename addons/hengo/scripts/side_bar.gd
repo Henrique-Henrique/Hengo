@@ -217,11 +217,7 @@ func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 					BG_COLOR[_type]
 				)
 		AddType.MACRO:
-			# merges saved and script macros
-			var macros: Array = global.SAVE_DATA.macros.duplicate()
-			macros.append_array(global.script_macros)
-
-			for macro_data: HenSaveMacro in macros:
+			for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
 				create_item(
 					category,
 					macro_data.name,

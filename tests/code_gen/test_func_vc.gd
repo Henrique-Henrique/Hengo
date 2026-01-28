@@ -29,7 +29,7 @@ func test_multi_output_function_first_return_as_input() -> void:
 	var void_node: HenVirtualCNode = HenTest.get_void_with_input()
 
 	# connect the func's first output to the void's input
-	void_node.get_new_input_connection_command(0, 0, func_node).add()
+	void_node.get_new_input_connection_command(StringName('0'), StringName('0'), func_node).add()
 
 	assert_str(HenTest.get_vc_code(void_node)).is_equal('test_void(test_func()[0])')
 
@@ -43,6 +43,6 @@ func test_multi_output_function_second_return_as_input() -> void:
 	var void_node: HenVirtualCNode = HenTest.get_void_with_input()
 	
 	# connect the func's second output to the void's input
-	void_node.get_new_input_connection_command(0, 1, func_node).add()
+	void_node.get_new_input_connection_command(StringName('0'), StringName('1'), func_node).add()
 
 	assert_str(HenTest.get_vc_code(void_node)).is_equal('test_void(test_func()[1])')

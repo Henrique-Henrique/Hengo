@@ -138,7 +138,7 @@ func get_output_by_idx(_idx: int) -> HenVCInOutData:
 	return get_outputs(global.SAVE_DATA).get(_idx)
 
 
-func get_new_input_connection_command(_id: int, _from_id: int, _from: HenVirtualCNode) -> HenVCConnectionReturn:
+func get_new_input_connection_command(_id: StringName, _from_id: StringName, _from: HenVirtualCNode) -> HenVCConnectionReturn:
 	return create_input_connection(_id, _from_id, self, _from)
 
 
@@ -199,7 +199,7 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 				global.TOOLTIP.close()
 
 
-func request_flow_connector_connection(_id: int, _mouse_pos: Vector2) -> void:
+func request_flow_connector_connection(_id: StringName, _mouse_pos: Vector2) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	global.GENERAL_POPUP.show_content(HenCodeSearch.load(_mouse_pos, {
@@ -208,7 +208,7 @@ func request_flow_connector_connection(_id: int, _mouse_pos: Vector2) -> void:
 	}), '')
 
 
-func request_io_connection(_io_type: StringName, _id: int, _mouse_pos: Vector2, _type: StringName) -> void:
+func request_io_connection(_io_type: StringName, _id: StringName, _mouse_pos: Vector2, _type: StringName) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	global.GENERAL_POPUP.show_content(HenCodeSearch.load(_mouse_pos, {
@@ -321,7 +321,7 @@ func set_position_transition(_position: Vector2) -> void:
 	position = _position
 	
 
-func get_id() -> int:
+func get_id() -> StringName:
 	return id
 
 
@@ -334,7 +334,7 @@ func get_vc_name(_save_data: HenSaveData) -> String:
 		return name
 
 
-func add_flow_connection(_id: int, _to_id: int, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
+func add_flow_connection(_id: StringName, _to_id: StringName, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
 	return add_flow_connection_with_return(_id, _to_id, self, _to)
 
 
@@ -346,11 +346,11 @@ func get_history_obj() -> HenVCNodeReturn:
 	return HenVCNodeReturn.new(self)
 
 
-func get_flow_input_connection(_id: int) -> HenVCFlowConnectionData:
+func get_flow_input_connection(_id: StringName) -> HenVCFlowConnectionData:
 	return get_flow_input_connection_data(_id, self)
 
 
-func get_flow_output_connection(_id: int) -> HenVCFlowConnectionData:
+func get_flow_output_connection(_id: StringName) -> HenVCFlowConnectionData:
 	return get_flow_output_connection_data(_id, self)
 
 
@@ -363,7 +363,7 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.name = _config.name
 	v_cnode.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.sub_type = _config.sub_type
-	v_cnode.id = global.get_new_node_counter() if not _config.has('id') else _config.id
+	v_cnode.id = global.get_new_node_counter() if not _config.has('id') else StringName(str(_config.id))
 	v_cnode.parent_route_id = _route.id
 	v_cnode.route_type = _route.type
 

@@ -19,10 +19,10 @@ class_name HenVirtualCNodeIO extends HenVirtualCNodeFlow
 signal io_hovered(_context: Dictionary)
 signal expression_saved(_context: Dictionary)
 signal method_picker_requested(_context: Dictionary)
-signal changed_code_value(_id: int, _context: Dictionary)
+signal changed_code_value(_id: StringName, _context: Dictionary)
 
 
-func get_input(_id: int, _save_data: HenSaveData) -> HenVCInOutData:
+func get_input(_id: StringName, _save_data: HenSaveData) -> HenVCInOutData:
 	for input: HenVCInOutData in get_inputs(_save_data):
 		if input.id == _id:
 			return input
@@ -30,7 +30,7 @@ func get_input(_id: int, _save_data: HenSaveData) -> HenVCInOutData:
 	return null
 
 
-func get_output(_id: int, _save_data: HenSaveData) -> HenVCInOutData:
+func get_output(_id: StringName, _save_data: HenSaveData) -> HenVCInOutData:
 	for output: HenVCInOutData in get_outputs(_save_data):
 		if output.id == _id:
 			return output
@@ -69,7 +69,7 @@ func on_connection_command_requested(_context: Dictionary) -> void:
 		global.history.commit_action()
 
 
-func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _from: HenVirtualCNode) -> HenVCConnectionReturn:
+func create_input_connection(_id: StringName, _from_id: StringName, _to: HenVirtualCNode, _from: HenVirtualCNode) -> HenVCConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var input: HenVCInOutData = get_input(_id, global.SAVE_DATA)
 	var output: HenVCInOutData = _from.get_output(_from_id, global.SAVE_DATA)
@@ -92,7 +92,7 @@ func create_input_connection(_id: int, _from_id: int, _to: HenVirtualCNode, _fro
 	return HenVCConnectionReturn.new(connection, _id)
 
 
-func get_input_connection(_id: int, _virtual_cnode: HenVirtualCNode) -> HenVCConnectionData:
+func get_input_connection(_id: StringName, _virtual_cnode: HenVirtualCNode) -> HenVCConnectionData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for input_connection: HenVCConnectionData in global.SAVE_DATA.get_connection_from_vc(_virtual_cnode):
 		if input_connection.get_to(global.SAVE_DATA) == _virtual_cnode and input_connection.to_id == _id:
@@ -108,7 +108,7 @@ func clear_in_out(_is_input: bool) -> void:
 		outputs.clear()
 
 
-func input_has_connection(_id: int, _save_data: HenSaveData) -> bool:
+func input_has_connection(_id: StringName, _save_data: HenSaveData) -> bool:
 	for input_connection: HenVCConnectionData in _save_data.get_connections_by_id(id):
 		if input_connection.to_id == _id and input_connection.to_node_id == id:
 			return true
@@ -116,7 +116,7 @@ func input_has_connection(_id: int, _save_data: HenSaveData) -> bool:
 	return false
 
 
-func output_has_connection(_id: int, _save_data: HenSaveData) -> bool:
+func output_has_connection(_id: StringName, _save_data: HenSaveData) -> bool:
 	for output_connection: HenVCConnectionData in _save_data.get_connections_by_id(id):
 		if output_connection.from_id == _id and output_connection.from_node_id == id:
 			return true
@@ -124,7 +124,7 @@ func output_has_connection(_id: int, _save_data: HenSaveData) -> bool:
 	return false
 
 
-func get_input_connection_command(_id: int, _save_data: HenSaveData) -> HenVCConnectionReturn:
+func get_input_connection_command(_id: StringName, _save_data: HenSaveData) -> HenVCConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		if connection.to_id == _id:
@@ -240,7 +240,7 @@ func create_io(_is_input: bool, _data: Dictionary) -> HenVCInOutData:
 	return in_out
 
 
-func _on_changed_code_value(_id: int, _context: Dictionary, _is_input: bool) -> void:
+func _on_changed_code_value(_id: StringName, _context: Dictionary, _is_input: bool) -> void:
 	if _is_input:
 		input_code_value_map.set(_id, _context)
 	
@@ -268,7 +268,7 @@ func get_inputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
 			if i < inputs.size():
 				var existing: HenVCInOutData = inputs[i]
 				# prevents recursion: only assign if value actually changed
-				if existing.id != data.get('id'): existing.id = data.get('id')
+				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if existing.name != data.get('name'): existing.name = data.get('name')
 				if existing.type != data.get('type'): existing.type = data.get('type')
 			else:

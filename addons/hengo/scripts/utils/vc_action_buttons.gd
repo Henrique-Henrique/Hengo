@@ -223,7 +223,7 @@ func hide_action() -> void:
 
 
 # finds virtual cnode by cnode id
-func _find_vc_by_cnode_id(_id: int) -> HenVirtualCNode:
+func _find_vc_by_cnode_id(_id: StringName) -> HenVirtualCNode:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	if not router.current_route:

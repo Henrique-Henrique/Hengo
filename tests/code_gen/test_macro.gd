@@ -25,7 +25,7 @@ func test_macro_flow_input_connection() -> void:
 	var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, macro_data)
 	var macro_flow_vc: HenVirtualCNode = HenTest.get_void('test void', macro_data.get_route(save_data))
 
-	macro_input.add_flow_connection(first_flow_input.id, 0, macro_flow_vc).add()
+	macro_input.add_flow_connection(first_flow_input.id, StringName('0'), macro_flow_vc).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, first_flow_input.id)
 
@@ -45,15 +45,15 @@ func test_macro_flow_output_connection() -> void:
 
 	var macro_flow_vc: HenVirtualCNode = HenTest.get_void('test inside macro')
 
-	macro_input.add_flow_connection(first_flow_input.id, 0, macro_flow_vc).add()
-	macro_flow_vc.add_flow_connection(0, first_flow_output.id, macro_output).add()
+	macro_input.add_flow_connection(first_flow_input.id, StringName('0'), macro_flow_vc).add()
+	macro_flow_vc.add_flow_connection(StringName('0'), first_flow_output.id, macro_output).add()
 
 	# creating if there to test flow output connection code
 	var if_vc: HenVirtualCNode = HenTest.get_if_vc()
 	var another_flow_vc: HenVirtualCNode = HenTest.get_void()
 
-	if_vc.add_flow_connection(0, first_flow_input.id, macro_vc).add()
-	macro_vc.add_flow_connection(first_flow_output.id, 0, another_flow_vc).add()
+	if_vc.add_flow_connection(StringName('0'), first_flow_input.id, macro_vc).add()
+	macro_vc.add_flow_connection(first_flow_output.id, StringName('0'), another_flow_vc).add()
 
 	var code: String = HenTest.get_vc_code(if_vc)
 
@@ -70,13 +70,13 @@ func test_macro_with_input_connection() -> void:
 	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_data.get_cnode_data(''))
 	var void_with_output: HenVirtualCNode = HenTest.get_const()
 
-	macro_vc.get_new_input_connection_command(first_input.id, 0, void_with_output).add()
+	macro_vc.get_new_input_connection_command(first_input.id, StringName('0'), void_with_output).add()
 
 	var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, macro_data)
 	var macro_flow_vc: HenVirtualCNode = HenTest.get_void_with_input()
 
-	macro_input.add_flow_connection(first_flow_input.id, 0, macro_flow_vc).add()
-	macro_flow_vc.get_new_input_connection_command(0, first_input.id, macro_input).add()
+	macro_input.add_flow_connection(first_flow_input.id, StringName('0'), macro_flow_vc).add()
+	macro_flow_vc.get_new_input_connection_command(StringName('0'), first_input.id, macro_input).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, first_flow_input.id)
 
@@ -93,12 +93,12 @@ func test_macro_with_output_connection() -> void:
 	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_data.get_cnode_data(''))
 	var void_with_input: HenVirtualCNode = HenTest.get_void_with_input()
 
-	void_with_input.get_new_input_connection_command(0, first_output.id, macro_vc).add()
+	void_with_input.get_new_input_connection_command(StringName('0'), first_output.id, macro_vc).add()
 
 	var macro_output: HenVirtualCNode = HenVirtualCNodeCode.search_macro_output(save_data, macro_data)
 	var macro_flow_vc: HenVirtualCNode = HenTest.get_const()
 
-	macro_output.get_new_input_connection_command(first_output.id, 0, macro_flow_vc).add()
+	macro_output.get_new_input_connection_command(first_output.id, StringName('0'), macro_flow_vc).add()
 
 	var code: String = HenTest.get_vc_code(void_with_input)
 
@@ -141,11 +141,11 @@ func test_macro_local_var_usage() -> void:
 	var const_vc: HenVirtualCNode = HenTest.get_const()
 
 	# set value
-	set_local_var.get_new_input_connection_command(0, 0, const_vc).add()
+	set_local_var.get_new_input_connection_command(StringName('0'), StringName('0'), const_vc).add()
 
 	var flow_input: HenSaveParam = HenSaveParam.new()
 	macro_data.flow_inputs.append(flow_input)
-	macro_input.add_flow_connection(flow_input.id, 0, set_local_var).add()
+	macro_input.add_flow_connection(flow_input.id, StringName('0'), set_local_var).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, flow_input.id)
 
@@ -163,7 +163,7 @@ func test_macro_override_virtual() -> void:
 
 	var virtual_flow_vc: HenVirtualCNode = HenTest.get_void('test virtual')
 
-	virtual_vc.add_flow_connection(0, 0, virtual_flow_vc).add()
+	virtual_vc.add_flow_connection(StringName('0'), StringName('0'), virtual_flow_vc).add()
 
 	var code: String = HenTest.get_all_code()
 
@@ -184,7 +184,7 @@ func test_macro_void_call_on_base_route_uses_direct_call() -> void:
 		route = macro_data.get_route(save_data)
 	})
 
-	macro_input.add_flow_connection(flow_input.id, 0, void_vc).add()
+	macro_input.add_flow_connection(flow_input.id, StringName('0'), void_vc).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, flow_input.id)
 
@@ -214,7 +214,7 @@ func test_macro_void_call_on_state_route_uses_ref_prefix() -> void:
 		route = state_macro.get_route(save_data)
 	})
 
-	macro_input.add_flow_connection(flow_input.id, 0, void_vc).add()
+	macro_input.add_flow_connection(flow_input.id, StringName('0'), void_vc).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, flow_input.id)
 
@@ -246,9 +246,9 @@ func test_macro_local_var_on_base_route_without_ref() -> void:
 	})
 
 	var const_vc: HenVirtualCNode = HenTest.get_const()
-	set_local_var.get_new_input_connection_command(0, 0, const_vc).add()
+	set_local_var.get_new_input_connection_command(StringName('0'), StringName('0'), const_vc).add()
 
-	macro_input.add_flow_connection(flow_input.id, 0, set_local_var).add()
+	macro_input.add_flow_connection(flow_input.id, StringName('0'), set_local_var).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, flow_input.id)
 
@@ -289,9 +289,9 @@ func test_macro_local_var_on_state_route_with_ref() -> void:
 	})
 
 	var const_vc: HenVirtualCNode = HenTest.get_const()
-	set_local_var.get_new_input_connection_command(0, 0, const_vc).add()
+	set_local_var.get_new_input_connection_command(StringName('0'), StringName('0'), const_vc).add()
 
-	macro_input.add_flow_connection(flow_input.id, 0, set_local_var).add()
+	macro_input.add_flow_connection(flow_input.id, StringName('0'), set_local_var).add()
 
 	var code: String = HenTest.get_vc_code(macro_vc, flow_input.id)
 
@@ -314,15 +314,15 @@ func test_macro_flow_output_with_if_inside() -> void:
 	
 	var inside_if: HenVirtualCNode = HenTest.get_if_vc()
 	
-	macro_input.add_flow_connection(flow_input.id, 0, inside_if).add()
-	inside_if.add_flow_connection(0, flow_output_1.id, macro_output).add()
-	inside_if.add_flow_connection(1, flow_output_2.id, macro_output).add()
+	macro_input.add_flow_connection(flow_input.id, StringName('0'), inside_if).add()
+	inside_if.add_flow_connection(StringName('0'), flow_output_1.id, macro_output).add()
+	inside_if.add_flow_connection(StringName('1'), flow_output_2.id, macro_output).add()
 	
 	var print_a: HenVirtualCNode = HenTest.get_void('print a')
 	var print_b: HenVirtualCNode = HenTest.get_void('print b')
 	
-	macro_vc.add_flow_connection(flow_output_1.id, 0, print_a).add()
-	macro_vc.add_flow_connection(flow_output_2.id, 0, print_b).add()
+	macro_vc.add_flow_connection(flow_output_1.id, StringName('0'), print_a).add()
+	macro_vc.add_flow_connection(flow_output_2.id, StringName('0'), print_b).add()
 	
 	var code: String = HenTest.get_vc_code(macro_vc, flow_input.id)
 	
@@ -349,20 +349,20 @@ func test_macro_complex_flow_routing() -> void:
 	
 	var if_vc: HenVirtualCNode = HenTest.get_if_vc()
 	
-	if_vc.add_flow_connection(0, flow_input_1.id, macro_vc).add()
-	if_vc.add_flow_connection(1, flow_input_2.id, macro_vc).add()
+	if_vc.add_flow_connection(StringName('0'), flow_input_1.id, macro_vc).add()
+	if_vc.add_flow_connection(StringName('1'), flow_input_2.id, macro_vc).add()
 	
 	var print_x: HenVirtualCNode = HenTest.get_void('print x')
 	var print_a: HenVirtualCNode = HenTest.get_void('print a')
 	
-	macro_vc.add_flow_connection(flow_output_1.id, 0, print_x).add()
-	print_x.add_flow_connection(0, 0, print_a).add()
+	macro_vc.add_flow_connection(flow_output_1.id, StringName('0'), print_x).add()
+	print_x.add_flow_connection(StringName('0'), StringName('0'), print_a).add()
 	
 	var print_y: HenVirtualCNode = HenTest.get_void('print y')
 	var print_b: HenVirtualCNode = HenTest.get_void('print b')
 	
-	macro_vc.add_flow_connection(flow_output_2.id, 0, print_y).add()
-	print_y.add_flow_connection(0, 0, print_b).add()
+	macro_vc.add_flow_connection(flow_output_2.id, StringName('0'), print_y).add()
+	print_y.add_flow_connection(StringName('0'), StringName('0'), print_b).add()
 	
 	var code: String = HenTest.get_vc_code(if_vc)
 	

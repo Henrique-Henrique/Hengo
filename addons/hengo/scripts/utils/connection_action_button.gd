@@ -9,7 +9,7 @@ const ICON_UNPLUG = preload('res://addons/hengo/assets/new_icons/unplug.svg')
 
 var action_type: ActionType
 var port_type: PortType
-var port_id: int
+var port_id: StringName
 var port_io_type: StringName
 var vc_ref: HenVirtualCNode
 
@@ -19,7 +19,7 @@ func _ready() -> void:
 
 
 # configures the button for a specific port
-func configure(_vc: HenVirtualCNode, _port_type: PortType, _port_id: int, _is_connected: bool, _io_type: StringName = &'') -> void:
+func configure(_vc: HenVirtualCNode, _port_type: PortType, _port_id: StringName, _is_connected: bool, _io_type: StringName = &'') -> void:
 	vc_ref = _vc
 	port_type = _port_type
 	port_id = _port_id

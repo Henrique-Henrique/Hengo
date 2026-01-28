@@ -67,7 +67,7 @@ func test_copy_paste_all_subtypes() -> void:
 			assert_float(pasted_node.position.x).is_equal(target_pos.x)
 			assert_float(pasted_node.position.y).is_equal(target_pos.y)
 			
-			assert_int(pasted_node.id).is_not_equal(node.id)
+			assert_that(pasted_node.id).is_not_equal(node.id)
 			
 			var _route: HenRouteData = save_data.get_base_route()
 			if _route.virtual_cnode_list.has(pasted_node):

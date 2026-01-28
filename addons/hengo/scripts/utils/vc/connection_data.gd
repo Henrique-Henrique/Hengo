@@ -1,11 +1,11 @@
 @tool
 class_name HenVCConnectionData extends Resource
 
-@export var id: int
-@export var from_id: int
-@export var to_id: int
-@export var from_node_id: int
-@export var to_node_id: int
+@export var id: StringName
+@export var from_id: StringName
+@export var to_id: StringName
+@export var from_node_id: StringName
+@export var to_node_id: StringName
 @export var from_type: StringName
 @export var to_type: StringName
 
@@ -16,7 +16,7 @@ var to_old_pos: Vector2 = Vector2.ZERO
 
 
 func _init() -> void:
-	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	id = StringName(str((Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()))
 
 func get_from(_save_data: HenSaveData) -> HenVirtualCNode:
 	return _save_data.get_cnode_by_id(from_node_id)

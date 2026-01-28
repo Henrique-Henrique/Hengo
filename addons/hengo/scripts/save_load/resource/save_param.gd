@@ -5,7 +5,7 @@ class_name HenSaveParam extends HenSaveResType
 
 
 func _init() -> void:
-	id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
+	id = StringName(str((Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()))
 	name = get_new_name()
 	type = &'Variant'
 
@@ -15,7 +15,7 @@ static func create(data: Dictionary = {}) -> HenSaveParam:
 	if data:
 		if data.has('name'): p.name = data.name
 		if data.has('type'): p.type = data.type
-		if data.has('id'): p.id = data.id
+		if data.has('id'): p.id = str(data.id)
 	return p
 
 

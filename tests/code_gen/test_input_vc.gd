@@ -14,7 +14,7 @@ func test_input_event_check_with_connection() -> void:
 	var vc: HenVirtualCNode = get_input_event_check_vc()
 	var event_vc: HenVirtualCNode = get_event_param_vc()
 	
-	vc.get_new_input_connection_command(0, 0, event_vc).add()
+	vc.get_new_input_connection_command(StringName('0'), StringName('0'), event_vc).add()
 	
 	var expected_code = 'event is InputEventKey and event.pressed and event.keycode == KEY_SPACE'
 	assert_str(HenTest.get_vc_code(vc)).is_equal(expected_code)
@@ -33,7 +33,7 @@ func test_input_action_check_with_connection() -> void:
 	var vc: HenVirtualCNode = get_input_action_check_vc()
 	var event_vc: HenVirtualCNode = get_event_param_vc()
 	
-	vc.get_new_input_connection_command(0, 0, event_vc).add()
+	vc.get_new_input_connection_command(StringName('0'), StringName('0'), event_vc).add()
 	
 	var expected_code = 'event.is_action_pressed("jump")'
 	assert_str(HenTest.get_vc_code(vc)).is_equal(expected_code)

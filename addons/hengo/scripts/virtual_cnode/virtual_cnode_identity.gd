@@ -2,7 +2,7 @@
 @abstract
 class_name HenVirtualCNodeIdentity extends Resource
 
-@export var id: int
+@export var id: StringName
 @export var name: String
 @export var type: HenVirtualCNode.Type
 @export var sub_type: HenVirtualCNode.SubType
