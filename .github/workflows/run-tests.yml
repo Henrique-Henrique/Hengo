@@ -17,4 +17,5 @@ jobs:
         uses: MikeSchulze/gdunit4-action@v1
         with:
           godot-version: '4.5'
+          version: 'v6.0.0'
           paths: 'res://tests'
