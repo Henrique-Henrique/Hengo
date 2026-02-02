@@ -44,15 +44,28 @@ var last_to_pos: Vector2
 
 # generates a smooth cubic bezier curve between two points
 func update_line() -> void:
+	if not input or not output: return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global.CAM: return
+
 	var from_ref: HenVirtualCNode = from.get_ref()
 	var to_ref: HenVirtualCNode = to.get_ref()
+	if not from_ref or not to_ref: return
 
-	if not from_ref or not to_ref:
-		return
-	
-	var start_size_y: float = TITLE_SIZE_Y + CNODE_IO_SIZE / 2.
-	var start_pos: Vector2 = from_ref.position + Vector2(from_ref.size.x, start_size_y + (CNODE_IO_SIZE * from_idx))
-	var end_pos: Vector2 = to_ref.position + Vector2(0, start_size_y + (CNODE_IO_SIZE * to_idx))
+	var start_pos: Vector2
+	if from_pool_visible:
+		start_pos = global.CAM.get_relative_vec2(input.global_position) + input.size / 2
+		last_from_pos = start_pos
+	else:
+		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x, from_ref.size.y / 2)
+
+	var end_pos: Vector2
+	if to_pool_visible:
+		end_pos = global.CAM.get_relative_vec2(output.global_position) + output.size / 2
+		last_to_pos = end_pos
+	else:
+		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(0, to_ref.size.y / 2)
 
 	# dynamic curvature based on distance
 	var distance: float = abs(end_pos.x - start_pos.x)
@@ -75,7 +88,7 @@ func update_line() -> void:
 
 # handles the line visual state
 func _update_visual_style(start_pos: Vector2, end_pos: Vector2) -> void:
-	if start_pos.y + 200 < end_pos.y:
+	if (start_pos.y + 200 < end_pos.y) or (start_pos.x + 800 < end_pos.x):
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		from_icon.visible = true
 		from_icon.position = start_pos + Vector2(18, 0)

@@ -34,6 +34,7 @@ corner_radius_bottom_left = 10
 [node name="ConnectionLine" type="Line2D"]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_pxqr5")
+width = 20.0
 default_color = Color(0.574328, 0.574328, 0.574328, 1)
 gradient = SubResource("Gradient_saaee")
 texture = ExtResource("1_106ed")

@@ -11,4 +11,7 @@ corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.21568628)
+shadow_size = 10
+shadow_offset = Vector2(0, 12)
 metadata/hengo_theme_scale = 2.0

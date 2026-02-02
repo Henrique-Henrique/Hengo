@@ -22,8 +22,9 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 2
 
 [node name="Panel" type="PanelContainer"]
-offset_right = 33.0
-offset_bottom = 28.0
+custom_minimum_size = Vector2(60, 0)
+offset_right = 106.0
+offset_bottom = 62.0
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_w25o5")
 script = ExtResource("1_mmpja")
@@ -60,3 +61,4 @@ modulate = Color(1, 1, 1, 0.54902)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_ldyji")
 theme_override_font_sizes/font_size = 18
+text = "input"

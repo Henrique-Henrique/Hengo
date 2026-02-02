@@ -96,9 +96,7 @@ func show_action(_cnode: HenCnode) -> void:
 	is_showing = true
 
 	# get container references with their positions
-	var center_container: HBoxContainer = _cnode.get_node('%CenterContainer')
-	var input_container: VBoxContainer = _cnode.get_node('%InputContainer')
-	var output_container: VBoxContainer = _cnode.get_node('%OutputContainer')
+	var center_container: VBoxContainer = _cnode.get_node('%CenterContainer')
 	var from_flow_container: HBoxContainer = _cnode.get_node('%FromFlowContainer')
 	var flow_container: HBoxContainer = _cnode.get_node('%FlowContainer')
 
@@ -110,10 +108,13 @@ func show_action(_cnode: HenCnode) -> void:
 		if input.is_static:
 			continue
 		
-		if i >= input_container.get_child_count():
+		if i >= center_container.get_child_count():
 			break
 		
-		var input_node: HenCnodeInOut = input_container.get_child(i)
+		var panel = center_container.get_child(i)
+		var row = panel.get_child(0)
+		var input_node: HenCnodeInOut = row.get_node_or_null('Input') if row else null
+
 		if not input_node or not input_node.visible:
 			continue
 		
@@ -124,8 +125,8 @@ func show_action(_cnode: HenCnode) -> void:
 		var has_connection: bool = vc.input_has_connection(input.id, global.SAVE_DATA)
 		btn.configure(vc, HenConnectionActionButton.PortType.INPUT, input.id, has_connection, input.type)
 		
-
-		var y_offset: float = center_container.position.y + input_container.position.y + input_node.position.y + input_node.size.y / 2 - btn.size.y / 2
+		# center_container pos + panel pos + row pos + input pos + centering math
+		var y_offset: float = center_container.position.y + panel.position.y + row.position.y + input_node.position.y + input_node.size.y / 2 - btn.size.y / 2
 		btn.position = _cnode.position + Vector2(-btn.size.x - 4, y_offset)
 		btn.visible = true
 		btn.animate_show()
@@ -137,10 +138,13 @@ func show_action(_cnode: HenCnode) -> void:
 	for i in outputs.size():
 		var output: HenVCInOutData = outputs[i]
 		
-		if i >= output_container.get_child_count():
+		if i >= center_container.get_child_count():
 			break
+			
+		var panel = center_container.get_child(i)
+		var row = panel.get_child(0)
+		var output_node: HenCnodeInOut = row.get_node_or_null('Output') if row else null
 		
-		var output_node: HenCnodeInOut = output_container.get_child(i)
 		if not output_node or not output_node.visible:
 			continue
 		
@@ -150,7 +154,8 @@ func show_action(_cnode: HenCnode) -> void:
 
 		btn.configure(vc, HenConnectionActionButton.PortType.OUTPUT, output.id, false, output.type)
 		
-		var y_offset: float = center_container.position.y + output_container.position.y + output_node.position.y + output_node.size.y / 2 - btn.size.y / 2
+		# center_container pos + panel pos + row pos + output pos + centering math
+		var y_offset: float = center_container.position.y + panel.position.y + row.position.y + output_node.position.y + output_node.size.y / 2 - btn.size.y / 2
 		btn.position = _cnode.position + Vector2(_cnode.size.x + 4, y_offset)
 		btn.visible = true
 		btn.animate_show()

@@ -31,76 +31,108 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 	var _outputs: Array[HenVCInOutData] = get_outputs(global.SAVE_DATA)
 
 
-	# clearing inputs and change to new
-	for input: HenCnodeInOut in _cnode.get_node('%InputContainer').get_children():
-		input.visible = false
+	# cleaning and configuring rows
+	var center_container: VBoxContainer = _cnode.get_node('%CenterContainer')
+	var row_idx: int = 0
+	
+	var input_idx: int = 0
+	var output_idx: int = 0
+	
+	for panel in center_container.get_children():
+		var row = panel.get_child(0)
+		var input_node = row.get_node_or_null('Input')
+		var output_node = row.get_node_or_null('Output')
+		
+		var is_row_visible: bool = false
+		
+		# INPUT
+		if input_node:
+			if input_idx < _inputs.size():
+				input_node.visible = true
+				is_row_visible = true
+				
+				var input_inst: HenCnodeInOut = input_node as HenCnodeInOut
+				input_inst.set_connected_color(Color.TRANSPARENT)
 
-		if idx < _inputs.size():
-			input.visible = true
-			
-			var input_data: HenVCInOutData = _inputs[idx]
-
-			input.reset_signals(input_data)
-			input.change_name(input_data.name)
-
-			input.io_type = input_data.type
-			input.sub_type = input_data.sub_type
-			if input_data.type:
-				if input_data.is_prop:
-					input.reset_in_props()
-					input.add_prop_ref(input_data.value if input_data.value else null, 0)
+				var input_data: HenVCInOutData = _inputs[input_idx]
+				
+				input_inst.reset_signals(input_data)
+				input_inst.change_name(input_data.name)
+				
+				input_inst.io_type = input_data.type
+				input_inst.sub_type = input_data.sub_type
+				
+				if input_data.type:
+					if input_data.is_prop:
+						input_inst.reset_in_props()
+						input_inst.add_prop_ref(input_data.value if input_data.value else null, 0)
+					else:
+						var default_value
+						
+						if _vc.sub_type == HenVirtualCNode.SubType.MAKE_TRANSITION:
+							var res: HenSaveState = input_data.get_res(global.SAVE_DATA)
+							
+							if res:
+								if res.flow_outputs.size() > 0:
+									default_value = res.flow_outputs[0].name
+								else:
+									default_value = 'INVALID'
+						
+						input_inst.change_type(
+							input_data.type, input_data.value if input_data.value else default_value,
+							'',
+							not input_data.is_static
+						)
 				else:
-					var default_value
-
-					if _vc.sub_type == HenVirtualCNode.SubType.MAKE_TRANSITION:
-						var res: HenSaveState = input_data.get_res(global.SAVE_DATA)
-
-						if res:
-							if res.flow_outputs.size() > 0:
-								default_value = res.flow_outputs[0].name
-							else:
-								default_value = 'INVALID'
-
-					input.change_type(
-						input_data.type, input_data.value if input_data.value else default_value,
-						'',
-						not input_data.is_static
-					)
+					input_inst.reset_in_props()
+					input_inst.set_in_prop(input_data.value if input_data.value else null, not input_data.is_static)
+					input_inst.root.reset_size()
+				
+				if input_data.is_static:
+					(input_inst.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 0)
+					(input_inst.get_node('%Connector') as TextureRect).visible = false
+				else:
+					(input_inst.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 8)
+					(input_inst.get_node('%Connector') as TextureRect).visible = true
+				
+				input_idx += 1
 			else:
-				input.reset_in_props()
-				input.set_in_prop(input_data.value if input_data.value else null, not input_data.is_static)
-				input.root.reset_size()
-			
-			if input_data.is_static:
-				(input.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 0)
-				(input.get_node('%Connector') as TextureRect).visible = false
+				input_node.visible = false
+				
+		# OUTPUT
+		if output_node:
+			if output_idx < _outputs.size():
+				output_node.visible = true
+				is_row_visible = true
+				
+				var output_inst: HenCnodeInOut = output_node as HenCnodeInOut
+				output_inst.set_connected_color(Color.TRANSPARENT)
+
+				var output_data: HenVCInOutData = _outputs[output_idx]
+				
+				output_inst.reset_signals(output_data)
+				
+				output_inst.change_name(output_data.name)
+				output_inst.change_type(
+					output_data.type,
+					output_data.value if output_data.value else null,
+					output_data.sub_type if output_data.sub_type else &''
+				)
+				
+				output_idx += 1
 			else:
-				(input.get_node('%CNameInput') as HBoxContainer).set('theme_override_constants/separation', 8)
-				(input.get_node('%Connector') as TextureRect).visible = true
+				output_node.visible = false
 
-		idx += 1
+		panel.visible = is_row_visible
 
-	idx = 0
-
-	# clearing outputs and change to new
-	for output: HenCnodeInOut in _cnode.get_node('%OutputContainer').get_children():
-		output.visible = false
-
-		if idx < _outputs.size():
-			output.visible = true
+		if is_row_visible:
+			var style: StyleBoxFlat = panel.get_theme_stylebox('panel')
+			if row_idx % 2 != 0:
+				style.bg_color = Color(0, 0, 0, 0.2)
+			else:
+				style.bg_color = Color.TRANSPARENT
 			
-			var output_data: HenVCInOutData = _outputs[idx]
-			
-			output.reset_signals(output_data)
-			
-			output.change_name(output_data.name)
-			output.change_type(
-				output_data.type,
-				output_data.value if output_data.value else null,
-				output_data.sub_type if output_data.sub_type else &''
-			)
-
-		idx += 1
+			row_idx += 1
 
 	for connection: HenVCConnectionData in global.SAVE_DATA.get_connections_by_id(id):
 		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
@@ -137,6 +169,8 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 			if not connection.line_ref:
 				continue
 		
+		connection.line_ref.points = []
+		
 		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
 		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
 		connection.line_ref.from = weakref(from)
@@ -146,12 +180,14 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 		# drawing inputs
 		if connection.line_ref.to_pool_visible:
-			var input: HenCnodeInOut = to.cnode_instance.get_node('%InputContainer').get_child(
-				to_idx
-			)
+			var panel = to.cnode_instance.get_node('%CenterContainer').get_child(to_idx)
+			var input: HenCnodeInOut = panel.get_child(0).get_node('Input')
 
 			connection.line_ref.output = input.get_node('%Connector')
 			input.remove_in_prop()
+
+			var input_color: Color = HenUtils.get_type_parent_color(connection.to_type, 0.2)
+			input.set_connected_color(input_color)
 
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
 
@@ -161,12 +197,14 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 		# drawing outputs
 		if connection.line_ref.from_pool_visible:
-			var output: HenCnodeInOut = from.cnode_instance.get_node('%OutputContainer').get_child(
-				from_idx
-			)
+			var panel = from.cnode_instance.get_node('%CenterContainer').get_child(from_idx)
+			var output: HenCnodeInOut = panel.get_child(0).get_node('Output')
 
 			connection.line_ref.input = output.get_node('%Connector')
 			connection.line_ref.update_colors(connection.from_type, connection.to_type)
+			
+			var output_color: Color = HenUtils.get_type_parent_color(connection.from_type, 0.2)
+			output.set_connected_color(output_color)
 
 			if not from.cnode_instance.is_connected('on_move', connection.line_ref.update_line):
 				from.cnode_instance.connect('on_move', connection.line_ref.update_line)
@@ -254,6 +292,8 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 			if not connection.line_ref:
 				continue
+		
+		connection.line_ref.points = []
 
 		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
 		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)

@@ -291,9 +291,9 @@ func get_outputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
 			if i < outputs.size():
 				var existing: HenVCInOutData = outputs[i]
 				# prevents recursion: only assign if value actually changed
-				if existing.id != data.get('id'): existing.id = data.get('id')
-				if existing.name != data.get('name'): existing.name = data.get('name')
-				if existing.type != data.get('type'): existing.type = data.get('type')
+				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
+				if existing.name != str(data.get('name')): existing.name = str(data.get('name'))
+				if existing.type != str(data.get('type')): existing.type = str(data.get('type'))
 			else:
 				create_io(false, data)
 		

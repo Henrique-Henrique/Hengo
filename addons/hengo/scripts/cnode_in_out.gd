@@ -254,6 +254,13 @@ func reset_in_props(_jump_first: bool = false) -> void:
 	root.reset_size()
 
 
+func set_connected_color(_color: Color = Color.TRANSPARENT) -> void:
+	var style: StyleBoxFlat = get('theme_override_styles/panel')
+	if not style: return
+	
+	style.bg_color = _color
+
+
 func remove_in_prop(_ignore_prop: bool = false) -> void:
 	if type == 'in':
 		for in_prop in get_node('%CNameInput').get_children().slice(2):

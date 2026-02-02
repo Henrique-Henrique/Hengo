@@ -34,14 +34,29 @@ var last_to_pos: Vector2
 
 # generates a smooth vertical cubic bezier for flow connections
 func update_line() -> void:
+	if not input or not output: return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global.CAM: return
+	
 	var from_ref: HenVirtualCNode = from.get_ref()
 	var to_ref: HenVirtualCNode = to.get_ref()
+	
+	if not from_ref or not to_ref: return
 
-	if not from_ref or not to_ref:
-		return
-
-	var start_pos: Vector2 = get_flow_io_position(from_ref, false, from_idx) + Vector2(0, 20)
-	var end_pos: Vector2 = get_flow_io_position(to_ref, true, to_idx) - Vector2(0, 20)
+	var start_pos: Vector2
+	if from_pool_visible:
+		start_pos = global.CAM.get_relative_vec2(input.global_position) + input.size / 2 + Vector2(0, 20)
+		last_from_pos = start_pos
+	else:
+		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x / 2.0, 0)
+	
+	var end_pos: Vector2
+	if to_pool_visible:
+		end_pos = global.CAM.get_relative_vec2(output.global_position) + output.size / 2 - Vector2(0, 20)
+		last_to_pos = end_pos
+	else:
+		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(to_ref.size.x / 2.0, to_ref.size.y)
 	
 	# calculate vertical curvature
 	var distance_y: float = abs(end_pos.y - start_pos.y)
@@ -66,14 +81,23 @@ func show_debug() -> void:
 	if not is_inside_tree():
 		return
 
+	if !debug_timer:
+		debug_timer = Timer.new()
+		debug_timer.wait_time = DEBUG_TIMER_TIME
+		debug_timer.timeout.connect(hide_debug)
+		add_child(debug_timer)
+
 	debug_timer.start(DEBUG_TIMER_TIME)
 
 
 func hide_debug() -> void:
 	texture = normal_texture
 	material.shader = null
-	debug_timer.queue_free()
-	debug_timer = null
+	
+	if debug_timer:
+		debug_timer.queue_free()
+		debug_timer = null
+
 	width = 9
 
 	# arrows
@@ -91,40 +115,3 @@ func hide_debug() -> void:
 
 func change_debug_line_color(_color: Color) -> void:
 	material.set_shader_parameter('color', _color)
-
-
-func get_flow_io_position(_from: HenVirtualCNode, _is_input: bool, _target_idx: int) -> Vector2:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var flows: Array = _from.get_flow_inputs(global.SAVE_DATA) if _is_input else _from.get_flow_outputs(global.SAVE_DATA)
-	
-	if _target_idx < 0 or _target_idx >= flows.size():
-		return _from.position
-	
-	var y_pos: float = 0.0 if _is_input else _from.size.y
-	
-	if flows.size() == 1:
-		var center_x: float = _from.size.x / 2.0
-		
-		return _from.position + Vector2(center_x, y_pos)
-
-	var spacing: float = 10.0
-	var total_flows_width: float = 0.0
-	var widths: Array = []
-
-	for flow: HenVCFlow in flows:
-		var item_width: float = HenUtils.get_text_size(flow.name).x
-		widths.append(item_width)
-		total_flows_width += item_width
-	
-	total_flows_width += spacing * (flows.size() - 1)
-	
-	var current_x_offset: float = (_from.size.x - total_flows_width) / 2.0
-	
-	for i in range(flows.size()):
-		var current_item_width: float = widths[i]
-		if i == _target_idx:
-			var port_center_x: float = current_x_offset + (current_item_width / 2.0)
-			return _from.position + Vector2(port_center_x, y_pos)
-		current_x_offset += current_item_width + spacing
-	
-	return _from.position

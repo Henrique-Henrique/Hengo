@@ -203,27 +203,69 @@ func get_fantasy_name() -> String:
 
 
 func add_input(__input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
-	var in_container = get_node('%InputContainer')
+	var idx: int = 0
+	for child in get_node('%CenterContainer').get_children():
+		if child.get_child_count() == 0: continue
+		var child_row = child.get_child(0)
+		if child_row.has_node('Input'):
+			idx += 1
+
+	var row: HBoxContainer = _get_row(idx)
+	if not row: return null
+
 	var input: HenCnodeInOut = CNODE_INPUT.instantiate()
 
 	input.set_type(__input.get('type') if __input.has('type') else 'Variant')
 	(input.get_node('%Name') as Label).text = __input.name
 	input.root = self
+	input.name = 'Input'
 
-	in_container.add_child(input)
+	row.add_child(input)
+	row.move_child(input, 0)
 
 	return input
 
 
 func add_output(_output: Dictionary) -> void:
-	var out_container = get_node('%OutputContainer')
+	var idx: int = 0
+	for child in get_node('%CenterContainer').get_children():
+		if child.get_child_count() == 0: continue
+		var child_row = child.get_child(0)
+		if child_row.has_node('Output'):
+			idx += 1
+
+	var row: HBoxContainer = _get_row(idx)
+	if not row: return
+
 	var output: HenCnodeInOut = CNODE_OUTPUT.instantiate()
 
 	output.set_type(_output.get('type') if _output.has('type') else 'Variant')
 	(output.get_node('%Name') as Label).text = _output.name
 	output.root = self
+	output.name = 'Output'
 
-	out_container.add_child(output)
+	row.add_child(output)
+
+
+func _get_row(_idx: int) -> HBoxContainer:
+	var container = get_node('%CenterContainer')
+	if _idx < container.get_child_count():
+		var child = container.get_child(_idx)
+		if child.get_child_count() > 0:
+			return child.get_child(0)
+		# fallthrough if existing child is broken (though unlikely with fresh pool)
+	
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	panel.add_theme_stylebox_override('panel', style)
+	container.add_child(panel)
+
+	var row = HBoxContainer.new()
+	row.add_theme_constant_override('separation', 0)
+	panel.add_child(row)
+	
+	return row
 
 
 func disable_error() -> void:
@@ -266,9 +308,14 @@ func request_flow_connetor_connection(_id: StringName, _mouse_pos: Vector2) -> v
 
 
 func update_title_color(_sub_type: int) -> void:
-	var title_color: TextureRect = get_node('%TitleColor')
 	var title_icon: TextureRect = get_node('%TitleIcon')
-	title_color.modulate = HenUtils.get_color_for_subtype(_sub_type)
+	var title: Label = get_node('%Title')
+
+	var color: Color = HenUtils.get_color_for_subtype(_sub_type)
+
+	self_modulate = color.lightened(.5)
+	title.add_theme_color_override('font_color', color)
+	title_icon.modulate = color
 	title_icon.texture = HenUtils.get_icon_for_subtype(_sub_type)
 
 

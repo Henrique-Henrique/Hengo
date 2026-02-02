@@ -15,6 +15,10 @@ run/main_scene="res://demo.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+HengoDebugger="*res://addons/hengo/scripts/debug/hengo_debugger.gd"
+
 [debug]
 
 gdscript/warnings/exclude_addons=false
@@ -71,7 +75,7 @@ hooks/session_hooks=Dictionary[String, bool]({
 settings/auto_zoom=true
 settings/auto_zoom_level_v2=1.7
 settings/max_zoom=2.0
-settings/min_zoom=1.0
+settings/min_zoom=0.5
 
 [input]
 

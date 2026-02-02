@@ -24,6 +24,7 @@ const ICON_TRANSITION = preload("res://addons/hengo/assets/new_icons/arrow-right
 const ICON_EVENT = preload("res://addons/hengo/assets/new_icons/sparkles.svg")
 const ICON_ROUTE = preload("res://addons/hengo/assets/new_icons/route.svg")
 const ICON_PROPERTY = preload("res://addons/hengo/assets/new_icons/sliders-horizontal.svg")
+const ICON_GAMEPAD = preload("res://addons/hengo/assets/new_icons/gamepad-2.svg")
 
 
 static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
@@ -31,7 +32,8 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.FUNC, \
 		HenVirtualCNode.SubType.USER_FUNC, \
 		HenVirtualCNode.SubType.FUNC_FROM, \
-		HenVirtualCNode.SubType.MACRO:
+		HenVirtualCNode.SubType.MACRO, \
+		HenVirtualCNode.SubType.SCRIPT_MACRO:
 			return ICON_FUNCTION
 
 		HenVirtualCNode.SubType.VIRTUAL, \
@@ -119,6 +121,11 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
 			return ICON_TRANSITION
 
+		HenVirtualCNode.SubType.INPUT_EVENT_CHECK, \
+		HenVirtualCNode.SubType.INPUT_ACTION_CHECK, \
+		HenVirtualCNode.SubType.INPUT_POLLING:
+			return ICON_GAMEPAD
+
 	return null
 
 
@@ -127,7 +134,8 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.FUNC, \
 		HenVirtualCNode.SubType.USER_FUNC, \
 		HenVirtualCNode.SubType.FUNC_FROM, \
-		HenVirtualCNode.SubType.MACRO:
+		HenVirtualCNode.SubType.MACRO, \
+		HenVirtualCNode.SubType.SCRIPT_MACRO:
 			return Color("#54a0ff")
 
 		HenVirtualCNode.SubType.VIRTUAL, \
@@ -190,7 +198,7 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 			return Color("#c8d6e5")
 
 		HenVirtualCNode.SubType.VOID:
-			return Color("#576574")
+			return Color("#d1d9e0")
 		
 		HenVirtualCNode.SubType.RAW_CODE:
 			return Color("#feca57")
@@ -202,6 +210,11 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.STATE_TRANSITION, \
 		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
 			return Color("#6c5ce7")
+
+		HenVirtualCNode.SubType.INPUT_EVENT_CHECK, \
+		HenVirtualCNode.SubType.INPUT_ACTION_CHECK, \
+		HenVirtualCNode.SubType.INPUT_POLLING:
+			return Color("#ef5777")
 
 	return Color("#343434")
 

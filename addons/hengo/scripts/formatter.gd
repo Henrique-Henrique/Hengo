@@ -413,12 +413,13 @@ static func start_map_inputs(_vc: HenVirtualCNode, _data: FormatterData, _rect: 
 			connection_list.append(connection)
 
 	# pre-check if _vc has any remote input connection and calculate gap based on name
-	var to_orig_y: float = _data.original_positions.get(_vc.id, _vc.position).y
+	var to_orig_pos: Vector2 = _data.original_positions.get(_vc.id, _vc.position)
 	var max_remote_name_len: int = 0
 	for conn: HenVCConnectionData in connection_list:
 		var from_node: HenVirtualCNode = conn.get_from(save_data)
-		var from_orig_y: float = _data.original_positions.get(from_node.id, from_node.position).y
-		if from_orig_y + 200 < to_orig_y:
+		var from_orig_pos: Vector2 = _data.original_positions.get(from_node.id, from_node.position)
+		
+		if (from_orig_pos.y + 200 < to_orig_pos.y) or (from_orig_pos.x + 800 < to_orig_pos.x):
 			var vc_name: String = from_node.get_vc_name(save_data)
 			max_remote_name_len = max(max_remote_name_len, vc_name.length())
 
