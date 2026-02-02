@@ -9,7 +9,6 @@ class_name HenConnectionLine extends Line2D
 # debug imports
 const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.gdshader')
 const normal_texture = preload('res://addons/hengo/assets/images/line.png')
-const dashed_texture = preload('res://addons/hengo/assets/images/line_dashed_big.png')
 const debug_texture = preload('res://addons/hengo/assets/images/line_debug.svg')
 
 var input

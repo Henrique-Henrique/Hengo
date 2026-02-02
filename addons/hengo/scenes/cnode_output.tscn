@@ -24,6 +24,7 @@ corner_radius_bottom_left = 8
 [node name="PanelContainer" type="PanelContainer"]
 offset_right = 80.0
 offset_bottom = 28.0
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_6s8ct")
 script = ExtResource("1_c51g4")
 type = "out"
