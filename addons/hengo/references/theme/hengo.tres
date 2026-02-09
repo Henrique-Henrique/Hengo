@@ -78,10 +78,10 @@ corner_radius_bottom_left = 12
 corner_detail = 5
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 bg_color = Color(0.08, 0.08, 0.1, 1)
 border_width_left = 1
 border_width_top = 1

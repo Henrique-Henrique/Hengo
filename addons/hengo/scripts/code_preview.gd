@@ -11,6 +11,8 @@ var reg: RegEx
 var last_line: int = 0
 
 func _ready() -> void:
+	custom_minimum_size = Vector2(500, 0) * EditorInterface.get_editor_scale()
+
 	reg = RegEx.new()
 	reg.compile('#ID:[0-9]*')
 
