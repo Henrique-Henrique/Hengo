@@ -1,9 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://c2qul21icd6bk"]
+[gd_scene load_steps=4 format=3 uid="uid://c2qul21icd6bk"]
 
-[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_0c46b"]
 [ext_resource type="Script" uid="uid://mnphnikfmwhe" path="res://addons/hengo/scripts/side_bar/right_side_bar.gd" id="1_vdqq6"]
-[ext_resource type="Material" uid="uid://ck0pfs2wsnaeo" path="res://addons/hengo/assets/shaders/panels.tres" id="2_bfqd8"]
-[ext_resource type="StyleBox" uid="uid://dqrpq6o5w3yhs" path="res://addons/hengo/resources/style_box/panel_blur.tres" id="3_0c46b"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0c46b"]
 
@@ -16,26 +13,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("1_0c46b")
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 script = ExtResource("1_vdqq6")
 
-[node name="Panel" type="Panel" parent="."]
-material = ExtResource("2_bfqd8")
+[node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 2
-theme_override_styles/panel = ExtResource("3_0c46b")
 
 [node name="Elements" type="Tree" parent="Panel"]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_0c46b")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_wrbx0")
 hide_root = true

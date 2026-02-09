@@ -1,6 +1,5 @@
-[gd_scene load_steps=5 format=3 uid="uid://dct6106nr8ey7"]
+[gd_scene load_steps=4 format=3 uid="uid://dct6106nr8ey7"]
 
-[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_bjfgc"]
 [ext_resource type="Script" uid="uid://cs0s5s8b1drqm" path="res://addons/hengo/scripts/expression_editor.gd" id="1_xyhe4"]
 [ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="2_rtepi"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_8mi2d"]
@@ -8,7 +7,6 @@
 [node name="ExpressionEditor" type="PanelContainer"]
 offset_right = 8.0
 offset_bottom = 35.0
-theme = ExtResource("1_bjfgc")
 script = ExtResource("1_xyhe4")
 
 [node name="List" type="VBoxContainer" parent="."]

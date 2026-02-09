@@ -3,20 +3,21 @@
 [ext_resource type="Script" uid="uid://dt7oll6jcta7b" path="res://addons/hengo/scripts/utils/connection_action_button.gd" id="1_action"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-content_margin_left = 8.0
-content_margin_top = 8.0
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.7666196, 0.76661956, 0.76661944, 1)
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.89708984, 0.8970898, 0.89708984, 1)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 1, 1, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+border_color = Color(0.69342947, 0.6934295, 0.69342947, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.7019608)
 shadow_size = 5
 shadow_offset = Vector2(0, 2)
 

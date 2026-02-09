@@ -313,7 +313,7 @@ func update_title_color(_sub_type: int) -> void:
 
 	var color: Color = HenUtils.get_color_for_subtype(_sub_type)
 
-	self_modulate = color.lightened(.5)
+	# self_modulate = color
 	title.add_theme_color_override('font_color', color)
 	title_icon.modulate = color
 	title_icon.texture = HenUtils.get_icon_for_subtype(_sub_type)

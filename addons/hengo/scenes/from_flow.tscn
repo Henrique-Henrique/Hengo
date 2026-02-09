@@ -57,6 +57,6 @@ unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.666667)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_utk7e")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 text = "teste"
 horizontal_alignment = 1

@@ -1,6 +1,5 @@
-[gd_scene load_steps=6 format=3 uid="uid://c4qu2ti8efl61"]
+[gd_scene load_steps=5 format=3 uid="uid://c4qu2ti8efl61"]
 
-[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_k7ch5"]
 [ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4nava"]
@@ -13,7 +12,6 @@
 offset_right = 42.0
 offset_bottom = 42.0
 mouse_filter = 2
-theme = ExtResource("1_k7ch5")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_4nava")
 script = ExtResource("1_y1kkq")
 

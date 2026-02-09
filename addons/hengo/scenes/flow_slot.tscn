@@ -28,7 +28,7 @@ alignment = 1
 modulate = Color(1, 1, 1, 0.666667)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_wkeep")
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 text = "cnode"
 horizontal_alignment = 1
 

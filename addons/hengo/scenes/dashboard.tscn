@@ -1,24 +1,19 @@
-[gd_scene load_steps=14 format=3 uid="uid://c714cqsys4rsq"]
+[gd_scene load_steps=11 format=3 uid="uid://c714cqsys4rsq"]
 
-[ext_resource type="Material" uid="uid://scw3edv1d866" path="res://addons/hengo/assets/shaders/popup_container.tres" id="1_4elpu"]
 [ext_resource type="Script" uid="uid://cnfv5ehb7ikwh" path="res://addons/hengo/scripts/utils/dashboard.gd" id="1_jlpx7"]
 [ext_resource type="Texture2D" uid="uid://b253cikspw8hb" path="res://addons/hengo/assets/new_icons/file-plus.svg" id="1_v3ptv"]
-[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="2_4elpu"]
 [ext_resource type="Texture2D" uid="uid://skoevmk0r0ms" path="res://addons/hengo/assets/new_icons/book-open-text.svg" id="2_jlpx7"]
-[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="2_l2d5o"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="2_l2d5o"]
 [ext_resource type="Texture2D" uid="uid://bljjoldgfwwoh" path="res://addons/hengo/assets/new_icons/lightbulb.svg" id="3_ksiib"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="3_q2m6f"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_q2m6f"]
 [ext_resource type="Texture2D" uid="uid://brdhk1mk4bmcr" path="res://addons/hengo/assets/new_icons/globe.svg" id="4_l2d5o"]
 [ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="4_tr5or"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v3ptv"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4elpu"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2ooio"]
 
 [node name="Dashboard" type="PanelContainer"]
-material = ExtResource("1_4elpu")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -26,8 +21,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = ExtResource("2_4elpu")
-theme_override_styles/panel = SubResource("StyleBoxFlat_v3ptv")
 script = ExtResource("1_jlpx7")
 
 [node name="MarginContainer" type="Control" parent="."]
@@ -51,6 +44,7 @@ layout_mode = 2
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"HeaderLarge"
 theme_override_fonts/font = ExtResource("2_l2d5o")
 theme_override_font_sizes/font_size = 32
 text = "Hengo Script"
