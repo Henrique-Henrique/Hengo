@@ -47,12 +47,17 @@ func load_res(_res_id: StringName) -> HenSaveData:
 	return save_data
 
 
-func load(_id: StringName, _headless: bool = false) -> bool:
+func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData = null) -> bool:
 	var start: int = Time.get_ticks_usec()
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	var save_data: HenSaveData = load_res(_id)
+	var save_data: HenSaveData
+	
+	if _override_data:
+		save_data = _override_data
+	else:
+		save_data = load_res(_id)
 
 	# loading hengo script data
 	if save_data:

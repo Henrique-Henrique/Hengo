@@ -1,4 +1,4 @@
-[gd_scene load_steps=59 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=58 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" uid="uid://dndakpv2e001o" path="res://addons/hengo/scripts/utils/thread_helper.gd" id="3_1gx8m"]
@@ -16,9 +16,8 @@
 [ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
 [ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
-[ext_resource type="Theme" uid="uid://d1c6eh1s5n5k1" path="res://addons/hengo/references/theme/hengo.tres" id="11_174hx"]
 [ext_resource type="Script" uid="uid://itdfd6vqm34v" path="res://addons/hengo/scripts/global.gd" id="11_3680e"]
-[ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
+[ext_resource type="Theme" uid="uid://b8wwxpbbrp2rl" path="res://addons/hengo/references/theme/hengo.tres" id="12_5c7h0"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="12_wtrk7"]
 [ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
 [ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
@@ -60,9 +59,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3592, 2070)
-shader_parameter/offset = Vector2(-2392.7937, -6.355706)
-shader_parameter/zoom_factor = 1.0554616
+shader_parameter/screen_size = Vector2(1912, 1001)
+shader_parameter/offset = Vector2(911.36145, 282.45667)
+shader_parameter/zoom_factor = 1.2498609
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -154,7 +153,7 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
-theme = ExtResource("11_174hx")
+theme = ExtResource("12_5c7h0")
 script = ExtResource("2_velgh")
 
 [node name="AutoLoads" type="Node" parent="."]
@@ -208,7 +207,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("11_174hx")
+theme = ExtResource("12_5c7h0")
 
 [node name="MarginContainer" type="MarginContainer" parent="Content/Panel"]
 layout_mode = 1
@@ -400,7 +399,7 @@ metadata/_tab_name = "Props"
 [node name="CodePreview" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 0)
+custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
@@ -435,22 +434,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer"]
-visible = false
-layout_mode = 2
-
-[node name="Tabs" type="TabBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-tab_alignment = 2
-script = ExtResource("11_lxtpw")
+theme_override_constants/separation = 0
 
 [node name="ActionBarMargin" type="MarginContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/margin_top = 8
 
 [node name="PanelContainer" type="PanelContainer" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin"]
 layout_mode = 2
@@ -568,7 +556,12 @@ icon = ExtResource("18_fdf88")
 
 [node name="RightSideBar" parent="Content/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer" instance=ExtResource("37_hog2e")]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="GeneralPopUpContainer" parent="." instance=ExtResource("8_uxy8l")]
 unique_name_in_owner = true
@@ -651,7 +644,7 @@ unique_name_in_owner = true
 [node name="DashBoard" parent="DashboardCanvas" instance=ExtResource("44_33cyo")]
 unique_name_in_owner = true
 visible = false
-theme = ExtResource("11_174hx")
+theme = ExtResource("12_5c7h0")
 
 [node name="ToastContainer" type="CanvasLayer" parent="."]
 unique_name_in_owner = true

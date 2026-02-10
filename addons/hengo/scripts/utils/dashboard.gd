@@ -1,12 +1,12 @@
 @tool
 class_name HenDashboard extends PanelContainer
 
-const ICON = preload('res://addons/hengo/assets/new_icons/file-code.svg')
+const ITEM_SCENE = preload('res://addons/hengo/scenes/utils/dashboard_item.tscn')
 
 @onready var close_bt: Button = %CloseBt
 @onready var new_script_bt: Button = %NewScript
 @onready var search_edit: LineEdit = %Search
-@onready var script_list_node: ItemList = %ScriptList
+@onready var script_list_node: VBoxContainer = %ScriptList
 
 var timer: SceneTreeTimer
 var script_list: Array[Dictionary]
@@ -17,9 +17,10 @@ func _ready() -> void:
 	signal_bus.request_list_update.connect(show_dashboard)
 
 	search_edit.text_changed.connect(_on_search_change)
-	script_list_node.item_activated.connect(_on_select)
 	close_bt.pressed.connect(_on_close)
 	new_script_bt.pressed.connect(_on_create_script)
+	
+	visibility_changed.connect(_on_visibility_changed)
 
 
 func _on_create_script() -> void:
@@ -37,18 +38,69 @@ func _on_close() -> void:
 	global.HENGO_EDITOR_PLUGIN.hide_plugin()
 
 
-func _on_select(_id: int) -> void:
-	var meta = script_list_node.get_item_metadata(_id)
-
+func _on_open_script(meta: Dictionary) -> void:
 	if not meta is Dictionary:
 		return
 	
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 
-	if await loader.load(str(meta.id)):
+	if loader.load(str(meta.id)):
 		hide_dashboard()
 	else:
 		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.base_name, HenToast.MessageType.ERROR)
+
+
+func _on_edit_properties_script(meta: Dictionary) -> void:
+	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name).path_join('identity.tres')
+	
+	if not FileAccess.file_exists(identity_path):
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to find identity file for: " + meta.base_name, HenToast.MessageType.ERROR)
+		return
+
+	# TODO: inspector cant edit this
+	var res: Resource = ResourceLoader.load(identity_path, '', ResourceLoader.CACHE_MODE_REPLACE)
+	if res:
+		HenInspector.edit_resource(res)
+
+
+func _on_delete_request(meta: Dictionary) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
+	var container = VBoxContainer.new()
+	
+	var label = Label.new()
+	label.text = "Are you sure you want to delete '%s'?" % meta.base_name
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	container.add_child(label)
+	
+	var hbox = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 20)
+	container.add_child(hbox)
+	
+	var yes_bt = Button.new()
+	yes_bt.text = "Delete"
+	# yes_bt.modulate = Color.RED
+	yes_bt.pressed.connect(func():
+		_on_delete_confirmed(meta)
+		global.GENERAL_POPUP.hide_popup()
+	)
+	hbox.add_child(yes_bt)
+	
+	var no_bt = Button.new()
+	no_bt.text = "Cancel"
+	no_bt.pressed.connect(global.GENERAL_POPUP.hide_popup)
+	hbox.add_child(no_bt)
+
+	global.GENERAL_POPUP.show_content(container, "Delete Script", Vector2.INF, 0.5)
+
+
+func _on_delete_confirmed(meta: Dictionary) -> void:
+	var path = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name)
+	var global_path = ProjectSettings.globalize_path(path)
+	
+	OS.move_to_trash(global_path)
+	show_dashboard()
 
 
 func _on_search_change(_text: String) -> void:
@@ -78,33 +130,68 @@ func debounce_search(delay: float, callback: Callable) -> void:
 
 
 func show_dashboard() -> void:
-	script_list.clear()
+	if not visible:
+		visible = true
+	else:
+		refresh()
 
+func _on_visibility_changed() -> void:
+	if is_visible_in_tree():
+		refresh()
+
+func refresh() -> void:
+	if script_list_node.get_child_count() > 0:
+		script_list_node.get_child(0).queue_free()
+		var label = Label.new()
+		label.text = "Loading..."
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		script_list_node.add_child(label)
+	
+	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
+	thread_helper.add_task(_load_scripts_thread)
+
+
+func _load_scripts_thread() -> void:
+	var new_script_list: Array[Dictionary] = []
+	
 	for dir_name: StringName in DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH):
 		var identity_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('identity.tres')
 
 		if not FileAccess.file_exists(identity_path):
 			continue
 		
+		var save_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('save.tres')
+		
+		# check both identity and save file to get the latest edit time
 		var time: int = FileAccess.get_modified_time(identity_path)
+		if FileAccess.file_exists(save_path):
+			var save_time: int = FileAccess.get_modified_time(save_path)
+			if save_time > time:
+				time = save_time
+
 		var identity: HenSaveDataIdentity = ResourceLoader.load(identity_path)
 
-		script_list.append(
+		new_script_list.append(
 			{
 				id = identity.id,
 				base_name = identity.name,
-				time = time
+				time = time,
+				dir_name = dir_name,
+				type = identity.type
 			}
 		)
 	
-	script_list.sort_custom(func(a, b): return a.time > b.time)
+	new_script_list.sort_custom(func(a, b): return a.time > b.time)
+	_on_scripts_loaded.call_deferred(new_script_list)
 
+
+func _on_scripts_loaded(_data: Array[Dictionary]) -> void:
+	script_list = _data
 	update(script_list)
-
-	visible = true
 
 
 func hide_dashboard() -> void:
+	await RenderingServer.frame_pre_draw
 	script_list.clear()
 	visible = false
 
@@ -118,9 +205,13 @@ func toggle_dashboard() -> void:
 
 
 func update(_data: Array[Dictionary]) -> void:
-	script_list_node.clear()
+	for child in script_list_node.get_children():
+		child.queue_free()
 
 	for script: Dictionary in _data:
-		var item_id: int = script_list_node.add_item(script.base_name)
-		script_list_node.set_item_icon(item_id, ICON)
-		script_list_node.set_item_metadata(item_id, script)
+		var item = ITEM_SCENE.instantiate()
+		script_list_node.add_child(item)
+		item.setup(script)
+		item.open_request.connect(_on_open_script)
+		item.edit_request.connect(_on_edit_properties_script)
+		item.delete_request.connect(_on_delete_request)

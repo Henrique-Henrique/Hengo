@@ -25,14 +25,16 @@ func _on_create(_open: bool = false) -> void:
 	if script.result != OK:
 		return
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	
 	if _open:
 		var loader: HenLoader = Engine.get_singleton(&'Loader')
-		loader.load(str(script.id))
+		loader.load(str(script.id), false, script.data)
 	else:
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 		signal_bus.request_list_update.emit()
 
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
+	global.GENERAL_POPUP.hide_popup()
 
 
 func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
@@ -72,7 +74,8 @@ func create_script(_name: String, _class: StringName) -> Dictionary:
 	
 	return {
 		result = result,
-		id = id
+		id = id,
+		data = res
 	}
 
 
