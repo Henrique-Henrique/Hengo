@@ -14,6 +14,10 @@ func _on_color_changed(_color: Color) -> void:
 
 
 # public
+func set_font_size(_size: int) -> void:
+	pass
+
+
 func set_default(_value) -> void:
 	if not _value or str(_value) == 'null':
 		color = Color()

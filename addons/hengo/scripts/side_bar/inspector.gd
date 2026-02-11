@@ -20,6 +20,8 @@ var vbox: VBoxContainer
 
 
 func _init() -> void:
+	focus_mode = Control.FOCUS_ALL
+	
 	vbox = VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL

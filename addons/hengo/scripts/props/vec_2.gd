@@ -21,6 +21,11 @@ func _on_y_changed(_value: float) -> void:
 
 # public
 #
+func set_font_size(_size: int) -> void:
+	get_node('x').set_font_size(_size)
+	get_node('y').set_font_size(_size)
+
+
 func set_default(_value: String) -> void:
 	var parsed = str_to_var(_value)
 	if parsed != null and parsed is Vector2:

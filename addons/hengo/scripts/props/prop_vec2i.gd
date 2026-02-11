@@ -24,6 +24,11 @@ func _on_y_changed(_value: float) -> void:
 
 
 # public
+func set_font_size(_size: int) -> void:
+	get_node('x').set_font_size(_size)
+	get_node('y').set_font_size(_size)
+
+
 func set_default(_value) -> void:
 	if _value is Vector2i:
 		my_value = _value

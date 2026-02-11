@@ -1,7 +1,6 @@
-[gd_scene load_steps=10 format=3 uid="uid://c714cqsys4rsq"]
+[gd_scene load_steps=9 format=3 uid="uid://c714cqsys4rsq"]
 
 [ext_resource type="Script" uid="uid://cnfv5ehb7ikwh" path="res://addons/hengo/scripts/utils/dashboard.gd" id="1_jlpx7"]
-[ext_resource type="Theme" uid="uid://b8wwxpbbrp2rl" path="res://addons/hengo/references/theme/hengo.tres" id="1_tr5or"]
 [ext_resource type="Texture2D" uid="uid://b253cikspw8hb" path="res://addons/hengo/assets/new_icons/file-plus.svg" id="1_v3ptv"]
 [ext_resource type="Texture2D" uid="uid://skoevmk0r0ms" path="res://addons/hengo/assets/new_icons/book-open-text.svg" id="2_jlpx7"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="2_l2d5o"]
@@ -19,7 +18,6 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = ExtResource("1_tr5or")
 script = ExtResource("1_jlpx7")
 
 [node name="MarginContainer" type="Control" parent="."]

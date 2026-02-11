@@ -91,6 +91,8 @@ func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 
 	if _type == HenVirtualCNode.SubType.VIRTUAL:
 		for param: HenSaveParam in transition_data:
+			if not param: continue
+			
 			arr.append(param.get_data())
 
 	return arr

@@ -6,8 +6,14 @@ func _ready() -> void:
 
 	line_edit.expand_to_text_length = true
 	step = 0.000001
-	line_edit.add_theme_font_size_override('font_size', 18)
 	line_edit.expand_to_text_length = true
+
+
+# public
+#
+func set_font_size(_size: int) -> void:
+	var line_edit: LineEdit = get_line_edit()
+	line_edit.add_theme_font_size_override('font_size', _size)
 
 
 # public

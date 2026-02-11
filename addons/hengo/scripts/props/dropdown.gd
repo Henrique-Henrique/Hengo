@@ -201,6 +201,10 @@ func _selected(_item: Dictionary) -> void:
 
 # public
 #
+func set_font_size(_size: int) -> void:
+	add_theme_font_size_override('font_size', _size)
+
+
 func set_default(_text: String) -> void:
 	match type:
 		'enum_list':

@@ -1,5 +1,5 @@
 @tool
-class_name HenToast extends CanvasLayer
+class_name HenToast extends Control
 
 enum MessageType {
     INFO,

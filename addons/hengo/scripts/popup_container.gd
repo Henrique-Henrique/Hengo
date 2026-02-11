@@ -1,10 +1,10 @@
 @tool
-class_name HenPopupContainer extends CanvasLayer
+class_name HenPopupContainer extends Panel
 
 signal closed
 
 func _ready() -> void:
-	get_child(0).gui_input.connect(_on_gui)
+	gui_input.connect(_on_gui)
 
 func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
@@ -30,9 +30,9 @@ func show_content(_content: Control, _name: String = '', _pos: Vector2 = Vector2
 	container.add_child(_content)
 	
 	if _lod > 0:
-		(get_node('%Background') as Panel).modulate = Color.WHITE
+		modulate = Color.WHITE
 	else:
-		(get_node('%Background') as Panel).modulate = Color.TRANSPARENT
+		modulate = Color.TRANSPARENT
 
 	show()
 
@@ -40,7 +40,7 @@ func show_content(_content: Control, _name: String = '', _pos: Vector2 = Vector2
 	var tween: Tween = get_tree().create_tween()
 
 	gp.scale = Vector2(.95, .95)
-	gp.modulate.a = 0.0 # Começa invisível
+	gp.modulate.a = 0.0
 
 	tween.set_parallel(true)
 	tween.tween_property(gp, 'scale', Vector2.ONE, .4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -55,11 +55,6 @@ func move(_pos: Vector2) -> void:
 	var gp = get_node('%GeneralPopUp')
 	gp.position += _pos
 	HenUtils.reposition_control_inside(gp)
-
-
-func reset_size() -> void:
-	var gp = get_node('%GeneralPopUp')
-	gp.reset_size()
 
 
 func show_container() -> void:

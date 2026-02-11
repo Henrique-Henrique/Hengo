@@ -31,7 +31,8 @@ func _enter_tree():
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)
 
 	main_scene = HENGO_ROOT.instantiate()
-	main_scene.theme = ThemeUtils.create_scaled_theme(BASE_THEME, EditorInterface.get_editor_scale())
+
+	(main_scene.get_node('%UIBase') as Control).theme = ThemeUtils.create_scaled_theme(BASE_THEME, EditorInterface.get_editor_scale())
 
 	register_singletons()
 
@@ -148,7 +149,7 @@ func _make_visible(_visible: bool):
 	if main_scene:
 		main_scene.visible = _visible
 		(main_scene.get_node('%Content') as CanvasLayer).visible = _visible
-		(main_scene.get_node('%DashboardCanvas') as CanvasLayer).visible = _visible
+		(main_scene.get_node('%DashBoard') as HenDashboard).show_dashboard()
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
