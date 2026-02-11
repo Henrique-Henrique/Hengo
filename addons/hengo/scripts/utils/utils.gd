@@ -2,29 +2,42 @@ class_name HenUtils extends Node
 
 const NONE_ICON = preload('res://addons/hengo/assets/icons/menu/none.svg')
 
-const ICON_FUNCTION = preload("res://addons/hengo/assets/new_icons/square-function.svg")
-const ICON_VARIABLE = preload("res://addons/hengo/assets/new_icons/variable.svg")
-const ICON_IF = preload("res://addons/hengo/assets/new_icons/git-branch.svg")
-const ICON_LOOP = preload("res://addons/hengo/assets/new_icons/repeat.svg")
-const ICON_STATE = preload("res://addons/hengo/assets/new_icons/activity.svg")
-const ICON_SIGNAL = preload("res://addons/hengo/assets/new_icons/signal.svg")
-const ICON_DEBUG = preload("res://addons/hengo/assets/new_icons/bug.svg")
-const ICON_VOID = preload("res://addons/hengo/assets/new_icons/circle-slash.svg")
-const ICON_INVALID = preload("res://addons/hengo/assets/new_icons/triangle.svg")
-const ICON_CODE = preload("res://addons/hengo/assets/new_icons/code.svg")
-const ICON_IMAGE = preload("res://addons/hengo/assets/new_icons/image.svg")
-const ICON_CALCULATOR = preload("res://addons/hengo/assets/new_icons/calculator.svg")
-const ICON_LINK_OFF = preload("res://addons/hengo/assets/new_icons/link-2-off.svg")
-const ICON_INPUT = preload("res://addons/hengo/assets/new_icons/file-input.svg")
-const ICON_OUTPUT = preload("res://addons/hengo/assets/new_icons/file-output.svg")
-const ICON_BOX = preload("res://addons/hengo/assets/new_icons/box.svg")
-const ICON_LAYERS = preload("res://addons/hengo/assets/new_icons/layers.svg")
-const ICON_PLAY = preload("res://addons/hengo/assets/new_icons/play.svg")
-const ICON_TRANSITION = preload("res://addons/hengo/assets/new_icons/arrow-right-left.svg")
-const ICON_EVENT = preload("res://addons/hengo/assets/new_icons/sparkles.svg")
-const ICON_ROUTE = preload("res://addons/hengo/assets/new_icons/route.svg")
-const ICON_PROPERTY = preload("res://addons/hengo/assets/new_icons/sliders-horizontal.svg")
-const ICON_GAMEPAD = preload("res://addons/hengo/assets/new_icons/gamepad-2.svg")
+const ICON_FUNCTION = preload('res://addons/hengo/assets/new_icons/square-function.svg')
+const ICON_VARIABLE = preload('res://addons/hengo/assets/new_icons/variable.svg')
+const ICON_IF = preload('res://addons/hengo/assets/new_icons/git-branch.svg')
+const ICON_LOOP = preload('res://addons/hengo/assets/new_icons/repeat.svg')
+const ICON_STATE = preload('res://addons/hengo/assets/new_icons/activity.svg')
+const ICON_SIGNAL = preload('res://addons/hengo/assets/new_icons/signal.svg')
+const ICON_DEBUG = preload('res://addons/hengo/assets/new_icons/bug.svg')
+const ICON_VOID = preload('res://addons/hengo/assets/new_icons/circle-slash.svg')
+const ICON_INVALID = preload('res://addons/hengo/assets/new_icons/triangle.svg')
+const ICON_CODE = preload('res://addons/hengo/assets/new_icons/code.svg')
+const ICON_IMAGE = preload('res://addons/hengo/assets/new_icons/image.svg')
+const ICON_CALCULATOR = preload('res://addons/hengo/assets/new_icons/calculator.svg')
+const ICON_LINK_OFF = preload('res://addons/hengo/assets/new_icons/link-2-off.svg')
+const ICON_INPUT = preload('res://addons/hengo/assets/new_icons/file-input.svg')
+const ICON_OUTPUT = preload('res://addons/hengo/assets/new_icons/file-output.svg')
+const ICON_BOX = preload('res://addons/hengo/assets/new_icons/box.svg')
+const ICON_LAYERS = preload('res://addons/hengo/assets/new_icons/layers.svg')
+const ICON_PLAY = preload('res://addons/hengo/assets/new_icons/play.svg')
+const ICON_TRANSITION = preload('res://addons/hengo/assets/new_icons/arrow-right-left.svg')
+const ICON_EVENT = preload('res://addons/hengo/assets/new_icons/sparkles.svg')
+const ICON_ROUTE = preload('res://addons/hengo/assets/new_icons/route.svg')
+const ICON_PROPERTY = preload('res://addons/hengo/assets/new_icons/sliders-horizontal.svg')
+const ICON_GAMEPAD = preload('res://addons/hengo/assets/new_icons/gamepad-2.svg')
+
+
+const DEPTH_COLORS: Array[Color] = [
+	Color('#acacacff'),
+	Color('#c6dbffff'),
+	Color('#ff8686ff'),
+	Color('#782a7a'),
+	Color('#b826d1ff'),
+]
+
+
+static func get_depth_color(depth: int) -> Color:
+	return DEPTH_COLORS[depth % DEPTH_COLORS.size()]
 
 
 static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
@@ -136,19 +149,19 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.FUNC_FROM, \
 		HenVirtualCNode.SubType.MACRO, \
 		HenVirtualCNode.SubType.SCRIPT_MACRO:
-			return Color("#54a0ff")
+			return Color('#54a0ff')
 
 		HenVirtualCNode.SubType.VIRTUAL, \
 		HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-			return Color("#ff9ff3")
+			return Color('#ff9ff3')
 
 		HenVirtualCNode.SubType.FUNC_INPUT, \
 		HenVirtualCNode.SubType.MACRO_INPUT:
-			return Color("#ff9ff3")
+			return Color('#ff9ff3')
 
 		HenVirtualCNode.SubType.FUNC_OUTPUT, \
 		HenVirtualCNode.SubType.MACRO_OUTPUT:
-			return Color("#ff9ff3")
+			return Color('#ff9ff3')
 
 		HenVirtualCNode.SubType.VAR, \
 		HenVirtualCNode.SubType.LOCAL_VAR, \
@@ -159,35 +172,35 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.CONST, \
 		HenVirtualCNode.SubType.GET_FROM_PROP, \
 		HenVirtualCNode.SubType.IN_PROP:
-			return Color("#1dd1a1")
+			return Color('#1dd1a1')
 
 		HenVirtualCNode.SubType.GET_PROP, \
 		HenVirtualCNode.SubType.SET_PROP:
-			return Color("#00d2d3")
+			return Color('#00d2d3')
 
 		HenVirtualCNode.SubType.IF:
-			return Color("#ff6b6b")
+			return Color('#ff6b6b')
 
 		HenVirtualCNode.SubType.FOR, \
 		HenVirtualCNode.SubType.FOR_ARR, \
 		HenVirtualCNode.SubType.FOR_ITEM:
-			return Color("#ff6b6b")
+			return Color('#ff6b6b')
 
 		HenVirtualCNode.SubType.BREAK, \
 		HenVirtualCNode.SubType.CONTINUE, \
 		HenVirtualCNode.SubType.PASS, \
 		HenVirtualCNode.SubType.GO_TO_VOID, \
 		HenVirtualCNode.SubType.SELF_GO_TO_VOID:
-			return Color("#ff6b6b")
+			return Color('#ff6b6b')
 
 		HenVirtualCNode.SubType.STATE, \
 		HenVirtualCNode.SubType.STATE_START:
-			return Color("#a29bfe")
+			return Color('#a29bfe')
 
 		HenVirtualCNode.SubType.SIGNAL_ENTER, \
 		HenVirtualCNode.SubType.SIGNAL_CONNECTION, \
 		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
-			return Color("#ff6b6b")
+			return Color('#ff6b6b')
 
 		HenVirtualCNode.SubType.DEBUG, \
 		HenVirtualCNode.SubType.DEBUG_VALUE, \
@@ -195,28 +208,28 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 		HenVirtualCNode.SubType.DEBUG_FLOW_START, \
 		HenVirtualCNode.SubType.START_DEBUG_STATE, \
 		HenVirtualCNode.SubType.DEBUG_STATE:
-			return Color("#c8d6e5")
+			return Color('#c8d6e5')
 
 		HenVirtualCNode.SubType.VOID:
-			return Color("#d1d9e0")
+			return Color('#d1d9e0')
 		
 		HenVirtualCNode.SubType.RAW_CODE:
-			return Color("#feca57")
+			return Color('#feca57')
 
 		HenVirtualCNode.SubType.EXPRESSION:
-			return Color("#ff9f43")
+			return Color('#ff9f43')
 
 		HenVirtualCNode.SubType.MAKE_TRANSITION, \
 		HenVirtualCNode.SubType.STATE_TRANSITION, \
 		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
-			return Color("#6c5ce7")
+			return Color('#6c5ce7')
 
 		HenVirtualCNode.SubType.INPUT_EVENT_CHECK, \
 		HenVirtualCNode.SubType.INPUT_ACTION_CHECK, \
 		HenVirtualCNode.SubType.INPUT_POLLING:
-			return Color("#ef5777")
+			return Color('#ef5777')
 
-	return Color("#343434")
+	return Color('#343434')
 
 static func move_array_item(_arr: Array, _ref, _factor: int) -> bool:
 	var target_idx: int = _arr.find(_ref) - _factor
@@ -229,7 +242,7 @@ static func move_array_item(_arr: Array, _ref, _factor: int) -> bool:
 			can_move = target_idx < _arr.size()
 
 	if can_move:
-		var value_to_change = _arr[target_idx]
+		var value_to_change: Variant = _arr[target_idx]
 		_arr[target_idx] = _ref
 		_arr[target_idx + _factor] = value_to_change
 
@@ -237,7 +250,7 @@ static func move_array_item(_arr: Array, _ref, _factor: int) -> bool:
 
 
 static func move_array_item_to_idx(_arr: Array, _ref, _pos: int) -> void:
-	var value_to_change = _arr[_pos]
+	var value_to_change: Variant = _arr[_pos]
 	var old_pos: int = _arr.find(_ref)
 
 	_arr[_pos] = _ref
@@ -314,16 +327,16 @@ static func disable_scene(_ref: Node) -> bool:
 
 
 static func get_error_text(_text: String) -> String:
-	return "\n[img]res://addons/hengo/assets/icons/terminal/circle-x.svg[/img] [b][color=#dc3545]" + _text + "[/color][color=#ff4757][/color][/b]"
+	return '\n[img]res://addons/hengo/assets/icons/terminal/circle-x.svg[/img] [b][color=#dc3545]' + _text + '[/color][color=#ff4757][/color][/b]'
 
 static func get_success_text(_text: String) -> String:
-	return "\n[img]res://addons/hengo/assets/icons/terminal/check.svg[/img] [b][color=#28a745]" + _text + "[/color][color=#2ed573][/color][/b]"
+	return '\n[img]res://addons/hengo/assets/icons/terminal/check.svg[/img] [b][color=#28a745]' + _text + '[/color][color=#2ed573][/color][/b]'
 
 static func get_warning_text(_text: String) -> String:
-	return "\n[img]res://addons/hengo/assets/icons/terminal/triangle-alert.svg[/img] [b][color=#ffc107]" + _text + "[/color][color=#ffa502][/color][/b]"
+	return '\n[img]res://addons/hengo/assets/icons/terminal/triangle-alert.svg[/img] [b][color=#ffc107]' + _text + '[/color][color=#ffa502][/color][/b]'
 
 static func get_building_text(_text: String) -> String:
-	return "\n[img]res://addons/hengo/assets/icons/terminal/chevron-right.svg[/img] [color=#ffffff]" + _text + "[/color][color=#747d8c][/color]"
+	return '\n[img]res://addons/hengo/assets/icons/terminal/chevron-right.svg[/img] [color=#ffffff]' + _text + '[/color][color=#747d8c][/color]'
 
 
 static func get_text_size(_text: String) -> Vector2:
@@ -545,7 +558,7 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 					list = _save_data.states
 				HenSideBar.AddType.LOCAL_VAR:
 					var check_list: Callable = func(l: Array) -> HenSaveParam:
-						for item in l:
+						for item: Variant in l:
 							if item is HenSaveResTypeWithRoute:
 								for lv: HenSaveParam in item.local_vars:
 									if lv.id == _res_data.id:
@@ -562,12 +575,12 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 					
 					if found: return found
 		
-		for item in list:
+		for item: Variant in list:
 			if item.id == _res_data.id:
 				return item
 			
 		if not _res_data.has('save_data_id') and _res_data.type == HenSideBar.AddType.STATE:
-			for sub_states in _save_data.sub_states.values():
+			for sub_states: Array in _save_data.sub_states.values():
 				for s: HenSaveState in sub_states:
 					if s.id == _res_data.id:
 						return s

@@ -72,14 +72,16 @@ hooks/session_hooks=Dictionary[String, bool]({
 
 [hengo]
 
-settings/auto_zoom=false
-settings/auto_zoom_level_v2=1.7
+settings/auto_zoom=true
+settings/auto_zoom_level_v2=1.4
 settings/max_zoom=2.0
 settings/min_zoom=0.5
-settings/auto_move=false
-settings/auto_layout=false
-settings/auto_move_on_add=false
-settings/auto_move_on_connection=false
+settings/auto_move=true
+settings/auto_layout=true
+settings/auto_move_on_add=true
+settings/auto_move_on_connection=true
+settings/auto_move_on_remove=true
+settings/development_mode=true
 
 [input]
 

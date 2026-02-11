@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bngdq8uvalmrx"]
 
-[node name="PropContainer" type="HBoxContainer"]
+[node name="PropContainer" type="VBoxContainer"]
 offset_right = 37.0
 offset_bottom = 23.0
 
