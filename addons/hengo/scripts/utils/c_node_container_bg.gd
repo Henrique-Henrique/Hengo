@@ -22,7 +22,7 @@ func _on_gui(_event: InputEvent) -> void:
 
 			match _event.button_index:
 				MOUSE_BUTTON_RIGHT:
-					global.GENERAL_POPUP.show_content(HenCodeSearch.load(get_global_mouse_position()), 'Code Search')
+					(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenCodeSearch.load(get_global_mouse_position()), 'Code Search')
 				MOUSE_BUTTON_LEFT:
 					for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE.duplicate():
 						vc.unselect()

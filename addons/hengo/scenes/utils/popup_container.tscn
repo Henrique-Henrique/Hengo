@@ -1,9 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://crsj5ij47bnr2"]
+[gd_scene load_steps=5 format=3 uid="uid://crsj5ij47bnr2"]
 
+[ext_resource type="Script" uid="uid://dne5p21o4tiec" path="res://addons/hengo/scripts/popup_container.gd" id="1_popup_script"]
 [ext_resource type="Material" uid="uid://scw3edv1d866" path="res://addons/hengo/assets/shaders/popup_container.tres" id="2_6srun"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ina0r"]
 bg_color = Color(0.011764706, 0.011764706, 0.011764706, 0.84313726)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_popup"]
 
 [node name="PopupContainer" type="Panel"]
 material = ExtResource("2_6srun")
@@ -13,3 +16,21 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ina0r")
+script = ExtResource("1_popup_script")
+
+[node name="GeneralPopUp" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 0
+anchor_left = 0.2
+anchor_top = 0.05
+anchor_right = 0.8
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
+
+[node name="VBoxContainer" type="PanelContainer" parent="GeneralPopUp"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_popup")

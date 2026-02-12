@@ -1,6 +1,8 @@
 @tool
 class_name HenDropdown extends Button
 
+const DROP_DOWN_MENU_SCENE: PackedScene = preload('res://addons/hengo/scenes/drop_down_menu.tscn')
+
 var options: Array = []
 @export var type: String = ''
 var custom_data
@@ -151,10 +153,13 @@ func _on_pressed() -> void:
 			pass
 
 			
-	global.DROPDOWN_MENU.position = global_position
-	global.DROPDOWN_MENU.get_parent().show_container()
-	global.DROPDOWN_MENU.mount(options, _selected, type)
-	global.DROPDOWN_MENU.size.x = size.x
+	var dropdown_menu: HenDropDownMenu = DROP_DOWN_MENU_SCENE.instantiate()
+	dropdown_menu.mount(options, _selected, type)
+	dropdown_menu.custom_minimum_size.x = size.x
+
+	var popup: HenPopupContainer = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(dropdown_menu, '', Vector2.INF, 0)
+	var gp: Control = popup.get_node('%GeneralPopUp')
+	popup.move(global_position - gp.global_position)
 
 
 func _selected(_item: Dictionary) -> void:

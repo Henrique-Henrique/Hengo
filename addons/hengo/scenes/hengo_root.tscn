@@ -1,4 +1,4 @@
-[gd_scene load_steps=61 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene load_steps=56 format=3 uid="uid://clbto1cshblaw"]
 
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" uid="uid://dndakpv2e001o" path="res://addons/hengo/scripts/utils/thread_helper.gd" id="3_1gx8m"]
@@ -8,10 +8,8 @@
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" uid="uid://bojhvy7et13dd" path="res://addons/hengo/scripts/save_load/loader.gd" id="7_rg66s"]
 [ext_resource type="Script" uid="uid://2jt18jo67ub8" path="res://addons/hengo/scripts/router.gd" id="8_nqb6j"]
-[ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
 [ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
 [ext_resource type="Script" uid="uid://bwvlnkdrjks50" path="res://addons/hengo/scripts/code_generation.gd" id="9_dkwui"]
-[ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
 [ext_resource type="Script" uid="uid://exlq4wcwactd" path="res://addons/hengo/scripts/enums.gd" id="10_q27l4"]
 [ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
 [ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
@@ -40,10 +38,9 @@
 [ext_resource type="Texture2D" uid="uid://e6883ccr0kd4" path="res://addons/hengo/assets/new_icons/circle-check.svg" id="39_vlu6e"]
 [ext_resource type="Texture2D" uid="uid://d1gvhd43e01be" path="res://addons/hengo/assets/new_icons/layout-dashboard.svg" id="40_174hx"]
 [ext_resource type="Texture2D" uid="uid://cih44fa46xubd" path="res://addons/hengo/assets/new_icons/shield-alert.svg" id="40_aqok7"]
-[ext_resource type="Material" uid="uid://scw3edv1d866" path="res://addons/hengo/assets/shaders/popup_container.tres" id="43_33cyo"]
 [ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
-[ext_resource type="Script" uid="uid://dne5p21o4tiec" path="res://addons/hengo/scripts/popup_container.gd" id="44_fdf88"]
 [ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/general_popup.gd" id="48_popup"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
 bg_color = Color(0.050000183, 0.049998, 0.068913735, 1)
@@ -62,8 +59,8 @@ corner_radius_bottom_left = 12
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
 shader_parameter/screen_size = Vector2(3592, 2070)
-shader_parameter/offset = Vector2(2066.0247, 958.50446)
-shader_parameter/zoom_factor = 0.5000526
+shader_parameter/offset = Vector2(-1266.9574, 354.1312)
+shader_parameter/zoom_factor = 0.8792751
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -129,11 +126,6 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ina0r"]
-bg_color = Color(0.011764706, 0.011764706, 0.011764706, 0.84313726)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_33cyo"]
-
 [node name="HengoRoot" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -187,6 +179,10 @@ script = ExtResource("27_ji2ve")
 [node name="API" type="Node" parent="AutoLoads"]
 unique_name_in_owner = true
 script = ExtResource("13_5c7h0")
+
+[node name="GeneralPopup" type="Node" parent="AutoLoads"]
+unique_name_in_owner = true
+script = ExtResource("48_popup")
 
 [node name="Content" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
@@ -607,42 +603,3 @@ layout_mode = 1
 unique_name_in_owner = true
 anchors_preset = 0
 script = ExtResource("47_h1p8r")
-
-[node name="PopupContainer" parent="Content/UIBase" instance=ExtResource("8_uxy8l")]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-
-[node name="DropDownMenu" parent="Content/UIBase/PopupContainer" instance=ExtResource("9_xwbyp")]
-unique_name_in_owner = true
-layout_mode = 0
-
-[node name="GeneralPopUpContainer" type="Panel" parent="Content/UIBase"]
-unique_name_in_owner = true
-visible = false
-material = ExtResource("43_33cyo")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ina0r")
-script = ExtResource("44_fdf88")
-
-[node name="GeneralPopUp" type="PanelContainer" parent="Content/UIBase/GeneralPopUpContainer"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 0
-anchor_left = 0.2
-anchor_top = 0.05
-anchor_right = 0.8
-anchor_bottom = 0.9
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 6
-size_flags_vertical = 6
-
-[node name="VBoxContainer" type="PanelContainer" parent="Content/UIBase/GeneralPopUpContainer/GeneralPopUp"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_33cyo")

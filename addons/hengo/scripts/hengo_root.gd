@@ -73,7 +73,7 @@ func _ready() -> void:
 	signal_bus.flow_connection_added.connect(_on_graph_changed_no_args)
 	signal_bus.flow_connection_removed.connect(_on_graph_changed_no_args)
 	
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.closed.connect(schedule_check_errors)
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).closed.connect(schedule_check_errors)
 
 
 func _on_graph_changed() -> void:
@@ -112,8 +112,7 @@ func _on_config_pressed() -> void:
 
 
 func _on_open_terminal() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.GENERAL_POPUP.show_content(HenTerminal.new())
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenTerminal.new())
 
 
 func _on_open_dashboard() -> void:
@@ -266,10 +265,9 @@ func _update_ui_state(all_errors: Array) -> void:
 
 
 func _show_error_popup(all_errors: Array) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var error_popup = preload('res://addons/hengo/scenes/utils/error_list_popup.tscn').instantiate()
 	error_popup.errors = all_errors
-	global.GENERAL_POPUP.show_content(error_popup, 'Compilation Errors')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(error_popup, 'Compilation Errors')
 
 
 func _validate_script_errors(_save_data: HenSaveData) -> Array:

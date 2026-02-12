@@ -3,7 +3,7 @@ class_name HenCnode extends PanelContainer
 
 const CNODE_INPUT = preload('res://addons/hengo/scenes/cnode_input.tscn')
 const CNODE_OUTPUT = preload('res://addons/hengo/scenes/cnode_output.tscn')
-const CNODE = preload('res://addons/hengo/scenes/cnode.tscn')
+const CNODE_SCENE_PATH: String = 'res://addons/hengo/scenes/cnode.tscn'
 const CONNECTION_LINE = preload('res://addons/hengo/scenes/connection_line.tscn')
 const FLOW_CONNECTION_LINE = preload('res://addons/hengo/scenes/flow_connection_line.tscn')
 
@@ -41,6 +41,8 @@ signal request_flow_connection
 signal on_select
 signal on_unselect
 signal on_mouse_exit
+
+static var _cnode_scene_cache: PackedScene
 
 
 func _ready():
@@ -321,6 +323,10 @@ func update_title_color(_sub_type: int) -> void:
 
 static func instantiate_and_add_pool() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var cnode_scene: PackedScene = _get_cnode_scene()
+
+	if not cnode_scene:
+		return
 
 	global.can_instantiate_pool = true
 
@@ -333,7 +339,7 @@ static func instantiate_and_add_pool() -> void:
 		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
 			return
 
-		var instance: HenCnode = CNODE.instantiate()
+		var instance: HenCnode = cnode_scene.instantiate()
 
 		for input_idx in range(5):
 			instance.add_input({name = "", type = "Variant"}, false)
@@ -350,7 +356,8 @@ static func instantiate_and_add_pool() -> void:
 
 		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
 			await global.CNODE_CONTAINER.get_tree().process_frame
-			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+				return
 			start_time = Time.get_ticks_usec()
 
 	for i in range(total_pool_size):
@@ -365,7 +372,8 @@ static func instantiate_and_add_pool() -> void:
 		
 		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
 			await global.CNODE_CONTAINER.get_tree().process_frame
-			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+				return
 			start_time = Time.get_ticks_usec()
 
 	for i in range(total_pool_size):
@@ -384,6 +392,14 @@ static func instantiate_and_add_pool() -> void:
 			start_time = Time.get_ticks_usec()
 
 	print('Pool instantiation finished.')
+
+
+static func _get_cnode_scene() -> PackedScene:
+	if _cnode_scene_cache:
+		return _cnode_scene_cache
+
+	_cnode_scene_cache = load(CNODE_SCENE_PATH) as PackedScene
+	return _cnode_scene_cache
 
 
 func _physics_process(_delta: float) -> void:

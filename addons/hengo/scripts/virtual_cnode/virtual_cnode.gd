@@ -200,9 +200,7 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 
 
 func request_flow_connector_connection(_id: StringName, _mouse_pos: Vector2) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	global.GENERAL_POPUP.show_content(HenCodeSearch.load(_mouse_pos, {
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenCodeSearch.load(_mouse_pos, {
 		id = _id,
 		from_flow_connector = self
 	}), '')
@@ -211,7 +209,7 @@ func request_flow_connector_connection(_id: StringName, _mouse_pos: Vector2) -> 
 func request_io_connection(_io_type: StringName, _id: StringName, _mouse_pos: Vector2, _type: StringName) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	global.GENERAL_POPUP.show_content(HenCodeSearch.load(_mouse_pos, {
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenCodeSearch.load(_mouse_pos, {
 		io_type = _io_type,
 		id = _id,
 		vc_ref = self,
@@ -282,7 +280,7 @@ func on_expression_saved(context: Dictionary) -> void:
 	for input in inputs_to_remove:
 		on_in_out_deleted(true, input)
 
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.hide_popup()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 	update()
 
 

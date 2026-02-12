@@ -132,7 +132,7 @@ func _create_sub_property_editor(parent_container: Control, item: Resource, prop
 	if not inspector:
 		return
 		
-	var prop_scene: PackedScene = inspector.PROPS.get(prop.type)
+	var prop_scene: PackedScene = inspector.get_prop_scene(item, prop)
 	if not prop_scene:
 		if prop.type == TYPE_ARRAY:
 			prop_scene = preload('res://addons/hengo/scenes/props/array.tscn')
@@ -149,15 +149,12 @@ func _create_sub_property_editor(parent_container: Control, item: Resource, prop
 		add_theme_constant_override('separation', int(10 * editor_scale))
 	
 	var editor: Control = prop_scene.instantiate()
-	
-	var val: Variant = item.get(prop.name)
-	if prop.type == TYPE_BOOL or prop.type == TYPE_COLOR:
-		editor.set_default(val)
-	else:
-		editor.set_default(str(val))
-		
-	if prop.type == TYPE_ARRAY and editor.has_method('setup'):
-		editor.call('setup', item, prop.name, val, prop.hint_string, depth + 1, current_path)
+	if not editor:
+		var scene_path: String = prop_scene.resource_path if prop_scene else '<null>'
+		push_error("Could not instantiate array editor for prop '%s' (type: %s, hint: '%s') from '%s'." % [prop.name, str(prop.type), str(prop.hint_string), scene_path])
+		return
+
+	inspector.configure_editor(editor, item, prop, depth + 1, current_path, false)
 
 	if editor.has_signal('value_changed'):
 		editor.value_changed.connect(func(new_val: Variant):
@@ -223,25 +220,9 @@ func _on_remove_pressed(index: int) -> void:
 
 func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, type: int) -> void:
 	var final_val: Variant = new_val
-	
-	if type == TYPE_INT and new_val is float:
-		final_val = int(new_val)
-	elif type == TYPE_INT and new_val is String:
-		final_val = int(new_val)
-	elif type == TYPE_FLOAT and new_val is String:
-		final_val = float(new_val)
-	elif type == TYPE_VECTOR2 and new_val is String:
-		final_val = str_to_var(new_val)
-	elif type == TYPE_VECTOR2I and new_val is String:
-		final_val = str_to_var(new_val)
-	elif type == TYPE_VECTOR3 and new_val is String:
-		final_val = str_to_var(new_val)
-	elif type == TYPE_VECTOR3I and new_val is String:
-		final_val = str_to_var(new_val)
-	elif type == TYPE_VECTOR4 and new_val is String:
-		final_val = str_to_var(new_val)
-	elif type == TYPE_COLOR and new_val is String:
-		final_val = str_to_var(new_val)
+	var inspector: HenInspector = find_parent_inspector()
+	if inspector:
+		final_val = inspector.normalize_value(item, p_name, new_val, type)
 	
 	var global: HenGlobal = Engine.get_singleton('Global')
 	var history: UndoRedo = global.history

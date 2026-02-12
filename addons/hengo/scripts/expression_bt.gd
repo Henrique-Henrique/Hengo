@@ -16,7 +16,7 @@ func _on_press() -> void:
 			exp = text
 		}
 	
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(expression_editor, 'Expression Editor')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(expression_editor, 'Expression Editor')
 
 
 func _on_save(_code_value: String, _word_list: Array) -> void:

@@ -42,7 +42,7 @@ func _ready() -> void:
 func _on_go_to(error: Dictionary) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
-	global.GENERAL_POPUP.hide_popup()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 	
 	if error.has('script_id') and str(error.script_id) != str(global.SAVE_DATA.identity.id):
 		HenSaver.save_new()

@@ -46,6 +46,7 @@ const SINGLETON_LIST: Array[StringName] = [
 	&'Global',
 	&'SignalBus',
 	&'API',
+	&'GeneralPopup',
     &'ToastContainer'
 ]
 

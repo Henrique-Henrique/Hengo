@@ -1,7 +1,8 @@
 @tool
 class_name HenSaveParam extends HenSaveResType
 
-@export var type: StringName = &'Variant'
+@export_custom(PROPERTY_HINT_NONE, 'all_godot_classes')
+var type: StringName = &'Variant'
 
 
 func _init() -> void:

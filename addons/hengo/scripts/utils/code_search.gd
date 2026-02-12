@@ -426,7 +426,7 @@ func _on_select(_data: Dictionary) -> void:
 			flow_connection.add()
 
 	global.history.commit_action()
-	global.GENERAL_POPUP.hide_popup()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 
 	global.CAM._check_virtual_cnodes()
 	await RenderingServer.frame_pre_draw

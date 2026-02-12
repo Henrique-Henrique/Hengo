@@ -68,17 +68,17 @@ func _enter_tree():
 	global.CAM = main_scene.get_node('%Cam')
 	global.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
 	global.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
-	global.DROPDOWN_MENU = main_scene.get_node('%DropDownMenu')
-	global.POPUP_CONTAINER = main_scene.get_node('%PopupContainer')
 	global.DOCS_TOOLTIP = main_scene.get_node('%DocsToolTip')
 	global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	global.TOOLTIP = main_scene.get_node('%Tooltip')
 	global.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
 	global.SIDE_PANEL = main_scene.get_node('%SidePanel')
-	global.GENERAL_POPUP = main_scene.get_node('%GeneralPopUpContainer')
 	global.CNODE_UI = cnode_ui
 	global.DASHBOARD = main_scene.get_node('%DashBoard')
 	global.RIGHT_SIDE_BAR = main_scene.get_node('%RightSideBar')
+
+	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
+	general_popup.setup(main_scene.get_node('%UIBase'))
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)

@@ -3,7 +3,11 @@ class_name HenPopupContainer extends Panel
 
 signal closed
 
+var _default_panel_style: StyleBox
+var _transparent_panel_style: StyleBoxEmpty = StyleBoxEmpty.new()
+
 func _ready() -> void:
+	_default_panel_style = get('theme_override_styles/panel')
 	gui_input.connect(_on_gui)
 
 func _on_gui(_event: InputEvent) -> void:
@@ -30,9 +34,12 @@ func show_content(_content: Control, _name: String = '', _pos: Vector2 = Vector2
 	container.add_child(_content)
 	
 	if _lod > 0:
-		modulate = Color.WHITE
+		if _default_panel_style:
+			add_theme_stylebox_override('panel', _default_panel_style)
 	else:
-		modulate = Color.TRANSPARENT
+		add_theme_stylebox_override('panel', _transparent_panel_style)
+
+	modulate = Color.WHITE
 
 	show()
 

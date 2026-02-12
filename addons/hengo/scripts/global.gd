@@ -6,9 +6,6 @@ var CAM: HenCam
 var CNODE_CONTAINER: Control
 var COMMENT_CONTAINER: Control
 var SIDE_MENU_POPUP: PanelContainer
-var DROPDOWN_MENU: HenDropDownMenu
-var POPUP_CONTAINER: Panel
-var GENERAL_POPUP: HenPopupContainer
 var DOCS_TOOLTIP: HenDocsToolTip
 var ERROR_BT: HenErrorBt
 var CONNECTION_GUIDE: HenConnectionGuide

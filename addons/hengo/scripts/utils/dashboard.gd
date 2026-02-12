@@ -25,7 +25,7 @@ func _ready() -> void:
 
 func _on_create_script() -> void:
 	var c: HenCreateScript = (load('res://addons/hengo/scenes/utils/create_script.tscn') as PackedScene).instantiate()
-	(Engine.get_singleton(&'Global') as HenGlobal).GENERAL_POPUP.show_content(c, 'Expression Editor')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(c, 'Expression Editor')
 
 
 func _on_close() -> void:
@@ -64,7 +64,7 @@ func _on_edit_properties_script(meta: Dictionary) -> void:
 
 
 func _on_delete_request(meta: Dictionary) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
 	
 	var container = VBoxContainer.new()
 	
@@ -83,16 +83,16 @@ func _on_delete_request(meta: Dictionary) -> void:
 	# yes_bt.modulate = Color.RED
 	yes_bt.pressed.connect(func():
 		_on_delete_confirmed(meta)
-		global.GENERAL_POPUP.hide_popup()
+		popup.hide_popup()
 	)
 	hbox.add_child(yes_bt)
 	
 	var no_bt = Button.new()
 	no_bt.text = "Cancel"
-	no_bt.pressed.connect(global.GENERAL_POPUP.hide_popup)
+	no_bt.pressed.connect(popup.hide_popup)
 	hbox.add_child(no_bt)
 
-	global.GENERAL_POPUP.show_content(container, "Delete Script", Vector2.INF, 0.5)
+	popup.show_content(container, "Delete Script", Vector2.INF, 0.5)
 
 
 func _on_delete_confirmed(meta: Dictionary) -> void:

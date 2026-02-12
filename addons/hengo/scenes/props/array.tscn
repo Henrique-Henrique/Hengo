@@ -1,9 +1,10 @@
 [gd_scene load_steps=2 format=3 uid="uid://cxq4eb6jplyha"]
 
-[ext_resource type="Script" uid="uid://d3rpfltt7v4cb" path="res://addons/hengo/scripts/props/prop_array.gd" id="1_c07fb"]
+[ext_resource type="Script" uid="uid://bv0885jt0xau2" path="res://addons/hengo/scripts/props/prop_array.gd" id="1_c07fb"]
 
 [node name="Array" type="VBoxContainer"]
 offset_right = 40.0
 offset_bottom = 40.0
 size_flags_horizontal = 3
+theme_override_constants/separation = 20
 script = ExtResource("1_c07fb")

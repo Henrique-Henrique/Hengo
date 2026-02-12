@@ -34,7 +34,7 @@ func _on_create(_open: bool = false) -> void:
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 		signal_bus.request_list_update.emit()
 
-	global.GENERAL_POPUP.hide_popup()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 
 
 func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
