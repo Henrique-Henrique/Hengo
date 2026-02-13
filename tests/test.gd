@@ -59,6 +59,7 @@ static func get_vc_code(_vc: HenVirtualCNode, _flow_id: StringName = '') -> Stri
 
 	# this is a hack to make the tests errors accurate only for code generation
 	global.SAVE_DATA = null
+	ProjectSettings.set_setting(HenSettings.DEBUG_COMPILATION_PATH, false)
 	var code: String = HenVirtualCNodeCode.get_virtual_cnode_code(save_data, _vc, _flow_id)
 	global.SAVE_DATA = save_data
 	return code
@@ -71,6 +72,7 @@ static func get_all_code() -> String:
 
 	# this is a hack to make the tests errors accurate only for code generation
 	global.SAVE_DATA = null
+	ProjectSettings.set_setting(HenSettings.DEBUG_COMPILATION_PATH, false)
 	var code: String = code_generation.get_code(save_data)
 	global.SAVE_DATA = save_data
 	return code

@@ -13,6 +13,14 @@ const MIN_ZOOM_PATH = 'hengo/settings/min_zoom'
 const MAX_ZOOM_PATH = 'hengo/settings/max_zoom'
 const ZOOM_INCREMENT_PATH = 'hengo/settings/zoom_increment'
 const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
+const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
+
+
+@export var debug_compilation: bool:
+	set(value):
+		_set_value(DEBUG_COMPILATION_PATH, value)
+	get:
+		return _get_value(DEBUG_COMPILATION_PATH, true)
 
 
 @export var development_mode: bool:
@@ -123,7 +131,8 @@ func _property_can_revert(property: StringName) -> bool:
 		&'min_zoom',
 		&'max_zoom',
 		&'zoom_increment',
-		&'zoom_rate'
+		&'zoom_rate',
+		&'debug_compilation'
 	]
 
 
@@ -153,6 +162,8 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 0.15
 		&'zoom_rate':
 			return 12.0
+		&'debug_compilation':
+			return true
 	return null
 
 

@@ -10,6 +10,7 @@ static func get_invalid_token() -> Dictionary:
 static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _input_id: StringName, _token_list: Array = []) -> Array:
 	var stack: Array = []
 	var token_list: Array = _token_list
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	stack.append({node = _vc, id = _input_id})
 
@@ -29,7 +30,6 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 			HenVirtualCNode.SubType.MACRO:
 				token_list.append(get_macro_token(_save_data, vc, _id))
 			HenVirtualCNode.SubType.MACRO_OUTPUT:
-				var global: HenGlobal = Engine.get_singleton(&'Global')
 				if global.USE_MACRO_REF:
 					var flow: HenVCFlowConnectionData = get_macro_flow_connection(_save_data, global.MACRO_REF, _id) if not _save_data.get_outgoing_flow_connection_from_vc(global.MACRO_REF).is_empty() else null
 
@@ -46,9 +46,11 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 					var var_name: String = token.name
 					if not token.get('use_self', true):
 						var_name = "_ref." + var_name
-					token_list.append(get_trace_value_token(int(vc.id), var_name))
+					if global.SETTINGS.debug_compilation:
+						token_list.append(get_trace_value_token(int(vc.id), var_name))
 
-				token_list.append(get_trace_flow_token(int(vc.id), &"0"))
+				if global.SETTINGS.debug_compilation:
+					token_list.append(get_trace_flow_token(int(vc.id), &"0"))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
 
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
@@ -377,6 +379,7 @@ static func _inject_code_into_body(body: String, placeholder: String, injection:
 
 static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: Array) -> Dictionary:
 	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	var true_flow_id: int = code_generation.get_flow_id()
 	var false_flow_id: int = code_generation.get_flow_id()
@@ -389,13 +392,16 @@ static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: 
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
 			StringName('0'):
-				(code_generation.flows_refs[true_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
+				if global.SETTINGS.debug_compilation:
+					(code_generation.flows_refs[true_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = true_flow_id})
 			StringName('1'):
-				(code_generation.flows_refs[false_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
+				if global.SETTINGS.debug_compilation:
+					(code_generation.flows_refs[false_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = false_flow_id})
 			StringName('2'):
-				(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"2"))
+				if global.SETTINGS.debug_compilation:
+					(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"2"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
@@ -411,6 +417,7 @@ static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: 
 
 static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: Array) -> Dictionary:
 	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var body_flow_id: int = code_generation.get_flow_id()
 	var then_flow_id: int = code_generation.get_flow_id()
 
@@ -420,10 +427,12 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
 			StringName('0'):
-				(code_generation.flows_refs[body_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
+				if global.SETTINGS.debug_compilation:
+					(code_generation.flows_refs[body_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = body_flow_id})
 			StringName('1'):
-				(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
+				if global.SETTINGS.debug_compilation:
+					(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
