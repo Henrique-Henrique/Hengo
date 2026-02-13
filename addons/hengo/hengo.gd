@@ -149,7 +149,7 @@ func _make_visible(_visible: bool):
 	if main_scene:
 		main_scene.visible = _visible
 		(main_scene.get_node('%Content') as CanvasLayer).visible = _visible
-		(main_scene.get_node('%DashBoard') as HenDashboard).show_dashboard()
+
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	

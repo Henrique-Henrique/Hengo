@@ -64,10 +64,6 @@ var unique_id: int = 0
 var SCRIPTS_INFO: Dictionary = {}
 var SCRIPTS_STATES: Dictionary = {}
 
-# debug
-var node_references: Dictionary = {}
-var state_references: Dictionary = {}
-
 # counter
 var node_counter: int = 0
 

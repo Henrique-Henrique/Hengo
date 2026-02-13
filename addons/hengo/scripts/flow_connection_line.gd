@@ -87,6 +87,14 @@ func show_debug() -> void:
 		debug_timer.timeout.connect(hide_debug)
 		add_child(debug_timer)
 
+	texture = debug_texture
+	material.shader = flow_debug_shader
+	material.set_shader_parameter('color', Color('#63ff92ff'))
+	width = 20
+
+	input.modulate = Color('#63ff92ff')
+	output.modulate = Color('#63ff92ff')
+	
 	debug_timer.start(DEBUG_TIMER_TIME)
 
 
@@ -101,11 +109,7 @@ func hide_debug() -> void:
 	width = 9
 
 	# arrows
-	input.modulate = Color('#515151')
-	output.get_node('%ArrowUp').get_child(0).modulate = Color('#515151')
-
-	var cnode_border: Panel = output.root.get_border()
-	cnode_border.visible = false
+	input.modulate = Color.WHITE
 	output.modulate = Color.WHITE
 
 	# animations

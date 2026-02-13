@@ -44,6 +44,13 @@ signal on_mouse_exit
 
 static var _cnode_scene_cache: PackedScene
 
+var debug_value_label: Label
+var debug_value_timer: Timer
+const DEBUG_VALUE_TIME: float = 3.0
+
+var debug_exec_timer: Timer
+const DEBUG_EXEC_TIME: float = 0.2
+
 
 func _ready():
 	var title_container := get_node('%TitleContainer') as PanelContainer
@@ -278,6 +285,10 @@ func get_border() -> Panel:
 	return get_node('%Border')
 
 
+func get_debug_border() -> Panel:
+	return get_node('%DebugBorder')
+
+
 func reset_signals(_vc: HenVirtualCNode = null):
 	for signal_name: StringName in [
 		'on_hovering',
@@ -409,3 +420,60 @@ func _physics_process(_delta: float) -> void:
 		if position.is_equal_approx(follow_position):
 			can_follow = false
 			set_process(false)
+
+
+func show_debug_value(_value: Variant) -> void:
+	if not debug_value_label:
+		debug_value_label = Label.new()
+		debug_value_label.add_theme_color_override("font_color", Color.WHITE)
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+		style.set_corner_radius_all(4)
+		style.content_margin_left = 5
+		style.content_margin_right = 5
+		style.content_margin_top = 2
+		style.content_margin_bottom = 2
+		debug_value_label.add_theme_stylebox_override("normal", style)
+		debug_value_label.z_index = 10
+		add_child(debug_value_label)
+		debug_value_label.position = Vector2(0, -30)
+
+	debug_value_label.text = str(_value)
+	debug_value_label.visible = true
+	debug_value_label.modulate.a = 1.0
+	
+	if not debug_value_timer:
+		debug_value_timer = Timer.new()
+		debug_value_timer.one_shot = true
+		debug_value_timer.timeout.connect(_hide_debug_value)
+		add_child(debug_value_timer)
+	
+	debug_value_timer.start(DEBUG_VALUE_TIME)
+
+
+	debug_value_timer.start(DEBUG_VALUE_TIME)
+
+
+func _hide_debug_value() -> void:
+	if debug_value_label:
+		debug_value_label.modulate.a = 0.0
+
+
+func show_debug_execution() -> void:
+	if not debug_exec_timer:
+		debug_exec_timer = Timer.new()
+		debug_exec_timer.one_shot = true
+		debug_exec_timer.timeout.connect(_hide_debug_execution)
+		add_child(debug_exec_timer)
+	
+	# highlight border
+	var border = get_debug_border()
+	border.modulate = Color.WHITE
+	border.visible = true
+	
+	debug_exec_timer.start(DEBUG_EXEC_TIME)
+
+
+func _hide_debug_execution() -> void:
+	var border = get_debug_border()
+	border.modulate = Color.TRANSPARENT

@@ -7,4 +7,5 @@ temp/
 reports/
 !.github/
 .*/
+.*
 /hengo/

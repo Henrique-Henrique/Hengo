@@ -3,86 +3,38 @@ extends EditorDebuggerPlugin
 
 const PREFIX = 'hengo'
 
-func _has_capture(prefix) -> bool:
+func _has_capture(prefix: String) -> bool:
 	return prefix == PREFIX
 
-func _capture(message, data, session_id) -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	match message:
-		'hengo:cnode':
-			for num: int in get_debug_ids(data[0]):
-				var id_str: String = str(num)
-
-				if global.current_script_debug_symbols.has(id_str):
-					var symbol_data: Array = global.current_script_debug_symbols[id_str]
-					var hash_number: int = symbol_data[0]
-					var flow: String = symbol_data[1]
-
-					if not global.node_references.has(hash_number):
-						continue
-
-					var node_data: Dictionary = global.node_references[hash_number]
-					var flow_name: String = flow if flow else 'cnode'
-
-					if node_data.has('base_conn'):
-						for connection_line in node_data['base_conn']:
-							connection_line.show_debug()
-
-					if node_data.has(flow_name):
-						var result: Array = node_data[flow_name]
-
-						# all flow conn
-						for flow_line in result[0]:
-							flow_line.show_debug()
-						
-						# all connections
-						for connection_line in result[1]:
-							connection_line.show_debug()
-
-			return true
-		'hengo:debugger_loaded':
-			# get_session(session_id).send_message('hengo:start_script', [global.current_script_path, global.DEBUG_TOKEN])
-			return true
-		'hengo:debug_value':
-			var id_str: String = str(data[0])
-
-			if global.current_script_debug_symbols.has(id_str):
-				var symbol_data: Array = global.current_script_debug_symbols[id_str]
-				var hash_number: int = symbol_data[0]
-
-				if not global.node_references.has(hash_number):
-					return true
-				
-				var node_data: Dictionary = global.node_references[hash_number]
-				var cnode = node_data['cnode'][2]
-				
-				cnode.show_debug_value(str_to_var(data[1]))
-
-			return true
-		'hengo:debug_state':
-			var id_str: String = str(data[0])
-
-			if global.current_script_debug_symbols.has(id_str):
-				var symbol_data: Array = global.current_script_debug_symbols[id_str]
-				var hash_number: int = symbol_data[0]
-
-				if not global.state_references.has(hash_number):
-					return true
-
-				global.state_references[hash_number].show_debug()
+func _capture(_message: String, _data: Array, _session_id: int) -> bool:
+	match _message:
+		'hengo:flow':
+			var id: int = _data[0]
+			var port: StringName = _data[1]
 			
+			var vc: HenVirtualCNode = _get_vc_by_id(id)
+
+			if vc:
+				if vc.cnode_instance:
+					vc.cnode_instance.show_debug_execution()
+				
+				var line: HenFlowConnectionLine = _get_flow_line(vc, port)
+				if line:
+					line.show_debug()
+			
+			return true
+		'hengo:value':
+			var id: int = _data[0]
+			var value = _data[1]
+			
+			var vc: HenVirtualCNode = _get_vc_by_id(id)
+
+			if vc and vc.cnode_instance:
+				vc.cnode_instance.show_debug_value(value)
+
 			return true
 
 	return false
-
-
-func reload_script() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	load_references()
-
-	# for session in get_sessions():
-	# 	session.send_message('hengo:reload_script', [global.current_script_path, global.DEBUG_TOKEN])
 
 
 func get_debug_ids(_num: int) -> Array:
@@ -101,20 +53,46 @@ func get_debug_ids(_num: int) -> Array:
 	return powers
 
 
-func _setup_session(session_id):
-	var session = get_session(session_id)
+func _setup_session(_session_id: int) -> void:
+	var session: EditorDebuggerSession = get_session(_session_id)
 
 	# Listens to the session started and stopped signals.
 	session.started.connect(_on_started)
 	session.stopped.connect(_on_stopped)
 
 
-func load_references() -> void:
-	pass
+func _get_vc_by_id(_id: int) -> HenVirtualCNode:
+	var router: HenRouter = Engine.get_singleton("Router")
+	if not router.current_route: return null
+	
+	for vc: HenVirtualCNode in router.current_route.virtual_cnode_list:
+		if int(vc.id) == _id:
+			return vc
+	return null
+
+
+func _get_flow_line(vc: HenVirtualCNode, port: StringName) -> HenFlowConnectionLine:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var flow_outputs: Array = vc.get_flow_outputs(global.SAVE_DATA)
+	var target_idx: int = -1
+	
+	for i in range(flow_outputs.size()):
+		var flow: HenVCFlow = flow_outputs[i]
+		if flow.id == port:
+			target_idx = i
+			break
+	
+	if target_idx == -1: return null
+	
+	for line: HenFlowConnectionLine in global.flow_connection_line_pool:
+		if line.is_visible_in_tree():
+			var from_vc: HenVirtualCNode = line.from.get_ref()
+			if from_vc == vc and line.from_idx == target_idx:
+				return line
+	return null
 
 
 func _on_started() -> void:
-	load_references()
 	(Engine.get_singleton(&'Global') as HenGlobal).HENGO_DEBUGGER_PLUGIN = self
 
 	print('Hengo Debugger Started!')
@@ -122,7 +100,6 @@ func _on_started() -> void:
 
 func _on_stopped() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.node_references = {}
 	global.HENGO_DEBUGGER_PLUGIN = null
 
 	print('Hengo Debugger Stopped!')

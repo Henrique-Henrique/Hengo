@@ -39,7 +39,16 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 			HenVirtualCNode.SubType.SCRIPT_MACRO:
 				token_list.append(get_script_macro_token(_save_data, vc, _id))
 			_:
-				token_list.append(get_token(_save_data, vc))
+				var token: Dictionary = get_token(_save_data, vc)
+				token_list.append(token)
+				
+				if vc.sub_type == HenVirtualCNode.SubType.SET_VAR or vc.sub_type == HenVirtualCNode.SubType.SET_LOCAL_VAR:
+					var var_name: String = token.name
+					if not token.get('use_self', true):
+						var_name = "_ref." + var_name
+					token_list.append(get_trace_value_token(int(vc.id), var_name))
+
+				token_list.append(get_trace_flow_token(int(vc.id), &"0"))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
 
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
@@ -47,6 +56,24 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 					stack.append({node = first.get_to(_save_data), id = first.to_id})
 
 	return _token_list
+
+
+static func get_trace_flow_token(_vc_id: int, _port: StringName) -> Dictionary:
+	return {
+		vc_id = _vc_id,
+		type = HenVirtualCNode.SubType.RAW_CODE,
+		code = {value = "HengoDebugger.trace_flow(%s, &'%s')" % [_vc_id, _port]},
+		use_self = false
+	}
+
+
+static func get_trace_value_token(_vc_id: int, _value_code: String) -> Dictionary:
+	return {
+		vc_id = _vc_id,
+		type = HenVirtualCNode.SubType.RAW_CODE,
+		code = {value = "HengoDebugger.trace_value(%s, %s)" % [_vc_id, _value_code]},
+		use_self = false
+	}
 
 
 static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: StringName) -> Dictionary:
@@ -362,10 +389,13 @@ static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: 
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
 			StringName('0'):
+				(code_generation.flows_refs[true_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = true_flow_id})
 			StringName('1'):
+				(code_generation.flows_refs[false_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = false_flow_id})
 			StringName('2'):
+				(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"2"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
@@ -390,8 +420,10 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 	for flow: HenVCFlowConnectionData in _save_data.get_outgoing_flow_connection_from_vc(_vc):
 		match flow.from_id:
 			StringName('0'):
+				(code_generation.flows_refs[body_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = body_flow_id})
 			StringName('1'):
+				(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
