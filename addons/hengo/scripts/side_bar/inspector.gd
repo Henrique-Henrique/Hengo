@@ -1,8 +1,9 @@
 @tool
-class_name HenInspector extends ScrollContainer
+class_name HenInspector extends VBoxContainer
 
 const PROP_CONTAINER: PackedScene = preload('res://addons/hengo/scenes/prop_container.tscn')
 const DROPDOWN_PROP: PackedScene = preload('res://addons/hengo/scenes/props/dropdown.tscn')
+const TITLE_FONT: Font = preload('res://addons/hengo/assets/fonts/bold.ttf')
 const DROPDOWN_HINT_TYPES: Array[String] = [
 	'state_transition',
 	'action',
@@ -34,35 +35,103 @@ const PROPS: Dictionary = {
 }
 
 var resource: Resource
+var header_panel: PanelContainer
+var header_margin: MarginContainer
+var header_box: HBoxContainer
+var title_label: Label
+var actions_box: HBoxContainer
+var body_scroll: ScrollContainer
 var vbox: VBoxContainer
+var inspector_title: String = ''
+var inspector_actions: Array[Dictionary] = []
 
 
 func _init() -> void:
 	focus_mode = Control.FOCUS_ALL
-	
+	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_theme_constant_override('separation', int(8 * _get_ui_scale()))
+
+	header_panel = PanelContainer.new()
+	header_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_apply_header_panel_style()
+	add_child(header_panel)
+
+	header_margin = MarginContainer.new()
+	header_margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_margin.add_theme_constant_override('margin_top', int(4 * _get_ui_scale()))
+	header_margin.add_theme_constant_override('margin_bottom', int(4 * _get_ui_scale()))
+	header_margin.add_theme_constant_override('margin_left', int(8 * _get_ui_scale()))
+	header_margin.add_theme_constant_override('margin_right', int(8 * _get_ui_scale()))
+	header_panel.add_child(header_margin)
+
+	header_box = HBoxContainer.new()
+	header_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_box.alignment = BoxContainer.ALIGNMENT_BEGIN
+	header_box.add_theme_constant_override('separation', int(10 * _get_ui_scale()))
+	header_margin.add_child(header_box)
+
+	title_label = Label.new()
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_label.clip_text = true
+	title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title_label.add_theme_font_override('font', TITLE_FONT)
+	title_label.add_theme_font_size_override('font_size', int(18 * _get_ui_scale()))
+	title_label.add_theme_color_override('font_color', Color('#f3f4f6'))
+	header_box.add_child(title_label)
+
+	actions_box = HBoxContainer.new()
+	actions_box.alignment = BoxContainer.ALIGNMENT_END
+	actions_box.add_theme_constant_override('separation', int(6 * _get_ui_scale()))
+	header_box.add_child(actions_box)
+
+	body_scroll = ScrollContainer.new()
+	body_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	add_child(body_scroll)
+
 	vbox = VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	add_child(vbox)
+	body_scroll.add_child(vbox)
 
 
 # initializes the inspector within the custom popup system
-static func edit_resource(_res: Resource) -> void:
+static func edit_resource(_res: Resource, _title: String = '', _actions: Array[Dictionary] = []) -> void:
 	var global: HenGlobal = Engine.get_singleton('Global')
 	var scene: PackedScene = load('res://addons/hengo/scenes/custom_inspector.tscn')
 	var inspector: HenInspector = scene.instantiate()
 	
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector)
-	inspector.edit(_res)
+	inspector.edit(_res, _title, _actions)
 
 	global.CURRENT_INSPECTOR = inspector
 	inspector.grab_focus()
 
 
-func edit(_res: Resource) -> void:
+func edit(_res: Resource, _title: String = '', _actions: Array[Dictionary] = []) -> void:
 	resource = _res
-	
+	inspector_title = _title
+	inspector_actions = _actions
+
+	_update_header()
 	_update_props()
+
+
+func _update_header() -> void:
+	var text: String = inspector_title.strip_edges()
+	if text.is_empty():
+		text = _get_default_title()
+	title_label.text = text
+
+	for child in actions_box.get_children():
+		child.queue_free()
+
+	for action in inspector_actions:
+		var bt: Button = _create_action_button(action)
+		if bt:
+			actions_box.add_child(bt)
 
 
 func _update_props() -> void:
@@ -159,6 +228,17 @@ func _on_value_changed(prop_name: String, new_val: Variant, type: int) -> void:
 	resource.set(prop_name, final_val)
 
 
+func undo_redo(_undo: bool) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.history:
+		return
+
+	if _undo:
+		global.history.undo()
+	else:
+		global.history.redo()
+
+
 func get_prop_scene(target_resource: Resource, prop: Dictionary) -> PackedScene:
 	if (prop.type == TYPE_STRING or prop.type == TYPE_STRING_NAME) and _is_dropdown_hint(prop.hint_string):
 		return DROPDOWN_PROP
@@ -216,3 +296,66 @@ func _instantiate_editor(prop_scene: PackedScene, prop: Dictionary) -> Control:
 
 func _is_dropdown_hint(hint: String) -> bool:
 	return DROPDOWN_HINT_TYPES.has(hint)
+
+
+func _get_default_title() -> String:
+	if not resource:
+		return 'Inspector'
+
+	if resource.has_method('get'):
+		var resource_name: Variant = resource.get('name')
+		if resource_name is String and not (resource_name as String).is_empty():
+			return str(resource_name)
+
+	return resource.get_class()
+
+
+func _create_action_button(action: Dictionary) -> Button:
+	if not action is Dictionary:
+		return null
+
+	var action_callable: Callable = action.get('callable', Callable())
+	if not action_callable.is_valid():
+		return null
+
+	var bt := Button.new()
+	bt.text = str(action.get('name', 'Action'))
+	bt.tooltip_text = str(action.get('tooltip', ''))
+	
+	var icon_value: Variant = action.get('icon', null)
+	if icon_value is Texture2D:
+		bt.icon = icon_value
+	elif icon_value is String:
+		var icon_res: Resource = load(icon_value)
+		if icon_res is Texture2D:
+			bt.icon = icon_res as Texture2D
+
+	var color_value: Variant = action.get('color', null)
+	if color_value is Color:
+		_apply_button_color(bt, color_value as Color)
+
+	bt.pressed.connect(func():
+		var args: Variant = action.get('args', [])
+		if args is Array and not (args as Array).is_empty():
+			action_callable.callv(args)
+		elif bool(action.get('pass_resource', false)):
+			action_callable.call(resource)
+		else:
+			action_callable.call()
+	)
+
+	return bt
+
+
+func _apply_button_color(bt: Button, color: Color) -> void:
+	bt.self_modulate = color
+
+
+func _apply_header_panel_style() -> void:
+	header_panel.add_theme_stylebox_override('panel', StyleBoxEmpty.new())
+
+
+func _get_ui_scale() -> float:
+	if Engine.is_editor_hint():
+		return EditorInterface.get_editor_scale()
+	return 1.0

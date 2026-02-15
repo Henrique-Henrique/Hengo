@@ -64,35 +64,13 @@ func _on_edit_properties_script(meta: Dictionary) -> void:
 
 
 func _on_delete_request(meta: Dictionary) -> void:
-	var popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
-	
-	var container = VBoxContainer.new()
-	
-	var label = Label.new()
-	label.text = "Are you sure you want to delete '%s'?" % meta.base_name
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	container.add_child(label)
-	
-	var hbox = HBoxContainer.new()
-	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox.add_theme_constant_override("separation", 20)
-	container.add_child(hbox)
-	
-	var yes_bt = Button.new()
-	yes_bt.text = "Delete"
-	# yes_bt.modulate = Color.RED
-	yes_bt.pressed.connect(func():
-		_on_delete_confirmed(meta)
-		popup.hide_popup()
+	HenConfirmPopup.show_confirm(
+		"Are you sure you want to delete '%s'?" % meta.base_name,
+		_on_delete_confirmed.bind(meta),
+		'Delete Script',
+		'Delete',
+		'Cancel'
 	)
-	hbox.add_child(yes_bt)
-	
-	var no_bt = Button.new()
-	no_bt.text = "Cancel"
-	no_bt.pressed.connect(popup.hide_popup)
-	hbox.add_child(no_bt)
-
-	popup.show_content(container, "Delete Script", Vector2.INF, 0.5)
 
 
 func _on_delete_confirmed(meta: Dictionary) -> void:

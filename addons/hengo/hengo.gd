@@ -148,7 +148,11 @@ func unregister_singletons() -> void:
 func _make_visible(_visible: bool):
 	if main_scene:
 		main_scene.visible = _visible
-		(main_scene.get_node('%Content') as CanvasLayer).visible = _visible
+		var content_node: Node = main_scene.get_node_or_null('%Content')
+		if content_node is CanvasLayer:
+			(content_node as CanvasLayer).visible = _visible
+		elif content_node is CanvasItem:
+			(content_node as CanvasItem).visible = _visible
 
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')

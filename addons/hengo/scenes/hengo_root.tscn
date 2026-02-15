@@ -40,7 +40,7 @@
 [ext_resource type="Texture2D" uid="uid://cih44fa46xubd" path="res://addons/hengo/assets/new_icons/shield-alert.svg" id="40_aqok7"]
 [ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
 [ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
-[ext_resource type="Script" path="res://addons/hengo/scripts/general_popup.gd" id="48_popup"]
+[ext_resource type="Script" uid="uid://yk1vflpkmh60" path="res://addons/hengo/scripts/general_popup.gd" id="48_popup"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
 bg_color = Color(0.050000183, 0.049998, 0.068913735, 1)
@@ -601,5 +601,11 @@ layout_mode = 1
 
 [node name="ToastContainer" type="Control" parent="Content/UIBase"]
 unique_name_in_owner = true
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("47_h1p8r")

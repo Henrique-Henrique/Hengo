@@ -73,7 +73,7 @@ func setup(_text: String, type: HenToast.MessageType = HenToast.MessageType.INFO
 		progress.modulate = config.color
 		icon_rect.texture = config.icon
 		icon_rect.modulate = config.color
-		get('theme_override_styles/panel').bg_color = Color(config.color, .1)
+		get('theme_override_styles/panel').bg_color = (config.color as Color).darkened(.6)
 
 	modulate.a = 0.0
 	scale = Vector2(0.9, 0.9)
