@@ -82,6 +82,7 @@ settings/auto_move_on_add=true
 settings/auto_move_on_connection=true
 settings/auto_move_on_remove=false
 settings/development_mode=true
+settings/debug_compilation=true
 
 [input]
 

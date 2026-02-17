@@ -143,6 +143,11 @@ func _update_props() -> void:
 
 	var prop_index: int = 0
 	for prop in resource.get_property_list():
+		if _is_tool_button_property(prop):
+			_create_tool_button(prop, prop_index)
+			prop_index += 1
+			continue
+
 		if prop.type == TYPE_ARRAY or prop.usage & PROPERTY_USAGE_EDITOR:
 			_create_prop_editor(prop, prop_index)
 			prop_index += 1
@@ -182,6 +187,47 @@ func _create_prop_editor(prop: Dictionary, prop_index: int) -> void:
 	else:
 		panel.self_modulate = Color(1, 1, 1, 0)
 	
+	panel.add_child(container)
+	vbox.add_child(panel)
+
+
+func _create_tool_button(prop: Dictionary, prop_index: int) -> void:
+	if prop_index > 0:
+		var separator := HSeparator.new()
+		vbox.add_child(separator)
+
+	var action_callable: Variant = resource.get(prop.name)
+	var hint_data: Dictionary = _parse_tool_button_hint(prop)
+
+	var bt := Button.new()
+	bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bt.text = str(hint_data.get('text', prop.name.capitalize()))
+
+	var icon_name: String = str(hint_data.get('icon', ''))
+	if not icon_name.is_empty() and has_theme_icon(icon_name, &"EditorIcons"):
+		bt.icon = get_theme_icon(icon_name, &"EditorIcons")
+
+	if action_callable is Callable:
+		var callable_value: Callable = action_callable as Callable
+		bt.disabled = not callable_value.is_valid()
+		if callable_value.is_valid():
+			bt.pressed.connect(func():
+				callable_value.call()
+			)
+	else:
+		bt.disabled = true
+
+	var container: VBoxContainer = PROP_CONTAINER.instantiate()
+	var label: Label = container.get_node('Name')
+	label.visible = false
+	container.add_child(bt)
+
+	var panel: PanelContainer = PanelContainer.new()
+	if prop_index % 2 != 0:
+		panel.self_modulate = Color(1, 1, 1, 0.05)
+	else:
+		panel.self_modulate = Color(1, 1, 1, 0)
+
 	panel.add_child(container)
 	vbox.add_child(panel)
 
@@ -296,6 +342,34 @@ func _instantiate_editor(prop_scene: PackedScene, prop: Dictionary) -> Control:
 
 func _is_dropdown_hint(hint: String) -> bool:
 	return DROPDOWN_HINT_TYPES.has(hint)
+
+
+func _is_tool_button_property(prop: Dictionary) -> bool:
+	return prop.type == TYPE_CALLABLE and int(prop.get('hint', PROPERTY_HINT_NONE)) == PROPERTY_HINT_TOOL_BUTTON and bool(prop.usage & PROPERTY_USAGE_EDITOR)
+
+
+# parses tool button hint string
+func _parse_tool_button_hint(prop: Dictionary) -> Dictionary:
+	var default_text: String = str(prop.name).capitalize()
+	var hint: String = str(prop.get('hint_string', ''))
+
+	if hint.is_empty():
+		return {
+			text = default_text,
+			icon = ''
+		}
+
+	var parts: PackedStringArray = hint.split(',', false, 1)
+	var text: String = parts[0].strip_edges() if parts.size() > 0 else default_text
+	var icon: String = parts[1].strip_edges() if parts.size() > 1 else ''
+
+	if text.is_empty():
+		text = default_text
+
+	return {
+		text = text,
+		icon = icon
+	}
 
 
 func _get_default_title() -> String:

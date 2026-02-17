@@ -15,6 +15,10 @@ const ZOOM_INCREMENT_PATH = 'hengo/settings/zoom_increment'
 const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
 
+var _batch_compiler: HenSaveAll
+
+@export_tool_button('Compile all saves', 'Build') var compile_all_saves: Callable = _on_compile_all_saves_pressed
+
 
 @export var debug_compilation: bool:
 	set(value):
@@ -170,3 +174,9 @@ func _property_get_revert(property: StringName) -> Variant:
 func _validate_property(_property: Dictionary) -> void:
 	if _property.name in [&'resource_local_to_scene', &'resource_path', &'resource_name']:
 		_property.usage = PROPERTY_USAGE_NONE
+
+
+func _on_compile_all_saves_pressed() -> void:
+	if not _batch_compiler:
+		_batch_compiler = HenSaveAll.new()
+	_batch_compiler.start()
