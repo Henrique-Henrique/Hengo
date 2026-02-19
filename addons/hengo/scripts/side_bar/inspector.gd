@@ -2,7 +2,6 @@
 class_name HenInspector extends VBoxContainer
 
 const PROP_CONTAINER: PackedScene = preload('res://addons/hengo/scenes/prop_container.tscn')
-const DROPDOWN_PROP: PackedScene = preload('res://addons/hengo/scenes/props/dropdown.tscn')
 const TITLE_FONT: Font = preload('res://addons/hengo/assets/fonts/bold.ttf')
 const DROPDOWN_HINT_TYPES: Array[String] = [
 	'state_transition',
@@ -286,11 +285,11 @@ func undo_redo(_undo: bool) -> void:
 
 
 func get_prop_scene(target_resource: Resource, prop: Dictionary) -> PackedScene:
+	var dropdown_prop = load('res://addons/hengo/scenes/props/dropdown.tscn')
 	if (prop.type == TYPE_STRING or prop.type == TYPE_STRING_NAME) and _is_dropdown_hint(prop.hint_string):
-		return DROPDOWN_PROP
+		return dropdown_prop
 	if is_save_param_resource(target_resource) and prop.name == 'type':
-		return DROPDOWN_PROP
-
+		return dropdown_prop
 	return PROPS.get(prop.type)
 
 

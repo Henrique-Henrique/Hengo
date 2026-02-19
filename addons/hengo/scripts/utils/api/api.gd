@@ -394,7 +394,12 @@ func _map_api() -> CompressedData:
 		native_props = map_native_props(data)
 	}
 
-	return save_and_get_compressed_data(new_api_data.duplicate(true), EXTENSION_API_COMPRESSED_PATH)
+	var compressed_data: CompressedData = save_and_get_compressed_data(new_api_data.duplicate(true), EXTENSION_API_COMPRESSED_PATH)
+	
+	if FileAccess.file_exists(EXTENSION_API_PATH):
+		DirAccess.remove_absolute(EXTENSION_API_PATH)
+
+	return compressed_data
 
 
 func get_api_file() -> FileAccess:
@@ -621,6 +626,7 @@ func save_and_get_compressed_data(data: Variant, path_out: String) -> Compressed
 	
 	f.store_8(FileAccess.COMPRESSION_ZSTD)
 	f.store_32(API_VERSION)
+	f.store_pascal_string(Engine.get_version_info().string)
 	f.store_32(size)
 	f.store_buffer(compressed)
 	f.close()
@@ -637,12 +643,15 @@ func load_compressed_data(path_in: String) -> CompressedData:
 	var file_size = f.get_length()
 	f.get_8()
 	var version = f.get_32()
-	
-	if version != API_VERSION:
+	var godot_version = f.get_pascal_string()
+
+	if version != API_VERSION or godot_version != Engine.get_version_info().string:
 		return null
 
 	var original_size = f.get_32()
-	var compressed_bytes = f.get_buffer(file_size - 9)
+	# 4 bytes (size) + 4 bytes (version) + 1 byte (compression) + pascal string (4 bytes len + utf8 len)
+	var header_size: int = 13 + godot_version.to_utf8_buffer().size()
+	var compressed_bytes = f.get_buffer(file_size - header_size)
 	f.close()
 
 	return CompressedData.new(compressed_bytes, original_size)
