@@ -470,11 +470,11 @@ func validate_errors(_save_data: HenSaveData) -> Array[Dictionary]:
 		current_errors = new_errors
 		if is_showing and is_instance_valid(cnode_instance):
 			if invalid:
-				cnode_instance.modulate = Color(1, 1, 1, .3)
+				cnode_instance.set_deferred('modulate', Color(1, 1, 1, .3))
 			elif not current_errors.is_empty():
-				cnode_instance.modulate = Color('ef4444')
+				cnode_instance.set_deferred('modulate', Color('ef4444'))
 			else:
-				cnode_instance.modulate = Color.WHITE
+				cnode_instance.set_deferred('modulate', Color.WHITE)
 				
 	return current_errors
 
@@ -596,6 +596,21 @@ func check_errors(_save_data: HenSaveData) -> Array[Dictionary]:
 				errors.append({
 					id = id,
 					description = 'Missing event input connection.',
+					type = 'error'
+				})
+			if _inputs.size() > 1 and (_inputs[1].value == null or str(_inputs[1].value).is_empty() or str(_inputs[1].value) == '0'):
+				errors.append({
+					id = id,
+					description = 'Missing input selection.',
+					type = 'error'
+				})
+
+		HenVirtualCNode.SubType.INPUT_POLLING:
+			var _inputs: Array = get_inputs(_save_data)
+			if _inputs.size() > 0 and (_inputs[0].value == null or str(_inputs[0].value).is_empty() or str(_inputs[0].value) == '0'):
+				errors.append({
+					id = id,
+					description = 'Missing input selection.',
 					type = 'error'
 				})
 

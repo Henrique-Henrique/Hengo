@@ -7,6 +7,9 @@ const COMPILE_ALL_REPORT_POPUP = preload('res://addons/hengo/scenes/utils/compil
 var _is_compiling: bool = false
 var _report: Dictionary = {}
 
+signal batch_started
+signal batch_finished
+
 
 # starts the batch compilation process
 func start() -> void:
@@ -27,6 +30,8 @@ func start() -> void:
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	if toast:
 		toast.notify.call_deferred('Starting batch compilation...', HenToast.MessageType.INFO)
+		
+	batch_started.emit()
 
 	thread_helper.add_task(_compile_task, _on_finished)
 
@@ -211,6 +216,7 @@ func _compile_task() -> void:
 # handles the cleanup and callback when the task finishes
 func _on_finished() -> void:
 	_is_compiling = false
+	batch_finished.emit()
 
 	var popup: HenCompileAllReportPopup = COMPILE_ALL_REPORT_POPUP.instantiate()
 	popup.report = _report

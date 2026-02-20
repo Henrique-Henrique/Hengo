@@ -7,16 +7,20 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 	
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	compile_bt.pressed.connect(_on_compile_press)
 	set_process(false)
-
-	signal_bus.scripts_generation_started.connect(start)
-	signal_bus.scripts_generation_finished.connect(reset)
 	
 
+var _batch_compiler: HenSaveAll
+
+
+# starts the batch compilation
 func _on_compile_press() -> void:
-	HenSaver.save()
+	if not _batch_compiler:
+		_batch_compiler = HenSaveAll.new()
+		_batch_compiler.batch_started.connect(start)
+		_batch_compiler.batch_finished.connect(reset)
+	_batch_compiler.start()
 
 
 func start() -> void:
