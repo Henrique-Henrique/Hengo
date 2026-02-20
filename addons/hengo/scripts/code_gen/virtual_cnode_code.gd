@@ -932,9 +932,9 @@ static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_
 		'Variant':
 			return 'null'
 		_:
-			if HenEnums.VARIANT_TYPES.has(_type):
+			if HenEnums.VARIANT_TYPES.has(_type) and _type != 'Object':
 				return _type + '()'
-			elif ClassDB.class_exists(_type):
+			elif _type != '':
 				if not _use_self:
 					return '_ref'
 
@@ -944,7 +944,9 @@ static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_
 				):
 					return 'self'
 				
-				if ClassDB.can_instantiate(_type):
-					return _type + '.new()'
+				if ClassDB.class_exists(_type) and not ClassDB.can_instantiate(_type):
+					return 'null'
+				
+				return _type + '.new()'
 	
 	return 'null'

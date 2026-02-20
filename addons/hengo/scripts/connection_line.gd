@@ -57,14 +57,14 @@ func update_line() -> void:
 		start_pos = global.CAM.get_relative_vec2(input.global_position) + input.size / 2
 		last_from_pos = start_pos
 	else:
-		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x, from_ref.size.y / 2)
+		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x - 30, from_ref.size.y / 2)
 
 	var end_pos: Vector2
 	if to_pool_visible:
 		end_pos = global.CAM.get_relative_vec2(output.global_position) + output.size / 2
 		last_to_pos = end_pos
 	else:
-		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(0, to_ref.size.y / 2)
+		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(30, to_ref.size.y / 2)
 
 	# dynamic curvature based on distance
 	var distance: float = abs(end_pos.x - start_pos.x)
@@ -90,9 +90,8 @@ func _update_visual_style(start_pos: Vector2, end_pos: Vector2) -> void:
 	if (start_pos.y + 200 < end_pos.y) or (start_pos.x + 800 < end_pos.x):
 		var global: HenGlobal = Engine.get_singleton(&'Global')
 		from_icon.visible = true
-		from_icon.position = start_pos + Vector2(18, 0)
 		remote_container.visible = true
-		remote_container.position = end_pos - Vector2(remote_container.size.x + 18, 0)
+		
 		if from.get_ref():
 			var from_vc: HenVirtualCNode = from.get_ref()
 			var icon: TextureRect = remote_container.get_node('%VCIcon') as TextureRect
@@ -102,6 +101,15 @@ func _update_visual_style(start_pos: Vector2, end_pos: Vector2) -> void:
 
 			(remote_container.get_node('%VCName') as Label).text = from_vc.get_vc_name(global.SAVE_DATA)
 			remote_container.reset_size()
+			
+		if to.get_ref():
+			var to_vc: HenVirtualCNode = to.get_ref()
+			from_icon.texture = HenUtils.get_icon_for_subtype(to_vc.sub_type)
+			from_icon.modulate = HenUtils.get_color_for_subtype(to_vc.sub_type)
+
+		from_icon.position = start_pos + Vector2(50, -from_icon.size.y / 2.0)
+		remote_container.position = end_pos - Vector2(remote_container.size.x + 50, remote_container.size.y / 2.0)
+		
 		self_modulate = Color.TRANSPARENT
 	else:
 		from_icon.visible = false

@@ -367,6 +367,27 @@ func check_type_validity(_data: Dictionary, _io_type: StringName = '', _type: St
 	return has_type
 
 
+func get_doc_for_ref(_type: StringName, _name: String) -> String:
+	var data: Dictionary = get_decompressed_data()
+	if data.is_empty():
+		return ""
+
+	if data.has(&"classes") and (data.classes as Dictionary).has(_type):
+		var class_data: Dictionary = data.classes[_type]
+		if class_data.has(&"methods") and (class_data.methods as Dictionary).has(_name):
+			return (class_data.methods[_name] as Dictionary).get(&"description", "")
+	
+	if data.has(&"native_classes") and (data.native_classes as Dictionary).has(_type):
+		var class_data: Dictionary = data.native_classes[_type]
+		if class_data.has(&"methods") and (class_data.methods as Dictionary).has(_name):
+			return (class_data.methods[_name] as Dictionary).get(&"description", "")
+
+	if data.has(&"utilities") and (data.utilities as Dictionary).has(_name):
+		return (data.utilities[_name] as Dictionary).get(&"description", "")
+		
+	return ""
+
+
 func debounce_search(delay: float, callback: Callable) -> void:
 	if timer:
 		timer.timeout.disconnect(callback)

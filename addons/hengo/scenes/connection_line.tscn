@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bndv7bbtjlyrk"]
+[gd_scene format=3 uid="uid://bndv7bbtjlyrk"]
 
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="1_106ed"]
 [ext_resource type="Script" uid="uid://bv17u31wtvw0f" path="res://addons/hengo/scripts/connection_line.gd" id="1_ck24c"]
@@ -31,7 +31,7 @@ corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qk788"]
 
-[node name="ConnectionLine" type="Line2D"]
+[node name="ConnectionLine" type="Line2D" unique_id=879662780]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_pxqr5")
 width = 20.0
@@ -41,13 +41,13 @@ texture = ExtResource("1_106ed")
 texture_mode = 1
 script = ExtResource("1_ck24c")
 
-[node name="FromIcon" type="TextureRect" parent="."]
+[node name="FromIcon" type="TextureRect" parent="." unique_id=1058470910]
 unique_name_in_owner = true
 offset_right = 36.0
 offset_bottom = 36.0
 texture = ExtResource("3_1adfp")
 
-[node name="Remote" type="PanelContainer" parent="."]
+[node name="Remote" type="PanelContainer" parent="." unique_id=112391920]
 unique_name_in_owner = true
 z_as_relative = false
 offset_right = 77.0
@@ -55,11 +55,11 @@ offset_bottom = 31.0
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_qk788")
 
-[node name="Control" type="Control" parent="Remote"]
+[node name="Control" type="Control" parent="Remote" unique_id=1239874848]
 layout_mode = 2
 size_flags_horizontal = 8
 
-[node name="RemoteLine" type="TextureRect" parent="Remote/Control"]
+[node name="RemoteLine" type="TextureRect" parent="Remote/Control" unique_id=1669416928]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(50, 0)
 layout_mode = 1
@@ -74,18 +74,18 @@ grow_vertical = 2
 size_flags_horizontal = 8
 texture = ExtResource("1_106ed")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Remote"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Remote" unique_id=1893333266]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="VCIcon" type="TextureRect" parent="Remote/HBoxContainer"]
+[node name="VCIcon" type="TextureRect" parent="Remote/HBoxContainer" unique_id=1208875224]
 unique_name_in_owner = true
 layout_mode = 2
 texture = ExtResource("5_vgs1e")
 expand_mode = 2
 stretch_mode = 6
 
-[node name="VCName" type="Label" parent="Remote/HBoxContainer"]
+[node name="VCName" type="Label" parent="Remote/HBoxContainer" unique_id=2040726842]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 8

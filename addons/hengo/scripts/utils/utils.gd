@@ -1,6 +1,6 @@
 class_name HenUtils extends Node
 
-const NONE_ICON = preload('res://addons/hengo/assets/icons/menu/none.svg')
+const NONE_ICON = preload('res://addons/hengo/assets/new_icons/full_circle.svg')
 
 const ICON_FUNCTION = preload('res://addons/hengo/assets/new_icons/square-function.svg')
 const ICON_VARIABLE = preload('res://addons/hengo/assets/new_icons/variable.svg')

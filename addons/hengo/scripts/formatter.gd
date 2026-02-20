@@ -503,6 +503,9 @@ static func set_position(_vc: HenVirtualCNode, _position: Vector2, _data: Format
 	
 # triggers formatting for the current router route
 static func format_current_route() -> void:
+	if not ProjectSettings.get_setting('hengo/settings/auto_layout', true):
+		return
+
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	if not router.current_route:
 		return

@@ -109,7 +109,9 @@ func _on_gui(_event: InputEvent) -> void:
 	if _event is InputEventMouseButton:
 		var e: InputEventMouseButton = _event
 		if e.pressed:
-			global.DOCS_TOOLTIP.visible = false
+			global.CONNECTION_GUIDE.visible = false
+			global.TOOLTIP.visible = false
+			Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 			if e.ctrl_pressed:
 				if selected:
 					on_unselect.emit()

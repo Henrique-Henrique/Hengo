@@ -390,14 +390,16 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2) + connection.line_ref.conn_size
 			connection.to_old_pos = pos
 		else:
-			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
+			if connection.line_ref.points.size() > 0:
+				connection.line_ref.last_from_pos = connection.line_ref.points[0]
 
 		# output positions
 		if connection.line_ref.to_pool_visible:
 			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2) + connection.line_ref.conn_size
 			connection.from_old_pos = pos
 		else:
-			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
+			if connection.line_ref.points.size() > 0:
+				connection.line_ref.last_to_pos = connection.line_ref.points[-1]
 
 		if not connection.line_ref.from_pool_visible and not connection.line_ref.to_pool_visible:
 			connection.line_ref.visible = false
@@ -420,14 +422,16 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
 			connection.to_old_pos = pos
 		else:
-			connection.line_ref.last_from_pos = connection.line_ref.points[0] if connection.line_ref.points.size() > 0 else Vector2.ZERO
+			if connection.line_ref.points.size() > 0:
+				connection.line_ref.last_from_pos = connection.line_ref.points[0]
 
 		# output positions
 		if connection.line_ref.to_pool_visible:
 			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
 			connection.from_old_pos = pos
 		else:
-			connection.line_ref.last_to_pos = connection.line_ref.points[-1] if connection.line_ref.points.size() > 0 else Vector2.ZERO
+			if connection.line_ref.points.size() > 0:
+				connection.line_ref.last_to_pos = connection.line_ref.points[-1]
 
 		if not connection.line_ref.from_pool_visible and not connection.line_ref.to_pool_visible:
 			connection.line_ref.visible = false

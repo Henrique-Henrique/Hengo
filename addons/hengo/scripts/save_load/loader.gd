@@ -8,6 +8,12 @@ class BaseRouteRef extends RefCounted:
 
 func reset_to_load(_id: StringName, _headless: bool) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	
+	if router.current_route:
+		for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
+			v_cnode.hide()
+		router.current_route = null
 
 	if not _headless:
 		var compile_bt: Button = global.CAM.get_parent().get_node_or_null('%Compile')

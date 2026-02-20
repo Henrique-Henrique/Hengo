@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://dw3xq8n4pk2yl"]
+[gd_scene format=3 uid="uid://dw3xq8n4pk2yl"]
 
 [ext_resource type="Script" uid="uid://dt7oll6jcta7b" path="res://addons/hengo/scripts/utils/connection_action_button.gd" id="1_action"]
 
@@ -21,15 +21,14 @@ shadow_color = Color(0, 0, 0, 0.7019608)
 shadow_size = 5
 shadow_offset = Vector2(0, 2)
 
-[node name="ConnectionActionButton" type="PanelContainer"]
-z_index = 101
+[node name="ConnectionActionButton" type="PanelContainer" unique_id=1054219475]
 custom_minimum_size = Vector2(20, 20)
 offset_right = 36.0
 offset_bottom = 36.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 script = ExtResource("1_action")
 
-[node name="Icon" type="TextureRect" parent="."]
+[node name="Icon" type="TextureRect" parent="." unique_id=543198718]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(20, 20)
 layout_mode = 2

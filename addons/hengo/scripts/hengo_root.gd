@@ -87,7 +87,7 @@ func _on_graph_changed_no_args(_a = null, _b = null) -> void:
 var _time: float = 0.0
 var _debounce_time: float = 0.0
 var _dirty: bool = false
-const DEBOUNCE_DELAY: float = 0.2
+const DEBOUNCE_DELAY: float = 0.13
 
 
 func _process(delta: float) -> void:
@@ -97,6 +97,7 @@ func _process(delta: float) -> void:
 		_debounce_time += delta
 		if _debounce_time >= DEBOUNCE_DELAY:
 			check_errors(false)
+			HenFormatter.format_current_route()
 			_dirty = false
 			_time = 0.0
 

@@ -75,6 +75,10 @@ enum SubType {
 
 var current_errors: Array[Dictionary] = []
 
+var _cached_doc_type: StringName = &""
+var _cached_doc_name: String = ""
+var _cached_doc_result: String = ""
+
 func _init() -> void:
 	if not cnode_need_update.is_connected(update): cnode_need_update.connect(update)
 	if not io_hovered.is_connected(on_node_io_hovered): io_hovered.connect(on_node_io_hovered)
@@ -196,6 +200,20 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 			HenVirtualCNode.Type.STATE:
 				global.TOOLTIP.go_to(_mouse_pos, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
 			_:
+				var v_inputs: Array = get_inputs(global.SAVE_DATA)
+				if not v_inputs.is_empty() and v_inputs[0].is_ref:
+					var target_name: String = name_to_code if name_to_code and not name_to_code.is_empty() else name
+					
+					if _cached_doc_type != v_inputs[0].type or _cached_doc_name != target_name:
+						_cached_doc_type = v_inputs[0].type
+						_cached_doc_name = target_name
+						_cached_doc_result = (Engine.get_singleton(&'API') as HenApi).get_doc_for_ref(v_inputs[0].type, target_name)
+					
+					if not _cached_doc_result.is_empty():
+						var tooltip_text: String = "[b]" + str(v_inputs[0].type) + "." + target_name + "[/b]\n\n" + _cached_doc_result
+						global.TOOLTIP.go_to(_mouse_pos + Vector2(25, 25), tooltip_text)
+						return
+						
 				global.TOOLTIP.close()
 
 

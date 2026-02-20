@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://cxi2fc0kvcl6b"]
+[gd_scene format=3 uid="uid://cxi2fc0kvcl6b"]
 
 [ext_resource type="Script" uid="uid://bn7gg8rslv0gn" path="res://addons/hengo/scripts/utils/vc_action_buttons.gd" id="1_a5k3c"]
 
-[node name="VCActionButtons" type="Control"]
+[node name="VCActionButtons" type="Control" unique_id=1393846661]
 z_index = 100
 layout_mode = 3
 anchors_preset = 0

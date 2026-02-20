@@ -68,7 +68,6 @@ func _enter_tree():
 	global.CAM = main_scene.get_node('%Cam')
 	global.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
 	global.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
-	global.DOCS_TOOLTIP = main_scene.get_node('%DocsToolTip')
 	global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	global.TOOLTIP = main_scene.get_node('%Tooltip')
 	global.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
