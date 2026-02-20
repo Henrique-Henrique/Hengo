@@ -4,7 +4,7 @@ class_name HenApi extends Node
 const HENGO_CACHE_PATH = 'res://.godot/hengo/'
 const EXTENSION_API_PATH = 'res://.godot/hengo/extension_api.json'
 const EXTENSION_API_COMPRESSED_PATH = 'res://.godot/hengo/api_compressed.bin'
-const API_VERSION: int = 1
+const API_VERSION: int = 2
 
 var api_data: Dictionary = {}
 var timer: SceneTreeTimer
@@ -593,7 +593,7 @@ func map_classes(_data: Dictionary) -> Dictionary:
 	# classes: just map docs
 	for class_data: Dictionary in _data.get(&'classes', []):
 		var dt: Dictionary = {
-			description = class_data.description,
+			description = class_data.description if class_data.has('description') else '',
 		}
 		var prop_data: Dictionary = {}
 

@@ -195,7 +195,8 @@ func set_in_prop(_default_value = null, _add_prop_ref: bool = true) -> void:
 						
 
 		if prop and _default_value:
-			prop.set_default(str(_default_value))
+			if not (prop is HenDropdown and prop.type == 'enum_list'):
+				prop.set_default(str(_default_value))
 		
 		if prop and prop.has_method('set_font_size'):
 			prop.set_font_size(18)

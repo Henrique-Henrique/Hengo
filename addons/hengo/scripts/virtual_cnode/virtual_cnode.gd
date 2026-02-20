@@ -569,6 +569,16 @@ func check_errors(_save_data: HenSaveData) -> Array[Dictionary]:
 					type = 'error'
 				})
 
+	# check if first input is an abstract class reference without connection
+	if not my_inputs.is_empty() and my_inputs[0].is_ref:
+		if ClassDB.class_exists(my_inputs[0].type) and not ClassDB.can_instantiate(my_inputs[0].type):
+			if not input_has_connection(my_inputs[0].id, _save_data):
+				errors.append({
+					id = id,
+					description = 'Abstract class \'{0}\' requires a connection.'.format([my_inputs[0].type]),
+					type = 'error'
+				})
+
 	match sub_type:
 		HenVirtualCNode.SubType.EXPRESSION:
 			var _inputs: Array = get_inputs(_save_data)

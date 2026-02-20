@@ -177,7 +177,7 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 
 			return indent + base
 		HenVirtualCNode.SubType.NOT_CONNECTED:
-			return HenVirtualCNodeCode.get_default_value_code(_save_data, _token.input_type, use_self)
+			return HenVirtualCNodeCode.get_default_value_code(_save_data, _token.input_type, use_self, _token.get('category', ''), _token.get('data', null))
 		HenVirtualCNode.SubType.CONST:
 			return indent + _token.singleton_class + '.' + _token.name
 		HenVirtualCNode.SubType.FOR, HenVirtualCNode.SubType.FOR_ARR:

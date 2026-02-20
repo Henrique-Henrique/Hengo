@@ -8,7 +8,7 @@ static func create_scaled_theme(base_theme: Theme, scale: float) -> Theme:
 	if scale <= 1.0:
 		return base_theme
 
-	scale = min(scale, 1.3)
+	scale = min(scale, 1.2)
 
 	var new_theme: Theme = base_theme.duplicate(true)
 

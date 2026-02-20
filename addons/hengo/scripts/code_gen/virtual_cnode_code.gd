@@ -519,7 +519,7 @@ static func search_macro_input(_save_data: HenSaveData, _macro: HenSaveMacro) ->
 static func get_output_token_list(_save_data: HenSaveData, _vc: HenVirtualCNode) -> Array:
 	return _vc.get_outputs(_save_data).map(
 		func(x: HenVCInOutData) -> Dictionary:
-			return {name = x.name, type = x.type}
+			return {name = x.name, type = x.type, category = x.category, data = x.data}
 	)
 
 
@@ -647,7 +647,9 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 		type = HenVirtualCNode.SubType.NOT_CONNECTED,
 		input_type = input.type,
 		use_self = use_self,
-		prop_name = input.name
+		prop_name = input.name,
+		category = input.category,
+		data = input.data
 	}
 
 	if input.is_ref:
@@ -683,6 +685,13 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 
 	if _vc.invalid:
 		return get_invalid_token()
+		
+	var v_inputs: Array = _vc.get_inputs(_save_data)
+	if not v_inputs.is_empty() and v_inputs[0].is_ref:
+		if ClassDB.class_exists(v_inputs[0].type) and not ClassDB.can_instantiate(v_inputs[0].type):
+			if not _vc.input_has_connection(v_inputs[0].id, _save_data):
+				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
+				return get_invalid_token()
 
 	match _vc.sub_type:
 		HenVirtualCNode.SubType.VOID, HenVirtualCNode.SubType.GO_TO_VOID, HenVirtualCNode.SubType.SELF_GO_TO_VOID:
@@ -917,7 +926,12 @@ static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode
 	return _separator.join(codes)
 
 
-static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool) -> String:
+static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool, _category: String = '', _data: Variant = null) -> String:
+	if _category == 'enum_list' and typeof(_data) == TYPE_ARRAY and (_data as Array).size() >= 2:
+		var enum_constants = ClassDB.class_get_enum_constants(_data[0], _data[1])
+		if not enum_constants.is_empty():
+			return '.'.join(_data as Array) + '.' + enum_constants[0]
+
 	match _type:
 		'String', 'NodePath', 'StringName':
 			return '""'

@@ -28,10 +28,27 @@ static func create(_data: Dictionary) -> HenVCInOutData:
 	io.name = _data.name
 	io.type = _data.type
 
+	if io.type.begins_with('enum::'):
+		var enum_path: String = io.type.replace('enum::', '')
+		var parts: PackedStringArray = enum_path.split('.')
+		
+		# checks if enum belongs to a class or global scope
+		if parts.size() >= 2:
+			io.type = parts[-1]
+			io.sub_type = '@dropdown'
+			io.category = 'enum_list'
+			io.data = [enum_path.trim_suffix('.' + parts[-1]), parts[-1]]
+		else:
+			io.type = parts[0]
+			io.sub_type = '@dropdown'
+			io.category = 'enum_list'
+			io.data = ['@GlobalScope', parts[0]]
+
 	if _data.has('sub_type'): io.sub_type = _data.sub_type
 	if _data.has('category'): io.category = _data.category
 	if _data.has('is_ref'): io.is_ref = _data.is_ref
 	if _data.has('code_value'): io.code_value = _data.code_value
+	if _data.has('default_value'): io.value = _data.default_value
 	if _data.has('value'): io.value = _data.value
 	if _data.has('data'): io.data = _data.data
 	if _data.has('is_prop'): io.is_prop = _data.is_prop
@@ -140,7 +157,28 @@ func on_inprop_config_request(_dropdown: HenDropdown) -> void:
 
 	match category:
 		'enum_list':
-			_dropdown.text = ClassDB.class_get_enum_constants(data[0], data[1])[0]
+			var enum_constants = ClassDB.class_get_enum_constants(data[0], data[1])
+			
+			if not enum_constants.is_empty():
+				_dropdown.text = enum_constants[0]
+
+				if value != null:
+					var target_val_str = str(value)
+					var enum_path_prefix = '.'.join(data) + '.'
+					if target_val_str.is_valid_int():
+						var target_val = target_val_str.to_int()
+						for enum_name in enum_constants:
+							if ClassDB.class_get_integer_constant(data[0], enum_name) == target_val:
+								_dropdown.text = enum_name
+								value = enum_path_prefix + enum_name
+								code_value = value
+								break
+					else:
+						for enum_name in enum_constants:
+							if enum_name == target_val_str or enum_path_prefix + enum_name == target_val_str:
+								_dropdown.text = enum_name
+								break
+
 			_dropdown.custom_value = '.'.join(data) + '.' + _dropdown.text
 		'get_prop', 'set_prop':
 			_dropdown.alignment = HORIZONTAL_ALIGNMENT_LEFT

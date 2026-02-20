@@ -192,6 +192,9 @@ static func _parse_arguments(_dict: Dictionary) -> Array:
 			name = arg.name
 		}
 
+		if arg.has('default_value'):
+			arg_dt.default_value = arg.default_value
+
 		# parsing enums
 		if arg.type.begins_with('enum::'):
 			var enum_name: String = arg.type.split('.')[-1]

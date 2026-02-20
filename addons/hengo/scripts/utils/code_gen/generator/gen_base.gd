@@ -48,7 +48,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 							tokens = []
 						}
 
-				(_refs.override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), StringName(str(0))))
+					(_refs.override_virtual_data[_vc.name].tokens as Array).append_array(HenVirtualCNodeCode.get_flow_tokens(_save_data, (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data), StringName(str(0))))
 
 
 	code += map_all_macros(_save_data, _refs)
@@ -86,7 +86,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 			if virtual_vc.get_vc_name(_save_data) == 'enter':
 				var flow_tokens: Array = HenVirtualCNodeCode.get_output_token_list(_save_data, virtual_vc)
 				start_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
-					return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type, false)))
+					return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type, false, x.get('category', ''), x.get('data', null))))
 				break
 
 	return code + TEXT_BASE.format({
