@@ -642,7 +642,7 @@ func save_and_get_compressed_data(data: Variant, path_out: String) -> Compressed
 	var f = FileAccess.open(path_out, FileAccess.WRITE)
 	
 	if f == null:
-		push_error("Erro ao abrir: " + path_out)
+		push_error('Error opening: ' + path_out)
 		return null
 	
 	f.store_8(FileAccess.COMPRESSION_ZSTD)
@@ -658,7 +658,7 @@ func save_and_get_compressed_data(data: Variant, path_out: String) -> Compressed
 func load_compressed_data(path_in: String) -> CompressedData:
 	var f = FileAccess.open(path_in, FileAccess.READ)
 	if f == null:
-		push_error("Não foi possível abrir: " + path_in)
+		push_error('Could not open: ' + path_in)
 		return null
 	
 	var file_size = f.get_length()

@@ -210,7 +210,7 @@ func on_cnode_hovering(_mouse_pos: Vector2) -> void:
 						_cached_doc_result = (Engine.get_singleton(&'API') as HenApi).get_doc_for_ref(v_inputs[0].type, target_name)
 					
 					if not _cached_doc_result.is_empty():
-						var tooltip_text: String = "[b]" + str(v_inputs[0].type) + "." + target_name + "[/b]\n\n" + _cached_doc_result
+						var tooltip_text: String = '[b]' + str(v_inputs[0].type) + '.' + target_name + '[/b]\n\n' + _cached_doc_result
 						global.TOOLTIP.go_to(_mouse_pos + Vector2(25, 25), tooltip_text)
 						return
 						
