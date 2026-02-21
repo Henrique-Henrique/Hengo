@@ -9,7 +9,7 @@ bg_color = Color(0.011764706, 0.011764706, 0.011764706, 0.84313726)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_popup"]
 
 [node name="PopupContainer" type="Panel" unique_id=9866950]
-z_index = 101
+z_index = 104
 z_as_relative = false
 material = ExtResource("2_6srun")
 anchors_preset = 15

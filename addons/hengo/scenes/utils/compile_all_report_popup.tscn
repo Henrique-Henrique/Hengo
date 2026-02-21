@@ -3,8 +3,10 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/utils/compile_all_report_popup.gd" id="1"]
 
 [node name="CompileAllReportPopup" type="VBoxContainer"]
+custom_minimum_size = Vector2(560, 440)
 offset_right = 480.0
 offset_bottom = 420.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 10
 script = ExtResource("1")

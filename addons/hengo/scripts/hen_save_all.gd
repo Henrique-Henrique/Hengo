@@ -30,7 +30,7 @@ func start() -> void:
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	if toast:
 		toast.notify.call_deferred('Starting batch compilation...', HenToast.MessageType.INFO)
-		
+
 	batch_started.emit()
 
 	thread_helper.add_task(_compile_task, _on_finished)
@@ -56,17 +56,16 @@ func _compile_task() -> void:
 	}
 
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
-		report.success = false
-		report.aborted = true
-		report.items = [ {
+		report.items.append({
 			script_id = '-',
 			script_name = '-',
 			status = 'failed',
 			message = 'Save folder not found: ' + str(HenEnums.HENGO_SAVE_PATH),
 			errors = ['Missing save directory']
-		}]
+		})
 		report.total = 1
 		report.failed_count = 1
+		report.aborted = true
 		report.elapsed_ms = Time.get_ticks_msec() - started_at
 		_report = report
 		return
@@ -75,37 +74,96 @@ func _compile_task() -> void:
 	save_dirs.sort()
 	report.total = save_dirs.size()
 
-	var staged_scripts: Dictionary = {}
-	var staged_identity: Dictionary = {}
 	var aborted: bool = false
 	var abort_index: int = -1
 
+	# dispatch all resource loads in parallel
+	var save_paths: Array[String] = []
+	var script_paths: Array[String] = []
+	var identity_paths: Array[String] = []
+	var save_exists: Array[bool] = []
+	var up_to_date: Array[bool] = []
+	var dirty_ids: Array[String] = []
+
 	for idx: int in range(save_dirs.size()):
-		var save_id: StringName = StringName(save_dirs[idx])
+		var save_id: String = save_dirs[idx]
+		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_dirs[idx]).path_join('save.tres')
+		var script_path: String = HenEnums.HENGO_SCRIPTS_PATH + save_id + '.gd'
+		var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_id).path_join('identity.tres')
+		var exists: bool = FileAccess.file_exists(save_path)
+		var is_up_to_date: bool = false
+		if exists and _is_script_up_to_date(save_path, script_path):
+			is_up_to_date = true
+
+		save_paths.append(save_path)
+		script_paths.append(script_path)
+		identity_paths.append(identity_path)
+		save_exists.append(exists)
+		up_to_date.append(is_up_to_date)
+		if exists and not is_up_to_date:
+			dirty_ids.append(save_id)
+
+	var force_compile_info: Dictionary = _collect_force_compile_ids(save_dirs, identity_paths, dirty_ids)
+	var force_compile: Dictionary = force_compile_info.get('force_compile', {})
+	var script_display_names: Dictionary = force_compile_info.get('display_names', {})
+	_fill_missing_display_names_from_saves(save_dirs, save_paths, script_display_names)
+
+	# request threaded loads for saves that need compilation
+	var requested_paths: Array[String] = []
+	for idx: int in range(save_dirs.size()):
+		if not save_exists[idx]:
+			continue
+		var save_id: String = save_dirs[idx]
+		if not up_to_date[idx] or bool(force_compile.get(save_id, false)):
+			ResourceLoader.load_threaded_request(save_paths[idx])
+			requested_paths.append(save_paths[idx])
+
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SCRIPTS_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)
+
+	var code_gen: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+	var compiled_saves: Array[Dictionary] = []
+	var consumed_paths: Array[String] = []
+
+	for idx: int in range(save_dirs.size()):
+		var save_id: String = save_dirs[idx]
+		var save_path: String = save_paths[idx]
+		var script_path: String = script_paths[idx]
 		var item: Dictionary = {
-			script_id = str(save_id),
-			script_name = str(save_id),
+			script_id = save_id,
+			script_name = str(script_display_names.get(save_id, save_id)),
 			status = 'pending',
 			message = '',
 			errors = []
 		}
 
-		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(str(save_id)).path_join('save.tres')
-		if not FileAccess.file_exists(save_path):
+		if not save_exists[idx]:
 			item.status = 'failed'
 			item.message = 'Missing save file.'
 			item.errors = ['Expected file: ' + save_path]
-			(report.items as Array).append(item)
+			report.items.append(item)
+			report.failed_count += 1
 			aborted = true
 			abort_index = idx
 			break
 
-		var save_data: HenSaveData = ResourceLoader.load(save_path)
+		var needs_compile: bool = (not up_to_date[idx]) or bool(force_compile.get(save_id, false))
+		if not needs_compile:
+			item.status = 'skipped'
+			item.message = 'Skipped (up to date).'
+			report.items.append(item)
+			report.skipped_count += 1
+			continue
+
+		var save_data: HenSaveData = ResourceLoader.load_threaded_get(save_path)
+		consumed_paths.append(save_path)
+
 		if not save_data:
 			item.status = 'failed'
 			item.message = 'Could not load save resource.'
 			item.errors = ['Failed to load: ' + save_path]
-			(report.items as Array).append(item)
+			report.items.append(item)
+			report.failed_count += 1
 			aborted = true
 			abort_index = idx
 			break
@@ -113,102 +171,85 @@ func _compile_task() -> void:
 		if save_data.identity:
 			item.script_name = save_data.identity.name
 
-		var graph_errors: Array[String] = _validate_save_data_errors(save_data)
+		# collect all routes once and reuse for both validation and deps
+		var routes: Array = _collect_routes(save_data)
+
+		# validate using check_errors (no UI side-effects)
+		var graph_errors: Array[String] = _validate_routes(save_data, routes)
 		if not graph_errors.is_empty():
 			item.status = 'failed'
 			item.message = 'Graph validation failed.'
 			item.errors = graph_errors
-			(report.items as Array).append(item)
+			report.items.append(item)
+			report.failed_count += 1
 			aborted = true
 			abort_index = idx
 			break
 
-		HenSaver.recalculate_dependencies(save_data)
+		# recalculate deps using the same routes
+		_recalculate_deps_from_routes(save_data, routes)
 
-		var code_gen: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+		code_gen.reset()
 		var code: String = code_gen.get_code(save_data)
-		var flow_errors: Array = code_gen.flow_errors.duplicate(true)
-		if not flow_errors.is_empty():
+		var flow_error_count: int = code_gen.flow_errors.size()
+		if flow_error_count > 0:
 			item.status = 'failed'
 			item.message = 'Code generation produced flow errors.'
-			item.errors = ['Flow errors count: ' + str(flow_errors.size())]
-			(report.items as Array).append(item)
+			item.errors = ['Flow errors count: ' + str(flow_error_count)]
+			report.items.append(item)
+			report.failed_count += 1
 			aborted = true
 			abort_index = idx
 			break
 
-		var compile_check: Dictionary = _validate_generated_script(code)
-		if int(compile_check.error) != OK:
+		# write script directly
+		var file: FileAccess = FileAccess.open(script_path, FileAccess.WRITE)
+		if not file:
 			item.status = 'failed'
-			item.message = 'Generated GDScript failed compile check.'
-			item.errors = ['Error code: %s (%s)' % [str(compile_check.error), str(compile_check.error_text)]]
-			(report.items as Array).append(item)
+			item.message = 'Failed to write script file.'
+			item.errors = ['Could not open: ' + script_path]
+			report.items.append(item)
+			report.failed_count += 1
 			aborted = true
 			abort_index = idx
 			break
 
-		staged_scripts[save_id] = {
-			path = HenEnums.HENGO_SCRIPTS_PATH + str(save_id) + '.gd',
-			code = code
-		}
-		staged_identity[save_id] = {
-			path = HenEnums.HENGO_SAVE_PATH.path_join(str(save_id)).path_join('identity.tres'),
-			identity = save_data.identity
-		}
+		file.store_string(code)
+		file.close()
+
+		# keep reference for in-memory ast update
+		compiled_saves.append({id = save_id, save_data = save_data})
 
 		item.status = 'success'
-		item.message = 'Compiled and validated in memory.'
-		(report.items as Array).append(item)
+		item.message = 'Compiled successfully.'
+		report.items.append(item)
+		report.success_count += 1
 
 	if aborted:
 		report.aborted = true
 		var start_skip: int = abort_index + 1
 		for i: int in range(start_skip, save_dirs.size()):
-			var skipped_id: StringName = StringName(save_dirs[i])
-			(report.items as Array).append({
-				script_id = str(skipped_id),
-				script_name = str(skipped_id),
+			var pending_id: String = save_dirs[i]
+			report.items.append({
+				script_id = pending_id,
+				script_name = str(script_display_names.get(pending_id, pending_id)),
 				status = 'skipped',
 				message = 'Skipped because batch was aborted after a failure.',
 				errors = []
 			})
+			report.skipped_count += 1
+
+		# consume pending threaded requests to avoid leaks
+		for path: String in requested_paths:
+			if not consumed_paths.has(path):
+				ResourceLoader.load_threaded_get(path)
 	else:
-		var persist_result: Dictionary = _persist_compiled_batch(staged_scripts, staged_identity)
-		report.success = bool(persist_result.success)
-		report.aborted = not bool(persist_result.success)
+		# update ast directly from memory, no disk I/O
+		var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+		for entry: Dictionary in compiled_saves:
+			map_deps.update_project_data_from_save(StringName(entry.id), entry.save_data)
 
-		if bool(persist_result.success):
-			var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-			for save_id: StringName in staged_scripts.keys():
-				map_deps.update_project_data(save_id)
-		else:
-			var failed_id: String = str(persist_result.get('failed_id', ''))
-			var reason: String = str(persist_result.get('reason', 'Unknown write error.'))
-			for item_ref in report.items:
-				var data: Dictionary = item_ref
-				if data.status == 'success':
-					if data.script_id == failed_id:
-						data.status = 'failed'
-						data.message = 'Failed to persist compiled output.'
-						data.errors = [reason]
-					else:
-						data.status = 'skipped'
-						data.message = 'Skipped because write phase failed.'
-						data.errors = []
-
-	if not report.has('success') or report.aborted:
-		report.success = false
-
-	for item_ref in report.items:
-		var item_data: Dictionary = item_ref
-		match str(item_data.get('status', '')):
-			'success':
-				report.success_count = int(report.success_count) + 1
-			'failed':
-				report.failed_count = int(report.failed_count) + 1
-			'skipped':
-				report.skipped_count = int(report.skipped_count) + 1
-
+	report.success = not aborted
 	report.elapsed_ms = Time.get_ticks_msec() - started_at
 	_report = report
 
@@ -230,79 +271,8 @@ func _on_finished() -> void:
 			toast.notify.call_deferred('Batch compilation failed. See report for details.', HenToast.MessageType.ERROR)
 
 
-# writes the compiled scripts to disk
-func _persist_compiled_batch(staged_scripts: Dictionary, staged_identity: Dictionary) -> Dictionary:
-	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SCRIPTS_PATH):
-		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)
-
-	var temp_paths: Array[String] = []
-	for save_id in staged_scripts.keys():
-		var dt: Dictionary = staged_scripts[save_id]
-		var final_path: String = str(dt.path)
-		var temp_path: String = final_path + '.tmp_hengo_compile'
-		var file: FileAccess = FileAccess.open(temp_path, FileAccess.WRITE)
-		if not file:
-			_cleanup_temp_files(temp_paths)
-			return {
-				success = false,
-				failed_id = str(save_id),
-				reason = 'Failed to create temporary file: ' + temp_path
-			}
-		file.store_string(str(dt.code))
-		file.close()
-		temp_paths.append(temp_path)
-
-	for save_id in staged_scripts.keys():
-		var dt: Dictionary = staged_scripts[save_id]
-		var final_path: String = str(dt.path)
-		var temp_path: String = final_path + '.tmp_hengo_compile'
-		var move_result: int = DirAccess.rename_absolute(temp_path, final_path)
-		if move_result != OK:
-			_cleanup_temp_files(temp_paths)
-			return {
-				success = false,
-				failed_id = str(save_id),
-				reason = 'Failed to replace script file: ' + final_path
-			}
-
-	for save_id in staged_identity.keys():
-		var identity_dt: Dictionary = staged_identity[save_id]
-		var identity_res: Resource = identity_dt.identity
-		var identity_path: String = str(identity_dt.path)
-		var save_result: int = ResourceSaver.save(identity_res, identity_path)
-		if save_result != OK:
-			return {
-				success = false,
-				failed_id = str(save_id),
-				reason = 'Failed to save identity resource: ' + identity_path
-			}
-
-	return {
-		success = true
-	}
-
-
-# removes temporary files in case of failure
-func _cleanup_temp_files(temp_paths: Array[String]) -> void:
-	for temp_path: String in temp_paths:
-		if FileAccess.file_exists(temp_path):
-			DirAccess.remove_absolute(temp_path)
-
-
-# validates that the generated gdscript code is valid
-func _validate_generated_script(code: String) -> Dictionary:
-	var script := GDScript.new()
-	script.source_code = code
-	var error: int = script.reload()
-	return {
-		error = error,
-		error_text = error_string(error)
-	}
-
-
-# validates that the save data is correct
-func _validate_save_data_errors(save_data: HenSaveData) -> Array[String]:
-	var errors: Array[String] = []
+# collects all routes from save data in a single pass
+func _collect_routes(save_data: HenSaveData) -> Array:
 	var routes: Array = [save_data.get_base_route()]
 
 	for state: HenSaveState in save_data.states:
@@ -314,12 +284,117 @@ func _validate_save_data_errors(save_data: HenSaveData) -> Array[String]:
 	for callback_data: HenSaveSignalCallback in save_data.signals_callback:
 		routes.append(callback_data.get_route(save_data))
 
+	return routes
+
+
+# validates all cnodes in the given routes using check_errors (no UI updates)
+func _validate_routes(save_data: HenSaveData, routes: Array) -> Array[String]:
+	var errors: Array[String] = []
+
 	for route in routes:
 		if not route:
 			continue
 		for vc: HenVirtualCNode in route.virtual_cnode_list:
-			var node_errors: Array = vc.validate_errors(save_data)
+			var node_errors: Array = vc.check_errors(save_data)
 			for err in node_errors:
 				errors.append(str(err.get('description', 'Unknown graph error')))
 
 	return errors
+
+
+# recalculates deps from pre-collected routes
+func _recalculate_deps_from_routes(save_data: HenSaveData, routes: Array) -> void:
+	save_data.identity.deps.clear()
+	save_data.identity.detailed_deps.clear()
+
+	for route in routes:
+		if not route:
+			continue
+		HenSaver._process_cnodes_for_deps(save_data, route.virtual_cnode_list)
+
+
+func _is_script_up_to_date(save_path: String, script_path: String) -> bool:
+	if not FileAccess.file_exists(script_path):
+		return false
+
+	var save_mtime: int = int(FileAccess.get_modified_time(save_path))
+	if save_mtime <= 0:
+		return false
+
+	var script_mtime: int = int(FileAccess.get_modified_time(script_path))
+	if script_mtime <= 0:
+		return false
+
+	return script_mtime >= save_mtime
+
+
+func _collect_force_compile_ids(save_dirs: PackedStringArray, identity_paths: Array[String], dirty_ids: Array[String]) -> Dictionary:
+	# request threaded loads for all existing identity files
+	var valid_indices: Array[int] = []
+	var script_display_names: Dictionary = {}
+	for idx: int in range(save_dirs.size()):
+		var save_id: String = str(save_dirs[idx])
+		script_display_names[save_id] = save_id
+		if FileAccess.file_exists(identity_paths[idx]):
+			ResourceLoader.load_threaded_request(identity_paths[idx])
+			valid_indices.append(idx)
+
+	var dep_to_dependents: Dictionary = {}
+
+	for idx: int in valid_indices:
+		var identity: HenSaveDataIdentity = ResourceLoader.load_threaded_get(identity_paths[idx])
+		if not identity:
+			continue
+		var current_id: String = str(save_dirs[idx])
+		var identity_name: String = str(identity.name)
+		if not identity_name.is_empty():
+			script_display_names[current_id] = identity_name
+
+		for dep in identity.deps:
+			var dep_id: String = str(dep)
+			if dep_id.is_empty():
+				continue
+			if not dep_to_dependents.has(dep_id):
+				dep_to_dependents[dep_id] = []
+			(dep_to_dependents[dep_id] as Array).append(str(save_dirs[idx]))
+
+	var force_compile: Dictionary = {}
+	var queue: Array[String] = dirty_ids.duplicate()
+
+	while not queue.is_empty():
+		var current_id: String = queue.pop_front()
+		if bool(force_compile.get(current_id, false)):
+			continue
+
+		force_compile[current_id] = true
+		if not dep_to_dependents.has(current_id):
+			continue
+
+		var dependents: Array = dep_to_dependents[current_id]
+		for dependent in dependents:
+			var dependent_id: String = str(dependent)
+			if not bool(force_compile.get(dependent_id, false)):
+				queue.append(dependent_id)
+
+	return {
+		force_compile = force_compile,
+		display_names = script_display_names
+	}
+
+
+func _fill_missing_display_names_from_saves(save_dirs: PackedStringArray, save_paths: Array[String], script_display_names: Dictionary) -> void:
+	for idx: int in range(save_dirs.size()):
+		var save_id: String = str(save_dirs[idx])
+		var display_name: String = str(script_display_names.get(save_id, save_id))
+		if display_name != save_id:
+			continue
+		if not FileAccess.file_exists(save_paths[idx]):
+			continue
+
+		var save_data: HenSaveData = ResourceLoader.load(save_paths[idx])
+		if not save_data or not save_data.identity:
+			continue
+
+		var resolved_name: String = str(save_data.identity.name)
+		if not resolved_name.is_empty():
+			script_display_names[save_id] = resolved_name

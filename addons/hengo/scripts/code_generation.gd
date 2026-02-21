@@ -6,6 +6,12 @@ var flows_refs: Dictionary = {}
 var flow_errors: Array[Dictionary] = []
 
 
+func reset() -> void:
+	flow_id = 0
+	flows_refs.clear()
+	flow_errors.clear()
+
+
 func get_flow_id() -> int:
 	flow_id += 1
 	return flow_id

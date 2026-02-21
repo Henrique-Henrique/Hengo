@@ -206,3 +206,16 @@ func _has_dependency_changed(_deps: Array, _updated_ast: ProjectAST) -> bool:
 
 func update_project_data(_id: StringName) -> void:
 	_map_project_data(_id)
+
+
+# builds ast from in-memory save data, no disk I/O
+func update_project_data_from_save(_id: StringName, _save_data: HenSaveData) -> void:
+	var ast: ProjectAST = ProjectAST.new()
+	ast.identity = _save_data.identity
+	ast.macros = _save_data.macros
+	ast.variables = _save_data.variables
+	ast.functions = _save_data.functions
+	ast.signals = _save_data.signals
+	ast.signals_callback = _save_data.signals_callback
+	ast.states = _save_data.states
+	ast_list.set(_id, ast)

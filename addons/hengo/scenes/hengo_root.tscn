@@ -556,7 +556,7 @@ layout_mode = 1
 
 [node name="ToastContainer" type="Control" parent="Content/UIBase" unique_id=1396520277]
 unique_name_in_owner = true
-z_index = 103
+z_index = 105
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
