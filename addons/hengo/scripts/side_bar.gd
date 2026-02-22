@@ -10,15 +10,17 @@ enum SideBarItem {
 	STATES
 }
 
-var list: Tree
+var list: VBoxContainer
 
-const ADD_ICON = preload('res://addons/hengo/assets/icons/plus.svg')
+const SIDE_BAR_CATEGORY_SCENE = preload('res://addons/hengo/scenes/side_bar_category.tscn')
+const SIDE_BAR_ROW_SCENE = preload('res://addons/hengo/scenes/side_bar_row.tscn')
 
 enum AddType {VAR, FUNC, SIGNAL_CALLBACK, SIGNAL, LOCAL_VAR, MACRO, STATE}
 enum ParamType {INPUT, OUTPUT}
 
 var BG_COLOR: Dictionary
 var ICONS: Dictionary
+var _category_row_bg_toggle: bool = false
 
 
 class DeleteResourceCommand:
@@ -119,8 +121,6 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 
-	print(1234)
-
 	BG_COLOR = {
 		AddType.STATE: HenEnums.FLOW_COLORS[5],
 		AddType.VAR: HenEnums.FLOW_COLORS[1],
@@ -144,10 +144,6 @@ func _ready() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	list = get_node('%List')
-	list.auto_tooltip = false
-	list.button_clicked.connect(_on_list_button_clicked)
-	list.item_mouse_selected.connect(_on_item_selected)
-	list.gui_input.connect(_on_gui)
 	list.mouse_exited.connect(_on_exit)
 
 	custom_minimum_size = Vector2(HenUtils.get_scaled_size(250), 0)
@@ -159,209 +155,188 @@ func _on_exit() -> void:
 	(Engine.get_singleton(&'Global') as HenGlobal).TOOLTIP.close()
 
 
-func _on_gui(_event: InputEvent) -> void:
-	if _event is InputEventMouseMotion:
-		var item: TreeItem = list.get_item_at_position((_event as InputEventMouseMotion).position)
-		var bt_id: int = list.get_button_id_at_position((_event as InputEventMouseMotion).position)
-		var global: HenGlobal = Engine.get_singleton(&'Global')
-
-		if bt_id >= 0:
-			global.TOOLTIP.close()
-			return
-
-		if item:
-			var _side_bar_item = item.get_metadata(0)
-
-			if _side_bar_item is not int and _side_bar_item is RefCounted:
-				var pos: Vector2 = (_event as InputEventMouseMotion).global_position
-				var text: String = ''
-
-				# if _side_bar_item is HenVarData:
-				# 	text = '[b]HenTypeVariable[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				# elif _side_bar_item is HenFuncData:
-				# 	text = '[b]Function[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				# elif _side_bar_item is HenSignalCallbackData:
-				# 	text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				# elif _side_bar_item is HenMacroData:
-				# 	text = '[b]HenTypeMacro[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				# elif _side_bar_item is HenSignalData:
-				# 	text = '[b]Signal[/b]\n\n{0}\n\n{1}'.format([_side_bar_item.name, HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT])
-				
-				pos.x = global.SIDE_PANEL.global_position.x + global.SIDE_PANEL.size.x
-
-				global.TOOLTIP.go_to(pos, text)
-			else:
-				global.TOOLTIP.close()
-		else:
-			global.TOOLTIP.close()
-
-
-func _on_item_selected(_mouse_position: Vector2, _mouse_button_index: int) -> void:
-	match _mouse_button_index:
-		1:
-			var obj = list.get_selected().get_metadata(0)
-
-			await RenderingServer.frame_pre_draw
-
-			if obj is HenSaveResTypeWithRoute:
-				var global: HenGlobal = Engine.get_singleton(&'Global')
-				(Engine.get_singleton(&'Router') as HenRouter).change_route((obj as HenSaveResTypeWithRoute).get_route(global.SAVE_DATA))
-			elif obj is HenRouteData:
-				(Engine.get_singleton(&'Router') as HenRouter).change_route(obj as HenRouteData)
-		2:
-			var meta = list.get_selected().get_metadata(0)
-			if meta:
-				HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta))
-
-
 func update() -> void:
-	list.clear()
+	_clear_list()
 
-	var root: TreeItem = list.create_item()
-	var base: TreeItem = root.create_child()
-
-	base.set_text(0, 'Base')
-	base.set_metadata(0, (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.get_base_route())
-
-	_add_categories(root, 'States', AddType.STATE)
-	_add_categories(root, 'Signals', AddType.SIGNAL)
-	_add_categories(root, 'Variables', AddType.VAR)
-	_add_categories(root, 'Functions', AddType.FUNC)
-	_add_categories(root, 'Signals Callback', AddType.SIGNAL_CALLBACK)
-	_add_categories(root, 'Macros', AddType.MACRO)
-
-
-func _add_categories(_root: TreeItem, _name: String, _type: AddType) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var category: TreeItem = _root.create_child()
+	var base_route: HenRouteData = global.SAVE_DATA.get_base_route()
+	var base_row: HenSideBarRow = _create_row('Base Route', base_route, HenUtils.ICON_ROUTE, Color('#9fb2c7'))
+	base_row.set_primary_emphasis(true)
+	base_row.set_selected(_is_meta_selected(base_route))
+	list.add_child(base_row)
 
-	category.set_icon(0, ICONS[_type])
-	category.set_text(0, _name)
-	category.add_button(0, ADD_ICON)
-	category.set_metadata(0, _type)
-	category.set_selectable(0, false)
-	category.set_icon_modulate(0, Color(BG_COLOR[_type], 1.0))
-	category.set_custom_color(0, Color('#808e9b'))
-	category.set_button_color(0, 0, Color('#616161'))
-	category.set_custom_bg_color(0, BG_COLOR.get(_type))
+	var categories: Array[Dictionary] = [
+		{name = 'States', type = AddType.STATE},
+		{name = 'Signals', type = AddType.SIGNAL},
+		{name = 'Variables', type = AddType.VAR},
+		{name = 'Functions', type = AddType.FUNC},
+		{name = 'Signals Callback', type = AddType.SIGNAL_CALLBACK},
+		{name = 'Macros', type = AddType.MACRO}
+	]
+
+	for i: int in range(categories.size()):
+		var category_data: Dictionary = categories[i]
+		_add_category(str(category_data.name), int(category_data.type), i < categories.size() - 1)
+
+
+func _clear_list() -> void:
+	for child: Node in list.get_children():
+		list.remove_child(child)
+		child.queue_free()
+
+
+func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var category: HenSideBarCategory = SIDE_BAR_CATEGORY_SCENE.instantiate()
+	category.setup(_name, _type, ICONS[_type], BG_COLOR[_type], show_divider, _get_category_add_label(_type))
+	category.add_pressed.connect(_on_add_requested)
+	list.add_child(category)
+	_category_row_bg_toggle = false
 
 	match _type:
 		AddType.STATE:
 			for state_data: HenSaveState in global.SAVE_DATA.states:
-				var item: TreeItem = create_item(
-					category,
+				var item: HenSideBarRow = _create_row(
 					state_data.name,
 					state_data,
 					ICONS[_type],
-					BG_COLOR[_type]
+					BG_COLOR[_type],
+					true,
+					12,
+					'New Substate'
 				)
-				_add_sub_states(item, state_data, _type)
+				_add_category_row(category, item)
+				_add_sub_states(category, state_data, _type, 1)
 		AddType.VAR:
 			for var_data: HenSaveVar in global.SAVE_DATA.variables:
-				create_item(
-					category,
+				_add_category_row(category, _create_row(
 					var_data.name,
 					var_data,
 					HenUtils.get_icon_texture(var_data.type),
-				)
+					BG_COLOR[_type],
+					false,
+					12
+				))
 		AddType.FUNC:
 			for func_data: HenSaveFunc in global.SAVE_DATA.functions:
-				create_item(
-					category,
-					func_data.name,
-					func_data,
-					ICONS[_type],
-					BG_COLOR[_type]
-				)
+				_add_category_row(category, _create_row(func_data.name, func_data, ICONS[_type], BG_COLOR[_type], false, 12))
 		AddType.SIGNAL_CALLBACK:
 			for db_data: HenSaveSignalCallback in global.SAVE_DATA.signals_callback:
-				create_item(
-					category,
-					db_data.name,
-					db_data,
-					ICONS[_type],
-					BG_COLOR[_type]
-				)
+				_add_category_row(category, _create_row(db_data.name, db_data, ICONS[_type], BG_COLOR[_type], false, 12))
 		AddType.SIGNAL:
 			for signal_data: HenSaveSignal in global.SAVE_DATA.signals:
-				create_item(
-					category,
-					signal_data.name,
-					signal_data,
-					ICONS[_type],
-					BG_COLOR[_type]
-				)
+				_add_category_row(category, _create_row(signal_data.name, signal_data, ICONS[_type], BG_COLOR[_type], false, 12))
 		AddType.MACRO:
 			for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
-				create_item(
-					category,
-					macro_data.name,
-					macro_data,
-					ICONS[_type],
-					BG_COLOR[_type]
-				)
+				_add_category_row(category, _create_row(macro_data.name, macro_data, ICONS[_type], BG_COLOR[_type], false, 12))
 
 
-func _add_sub_states(parent: TreeItem, state: HenSaveState, type: AddType) -> void:
+func _add_sub_states(category: HenSideBarCategory, state: HenSaveState, type: AddType, depth: int) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var sub_states: Array = state.get_sub_states(global.SAVE_DATA)
 
-	if sub_states.is_empty():
-		return
-
 	for sub_state: HenSaveState in sub_states:
-		var item: TreeItem = create_item(
-			parent,
+		var item: HenSideBarRow = _create_row(
 			sub_state.name,
 			sub_state,
 			ICONS[type],
-			BG_COLOR[type]
+			BG_COLOR[type],
+			true,
+			12 + (depth * 24),
+			'New Substate'
 		)
-		_add_sub_states(item, sub_state, type)
+		_add_category_row(category, item)
+		_add_sub_states(category, sub_state, type, depth + 1)
 
 
-func create_item(_category: TreeItem, _name: String, _meta: HenSaveResType, _icon: Texture2D = null, _icon_color: Color = Color.WHITE) -> TreeItem:
-	var item: TreeItem = _category.create_child()
-
-	item.set_cell_mode(0, TreeItem.TreeCellMode.CELL_MODE_CUSTOM)
-	item.set_metadata(0, _meta)
-	item.set_text(0, _name)
-	item.set_icon(0, _icon)
-	item.set_icon_modulate(0, Color(_icon_color, 1))
-	item.set_custom_color(0, Color('#8c9197ff'))
-
-	var bg_color = _icon_color
-	bg_color.a = 0.05
-	item.set_custom_bg_color(0, bg_color)
-	
-	if _meta is HenSaveState:
-		item.add_button(0, ADD_ICON)
-
-	return item
+func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_color: Color = Color.WHITE, show_add: bool = false, indent: int = 0, add_label: String = 'New') -> HenSideBarRow:
+	var row: HenSideBarRow = SIDE_BAR_ROW_SCENE.instantiate()
+	row.setup(_name, _meta, _icon, _icon_color, show_add, indent, add_label)
+	row.row_pressed.connect(_on_row_pressed)
+	row.add_pressed.connect(_on_row_add_pressed)
+	row.set_selected(_is_meta_selected(_meta))
+	return row
 
 
-func _on_list_button_clicked(_item: TreeItem, _column: int, _id: int, _mouse_button_index: int) -> void:
-	var meta = _item.get_metadata(0)
+func _add_category_row(category: HenSideBarCategory, row: HenSideBarRow) -> void:
+	row.set_background_mode(_category_row_bg_toggle)
+	category.add_row(row)
+	_category_row_bg_toggle = not _category_row_bg_toggle
+
+
+func _get_category_add_label(_type: AddType) -> String:
+	match _type:
+		AddType.STATE:
+			return 'New State'
+		AddType.VAR:
+			return 'New Variable'
+		AddType.FUNC:
+			return 'New Function'
+		AddType.SIGNAL:
+			return 'New Signal'
+		AddType.SIGNAL_CALLBACK:
+			return 'New Callback'
+		AddType.MACRO:
+			return 'New Macro'
+
+	return 'New'
+
+
+func _on_add_requested(meta: int) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	
-	if meta is int:
-		match meta:
-			AddType.STATE:
-				global.SAVE_DATA.add_state()
-			AddType.VAR:
-				global.SAVE_DATA.add_var()
-			AddType.FUNC:
-				global.SAVE_DATA.add_func()
-			AddType.SIGNAL:
-				global.SAVE_DATA.add_signal()
-			AddType.SIGNAL_CALLBACK:
-				global.SAVE_DATA.add_signals_callback()
-			AddType.MACRO:
-				global.SAVE_DATA.add_macro()
-	elif meta is HenSaveState:
-		(meta as HenSaveState).add_sub_state(global.SAVE_DATA)
-		
+	match meta:
+		AddType.STATE:
+			global.SAVE_DATA.add_state()
+		AddType.VAR:
+			global.SAVE_DATA.add_var()
+		AddType.FUNC:
+			global.SAVE_DATA.add_func()
+		AddType.SIGNAL:
+			global.SAVE_DATA.add_signal()
+		AddType.SIGNAL_CALLBACK:
+			global.SAVE_DATA.add_signals_callback()
+		AddType.MACRO:
+			global.SAVE_DATA.add_macro()
+
 	update()
+
+
+func _on_row_add_pressed(meta: Variant) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if meta is HenSaveState:
+		(meta as HenSaveState).add_sub_state(global.SAVE_DATA)
+
+	update()
+
+
+func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
+	match mouse_button_index:
+		MOUSE_BUTTON_LEFT:
+			_change_route_from_meta(meta)
+		MOUSE_BUTTON_RIGHT:
+			if meta:
+				HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta))
+
+
+func _change_route_from_meta(meta: Variant) -> void:
+	if meta is HenSaveResTypeWithRoute:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		(Engine.get_singleton(&'Router') as HenRouter).change_route((meta as HenSaveResTypeWithRoute).get_route(global.SAVE_DATA))
+	elif meta is HenRouteData:
+		(Engine.get_singleton(&'Router') as HenRouter).change_route(meta as HenRouteData)
+
+
+func _is_meta_selected(meta: Variant) -> bool:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	if not router or not router.current_route or not meta:
+		return false
+
+	if meta is HenRouteData:
+		return (meta as HenRouteData).id == router.current_route.id
+	if meta is HenSaveResTypeWithRoute:
+		return (meta as HenSaveResTypeWithRoute).id == router.current_route.id
+
+	return false
 
 
 func _get_inspect_title(meta: Variant) -> String:

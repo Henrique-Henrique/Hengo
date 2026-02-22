@@ -25,12 +25,13 @@ visible = false
 layout_mode = 2
 placeholder_text = "Type to search..."
 
-[node name="List" type="Tree" parent="VBoxContainer"]
-unique_name_in_owner = true
+[node name="ListScroll" type="ScrollContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_k7ch5")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_axb3u")
-allow_rmb_select = true
-hide_root = true
-auto_tooltip = false
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="VBoxContainer/ListScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
