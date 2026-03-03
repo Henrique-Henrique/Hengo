@@ -8,21 +8,24 @@ var signal_params: Dictionary = {}
 var states: Dictionary = {}
 var current_state: HengoState
 
+
 func set_states(_states: Dictionary) -> void:
 	states = _states
+
 
 func change_state(_state: String, ..._args) -> void:
 	if not states.has(_state):
 		print('State not found: ', _state)
 		return
 		
-	print('S -> ', _state)
-	
 	if current_state:
 		current_state.exit()
 		
 	var state: HengoState = states[_state]
 	current_state = state
+
+	if OS.is_debug_build() and EngineDebugger.is_active():
+		EngineDebugger.send_message('hengo:state', [_state])
 
 	if state.has_method(&'enter'):
 		state.callv(&'enter', _args)

@@ -6,7 +6,8 @@ static func _provide_params_ref(_save_data: HenSaveData, _params: Array, _prefix
 		var first: Dictionary = _params[0]
 
 		if first.has('is_ref'):
-			first.use_self = _prefix == ''
+			if not first.get('use_self', false):
+				first.use_self = _prefix == ''
 			
 			var new_prefix: StringName = get_code_by_token(_save_data, first)
 

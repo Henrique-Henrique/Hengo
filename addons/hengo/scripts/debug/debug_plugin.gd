@@ -3,11 +3,18 @@ extends EditorDebuggerPlugin
 
 const PREFIX = 'hengo'
 
+
 func _has_capture(prefix: String) -> bool:
 	return prefix == PREFIX
 
+
 func _capture(_message: String, _data: Array, _session_id: int) -> bool:
 	match _message:
+		'hengo:state':
+			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+			if signal_bus:
+				signal_bus.debug_state_changed.emit(StringName(_data[0]))
+			return true
 		'hengo:flow':
 			var id: int = _data[0]
 			var port: StringName = _data[1]
@@ -21,6 +28,10 @@ func _capture(_message: String, _data: Array, _session_id: int) -> bool:
 				var line: HenFlowConnectionLine = _get_flow_line(vc, port)
 				if line:
 					line.show_debug()
+			
+			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+			if signal_bus:
+				signal_bus.debug_flow_transition.emit(id, port)
 			
 			return true
 		'hengo:value':
@@ -56,7 +67,6 @@ func get_debug_ids(_num: int) -> Array:
 func _setup_session(_session_id: int) -> void:
 	var session: EditorDebuggerSession = get_session(_session_id)
 
-	# Listens to the session started and stopped signals.
 	session.started.connect(_on_started)
 	session.stopped.connect(_on_stopped)
 
@@ -101,5 +111,9 @@ func _on_started() -> void:
 func _on_stopped() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	global.HENGO_DEBUGGER_PLUGIN = null
+
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	if signal_bus:
+		signal_bus.debug_state_changed.emit(&'')
 
 	print('Hengo Debugger Stopped!')

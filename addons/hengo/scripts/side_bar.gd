@@ -33,6 +33,7 @@ class DeleteResourceCommand:
 	var removed_sub_states: Dictionary = {}
 	var file_entries: Array[Dictionary] = []
 
+
 	func _init(_side_bar: HenSideBar, _meta: HenSaveResType) -> void:
 		side_bar = _side_bar
 		meta = _meta
@@ -118,7 +119,7 @@ class DeleteResourceCommand:
 
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self):
+	if HenUtils.disable_scene_with_owner(self ):
 		return
 
 	BG_COLOR = {
@@ -149,6 +150,10 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(HenUtils.get_scaled_size(250), 0)
 
 	global.SIDE_BAR = self
+	
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	if signal_bus and not signal_bus.request_structural_update.is_connected(update):
+		signal_bus.request_structural_update.connect(update)
 
 
 func _on_exit() -> void:
@@ -159,6 +164,9 @@ func update() -> void:
 	_clear_list()
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.SAVE_DATA:
+		return
+
 	var base_route: HenRouteData = global.SAVE_DATA.get_base_route()
 	var base_row: HenSideBarRow = _create_row('Base Route', base_route, HenUtils.ICON_ROUTE, Color('#9fb2c7'))
 	base_row.set_primary_emphasis(true)
@@ -205,6 +213,7 @@ func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
 					12,
 					'New Substate'
 				)
+				item.set_start_badge(state_data.start)
 				_add_category_row(category, item)
 				_add_sub_states(category, state_data, _type, 1)
 		AddType.VAR:
@@ -245,6 +254,7 @@ func _add_sub_states(category: HenSideBarCategory, state: HenSaveState, type: Ad
 			12 + (depth * 24),
 			'New Substate'
 		)
+		item.set_start_badge(sub_state.start)
 		_add_category_row(category, item)
 		_add_sub_states(category, sub_state, type, depth + 1)
 
@@ -380,7 +390,7 @@ func _request_delete_resource(meta: HenSaveResType) -> void:
 	if not global or not global.SAVE_DATA or not meta:
 		return
 
-	var cmd := DeleteResourceCommand.new(self, meta)
+	var cmd := DeleteResourceCommand.new(self , meta)
 	if not cmd.can_remove():
 		return
 

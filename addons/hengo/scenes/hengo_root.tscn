@@ -27,6 +27,7 @@
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
+[ext_resource type="PackedScene" uid="uid://bsdw3ppkktst5" path="res://addons/hengo/scenes/machine_graph.tscn" id="27_dkwui"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
 [ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
 [ext_resource type="Texture2D" uid="uid://c6f7xyoyth505" path="res://addons/hengo/assets/new_icons/user-round-cog.svg" id="32_h1p8r"]
@@ -47,28 +48,6 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onj4m"]
-bg_color = Color(1, 1, 1, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
-shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(3592, 2070)
-shader_parameter/offset = Vector2(348.2699, -190.63985)
-shader_parameter/zoom_factor = 1.3998961
-shader_parameter/alpha = 0.2
-shader_parameter/text = ExtResource("17_lxtpw")
-shader_parameter/text_size = 400.0
-
-[sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
-bg_color = Color(1, 1, 1, 0.0862745)
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
@@ -80,7 +59,7 @@ bg_color = Color(1, 1, 1, 0.0862745)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_right = 8.0
-bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
+bg_color = Color(0, 0, 0, 0.2901961)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -106,6 +85,28 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onj4m"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
+shader = ExtResource("9_5sxro")
+shader_parameter/screen_size = Vector2(800, 2064)
+shader_parameter/offset = Vector2(146.05743, 572.0597)
+shader_parameter/zoom_factor = 1.0725291
+shader_parameter/alpha = 0.2
+shader_parameter/text = ExtResource("17_lxtpw")
+shader_parameter/text_size = 400.0
+
+[sub_resource type="Gradient" id="Gradient_rg8iy"]
+colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
+bg_color = Color(1, 1, 1, 0.0862745)
 
 [node name="HengoRoot" type="Control" unique_id=706706338]
 layout_mode = 3
@@ -198,11 +199,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer" unique_id=2113415455]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="CNodeUI" type="Panel" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer" unique_id=1262400160]
+[node name="CNodeUI" type="Panel" parent="Content/UIBase/Panel/MarginContainer" unique_id=1262400160]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
@@ -210,115 +207,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="Panel" type="Control" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI" unique_id=674967786]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_vertical = 3
-
-[node name="CNodeContainerBG" type="Control" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel" unique_id=1077183945]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("16_74kfo")
-
-[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG" unique_id=717265577]
-process_mode = 4
-clip_children = 1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_onj4m")
-
-[node name="Grid" type="TextureRect" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Panel" unique_id=1070055922]
-process_mode = 4
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_r8ipe")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("17_lxtpw")
-
-[node name="Cam" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG" unique_id=95183905 node_paths=PackedStringArray("grid")]
-unique_name_in_owner = true
-position = Vector2(0, -8)
-script = ExtResource("3_84akk")
-grid = NodePath("../Panel/Grid")
-
-[node name="RefPoint" type="Marker2D" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=2087226410]
-visible = false
-position = Vector2(289, 313)
-
-[node name="Lines" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=469442060]
-
-[node name="ConnectionGuide" type="Line2D" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=1282222396]
-unique_name_in_owner = true
-visible = false
-z_index = 2
-width = 6.0
-gradient = SubResource("Gradient_rg8iy")
-texture = ExtResource("7_6jref")
-texture_mode = 1
-script = ExtResource("7_gj1gq")
-
-[node name="CommentContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=252482894]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-metadata/_edit_use_anchors_ = true
-
-[node name="CnodeContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=1663593833]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-metadata/_edit_use_anchors_ = true
-
-[node name="SelectionRect" type="ReferenceRect" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=805961561]
-process_mode = 4
-visible = false
-offset_left = 153.0
-offset_top = 148.0
-offset_right = 193.0
-offset_bottom = 188.0
-mouse_filter = 2
-border_color = Color(0.749928, 0.915784, 0.889306, 1)
-border_width = 3.0
-
-[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam/SelectionRect" unique_id=1630308070]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
-
-[node name="VCActionButtons" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/Panel/CNodeContainerBG/Cam" unique_id=1698247101 instance=ExtResource("20_w813u")]
-unique_name_in_owner = true
-visible = false
-
-[node name="HSplitContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI" unique_id=1223978220]
+[node name="HSplitContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI" unique_id=1223978220]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -327,41 +216,41 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
-split_offsets = PackedInt32Array(-10000)
-split_offset = -10000
+split_offsets = PackedInt32Array(-5000)
+split_offset = -5000
 
-[node name="SideBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer" unique_id=116167880]
+[node name="SideBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer" unique_id=116167880]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
 
-[node name="SidePanel" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin" unique_id=1340978270]
+[node name="SidePanel" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin" unique_id=1340978270]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel" unique_id=251941409]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel" unique_id=251941409]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 18
 
-[node name="MenuBar" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=2140933203]
+[node name="MenuBar" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=2140933203]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar" unique_id=935502521]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar" unique_id=935502521]
 layout_mode = 2
 alignment = 2
 
-[node name="CompileContainer" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar/CNodeActionBar" unique_id=1799733899]
+[node name="CompileContainer" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar/CNodeActionBar" unique_id=1799733899]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="TabContainer" type="TabContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=908628429]
+[node name="TabContainer" type="TabContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=908628429]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/tab_separation = 12
@@ -372,13 +261,13 @@ tab_1/title = "Code Preview"
 tab_1/icon = ExtResource("22_33cyo")
 script = ExtResource("18_hg3xi")
 
-[node name="SideBar" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=1587614674 instance=ExtResource("22_x5h56")]
+[node name="SideBar" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=1587614674 instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 metadata/_tab_name = "Props"
 
-[node name="CodePreview" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=48314858 instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=48314858 instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(1000, 0)
@@ -398,82 +287,67 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
-[node name="HSplitContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer" unique_id=1067875316]
+[node name="VBoxContainer2" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer" unique_id=1462542696]
 layout_mode = 2
-mouse_filter = 2
-
-[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer" unique_id=428273699]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 4.0
-mouse_filter = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control" unique_id=1462542696]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="ActionBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer" unique_id=191747223]
+[node name="ActionBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2" unique_id=191747223]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin" unique_id=1549042612]
+[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin" unique_id=1549042612]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_5c7h0")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer" unique_id=876575320]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer" unique_id=876575320]
 layout_mode = 2
 
-[node name="CloseBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1259709975]
+[node name="CloseBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1259709975]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("30_hog2e")
 flat = true
 
-[node name="ClassName" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1357072692]
+[node name="ClassName" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1357072692]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
 
-[node name="Config" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=712136240]
+[node name="Config" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=712136240]
 unique_name_in_owner = true
 layout_mode = 2
 icon = ExtResource("32_h1p8r")
 
-[node name="Label" type="Label" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1867830194]
+[node name="Label" type="Label" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1867830194]
 layout_mode = 2
 text = "Base > Test"
 
-[node name="ActionsBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1964371426]
+[node name="ActionsBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1964371426]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Actions"
 icon = ExtResource("39_174hx")
 
-[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1642556444]
+[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1642556444]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
 
-[node name="TerminalBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=26054358]
+[node name="TerminalBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=26054358]
 unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
 flat = true
 
-[node name="TerminalInfo" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=742267508]
+[node name="TerminalInfo" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=742267508]
 unique_name_in_owner = true
 process_mode = 4
 layout_mode = 2
 mouse_filter = 2
 
-[node name="InfoBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=2121055772]
+[node name="InfoBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=2121055772]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
@@ -488,7 +362,7 @@ disabled = true
 text = "0"
 icon = ExtResource("38_onj4m")
 
-[node name="SuccessBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=558683972]
+[node name="SuccessBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=558683972]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
@@ -503,7 +377,7 @@ disabled = true
 text = "0"
 icon = ExtResource("39_vlu6e")
 
-[node name="ErrorBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=461419965]
+[node name="ErrorBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=461419965]
 unique_name_in_owner = true
 process_mode = 4
 modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
@@ -518,17 +392,17 @@ disabled = true
 text = "0"
 icon = ExtResource("40_aqok7")
 
-[node name="OpenDashboard" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1244948004]
+[node name="OpenDashboard" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1244948004]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Dashboard"
 icon = ExtResource("40_174hx")
 
-[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1498597782]
+[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1498597782]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Compile" type="Button" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer/Control/VBoxContainer/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=760264391]
+[node name="Compile" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=760264391]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -537,8 +411,128 @@ theme_override_fonts/font = ExtResource("23_tlngq")
 text = "Check and Compile All"
 icon = ExtResource("18_fdf88")
 
-[node name="RightSideBar" parent="Content/UIBase/Panel/MarginContainer/VBoxContainer/CNodeUI/HSplitContainer/HSplitContainer" unique_id=24126550 instance=ExtResource("37_hog2e")]
+[node name="VBoxContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2" unique_id=334363352]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+drag_area_margin_begin = -1402
+
+[node name="Panel" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=674967786]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CNodeContainerBG" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel" unique_id=1077183945]
 unique_name_in_owner = true
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("16_74kfo")
+
+[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG" unique_id=717265577]
+process_mode = 4
+clip_children = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_onj4m")
+
+[node name="Grid" type="TextureRect" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Panel" unique_id=1070055922]
+process_mode = 4
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_r8ipe")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("17_lxtpw")
+
+[node name="Cam" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG" unique_id=95183905 node_paths=PackedStringArray("grid")]
+unique_name_in_owner = true
+position = Vector2(0, -8)
+script = ExtResource("3_84akk")
+grid = NodePath("../Panel/Grid")
+
+[node name="RefPoint" type="Marker2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=2087226410]
+visible = false
+position = Vector2(289, 313)
+
+[node name="Lines" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=469442060]
+
+[node name="ConnectionGuide" type="Line2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1282222396]
+unique_name_in_owner = true
+visible = false
+z_index = 2
+width = 6.0
+gradient = SubResource("Gradient_rg8iy")
+texture = ExtResource("7_6jref")
+texture_mode = 1
+script = ExtResource("7_gj1gq")
+
+[node name="CommentContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=252482894]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="CnodeContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1663593833]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="SelectionRect" type="ReferenceRect" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=805961561]
+process_mode = 4
+visible = false
+offset_left = 153.0
+offset_top = 148.0
+offset_right = 193.0
+offset_bottom = 188.0
+mouse_filter = 2
+border_color = Color(0.749928, 0.915784, 0.889306, 1)
+border_width = 3.0
+
+[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam/SelectionRect" unique_id=1630308070]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
+
+[node name="VCActionButtons" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1698247101 instance=ExtResource("20_w813u")]
+unique_name_in_owner = true
+visible = false
+
+[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel" unique_id=428273699]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 4.0
+mouse_filter = 2
+
+[node name="MachineGraph" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=2066009994 instance=ExtResource("27_dkwui")]
 layout_mode = 2
 
 [node name="Tooltip" parent="Content/UIBase" unique_id=1420862732 instance=ExtResource("23_x5h56")]
@@ -551,8 +545,23 @@ offset_bottom = 55.0
 
 [node name="DashBoard" parent="Content/UIBase" unique_id=179649431 instance=ExtResource("44_33cyo")]
 unique_name_in_owner = true
+visible = false
 z_index = 102
 layout_mode = 1
+
+[node name="RightSideBar" parent="Content/UIBase" unique_id=24126550 instance=ExtResource("37_hog2e")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 1224.0
+offset_top = 4.0
+offset_right = 1724.0
+offset_bottom = 968.0
+grow_horizontal = 1
+grow_vertical = 1
 
 [node name="ToastContainer" type="Control" parent="Content/UIBase" unique_id=1396520277]
 unique_name_in_owner = true

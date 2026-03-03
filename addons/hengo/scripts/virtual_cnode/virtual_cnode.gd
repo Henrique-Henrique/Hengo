@@ -79,6 +79,7 @@ var _cached_doc_type: StringName = &""
 var _cached_doc_name: String = ""
 var _cached_doc_result: String = ""
 
+
 func _init() -> void:
 	if not cnode_need_update.is_connected(update): cnode_need_update.connect(update)
 	if not io_hovered.is_connected(on_node_io_hovered): io_hovered.connect(on_node_io_hovered)
@@ -92,8 +93,8 @@ func show() -> void:
 		return
 
 	cnode_instance = cnode
-	configure_cnode_to_show(self, cnode)
-	cnode.reset_signals(self)
+	configure_cnode_to_show(self , cnode)
+	cnode.reset_signals(self )
 
 
 func hide() -> void:
@@ -137,13 +138,14 @@ func get_input_by_idx(_idx: int) -> HenVCInOutData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	return get_inputs(global.SAVE_DATA).get(_idx)
 
+
 func get_output_by_idx(_idx: int) -> HenVCInOutData:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	return get_outputs(global.SAVE_DATA).get(_idx)
 
 
 func get_new_input_connection_command(_id: StringName, _from_id: StringName, _from: HenVirtualCNode) -> HenVCConnectionReturn:
-	return create_input_connection(_id, _from_id, self, _from)
+	return create_input_connection(_id, _from_id, self , _from)
 
 
 func select() -> void:
@@ -151,8 +153,8 @@ func select() -> void:
 
 	if not selected:
 		selected = true
-		if not global.SELECTED_VIRTUAL_CNODE.has(self):
-			global.SELECTED_VIRTUAL_CNODE.append(self)
+		if not global.SELECTED_VIRTUAL_CNODE.has(self ):
+			global.SELECTED_VIRTUAL_CNODE.append(self )
 
 		if cnode_instance:
 			cnode_instance.select()
@@ -162,8 +164,8 @@ func unselect() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
 	selected = false
-	if global.SELECTED_VIRTUAL_CNODE.has(self):
-		global.SELECTED_VIRTUAL_CNODE.erase(self)
+	if global.SELECTED_VIRTUAL_CNODE.has(self ):
+		global.SELECTED_VIRTUAL_CNODE.erase(self )
 
 	if cnode_instance:
 		cnode_instance.unselect()
@@ -174,9 +176,10 @@ func on_cnode_mouse_enter() -> void:
 
 	if global.can_make_flow_connection and not get_flow_inputs(global.SAVE_DATA).is_empty():
 		global.flow_connection_to_data = {
-			to_cnode = self,
+			to_cnode = self ,
 			to_id = get_flow_inputs(global.SAVE_DATA)[0].id
 		}
+
 
 func on_cnode_selected(_selected: bool) -> void:
 	if _selected:
@@ -230,7 +233,7 @@ func request_io_connection(_io_type: StringName, _id: StringName, _mouse_pos: Ve
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenCodeSearch.load(_mouse_pos, {
 		io_type = _io_type,
 		id = _id,
-		vc_ref = self,
+		vc_ref = self ,
 		type = _type
 	}), '')
 
@@ -247,16 +250,17 @@ func on_cnode_double_click() -> void:
 
 
 func on_cnode_right_click(_mouse_pos: Vector2) -> void:
-	# showing state config on right click
+	# show state config on right click
 	if type == HenVirtualCNode.Type.STATE:
 		pass
+
 
 func on_node_io_hovered(context: Dictionary) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	
-	# creates connection data using self as the owner and context source as the port
+	# create connection data using self as the owner and context source as the port
 	global.connection_to_data = CNodeInOutConnectionData.new(
-		self,
+		self ,
 		context.source
 	)
 
@@ -264,7 +268,7 @@ func on_node_io_hovered(context: Dictionary) -> void:
 		var connector: TextureRect = context.connector
 		var pos = global.CAM.get_relative_vec2(connector.global_position)
 
-		# updates the global guide visual state
+		# update the global guide visual state
 		global.CONNECTION_GUIDE.hover_pos = pos + connector.size / 2
 		global.CONNECTION_GUIDE.gradient.colors[1] = context.color
 
@@ -303,7 +307,7 @@ func on_expression_saved(context: Dictionary) -> void:
 
 
 func on_method_picker_requested(context: Dictionary) -> void:
-	# triggers the internal logic to open the connection menu
+	# trigger the internal logic to open the connection menu
 	request_io_connection(
 		context.io_type,
 		context.port_id,
@@ -351,7 +355,7 @@ func get_vc_name(_save_data: HenSaveData) -> String:
 
 
 func add_flow_connection(_id: StringName, _to_id: StringName, _to: HenVirtualCNode) -> HenVCFlowConnectionReturn:
-	return add_flow_connection_with_return(_id, _to_id, self, _to)
+	return add_flow_connection_with_return(_id, _to_id, self , _to)
 
 
 func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> HenVCInOutData:
@@ -359,19 +363,19 @@ func add_io(_is_input: bool, _data: Dictionary, _check_types: bool = true) -> He
 
 
 func get_history_obj() -> HenVCNodeReturn:
-	return HenVCNodeReturn.new(self)
+	return HenVCNodeReturn.new(self )
 
 
 func get_flow_input_connection(_id: StringName) -> HenVCFlowConnectionData:
-	return get_flow_input_connection_data(_id, self)
+	return get_flow_input_connection_data(_id, self )
 
 
 func get_flow_output_connection(_id: StringName) -> HenVCFlowConnectionData:
-	return get_flow_output_connection_data(_id, self)
+	return get_flow_output_connection_data(_id, self )
 
 
 static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
-	# adding virtual cnode to list
+	# add virtual cnode to list
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 	var _route: HenRouteData = _config.route
@@ -384,8 +388,6 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	v_cnode.route_type = _route.type
 
 	if _config.has('name_to_code'): v_cnode.name_to_code = _config.name_to_code
-
-	_route.virtual_cnode_list.append(v_cnode)
 
 	if _config.has('input_code_value_map'):
 		v_cnode.input_code_value_map = _config.input_code_value_map
@@ -473,6 +475,8 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 		for output_data: Dictionary in _config.outputs:
 			v_cnode.add_io(false, output_data, false)
 
+	_route.add_virtual_cnode_to_route(v_cnode)
+
 	return v_cnode
 
 
@@ -498,7 +502,7 @@ func validate_errors(_save_data: HenSaveData) -> Array[Dictionary]:
 
 
 func check_errors(_save_data: HenSaveData) -> Array[Dictionary]:
-	# validates input, output, and flow connections for errors
+	# validate input, output, and flow connections for errors
 	var errors: Array[Dictionary] = []
 	var res
 

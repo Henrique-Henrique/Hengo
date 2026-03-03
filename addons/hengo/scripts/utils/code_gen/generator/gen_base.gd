@@ -4,22 +4,29 @@ const TEXT_BASE: String = """var _STATE_CONTROLLER = HengoStateController.new()
 
 const _EVENTS = {events}
 
+
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
 {states_dict}
 	})
 
+
 func _ready() -> void:
 	if not _STATE_CONTROLLER.current_state:
 		_STATE_CONTROLLER.change_state("{start_state_name}"{start_state_data})
 {_ready}
+
+
 func trigger_event(_event: StringName) -> void:
 	if _EVENTS.has(_event):
 		_STATE_CONTROLLER.change_state(_EVENTS[_event])
 
+
 func _process(delta: float) -> void:
 	_STATE_CONTROLLER.static_process(delta)
 {_process}
+
+
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 {_physics_process}
@@ -28,18 +35,20 @@ func _physics_process(delta: float) -> void:
 
 static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferences) -> String:
 	var code: String = ''
-	var start_state: HenVirtualCNode
+	var start_state_ref: HenSaveState
 	var events: Array[Dictionary] = []
 
-	# getting states
+	# get start state
+	for s: HenSaveState in _save_data.states:
+		if s.start:
+			start_state_ref = s
+			break
+
+	# get overrides
 	for _vc: HenVirtualCNode in _save_data.get_base_route().virtual_cnode_list:
 		var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(_vc)
 
 		match _vc.sub_type:
-			# getting start state cnode
-			HenVirtualCNode.SubType.STATE_START:
-				if not flow_connections.is_empty():
-					start_state = (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data)
 			HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
 					if not _refs.override_virtual_data.has(_vc.name):
@@ -80,9 +89,8 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 	var start_state_data: String = ''
 
 	# start state params generation
-	if start_state:
-		var res: HenSaveState = start_state.get_res(_save_data)
-		for virtual_vc: HenVirtualCNode in res.get_route(_save_data).virtual_sub_type_vc_list:
+	if start_state_ref:
+		for virtual_vc: HenVirtualCNode in start_state_ref.get_route(_save_data).virtual_sub_type_vc_list:
 			if virtual_vc.get_vc_name(_save_data) == 'enter':
 				var flow_tokens: Array = HenVirtualCNodeCode.get_output_token_list(_save_data, virtual_vc)
 				start_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
@@ -97,7 +105,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 				to_state_name = (ev.to_state_name as String).to_snake_case()
 			})
 			)) + '\n}' if not events.is_empty() else '{}',
-		start_state_name = (start_state as HenVirtualCNode).get_vc_name(_save_data).to_snake_case() if start_state else '',
+		start_state_name = start_state_ref.name.to_snake_case() if start_state_ref else '',
 		start_state_data = start_state_data,
 		_ready = ' \n'.join(ready_code),
 		_process = '\n'.join(process_code),
@@ -108,7 +116,9 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 	})
 
 
-# generates code for override virtuals that are not _ready, _process, or _physics_process
+# generate code for override virtuals that are not _ready, _process, or _physics_process
+
+
 static func _get_custom_virtual_code(_name: StringName, _item: Dictionary, _save_data: HenSaveData) -> String:
 	var params: Array = _item.get('params', [])
 	var params_str: String = ', '.join(params.map(func(p: Dictionary) -> String:

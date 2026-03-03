@@ -2,6 +2,7 @@
 class_name HenCam extends Node2D
 
 @export var grid: TextureRect
+@export var is_global_cam: bool = true
 
 var target_zoom: float = 1.
 
@@ -23,11 +24,13 @@ var initial: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self):
+	if HenUtils.disable_scene_with_owner(self ):
 		return
+	add_to_group(&'hen_cam')
 	update_settings()
 
-	can_scroll = false
+	if is_global_cam:
+		can_scroll = false
 	var parent: Control = get_parent()
 
 	parent.item_rect_changed.connect(_on_ui_size_changed)
@@ -49,8 +52,35 @@ func update_settings() -> void:
 	MAX_ZOOM = MAX_ZOOM * EditorInterface.get_editor_scale()
 
 
+func is_cam_active() -> bool:
+	var parent: Control = get_parent() as Control
+	
+	if is_global_cam:
+		var global: HenGlobal = Engine.get_singleton(&'Global') as HenGlobal
+		if not global or global.CAM != self:
+			return false
+			
+		# cede control if a local cam is hovered
+		for node in get_tree().get_nodes_in_group(&'hen_cam'):
+			if node != self and node is HenCam:
+				var local_cam: HenCam = node as HenCam
+				if not local_cam.is_global_cam and local_cam.is_cam_active():
+					return false
+					
+		return true
+	
+	if not is_inside_tree():
+		return false
+		
+	if parent and parent.is_visible_in_tree():
+		var rect: Rect2 = parent.get_global_rect()
+		return rect.has_point(parent.get_global_mouse_position())
+		
+	return false
+
+
 func _input(event: InputEvent) -> void:
-	if (Engine.get_singleton(&'Global') as HenGlobal).CAM == self:
+	if is_cam_active():
 		if event is InputEventMouseMotion:
 			check_vc_action_menu()
 
@@ -115,7 +145,7 @@ func _set_transform(_pos: Vector2) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if ignore_process or (Engine.get_singleton(&'Global') as HenGlobal).CAM == self:
+	if ignore_process or is_cam_active():
 		var factor: float = ZOOM_RATE * _delta
 		transform.x = lerp(transform.x, t_x, factor)
 		transform.y = lerp(transform.y, t_y, factor)
@@ -133,9 +163,14 @@ func _physics_process(_delta: float) -> void:
 
 
 # checks virtual cnodes visibility
+
+
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
+	if not is_global_cam:
+		return
+		
 	var rect: Rect2 = Rect2(
-		_pos / -_zoom, # position
+		_pos / -_zoom,
 		(get_parent() as Control).size / _zoom
 	)
 	var router: HenRouter = Engine.get_singleton(&'Router')
@@ -146,7 +181,7 @@ func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = tran
 
 func get_rect() -> Rect2:
 	return Rect2(
-		transform.origin / -transform.x.x, # position
+		transform.origin / -transform.x.x,
 		(get_parent() as Control).size / transform.x.x
 	)
 
@@ -167,6 +202,8 @@ func go_to_center(_pos: Vector2) -> void:
 
 
 # centers camera with optional zoom
+
+
 func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
 	var zoom_to_use: float = _target_zoom if _target_zoom > 0 else transform.x.x
 	zoom_to_use = clamp(zoom_to_use, MIN_ZOOM, MAX_ZOOM)
@@ -183,6 +220,9 @@ func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
 
 
 func check_vc_action_menu() -> void:
+	if not is_global_cam:
+		return
+		
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	if router.current_route and is_instance_valid(router.current_route.get('ref')):
@@ -196,6 +236,3 @@ func check_vc_action_menu() -> void:
 				continue
 
 			vc.showing_action_menu = mouse_inside
-
-			# if vc.showing_action_menu:
-			# 	HenVCActionButtons.get_singleton().show_action(vc.cnode_ref)

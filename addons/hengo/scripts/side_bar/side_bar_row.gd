@@ -12,6 +12,7 @@ var icon_rect: TextureRect
 var title_label: Label
 var add_button: Button
 var margin_container: MarginContainer
+var badge_label: Label
 var _is_primary: bool = false
 
 
@@ -47,6 +48,34 @@ func setup(_title: String, _meta: Variant, _icon: Texture2D = null, _icon_color:
 	add_button.add_theme_stylebox_override('pressed', add_style)
 	add_button.add_theme_stylebox_override('focus', add_style)
 	add_button.add_theme_stylebox_override('disabled', add_style)
+
+
+func set_start_badge(is_start: bool) -> void:
+	if not badge_label:
+		badge_label = Label.new()
+		badge_label.text = 'start'
+		
+		var editor_scale: float = EditorInterface.get_editor_scale() if Engine.is_editor_hint() else 1.0
+		badge_label.add_theme_color_override('font_color', Color('#63ff92'))
+		
+		var badge_style := StyleBoxFlat.new()
+		badge_style.bg_color = Color('#1e3d29')
+		badge_style.border_color = Color('#3b8855')
+		badge_style.set_border_width_all(int(max(1, roundi(1 * editor_scale))))
+		badge_style.corner_radius_top_left = int(max(4, roundi(4 * editor_scale)))
+		badge_style.corner_radius_top_right = int(max(4, roundi(4 * editor_scale)))
+		badge_style.corner_radius_bottom_left = int(max(4, roundi(4 * editor_scale)))
+		badge_style.corner_radius_bottom_right = int(max(4, roundi(4 * editor_scale)))
+		badge_style.content_margin_left = int(max(6, roundi(6 * editor_scale)))
+		badge_style.content_margin_right = int(max(6, roundi(6 * editor_scale)))
+		badge_style.content_margin_top = 0
+		badge_style.content_margin_bottom = 0
+		badge_label.add_theme_stylebox_override('normal', badge_style)
+		
+		get_node('Margin/Body').add_child(badge_label)
+		get_node('Margin/Body').move_child(badge_label, 2)
+	
+	badge_label.visible = is_start
 
 
 func set_selected(selected: bool) -> void:
@@ -90,7 +119,7 @@ func set_primary_emphasis(enable: bool = true) -> void:
 
 
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed:
 		var mb := event as InputEventMouseButton
 		if add_button.visible and add_button.get_global_rect().has_point(mb.global_position):
 			return

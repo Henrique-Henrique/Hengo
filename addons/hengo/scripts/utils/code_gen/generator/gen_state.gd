@@ -1,5 +1,6 @@
 class_name HenGeneratorState extends RefCounted
 
+
 static func get_states_start_code(_save_data: HenSaveData) -> String:
 	var code: String = ''
 	var idx: int = 0
@@ -20,7 +21,7 @@ static func get_states_code(_save_data: HenSaveData) -> String:
 static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array, _level: int = 0) -> String:
 	var code: String = ''
 	var idx: int = 0
-	# generating classes implementation
+	# generate classes implementation
 	for state: HenSaveState in _state_arr:
 		var virtual_tokens: Dictionary = HenGeneratorBase.parse_virtual_cnode(state.get_route(_save_data).virtual_sub_type_vc_list, _save_data)
 
@@ -42,8 +43,11 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 		if not sub_states.is_empty():
 			base += get_states_code_with_arr(_save_data, sub_states, _level + 1)
 			var sub_state_tokens: Array = []
+			var start_sub_state: HenSaveState = null
 
 			for sub_state: HenSaveState in sub_states:
+				if sub_state.start:
+					start_sub_state = sub_state
 				sub_state_tokens.append('add_sub_state("{name_key}", {name}.new(_p))'.format(({
 					name_key = sub_state.name.to_snake_case(),
 					name = sub_state.name.to_pascal_case()
@@ -53,6 +57,28 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 				tokens = sub_state_tokens,
 				params = [ {name = '_p'}]
 			})
+
+			if start_sub_state:
+				var sub_state_data: String = ''
+				for virtual_vc: HenVirtualCNode in start_sub_state.get_route(_save_data).virtual_sub_type_vc_list:
+					if virtual_vc.get_vc_name(_save_data) == 'enter':
+						var flow_tokens: Array = HenVirtualCNodeCode.get_output_token_list(_save_data, virtual_vc)
+						sub_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
+							return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type, false, x.get('category', ''), x.get('data', null))))
+						break
+				
+				var change_sub_command = '_ref._STATE_CONTROLLER.current_state.change_sub_state("{name}"{data})'.format({
+					name = start_sub_state.name.to_snake_case(),
+					data = sub_state_data
+				})
+
+				if not virtual_tokens.has('enter'):
+					virtual_tokens['enter'] = {
+						tokens = [change_sub_command],
+						params = []
+					}
+				else:
+					(virtual_tokens['enter'].tokens as Array).append(change_sub_command)
 		else:
 			if virtual_tokens.is_empty():
 				base += '\t'.repeat(_level + 1) + 'pass'
@@ -80,7 +106,7 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 				indent = '\t'.repeat(_level + 1),
 				super_call = '\t'.repeat(_level + 2) + 'super({params})\n'.format({
 					params = params_str
-				}) if virtual_name != 'enter' and _level < 1 else '',
+				}) if virtual_name != 'enter' else '',
 				params = params_str
 			})
 

@@ -1,5 +1,6 @@
 class_name HenVirtualCNodeCode extends RefCounted
 
+
 static func get_invalid_token() -> Dictionary:
 	return {
 		type = HenVirtualCNode.SubType.INVALID,
@@ -81,7 +82,7 @@ static func get_trace_value_token(_vc_id: int, _value_code: String) -> Dictionar
 
 
 static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: StringName) -> Dictionary:
-	# handles script macro token generation and argument injection
+	# handle script macro token generation and argument injection
 	var res: HenSaveMacro = _vc.get_res(_save_data)
 
 	if not res or not FileAccess.file_exists(res.script_path):
@@ -124,7 +125,7 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 	var available_inputs: Array = _vc.get_inputs(_save_data)
 
 	
-	# maps arguments to inputs or flow outputs based on availability
+	# map arguments to inputs or flow outputs based on availability
 	for arg_name: String in args:
 		var matched_input: HenVCInOutData = null
 		
@@ -140,7 +141,7 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 			code_body = _inject_code_into_body(code_body, arg_name, input_code)
 			continue
 		
-		# checks if arg matches any available flow output by ID
+		# check if arg matches any available flow output by id
 		var matched_flow_output: HenVCFlow = null
 		for flow_out: HenVCFlow in available_flow_outputs:
 			if flow_out.id == arg_name:
@@ -211,7 +212,7 @@ static func get_script_macro_output_token(_save_data: HenSaveData, _vc: HenVirtu
 	
 	var parsed: Dictionary = parse_script_function(script_content, func_name)
 
-	# if default function is not found, try to find by index
+	# find by index if default function is not found
 	if parsed.is_empty():
 		func_name = 'get_output_' + str(output_idx)
 		parsed = parse_script_function(script_content, func_name)
@@ -228,7 +229,7 @@ static func get_script_macro_output_token(_save_data: HenSaveData, _vc: HenVirtu
 	var args: Array = parsed.args
 	var available_inputs: Array = _vc.get_inputs(_save_data)
 	
-	# maps arguments to inputs based on availability
+	# map arguments to inputs based on availability
 	for arg_name: String in args:
 		var matched_input: HenVCInOutData = null
 		
@@ -270,7 +271,6 @@ static func process_script_macro_body(body: String, use_self: bool, macro_id: Va
 		var regex: RegEx = RegEx.new()
 		regex.compile('%([a-zA-Z0-9_]+)%')
 		
-		# replace all occurrences
 		for result: RegExMatch in regex.search_all(body):
 			var property: String = result.get_string(1)
 			body = body.replace(result.get_string(), (property + '_' + str(macro_id)).to_snake_case())
@@ -279,7 +279,7 @@ static func process_script_macro_body(body: String, use_self: bool, macro_id: Va
 
 
 static func parse_script_function(script: String, func_name: String) -> Dictionary:
-	# parses script text to extract args and body for a specific function
+	# parse script text to extract args and body for a specific function
 	var lines: PackedStringArray = script.split('\n')
 	var found: bool = false
 	var args: Array = []
@@ -355,7 +355,7 @@ static func parse_script_function(script: String, func_name: String) -> Dictiona
 
 
 static func _inject_code_into_body(body: String, placeholder: String, injection: String) -> String:
-	# replaces placeholder with injected code preserving indentation
+	# replace placeholder with injected code preserving indentation
 	var lines: PackedStringArray = body.split('\n')
 	var result: String = ''
 	
@@ -757,8 +757,10 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 
 			token.merge({
 				name = name,
-				use_self = true if _vc.sub_type == HenVirtualCNode.SubType.LOCAL_VAR else token.use_self
-			})
+				use_self = true if not global.USE_MACRO_REF else token.use_self
+			} if _vc.sub_type == HenVirtualCNode.SubType.LOCAL_VAR else {
+				name = name
+			}, true)
 		HenVirtualCNode.SubType.VAR_FROM:
 			var inputs: Array = _vc.get_inputs(_save_data)
 			
@@ -792,8 +794,11 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 			token.merge({
 				name = name,
 				value = get_input_token_list(_save_data, _vc)[0],
-				use_self = true if _vc.sub_type == HenVirtualCNode.SubType.SET_LOCAL_VAR else token.use_self
-			})
+				use_self = true if not global.USE_MACRO_REF else token.use_self
+			} if _vc.sub_type == HenVirtualCNode.SubType.SET_LOCAL_VAR else {
+				name = name,
+				value = get_input_token_list(_save_data, _vc)[0]
+			}, true)
 		HenVirtualCNode.SubType.VIRTUAL, HenVirtualCNode.SubType.FUNC_INPUT, HenVirtualCNode.SubType.OVERRIDE_VIRTUAL, HenVirtualCNode.SubType.SIGNAL_ENTER:
 			token.merge({
 				param = _vc.get_outputs(_save_data)[_id].name.to_snake_case(),

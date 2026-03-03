@@ -4,6 +4,18 @@ class_name HenSaveState extends HenSaveResTypeWithRoute
 @export var flow_outputs: Array[HenSaveParam]
 @export var transition_data: Array[HenSaveParam]
 @export var is_sub_state: bool
+@export var start: bool = false:
+	set(value):
+		if start == value: return
+		start = value
+		if start:
+			_set_other_states_start_false()
+		
+		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+		if signal_bus:
+			signal_bus.request_structural_update.emit()
+@export_multiline var description: String = ''
+
 
 static func create(_is_sub_state: bool = false) -> HenSaveState:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -132,8 +144,28 @@ func get_transition_cnode_data(_save_data_id: StringName, _from_another_script: 
 	}
 
 
-# hides the default resource section properties
+# hide the default resource section properties
+
+
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
 	if _property.name in [&'is_sub_state']:
 		_property.usage = PROPERTY_USAGE_STORAGE
+
+
+func _set_other_states_start_false() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.SAVE_DATA: return
+
+	if is_sub_state:
+		for state_id_key in global.SAVE_DATA.sub_states.keys():
+			var sub_states: Array = global.SAVE_DATA.sub_states.get(state_id_key)
+			if sub_states.has(self ):
+				for s: HenSaveState in sub_states:
+					if s != self and s.start:
+						s.start = false
+				break
+	else:
+		for s: HenSaveState in global.SAVE_DATA.states:
+			if s != self and s.start:
+				s.start = false

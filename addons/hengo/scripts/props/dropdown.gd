@@ -12,6 +12,7 @@ var input_ref: HenVCInOutData
 signal value_changed
 signal on_set_res_data
 
+
 func _ready() -> void:
 	button_down.connect(_on_pressed)
 
@@ -55,7 +56,7 @@ func _on_pressed() -> void:
 			
 			options = arr
 		'all_godot_classes':
-			options = (ClassDB.get_class_list() as Array).map(func(x: String): return {
+			options = (HenEnums.VARIANT_TYPES + ClassDB.get_class_list() as Array).map(func(x: String): return {
 				name = x
 			})
 		'hengo_states':
@@ -75,19 +76,6 @@ func _on_pressed() -> void:
 		'all_props':
 			var arr: Array = []
 
-			# local variables
-			# match router.current_route.type:
-			# 	router.ROUTE_TYPE.FUNC, router.ROUTE_TYPE.SIGNAL, router.ROUTE_TYPE.MACRO:
-			# 		if router.current_route.get_ref().get(&'local_vars') is Array:
-			# 			for var_data: HenVarData in (router.current_route.get_ref().get(&'local_vars') as Array):
-			# 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
-			# 					arr.append({
-			# 						name = var_data.name,
-			# 						category = 'class_props',
-			# 						ref = var_data
-			# 					})
-
-			# variables
 			for var_data: HenSaveVar in global.SAVE_DATA.variables:
 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 					arr.append({
@@ -96,7 +84,6 @@ func _on_pressed() -> void:
 						ref = var_data
 					})
 			
-			# properties
 			for prop: Dictionary in ClassDB.class_get_property_list(global.SAVE_DATA.identity.type):
 				var _type: StringName = input_ref.type
 				var prop_type: StringName = type_string(prop.type)
@@ -116,9 +103,6 @@ func _on_pressed() -> void:
 			})
 		'callable':
 			options = []
-			# options = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
-			# 	name = x.route.name
-			# })
 		'key_code':
 			var arr: Array = []
 			var key_list: Array = [
@@ -187,10 +171,6 @@ func _selected(_item: Dictionary) -> void:
 
 			input_ref.category = 'class_props'
 
-			# if _item.has('ref'):
-			# 	input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.IS_PROP)
-			# else:
-			# 	input_ref.remove_ref()
 			return
 		'get_prop':
 			emit_signal('value_changed', text, _item.type)
@@ -204,8 +184,6 @@ func _selected(_item: Dictionary) -> void:
 
 	value_changed.emit(text)
 
-# public
-#
 func set_font_size(_size: int) -> void:
 	add_theme_font_size_override('font_size', _size)
 

@@ -33,6 +33,8 @@ gdscript/warnings/unsafe_method_access=1
 
 [display]
 
+window/size/viewport_width=1728
+window/size/viewport_height=972
 window/size/always_on_top=true
 
 [editor_plugins]
