@@ -59,7 +59,7 @@ corner_radius_bottom_left = 12
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_right = 8.0
-bg_color = Color(0, 0, 0, 0.2901961)
+bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -95,9 +95,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(800, 2064)
-shader_parameter/offset = Vector2(146.05743, 572.0597)
-shader_parameter/zoom_factor = 1.0725291
+shader_parameter/screen_size = Vector2(2428, 1975)
+shader_parameter/offset = Vector2(916.8984, 87.88893)
+shader_parameter/zoom_factor = 1.4650834
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -415,7 +415,9 @@ icon = ExtResource("18_fdf88")
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 0
+split_offsets = PackedInt32Array(50000)
 drag_area_margin_begin = -1402
+split_offset = 50000
 
 [node name="Panel" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=674967786]
 custom_minimum_size = Vector2(800, 0)

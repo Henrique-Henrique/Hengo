@@ -56,6 +56,12 @@ func change_route(_route: HenRouteData) -> void:
 
 func _centralize_cam(_vc: HenVirtualCNode = null) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not current_route:
+		return
+
+	if current_route.virtual_cnode_list.is_empty():
+		return
+
 	var vc: HenVirtualCNode = _vc if _vc else current_route.virtual_cnode_list.get(0)
 
 	if not vc:

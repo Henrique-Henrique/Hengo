@@ -66,12 +66,16 @@ static func start_generate(_regenerate: bool = false) -> void:
 		msg += " (" + str(recompiled_count) + " dependents recompiled)"
 		
 	toast.notify.call_deferred(msg, HenToast.MessageType.SUCCESS)
+	
+	if Engine.is_editor_hint():
+		EditorInterface.get_resource_filesystem().scan()
+		
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	signal_bus.scripts_generation_finished.emit.call_deferred()
 
 
 static func _compile_script(_id: StringName) -> void:
-	var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('save.tres')
+	var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('save' + HenEnums.SAVE_EXTENSION)
 	if not FileAccess.file_exists(save_path):
 		push_error("Cannot compile script, save data not found: " + save_path)
 		return
@@ -83,7 +87,7 @@ static func _compile_script(_id: StringName) -> void:
 	
 	recalculate_dependencies(save_data)
 	
-	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity.tres')
+	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
 	ResourceSaver.save(save_data.identity, identity_path)
 	
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')

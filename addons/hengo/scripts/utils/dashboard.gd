@@ -51,7 +51,7 @@ func _on_open_script(meta: Dictionary) -> void:
 
 
 func _on_edit_properties_script(meta: Dictionary) -> void:
-	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name).path_join('identity.tres')
+	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name).path_join('identity' + HenEnums.SAVE_EXTENSION)
 	
 	if not FileAccess.file_exists(identity_path):
 		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to find identity file for: " + meta.base_name, HenToast.MessageType.ERROR)
@@ -133,12 +133,12 @@ func _load_scripts_thread() -> void:
 	var new_script_list: Array[Dictionary] = []
 	
 	for dir_name: StringName in DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH):
-		var identity_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('identity.tres')
+		var identity_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('identity' + HenEnums.SAVE_EXTENSION)
 
 		if not FileAccess.file_exists(identity_path):
 			continue
 		
-		var save_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('save.tres')
+		var save_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('save' + HenEnums.SAVE_EXTENSION)
 		
 		# check both identity and save file to get the latest edit time
 		var time: int = FileAccess.get_modified_time(identity_path)

@@ -43,7 +43,7 @@ func reset_to_load(_id: StringName, _headless: bool) -> void:
 
 func load_res(_res_id: StringName) -> HenSaveData:
 	var save_data: HenSaveData
-	var path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(_res_id).path_join('save.tres')
+	var path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(_res_id).path_join('save' + HenEnums.SAVE_EXTENSION)
 
 	if FileAccess.file_exists(path):
 		save_data = ResourceLoader.load(path)
@@ -114,4 +114,4 @@ func show_class_name() -> void:
 
 
 func get_data_path(_id: int) -> StringName:
-	return HenEnums.HENGO_SAVE_PATH.path_join(str(_id)).path_join('/save.tres')
+	return HenEnums.HENGO_SAVE_PATH.path_join(str(_id)).path_join('save' + HenEnums.SAVE_EXTENSION)

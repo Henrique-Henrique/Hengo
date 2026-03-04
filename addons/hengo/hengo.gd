@@ -22,10 +22,14 @@ func _enter_tree():
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
 	
-	# var ignore_path: String = HenEnums.HENGO_SAVE_PATH.path_join('.gdignore')
+	var ignore_path: String = HenEnums.HENGO_SAVE_PATH.path_join('.gdignore')
+	var dev_mode: bool = ProjectSettings.get_setting(HenSettings.DEVELOPMENT_MODE_PATH, false)
 
-	# if not FileAccess.file_exists(ignore_path):
-	# 	FileAccess.open(ignore_path, FileAccess.WRITE)
+	# handling .gdignore based on development setting
+	if dev_mode and FileAccess.file_exists(ignore_path):
+		DirAccess.remove_absolute(ignore_path)
+	elif not dev_mode and not FileAccess.file_exists(ignore_path):
+		FileAccess.open(ignore_path, FileAccess.WRITE)
 
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SCRIPTS_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)

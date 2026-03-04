@@ -4,6 +4,7 @@ class_name HenEnums extends Node
 const HENGO_PATH: StringName = 'res://hengo/'
 const HENGO_SAVE_PATH: StringName = 'res://hengo/saves/'
 const HENGO_SCRIPTS_PATH: StringName = 'res://hengo/scripts/'
+const SAVE_EXTENSION: String = '.res'
 
 
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'

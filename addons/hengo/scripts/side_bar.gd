@@ -539,11 +539,11 @@ func _get_file_entries_for_delete(meta: HenSaveResType, removed_items: Array[Dic
 			for item_info: Dictionary in removed_items:
 				var state_item: Variant = item_info.item
 				if state_item is HenSaveState and state_item.id == route_id:
-					append_entry.call(state_item, base_path + str(route_id) + '.tres')
+					append_entry.call(state_item, base_path + str(route_id) + HenEnums.SAVE_EXTENSION)
 					break
 	else:
 		if side_bar_type >= 0:
-			append_entry.call(meta, str(HenUtils.get_side_bar_item_path(save_data.identity.id, side_bar_type)) + str(meta.id) + '.tres')
+			append_entry.call(meta, str(HenUtils.get_side_bar_item_path(save_data.identity.id, side_bar_type)) + str(meta.id) + HenEnums.SAVE_EXTENSION)
 		if not meta.resource_path.is_empty():
 			append_entry.call(meta, meta.resource_path)
 

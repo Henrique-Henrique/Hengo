@@ -498,7 +498,7 @@ static func save_side_bar_item(_res: Resource, _save_data_id: StringName, _type:
 	if not DirAccess.dir_exists_absolute(path):
 		DirAccess.make_dir_absolute(path)
 	
-	_res.take_over_path(path + str(_res.get(&'id')) + '.tres')
+	_res.take_over_path(path + str(_res.get(&'id')) + HenEnums.SAVE_EXTENSION)
 	var result: int = ResourceSaver.save(_res)
 	return result == OK
 

@@ -40,8 +40,6 @@ func set_global_config() -> void:
 		_save_data.identity.id,
 	)
 
-	HenCreateScript.get_start_state(base_route)
-
 	_save_data.add_route(_save_data.identity.id, base_route)
 
 	global.SAVE_DATA = _save_data

@@ -63,7 +63,7 @@ func get_real_ast_size() -> void:
 func _map_project_data(_id: StringName) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 
-	var identity_path = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity.tres')
+	var identity_path = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
 	if FileAccess.file_exists(identity_path):
 		var res_identity: HenSaveDataIdentity = load(identity_path)
 

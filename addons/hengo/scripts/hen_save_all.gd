@@ -87,9 +87,9 @@ func _compile_task() -> void:
 
 	for idx: int in range(save_dirs.size()):
 		var save_id: String = save_dirs[idx]
-		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_dirs[idx]).path_join('save.tres')
+		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_dirs[idx]).path_join('save' + HenEnums.SAVE_EXTENSION)
 		var script_path: String = HenEnums.HENGO_SCRIPTS_PATH + save_id + '.gd'
-		var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_id).path_join('identity.tres')
+		var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
 		var exists: bool = FileAccess.file_exists(save_path)
 		var is_up_to_date: bool = false
 		if exists and _is_script_up_to_date(save_path, script_path):
@@ -262,6 +262,9 @@ func _on_finished() -> void:
 	var popup: HenCompileAllReportPopup = COMPILE_ALL_REPORT_POPUP.instantiate()
 	popup.report = _report
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, 'Compile All Saves')
+
+	if Engine.is_editor_hint():
+		EditorInterface.get_resource_filesystem().scan()
 
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 	if toast:
