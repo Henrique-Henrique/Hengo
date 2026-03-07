@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://llwhyl5uvbi7"]
+[gd_scene load_steps=7 format=3 uid="uid://llwhyl5uvbi7"]
 
 [ext_resource type="Script" uid="uid://cxgolpuk1ybcr" path="res://addons/hengo/scripts/utils/dashboard_item.gd" id="1_dashboard_item"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="2_4rqa0"]
-[ext_resource type="Texture2D" uid="uid://cifef66nwyf56" path="res://addons/hengo/assets/new_icons/pencil.svg" id="3_edit"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_juebo"]
-[ext_resource type="Texture2D" uid="uid://cfvp7blxgc4om" path="res://addons/hengo/assets/new_icons/trash-2.svg" id="4_delete"]
+[ext_resource type="Texture2D" uid="uid://cgy3hthvwsw50" path="res://addons/hengo/assets/new_icons/tags.svg" id="3_rename"]
+[ext_resource type="Texture2D" uid="uid://cifef66nwyf56" path="res://addons/hengo/assets/new_icons/pencil.svg" id="4_edit"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="5_juebo"]
+[ext_resource type="Texture2D" uid="uid://cfvp7blxgc4om" path="res://addons/hengo/assets/new_icons/trash-2.svg" id="6_delete"]
 
 [node name="DashboardItem" type="PanelContainer"]
 anchors_preset = 10
@@ -35,19 +36,19 @@ text = "Script Name"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.490196)
-theme_override_fonts/font = ExtResource("3_juebo")
+theme_override_fonts/font = ExtResource("5_juebo")
 text = "00-00-00 00:00"
 
-[node name="Edit" type="Button" parent="HBoxContainer"]
+[node name="Rename" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-tooltip_text = "Edit Script"
+tooltip_text = "Rename Script"
 mouse_default_cursor_shape = 2
-icon = ExtResource("3_edit")
+icon = ExtResource("3_rename")
 
 [node name="Delete" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 tooltip_text = "Delete Script"
 mouse_default_cursor_shape = 2
-icon = ExtResource("4_delete")
+icon = ExtResource("6_delete")

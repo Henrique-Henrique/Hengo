@@ -229,8 +229,9 @@ func _update_debug_highlight() -> void:
 		var node_id: String = node.id
 		var short_id: String = node_id.get_slice('.', node_id.get_slice_count('.') - 1)
 		var is_compound: bool = not node.children.is_empty()
-		
-		if _debug_active_state_name != &'' and short_id == String(_debug_active_state_name):
+
+		var short_id_snake: String = short_id.strip_edges().to_lower().replace(" ", "_")
+		if _debug_active_state_name != &'' and short_id_snake == String(_debug_active_state_name):
 			style.border_color = Color('#63ff92')
 			style.set_border_width_all(2)
 		else:

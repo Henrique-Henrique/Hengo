@@ -57,6 +57,7 @@ func create_script(_name: String, _class: StringName) -> Dictionary:
 		DirAccess.make_dir_absolute(id_path)
 
 	var identity: HenSaveDataIdentity = HenSaveDataIdentity.create(str(id), _class, _name)
+	identity.script_path = HenEnums.HENGO_SCRIPTS_PATH + _name + '.gd'
 	var res: HenSaveData = get_save_content(identity)
 
 	identity.take_over_path(id_path.path_join('identity' + HenEnums.SAVE_EXTENSION))

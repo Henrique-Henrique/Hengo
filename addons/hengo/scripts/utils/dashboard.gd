@@ -2,6 +2,7 @@
 class_name HenDashboard extends PanelContainer
 
 const ITEM_SCENE = preload('res://addons/hengo/scenes/utils/dashboard_item.tscn')
+const RENAME_POPUP_SCENE = preload('res://addons/hengo/scenes/utils/rename_script_popup.tscn')
 
 @onready var close_bt: Button = %CloseBt
 @onready var new_script_bt: Button = %NewScript
@@ -50,17 +51,21 @@ func _on_open_script(meta: Dictionary) -> void:
 		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.base_name, HenToast.MessageType.ERROR)
 
 
-func _on_edit_properties_script(meta: Dictionary) -> void:
+func _on_rename_script(meta: Dictionary) -> void:
 	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name).path_join('identity' + HenEnums.SAVE_EXTENSION)
-	
+
 	if not FileAccess.file_exists(identity_path):
 		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to find identity file for: " + meta.base_name, HenToast.MessageType.ERROR)
 		return
 
-	# TODO: inspector cant edit this
-	var res: Resource = ResourceLoader.load(identity_path, '', ResourceLoader.CACHE_MODE_REPLACE)
-	if res:
-		HenInspector.edit_resource(res)
+	var identity: HenSaveDataIdentity = ResourceLoader.load(identity_path, '', ResourceLoader.CACHE_MODE_REPLACE)
+	if not identity:
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load identity for: " + meta.base_name, HenToast.MessageType.ERROR)
+		return
+
+	var popup: HenRenameScriptPopup = RENAME_POPUP_SCENE.instantiate() as HenRenameScriptPopup
+	popup.setup(identity)
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, 'Renomear Script')
 
 
 func _on_delete_request(meta: Dictionary) -> void:
@@ -191,5 +196,5 @@ func update(_data: Array[Dictionary]) -> void:
 		script_list_node.add_child(item)
 		item.setup(script)
 		item.open_request.connect(_on_open_script)
-		item.edit_request.connect(_on_edit_properties_script)
+		item.rename_request.connect(_on_rename_script)
 		item.delete_request.connect(_on_delete_request)

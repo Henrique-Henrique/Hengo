@@ -324,7 +324,7 @@ func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
 		MOUSE_BUTTON_LEFT:
 			_change_route_from_meta(meta)
 		MOUSE_BUTTON_RIGHT:
-			if meta:
+			if meta and not meta is HenRouteData:
 				HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta))
 
 

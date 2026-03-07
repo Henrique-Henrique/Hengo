@@ -3,18 +3,18 @@ class_name HenDashboardItem
 extends PanelContainer
 
 signal open_request(meta: Dictionary)
-signal edit_request(meta: Dictionary)
+signal rename_request(meta: Dictionary)
 signal delete_request(meta: Dictionary)
 
 @onready var icon: TextureRect = $HBoxContainer/Icon
 @onready var name_label: Label = %Name
-@onready var edit_bt: Button = %Edit
+@onready var rename_bt: Button = %Rename
 @onready var delete_bt: Button = %Delete
 
 var meta: Dictionary
 
 func _ready() -> void:
-	edit_bt.pressed.connect(func(): edit_request.emit(meta))
+	rename_bt.pressed.connect(func(): rename_request.emit(meta))
 	delete_bt.pressed.connect(func(): delete_request.emit(meta))
 	
 	mouse_entered.connect(_on_hover)

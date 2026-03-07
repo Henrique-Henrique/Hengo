@@ -90,19 +90,26 @@ static func _compile_script(_id: StringName) -> void:
 	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
 	ResourceSaver.save(save_data.identity, identity_path)
 	
-	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	var map_deps: HenMapDependencies = Engine.get_singleton('MapDependencies')
 	map_deps.update_project_data(_id)
 		
 	var code_gen: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
 	var code: String = code_gen.get_code(save_data)
 	
-	if not DirAccess.dir_exists_absolute('res://hengo/scripts'):
-		DirAccess.make_dir_absolute('res://hengo/scripts')
-	
-	var script_path: String = HenEnums.HENGO_SCRIPTS_PATH + str(_id) + ".gd"
+	# Determine where to write the compiled script
+	var script_path: String
+	if save_data.identity and not save_data.identity.script_path.is_empty():
+		script_path = save_data.identity.script_path
+	else:
+		script_path = HenEnums.HENGO_SCRIPTS_PATH + str(_id) + ".gd"
+
+	var script_dir: String = script_path.get_base_dir()
+	if not DirAccess.dir_exists_absolute(script_dir):
+		DirAccess.make_dir_recursive_absolute(script_dir)
+
 	var file: FileAccess = FileAccess.open(script_path, FileAccess.WRITE)
 	if file:
-		print('Compiled: ', _id)
+		print('Compiled: ', _id, ' -> ', script_path)
 		file.store_string(code)
 		file.close()
 	else:

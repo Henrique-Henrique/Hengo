@@ -106,7 +106,20 @@ func _compile_task() -> void:
 	var force_compile_info: Dictionary = _collect_force_compile_ids(save_dirs, identity_paths, dirty_ids)
 	var force_compile: Dictionary = force_compile_info.get('force_compile', {})
 	var script_display_names: Dictionary = force_compile_info.get('display_names', {})
+	var identity_script_paths: Dictionary = force_compile_info.get('script_paths', {})
 	_fill_missing_display_names_from_saves(save_dirs, save_paths, script_display_names)
+
+	# override default script paths with custom paths from identity where available
+	for idx: int in range(save_dirs.size()):
+		var save_id: String = save_dirs[idx]
+		var custom_path: String = str(identity_script_paths.get(save_id, ''))
+		if not custom_path.is_empty():
+			script_paths[idx] = custom_path
+			# re-evaluate up-to-date with the real script path
+			if save_exists[idx]:
+				up_to_date[idx] = _is_script_up_to_date(save_paths[idx], custom_path)
+				if save_exists[idx] and not up_to_date[idx] and not dirty_ids.has(save_id):
+					dirty_ids.append(save_id)
 
 	# request threaded loads for saves that need compilation
 	var requested_paths: Array[String] = []
@@ -203,6 +216,9 @@ func _compile_task() -> void:
 			break
 
 		# write script directly
+		var script_dir: String = script_path.get_base_dir()
+		if not DirAccess.dir_exists_absolute(script_dir):
+			DirAccess.make_dir_recursive_absolute(script_dir)
 		var file: FileAccess = FileAccess.open(script_path, FileAccess.WRITE)
 		if not file:
 			item.status = 'failed'
@@ -335,6 +351,7 @@ func _collect_force_compile_ids(save_dirs: PackedStringArray, identity_paths: Ar
 	# request threaded loads for all existing identity files
 	var valid_indices: Array[int] = []
 	var script_display_names: Dictionary = {}
+	var identity_script_paths: Dictionary = {}
 	for idx: int in range(save_dirs.size()):
 		var save_id: String = str(save_dirs[idx])
 		script_display_names[save_id] = save_id
@@ -352,6 +369,10 @@ func _collect_force_compile_ids(save_dirs: PackedStringArray, identity_paths: Ar
 		var identity_name: String = str(identity.name)
 		if not identity_name.is_empty():
 			script_display_names[current_id] = identity_name
+
+		# store custom script path if set
+		if not identity.script_path.is_empty():
+			identity_script_paths[current_id] = identity.script_path
 
 		for dep in identity.deps:
 			var dep_id: String = str(dep)
@@ -381,7 +402,8 @@ func _collect_force_compile_ids(save_dirs: PackedStringArray, identity_paths: Ar
 
 	return {
 		force_compile = force_compile,
-		display_names = script_display_names
+		display_names = script_display_names,
+		script_paths = identity_script_paths
 	}
 
 
