@@ -67,7 +67,7 @@ static func get_trace_flow_token(_vc_id: int, _port: StringName) -> Dictionary:
 	return {
 		vc_id = _vc_id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
-		code = {value = "HengoDebugger.trace_flow(%s, &'%s')" % [_vc_id, _port]},
+		code = {value = "if get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')" % [_vc_id, _port]},
 		use_self = false
 	}
 
@@ -76,7 +76,7 @@ static func get_trace_value_token(_vc_id: int, _value_code: String) -> Dictionar
 	return {
 		vc_id = _vc_id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
-		code = {value = "HengoDebugger.trace_value(%s, %s)" % [_vc_id, _value_code]},
+		code = {value = "if get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_value(%s, %s)" % [_vc_id, _value_code]},
 		use_self = false
 	}
 
@@ -165,7 +165,7 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 
 			var debug_global: HenGlobal = Engine.get_singleton(&'Global')
 			if debug_global.SETTINGS.debug_compilation:
-				generated_flow_code = "HengoDebugger.trace_flow(%s, &'%s')\n%s" % [_vc.id, matched_flow_output.id, generated_flow_code]
+				generated_flow_code = "if get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')\n%s" % [_vc.id, matched_flow_output.id, generated_flow_code]
 			
 			code_body = _inject_code_into_body(code_body, arg_name, generated_flow_code)
 			continue

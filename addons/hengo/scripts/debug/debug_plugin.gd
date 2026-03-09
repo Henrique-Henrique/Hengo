@@ -4,6 +4,31 @@ extends EditorDebuggerPlugin
 const PREFIX = 'hengo'
 
 
+func _init() -> void:
+	EditorInterface.get_inspector().edited_object_changed.connect(_on_edited_object_changed)
+
+
+func _on_edited_object_changed() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.SAVE_DATA:
+		return
+		
+	var obj: Object = EditorInterface.get_inspector().get_edited_object()
+	if obj and obj.get_class() == 'EditorDebuggerRemoteObjects':
+		if obj.get('Constants/HENGO_DEBUG_SCRIPT_ID') == global.SAVE_DATA.identity.id:
+			var active_sessions: Array = get_sessions()
+			for session: EditorDebuggerSession in active_sessions:
+				if session.is_active():
+					var node_path = obj.get('Node/path')
+					session.send_message('hengo:set_target', [node_path])
+			return
+
+	var fallback_sessions: Array = get_sessions()
+	for session: EditorDebuggerSession in fallback_sessions:
+		if session.is_active():
+			session.send_message('hengo:set_target', [-1])
+
+
 func _has_capture(prefix: String) -> bool:
 	return prefix == PREFIX
 

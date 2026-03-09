@@ -1,11 +1,9 @@
 [gd_scene format=3 uid="uid://cecxlhrb3et2l"]
 
-[ext_resource type="Script" uid="uid://bkjgacuhvvmww" path="res://hengo/scripts/meu_node.gd" id="1_m0rpm"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://bnwrngsj2kwv" path="res://hengo/scripts/my_sprite.gd" id="2_0bhed"]
+[ext_resource type="Script" uid="uid://djrgwfuleeq50" path="res://hengo/scripts/ata.gd" id="2_0bhed"]
 
 [node name="Node" type="Node2D" unique_id=1576522687]
-script = ExtResource("1_m0rpm")
 
 [node name="Label" type="Label" parent="." unique_id=818398667]
 offset_right = 17.0
@@ -15,8 +13,14 @@ text = "test"
 metadata/_edit_use_anchors_ = true
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=143685121]
-position = Vector2(793, 471)
+position = Vector2(496, 315)
 texture = ExtResource("1_wvpun")
 script = ExtResource("2_0bhed")
+
+[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=214986247]
+position = Vector2(672, 310)
+texture = ExtResource("1_wvpun")
+script = ExtResource("2_0bhed")
+direita = true
 
 [node name="Node" type="Node" parent="." unique_id=2080766891]
