@@ -43,6 +43,10 @@ func is_compiling() -> bool:
 
 # internal task that runs on a separate thread
 func _compile_task() -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	if signal_bus:
+		signal_bus.is_batch_loading = true
+
 	var started_at: int = Time.get_ticks_msec()
 	var report: Dictionary = {
 		success = false,
@@ -68,6 +72,8 @@ func _compile_task() -> void:
 		report.aborted = true
 		report.elapsed_ms = Time.get_ticks_msec() - started_at
 		_report = report
+		if signal_bus:
+			signal_bus.is_batch_loading = false
 		return
 
 	var save_dirs: PackedStringArray = DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH)
@@ -268,6 +274,9 @@ func _compile_task() -> void:
 	report.success = not aborted
 	report.elapsed_ms = Time.get_ticks_msec() - started_at
 	_report = report
+
+	if signal_bus:
+		signal_bus.is_batch_loading = false
 
 
 # handles the cleanup and callback when the task finishes

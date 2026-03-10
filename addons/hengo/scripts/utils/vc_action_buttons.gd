@@ -14,7 +14,7 @@ var is_showing: bool = false
 
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self):
+	if HenUtils.disable_scene_with_owner(self ):
 		return
 
 	_instantiate_pool()
@@ -40,6 +40,9 @@ func _get_button_from_pool() -> HenConnectionActionButton:
 
 # checks mouse position against bounding boxes
 func _process(_delta: float) -> void:
+	if not Engine.has_singleton(&'Global'):
+		return
+		
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if not global or not global.CAM or not global.HENGO_ROOT or not global.HENGO_ROOT.visible:
 		return
@@ -79,6 +82,8 @@ func _process(_delta: float) -> void:
 
 # shows action buttons for all ports of the cnode
 func show_action(_cnode: HenCnode) -> void:
+	if not Engine.has_singleton(&'Global'):
+		return
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	# find the virtual cnode by id
@@ -242,4 +247,6 @@ func _find_vc_by_cnode_id(_id: StringName) -> HenVirtualCNode:
 
 
 static func get_singleton() -> HenVCActionButtons:
+	if not Engine.has_singleton(&'Global'):
+		return null
 	return (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%VCActionButtons') as HenVCActionButtons

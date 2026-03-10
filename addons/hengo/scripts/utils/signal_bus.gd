@@ -15,6 +15,9 @@ signal request_list_update
 
 signal request_structural_update
 
+# set to true during batch compilation to suppress thread-unsafe UI signals
+var is_batch_loading: bool = false
+
 signal add_virtual_cnode_to_route(_id: String, _vc: HenVirtualCNode)
 signal remove_virtual_cnode_from_route(_id: String, _vc: HenVirtualCNode)
 

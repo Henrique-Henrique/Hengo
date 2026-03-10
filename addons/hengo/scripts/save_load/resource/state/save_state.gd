@@ -12,7 +12,7 @@ class_name HenSaveState extends HenSaveResTypeWithRoute
 			_set_other_states_start_false()
 		
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-		if signal_bus:
+		if signal_bus and not signal_bus.is_batch_loading:
 			signal_bus.request_structural_update.emit()
 @export_multiline var description: String = ''
 
