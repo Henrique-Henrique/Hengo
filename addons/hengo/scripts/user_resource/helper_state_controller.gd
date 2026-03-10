@@ -1,12 +1,15 @@
-extends Resource
 class_name HengoStateController
 
-var parent: Node
+var parent
 var connections: Dictionary = {}
 var signal_params: Dictionary = {}
 
 var states: Dictionary = {}
 var current_state: HengoState
+
+
+func _init(_ref) -> void:
+	parent = _ref
 
 
 func set_states(_states: Dictionary) -> void:
@@ -25,7 +28,8 @@ func change_state(_state: String, ..._args) -> void:
 	current_state = state
 
 	if OS.is_debug_build() and EngineDebugger.is_active():
-		EngineDebugger.send_message('hengo:state', [_state])
+		if parent and parent.get_instance_id() == HengoDebugger.target_instance_id:
+			EngineDebugger.send_message('hengo:state', [_state])
 
 	if state.has_method(&'enter'):
 		state.callv(&'enter', _args)

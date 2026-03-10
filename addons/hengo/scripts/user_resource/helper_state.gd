@@ -1,4 +1,3 @@
-extends RefCounted
 class_name HengoState
 
 var _ref
@@ -38,7 +37,8 @@ func change_sub_state(_name: String, ..._args) -> void:
 	current_sub_state = state
 
 	if OS.is_debug_build() and EngineDebugger.is_active():
-		EngineDebugger.send_message('hengo:state', [_name])
+		if _ref and _ref.get_instance_id() == HengoDebugger.target_instance_id:
+			EngineDebugger.send_message('hengo:state', [_name])
 
 	if state.has_method(&'enter'):
 		state.callv(&'enter', _args)

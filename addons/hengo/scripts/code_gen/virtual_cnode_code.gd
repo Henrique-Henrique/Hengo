@@ -37,7 +37,7 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 
 					if flow and flow.get_to(_save_data):
 						if global.SETTINGS.debug_compilation:
-							token_list.append(get_trace_flow_token(int(global.MACRO_REF.id), _id))
+							token_list.append(get_trace_flow_token(global.MACRO_REF, _id))
 						stack.append({node = flow.get_to(_save_data), id = flow.to_id})
 			HenVirtualCNode.SubType.SCRIPT_MACRO:
 				token_list.append(get_script_macro_token(_save_data, vc, _id))
@@ -50,10 +50,10 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 					if not token.get('use_self', true):
 						var_name = "_ref." + var_name
 					if global.SETTINGS.debug_compilation:
-						token_list.append(get_trace_value_token(int(vc.id), var_name))
+						token_list.append(get_trace_value_token(vc, var_name))
 
 				if global.SETTINGS.debug_compilation:
-					token_list.append(get_trace_flow_token(int(vc.id), &"0"))
+					token_list.append(get_trace_flow_token(vc, &"0"))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
 
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
@@ -63,20 +63,22 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 	return _token_list
 
 
-static func get_trace_flow_token(_vc_id: int, _port: StringName) -> Dictionary:
+static func get_trace_flow_token(_vc: HenVirtualCNode, _port: StringName) -> Dictionary:
+	var prefix: String = "_ref." if _vc.route_type == HenRouter.ROUTE_TYPE.STATE else ""
 	return {
-		vc_id = _vc_id,
+		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
-		code = {value = "if get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')" % [_vc_id, _port]},
+		code = {value = "if %sget_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')" % [prefix, _vc.id, _port]},
 		use_self = false
 	}
 
 
-static func get_trace_value_token(_vc_id: int, _value_code: String) -> Dictionary:
+static func get_trace_value_token(_vc: HenVirtualCNode, _value_code: String) -> Dictionary:
+	var prefix: String = "_ref." if _vc.route_type == HenRouter.ROUTE_TYPE.STATE else ""
 	return {
-		vc_id = _vc_id,
+		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
-		code = {value = "if get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_value(%s, %s)" % [_vc_id, _value_code]},
+		code = {value = "if %sget_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_value(%s, %s)" % [prefix, _vc.id, _value_code]},
 		use_self = false
 	}
 
@@ -165,7 +167,8 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 
 			var debug_global: HenGlobal = Engine.get_singleton(&'Global')
 			if debug_global.SETTINGS.debug_compilation:
-				generated_flow_code = "if get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')\n%s" % [_vc.id, matched_flow_output.id, generated_flow_code]
+				var prefix: String = "_ref." if _vc.route_type == HenRouter.ROUTE_TYPE.STATE else ""
+				generated_flow_code = "if %sget_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')\n%s" % [prefix, _vc.id, matched_flow_output.id, generated_flow_code]
 			
 			code_body = _inject_code_into_body(code_body, arg_name, generated_flow_code)
 			continue
@@ -399,15 +402,15 @@ static func get_if_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack: 
 		match flow.from_id:
 			StringName('0'):
 				if global.SETTINGS.debug_compilation:
-					(code_generation.flows_refs[true_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
+					(code_generation.flows_refs[true_flow_id] as Array).append(get_trace_flow_token(_vc, &"0"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = true_flow_id})
 			StringName('1'):
 				if global.SETTINGS.debug_compilation:
-					(code_generation.flows_refs[false_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
+					(code_generation.flows_refs[false_flow_id] as Array).append(get_trace_flow_token(_vc, &"1"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = false_flow_id})
 			StringName('2'):
 				if global.SETTINGS.debug_compilation:
-					(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"2"))
+					(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(_vc, &"2"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
@@ -434,11 +437,11 @@ static func get_for_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _stack:
 		match flow.from_id:
 			StringName('0'):
 				if global.SETTINGS.debug_compilation:
-					(code_generation.flows_refs[body_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"0"))
+					(code_generation.flows_refs[body_flow_id] as Array).append(get_trace_flow_token(_vc, &"0"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = body_flow_id})
 			StringName('1'):
 				if global.SETTINGS.debug_compilation:
-					(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(int(_vc.id), &"1"))
+					(code_generation.flows_refs[then_flow_id] as Array).append(get_trace_flow_token(_vc, &"1"))
 				_stack.append({node = flow.get_to(_save_data), id = flow.to_id, flow_id = then_flow_id})
 
 	return {
@@ -488,7 +491,7 @@ static func get_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow
 		global.USE_MACRO_USE_SELF = true
 
 		if global.SETTINGS.debug_compilation:
-			flow_tokens.append(get_trace_flow_token(int(_vc.id), _flow_id))
+			flow_tokens.append(get_trace_flow_token(_vc, _flow_id))
 		
 		flow_tokens.append_array(get_flow_tokens(_save_data, input_flow_to, input_flow.to_id))
 		

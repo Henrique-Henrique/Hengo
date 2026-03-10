@@ -1,6 +1,6 @@
 class_name HenGeneratorBase extends RefCounted
 
-const TEXT_BASE: String = """var _STATE_CONTROLLER = HengoStateController.new()
+const TEXT_BASE: String = """var _STATE_CONTROLLER = HengoStateController.new(self)
 
 const _EVENTS = {events}
 
