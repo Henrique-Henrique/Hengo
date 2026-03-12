@@ -94,38 +94,52 @@ func _compile_task() -> void:
 	for idx: int in range(save_dirs.size()):
 		var save_id: String = save_dirs[idx]
 		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_dirs[idx]).path_join('save' + HenEnums.SAVE_EXTENSION)
-		var script_path: String = HenEnums.HENGO_SCRIPTS_PATH + save_id + '.gd'
 		var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
 		var exists: bool = FileAccess.file_exists(save_path)
-		var is_up_to_date: bool = false
-		if exists and _is_script_up_to_date(save_path, script_path):
-			is_up_to_date = true
 
 		save_paths.append(save_path)
-		script_paths.append(script_path)
 		identity_paths.append(identity_path)
 		save_exists.append(exists)
+
+	var identities_info: Dictionary = _collect_identities_info(save_dirs, identity_paths)
+	var dep_to_dependents: Dictionary = identities_info.get('dep_to_dependents', {})
+	var script_display_names: Dictionary = identities_info.get('display_names', {})
+	var identity_script_paths: Dictionary = identities_info.get('script_paths', {})
+
+	_fill_missing_display_names_from_saves(save_dirs, save_paths, script_display_names)
+
+	for idx: int in range(save_dirs.size()):
+		var save_id: String = save_dirs[idx]
+		var custom_path: String = str(identity_script_paths.get(save_id, ''))
+		var script_path: String = custom_path if not custom_path.is_empty() else HenEnums.HENGO_SCRIPTS_PATH + save_id + '.gd'
+		script_paths.append(script_path)
+
+		var exists: bool = save_exists[idx]
+		var is_up_to_date: bool = false
+		if exists and _is_script_up_to_date(save_paths[idx], script_path):
+			is_up_to_date = true
+
 		up_to_date.append(is_up_to_date)
 		if exists and not is_up_to_date:
 			dirty_ids.append(save_id)
 
-	var force_compile_info: Dictionary = _collect_force_compile_ids(save_dirs, identity_paths, dirty_ids)
-	var force_compile: Dictionary = force_compile_info.get('force_compile', {})
-	var script_display_names: Dictionary = force_compile_info.get('display_names', {})
-	var identity_script_paths: Dictionary = force_compile_info.get('script_paths', {})
-	_fill_missing_display_names_from_saves(save_dirs, save_paths, script_display_names)
+	var force_compile: Dictionary = {}
+	var queue: Array[String] = dirty_ids.duplicate()
 
-	# override default script paths with custom paths from identity where available
-	for idx: int in range(save_dirs.size()):
-		var save_id: String = save_dirs[idx]
-		var custom_path: String = str(identity_script_paths.get(save_id, ''))
-		if not custom_path.is_empty():
-			script_paths[idx] = custom_path
-			# re-evaluate up-to-date with the real script path
-			if save_exists[idx]:
-				up_to_date[idx] = _is_script_up_to_date(save_paths[idx], custom_path)
-				if save_exists[idx] and not up_to_date[idx] and not dirty_ids.has(save_id):
-					dirty_ids.append(save_id)
+	while not queue.is_empty():
+		var current_id: String = queue.pop_front()
+		if bool(force_compile.get(current_id, false)):
+			continue
+
+		force_compile[current_id] = true
+		if not dep_to_dependents.has(current_id):
+			continue
+
+		var dependents: Array = dep_to_dependents[current_id]
+		for dependent in dependents:
+			var dependent_id: String = str(dependent)
+			if not bool(force_compile.get(dependent_id, false)):
+				queue.append(dependent_id)
 
 	# request threaded loads for saves that need compilation
 	var requested_paths: Array[String] = []
@@ -356,7 +370,7 @@ func _is_script_up_to_date(save_path: String, script_path: String) -> bool:
 	return script_mtime >= save_mtime
 
 
-func _collect_force_compile_ids(save_dirs: PackedStringArray, identity_paths: Array[String], dirty_ids: Array[String]) -> Dictionary:
+func _collect_identities_info(save_dirs: PackedStringArray, identity_paths: Array[String]) -> Dictionary:
 	# request threaded loads for all existing identity files
 	var valid_indices: Array[int] = []
 	var script_display_names: Dictionary = {}
@@ -391,26 +405,8 @@ func _collect_force_compile_ids(save_dirs: PackedStringArray, identity_paths: Ar
 				dep_to_dependents[dep_id] = []
 			(dep_to_dependents[dep_id] as Array).append(str(save_dirs[idx]))
 
-	var force_compile: Dictionary = {}
-	var queue: Array[String] = dirty_ids.duplicate()
-
-	while not queue.is_empty():
-		var current_id: String = queue.pop_front()
-		if bool(force_compile.get(current_id, false)):
-			continue
-
-		force_compile[current_id] = true
-		if not dep_to_dependents.has(current_id):
-			continue
-
-		var dependents: Array = dep_to_dependents[current_id]
-		for dependent in dependents:
-			var dependent_id: String = str(dependent)
-			if not bool(force_compile.get(dependent_id, false)):
-				queue.append(dependent_id)
-
 	return {
-		force_compile = force_compile,
+		dep_to_dependents = dep_to_dependents,
 		display_names = script_display_names,
 		script_paths = identity_script_paths
 	}
