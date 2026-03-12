@@ -83,7 +83,7 @@ func _map_project_data(_id: StringName) -> void:
 		var dir: DirAccess = DirAccess.open(path)
 
 		for file: String in dir.get_files():
-			if file.get_extension() == 'tres':
+			if file.ends_with(HenEnums.SAVE_EXTENSION):
 				var res: Resource = load(path.path_join(file))
 				
 				# match type to append resource to the correct ast array
@@ -114,6 +114,7 @@ func get_code_search_list(_io_type: StringName = '', _type: StringName = '') -> 
 		show_category = true,
 		method_list = []
 	}
+
 
 	for v: ProjectAST in ast_list.values():
 		if v.identity:

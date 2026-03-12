@@ -125,6 +125,8 @@ func _compile_task() -> void:
 
 	var force_compile: Dictionary = {}
 	var queue: Array[String] = dirty_ids.duplicate()
+	var preloaded_saves: Dictionary = {}
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 
 	while not queue.is_empty():
 		var current_id: String = queue.pop_front()
@@ -138,7 +140,43 @@ func _compile_task() -> void:
 		var dependents: Array = dep_to_dependents[current_id]
 		for dependent in dependents:
 			var dependent_id: String = str(dependent)
-			if not bool(force_compile.get(dependent_id, false)):
+			if bool(force_compile.get(dependent_id, false)):
+				continue
+			
+			if not preloaded_saves.has(current_id):
+				var idx: int = Array(save_dirs).find(current_id)
+				if idx != -1 and save_exists[idx]:
+					var temp_save: HenSaveData = ResourceLoader.load_threaded_get(save_paths[idx])
+					if not temp_save:
+						temp_save = ResourceLoader.load(save_paths[idx])
+					if temp_save:
+						var temp_ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
+						temp_ast.identity = temp_save.identity
+						temp_ast.variables = temp_save.variables
+						temp_ast.functions = temp_save.functions
+						temp_ast.signals = temp_save.signals
+						temp_ast.macros = temp_save.macros
+						preloaded_saves[current_id] = temp_ast
+					
+			if not preloaded_saves.has(current_id):
+				# fallback to full recompilation if we can't build a temporary AST
+				queue.append(dependent_id)
+				continue
+
+			var dependent_ast: HenMapDependencies.ProjectAST = map_deps.ast_list.get(StringName(dependent_id))
+			if not dependent_ast or not dependent_ast.identity:
+				queue.append(dependent_id)
+				continue
+				
+			var detailed_deps: Dictionary = dependent_ast.identity.detailed_deps
+			if not detailed_deps.has(StringName(current_id)):
+				queue.append(dependent_id)
+				continue
+				
+			var deps: Array = detailed_deps[StringName(current_id)]
+			var changed_ast: HenMapDependencies.ProjectAST = preloaded_saves[current_id]
+			
+			if map_deps._has_dependency_changed(deps, changed_ast):
 				queue.append(dependent_id)
 
 	# request threaded loads for saves that need compilation
@@ -281,7 +319,6 @@ func _compile_task() -> void:
 				ResourceLoader.load_threaded_get(path)
 	else:
 		# update ast directly from memory, no disk I/O
-		var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 		for entry: Dictionary in compiled_saves:
 			map_deps.update_project_data_from_save(StringName(entry.id), entry.save_data)
 
