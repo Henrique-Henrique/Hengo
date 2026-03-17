@@ -283,6 +283,14 @@ static func is_type_relation_valid(_type: StringName, _to_type: StringName) -> b
 	return false
 
 
+static func get_variant_type_from_string(type_name: StringName) -> int:
+	for i in TYPE_MAX:
+		if type_string(i) == type_name:
+			return i
+	
+	return TYPE_NIL
+
+
 static func reposition_control_inside(_control: Control) -> void:
 	var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CNODE_UI.get_viewport_rect()
 

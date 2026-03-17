@@ -652,7 +652,8 @@ static func get_input_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: 
 		use_self = use_self,
 		prop_name = input.name,
 		category = input.category,
-		data = input.data
+		data = input.data,
+		value = input.value
 	}
 
 	if input.is_ref:
@@ -934,7 +935,15 @@ static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode
 	return _separator.join(codes)
 
 
-static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool, _category: String = '', _data: Variant = null) -> String:
+static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool, _category: String = '', _data: Variant = null, _default_value: Variant = null) -> String:
+	if _default_value != null:
+		var raw_val: String = var_to_str(_default_value)
+		# ensure single quotes for strings
+		if _type == 'String' or _type == 'NodePath' or _type == 'StringName':
+			if raw_val.begins_with('"') and raw_val.ends_with('"'):
+				return "'" + raw_val.substr(1, raw_val.length() - 2) + "'"
+		return raw_val
+
 	if _category == 'enum_list' and typeof(_data) == TYPE_ARRAY and (_data as Array).size() >= 2:
 		var enum_constants = ClassDB.class_get_enum_constants(_data[0], _data[1])
 		if not enum_constants.is_empty():
@@ -942,7 +951,7 @@ static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_
 
 	match _type:
 		'String', 'NodePath', 'StringName':
-			return '""'
+			return "''"
 		'int':
 			return '0'
 		'float':

@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://bs0bilogpm0ts" path="res://hengo/scripts/direita.gd" id="2_0bhed"]
 
 [node name="Node" type="Node2D" unique_id=1576522687]
 
@@ -15,12 +14,9 @@ metadata/_edit_use_anchors_ = true
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=143685121]
 position = Vector2(496, 315)
 texture = ExtResource("1_wvpun")
-script = ExtResource("2_0bhed")
 
 [node name="Sprite2D2" type="Sprite2D" parent="." unique_id=214986247]
 position = Vector2(672, 310)
 texture = ExtResource("1_wvpun")
-script = ExtResource("2_0bhed")
-direita = true
 
 [node name="Node" type="Node" parent="." unique_id=2080766891]

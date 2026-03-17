@@ -116,6 +116,8 @@ func edit(_res: Resource, _title: String = '', _actions: Array[Dictionary] = [])
 
 	_update_header()
 	_update_props()
+	
+	if not _res.property_list_changed.is_connected(_update_props): _res.property_list_changed.connect(_update_props)
 
 
 func _update_header() -> void:
@@ -238,7 +240,7 @@ func configure_editor(editor: Control, target_resource: Resource, prop: Dictiona
 		var dropdown: HenDropdown = editor as HenDropdown
 		if _is_dropdown_hint(prop.hint_string):
 			dropdown.type = prop.hint_string
-		elif is_save_param_resource(target_resource) and prop.name == 'type':
+		elif target_resource is HenSaveParam and prop.name == 'type':
 			dropdown.type = 'all_godot_classes'
 	
 	if prop.type == TYPE_BOOL:
@@ -249,7 +251,10 @@ func configure_editor(editor: Control, target_resource: Resource, prop: Dictiona
 		if editor.has_method('setup'):
 			editor.call('setup', target_resource, prop.name, value, prop.hint_string, p_depth, p_path)
 	else:
-		editor.set_default(str(value))
+		if prop.type == TYPE_STRING and str(value) == '<null>':
+			editor.set_default('')
+		else:
+			editor.set_default(str(value))
 
 	if connect_change_signal and editor.has_signal('value_changed'):
 		editor.value_changed.connect(func(new_val: Variant):
@@ -271,6 +276,10 @@ func _on_value_changed(prop_name: String, new_val: Variant, type: int) -> void:
 	# 	return
 
 	resource.set(prop_name, final_val)
+	
+	if prop_name == 'type' and (resource is HenSaveVar or resource is HenSaveParam):
+		_update_props()
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
 
 func undo_redo(_undo: bool) -> void:
@@ -288,7 +297,7 @@ func get_prop_scene(target_resource: Resource, prop: Dictionary) -> PackedScene:
 	var dropdown_prop = load('res://addons/hengo/scenes/props/dropdown.tscn')
 	if (prop.type == TYPE_STRING or prop.type == TYPE_STRING_NAME) and _is_dropdown_hint(prop.hint_string):
 		return dropdown_prop
-	if is_save_param_resource(target_resource) and prop.name == 'type':
+	if target_resource is HenSaveParam and prop.name == 'type':
 		return dropdown_prop
 	return PROPS.get(prop.type)
 
@@ -319,14 +328,6 @@ func normalize_value(target_resource: Resource, prop_name: String, new_val: Vari
 		final_val = StringName(new_val)
 
 	return final_val
-
-
-func is_save_param_resource(res: Resource) -> bool:
-	if res is HenSaveParam:
-		return true
-
-	var script: Script = res.get_script()
-	return script != null and script.resource_path == 'res://addons/hengo/scripts/save_load/resource/save_param.gd'
 
 
 func _instantiate_editor(prop_scene: PackedScene, prop: Dictionary) -> Control:

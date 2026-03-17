@@ -85,7 +85,10 @@ func _init() -> void:
 	if not io_hovered.is_connected(on_node_io_hovered): io_hovered.connect(on_node_io_hovered)
 	if not expression_saved.is_connected(on_expression_saved): expression_saved.connect(on_expression_saved)
 	if not method_picker_requested.is_connected(on_method_picker_requested): method_picker_requested.connect(on_method_picker_requested)
-
+	
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	if not signal_bus.request_structural_update.is_connected(update): signal_bus.request_structural_update.connect(update)
+	
 
 func show() -> void:
 	var cnode: HenCnode = HenPool.get_cnode_from_pool()
@@ -228,8 +231,6 @@ func request_flow_connector_connection(_id: StringName, _mouse_pos: Vector2) -> 
 
 
 func request_io_connection(_io_type: StringName, _id: StringName, _mouse_pos: Vector2, _type: StringName) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenCodeSearch.load(_mouse_pos, {
 		io_type = _io_type,
 		id = _id,

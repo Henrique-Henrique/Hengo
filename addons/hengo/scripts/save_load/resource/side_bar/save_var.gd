@@ -1,8 +1,14 @@
 @tool
 class_name HenSaveVar extends HenSaveResType
 
-@export_custom(PROPERTY_HINT_NONE, 'all_godot_classes') var type: StringName
+@export_custom(PROPERTY_HINT_NONE, 'all_godot_classes') var type: StringName:
+	set(v):
+		type = v
+		default_value = null
+		notify_property_list_changed()
 @export var is_export: bool
+
+var default_value: Variant = null
 
 static func create() -> HenSaveVar:
 	var v: HenSaveVar = HenSaveVar.new()
@@ -24,8 +30,23 @@ func get_data() -> Dictionary:
 		name = name,
 		type = type,
 		id = id,
-		export = is_export
+		export = is_export,
+		default_value = default_value
 	}
+
+
+func _get_property_list() -> Array[Dictionary]:
+	var list: Array[Dictionary] = []
+	var variant_type_int: int = HenUtils.get_variant_type_from_string(type)
+	
+	if variant_type_int != TYPE_NIL:
+		list.append({
+			name = 'default_value',
+			type = variant_type_int,
+			usage = PROPERTY_USAGE_DEFAULT
+		})
+	
+	return list
 
 
 func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:

@@ -271,6 +271,7 @@ func get_inputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
 				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if existing.name != data.get('name'): existing.name = data.get('name')
 				if existing.type != data.get('type'): existing.type = data.get('type')
+				if existing.value != data.get('default_value'): existing.value = data.get('default_value')
 			else:
 				create_io(true, data)
 		
@@ -294,6 +295,7 @@ func get_outputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
 				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if existing.name != str(data.get('name')): existing.name = str(data.get('name'))
 				if existing.type != str(data.get('type')): existing.type = str(data.get('type'))
+				if existing.value != data.get('default_value'): existing.value = data.get('default_value')
 			else:
 				create_io(false, data)
 		

@@ -230,7 +230,17 @@ func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, typ
 	history.create_action('Set ' + p_name)
 	history.add_do_property(item, p_name, final_val)
 	history.add_undo_property(item, p_name, item.get(p_name))
+	
+	if p_name == 'type' and item is HenSaveParam:
+		history.add_do_method((Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit)
+		history.add_undo_method((Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit)
+		history.add_do_method(_refresh_list)
+		history.add_undo_method(_refresh_list)
+	
 	history.commit_action()
+	
+	if p_name == 'type' and item is HenSaveParam:
+		_refresh_list()
 
 
 func _active_refresh(new_arr: Array) -> void:
