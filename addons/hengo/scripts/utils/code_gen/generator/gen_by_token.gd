@@ -251,6 +251,17 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 					indented_lines.append(base_indent + lines[i])
 			
 			return '\n'.join(indented_lines)
+		HenVirtualCNode.SubType.LITERAL:
+			var lit_type: StringName = _token.literal_type
+			var params_code: String = ', '.join((_token.params as Array).map(func(x: Dictionary) -> String:
+				return get_code_by_token(_save_data, x, _level, '', true)
+			))
+			
+			if (lit_type as String) in ['bool', 'int', 'float', 'String', 'StringName', 'NodePath']:
+				return params_code # primitive, returns just the value
+			else:
+				# complex type, returns e.g. Vector2(1, 2)
+				return indent + lit_type + '(' + params_code + ')'
 		HenVirtualCNode.SubType.EXPRESSION:
 			var new_exp: String = _token.exp
 			var reg: RegEx = RegEx.new()

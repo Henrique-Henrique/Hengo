@@ -702,8 +702,91 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_signals(_ast, _io_type, _type, arr)
 	HenAPIProcessors.process_macros(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
+	process_literals(_io_type, _type, arr)
 
 	return arr
+
+
+func process_literals(_io_type: StringName, _type: StringName, _arr: Array) -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var literal_category: Dictionary = {
+		name = 'Literals',
+		icon = 'code',
+		color = '#f59e0b',
+		method_list = []
+	}
+
+	var basic_types: Array[StringName] = [&'bool', &'float', &'int', &'String', &'Vector2i', &'Vector3i', &'Vector4', &'Vector2', &'Vector3', &'Color', &'Array']
+
+	for t: StringName in basic_types:
+		var connect_valid: bool = false
+		var connect_input_idx: int = -1
+		var connect_output_idx: int = -1
+		
+		if not _io_type:
+			connect_valid = true
+		elif _io_type == 'in':
+			if not _type or HenUtils.is_type_relation_valid(t, _type):
+				connect_output_idx = 0
+				connect_valid = true
+		elif _io_type == 'out':
+			if not _type or HenUtils.is_type_relation_valid(_type, t):
+				connect_input_idx = 0
+				connect_valid = true
+
+		if connect_valid:
+			var literal_inputs: Array = []
+			
+			match t:
+				&'Vector2', &'Vector2i':
+					literal_inputs = [
+						{name = 'x', type = 'float' if t == &'Vector2' else 'int'},
+						{name = 'y', type = 'float' if t == &'Vector2' else 'int'}
+					]
+				&'Vector3', &'Vector3i':
+					literal_inputs = [
+						{name = 'x', type = 'float' if t == &'Vector3' else 'int'},
+						{name = 'y', type = 'float' if t == &'Vector3' else 'int'},
+						{name = 'z', type = 'float' if t == &'Vector3' else 'int'}
+					]
+				&'Vector4':
+					literal_inputs = [
+						{name = 'x', type = 'float'},
+						{name = 'y', type = 'float'},
+						{name = 'z', type = 'float'},
+						{name = 'w', type = 'float'}
+					]
+				&'Color':
+					literal_inputs = [
+						{name = 'r', type = 'float'},
+						{name = 'g', type = 'float'},
+						{name = 'b', type = 'float'},
+						{name = 'a', type = 'float'}
+					]
+				_:
+					literal_inputs = [ {name = '', type = t, is_static = true}]
+
+			var dt: Dictionary = {
+				_class_name = 'Literal',
+				name = t,
+				data = {
+					name = t,
+					sub_type = HenVirtualCNode.SubType.LITERAL,
+					category = 'native',
+					inputs = literal_inputs,
+					outputs = [ {name = 'value', type = t}],
+					route = router.current_route if router else null
+				},
+				force_valid = true,
+				is_match = true
+			}
+			if connect_input_idx != -1: dt.input_io_idx = connect_input_idx
+			if connect_output_idx != -1: dt.output_io_idx = connect_output_idx
+			
+			(literal_category.method_list as Array).append(dt)
+
+	if not (literal_category.method_list as Array).is_empty():
+		_arr.append(literal_category)
 
 
 func get_native_props_as_data(_data: Dictionary, _io_type: StringName = '', _type: StringName = '', _native_props_cache: Dictionary = {}) -> Array:

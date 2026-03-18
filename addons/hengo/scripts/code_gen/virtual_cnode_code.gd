@@ -828,6 +828,11 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				singleton_class = _vc.name,
 				name = _vc.name_to_code
 			})
+		HenVirtualCNode.SubType.LITERAL:
+			token.merge({
+				literal_type = _vc.get_outputs(_save_data)[0].type,
+				params = get_input_token_list(_save_data, _vc)
+			})
 		HenVirtualCNode.SubType.EXPRESSION:
 			# check inputs
 			for input: HenVCInOutData in _vc.get_inputs(_save_data).slice(1):
