@@ -1,0 +1,15 @@
+[gd_resource type="StyleBoxFlat" format=3 uid="uid://dp6bf5q8urrgj"]
+
+[resource]
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.7647059, 0.87058824, 1, 0.078431375)
+border_color = Color(0.8, 0.8, 0.8, 0.13333334)
+border_blend = true
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+metadata/hengo_theme_scale = 2.0

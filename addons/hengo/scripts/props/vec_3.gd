@@ -28,8 +28,25 @@ func _on_z_changed(_value: float) -> void:
 
 # public
 #
+func set_font_size(_size: int) -> void:
+	get_node('x').set_font_size(_size)
+	get_node('y').set_font_size(_size)
+	get_node('z').set_font_size(_size)
+
+
 func set_default(_value: String) -> void:
-	my_value = str_to_var(_value)
+	var parsed = str_to_var(_value)
+	if parsed != null and parsed is Vector3:
+		my_value = parsed
+	elif _value.begins_with('(') and _value.ends_with(')'):
+		var inner = _value.substr(1, _value.length() - 2)
+		var parts = inner.split(',')
+		if parts.size() >= 3:
+			my_value = Vector3(
+				float(parts[0].strip_edges()),
+				float(parts[1].strip_edges()),
+				float(parts[2].strip_edges())
+			)
 
 	get_node('x').value = my_value.x
 	get_node('y').value = my_value.y

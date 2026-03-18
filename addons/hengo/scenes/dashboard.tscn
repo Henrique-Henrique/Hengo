@@ -1,28 +1,128 @@
-[gd_scene load_steps=5 format=3 uid="uid://dcyvdoty8t12u"]
+[gd_scene load_steps=9 format=3 uid="uid://c714cqsys4rsq"]
 
-[ext_resource type="Script" uid="uid://0ka1u8kwhsnd" path="res://addons/hengo/scripts/dashboard.gd" id="1_6bswm"]
-[ext_resource type="FontFile" uid="uid://c5wxb4esayen3" path="res://addons/hengo/assets/fonts/Inter-SemiBold.ttf" id="2_7b2fy"]
-[ext_resource type="StyleBox" uid="uid://wx7n022jvi5u" path="res://addons/hengo/resources/style_box/prop.tres" id="2_pywj1"]
+[ext_resource type="Script" uid="uid://cnfv5ehb7ikwh" path="res://addons/hengo/scripts/utils/dashboard.gd" id="1_jlpx7"]
+[ext_resource type="Texture2D" uid="uid://b253cikspw8hb" path="res://addons/hengo/assets/new_icons/file-plus.svg" id="1_v3ptv"]
+[ext_resource type="Texture2D" uid="uid://skoevmk0r0ms" path="res://addons/hengo/assets/new_icons/book-open-text.svg" id="2_jlpx7"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="2_l2d5o"]
+[ext_resource type="Texture2D" uid="uid://bljjoldgfwwoh" path="res://addons/hengo/assets/new_icons/lightbulb.svg" id="3_ksiib"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_q2m6f"]
+[ext_resource type="Texture2D" uid="uid://brdhk1mk4bmcr" path="res://addons/hengo/assets/new_icons/globe.svg" id="4_l2d5o"]
+[ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="4_tr5or"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_26g6y"]
-
-[node name="VBoxContainer" type="VBoxContainer"]
-offset_right = 300.0
-offset_bottom = 648.0
+[node name="Dashboard" type="PanelContainer"]
+self_modulate = Color(0.83033526, 0.83033514, 0.83033514, 1)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("1_6bswm")
+script = ExtResource("1_jlpx7")
 
-[node name="LineEdit" type="LineEdit" parent="."]
+[node name="MarginContainer" type="Control" parent="."]
 layout_mode = 2
-theme_override_styles/normal = ExtResource("2_pywj1")
-placeholder_text = "Search script"
 
-[node name="Tree" type="Tree" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_top = 0.05
+anchor_right = 0.8
+anchor_bottom = 0.95
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"HeaderLarge"
+theme_override_fonts/font = ExtResource("2_l2d5o")
+theme_override_font_sizes/font_size = 32
+text = "Hengo Script"
+
+[node name="CloseBt" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 605.4)
+layout_mode = 2
+icon = ExtResource("4_tr5or")
+flat = true
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "A Visual Script that compiles to GDScript"
+
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_q2m6f")
+text = "QUICK ACTIONS"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="NewScript" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "New Script"
+icon = ExtResource("1_v3ptv")
+
+[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+text = "Documentation (WIP)"
+icon = ExtResource("2_jlpx7")
+
+[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "USEFUL LINKS"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+disabled = true
+text = "How to use (WIP)"
+icon = ExtResource("3_ksiib")
+flat = true
+
+[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+disabled = true
+text = "Website (WIP)"
+icon = ExtResource("4_l2d5o")
+flat = true
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_fonts/font = ExtResource("2_7b2fy")
-theme_override_font_sizes/font_size = 16
-theme_override_styles/panel = SubResource("StyleBoxEmpty_26g6y")
-hide_root = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_q2m6f")
+text = "SCRIPT EXPLORER"
+
+[node name="Search" type="LineEdit" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Search files..."
+
+[node name="ScriptListScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ScriptList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/ScriptListScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8

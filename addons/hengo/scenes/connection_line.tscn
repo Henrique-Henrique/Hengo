@@ -1,7 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://bndv7bbtjlyrk"]
+[gd_scene format=3 uid="uid://bndv7bbtjlyrk"]
 
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="1_106ed"]
 [ext_resource type="Script" uid="uid://bv17u31wtvw0f" path="res://addons/hengo/scripts/connection_line.gd" id="1_ck24c"]
+[ext_resource type="Texture2D" uid="uid://8ws73jyducrn" path="res://addons/hengo/assets/new_icons/blend.svg" id="3_1adfp"]
+[ext_resource type="Texture2D" uid="uid://d2jgkndghae5" path="res://addons/hengo/assets/new_icons/calculator.svg" id="5_vgs1e"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="7_5a0w7"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pxqr5"]
 resource_local_to_scene = true
@@ -10,13 +13,84 @@ resource_local_to_scene = true
 resource_local_to_scene = true
 colors = PackedColorArray(0.4, 0.2, 0.6, 1, 0.4, 0.2, 0.6, 1)
 
-[node name="ConnectionLine" type="Line2D"]
-z_index = 1
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qk788"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.14509805, 0.14509805, 0.14509805, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.8, 0.8, 0.09803922)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_qk788"]
+
+[node name="ConnectionLine" type="Line2D" unique_id=879662780]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_pxqr5")
-width = 7.0
+width = 20.0
 default_color = Color(0.574328, 0.574328, 0.574328, 1)
 gradient = SubResource("Gradient_saaee")
 texture = ExtResource("1_106ed")
 texture_mode = 1
 script = ExtResource("1_ck24c")
+
+[node name="FromIcon" type="TextureRect" parent="." unique_id=1058470910]
+unique_name_in_owner = true
+offset_right = 36.0
+offset_bottom = 36.0
+texture = ExtResource("3_1adfp")
+
+[node name="Remote" type="PanelContainer" parent="." unique_id=112391920]
+unique_name_in_owner = true
+z_as_relative = false
+offset_right = 77.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_qk788")
+
+[node name="Control" type="Control" parent="Remote" unique_id=1239874848]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="RemoteLine" type="TextureRect" parent="Remote/Control" unique_id=1669416928]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_top = -4.0
+offset_right = 58.0
+offset_bottom = 4.0
+grow_vertical = 2
+size_flags_horizontal = 8
+texture = ExtResource("1_106ed")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Remote" unique_id=1893333266]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="VCIcon" type="TextureRect" parent="Remote/HBoxContainer" unique_id=1208875224]
+unique_name_in_owner = true
+layout_mode = 2
+texture = ExtResource("5_vgs1e")
+expand_mode = 2
+stretch_mode = 6
+
+[node name="VCName" type="Label" parent="Remote/HBoxContainer" unique_id=2040726842]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("7_5a0w7")
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxEmpty_qk788")
+text = "dsadsa"

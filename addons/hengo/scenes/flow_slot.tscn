@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://cfwcyd5bthd1j"]
 
 [ext_resource type="Texture2D" uid="uid://ffvsjb26gopq" path="res://addons/hengo/assets/images/flow_out.svg" id="1_ot4qg"]
-[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="1_wkeep"]
+[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/regular.ttf" id="1_wkeep"]
 [ext_resource type="Script" uid="uid://duabhyiaan0or" path="res://addons/hengo/scripts/flow_connector.gd" id="2_f5mdk"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ygsf2"]
@@ -28,7 +28,7 @@ alignment = 1
 modulate = Color(1, 1, 1, 0.666667)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_wkeep")
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "cnode"
 horizontal_alignment = 1
 
@@ -52,4 +52,3 @@ expand_mode = 1
 stretch_mode = 3
 flip_v = true
 script = ExtResource("2_f5mdk")
-type = "true_flow"

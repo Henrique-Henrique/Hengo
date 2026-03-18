@@ -1,13 +1,16 @@
 @tool
 class_name HenConnectionLine extends Line2D
 
+
+@onready var from_icon: TextureRect = $FromIcon
+@onready var remote_container: PanelContainer = $Remote
+
+
 # debug imports
 const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.gdshader')
 const normal_texture = preload('res://addons/hengo/assets/images/line.png')
 const debug_texture = preload('res://addons/hengo/assets/images/line_debug.svg')
 
-var from_cnode: HenCnode
-var to_cnode: HenCnode
 var input
 var output
 var conn_size: Vector2
@@ -15,7 +18,7 @@ var conn_size: Vector2
 var deleted: bool = false
 
 const POINT_WIDTH: int = 50
-const POINT_WIDTH_BEZIER: int = POINT_WIDTH / 2
+const POINT_WIDTH_BEZIER: int = int(POINT_WIDTH / 2.)
 
 # debug
 const DEBUG_TIMER_TIME = .15
@@ -23,44 +26,100 @@ const DEBUG_TRANS_TIME = 1.
 
 var debug_timer: Timer
 
+var from: WeakRef
+var to: WeakRef
+var from_idx: int
+var to_idx: int
+
+const TITLE_SIZE_Y = 43
+const CNODE_IO_SIZE = 40
+
 # pool
 var from_pool_visible: bool = true
 var to_pool_visible: bool = true
-var from_virtual_pos: Vector2
-var to_virtual_pos: Vector2
+var last_from_pos: Vector2
+var last_to_pos: Vector2
 
 
+# generates a smooth cubic bezier curve between two points
 func update_line() -> void:
-	var start_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(input.global_position) + conn_size if from_pool_visible and input else from_virtual_pos
-	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(output.global_position) + conn_size if to_pool_visible and output else to_virtual_pos
+	if not input or not output: return
 
-	var first_point: Vector2 = start_pos + Vector2(POINT_WIDTH, 0)
-	var last_point: Vector2 = end_pos - Vector2(POINT_WIDTH, 0)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global.CAM: return
 
-	if (first_point.distance_to(last_point) / POINT_WIDTH) >= .7:
-		var before_first_point: Vector2 = first_point - Vector2(POINT_WIDTH_BEZIER, 0)
-		var after_first_point: Vector2 = first_point + first_point.direction_to(last_point) * POINT_WIDTH_BEZIER
+	var from_ref: HenVirtualCNode = from.get_ref()
+	var to_ref: HenVirtualCNode = to.get_ref()
+	if not from_ref or not to_ref: return
 
-		var first_bezier: Curve2D = Curve2D.new()
-
-		first_bezier.add_point(before_first_point, Vector2.ZERO, first_point - before_first_point)
-		first_bezier.add_point(after_first_point, first_point - after_first_point, Vector2.ZERO)
-
-		# creating second bezier curve
-		var before_last_point: Vector2 = last_point + Vector2(POINT_WIDTH_BEZIER, 0)
-		var after_last_point: Vector2 = last_point - last_point.direction_to(after_first_point) * POINT_WIDTH_BEZIER * -1
-
-		var last_bezier: Curve2D = Curve2D.new()
-
-		last_bezier.add_point(after_last_point, Vector2.ZERO, last_point - after_last_point)
-		last_bezier.add_point(before_last_point, last_point - before_last_point, Vector2.ZERO)
-
-		points = [start_pos]
-		points += first_bezier.get_baked_points()
-		points += last_bezier.get_baked_points()
-		points += PackedVector2Array([end_pos])
+	var start_pos: Vector2
+	if from_pool_visible:
+		start_pos = global.CAM.get_relative_vec2(input.global_position) + input.size / 2
+		last_from_pos = start_pos
 	else:
-		points = [start_pos, end_pos]
+		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x - 30, from_ref.size.y / 2)
+
+	var end_pos: Vector2
+	if to_pool_visible:
+		end_pos = global.CAM.get_relative_vec2(output.global_position) + output.size / 2
+		last_to_pos = end_pos
+	else:
+		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(30, to_ref.size.y / 2)
+
+	# dynamic curvature based on distance
+	var distance: float = abs(end_pos.x - start_pos.x)
+	var tangent_offset: float = clamp(distance / 2.0, 20.0, 100.0)
+
+	var control_1: Vector2 = start_pos + Vector2(tangent_offset, 0)
+	var control_2: Vector2 = end_pos - Vector2(tangent_offset, 0)
+
+	var curve_points: PackedVector2Array = PackedVector2Array()
+	var steps: int = 20 # adjust for smoothness
+	
+	for i in range(steps + 1):
+		var t: float = i / float(steps)
+		var point: Vector2 = start_pos.bezier_interpolate(control_1, control_2, end_pos, t)
+		curve_points.append(point)
+
+	points = curve_points
+	
+	_update_visual_style(start_pos, end_pos)
+
+# handles the line visual state
+func _update_visual_style(start_pos: Vector2, end_pos: Vector2) -> void:
+	if (start_pos.y + 200 < end_pos.y) or (start_pos.x + 800 < end_pos.x):
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		from_icon.visible = true
+		remote_container.visible = true
+		
+		if from.get_ref():
+			var from_vc: HenVirtualCNode = from.get_ref()
+			var icon: TextureRect = remote_container.get_node('%VCIcon') as TextureRect
+
+			icon.texture = HenUtils.get_icon_for_subtype(from_vc.sub_type)
+			icon.modulate = HenUtils.get_color_for_subtype(from_vc.sub_type)
+
+			(remote_container.get_node('%VCName') as Label).text = from_vc.get_vc_name(global.SAVE_DATA)
+			remote_container.reset_size()
+			
+		if to.get_ref():
+			var to_vc: HenVirtualCNode = to.get_ref()
+			from_icon.texture = HenUtils.get_icon_for_subtype(to_vc.sub_type)
+			from_icon.modulate = HenUtils.get_color_for_subtype(to_vc.sub_type)
+
+		from_icon.position = start_pos + Vector2(50, -from_icon.size.y / 2.0)
+		remote_container.position = end_pos - Vector2(remote_container.size.x + 50, remote_container.size.y / 2.0)
+		
+		self_modulate = Color.TRANSPARENT
+	else:
+		from_icon.visible = false
+		remote_container.visible = false
+		self_modulate = Color.WHITE
+
+
+func set_color(_color: Color) -> void:
+	gradient.colors[0] = _color
+	gradient.colors[1] = _color
 
 
 func update_colors(_from_type: StringName, _to_type: StringName) -> void:

@@ -1,157 +1,114 @@
-[gd_scene load_steps=60 format=3 uid="uid://clbto1cshblaw"]
+[gd_scene format=3 uid="uid://clbto1cshblaw"]
 
-[ext_resource type="Theme" uid="uid://xxj7abqbehjg" path="res://addons/hengo/references/theme/main.tres" id="1_2muha"]
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
+[ext_resource type="Script" uid="uid://dndakpv2e001o" path="res://addons/hengo/scripts/utils/thread_helper.gd" id="3_1gx8m"]
 [ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
+[ext_resource type="Script" uid="uid://txuf5gnky3em" path="res://addons/hengo/scripts/save_load/map_dependencies.gd" id="6_0js6d"]
 [ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
 [ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
-[ext_resource type="Script" uid="uid://dcs554q3syj4q" path="res://addons/hengo/scripts/cnode_action_bar.gd" id="7_sagw0"]
-[ext_resource type="PackedScene" uid="uid://crsj5ij47bnr2" path="res://addons/hengo/scenes/utils/popup_container.tscn" id="8_uxy8l"]
+[ext_resource type="Script" uid="uid://bojhvy7et13dd" path="res://addons/hengo/scripts/save_load/loader.gd" id="7_rg66s"]
+[ext_resource type="Script" uid="uid://2jt18jo67ub8" path="res://addons/hengo/scripts/router.gd" id="8_nqb6j"]
 [ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
-[ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="9_si04b"]
-[ext_resource type="PackedScene" uid="uid://bd8qatv1gtb" path="res://addons/hengo/scenes/drop_down_menu.tscn" id="9_xwbyp"]
+[ext_resource type="Script" uid="uid://bwvlnkdrjks50" path="res://addons/hengo/scripts/code_generation.gd" id="9_dkwui"]
+[ext_resource type="Script" uid="uid://exlq4wcwactd" path="res://addons/hengo/scripts/enums.gd" id="10_q27l4"]
 [ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
 [ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
-[ext_resource type="Script" uid="uid://bigmtmv0jlplu" path="res://addons/hengo/scripts/utils/tabs.gd" id="11_lxtpw"]
-[ext_resource type="Texture2D" uid="uid://bt4sh4ymnseob" path="res://addons/hengo/assets/icons/menu/none.svg" id="11_rvhdl"]
-[ext_resource type="Texture2D" uid="uid://pkm3710o747j" path="res://addons/hengo/assets/icons/menu/compile.svg" id="11_xut0q"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="12_wtrk7"]
-[ext_resource type="Texture2D" uid="uid://lbtan5ojs7w8" path="res://addons/hengo/assets/images/grid_2.png" id="14_8emys"]
-[ext_resource type="Texture2D" uid="uid://b0m53nlcuqhhw" path="res://addons/hengo/assets/images/grid_1.png" id="15_w813u"]
-[ext_resource type="FontFile" uid="uid://cilbr27ige0dq" path="res://addons/hengo/assets/fonts/Inter-Light.ttf" id="16_xresw"]
+[ext_resource type="Script" uid="uid://itdfd6vqm34v" path="res://addons/hengo/scripts/global.gd" id="11_3680e"]
+[ext_resource type="Theme" uid="uid://b8wwxpbbrp2rl" path="res://addons/hengo/references/theme/hengo.tres" id="12_5c7h0"]
+[ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
+[ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
+[ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="17_lxtpw"]
+[ext_resource type="Texture2D" uid="uid://byhp341nd8v2j" path="res://addons/hengo/assets/new_icons/cog.svg" id="18_fdf88"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
 [ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
-[ext_resource type="FontFile" uid="uid://dr3uwsfctm3mb" path="res://addons/hengo/assets/fonts/Inter-Regular.ttf" id="20_y63ss"]
+[ext_resource type="Texture2D" uid="uid://c6p6p77i7bfc4" path="res://addons/hengo/assets/icons/settings.svg" id="21_5c7h0"]
+[ext_resource type="Texture2D" uid="uid://fnc82jlho3ft" path="res://addons/hengo/assets/icons/menu/text.svg" id="22_33cyo"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
-[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/Inter-Bold.ttf" id="23_tlngq"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
-[ext_resource type="Texture2D" uid="uid://k4vqsiuhja06" path="res://addons/hengo/assets/icons/cnode/enum.svg" id="24_hg3xi"]
+[ext_resource type="PackedScene" uid="uid://bsdw3ppkktst5" path="res://addons/hengo/scenes/machine_graph.tscn" id="27_dkwui"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
-[ext_resource type="StyleBox" uid="uid://b0ss25v1amkw5" path="res://addons/hengo/resources/style_box/cnode.tres" id="33_n637n"]
-[ext_resource type="Script" uid="uid://dyq7utko10qha" path="res://addons/hengo/scripts/docs_tool_tip.gd" id="36_alymh"]
-[ext_resource type="StyleBox" uid="uid://dgycmph30efbx" path="res://addons/hengo/resources/style_box/event.tres" id="36_dyro1"]
+[ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
+[ext_resource type="Texture2D" uid="uid://c6f7xyoyth505" path="res://addons/hengo/assets/new_icons/user-round-cog.svg" id="32_h1p8r"]
+[ext_resource type="PackedScene" uid="uid://c2qul21icd6bk" path="res://addons/hengo/scenes/right_side_bar.tscn" id="37_hog2e"]
+[ext_resource type="Texture2D" uid="uid://cdltixrky1fo7" path="res://addons/hengo/assets/new_icons/info.svg" id="38_onj4m"]
+[ext_resource type="Texture2D" uid="uid://upmmxrxll8y4" path="res://addons/hengo/assets/new_icons/mouse-pointer-click.svg" id="39_174hx"]
+[ext_resource type="Texture2D" uid="uid://e6883ccr0kd4" path="res://addons/hengo/assets/new_icons/circle-check.svg" id="39_vlu6e"]
+[ext_resource type="Texture2D" uid="uid://d1gvhd43e01be" path="res://addons/hengo/assets/new_icons/layout-dashboard.svg" id="40_174hx"]
+[ext_resource type="Texture2D" uid="uid://cih44fa46xubd" path="res://addons/hengo/assets/new_icons/shield-alert.svg" id="40_aqok7"]
+[ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
+[ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
+[ext_resource type="Script" uid="uid://yk1vflpkmh60" path="res://addons/hengo/scripts/general_popup.gd" id="48_popup"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.109804, 0.109804, 0.109804, 1)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
-shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(1904, 667)
-shader_parameter/offset = Vector2(774.351, 136.988)
-shader_parameter/zoom_factor = 0.849982
-shader_parameter/alpha = 0.2
-shader_parameter/text = ExtResource("14_8emys")
-shader_parameter/text_size = 200.0
-
-[sub_resource type="Gradient" id="Gradient_rg8iy"]
-colors = PackedColorArray(0.352941, 0.733333, 0.937255, 1, 1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
-bg_color = Color(1, 1, 1, 0.0862745)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bcrex"]
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ji2ve"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8emys"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_w813u"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hg3xi"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w813u"]
-content_margin_left = 8.0
-content_margin_top = 8.0
-content_margin_right = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.1, 0.1, 0.1, 0.890196)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(1, 1, 1, 0.152941)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+bg_color = Color(0.050000183, 0.049998, 0.068913735, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.290196)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rluxx"]
-bg_color = Color(0.219501, 0.219501, 0.219501, 0.6)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_i5te2"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eipqu"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tk0ia"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ny40n"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_74kfo"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5yt1h"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.230315, 0.230315, 0.230315, 0.458824)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1gx8m"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xresw"]
-bg_color = Color(0.123256, 0.126406, 0.129557, 1)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5c7h0"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x5h56"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4745098, 0.4745098, 0.4745098, 0.44313726)
+border_blend = true
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xresw"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_onj4m"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vu20g"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vlu6e"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r5155"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h1p8r"]
+content_margin_left = 8.0
+content_margin_top = 0.0
+content_margin_right = 8.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 0.16862746)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mlcja"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0, 0, 0, 0.176471)
-border_width_bottom = 2
-border_color = Color(1, 1, 1, 0.054902)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onj4m"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fc62w"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
+shader = ExtResource("9_5sxro")
+shader_parameter/screen_size = Vector2(2428, 1975)
+shader_parameter/offset = Vector2(916.8984, 87.88893)
+shader_parameter/zoom_factor = 1.4650834
+shader_parameter/alpha = 0.2
+shader_parameter/text = ExtResource("17_lxtpw")
+shader_parameter/text_size = 400.0
 
-[node name="HengoRoot" type="Control"]
+[sub_resource type="Gradient" id="Gradient_rg8iy"]
+colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
+bg_color = Color(1, 1, 1, 0.0862745)
+
+[node name="HengoRoot" type="Control" unique_id=706706338]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -161,19 +118,88 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
-theme = ExtResource("1_2muha")
 script = ExtResource("2_velgh")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="AutoLoads" type="Node" parent="." unique_id=327266070]
+unique_name_in_owner = true
+
+[node name="ThreadHelper" type="Node" parent="AutoLoads" unique_id=798517556]
+unique_name_in_owner = true
+script = ExtResource("3_1gx8m")
+
+[node name="MapDependencies" type="Node" parent="AutoLoads" unique_id=1174672169]
+unique_name_in_owner = true
+script = ExtResource("6_0js6d")
+metadata/_custom_type_script = "uid://txuf5gnky3em"
+
+[node name="Loader" type="Node" parent="AutoLoads" unique_id=809164026]
+unique_name_in_owner = true
+script = ExtResource("7_rg66s")
+metadata/_custom_type_script = "uid://bojhvy7et13dd"
+
+[node name="Router" type="Node" parent="AutoLoads" unique_id=1440772332]
+unique_name_in_owner = true
+script = ExtResource("8_nqb6j")
+
+[node name="CodeGeneration" type="Node" parent="AutoLoads" unique_id=1979949874]
+unique_name_in_owner = true
+script = ExtResource("9_dkwui")
+metadata/_custom_type_script = "uid://bwvlnkdrjks50"
+
+[node name="Enums" type="Node" parent="AutoLoads" unique_id=799741258]
+unique_name_in_owner = true
+script = ExtResource("10_q27l4")
+
+[node name="Global" type="Node" parent="AutoLoads" unique_id=1661148837]
+unique_name_in_owner = true
+script = ExtResource("11_3680e")
+
+[node name="SignalBus" type="Node" parent="AutoLoads" unique_id=1061698614]
+unique_name_in_owner = true
+script = ExtResource("27_ji2ve")
+
+[node name="API" type="Node" parent="AutoLoads" unique_id=817541594]
+unique_name_in_owner = true
+script = ExtResource("13_5c7h0")
+
+[node name="GeneralPopup" type="Node" parent="AutoLoads" unique_id=324736783]
+unique_name_in_owner = true
+script = ExtResource("48_popup")
+
+[node name="Content" type="CanvasLayer" parent="." unique_id=1559135038]
+unique_name_in_owner = true
+
+[node name="UIBase" type="Control" parent="Content" unique_id=330977857]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("12_5c7h0")
+
+[node name="Panel" type="Panel" parent="Content/UIBase" unique_id=1116617169]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 0
 
-[node name="CNodeUI" type="Panel" parent="VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Content/UIBase/Panel" unique_id=276706326]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="CNodeUI" type="Panel" parent="Content/UIBase/Panel/MarginContainer" unique_id=1262400160]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 2
@@ -181,11 +207,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
 
-[node name="Grid" type="TextureRect" parent="VBoxContainer/CNodeUI"]
-process_mode = 4
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_r8ipe")
+[node name="HSplitContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI" unique_id=1223978220]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -193,251 +215,62 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("15_w813u")
+theme_override_constants/separation = 0
+split_offsets = PackedInt32Array(-5000)
+split_offset = -5000
 
-[node name="Cam" type="Node2D" parent="VBoxContainer/CNodeUI" node_paths=PackedStringArray("grid")]
-script = ExtResource("3_84akk")
-grid = NodePath("../Grid")
-
-[node name="RefPoint" type="Marker2D" parent="VBoxContainer/CNodeUI/Cam"]
-visible = false
-position = Vector2(289, 313)
-
-[node name="CommentContainer" type="Control" parent="VBoxContainer/CNodeUI/Cam"]
+[node name="SideBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer" unique_id=116167880]
 unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-theme = ExtResource("1_2muha")
-metadata/_edit_use_anchors_ = true
-
-[node name="CnodeContainer" type="Control" parent="VBoxContainer/CNodeUI/Cam"]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-theme = ExtResource("1_2muha")
-metadata/_edit_use_anchors_ = true
-
-[node name="ConnectionGuide" type="Line2D" parent="VBoxContainer/CNodeUI/Cam"]
-unique_name_in_owner = true
-visible = false
-z_index = 2
-width = 6.0
-gradient = SubResource("Gradient_rg8iy")
-texture = ExtResource("7_6jref")
-texture_mode = 1
-script = ExtResource("7_gj1gq")
-
-[node name="Lines" type="Node2D" parent="VBoxContainer/CNodeUI/Cam"]
-
-[node name="SelectionRect" type="ReferenceRect" parent="VBoxContainer/CNodeUI/Cam"]
-process_mode = 4
-visible = false
-offset_left = 153.0
-offset_top = 148.0
-offset_right = 193.0
-offset_bottom = 188.0
-mouse_filter = 2
-border_color = Color(0.749928, 0.915784, 0.889306, 1)
-border_width = 3.0
-
-[node name="Panel" type="Panel" parent="VBoxContainer/CNodeUI/Cam/SelectionRect"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
-
-[node name="ref" type="Sprite2D" parent="VBoxContainer/CNodeUI/Cam"]
-visible = false
-modulate = Color(0.270724, 0.690067, 0.0733794, 1)
-scale = Vector2(0.21, 0.21)
-texture = ExtResource("9_si04b")
-
-[node name="ref2" type="Sprite2D" parent="VBoxContainer/CNodeUI/Cam"]
-visible = false
-modulate = Color(0.270724, 0.690067, 0.0733794, 1)
-position = Vector2(0, 3000)
-scale = Vector2(0.21, 0.21)
-texture = ExtResource("9_si04b")
-
-[node name="VCActionButtons" parent="VBoxContainer/CNodeUI/Cam" instance=ExtResource("20_w813u")]
-unique_name_in_owner = true
-visible = false
-
-[node name="Center2" type="Marker2D" parent="VBoxContainer/CNodeUI"]
-visible = false
-position = Vector2(-580, 0)
-
-[node name="CNodeStatLabel" type="Label" parent="VBoxContainer/CNodeUI"]
-unique_name_in_owner = true
-process_mode = 4
-modulate = Color(1, 1, 1, 0.658824)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -40.0
-offset_top = -20.0
-grow_horizontal = 0
-grow_vertical = 0
-theme_override_styles/normal = SubResource("StyleBoxEmpty_bcrex")
-horizontal_alignment = 2
-
-[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/CNodeUI"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 4.0
-mouse_filter = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 32.0
-grow_horizontal = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
-layout_mode = 2
-
-[node name="Tabs" type="TabBar" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-tab_alignment = 2
-script = ExtResource("11_lxtpw")
-
-[node name="ScriptInfoMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/HSplitContainer/Control/VBoxContainer"]
-unique_name_in_owner = true
-process_mode = 4
-layout_mode = 2
-mouse_filter = 2
-theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_fonts/italics_font = ExtResource("16_xresw")
-theme_override_fonts/bold_font = ExtResource("23_tlngq")
-theme_override_font_sizes/normal_font_size = 16
-theme_override_styles/fill = SubResource("StyleBoxEmpty_ji2ve")
-theme_override_styles/background = SubResource("StyleBoxEmpty_8emys")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_w813u")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_hg3xi")
-bbcode_enabled = true
-fit_content = true
-autowrap_mode = 0
-shortcut_keys_enabled = false
-horizontal_alignment = 2
-justification_flags = 0
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
-
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/CNodeUI/HSplitContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 0
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
 
-[node name="Control" type="Control" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
-layout_mode = 2
-size_flags_horizontal = 0
-
-[node name="SidePanel" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer"]
+[node name="SidePanel" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin" unique_id=1340978270]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_w813u")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel" unique_id=251941409]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 18
 
-[node name="MenuBar" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="MenuBar" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=2140933203]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar" node_paths=PackedStringArray("dashboard")]
+[node name="CNodeActionBar" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar" unique_id=935502521]
 layout_mode = 2
 alignment = 2
-script = ExtResource("7_sagw0")
-dashboard = NodePath("DashBoard")
 
-[node name="DashBoard" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
-layout_mode = 2
-tooltip_text = "Dashboard"
-icon = ExtResource("11_rvhdl")
-flat = true
-
-[node name="ClassName" type="Label" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
+[node name="CompileContainer" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar/CNodeActionBar" unique_id=1799733899]
 unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
-
-[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-mouse_filter = 1
-theme_override_styles/panel = SubResource("StyleBoxFlat_rluxx")
-
-[node name="CompileContainer" type="HBoxContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer"]
-unique_name_in_owner = true
-layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="Compile" type="Button" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("23_tlngq")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_i5te2")
-theme_override_styles/disabled = SubResource("StyleBoxEmpty_eipqu")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_tk0ia")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_ny40n")
-text = "Compile"
-
-[node name="LoadIcon" type="TextureRect" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/MenuBar/CNodeActionBar/PanelContainer/CompileContainer"]
-layout_mode = 2
-texture = ExtResource("11_xut0q")
-expand_mode = 2
-stretch_mode = 3
-
-[node name="TabContainer" type="TabContainer" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer"]
+[node name="TabContainer" type="TabContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=908628429]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxEmpty_74kfo")
-theme_override_styles/tab_selected = SubResource("StyleBoxFlat_5yt1h")
+theme_override_constants/tab_separation = 12
 current_tab = 0
+tab_0/title = "Props"
+tab_0/icon = ExtResource("21_5c7h0")
+tab_1/title = "Code Preview"
+tab_1/icon = ExtResource("22_33cyo")
 script = ExtResource("18_hg3xi")
 
-[node name="SideBar" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("22_x5h56")]
+[node name="SideBar" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=1587614674 instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 metadata/_tab_name = "Props"
 
-[node name="CodePreview" parent="VBoxContainer/CNodeUI/HSplitContainer/MarginContainer/SidePanel/VBoxContainer/TabContainer" instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=48314858 instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 0)
+custom_minimum_size = Vector2(1000, 0)
 layout_mode = 2
 theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
@@ -454,11 +287,157 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
-[node name="ScriptMsgContainer" type="PanelContainer" parent="VBoxContainer/CNodeUI"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer" unique_id=1462542696]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="ActionBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2" unique_id=191747223]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin" unique_id=1549042612]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_5c7h0")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer" unique_id=876575320]
+layout_mode = 2
+
+[node name="CloseBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1259709975]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("30_hog2e")
+flat = true
+
+[node name="ClassName" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1357072692]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
+
+[node name="Config" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=712136240]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("32_h1p8r")
+
+[node name="Label" type="Label" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1867830194]
+layout_mode = 2
+text = "Base > Test"
+
+[node name="ActionsBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1964371426]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Actions"
+icon = ExtResource("39_174hx")
+
+[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1642556444]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
+
+[node name="TerminalBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=26054358]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
+flat = true
+
+[node name="TerminalInfo" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=742267508]
 unique_name_in_owner = true
 process_mode = 4
-visible = false
-z_index = 99
+layout_mode = 2
+mouse_filter = 2
+
+[node name="InfoBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=2121055772]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("38_onj4m")
+
+[node name="SuccessBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=558683972]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("39_vlu6e")
+
+[node name="ErrorBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=461419965]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("40_aqok7")
+
+[node name="OpenDashboard" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1244948004]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Dashboard"
+icon = ExtResource("40_174hx")
+
+[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1498597782]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Compile" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=760264391]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_fonts/font = ExtResource("23_tlngq")
+text = "Check and Compile All"
+icon = ExtResource("18_fdf88")
+
+[node name="VBoxContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2" unique_id=334363352]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+split_offsets = PackedInt32Array(50000)
+drag_area_margin_begin = -1402
+split_offset = 50000
+
+[node name="Panel" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=674967786]
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CNodeContainerBG" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel" unique_id=1077183945]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("16_74kfo")
+
+[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG" unique_id=717265577]
+process_mode = 4
+clip_children = 1
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -466,118 +445,134 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_xresw")
+theme_override_styles/panel = SubResource("StyleBoxFlat_onj4m")
 
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer/CNodeUI/ScriptMsgContainer"]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="ScriptMsg" type="RichTextLabel" parent="VBoxContainer/CNodeUI/ScriptMsgContainer/CenterContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_fonts/italics_font = ExtResource("16_xresw")
-theme_override_fonts/bold_font = ExtResource("23_tlngq")
-theme_override_styles/fill = SubResource("StyleBoxEmpty_x5h56")
-theme_override_styles/background = SubResource("StyleBoxEmpty_xresw")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_vu20g")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_r5155")
-bbcode_enabled = true
-text = "[center]
-[font_size=24][b]Hengo Visual Script[/b][/font_size]
-[font_size=16][color=#cccccc]
-Please open the script to begin editing.
-[/color][/font_size]
-[font_size=13][i][color=#888888]Tip: You can open the script using the button at the top right to access the FileSystem,  
-or via \"Select Resource\" (Ctrl + P), or directly from Scene dock.[/color][/i][/font_size]
-[/center]"
-fit_content = true
-autowrap_mode = 0
-shortcut_keys_enabled = false
-justification_flags = 0
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
-
-[node name="GeneralPopUp" parent="." instance=ExtResource("8_uxy8l")]
-visible = false
-
-[node name="GeneralPopUp" type="PanelContainer" parent="GeneralPopUp"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(230, 0)
-offset_right = 230.0
-offset_bottom = 39.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_styles/panel = ExtResource("33_n637n")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="GeneralPopUp/GeneralPopUp"]
-layout_mode = 2
-
-[node name="Button" type="Button" parent="GeneralPopUp/GeneralPopUp/VBoxContainer"]
+[node name="Grid" type="TextureRect" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Panel" unique_id=1070055922]
 process_mode = 4
-layout_mode = 2
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_r8ipe")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-disabled = true
-text = "Name"
-icon = ExtResource("24_hg3xi")
-flat = true
-alignment = 0
+texture = ExtResource("17_lxtpw")
 
-[node name="PopupContainer" parent="." instance=ExtResource("8_uxy8l")]
+[node name="Cam" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG" unique_id=95183905 node_paths=PackedStringArray("grid")]
+unique_name_in_owner = true
+position = Vector2(0, -8)
+script = ExtResource("3_84akk")
+grid = NodePath("../Panel/Grid")
+
+[node name="RefPoint" type="Marker2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=2087226410]
+visible = false
+position = Vector2(289, 313)
+
+[node name="Lines" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=469442060]
+
+[node name="ConnectionGuide" type="Line2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1282222396]
+unique_name_in_owner = true
+visible = false
+z_index = 2
+width = 6.0
+gradient = SubResource("Gradient_rg8iy")
+texture = ExtResource("7_6jref")
+texture_mode = 1
+script = ExtResource("7_gj1gq")
+
+[node name="CommentContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=252482894]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="CnodeContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1663593833]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1.0
+offset_bottom = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="SelectionRect" type="ReferenceRect" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=805961561]
+process_mode = 4
+visible = false
+offset_left = 153.0
+offset_top = 148.0
+offset_right = 193.0
+offset_bottom = 188.0
+mouse_filter = 2
+border_color = Color(0.749928, 0.915784, 0.889306, 1)
+border_width = 3.0
+
+[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam/SelectionRect" unique_id=1630308070]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
+
+[node name="VCActionButtons" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1698247101 instance=ExtResource("20_w813u")]
 unique_name_in_owner = true
 visible = false
 
-[node name="DropDownMenu" parent="PopupContainer" instance=ExtResource("9_xwbyp")]
-unique_name_in_owner = true
-theme = ExtResource("1_2muha")
+[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel" unique_id=428273699]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 4.0
+mouse_filter = 2
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-layer = 100
+[node name="MachineGraph" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=2066009994 instance=ExtResource("27_dkwui")]
+layout_mode = 2
 
-[node name="DocsToolTip" type="PanelContainer" parent="CanvasLayer" node_paths=PackedStringArray("rich_text_label", "title_label")]
+[node name="Tooltip" parent="Content/UIBase" unique_id=1420862732 instance=ExtResource("23_x5h56")]
 unique_name_in_owner = true
 visible = false
-offset_right = 305.0
-offset_bottom = 133.0
-theme = ExtResource("1_2muha")
-theme_override_styles/panel = ExtResource("36_dyro1")
-script = ExtResource("36_alymh")
-rich_text_label = NodePath("VBoxContainer/Text")
-title_label = NodePath("VBoxContainer/Title")
+z_index = 101
+layout_mode = 0
+offset_right = 113.0
+offset_bottom = 55.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/DocsToolTip"]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="CanvasLayer/DocsToolTip/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("12_wtrk7")
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_mlcja")
-text = "Title"
-
-[node name="Text" type="RichTextLabel" parent="CanvasLayer/DocsToolTip/VBoxContainer"]
-layout_mode = 2
-size_flags_vertical = 3
-focus_mode = 2
-theme_override_fonts/normal_font = ExtResource("20_y63ss")
-theme_override_styles/normal = SubResource("StyleBoxEmpty_fc62w")
-text = "A control for displaying text that can contain custom fonts, images, and basic formatting. RichTextLabel manages these as an internal tag stack. It also adapts itself to given width/heights.
-
-Note: Assignments to text clear the tag stack and reconstruct it from the property's contents. Any edits made to text will erase previous edits made from other manual sources such as append_text and the push_* / pop methods.
-
-Note: RichTextLabel doesn't support entangled BBCode tags. For example, instead of using [b]bold[i]bold italic[/b]italic[/i], use [b]bold[i]bold italic[/i][/b][i]italic[/i]."
-selection_enabled = true
-
-[node name="TooltipCanvas" type="CanvasLayer" parent="."]
-
-[node name="Tooltip" parent="TooltipCanvas" instance=ExtResource("23_x5h56")]
+[node name="DashBoard" parent="Content/UIBase" unique_id=179649431 instance=ExtResource("44_33cyo")]
 unique_name_in_owner = true
 visible = false
-theme = ExtResource("1_2muha")
+z_index = 102
+layout_mode = 1
 
-[node name="SignalBus" type="Node" parent="."]
+[node name="RightSideBar" parent="Content/UIBase" unique_id=24126550 instance=ExtResource("37_hog2e")]
 unique_name_in_owner = true
-script = ExtResource("27_ji2ve")
+visible = false
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 1224.0
+offset_top = 4.0
+offset_right = 1724.0
+offset_bottom = 968.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="ToastContainer" type="Control" parent="Content/UIBase" unique_id=1396520277]
+unique_name_in_owner = true
+z_index = 105
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("47_h1p8r")

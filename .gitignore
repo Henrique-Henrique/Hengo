@@ -1,7 +1,11 @@
 # Godot 4+ specific ignores
-.godot/
-.api/
 extension_api.json
 addons/gut
+addons/gdUnit4
 addons/hengo/api/native_api.json
 temp/
+reports/
+!.github/
+.*/
+.*
+/hengo/

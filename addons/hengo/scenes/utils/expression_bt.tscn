@@ -18,6 +18,7 @@ corner_radius_bottom_left = 4
 offset_right = 120.0
 offset_bottom = 32.0
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_4ogn3")
 text = "Expression"
 icon = ExtResource("1_s8fms")

@@ -1,0 +1,66 @@
+[gd_scene load_steps=5 format=3 uid="uid://b4k8x6y201a3"]
+
+[ext_resource type="Script" uid="uid://br5ccxsi7svcc" path="res://addons/hengo/scripts/utils/toast/toast.gd" id="1_toast"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4onva"]
+resource_local_to_scene = true
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+bg_color = Color(0.34615505, 0.649126, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.13333334)
+border_blend = true
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4onva"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rv1bs"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="Toast" type="PanelContainer"]
+custom_minimum_size = Vector2(250, 0)
+offset_right = 250.0
+offset_bottom = 50.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_4onva")
+script = ExtResource("1_toast")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Content" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Icon" type="TextureRect" parent="VBox/Content"]
+process_mode = 4
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="VBox/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+autowrap_mode = 1
+
+[node name="Progress" type="ProgressBar" parent="VBox"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxEmpty_4onva")
+theme_override_styles/fill = SubResource("StyleBoxFlat_rv1bs")
+value = 100.0
+show_percentage = false

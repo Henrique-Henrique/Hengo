@@ -1,0 +1,53 @@
+[gd_scene load_steps=6 format=3 uid="uid://bihfp8yx5bhak"]
+
+[ext_resource type="Script" uid="uid://wlu45tx3jnix" path="res://addons/hengo/scripts/utils/code_search.gd" id="1_lav8o"]
+[ext_resource type="PackedScene" uid="uid://b3e2x7vlh05ft" path="res://addons/hengo/scenes/utils/api_search_item.tscn" id="2_fvg77"]
+[ext_resource type="PackedScene" uid="uid://uku58hykbu48" path="res://addons/hengo/scenes/code_search_item.tscn" id="3_ogmfe"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ogmfe"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6fpm2"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.08627451)
+
+[node name="Code Search" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lav8o")
+first_list_virtual_list_item = ExtResource("3_ogmfe")
+
+[node name="Search" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_ogmfe")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6fpm2")
+placeholder_text = "Type to search..."
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FirstList" parent="HBoxContainer" instance=ExtResource("2_fvg77")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SecondList" parent="HBoxContainer" instance=ExtResource("2_fvg77")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ThirdList" parent="HBoxContainer" instance=ExtResource("2_fvg77")]
+unique_name_in_owner = true
+layout_mode = 2

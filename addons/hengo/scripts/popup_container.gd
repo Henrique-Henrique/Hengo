@@ -1,73 +1,78 @@
 @tool
-class_name HenPopupContainer extends CanvasLayer
+class_name HenPopupContainer extends Panel
 
 signal closed
 
+var _default_panel_style: StyleBox
+var _transparent_panel_style: StyleBoxEmpty = StyleBoxEmpty.new()
+
 func _ready() -> void:
-    get_child(0).gui_input.connect(_on_gui)
+	_default_panel_style = get('theme_override_styles/panel')
+	gui_input.connect(_on_gui)
 
 func _on_gui(_event: InputEvent) -> void:
-    if _event is InputEventMouseButton:
-        if _event.pressed:
-            if _event.button_index == MOUSE_BUTTON_LEFT or _event.button_index == MOUSE_BUTTON_RIGHT:
-                hide_popup()
+	if _event is InputEventMouseButton:
+		if _event.pressed:
+			if _event.button_index == MOUSE_BUTTON_LEFT or _event.button_index == MOUSE_BUTTON_RIGHT:
+				hide_popup()
 
 func clean() -> void:
-    var container = get_node('%GeneralPopUp').get_child(0)
-    # cleaning other controls of popup
-    for node in container.get_children().slice(1):
-        container.remove_child(node)
-        node.queue_free()
+	var container = get_node('%GeneralPopUp').get_child(0)
+	# cleaning other controls of popup
+	for node in container.get_children():
+		container.remove_child(node)
+		node.queue_free()
 
 # public
-func show_content(_content: Node, _name: String, _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
-    var gp = get_node('%GeneralPopUp')
-    var container = gp.get_child(0)
+func show_content(_content: Control, _name: String = '', _pos: Vector2 = Vector2.INF, _lod: float = 1) -> HenPopupContainer:
+	var gp: PanelContainer = get_node('%GeneralPopUp')
+	var container = gp.get_child(0)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-    clean()
-    
-    container.add_child(_content)
-    container.get_child(0).text = _name
-    
-    if _pos == Vector2.INF:
-        # center
-        gp.position = (get_window().size / 2) - (Vector2i(_content.size) / 2)
-    else:
-        gp.position = _pos
-    
-    gp.reset_size()
+	clean()
+	
+	container.add_child(_content)
+	
+	if _lod > 0:
+		if _default_panel_style:
+			add_theme_stylebox_override('panel', _default_panel_style)
+	else:
+		add_theme_stylebox_override('panel', _transparent_panel_style)
 
-    HenUtils.reposition_control_inside(gp)
+	modulate = Color.WHITE
 
-    if _lod > 0:
-        (get_node('%Background') as Panel).modulate = Color.WHITE
-        ((get_node('%Background') as Panel).material as ShaderMaterial).set_shader_parameter('lod', _lod)
-    else:
-        (get_node('%Background') as Panel).modulate = Color.TRANSPARENT
+	show()
 
-    show()
+	gp.pivot_offset = gp.size / 2.0
+	var tween: Tween = get_tree().create_tween()
 
-    # animations
-    var tween: Tween = get_tree().create_tween()
+	gp.scale = Vector2(.95, .95)
+	gp.modulate.a = 0.0
 
-    gp.scale = Vector2(.95, .95)
-    tween.tween_property(gp, 'scale', Vector2.ONE, .5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-    HenGlobal.CAM.can_scroll = false
+	tween.set_parallel(true)
+	tween.tween_property(gp, 'scale', Vector2.ONE, .4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(gp, 'modulate:a', 1.0, .4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	
+	global.CAM.can_scroll = false
 
-    return self
+	return self
 
 
-func reset_size() -> void:
-    var gp = get_node('%GeneralPopUp')
-    gp.reset_size()
+func move(_pos: Vector2) -> void:
+	var gp = get_node('%GeneralPopUp')
+	gp.position += _pos
+	HenUtils.reposition_control_inside(gp)
 
 
 func show_container() -> void:
-    HenGlobal.CAM.can_scroll = false
-    show()
+	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = false
+	show()
 
 
 func hide_popup() -> void:
-    HenGlobal.CAM.can_scroll = true
-    hide()
-    closed.emit()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.CAM.can_scroll = true
+	global.CURRENT_INSPECTOR = null
+	hide()
+
+	closed.emit()

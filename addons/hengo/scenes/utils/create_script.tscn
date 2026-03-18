@@ -1,0 +1,43 @@
+[gd_scene load_steps=5 format=3 uid="uid://cg53n7q0whfb0"]
+
+[ext_resource type="Texture2D" uid="uid://lad66re0b55x" path="res://addons/hengo/assets/new_icons/plus.svg" id="1_nrc6t"]
+[ext_resource type="Script" uid="uid://cf5ipxvsgde7s" path="res://addons/hengo/scripts/utils/create_script.gd" id="2_dkfqg"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="3_wpakf"]
+[ext_resource type="Texture2D" uid="uid://b253cikspw8hb" path="res://addons/hengo/assets/new_icons/file-plus.svg" id="5_a2o7k"]
+
+[node name="VBoxContainer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+script = ExtResource("2_dkfqg")
+
+[node name="ScriptName" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Script name"
+
+[node name="ExtendBt" parent="." instance=ExtResource("3_wpakf")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Extend from (Default: Node)"
+type = "all_godot_classes"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="CreateOpen" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create and Open"
+icon = ExtResource("5_a2o7k")
+
+[node name="CreateBt" type="Button" parent="HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create"
+icon = ExtResource("1_nrc6t")

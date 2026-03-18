@@ -1,0 +1,47 @@
+[gd_scene load_steps=5 format=3 uid="uid://uku58hykbu48"]
+
+[ext_resource type="Script" uid="uid://cf5wc77cp4q5y" path="res://addons/hengo/scripts/utils/code_search_item.gd" id="1_5wlq4"]
+[ext_resource type="StyleBox" uid="uid://dp6bf5q8urrgj" path="res://addons/hengo/resources/style_box/level_1.tres" id="2_twrqp"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_12dj8"]
+bg_color = Color(0, 0, 0, 0)
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.14509805)
+
+[sub_resource type="Theme" id="Theme_0geum"]
+Button/styles/normal = ExtResource("2_twrqp")
+Button/styles/pressed = ExtResource("2_twrqp")
+
+[node name="CodeSearchItem" type="PanelContainer"]
+offset_right = 32.0
+offset_bottom = 13.0
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_12dj8")
+script = ExtResource("1_5wlq4")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Name" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+mouse_filter = 2
+mouse_behavior_recursive = 1
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 0.8980392)
+disabled = true
+flat = true
+alignment = 0
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="SubCategoryContainer" type="HFlowContainer" parent="VBoxContainer/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme = SubResource("Theme_0geum")
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8

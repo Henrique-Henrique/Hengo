@@ -11,11 +11,7 @@ var select_callable
 
 
 func _ready() -> void:
-    search_bar = (get_node('%SearchBar') as LineEdit)
-
-    search_bar.text_changed.connect(_on_search)
-    list_container = get_node('%List')
-    list_container.item_clicked.connect(_on_item_click)
+    _ensure_refs()
 
 
 func _on_item_click(_index: int, _pos: Vector2, _mouse_index: int) -> void:
@@ -24,7 +20,7 @@ func _on_item_click(_index: int, _pos: Vector2, _mouse_index: int) -> void:
 
     (select_callable as Callable).call(search_list[_index])
     select_callable = null
-    get_parent().hide()
+    (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 
 
 func _on_search(_text: String) -> void:
@@ -47,6 +43,9 @@ func _on_search(_text: String) -> void:
 
 
 func _remount() -> void:
+    if not list_container:
+        return
+
     list_container.clear()
 
     match type:
@@ -61,6 +60,11 @@ func _remount() -> void:
 
 # public
 func mount(_list: Array, _call: Callable, _type: String) -> void:
+    _ensure_refs()
+    if not search_bar:
+        push_error('DropDownMenu is missing %SearchBar node.')
+        return
+
     search_bar.text = ''
 
     list = _list
@@ -68,3 +72,15 @@ func mount(_list: Array, _call: Callable, _type: String) -> void:
     select_callable = _call
     type = _type
     _remount()
+
+
+func _ensure_refs() -> void:
+    if not search_bar:
+        search_bar = get_node_or_null('%SearchBar') as LineEdit
+        if search_bar and not search_bar.text_changed.is_connected(_on_search):
+            search_bar.text_changed.connect(_on_search)
+
+    if not list_container:
+        list_container = get_node_or_null('%List') as ItemList
+        if list_container and not list_container.item_clicked.is_connected(_on_item_click):
+            list_container.item_clicked.connect(_on_item_click)

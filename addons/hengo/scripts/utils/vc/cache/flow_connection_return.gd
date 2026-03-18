@@ -1,77 +1,55 @@
 @tool
 class_name HenVCFlowConnectionReturn
 
-var flow_connection: HenVCFlowConnectionData
-
-var to: HenVirtualCNode
-var to_id: int
-var from_id: int
-var from: HenVirtualCNode
-var to_from_ref: HenVCFromFlowConnectionData
-
-# old
-var old_to: HenVirtualCNode
-var old_to_id: int
-var old_from_id: int
-var old_from: HenVirtualCNode
-var old_to_from_ref: HenVCFromFlowConnectionData
-
-func _init(_flow: HenVCFlowConnectionData, _from_id: int, _to: HenVirtualCNode, _to_id: int, _from: HenVirtualCNode, _to_from_ref: HenVCFromFlowConnectionData) -> void:
-    from_id = _from_id
-    flow_connection = _flow
-    to = _to
-    to_id = _to_id
-    from = _from
-    to_from_ref = _to_from_ref
+var connection: HenVCFlowConnectionData
+var old_connections: Array
 
 
+func _init(_connection: HenVCFlowConnectionData) -> void:
+	connection = _connection
+
+
+# adds flow connection and removes conflicting ones
 func add() -> void:
-    # remove other flow connection
-    if flow_connection.to:
-        flow_connection.to_from_ref.from_connections.erase(flow_connection)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var from_connections: Array = global.SAVE_DATA.get_flow_connection_from_vc(connection.get_from(global.SAVE_DATA))
+	var remove_connection: Array = []
+	
+	for connection_ref: HenVCFlowConnectionData in from_connections:
+		if connection_ref.get_from(global.SAVE_DATA) != connection.get_from(global.SAVE_DATA):
+			continue
 
-        if flow_connection.line_ref:
-            flow_connection.line_ref.visible = false
-            flow_connection.line_ref = null
-        
-        old_to = flow_connection.to
-        old_from_id = flow_connection.from_id
-        old_to_id = flow_connection.to_id
-        old_from = flow_connection.from
-        old_to_from_ref = flow_connection.to_from_ref
+		if connection_ref.from_id != connection.from_id:
+			continue
 
-    flow_connection.from_id = from_id
-    flow_connection.to = to
-    flow_connection.to_id = to_id
-    flow_connection.from = from
-    flow_connection.to_from_ref = to_from_ref
-    flow_connection.line_ref = null
+		remove_connection.append(connection_ref)
 
-    flow_connection.to_from_ref.from_connections.append(flow_connection)
+	for connection_ref: HenVCFlowConnectionData in remove_connection:
+		global.SAVE_DATA.remove_flow_connection(connection_ref)
+		old_connections.append(connection_ref)
 
-    flow_connection.from.update()
-    flow_connection.to.update()
+	global.SAVE_DATA.add_flow_connection(connection)
+
+	if global.IS_HEADLESS:
+		return
+	
+	connection.get_to(global.SAVE_DATA).update()
+	connection.get_from(global.SAVE_DATA).update()
+	
+	global.AUTO_CAMERA.on_connection_changed(connection.get_to(global.SAVE_DATA))
+
 
 func remove() -> void:
-    flow_connection.to = null
-    flow_connection.to_from_ref.from_connections.erase(flow_connection)
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	global.SAVE_DATA.remove_flow_connection(connection)
 
-    if flow_connection.line_ref:
-        flow_connection.line_ref.visible = false
-    
-    flow_connection.line_ref = null
+	for connection_ref: HenVCFlowConnectionData in old_connections:
+		global.SAVE_DATA.add_flow_connection(connection_ref)
 
-    # adding old flow connection
-    if old_to:
-        flow_connection.from_id = old_from_id
-        flow_connection.to = old_to
-        flow_connection.to_id = old_to_id
-        flow_connection.from = old_from
-        flow_connection.to_from_ref = old_to_from_ref
+	old_connections.clear()
 
-        old_to_from_ref.from_connections.append(flow_connection)
-        old_to.update()
-
-    old_to = null
-
-    flow_connection.from.update()
+	if global.IS_HEADLESS:
+		return
+	
+	connection.get_to(global.SAVE_DATA).update()
+	connection.get_from(global.SAVE_DATA).update()

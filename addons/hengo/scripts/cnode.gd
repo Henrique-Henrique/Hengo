@@ -1,17 +1,17 @@
 @tool
 class_name HenCnode extends PanelContainer
 
+const CNODE_INPUT = preload('res://addons/hengo/scenes/cnode_input.tscn')
+const CNODE_OUTPUT = preload('res://addons/hengo/scenes/cnode_output.tscn')
+const CNODE_SCENE_PATH: String = 'res://addons/hengo/scenes/cnode.tscn'
+const CONNECTION_LINE = preload('res://addons/hengo/scenes/connection_line.tscn')
+const FLOW_CONNECTION_LINE = preload('res://addons/hengo/scenes/flow_connection_line.tscn')
+
+
 var flow_to: Dictionary = {}
-var route_ref: Dictionary
 var data: Dictionary = {}
 var category: String
-var raw_name: String
-var hash: int
-var connectors: Dictionary = {}
-var from_lines: Array = []
-var deleted: bool = false
-
-var comment_ref
+var id: StringName
 
 # behavior
 var moving: bool = false
@@ -22,17 +22,34 @@ var old_state_event_connected: PanelContainer
 
 # tooltip
 var _is_mouse_enter: bool = false
-var _preview_timer: SceneTreeTimer
 
 # formatter
 var can_move_to_format: bool = true
 
 # pool
 var is_pool: bool = false
-var virtual_ref: HenVirtualCNode
+var can_follow: bool = false
+var follow_position: Vector2 = Vector2.ZERO
 
-
+signal on_hovering(_mouse_pos: Vector2)
+signal on_double_click
+signal on_mouse_enter
 signal on_move
+signal on_right_click
+signal changed_position(_pos: Vector2)
+signal request_flow_connection
+signal on_select
+signal on_unselect
+signal on_mouse_exit
+
+static var _cnode_scene_cache: PackedScene
+
+var debug_value_label: Label
+var debug_value_timer: Timer
+const DEBUG_VALUE_TIME: float = 3.0
+
+var debug_exec_timer: Timer
+const DEBUG_EXEC_TIME: float = 0.2
 
 
 func _ready():
@@ -46,29 +63,32 @@ func _ready():
 # private
 #
 
+func follow(_position: Vector2) -> void:
+	if position.is_equal_approx(_position):
+		can_follow = false
+		set_process(false)
+		return
+	
+	set_process(true)
+	can_follow = true
+	follow_position = _position
+
 
 func _on_enter() -> void:
-	# if virtual_ref:
-	# 	print(JSON.stringify(virtual_ref.get_save()))
-	# print(get_local_mouse_position())
 	_is_mouse_enter = true
+	on_mouse_enter.emit()
 
-
-	if HenGlobal.can_make_flow_connection and not virtual_ref.from_flow_connections.is_empty():
-		HenGlobal.flow_connection_to_data = {
-			to_cnode = self,
-			to_id = virtual_ref.from_flow_connections[0].id
-		}
-	
 	# animations
 	if not selected: hover_animation()
 
 
 func _on_exit() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	_is_mouse_enter = false
-	HenGlobal.flow_connection_to_data = {}
+	global.flow_connection_to_data.clear()
 	if not selected: exit_animation()
-	HenGlobal.TOOLTIP.close()
+	global.TOOLTIP.close()
+	on_mouse_exit.emit()
 
 
 func hover_animation() -> void:
@@ -77,89 +97,62 @@ func hover_animation() -> void:
 	tween.tween_property(%Border, 'modulate', Color(1, 1, 1, .7), .2)
 
 
-func exit_animation() -> void:
+func exit_animation(_time: float = .2) -> void:
 	var tween: Tween = get_tree().create_tween()
 
-	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, .2)
-
-
-func _scale_and_update_line(_scale: Vector2) -> void:
-	scale = _scale
-
-	if virtual_ref:
-		for from_connection: HenVCFromFlowConnectionData in virtual_ref.from_flow_connections:
-			for connetion: HenVCFlowConnectionData in from_connection.from_connections:
-				if connetion.line_ref:
-					connetion.line_ref.update_line()
-				
-		for connetion: HenVCFlowConnectionData in virtual_ref.flow_connections:
-				if connetion.line_ref:
-					connetion.line_ref.update_line()
+	tween.tween_property(%Border, 'modulate', Color.TRANSPARENT, _time)
 
 
 func _on_gui(_event: InputEvent) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if _event is InputEventMouseButton:
-		if _event.pressed:
-			HenGlobal.DOCS_TOOLTIP.visible = false
-			if _event.ctrl_pressed:
+		var e: InputEventMouseButton = _event
+		if e.pressed:
+			global.CONNECTION_GUIDE.visible = false
+			global.TOOLTIP.visible = false
+			Input.set_default_cursor_shape(Input.CURSOR_ARROW)
+			if e.ctrl_pressed:
 				if selected:
-					unselect()
+					on_unselect.emit()
 				else:
-					select()
-			elif _event.double_click:
-				if virtual_ref:
-					if not virtual_ref.route.is_empty():
-						HenRouter.change_route(virtual_ref.route)
-					elif virtual_ref.ref and virtual_ref.ref.get('route'):
-						HenRouter.change_route(virtual_ref.ref.get('route'))
+					on_select.emit()
+			elif e.double_click:
+				on_double_click.emit()
 			else:
-				if _event.button_index == MOUSE_BUTTON_LEFT:
+				if e.button_index == MOUSE_BUTTON_LEFT:
 					if selected:
-						for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
-							i.moving = true
+						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
+							vc.set_cnode_moving(true)
 					else:
-						moving = true
 						# cleaning other selects
-						for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
-							i.moving = false
-							i.unselect()
+						for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
+							vc.set_cnode_moving(false)
+							vc.unselect()
 						
-						select()
-				elif _event.button_index == MOUSE_BUTTON_RIGHT:
-					# showing state config on doubleclick
-					if virtual_ref:
-						if virtual_ref.type == HenVirtualCNode.Type.STATE:
-							HenGlobal.GENERAL_POPUP.get_parent().show_content(
-								HenPropEditor.mount(virtual_ref),
-								'Testing',
-								get_global_mouse_position()
-							)
+						moving = true
+						on_select.emit()
+				elif e.button_index == MOUSE_BUTTON_RIGHT:
+					on_right_click.emit(get_global_mouse_position())
 					
 		else:
 			moving = false
 			HenVCActionButtons.get_singleton().show_action(self)
 
 			# group moving false
-			for i in get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP):
-				i.moving = false
+			for vc: HenVirtualCNode in global.SELECTED_VIRTUAL_CNODE:
+				vc.set_cnode_moving(false)
 			
 	elif _event is InputEventMouseMotion and _is_mouse_enter:
-		if virtual_ref.invalid:
-			HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.CNODE_INVALID)
-		else:
-			match virtual_ref.type:
-				HenVirtualCNode.Type.STATE:
-					HenGlobal.TOOLTIP.go_to(get_global_mouse_position(), HenEnums.TOOLTIP_TEXT.RIGHT_MOUSE_INSPECT)
-				_:
-					HenGlobal.TOOLTIP.close()
+		on_hovering.emit(get_global_mouse_position())
 
 
 func _input(_event: InputEvent):
 	if _event is InputEventMouseMotion:
+		var global: HenGlobal = Engine.get_singleton(&'Global')
 		# moving on click
-		if moving and not comment_ref:
-			if HenGlobal.CAM:
-				move(position + _event.relative / HenGlobal.CAM.transform.x.x)
+		if moving and global.CAM:
+			move(position + _event.relative / global.CAM.transform.x.x)
 
 
 # used when pick state on state signal
@@ -181,180 +174,308 @@ func _on_dropdown_state_pick(_value: Dictionary) -> void:
 #
 func move(_pos: Vector2) -> void:
 	position = _pos
-
-	if virtual_ref:
-		virtual_ref.position = position
-
+	changed_position.emit(position)
 	HenVCActionButtons.get_singleton().hide_action()
 	emit_signal('on_move')
 
 
+func move_simple(_pos: Vector2) -> void:
+	position = _pos
+	emit_signal('on_move')
+
+
 func select() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 	selected = true
 	hover_animation()
-	add_to_group(HenEnums.CNODE_SELECTED_GROUP)
 
-	if virtual_ref and HenGlobal.CODE_PREVIEWER.visible:
-		var new_id_list: Array = get_tree().get_nodes_in_group(HenEnums.CNODE_SELECTED_GROUP).map(func(x): return x.virtual_ref.id)
-		if not (HenGlobal.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (HenGlobal.CODE_PREVIEWER.id_list == new_id_list):
-			return
+	# if global.CODE_PREVIEWER.visible:
+	# 	var new_id_list: Array = global.SELECTED_VIRTUAL_CNODE.map(func(x: HenVirtualCNode): return x.identity.id)
+	# 	if not (global.CODE_PREVIEWER.id_list.is_empty() and new_id_list.is_empty()) and (global.CODE_PREVIEWER.id_list == new_id_list):
+	# 		return
 
-		var script_data: HenScriptData = HenSaver.generate_script_data()
-		var code: String = HenCodeGeneration.get_code(script_data, true)
-		
-		HenGlobal.CODE_PREVIEWER.set_code(code)
-		HenGlobal.CODE_PREVIEWER.show_vc_line_reference()
+		# var script_data: HenScriptData = HenSaver.generate_script_data()
+		# var code: String = (Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).get_code(script_data, true)
+		# global.CODE_PREVIEWER.set_code(code)
+		# global.CODE_PREVIEWER.show_vc_line_reference()
 
 
-func unselect() -> void:
+func unselect(_time: float = .2) -> void:
 	selected = false
-	exit_animation()
-	remove_from_group(HenEnums.CNODE_SELECTED_GROUP)
+	exit_animation(_time)
+
 
 func change_name(_name: String) -> void:
 	get_node('%Title').text = _name
 
-
-func change_name_and_raw(_name: String) -> void:
-	get_node('%Title').text = _name
-	raw_name = _name
-
-
-func get_cnode_name() -> String:
-	return raw_name
 
 func get_fantasy_name() -> String:
 	return get_node('%Title').text
 
 
 func add_input(__input: Dictionary, _instantiate_prop: bool = true) -> HenCnodeInOut:
-	var in_container = get_node('%InputContainer')
-	var input: HenCnodeInOut = HenAssets.CNodeInputScene.instantiate()
+	var idx: int = 0
+	for child in get_node('%CenterContainer').get_children():
+		if child.get_child_count() == 0: continue
+		var child_row = child.get_child(0)
+		if child_row.has_node('Input'):
+			idx += 1
+
+	var row: HBoxContainer = _get_row(idx)
+	if not row: return null
+
+	var input: HenCnodeInOut = CNODE_INPUT.instantiate()
 
 	input.set_type(__input.get('type') if __input.has('type') else 'Variant')
 	(input.get_node('%Name') as Label).text = __input.name
 	input.root = self
+	input.name = 'Input'
 
-	in_container.add_child(input)
+	row.add_child(input)
+	row.move_child(input, 0)
 
 	return input
 
 
 func add_output(_output: Dictionary) -> void:
-	var out_container = get_node('%OutputContainer')
-	var output: HenCnodeInOut = HenAssets.CNodeOutputScene.instantiate()
+	var idx: int = 0
+	for child in get_node('%CenterContainer').get_children():
+		if child.get_child_count() == 0: continue
+		var child_row = child.get_child(0)
+		if child_row.has_node('Output'):
+			idx += 1
+
+	var row: HBoxContainer = _get_row(idx)
+	if not row: return
+
+	var output: HenCnodeInOut = CNODE_OUTPUT.instantiate()
 
 	output.set_type(_output.get('type') if _output.has('type') else 'Variant')
 	(output.get_node('%Name') as Label).text = _output.name
 	output.root = self
+	output.name = 'Output'
 
-	out_container.add_child(output)
+	row.add_child(output)
+
+
+func _get_row(_idx: int) -> HBoxContainer:
+	var container = get_node('%CenterContainer')
+	if _idx < container.get_child_count():
+		var child = container.get_child(_idx)
+		if child.get_child_count() > 0:
+			return child.get_child(0)
+		# fallthrough if existing child is broken (though unlikely with fresh pool)
+	
+	var panel = PanelContainer.new()
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	panel.add_theme_stylebox_override('panel', style)
+	container.add_child(panel)
+
+	var row = HBoxContainer.new()
+	row.add_theme_constant_override('separation', 0)
+	panel.add_child(row)
+	
+	return row
 
 
 func disable_error() -> void:
 	get_node('%ErrorBorder').visible = false
 
 
-func get_connection_lines_in_flow() -> Dictionary:
-	return {}
-
-
-func get_connector_lines(_connector) -> Array:
-	var flow_lines: Array = []
-	var conn_lines: Array = []
-
-	# next cnode
-	if _connector.connections_lines.size() > 0:
-		var cnode = _connector.connections_lines[0].to_cnode
-		
-		flow_lines += _connector.connections_lines
-
-		if cnode.connectors.keys().size() == 1:
-			var result: Array = cnode.get_connector_lines(cnode.get_connector())
-
-			if not result.is_empty():
-				flow_lines += result[0]
-				conn_lines += cnode.get_input_connection_lines() + result[1]
-
-	return [flow_lines, conn_lines]
-
-
-func get_input_connection_lines() -> Array:
-	var input_container = get_node('%InputContainer')
-	var lines: Array = []
-
-	for input: HenCnodeInOut in input_container.get_children():
-		lines += input.from_connection_lines
-
-		if input.from_connection_lines.size() > 0:
-			lines += input.from_connection_lines[0].from_cnode.get_input_connection_lines()
-		
-	return lines
-
-
-func get_connector(_type: String = 'cnode') -> Variant:
-	if connectors.has(_type): return connectors[_type]
-
-	return null
-
-
 func get_border() -> Panel:
 	return get_node('%Border')
 
 
-func show_debug_value(_value) -> void:
-	var container: VBoxContainer = get_node('%Container')
-	container.get_child(1).show_value(_value)
+func get_debug_border() -> Panel:
+	return get_node('%DebugBorder')
+
+
+func reset_signals(_vc: HenVirtualCNode = null):
+	for signal_name: StringName in [
+		'on_hovering',
+		'on_double_click',
+		'on_right_click',
+		'changed_position',
+		'on_mouse_enter',
+		'on_mouse_exit',
+		'request_flow_connection',
+		'on_select',
+		'on_unselect'
+	]:
+		for connection: Dictionary in get_signal_connection_list(signal_name):
+			@warning_ignore('unsafe_method_access')
+			connection.signal.disconnect(connection.callable)
+
+	if _vc:
+		on_hovering.connect(_vc.on_cnode_hovering)
+		on_double_click.connect(_vc.on_cnode_double_click)
+		on_right_click.connect(_vc.on_cnode_right_click)
+		changed_position.connect(_vc.on_cnode_changed_position)
+		on_mouse_enter.connect(_vc.on_cnode_mouse_enter)
+		request_flow_connection.connect(_vc.request_flow_connector_connection)
+		on_select.connect(_vc.select)
+		on_unselect.connect(_vc.unselect)
+
+
+func request_flow_connetor_connection(_id: StringName, _mouse_pos: Vector2) -> void:
+	request_flow_connection.emit(_id, _mouse_pos)
+
+
+func update_title_color(_sub_type: int) -> void:
+	var title_icon: TextureRect = get_node('%TitleIcon')
+	var title: Label = get_node('%Title')
+
+	var color: Color = HenUtils.get_color_for_subtype(_sub_type)
+
+	# self_modulate = color
+	title.add_theme_color_override('font_color', color)
+	title_icon.modulate = color
+	title_icon.texture = HenUtils.get_icon_for_subtype(_sub_type)
+
 
 static func instantiate_and_add_pool() -> void:
-	HenGlobal.can_instantiate_pool = true
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var cnode_scene: PackedScene = _get_cnode_scene()
 
-	for loop_idx in range(3):
-		if not HenGlobal.can_instantiate_pool:
+	if not cnode_scene:
+		return
+
+	global.can_instantiate_pool = true
+
+	var total_pool_size: int = 100
+	var budget_per_frame_usec: int = 8000
+	
+	var start_time: float = Time.get_ticks_usec()
+	
+	for i in range(total_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
 			return
+
+		var instance: HenCnode = cnode_scene.instantiate()
+
+		for input_idx in range(5):
+			instance.add_input({name = "", type = "Variant"}, false)
+
+		for output_idx in range(5):
+			instance.add_output({name = "", type = "Variant"})
 		
-		var start: float = Time.get_ticks_usec()
+		instance.position = Vector2(50000, 50000)
+		instance.is_pool = true
+		instance.visible = false
+		
+		global.cnode_pool.append(instance)
+		global.CNODE_CONTAINER.add_child(instance)
 
-		for vc_idx in range(30): # pool size
-			var instance: HenCnode = HenAssets.CNodeScene.instantiate()
-
-			for input_idx in range(5): # input pool size
-				instance.add_input({name = "", type = "Variant"}, false)
-
-			for output_idx in range(5): # output pool size
-				instance.add_output({name = "", type = "Variant"})
-			
-			instance.position = Vector2(50000, 50000)
-			instance.is_pool = true
-			instance.visible = false
-			# instance.set_flow_connection(TYPE.DEFAULT)
-
-			if not HenGlobal.can_instantiate_pool:
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
 				return
-			
-			HenGlobal.cnode_pool.append(instance)
-			HenGlobal.CNODE_CONTAINER.add_child(instance)
+			start_time = Time.get_ticks_usec()
 
-			await RenderingServer.frame_post_draw
-			
+	for i in range(total_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
+			return
 
-		for connection_line_idx in range(30): # connection line pool size
-			var line: HenConnectionLine = HenAssets.ConnectionLineScene.instantiate()
-			line.visible = false
-			line.position = Vector2(50000, 50000)
-			HenGlobal.connection_line_pool.append(line)
-			HenGlobal.CAM.get_node('Lines').add_child(line)
+		var line: HenConnectionLine = CONNECTION_LINE.instantiate()
+		line.visible = false
+		line.position = Vector2(50000, 50000)
+		global.connection_line_pool.append(line)
+		global.CAM.get_node('Lines').add_child(line)
 		
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree():
+				return
+			start_time = Time.get_ticks_usec()
 
-		for flow_connection_line_idx in range(30): # flow connection line pool size
-			var line: HenFlowConnectionLine = HenAssets.FlowConnectionLineScene.instantiate()
-			line.visible = false
-			line.position = Vector2(50000, 50000)
-			HenGlobal.flow_connection_line_pool.append(line)
-			HenGlobal.CAM.get_node('Lines').add_child(line)
+	for i in range(total_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
+			return
+
+		var line: HenFlowConnectionLine = FLOW_CONNECTION_LINE.instantiate()
+		line.visible = false
+		line.position = Vector2(50000, 50000)
+		global.flow_connection_line_pool.append(line)
+		global.CAM.get_node('Lines').add_child(line)
+
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			start_time = Time.get_ticks_usec()
+
+	print('Pool instantiation finished.')
 
 
-		var end: float = Time.get_ticks_usec()
-		print('time => ', (end - start) / 1000., 'ms')
+static func _get_cnode_scene() -> PackedScene:
+	if _cnode_scene_cache:
+		return _cnode_scene_cache
 
-		await HenGlobal.CNODE_CONTAINER.get_tree().create_timer(1).timeout
+	_cnode_scene_cache = load(CNODE_SCENE_PATH) as PackedScene
+	return _cnode_scene_cache
+
+
+func _physics_process(_delta: float) -> void:
+	if can_follow:
+		position = position.lerp(follow_position, _delta * 48)
+		on_move.emit()
+		if position.is_equal_approx(follow_position):
+			can_follow = false
+			set_process(false)
+
+
+func show_debug_value(_value: Variant) -> void:
+	if not debug_value_label:
+		debug_value_label = Label.new()
+		debug_value_label.add_theme_color_override("font_color", Color.WHITE)
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+		style.set_corner_radius_all(4)
+		style.content_margin_left = 5
+		style.content_margin_right = 5
+		style.content_margin_top = 2
+		style.content_margin_bottom = 2
+		debug_value_label.add_theme_stylebox_override("normal", style)
+		debug_value_label.z_index = 10
+		add_child(debug_value_label)
+		debug_value_label.position = Vector2(0, -30)
+
+	debug_value_label.text = str(_value)
+	debug_value_label.visible = true
+	debug_value_label.modulate.a = 1.0
+	
+	if not debug_value_timer:
+		debug_value_timer = Timer.new()
+		debug_value_timer.one_shot = true
+		debug_value_timer.timeout.connect(_hide_debug_value)
+		add_child(debug_value_timer)
+	
+	debug_value_timer.start(DEBUG_VALUE_TIME)
+
+
+	debug_value_timer.start(DEBUG_VALUE_TIME)
+
+
+func _hide_debug_value() -> void:
+	if debug_value_label:
+		debug_value_label.modulate.a = 0.0
+
+
+func show_debug_execution() -> void:
+	if not debug_exec_timer:
+		debug_exec_timer = Timer.new()
+		debug_exec_timer.one_shot = true
+		debug_exec_timer.timeout.connect(_hide_debug_execution)
+		add_child(debug_exec_timer)
+	
+	# highlight border
+	var border = get_debug_border()
+	border.modulate = Color.WHITE
+	border.visible = true
+	
+	debug_exec_timer.start(DEBUG_EXEC_TIME)
+
+
+func _hide_debug_execution() -> void:
+	var border = get_debug_border()
+	border.modulate = Color.TRANSPARENT

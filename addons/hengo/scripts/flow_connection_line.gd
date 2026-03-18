@@ -6,10 +6,16 @@ const flow_debug_shader = preload('res://addons/hengo/assets/shaders/flow_debug.
 const normal_texture = preload('res://addons/hengo/assets/images/line_dashed.png')
 const debug_texture = preload('res://addons/hengo/assets/images/flow_line_debug.svg')
 
-var from_connector: HenFlowConnector
-var to_cnode: HenCnode
+var input: HenFlowConnector
+var output: TextureRect
 var flow_type: StringName = ''
 var from_flow_idx: int = 0
+
+var from: WeakRef
+var to: WeakRef
+var from_idx: int
+var to_idx: int
+
 # debug
 const DEBUG_TIMER_TIME = .15
 const DEBUG_TRANS_TIME = .7
@@ -22,111 +28,89 @@ const POINT_WIDTH_BEZIER: float = POINT_WIDTH
 # pool
 var from_pool_visible: bool = true
 var to_pool_visible: bool = true
-var from_virtual_pos: Vector2
-var to_virtual_pos: Vector2
+var last_from_pos: Vector2
+var last_to_pos: Vector2
 
 
+# generates a smooth vertical cubic bezier for flow connections
 func update_line() -> void:
-	var from_pos: Vector2 = HenGlobal.CAM.get_relative_vec2(from_connector.global_position) + from_connector.size / 2 if from_pool_visible and from_connector else from_virtual_pos
-	var from_flow: HenFromFlow = to_cnode.get_node('%FromFlowContainer').get_child(from_flow_idx) if to_cnode else null
-	var end_pos: Vector2 = HenGlobal.CAM.get_relative_vec2((from_flow.get_node('%Arrow') as TextureRect).global_position) if to_pool_visible and to_cnode else to_virtual_pos
+	if not input or not output: return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global.CAM: return
 	
+	var from_ref: HenVirtualCNode = from.get_ref()
+	var to_ref: HenVirtualCNode = to.get_ref()
+	
+	if not from_ref or not to_ref: return
 
-	var first_point: Vector2 = from_pos + Vector2(0, POINT_WIDTH)
-	var last_point: Vector2 = end_pos - Vector2(0, POINT_WIDTH)
-
-	if (first_point.distance_to(last_point) / POINT_WIDTH) >= 1.5:
-		# creating last point here because after_first_point need him
-		# creating first bezier curve
-		var before_first_point: Vector2 = first_point - Vector2(0, POINT_WIDTH_BEZIER)
-		var after_first_point: Vector2 = (
-			first_point + first_point.direction_to(last_point) * POINT_WIDTH_BEZIER
-		)
-
-		var first_bezier: Curve2D = Curve2D.new()
-
-		first_bezier.add_point(before_first_point, Vector2.ZERO, first_point - before_first_point)
-		first_bezier.add_point(after_first_point, first_point - after_first_point, Vector2.ZERO)
-
-		# creating second bezier curve
-		var before_last_point: Vector2 = last_point + Vector2(0, POINT_WIDTH_BEZIER)
-		var after_last_point: Vector2 = (
-			last_point - last_point.direction_to(after_first_point) * POINT_WIDTH_BEZIER * -1
-		)
-
-		var last_bezier: Curve2D = Curve2D.new()
-
-		last_bezier.add_point(after_last_point, Vector2.ZERO, last_point - after_last_point)
-		last_bezier.add_point(before_last_point, last_point - before_last_point, Vector2.ZERO)
-
-		points = [from_pos]
-		points += first_bezier.get_baked_points()
-		points += last_bezier.get_baked_points()
-		points += PackedVector2Array([end_pos])
+	var start_pos: Vector2
+	if from_pool_visible:
+		start_pos = global.CAM.get_relative_vec2(input.global_position) + input.size / 2 + Vector2(0, 20)
+		last_from_pos = start_pos
 	else:
-		points = [from_pos, end_pos]
+		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x / 2.0, 0)
+	
+	var end_pos: Vector2
+	if to_pool_visible:
+		end_pos = global.CAM.get_relative_vec2(output.global_position) + output.size / 2 - Vector2(0, 20)
+		last_to_pos = end_pos
+	else:
+		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(to_ref.size.x / 2.0, to_ref.size.y)
+	
+	# calculate vertical curvature
+	var distance_y: float = abs(end_pos.y - start_pos.y)
+	var tangent_offset: float = clamp(distance_y / 2.0, 30.0, 150.0)
+
+	# control points aligned vertically
+	var control_1: Vector2 = start_pos + Vector2(0, tangent_offset)
+	var control_2: Vector2 = end_pos - Vector2(0, tangent_offset)
+
+	var curve_points: PackedVector2Array = PackedVector2Array()
+	var steps: int = 24 # slightly more steps for vertical flow smoothness
+	
+	for i in range(steps + 1):
+		var t: float = i / float(steps)
+		var point: Vector2 = start_pos.bezier_interpolate(control_1, control_2, end_pos, t)
+		curve_points.append(point)
+
+	points = curve_points
 
 
 func show_debug() -> void:
 	if not is_inside_tree():
 		return
 
-
 	if !debug_timer:
 		debug_timer = Timer.new()
 		debug_timer.wait_time = DEBUG_TIMER_TIME
 		debug_timer.timeout.connect(hide_debug)
 		add_child(debug_timer)
-		debug_timer.start()
-		material.shader = flow_debug_shader
-		width = 13
-		texture = debug_texture
 
-		var cnode_border: Panel = to_cnode.get_border()
-		var from_cnode_border: Panel = from_connector.root.get_border()
-		var border_style: StyleBoxFlat = cnode_border.get('theme_override_styles/panel')
-		var from_border_style: StyleBoxFlat = from_cnode_border.get('theme_override_styles/panel')
+	texture = debug_texture
+	material.shader = flow_debug_shader
+	material.set_shader_parameter('color', Color('#63ff92ff'))
+	width = 20
 
-		var to_color: Color = Color('#FABC3F') if to_cnode.sub_type == HenVirtualCNode.SubType.DEBUG_VALUE else Color('#52b788')
-		var from_color: Color = Color('#FABC3F') if from_connector.root.sub_type == HenVirtualCNode.SubType.DEBUG_VALUE else Color('#52b788')
-
-		# arrows colors
-		from_connector.modulate = to_color
-		to_cnode.get_node('%ArrowUp').get_child(0).modulate = to_color
-
-		border_style.set('border_color', to_color)
-		border_style.set('bg_color', Color(to_color, .1))
-
-		from_border_style.set('border_color', from_color)
-		from_border_style.set('bg_color', Color(from_color, .1))
+	input.modulate = Color('#63ff92ff')
+	output.modulate = Color('#63ff92ff')
 	
-
-		# animations
-		var tween: Tween = get_tree().create_tween().parallel().set_trans(Tween.TRANS_LINEAR)
-		tween.tween_method(change_debug_line_color, default_color, to_color, DEBUG_TIMER_TIME)
-		tween.tween_property(self, 'width', 17, DEBUG_TIMER_TIME)
-	
-		cnode_border.visible = true
-		from_cnode_border.visible = true
-		return
-
 	debug_timer.start(DEBUG_TIMER_TIME)
 
 
 func hide_debug() -> void:
 	texture = normal_texture
 	material.shader = null
-	debug_timer.queue_free()
-	debug_timer = null
+	
+	if debug_timer:
+		debug_timer.queue_free()
+		debug_timer = null
+
 	width = 9
 
 	# arrows
-	from_connector.modulate = Color('#515151')
-	to_cnode.get_node('%ArrowUp').get_child(0).modulate = Color('#515151')
-
-	var cnode_border: Panel = to_cnode.get_border()
-	cnode_border.visible = false
-	to_cnode.modulate = Color.WHITE
+	input.modulate = Color.WHITE
+	output.modulate = Color.WHITE
 
 	# animations
 	var tween: Tween = get_tree().create_tween().parallel().set_trans(Tween.TRANS_ELASTIC)

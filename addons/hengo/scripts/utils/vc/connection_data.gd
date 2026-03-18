@@ -1,30 +1,26 @@
 @tool
-class_name HenVCConnectionData extends RefCounted
+class_name HenVCConnectionData extends Resource
 
-var from_id: int
-var to_id: int
-var line_ref: HenConnectionLine
-var type: StringName
-
-
-class InputConnectionData extends HenVCConnectionData:
-	var from: HenVirtualCNode
-	var from_ref: OutputConnectionData
-	var from_old_pos: Vector2
-	var from_type: StringName
-	var input_ref: HenVCInOutData
-
-	func get_save() -> Dictionary:
-		return {
-			from_id = from_id,
-			to_id = to_id,
-			from_vc_id = from.id,
-		}
+@export var id: StringName
+@export var from_id: StringName
+@export var to_id: StringName
+@export var from_node_id: StringName
+@export var to_node_id: StringName
+@export var from_type: StringName
+@export var to_type: StringName
 
 
-class OutputConnectionData extends HenVCConnectionData:
-	var to: HenVirtualCNode
-	var to_ref: InputConnectionData
-	var to_old_pos: Vector2
-	var to_type: StringName
-	var output_ref: HenVCInOutData
+var line_ref: HenConnectionLine = null
+var from_old_pos: Vector2 = Vector2.ZERO
+var to_old_pos: Vector2 = Vector2.ZERO
+
+
+func _init() -> void:
+	id = StringName(str((Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()))
+
+func get_from(_save_data: HenSaveData) -> HenVirtualCNode:
+	return _save_data.get_cnode_by_id(from_node_id)
+
+
+func get_to(_save_data: HenSaveData) -> HenVirtualCNode:
+	return _save_data.get_cnode_by_id(to_node_id)

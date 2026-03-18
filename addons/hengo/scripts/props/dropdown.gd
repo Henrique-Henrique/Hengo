@@ -1,6 +1,8 @@
 @tool
 class_name HenDropdown extends Button
 
+const DROP_DOWN_MENU_SCENE: PackedScene = preload('res://addons/hengo/scenes/drop_down_menu.tscn')
+
 var options: Array = []
 @export var type: String = ''
 var custom_data
@@ -8,18 +10,41 @@ var custom_value: String = ''
 var input_ref: HenVCInOutData
 
 signal value_changed
+signal on_set_res_data
+
 
 func _ready() -> void:
 	button_down.connect(_on_pressed)
 
 
 func _on_pressed() -> void:
+	var router: HenRouter = Engine.get_singleton(&'Router')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	match type:
 		'state_transition':
-			# all transitions
-			if HenRouter.current_route.type == HenRouter.ROUTE_TYPE.STATE:
-				options = HenRouter.current_route.ref.flow_connections.map(func(x):
-					return {name = x.name, ref = x})
+			var arr: Array = []
+			var state_id: StringName
+
+			for state_key: StringName in global.SAVE_DATA.routes.keys():
+				var route: HenRouteData = global.SAVE_DATA.routes.get(state_key)
+
+				if route == router.current_route:
+					state_id = state_key
+					break
+
+			if state_id:
+				for state: HenSaveState in global.SAVE_DATA.states:
+					if str(state.id) == state_id:
+						for flow: HenSaveParam in state.flow_outputs:
+							arr.append({
+								name = flow.name,
+								id = state.id,
+								type = HenSideBar.AddType.STATE,
+								flow_id = flow.id
+							})
+			
+			options = arr
 		'action':
 			var arr: Array = []
 
@@ -30,13 +55,17 @@ func _on_pressed() -> void:
 					})
 			
 			options = arr
+		'all_godot_classes':
+			options = (HenEnums.VARIANT_TYPES + ClassDB.get_class_list() as Array).map(func(x: String): return {
+				name = x
+			})
 		'hengo_states':
-			options = HenGlobal.SCRIPTS_STATES[custom_data] if HenGlobal.SCRIPTS_STATES.has(custom_data) else []
+			options = global.SCRIPTS_STATES[custom_data] if global.SCRIPTS_STATES.has(custom_data) else []
 		'all_classes':
-			options = HenEnums.DROPDOWN_ALL_CLASSES
+			options = (Engine.get_singleton(&'Enums') as HenEnums).DROPDOWN_ALL_CLASSES
 		'all_classes_self':
 			options = [ {name = 'SELF'}]
-			options.append_array(HenEnums.DROPDOWN_ALL_CLASSES)
+			options.append_array((Engine.get_singleton(&'Enums') as HenEnums).DROPDOWN_ALL_CLASSES)
 		'enum_list':
 			var enum_reference: Dictionary = {}
 
@@ -47,20 +76,7 @@ func _on_pressed() -> void:
 		'all_props':
 			var arr: Array = []
 
-			# local variables
-			match HenRouter.current_route.type:
-				HenRouter.ROUTE_TYPE.FUNC, HenRouter.ROUTE_TYPE.SIGNAL, HenRouter.ROUTE_TYPE.MACRO:
-					if HenRouter.current_route.ref.get(&'local_vars') is Array:
-						for var_data: HenVarData in (HenRouter.current_route.ref.local_vars as Array):
-							if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
-								arr.append({
-									name = var_data.name,
-									category = 'class_props',
-									ref = var_data
-								})
-
-			# variables
-			for var_data: HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
+			for var_data: HenSaveVar in global.SAVE_DATA.variables:
 				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
 					arr.append({
 						name = var_data.name,
@@ -68,8 +84,7 @@ func _on_pressed() -> void:
 						ref = var_data
 					})
 			
-			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type):
+			for prop: Dictionary in ClassDB.class_get_property_list(global.SAVE_DATA.identity.type):
 				var _type: StringName = input_ref.type
 				var prop_type: StringName = type_string(prop.type)
 				
@@ -88,74 +103,60 @@ func _on_pressed() -> void:
 			})
 		'callable':
 			options = []
-			# options = HenGlobal.ROUTE_REFERENCE_CONTAINER.get_children().map(func(x): return {
-			# 	name = x.route.name
-			# })
-		'get_prop', 'set_prop':
+		'key_code':
 			var arr: Array = []
-			
-			# local variables
-			# ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-			# # variables
-			# for var_data:HenVarData in HenGlobal.SIDE_BAR_LIST.var_list:
-			# 	arr.append({name = var_data.name, type = var_data.type, ref = var_data})
-
-			# properties
-			for prop: Dictionary in ClassDB.class_get_property_list(HenGlobal.script_config.type if not custom_data else custom_data):
-				var prop_type: StringName = type_string(prop.type)
-				if prop.type != TYPE_NIL:
-					arr.append({
-						name = prop.name,
-						type = prop_type
-					})
-				
-				get_const_list(arr, '', prop.name, prop_type, false)
-
+			var key_list: Array = [
+				'KEY_SPACE', 'KEY_ESCAPE', 'KEY_TAB', 'KEY_BACKSPACE', 'KEY_ENTER',
+				'KEY_UP', 'KEY_DOWN', 'KEY_LEFT', 'KEY_RIGHT',
+				'KEY_A', 'KEY_B', 'KEY_C', 'KEY_D', 'KEY_E', 'KEY_F', 'KEY_G', 'KEY_H',
+				'KEY_I', 'KEY_J', 'KEY_K', 'KEY_L', 'KEY_M', 'KEY_N', 'KEY_O', 'KEY_P',
+				'KEY_Q', 'KEY_R', 'KEY_S', 'KEY_T', 'KEY_U', 'KEY_V', 'KEY_W', 'KEY_X',
+				'KEY_Y', 'KEY_Z',
+				'KEY_0', 'KEY_1', 'KEY_2', 'KEY_3', 'KEY_4', 'KEY_5', 'KEY_6', 'KEY_7',
+				'KEY_8', 'KEY_9',
+				'KEY_F1', 'KEY_F2', 'KEY_F3', 'KEY_F4', 'KEY_F5', 'KEY_F6',
+				'KEY_F7', 'KEY_F8', 'KEY_F9', 'KEY_F10', 'KEY_F11', 'KEY_F12',
+				'KEY_SHIFT', 'KEY_CTRL', 'KEY_ALT', 'KEY_META',
+				'KEY_INSERT', 'KEY_DELETE', 'KEY_HOME', 'KEY_END', 'KEY_PAGEUP', 'KEY_PAGEDOWN'
+			]
+			for key_name in key_list:
+				arr.append({name = key_name, code_name = key_name})
+			options = arr
+		'mouse_button':
+			var arr: Array = []
+			var mouse_list: Array = [
+				'MOUSE_BUTTON_LEFT', 'MOUSE_BUTTON_RIGHT', 'MOUSE_BUTTON_MIDDLE',
+				'MOUSE_BUTTON_WHEEL_UP', 'MOUSE_BUTTON_WHEEL_DOWN',
+				'MOUSE_BUTTON_WHEEL_LEFT', 'MOUSE_BUTTON_WHEEL_RIGHT',
+				'MOUSE_BUTTON_XBUTTON1', 'MOUSE_BUTTON_XBUTTON2'
+			]
+			for btn_name in mouse_list:
+				arr.append({name = btn_name, code_name = btn_name})
 			options = arr
 		'state_event_list':
 			pass
-			# var data: Dictionary = HenGlobal.SCRIPTS_INFO.get(custom_data)
 
-			# if data.has('state_event_list'):
-			# 	options = data.state_event_list.map(func(x: String) -> Dictionary: return {name = x.to_snake_case()})
-		'signal_list':
-			var arr: Array = []
-			var all_classes: PackedStringArray = ClassDB.get_class_list()
-
-			# print(ClassDB.class_get_signal_list('BaseButton', true))
-
-			for class_name_data: String in all_classes:
-				for signal_data: Dictionary in ClassDB.class_get_signal_list(class_name_data, true):
-					arr.append(
-						{
-							name = '{name}   ({class})'.format({
-								name = signal_data.name,
-								'class' = class_name_data
-							}),
-							signal_name = signal_data.name,
-							signal_class = class_name_data
-						})
-				
-			options = arr
 			
+	var dropdown_menu: HenDropDownMenu = DROP_DOWN_MENU_SCENE.instantiate()
+	dropdown_menu.mount(options, _selected, type)
+	dropdown_menu.custom_minimum_size.x = size.x
 
-	HenGlobal.DROPDOWN_MENU.position = global_position
-	HenGlobal.DROPDOWN_MENU.get_parent().show_container()
-	HenGlobal.DROPDOWN_MENU.mount(options, _selected, type)
+	var popup: HenPopupContainer = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(dropdown_menu, '', Vector2.INF, 0)
+	var gp: Control = popup.get_node('%GeneralPopUp')
+	popup.move(global_position - gp.global_position)
 
 
 func _selected(_item: Dictionary) -> void:
 	text = _item.name
 
-	HenGlobal.CAM.can_scroll = true
+	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = true
 
 	match type:
 		'hengo_states':
 			text = (_item.name as String).to_snake_case()
 		'state_transition':
-			emit_signal('value_changed', text)
-			input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
+			_item.erase('name')
+			on_set_res_data.emit(_item)
 			return
 		'enum_list':
 			text = _item.name
@@ -170,10 +171,6 @@ func _selected(_item: Dictionary) -> void:
 
 			input_ref.category = 'class_props'
 
-			if _item.has('ref'):
-				input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.IS_PROP)
-			else:
-				input_ref.remove_ref()
 			return
 		'get_prop':
 			emit_signal('value_changed', text, _item.type)
@@ -183,30 +180,14 @@ func _selected(_item: Dictionary) -> void:
 			else:
 				input_ref.remove_ref()
 			return
-		'set_prop':
-			emit_signal('value_changed', text)
-			
-			var second_input: HenCnodeInOut = get_parent().owner.get_parent().get_child(1 if not custom_data else 2)
-			
-			if _item.has('ref'):
-				second_input.input_ref.type = _item.ref.type
-				second_input.input_ref.reset_input_value()
-				second_input.input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.TYPE_CHANGE)
-				input_ref.set_ref(_item.ref, HenVCInOutData.RefChangeRule.VALUE_CODE_VALUE_CHANGE)
-			else:
-				second_input.input_ref.remove_ref()
-				second_input.input_ref.type = _item.type
-				second_input.input_ref.reset_input_value()
-				second_input.input_ref.update_changes.emit()
-			return
-		'signal_list':
-			var item: HenSignalData = custom_data.signal_ref
-			item.set_signal_params(_item.signal_class, _item.signal_name)
+
 
 	value_changed.emit(text)
 
-# public
-#
+func set_font_size(_size: int) -> void:
+	add_theme_font_size_override('font_size', _size)
+
+
 func set_default(_text: String) -> void:
 	match type:
 		'enum_list':
@@ -237,8 +218,9 @@ func get_generated_code() -> String:
 	
 
 func get_const_list(_arr: Array, _type: StringName, _name: String, _prop_type: StringName, _check_type: bool = true) -> Array:
-	if HenEnums.NATIVE_PROPS_LIST.has(_prop_type):
-		for prop: Dictionary in HenEnums.NATIVE_PROPS_LIST.get(_prop_type):
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+	if enums.NATIVE_PROPS_LIST.has(_prop_type):
+		for prop: Dictionary in enums.NATIVE_PROPS_LIST.get(_prop_type):
 			var my_name: String = _name + ' -> ' + prop.name
 
 			if _check_type:

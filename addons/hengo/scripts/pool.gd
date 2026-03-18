@@ -1,20 +1,32 @@
 @tool
 class_name HenPool extends RefCounted
 
+static func get_cnode_from_pool() -> HenCnode:
+    var _cnode: HenCnode
 
-static func get_line_from_pool(_from_cnode: HenCnode, _to_cnode: HenCnode, _input_connector, _output_connector) -> HenConnectionLine:
+    for cnode: HenCnode in (Engine.get_singleton(&'Global') as HenGlobal).cnode_pool:
+        if not cnode.visible:
+            _cnode = cnode
+            cnode.unselect(0)
+            break
+
+    return _cnode
+
+
+static func get_line_from_pool() -> HenConnectionLine:
     var _line: HenConnectionLine
 
-    for line: HenConnectionLine in HenGlobal.connection_line_pool:
+    for line: HenConnectionLine in (Engine.get_singleton(&'Global') as HenGlobal).connection_line_pool:
         if not line.visible:
+            line.from = null
+            line.to = null
             line.points = []
-            line.from_cnode = _from_cnode
-            line.to_cnode = _to_cnode
-            line.input = _input_connector
-            line.output = _output_connector
             line.position = Vector2.ZERO
             line.visible = true
-
+            line.from_pool_visible = false
+            line.to_pool_visible = false
+            line.last_from_pos = Vector2.ZERO
+            line.last_to_pos = Vector2.ZERO
             _line = line
             break
     
@@ -24,13 +36,17 @@ static func get_line_from_pool(_from_cnode: HenCnode, _to_cnode: HenCnode, _inpu
 static func get_flow_line_from_pool() -> HenFlowConnectionLine:
     var _line: HenFlowConnectionLine
 
-    for line: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+    for line: HenFlowConnectionLine in (Engine.get_singleton(&'Global') as HenGlobal).flow_connection_line_pool:
         if not line.visible:
+            line.from = null
+            line.to = null
             line.points = []
-            
             line.position = Vector2.ZERO
             line.visible = true
-
+            line.from_pool_visible = false
+            line.to_pool_visible = false
+            line.last_from_pos = Vector2.ZERO
+            line.last_to_pos = Vector2.ZERO
             _line = line
             break
     

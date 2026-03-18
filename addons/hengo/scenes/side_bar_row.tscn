@@ -1,0 +1,53 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/side_bar/side_bar_row.gd" id="1_7v3k4"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/icons/add.svg" id="2_h4mou"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_a83b1"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btnrow"]
+
+[node name="SideBarRow" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 24)
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_a83b1")
+script = ExtResource("1_7v3k4")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
+
+[node name="Body" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 0
+
+[node name="Icon" type="TextureRect" parent="Margin/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Margin/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Item"
+clip_text = true
+
+[node name="AddButton" type="Button" parent="Margin/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 24)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btnrow")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btnrow")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btnrow")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btnrow")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_btnrow")
+text = "New"
+icon = ExtResource("2_h4mou")
+flat = true

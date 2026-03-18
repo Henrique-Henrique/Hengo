@@ -1,0 +1,65 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/side_bar/side_bar_category.gd" id="1_b4epu"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/icons/add.svg" id="2_efo5g"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h8v1j"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btncat"]
+
+[node name="SideBarCategory" type="VBoxContainer"]
+size_flags_horizontal = 3
+script = ExtResource("1_b4epu")
+
+[node name="HeaderPanel" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_h8v1j")
+
+[node name="Header" type="MarginContainer" parent="HeaderPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 4
+
+[node name="HeaderRow" type="HBoxContainer" parent="HeaderPanel/Header"]
+layout_mode = 2
+
+[node name="Icon" type="TextureRect" parent="HeaderPanel/Header/HeaderRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="HeaderPanel/Header/HeaderRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Category"
+clip_text = true
+
+[node name="AddButton" type="Button" parent="HeaderPanel/Header/HeaderRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 24)
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btncat")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btncat")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btncat")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_btncat")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_btncat")
+text = "New"
+icon = ExtResource("2_efo5g")
+flat = true
+
+[node name="Items" type="VBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Divider" type="ColorRect" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(0.376471, 0.376471, 0.376471, 0.35)

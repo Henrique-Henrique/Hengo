@@ -1,0 +1,21 @@
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Tests
+        uses: MikeSchulze/gdunit4-action@v1
+        with:
+          godot-version: '4.6'
+          version: 'v6.1.1'
+          paths: 'res://tests'

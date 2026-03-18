@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://scw3edv1d866"]
+
+[ext_resource type="Shader" uid="uid://d2dq680ncrnje" path="res://addons/hengo/assets/shaders/blur.gdshader" id="1_i5064"]
+
+[resource]
+shader = ExtResource("1_i5064")
+shader_parameter/lod = 3.0000001425
+shader_parameter/color = Color(0, 0, 0, 1)
+shader_parameter/transparency = 0.6000000285

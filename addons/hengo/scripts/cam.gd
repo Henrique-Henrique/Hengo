@@ -2,13 +2,14 @@
 class_name HenCam extends Node2D
 
 @export var grid: TextureRect
+@export var is_global_cam: bool = true
 
 var target_zoom: float = 1.
 
-const MIN_ZOOM: float = .2
-const MAX_ZOOM: float = 1.5
-const ZOOM_INCREMENT: float = .15
-const ZOOM_RATE: float = 12.
+var MIN_ZOOM: float = 1
+var MAX_ZOOM: float = 2
+var ZOOM_INCREMENT: float = .15
+var ZOOM_RATE: float = 12.
 
 var t_x: Vector2 = Vector2(1, 0)
 var t_y: Vector2 = Vector2(0, 1)
@@ -21,14 +22,16 @@ var can_scroll: bool = true
 @onready var ref_point: Marker2D = get_node('RefPoint')
 var initial: Vector2 = Vector2.ZERO
 
-# private
-#
+
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self):
+	if HenUtils.disable_scene_with_owner(self ):
 		return
-	
-	can_scroll = false
-	var parent: Panel = get_parent()
+	add_to_group(&'hen_cam')
+	update_settings()
+
+	if is_global_cam:
+		can_scroll = false
+	var parent: Control = get_parent()
 
 	parent.item_rect_changed.connect(_on_ui_size_changed)
 
@@ -40,17 +43,67 @@ func _on_ui_size_changed() -> void:
 	(grid.material as ShaderMaterial).set_shader_parameter('screen_size', get_parent().size)
 
 
+func update_settings() -> void:
+	MIN_ZOOM = ProjectSettings.get_setting(HenSettings.MIN_ZOOM_PATH, 1.0)
+	MAX_ZOOM = ProjectSettings.get_setting(HenSettings.MAX_ZOOM_PATH, 2.0)
+	ZOOM_INCREMENT = ProjectSettings.get_setting(HenSettings.ZOOM_INCREMENT_PATH, 0.15)
+	ZOOM_RATE = ProjectSettings.get_setting(HenSettings.ZOOM_RATE_PATH, 12.0)
+
+	MAX_ZOOM = MAX_ZOOM * EditorInterface.get_editor_scale()
+
+
+func is_cam_active() -> bool:
+	var parent: Control = get_parent() as Control
+	
+	if is_global_cam:
+		var global: HenGlobal = Engine.get_singleton(&'Global') as HenGlobal
+		if not global or global.CAM != self:
+			return false
+			
+		# cede control if a local cam is hovered
+		for node in get_tree().get_nodes_in_group(&'hen_cam'):
+			if node != self and node is HenCam:
+				var local_cam: HenCam = node as HenCam
+				if not local_cam.is_global_cam and local_cam.is_cam_active():
+					return false
+					
+		return true
+	
+	if not is_inside_tree():
+		return false
+		
+	if parent and parent.is_visible_in_tree():
+		var rect: Rect2 = parent.get_global_rect()
+		return rect.has_point(parent.get_global_mouse_position())
+		
+	return false
+
+
 func _input(event: InputEvent) -> void:
-	if HenGlobal.CAM == self:
+	if is_cam_active():
 		if event is InputEventMouseMotion:
 			check_vc_action_menu()
 
-			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE:
+			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE or \
+			   (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_RIGHT:
 				transform.origin += (event as InputEventMouseMotion).relative
 				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
 				_check_virtual_cnodes()
 		
+		elif event is InputEventPanGesture:
+			transform.origin -= (event as InputEventPanGesture).delta * 40
+			(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
+			set_physics_process(false)
+			_check_virtual_cnodes()
+
+		elif event is InputEventMagnifyGesture:
+			var zoom_amount = (event as InputEventMagnifyGesture).factor
+			if zoom_amount > 1.0:
+				_zoom_in((zoom_amount - 1.0) * 2.0)
+			elif zoom_amount < 1.0:
+				_zoom_out((1.0 - zoom_amount) * 2.0)
+
 		elif event is InputEventMouseButton:
 			if event.is_pressed():
 				if can_scroll:
@@ -60,13 +113,13 @@ func _input(event: InputEvent) -> void:
 						_zoom_out()
 
 
-func _zoom_in() -> void:
-	target_zoom = min(target_zoom + ZOOM_INCREMENT, MAX_ZOOM)
+func _zoom_in(amount: float = ZOOM_INCREMENT) -> void:
+	target_zoom = min(target_zoom + amount, MAX_ZOOM)
 	_set_transform(get_global_mouse_position())
 
 
-func _zoom_out() -> void:
-	target_zoom = max(target_zoom - ZOOM_INCREMENT, MIN_ZOOM)
+func _zoom_out(amount: float = ZOOM_INCREMENT) -> void:
+	target_zoom = max(target_zoom - amount, MIN_ZOOM)
 	_set_transform(get_global_mouse_position())
 
 
@@ -92,7 +145,7 @@ func _set_transform(_pos: Vector2) -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if ignore_process or HenGlobal.CAM == self:
+	if ignore_process or is_cam_active():
 		var factor: float = ZOOM_RATE * _delta
 		transform.x = lerp(transform.x, t_x, factor)
 		transform.y = lerp(transform.y, t_y, factor)
@@ -109,27 +162,30 @@ func _physics_process(_delta: float) -> void:
 			ignore_process = false
 
 
-# checking virtual cnodes positions
+# checks virtual cnodes visibility
+
+
 func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
+	if not is_global_cam:
+		return
+		
 	var rect: Rect2 = Rect2(
-		_pos / -_zoom, # position
-		(get_parent() as Panel).size / _zoom
+		_pos / -_zoom,
+		(get_parent() as Control).size / _zoom
 	)
+	var router: HenRouter = Engine.get_singleton(&'Router')
 
-
-	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		for v_cnode: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
-			v_cnode.check_visibility(rect)
+	for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
+		v_cnode.check_visibility(rect)
 
 
 func get_rect() -> Rect2:
 	return Rect2(
-		transform.origin / -transform.x.x, # position
-		(get_parent() as Panel).size / transform.x.x
+		transform.origin / -transform.x.x,
+		(get_parent() as Control).size / transform.x.x
 	)
 
-# public
-#
+
 func get_relative_vec2(_pos: Vector2) -> Vector2:
 	return (_pos - global_position) / transform.x.x
 
@@ -145,10 +201,33 @@ func go_to_center(_pos: Vector2) -> void:
 	set_physics_process(true)
 
 
+# centers camera with optional zoom
+
+
+func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
+	var zoom_to_use: float = _target_zoom if _target_zoom > 0 else transform.x.x
+	zoom_to_use = clamp(zoom_to_use, MIN_ZOOM, MAX_ZOOM)
+	
+	pos = (_pos * (-zoom_to_use)) + (get_parent().size / 2)
+	
+	if _target_zoom > 0:
+		target_zoom = zoom_to_use
+		t_x = Vector2(target_zoom, 0)
+		t_y = Vector2(0, target_zoom)
+	
+	ignore_process = true
+	set_physics_process(true)
+
+
 func check_vc_action_menu() -> void:
-	if HenRouter.current_route and is_instance_valid(HenRouter.current_route.get('ref')):
-		for vc: HenVirtualCNode in HenRouter.current_route.ref.virtual_cnode_list:
-			if not vc.is_showing:
+	if not is_global_cam:
+		return
+		
+	var router: HenRouter = Engine.get_singleton(&'Router')
+
+	if router.current_route and is_instance_valid(router.current_route.get('ref')):
+		for vc: HenVirtualCNode in router.get_current_route_v_cnodes():
+			if not vc.is_showing_on_screen():
 				continue
 
 			var mouse_inside: bool = vc.check_mouse_inside()
@@ -157,6 +236,3 @@ func check_vc_action_menu() -> void:
 				continue
 
 			vc.showing_action_menu = mouse_inside
-
-			if vc.showing_action_menu:
-				HenVCActionButtons.get_singleton().show_action(vc.cnode_ref)

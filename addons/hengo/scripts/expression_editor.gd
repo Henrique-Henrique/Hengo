@@ -10,9 +10,9 @@ var v_cnode: HenVirtualCNode
 var bt_ref: HenExpressionBt
 var word_list: Array
 var completion_list: Array
-
 var default_config: Dictionary
 
+signal on_save
 
 const NATIVE_KEYWORDS: Array[StringName] = ['and', 'or', 'not', 'in', 'is']
 
@@ -30,10 +30,12 @@ func _ready() -> void:
 
 
 func _completion_request() -> void:
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+
 	for key in completion_list:
 		code_edit.add_code_completion_option(CodeEdit.KIND_VARIABLE, key, key)
 
-	for native_name in HenEnums.MATH_UTILITY_NAME_LIST:
+	for native_name in enums.MATH_UTILITY_NAME_LIST:
 		code_edit.add_code_completion_option(CodeEdit.KIND_FUNCTION, native_name, native_name + '(')
 	
 	code_edit.update_code_completion_options(true)
@@ -82,20 +84,7 @@ func _on_change() -> void:
 
 
 func _on_save() -> void:
-	# cleaning inputs
-	v_cnode.inputs[0].value = code_edit.text
-
-	for input: HenVCInOutData in v_cnode.inputs.slice(1):
-		v_cnode._on_in_out_deleted(true, input)
-
-	for word in word_list:
-		v_cnode._on_in_out_added(true, {
-			name = word,
-			type = 'Variant'
-		})
-		
-	HenGlobal.GENERAL_POPUP.get_parent().hide()
-	v_cnode.update()
+	on_save.emit(code_edit.text, word_list)
 
 
 func unique_array(arr: Array) -> Array:

@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://chuixd71sfisa"]
+
+[ext_resource type="Script" uid="uid://cccef4cmcfb2w" path="res://addons/hengo/scripts/utils/rename_script_popup.gd" id="1_rename_popup"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="2_bold"]
+[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_medium"]
+
+[node name="VBoxContainer" type="VBoxContainer" unique_id=1676275452]
+custom_minimum_size = Vector2(340, 0)
+theme_override_constants/separation = 10
+script = ExtResource("1_rename_popup")
+
+[node name="LabelCategory" type="Label" parent="." unique_id=898301880]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_bold")
+text = "Category (e.g. objects/car/)"
+
+[node name="Category" type="LineEdit" parent="." unique_id=250871296]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "objects/car/   (leave empty for root)"
+
+[node name="LabelName" type="Label" parent="." unique_id=643815049]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_bold")
+text = "Script Name"
+
+[node name="ScriptName" type="LineEdit" parent="." unique_id=1725351099]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "car_controller"
+
+[node name="Warning" type="Label" parent="." unique_id=1924250886]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_fonts/font = ExtResource("3_medium")
+autowrap_mode = 3
+
+[node name="ConfirmBt" type="Button" parent="." unique_id=225310069]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Confirm"

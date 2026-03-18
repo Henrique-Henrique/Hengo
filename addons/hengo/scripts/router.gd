@@ -11,38 +11,60 @@ enum ROUTE_TYPE {
 	MACRO
 }
 
-static var current_route: Dictionary = {} # name: String, type: ROUTE_TYPE, id: String
-static var line_route_reference: Dictionary = {}
-static var comment_reference: Dictionary = {}
+var current_route: HenRouteData
 
-static func get_current_route_v_cnodes() -> Array:
+
+func get_current_route_v_cnodes() -> Array:
 	if current_route:
-		return current_route.ref.virtual_cnode_list
+		return current_route.virtual_cnode_list
 
 	return []
 
-static func change_route(_route: Dictionary) -> void:
+
+func change_route(_route: HenRouteData) -> void:
 	if current_route == _route:
+		_centralize_cam()
 		return
 
+	var old_route: HenRouteData = current_route
+
 	if current_route:
-		for v_cnode: HenVirtualCNode in current_route.ref.virtual_cnode_list:
+		for v_cnode: HenVirtualCNode in get_current_route_v_cnodes():
 			v_cnode.hide()
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	for line: HenConnectionLine in HenGlobal.connection_line_pool:
+	for line: HenConnectionLine in global.connection_line_pool:
 		line.visible = false
 
-
-	for connection: HenConnectionLine in HenGlobal.connection_line_pool:
+	for connection: HenConnectionLine in global.connection_line_pool:
 		connection.visible = false
 
-
-	for flow_connection: HenFlowConnectionLine in HenGlobal.flow_connection_line_pool:
+	for flow_connection: HenFlowConnectionLine in global.flow_connection_line_pool:
 		flow_connection.visible = false
-
 
 	current_route = _route
 
-	HenGlobal.CAM._check_virtual_cnodes()
-	HenGlobal.SIDE_BAR._on_list_changed()
+	global.CAM._check_virtual_cnodes()
+	global.SIDE_BAR.update()
+	
+	global.AUTO_CAMERA.on_route_changed(old_route, _route)
+	
+	HenFormatter.format_current_route()
+	global.RIGHT_SIDE_BAR.update(current_route)
+
+
+func _centralize_cam(_vc: HenVirtualCNode = null) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not current_route:
+		return
+
+	if current_route.virtual_cnode_list.is_empty():
+		return
+
+	var vc: HenVirtualCNode = _vc if _vc else current_route.virtual_cnode_list.get(0)
+
+	if not vc:
+		return
+
+	global.CAM.go_to_center(vc.position)

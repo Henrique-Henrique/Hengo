@@ -104,9 +104,9 @@ func start(_start: Vector2, _in_out = null) -> void:
 		stick_list.append(s)
 
 
-	if _in_out:
-		var first_color: Color = _in_out.get_type_color(_in_out.input_ref.type)
-		gradient.colors[0] = first_color
+	# if _in_out:
+	# 	var first_color: Color = _in_out.get_type_color(_in_out.input_ref.type)
+	# 	gradient.colors[0] = first_color
 
 	set_physics_process(true)
 	visible = true

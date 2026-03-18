@@ -14,6 +14,10 @@ func _on_press() -> void:
 
 # public
 #
+func set_font_size(_size: int) -> void:
+	pass
+
+
 func set_default(_value) -> void:
 	if not _value or str(_value) == 'null': _value = bool()
 	button_pressed = str_to_var(_value) if _value is String else _value

@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://bsdw3ppkktst5"]
+
+[ext_resource type="Script" uid="uid://br15eim72aeff" path="res://addons/hengo/scripts/state_viewer/state_viewer_machine_graph.gd" id="1_fkdvs"]
+[ext_resource type="Script" uid="uid://buw3cbicdpedm" path="res://addons/hengo/scripts/state_viewer/state_viewer_edges_overlay.gd" id="2_2m6er"]
+[ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_camxx"]
+[ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="4_gridsh"]
+[ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="5_gridtex"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_8nimy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
+shader = ExtResource("4_gridsh")
+shader_parameter/screen_size = Vector2(1539, 1975)
+shader_parameter/offset = Vector2(178.45523, 6.752313)
+shader_parameter/zoom_factor = 2.4641013
+shader_parameter/alpha = 0.05
+shader_parameter/text = ExtResource("5_gridtex")
+shader_parameter/text_size = 400.0
+
+[node name="MachineGraph" type="Control" unique_id=2066009994]
+clip_contents = true
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fkdvs")
+
+[node name="Panel" type="Panel" parent="." unique_id=1842519355]
+process_mode = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_8nimy")
+
+[node name="Grid" type="TextureRect" parent="Panel" unique_id=1070055922]
+process_mode = 4
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_r8ipe")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_gridtex")
+
+[node name="Cam" type="Node2D" parent="." unique_id=95183905 node_paths=PackedStringArray("grid")]
+unique_name_in_owner = true
+position = Vector2(0, -8)
+script = ExtResource("3_camxx")
+grid = NodePath("../Panel/Grid")
+is_global_cam = false
+
+[node name="RefPoint" type="Marker2D" parent="Cam" unique_id=2087226410]
+visible = false
+position = Vector2(289, 313)
+
+[node name="NodesContainer" type="Control" parent="Cam" unique_id=1022002004]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HenStateViewerEdgesOverlay" type="Control" parent="Cam" unique_id=1916172987]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+script = ExtResource("2_2m6er")

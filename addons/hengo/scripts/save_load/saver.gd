@@ -1,164 +1,152 @@
 @tool
 class_name HenSaver extends Node
 
-const TEMP_EXT: String = '.tmp'
-const BACKUP_EXT: String = '.bkp'
-
-
-class Saver:
-	var task_id_list: Array[int] = []
-
-
-class SaveData:
-	var id: int
-	var script_data: HenScriptData
-
-	func _init(_id: int, _script_data: HenScriptData):
-		id = _id
-		script_data = _script_data
-
-
-class SaveConfig:
-	var script_list: Array[SaveData] = []
-
-	func add_script(_save_data: SaveData) -> void:
-		script_list.append(_save_data)
-
-
-static func generate_script_data() -> HenScriptData:
-	var script_data: HenScriptData = HenScriptData.new()
-
-	script_data.path = HenGlobal.script_config.path
-	script_data.type = HenGlobal.script_config.type
-	script_data.node_counter = HenGlobal.node_counter
-	script_data.prop_counter = HenGlobal.prop_counter
-
-	# ---------------------------------------------------------------------------- #
-	# Side Bar List
-	script_data.side_bar_list = HenGlobal.SIDE_BAR_LIST.get_save()
-
-	# ---------------------------------------------------------------------------- #
-	var v_cnode_list: Array[Dictionary] = []
-
-	for v_cnode: HenVirtualCNode in HenGlobal.BASE_ROUTE.ref.virtual_cnode_list:
-		v_cnode_list.append(v_cnode.get_save())
-
-		if v_cnode.type == HenVirtualCNode.Type.STATE_EVENT:
-			script_data.state_event_list.append(v_cnode.name)
-			
-	script_data.virtual_cnode_list = v_cnode_list
-
-	return script_data
-
 
 static func save() -> void:
-	HenGlobal.HENGO_SAVER = Saver.new()
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.emit()
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_started.emit()
+	(Engine.get_singleton(&'ThreadHelper') as HenThreadHelper).add_task(start_generate.bind(true))
 
-	var script_data: HenScriptData = generate_script_data()
-	var script_id: int = HenGlobal.script_config.id
 
-	# check if save dierctory exists
+static func save_new() -> void:
+	if not DirAccess.dir_exists_absolute('res://hengo'):
+		DirAccess.make_dir_absolute('res://hengo')
+	
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
+	
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+	var save_data: HenSaveData = global.SAVE_DATA
+	var result: int = ResourceSaver.save(save_data)
+	
+	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.identity.id)) if result == OK else 'Erro saving' + str(save_data.identity.id))
+
+
+static func start_generate(_regenerate: bool = false) -> void:
+	var start_time: int = Time.get_ticks_msec()
+	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+
+	# check if save directory exists
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
 
-	if not DirAccess.dir_exists_absolute('res://hengo/save'):
-		DirAccess.make_dir_absolute('res://hengo/save')
-		FileAccess.open('res://hengo/save/.gdignore', FileAccess.WRITE).close()
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
 
-	HenGlobal.HENGO_SAVER.task_id_list.append(WorkerThreadPool.add_task(generate.bind(script_data, script_id, true)))
+	save_new()
+	
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var current_save_data: HenSaveData = global.SAVE_DATA
+	var current_id: StringName = str(current_save_data.identity.id)
+	
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	map_deps.update_project_data(current_id)
+	
+	# validates compilation
+	var hengo_root: HenHengoRoot = global.HENGO_ROOT
+	if hengo_root and not hengo_root.check_errors(true):
+		toast.notify.call_deferred("Compilation blocked due to errors.", HenToast.MessageType.ERROR)
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_finished.emit.call_deferred()
+		return
 
-
-static func generate(_script_data: HenScriptData, _script_id: int, _regenerate: bool = false) -> void:
-	var script_data: SaveData = SaveData.new(_script_id, _script_data)
-	var save_config: SaveConfig = SaveConfig.new()
-	save_config.add_script(script_data)
-
-	if _regenerate:
-		HenCodeGeneration.regenerate(save_config, _script_id, _script_data.side_bar_list)
-
-	save_data(save_config)
-
-
-static func save_data(_save_config: SaveConfig) -> void:
-	# creating backup files
-	for config in _save_config.script_list:
-		var res_path: StringName = HenLoader.get_data_path(config.id)
-		var result: int = OK
-
-		if FileAccess.file_exists(res_path):
-			result = DirAccess.rename_absolute(res_path, res_path + BACKUP_EXT)
-		else:
-			var file: FileAccess = FileAccess.open(res_path + BACKUP_EXT, FileAccess.WRITE)
-			
-			if file: file.close()
-			else: result = false
-
-		if result != OK:
-			rollback(_save_config)
-			return
-
-	# saving temp files
-	for config in _save_config.script_list:
-		var valid: bool = HenScriptData.save(config.script_data, HenLoader.get_data_path(config.id) + TEMP_EXT)
+	_compile_script(current_id)
+	
+	var scripts_to_recompile: Array[StringName] = map_deps.check_dependencies(current_id)
+	var recompiled_count: int = 0
+	
+	for script_id: StringName in scripts_to_recompile:
+		_compile_script(script_id)
+		recompiled_count += 1
+	
+	var end_time: int = Time.get_ticks_msec()
+	var compilation_time: float = (end_time - start_time)
+	
+	var msg: String = "Saved & Compiled in " + str(compilation_time) + "ms"
+	if recompiled_count > 0:
+		msg += " (" + str(recompiled_count) + " dependents recompiled)"
 		
-		if not valid:
-			rollback(_save_config)
-			return
-
-	# checking if all temp files are created
-	for config in _save_config.script_list:
-		if not FileAccess.file_exists(HenLoader.get_data_path(config.id) + TEMP_EXT):
-			rollback(_save_config)
-			return
-
-	# renaming temp files to original files
-	for config in _save_config.script_list:
-		var result: int = DirAccess.rename_absolute(
-			HenLoader.get_data_path(config.id) + TEMP_EXT,
-			HenLoader.get_data_path(config.id)
-		)
-
-		print('saving -> ', HenLoader.get_data_path(config.id))
-
-		if result != OK:
-			rollback(_save_config)
-			return
-
-	var script_list: PackedStringArray = []
-
-	# removing backup files
-	for config in _save_config.script_list:
-		var path: StringName = HenLoader.get_data_path(config.id)
-
-		# remove backup
-		if FileAccess.file_exists(path + BACKUP_EXT):
-			DirAccess.remove_absolute(path + BACKUP_EXT)
-
-		script_list.append(ResourceUID.get_id_path(config.id))
-
-	# saving gdscript files
-	for config in _save_config.script_list:
-		HenScriptData.save_code(config.script_data, config.id)
-
-	print('Successfully saved')
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.emit.call_deferred(script_list)
+	toast.notify.call_deferred(msg, HenToast.MessageType.SUCCESS)
+	
+	if Engine.is_editor_hint():
+		EditorInterface.get_resource_filesystem().scan()
+		
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.scripts_generation_finished.emit.call_deferred()
 
 
-static func rollback(_save_config: SaveConfig) -> void:
-	for config in _save_config.script_list:
-		var path: StringName = HenLoader.get_data_path(config.id)
+static func _compile_script(_id: StringName) -> void:
+	var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('save' + HenEnums.SAVE_EXTENSION)
+	if not FileAccess.file_exists(save_path):
+		push_error("Cannot compile script, save data not found: " + save_path)
+		return
+		
+	var save_data: HenSaveData = load(save_path)
+	if not save_data:
+		push_error("Failed to load save data for compilation: " + save_path)
+		return
+	
+	recalculate_dependencies(save_data)
+	
+	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
+	ResourceSaver.save(save_data.identity, identity_path)
+	
+	var map_deps: HenMapDependencies = Engine.get_singleton('MapDependencies')
+	map_deps.update_project_data(_id)
+		
+	var code_gen: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
+	var code: String = code_gen.get_code(save_data)
+	
+	# Determine where to write the compiled script
+	var script_path: String
+	if save_data.identity and not save_data.identity.script_path.is_empty():
+		script_path = save_data.identity.script_path
+	else:
+		script_path = HenEnums.HENGO_SCRIPTS_PATH + str(_id) + ".gd"
 
-		# renaming backup files to original files
-		if FileAccess.file_exists(path + BACKUP_EXT):
-			var result: int = DirAccess.rename_absolute(
-				path + BACKUP_EXT,
-				path
-			)
+	var script_dir: String = script_path.get_base_dir()
+	if not DirAccess.dir_exists_absolute(script_dir):
+		DirAccess.make_dir_recursive_absolute(script_dir)
 
-			if result != OK:
-				push_error('Rollback failed -> ', path)
+	var file: FileAccess = FileAccess.open(script_path, FileAccess.WRITE)
+	if file:
+		print('Compiled: ', _id, ' -> ', script_path)
+		file.store_string(code)
+		file.close()
+	else:
+		push_error('Failed to write compiled script: ' + script_path)
+
+
+static func recalculate_dependencies(save_data: HenSaveData) -> void:
+	save_data.identity.deps.clear()
+	save_data.identity.detailed_deps.clear()
+	
+	_process_cnodes_for_deps(save_data, save_data.get_base_route().virtual_cnode_list)
+	
+	for state_data: HenSaveState in save_data.states:
+		_process_cnodes_for_deps(save_data, state_data.get_route(save_data).virtual_cnode_list)
+	
+	for func_data: HenSaveFunc in save_data.functions:
+		_process_cnodes_for_deps(save_data, func_data.get_route(save_data).virtual_cnode_list)
+		
+	for macro_data: HenSaveMacro in save_data.macros:
+		_process_cnodes_for_deps(save_data, macro_data.get_route(save_data).virtual_cnode_list)
+		
+	for sc_data: HenSaveSignalCallback in save_data.signals_callback:
+		_process_cnodes_for_deps(save_data, sc_data.get_route(save_data).virtual_cnode_list)
+
+
+static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) -> void:
+	for vc: HenVirtualCNode in cnode_list:
+		var res = vc.get_res(save_data)
+		if res:
+			var parent_id: String = HenUtils.get_res_parent_id(res)
+			save_data.add_dep(parent_id)
 			
-		# removing temp files
-		if FileAccess.file_exists(path + TEMP_EXT):
-			DirAccess.remove_absolute(path + TEMP_EXT)
+			var dep_hash: int = HenUtils.get_dependency_hash(res)
+				
+			if dep_hash != 0:
+				save_data.add_detailed_dep(parent_id, {
+					type = HenUtils.get_dependency_type(res),
+					id = res.id,
+					hash = dep_hash
+				})

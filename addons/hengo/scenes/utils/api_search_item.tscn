@@ -1,0 +1,47 @@
+[gd_scene load_steps=5 format=3 uid="uid://b3e2x7vlh05ft"]
+
+[ext_resource type="PackedScene" uid="uid://6urv5rx15yye" path="res://addons/hengo/scenes/utils/virtual_list.tscn" id="1_50ah6"]
+[ext_resource type="PackedScene" uid="uid://bx3caej844dt8" path="res://addons/hengo/scenes/utils/api_list_item.tscn" id="2_ypr0m"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ogmfe"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.6, 0.6, 0.6, 0)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6fpm2"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.8, 0.08627451)
+
+[node name="ScrollContainer" type="ScrollContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="APISearchItem" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="VirtualList" parent="APISearchItem" instance=ExtResource("1_50ah6")]
+unique_name_in_owner = true
+layout_mode = 2
+item_scene = ExtResource("2_ypr0m")
+default_item_height = 10
+
+[node name="Search" type="LineEdit" parent="APISearchItem"]
+visible = false
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_ogmfe")
+theme_override_styles/focus = SubResource("StyleBoxFlat_6fpm2")
+placeholder_text = "Type to search..."

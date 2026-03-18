@@ -1,16 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://c4qu2ti8efl61"]
+[gd_scene load_steps=5 format=3 uid="uid://c4qu2ti8efl61"]
 
 [ext_resource type="Script" uid="uid://d2pcl0fdy7rvm" path="res://addons/hengo/scripts/side_bar.gd" id="1_y1kkq"]
-[ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/Inter-Medium.ttf" id="2_k7ch5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4nava"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_axb3u"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_k7ch5"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4nava"]
-bg_color = Color(1, 1, 1, 0.0901961)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_axb3u"]
 
 [node name="SideBar" type="PanelContainer"]
 offset_right = 42.0
@@ -19,35 +15,23 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_4nava")
 script = ExtResource("1_y1kkq")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="SearchBar" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+[node name="SearchBar" type="LineEdit" parent="VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 placeholder_text = "Type to search..."
 
-[node name="List" type="Tree" parent="MarginContainer/VBoxContainer"]
-unique_name_in_owner = true
+[node name="ListScroll" type="ScrollContainer" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/v_separation = 8
-theme_override_constants/item_margin = 0
-theme_override_constants/draw_guides = 0
-theme_override_fonts/font = ExtResource("2_k7ch5")
-theme_override_styles/panel = SubResource("StyleBoxEmpty_axb3u")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_k7ch5")
-theme_override_styles/hovered = SubResource("StyleBoxFlat_4nava")
-allow_rmb_select = true
-hide_root = true
-auto_tooltip = false
+horizontal_scroll_mode = 0
+
+[node name="List" type="VBoxContainer" parent="VBoxContainer/ListScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14

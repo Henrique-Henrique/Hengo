@@ -1,32 +1,26 @@
 @tool
-class_name HenEnums extends MainLoop
+class_name HenEnums extends Node
+
+const HENGO_PATH: StringName = 'res://hengo/'
+const HENGO_SAVE_PATH: StringName = 'res://hengo/saves/'
+const HENGO_SCRIPTS_PATH: StringName = 'res://hengo/scripts/'
+const SAVE_EXTENSION: String = '.res'
+
 
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
-
-
-static func add_script_ref_cache(_script_id: int, _id: int) -> void:
-    var script_id: StringName = str(_script_id)
-    var id: StringName = str(_id)
-
-    if HenGlobal.SCRIPT_REF_CACHE.has(script_id):
-        if HenGlobal.SCRIPT_REF_CACHE.get(script_id).has(id):
-            return
-
-        HenGlobal.SCRIPT_REF_CACHE.get(script_id).append(id)
-    else:
-        HenGlobal.SCRIPT_REF_CACHE.set(script_id, [id])
-
-
-static func get_script_cache_refs(_script_id: int) -> Array:
-    if HenGlobal.SCRIPT_REF_CACHE.has(str(_script_id)):
-        return HenGlobal.SCRIPT_REF_CACHE.get(str(_script_id))
-
-    return []
-
-
 const CNODE_SELECTED_GROUP: String = 'hen_cnode_selected'
 const STATE_SELECTED_GROUP: String = 'hen_state_selected'
 const NATIVE_API_PATH: String = 'res://addons/hengo/api/native_api.json'
+
+const FLOW_COLORS: Array[Color] = [
+	Color('#4ac27c18'),
+	Color('#3498db18'),
+	Color('#e74c3c18'),
+	Color('#f1c40f18'),
+	Color('#9b59b618'),
+	Color('#ff9ff318'),
+	Color('#e67e2218'),
+]
 
 enum PROP_TYPE {
     STRING,
@@ -35,6 +29,28 @@ enum PROP_TYPE {
     DROPDOWN,
     BOOL
 }
+
+enum DependencyType {
+	VAR,
+	FUNC,
+	SIGNAL,
+	MACRO
+}
+
+const SINGLETON_LIST: Array[StringName] = [
+	&'ThreadHelper',
+	&'MapDependencies',
+	&'Loader',
+	&'Router',
+	&'CodeGeneration',
+	&'Enums',
+	&'Global',
+	&'SignalBus',
+	&'API',
+	&'GeneralPopup',
+    &'ToastContainer'
+]
+
 
 const VARIANT_TYPES: PackedStringArray = [
     'int',
@@ -106,21 +122,21 @@ const RULES_TO_CONNECT: Dictionary = {
 var string: String = NodePath()
 
 # dynamic native api
-static var NATIVE_API_LIST: Dictionary = {}
-static var CONST_API_LIST: Dictionary = {}
-static var SINGLETON_API_LIST: Array = []
-static var NATIVE_PROPS_LIST: Dictionary = {}
-static var MATH_UTILITY_NAME_LIST: Array = []
+var NATIVE_API_LIST: Dictionary = {}
+var CONST_API_LIST: Dictionary = {}
+var SINGLETON_API_LIST: Array = []
+var NATIVE_PROPS_LIST: Dictionary = {}
+var MATH_UTILITY_NAME_LIST: Array = []
 
 # static
 #
-static var OBJECT_TYPES: PackedStringArray
-static var ALL_CLASSES: PackedStringArray
+var OBJECT_TYPES: PackedStringArray
+var ALL_CLASSES: PackedStringArray
 
 # dropdown
-static var DROPDOWN_ALL_CLASSES: Array
-static var DROPDOWN_OBJECT_TYPES: Array
-static var DROPDOWN_STATES: Array = []
+var DROPDOWN_ALL_CLASSES: Array
+var DROPDOWN_OBJECT_TYPES: Array
+var DROPDOWN_STATES: Array = []
 
 
 const TOOLTIP_TEXT = {

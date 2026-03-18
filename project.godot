@@ -8,21 +8,28 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Hengo"
 run/main_scene="res://demo.tscn"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-HengoDebugger="*res://addons/hengo/scripts/debug/hengo_debugger.gd"
+HengoDebugger="*uid://c41kud4y2lgja"
 
 [debug]
 
-gdscript/warnings/exclude_addons=false
+gdscript/warnings/directory_rules={
+"res://addons": 1
+}
 gdscript/warnings/unsafe_property_access=1
+gdscript/warnings/unsafe_method_access=1
 
 [display]
 
@@ -42,10 +49,61 @@ folder_colors={
 "res://addons/hengo/scripts/": "blue"
 }
 
+[gdunit4]
+
+settings/test/test_lookup_folder="tests"
+templates/testsuite/CSharpScript="// GdUnit generated TestSuite
+
+using Godot;
+using GdUnit4;
+
+namespace ${name_space}
+{
+	using static Assertions;
+	using static Utils;
+
+	[TestSuite]
+	public class ${suite_class_name}
+	{
+		// TestSuite generated from
+		private const string sourceClazzPath = \"${source_resource_path}\";
+
+	}
+}
+"
+hooks/session_hooks=Dictionary[String, bool]({
+"res://addons/gdUnit4/src/core/hooks/GdUnitHtmlReporterTestSessionHook.gd": true,
+"res://addons/gdUnit4/src/core/hooks/GdUnitXMLReporterTestSessionHook.gd": true
+})
+
+[hengo]
+
+settings/auto_zoom=true
+settings/auto_zoom_level_v2=1.4
+settings/max_zoom=2.0
+settings/min_zoom=0.5
+settings/auto_move=true
+settings/auto_layout=true
+settings/auto_move_on_add=true
+settings/auto_move_on_connection=true
+settings/auto_move_on_remove=false
+settings/development_mode=true
+settings/debug_compilation=true
+
 [input]
 
 seila={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":true,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":69,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+"press space"={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":32,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
+]
+}
+"quit to translate"={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }

@@ -1,49 +1,47 @@
 @tool
 class_name HenCompile extends HBoxContainer
 
-const LOAD_ICON = preload('res://addons/hengo/assets/icons/loader-circle.svg')
-const BUILD_ICON = preload('res://addons/hengo/assets/icons/menu/compile.svg')
-
-var icon: TextureRect
 @onready var compile_bt: Button = get_node('%Compile')
 
 func _ready() -> void:
-	icon = get_node('LoadIcon')
+	if HenUtils.disable_scene_with_owner(self ):
+		return
+	
 	compile_bt.pressed.connect(_on_compile_press)
 	set_process(false)
-	HenGlobal.SIGNAL_BUS.scripts_generation_started.connect(start)
-	HenGlobal.SIGNAL_BUS.scripts_generation_finished.connect(reset)
 	
 
+var _batch_compiler: HenSaveAll
+
+
+# starts the batch compilation
 func _on_compile_press() -> void:
-	HenSaver.save()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global and global.SAVE_DATA:
+		HenSaver.save_new()
 
-
-func _process(_delta: float) -> void:
-	icon.rotation += 5 * _delta
+	if not _batch_compiler:
+		_batch_compiler = HenSaveAll.new()
+		_batch_compiler.batch_started.connect(start)
+		_batch_compiler.batch_finished.connect(reset)
+	_batch_compiler.start()
 
 
 func start() -> void:
-	icon.texture = LOAD_ICON
-	icon.pivot_offset = icon.size / 2
 	set_process(true)
-	icon.modulate = Color.SKY_BLUE
 	compile_bt.disabled = true
 
 
-func reset(_script_list: PackedStringArray) -> void:
-	icon.texture = BUILD_ICON
+func reset() -> void:
 	set_process(false)
-	icon.rotation = 0
-	icon.modulate = Color.WHITE
 	compile_bt.disabled = false
 
 
 static func start_load() -> void:
-	var instance: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
+	var instance: HenCompile = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%CompileContainer')
 	instance.start()
 
 
 static func reset_load() -> void:
-	var instance: HenCompile = HenGlobal.HENGO_ROOT.get_node('%CompileContainer')
-	instance.reset([])
+	var instance: HenCompile = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%CompileContainer')
+	instance.reset()

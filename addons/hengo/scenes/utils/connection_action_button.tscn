@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://dw3xq8n4pk2yl"]
+
+[ext_resource type="Script" uid="uid://dt7oll6jcta7b" path="res://addons/hengo/scripts/utils/connection_action_button.gd" id="1_action"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.89708984, 0.8970898, 0.89708984, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.69342947, 0.6934295, 0.69342947, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.7019608)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+
+[node name="ConnectionActionButton" type="PanelContainer" unique_id=1054219475]
+custom_minimum_size = Vector2(20, 20)
+offset_right = 36.0
+offset_bottom = 36.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+script = ExtResource("1_action")
+
+[node name="Icon" type="TextureRect" parent="." unique_id=543198718]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+expand_mode = 3
+stretch_mode = 5

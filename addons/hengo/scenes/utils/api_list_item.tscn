@@ -1,0 +1,82 @@
+[gd_scene load_steps=8 format=3 uid="uid://bx3caej844dt8"]
+
+[ext_resource type="Script" uid="uid://b8hxqbnubekug" path="res://addons/hengo/scripts/utils/api_list_item.gd" id="1_bt5uw"]
+[ext_resource type="Texture2D" uid="uid://c2lto2o5px7t1" path="res://addons/hengo/assets/icons/equal.svg" id="2_87wgy"]
+[ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="2_dbigx"]
+[ext_resource type="StyleBox" uid="uid://damcd15xtxuwv" path="res://addons/hengo/resources/style_box/badge.tres" id="3_vwr0l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bt5uw"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.050980393)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_87wgy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bt5uw"]
+
+[node name="MarginContainer" type="MarginContainer"]
+offset_right = 132.0
+offset_bottom = 119.0
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 4
+script = ExtResource("1_bt5uw")
+
+[node name="Container" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+process_mode = 4
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bt5uw")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Container"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Container/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Name" type="Label" parent="Container/HBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_dbigx")
+theme_override_font_sizes/font_size = 30
+text = "Name"
+
+[node name="Type" type="Button" parent="Container/HBoxContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_dbigx")
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = ExtResource("3_vwr0l")
+text = "Type"
+icon = ExtResource("2_87wgy")
+
+[node name="ChildCount" type="Label" parent="Container/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_dbigx")
+theme_override_styles/normal = ExtResource("3_vwr0l")
+text = "5"
+
+[node name="Bt" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_87wgy")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_bt5uw")
+text = " "
+flat = true
