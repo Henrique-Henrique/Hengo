@@ -716,7 +716,7 @@ func process_literals(_io_type: StringName, _type: StringName, _arr: Array) -> v
 		method_list = []
 	}
 
-	var basic_types: Array[StringName] = [&'bool', &'float', &'int', &'String', &'Vector2i', &'Vector3i', &'Vector4', &'Vector2', &'Vector3', &'Color', &'Array']
+	var basic_types: Array[StringName] = [&'bool', &'float', &'int', &'String', &'Vector2i', &'Vector3i', &'Vector4', &'Vector2', &'Vector3', &'Color']
 
 	for t: StringName in basic_types:
 		var connect_valid: bool = false
