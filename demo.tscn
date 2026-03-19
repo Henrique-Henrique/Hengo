@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://byqfcke3xng5s" path="res://hengo/scripts/rotaciona_de_algum_jeito.gd" id="2_0bhed"]
+[ext_resource type="Script" uid="uid://cs1tl14isd3sd" path="res://hengo/scripts/sprite_rot.gd" id="2_0bhed"]
 
 [node name="Node" type="Node2D" unique_id=1576522687]
 

@@ -44,7 +44,7 @@ func add_flow_connection_with_return(_id: StringName, _to_id: StringName, _from:
 func get_flow_input_connection_command(_id: StringName) -> HenVCFlowConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
-		if connection.to_id == _id:
+		if connection.to_id == _id and connection.get_to(global.SAVE_DATA) == self:
 			return HenVCFlowConnectionReturn.new(connection)
 
 	return null
@@ -52,8 +52,9 @@ func get_flow_input_connection_command(_id: StringName) -> HenVCFlowConnectionRe
 
 func get_flow_output_connection_command(_id: StringName) -> HenVCFlowConnectionReturn:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
-		if connection.from_id == _id:
+		if connection.from_id == _id and connection.get_from(global.SAVE_DATA) == self:
 			return HenVCFlowConnectionReturn.new(connection)
 
 	return null
@@ -229,7 +230,7 @@ func get_flow_outputs(_save_data: HenSaveData) -> Array[HenVCFlow]:
 
 
 func create_flow(_is_input: bool, _data: Dictionary) -> HenVCFlow:
-	var flow: HenVCFlow = HenVCFlow.create(self, _data)
+	var flow: HenVCFlow = HenVCFlow.create(self , _data)
 
 	if _is_input:
 		flow_inputs.append(flow)

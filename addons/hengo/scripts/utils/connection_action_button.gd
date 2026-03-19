@@ -46,8 +46,8 @@ func animate_show() -> void:
 	modulate.a = 0.0
 	
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(self, 'scale', Vector2.ONE, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, 'modulate:a', 1.0, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self , 'scale', Vector2.ONE, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self , 'modulate:a', 1.0, 0.2).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 func _on_gui(_event: InputEvent) -> void:
