@@ -85,7 +85,7 @@ func _enter_tree():
 
 	EditorInterface.get_editor_main_screen().add_child(main_scene)
 	_make_visible(false)
-	add_autoload_singleton('HengoDebugger', 'res://addons/hengo/scripts/debug/hengo_debugger.gd')
+	add_autoload_singleton('HengoDebuggerInit', 'res://addons/hengo/scripts/debug/hengo_debugger_init.gd')
 	global.HENGO_EDITOR_PLUGIN = self
 
 	global.cnode_pool.clear()
@@ -111,7 +111,7 @@ func _exit_tree():
 	if main_scene:
 		main_scene.queue_free()
 	
-	remove_autoload_singleton('HengoDebugger')
+	remove_autoload_singleton('HengoDebuggerInit')
 	global.HENGO_EDITOR_PLUGIN = null
 	unregister_singletons()
 
