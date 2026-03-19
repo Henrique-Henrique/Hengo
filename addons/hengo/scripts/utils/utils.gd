@@ -315,7 +315,11 @@ static func reposition_control_inside(_control: Control) -> void:
 	
 
 static func disable_scene_with_owner(_ref: Node) -> bool:
-	var can_disable: bool = EditorInterface.get_edited_scene_root() == _ref or EditorInterface.get_edited_scene_root() == _ref.owner
+	var can_disable: bool = false
+	var root: Node = EditorInterface.get_edited_scene_root()
+	
+	if root:
+		can_disable = (root == _ref or root == _ref.owner)
 
 	if can_disable:
 		_ref.set_process(false)
