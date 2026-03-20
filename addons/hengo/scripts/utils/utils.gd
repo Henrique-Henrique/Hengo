@@ -604,3 +604,12 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 						return s
 
 	return null
+
+
+static func is_abstract_class_needing_connection(_type: StringName, _identity_type: StringName) -> bool:
+	if not ClassDB.class_exists(_type) or not _identity_type:
+		return false
+	return (
+		ClassDB.is_parent_class(_type, _identity_type) and
+		not ClassDB.can_instantiate(_type)
+	)

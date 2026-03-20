@@ -577,7 +577,8 @@ func check_errors(_save_data: HenSaveData) -> Array[Dictionary]:
 
 	# check if first input is an abstract class reference without connection
 	if not my_inputs.is_empty() and my_inputs[0].is_ref:
-		if ClassDB.class_exists(my_inputs[0].type) and not ClassDB.can_instantiate(my_inputs[0].type):
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		if HenUtils.is_abstract_class_needing_connection(my_inputs[0].type, global.SAVE_DATA.identity.type):
 			if not input_has_connection(my_inputs[0].id, _save_data):
 				errors.append({
 					id = id,

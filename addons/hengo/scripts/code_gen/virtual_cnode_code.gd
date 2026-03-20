@@ -692,7 +692,8 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 		
 	var v_inputs: Array = _vc.get_inputs(_save_data)
 	if not v_inputs.is_empty() and v_inputs[0].is_ref:
-		if ClassDB.class_exists(v_inputs[0].type) and not ClassDB.can_instantiate(v_inputs[0].type):
+		var identity_type: StringName = global.SAVE_DATA.identity.type if global.SAVE_DATA and global.SAVE_DATA.identity else &""
+		if HenUtils.is_abstract_class_needing_connection(v_inputs[0].type, identity_type):
 			if not _vc.input_has_connection(v_inputs[0].id, _save_data):
 				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
 				return get_invalid_token()
