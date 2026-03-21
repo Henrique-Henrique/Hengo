@@ -15,7 +15,7 @@ var categories: Dictionary
 var loading_label: Label
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self):
+	if HenUtils.disable_scene_with_owner(self ):
 		return
 
 	(get_node('%FirstList').get_node('%VirtualList') as HenVirtualList).item_scene = first_list_virtual_list_item
@@ -231,7 +231,7 @@ func _worker_task(idx: int, thread_data: Dictionary) -> void:
 			thread_data.results[2] = api.get_side_bar_list(io_type, type)
 			
 		3:
-			var native_list: Array = api.get_native_list_raw(io_type, type)
+			var native_list: Array = HenNativeItems.filter_by_connection(io_type, type)
 			if not native_list.is_empty():
 				thread_data.results[3] = {_class_name = 'Native', categories = native_list, is_native = true}
 				
@@ -344,7 +344,7 @@ func get_class_parent_recursively(_class_name: StringName) -> Array[Dictionary]:
 
 
 func _on_select(_data: Dictionary) -> void:
-	var data: Dictionary = _data.data if _data.has(&'data') else {}
+	var data: Dictionary = _data.get(&'data', {}).duplicate()
 
 	if data.is_empty():
 		print('Not has data')

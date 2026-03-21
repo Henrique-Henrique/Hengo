@@ -820,6 +820,26 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 				name = _vc.name.to_snake_case(),
 				params = get_input_token_list(_save_data, _vc)
 			})
+		HenVirtualCNode.SubType.OPERATOR:
+			var op_type: String = _vc.input_code_value_map.get('operator_type', HenOperatorData.classify_operator_type(_vc.name_to_code))
+			var inputs: Array = get_input_token_list(_save_data, _vc)
+			
+			if op_type == 'compound':
+				var var_name: String = _vc.get_inputs(_save_data)[0].name.to_snake_case()
+				if _vc.input_has_connection(_vc.get_inputs(_save_data)[0].id, _save_data):
+					var_name = inputs[0].get('name', var_name)
+				token.merge({
+					name = var_name,
+					op = _vc.name_to_code,
+					value = inputs[1] if inputs.size() > 1 else inputs[0],
+					op_type = op_type
+				})
+			else:
+				token.merge({
+					name = _vc.name_to_code,
+					params = inputs,
+					op_type = op_type
+				})
 		HenVirtualCNode.SubType.RAW_CODE:
 			token.merge({
 				code = get_input_token_list(_save_data, _vc)[0],

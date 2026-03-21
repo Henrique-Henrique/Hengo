@@ -26,6 +26,9 @@ const ICON_ROUTE = preload('res://addons/hengo/assets/new_icons/route.svg')
 const ICON_PROPERTY = preload('res://addons/hengo/assets/new_icons/sliders-horizontal.svg')
 const ICON_GAMEPAD = preload('res://addons/hengo/assets/new_icons/gamepad-2.svg')
 const ICON_LITERAL = preload('res://addons/hengo/assets/new_icons/shapes.svg')
+const ICON_EQUAL = preload('res://addons/hengo/assets/new_icons/equal.svg')
+const ICON_BINARY = preload('res://addons/hengo/assets/new_icons/binary.svg')
+const ICON_PLUS = preload('res://addons/hengo/assets/new_icons/plus.svg')
 
 const DEPTH_COLORS: Array[Color] = [
 	Color('#acacacff'),
@@ -126,6 +129,9 @@ static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
 		HenVirtualCNode.SubType.EXPRESSION:
 			return ICON_CALCULATOR
 
+		HenVirtualCNode.SubType.OPERATOR:
+			return ICON_CALCULATOR
+
 		HenVirtualCNode.SubType.NOT_CONNECTED:
 			return ICON_LINK_OFF
 
@@ -224,6 +230,9 @@ static func get_color_for_subtype(_sub_type: int) -> Color:
 
 		HenVirtualCNode.SubType.EXPRESSION:
 			return Color('#ff9f43')
+
+		HenVirtualCNode.SubType.OPERATOR:
+			return Color('#f39c12')
 
 		HenVirtualCNode.SubType.MAKE_TRANSITION, \
 		HenVirtualCNode.SubType.STATE_TRANSITION, \

@@ -4,4 +4,5 @@ godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_g
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_vcnode.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_signal_vc.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_macro.gd" --ignoreHeadlessMode
+godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests/code_gen/test_operator_vc.gd" --ignoreHeadlessMode
 godot --headless -s "addons\gdUnit4\bin\GdUnitCmdTool.gd" -a "res://tests" --ignoreHeadlessMode

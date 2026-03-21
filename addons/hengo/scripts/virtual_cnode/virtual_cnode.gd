@@ -70,7 +70,8 @@ enum SubType {
 	INPUT_ACTION_CHECK = 58,
 	INPUT_POLLING = 59,
 	SCRIPT_MACRO = 60,
-	LITERAL = 61
+	LITERAL = 61,
+	OPERATOR = 75
 }
 
 
@@ -382,12 +383,16 @@ static func instantiate_virtual_cnode(_config: Dictionary) -> HenVirtualCNode:
 	var v_cnode: HenVirtualCNode = HenVirtualCNode.new()
 	var _route: HenRouteData = _config.route
 
+	if not _route:
+		var router: HenRouter = Engine.get_singleton(&"Router")
+		_route = router.current_route
+
 	v_cnode.name = _config.name
 	v_cnode.type = _config.type as Type if _config.has('type') else Type.DEFAULT
 	v_cnode.sub_type = _config.sub_type
 	v_cnode.id = global.get_new_node_counter() if not _config.has('id') else StringName(str(_config.id))
-	v_cnode.parent_route_id = _route.id
-	v_cnode.route_type = _route.type
+	v_cnode.parent_route_id = _route.id if _route else &""
+	v_cnode.route_type = _route.type if _route else HenRouter.ROUTE_TYPE.BASE
 
 	if _config.has('name_to_code'): v_cnode.name_to_code = _config.name_to_code
 

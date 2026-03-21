@@ -234,6 +234,31 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 				op = _token.name,
 				b = get_code_by_token(_save_data, _token.params[1], _level, '', true)
 			})
+		HenVirtualCNode.SubType.OPERATOR:
+			match _token.op_type:
+				'unary':
+					return indent + '{op}{a}'.format({
+						op = _token.name,
+						a = get_code_by_token(_save_data, _token.params[0], _level, '', true)
+					})
+				'compound':
+					return indent + '{name} {op} {value}'.format({
+						name = _token.name,
+						op = _token.op,
+						value = get_code_by_token(_save_data, _token.value, _level, '', true)
+					})
+				'ternary':
+					return indent + '{b} if {a} else {c}'.format({
+						b = get_code_by_token(_save_data, _token.params[1], _level, '', true),
+						a = get_code_by_token(_save_data, _token.params[0], _level, '', true),
+						c = get_code_by_token(_save_data, _token.params[2], _level, '', true)
+					})
+				_:
+					return indent + '{a} {op} {b}'.format({
+						a = get_code_by_token(_save_data, _token.params[0], _level, '', true),
+						op = _token.name,
+						b = get_code_by_token(_save_data, _token.params[1], _level, '', true)
+					})
 		HenVirtualCNode.SubType.PASS:
 			return indent + 'pass'
 		HenVirtualCNode.SubType.RAW_CODE:
