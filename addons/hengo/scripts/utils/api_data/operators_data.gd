@@ -8,7 +8,6 @@ const OPERATOR_CATEGORIES: Array = [
 		sub_categories = [
 			{
 				name = 'String',
-				types = ['String'],
 				operators = [
 					{name = 'Equal', code = '==', input_0_type = 'String', input_1_type = 'String', output_type = 'bool'},
 					{name = 'Not Equal', code = '!=', input_0_type = 'String', input_1_type = 'String', output_type = 'bool'}
@@ -16,7 +15,6 @@ const OPERATOR_CATEGORIES: Array = [
 			},
 			{
 				name = 'int',
-				types = ['int'],
 				operators = [
 					{name = 'Greater Than', code = '>', input_0_type = 'int', input_1_type = 'int', output_type = 'bool'},
 					{name = 'Less Than', code = '<', input_0_type = 'int', input_1_type = 'int', output_type = 'bool'},
@@ -28,7 +26,6 @@ const OPERATOR_CATEGORIES: Array = [
 			},
 			{
 				name = 'float',
-				types = ['float'],
 				operators = [
 					{name = 'Greater Than', code = '>', input_0_type = 'float', input_1_type = 'float', output_type = 'bool'},
 					{name = 'Less Than', code = '<', input_0_type = 'float', input_1_type = 'float', output_type = 'bool'},
@@ -40,7 +37,6 @@ const OPERATOR_CATEGORIES: Array = [
 			},
 			{
 				name = 'Variant',
-				types = ['Variant'],
 				operators = [
 					{name = 'Equal', code = '==', input_0_type = 'Variant', input_1_type = 'Variant', output_type = 'bool'},
 					{name = 'Not Equal', code = '!=', input_0_type = 'Variant', input_1_type = 'Variant', output_type = 'bool'}
@@ -55,7 +51,6 @@ const OPERATOR_CATEGORIES: Array = [
 		sub_categories = [
 			{
 				name = 'bool',
-				types = ['bool'],
 				operators = [
 					{name = 'NOT', code = '!', op_type = 'unary', input_0_type = 'bool', output_type = 'bool'},
 					{name = 'AND', code = '&&', input_0_type = 'bool', input_1_type = 'bool', output_type = 'bool'},
@@ -71,14 +66,12 @@ const OPERATOR_CATEGORIES: Array = [
 		sub_categories = [
 			{
 				name = 'String',
-				types = ['String'],
 				operators = [
 					{name = 'Add To', code = '+=', op_type = 'compound', input_0_type = 'String', input_1_type = 'String', output_type = 'void'}
 				]
 			},
 			{
 				name = 'int',
-				types = ['int'],
 				operators = [
 					{name = 'Add To', code = '+=', op_type = 'compound', input_0_type = 'int', input_1_type = 'int', output_type = 'void'},
 					{name = 'Subtract From', code = '-=', op_type = 'compound', input_0_type = 'int', input_1_type = 'int', output_type = 'void'},
@@ -88,7 +81,6 @@ const OPERATOR_CATEGORIES: Array = [
 			},
 			{
 				name = 'float',
-				types = ['float'],
 				operators = [
 					{name = 'Add To', code = '+=', op_type = 'compound', input_0_type = 'float', input_1_type = 'float', output_type = 'void'},
 					{name = 'Subtract From', code = '-=', op_type = 'compound', input_0_type = 'float', input_1_type = 'float', output_type = 'void'},
