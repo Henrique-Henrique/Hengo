@@ -80,8 +80,8 @@ hooks/session_hooks=Dictionary[String, bool]({
 
 settings/auto_zoom=true
 settings/auto_zoom_level_v2=1.4
-settings/max_zoom=2.0
-settings/min_zoom=0.5
+settings/max_zoom=5.0
+settings/min_zoom=0.1
 settings/auto_move=true
 settings/auto_layout=true
 settings/auto_move_on_add=true

@@ -7,7 +7,7 @@ class TabData:
 
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self):
+	if HenUtils.disable_scene_with_owner(self ):
 		return
 	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
@@ -31,7 +31,7 @@ func _on_tab_selected(_index: int) -> void:
 
 	if meta:
 		var loader: HenLoader = Engine.get_singleton(&'Loader')
-		if not await loader.load(ResourceUID.get_id_path(meta.id)):
+		if not loader.load(ResourceUID.get_id_path(meta.id)):
 			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + ResourceUID.get_id_path(meta.id), HenToast.MessageType.ERROR)
 
 

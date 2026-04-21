@@ -1,28 +1,48 @@
 [gd_scene format=3 uid="uid://cecxlhrb3et2l"]
 
-[ext_resource type="Script" uid="uid://b14uj1wkp3wia" path="res://hengo/scripts/ata.gd" id="1_m0rpm"]
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://cs1tl14isd3sd" path="res://hengo/scripts/sprite_rot.gd" id="2_0bhed"]
+[ext_resource type="Script" uid="uid://1bliul3auruy" path="res://hengo/scripts/seila.gd" id="4_c6xj6"]
 
-[node name="Node" type="Node2D" unique_id=1576522687]
-script = ExtResource("1_m0rpm")
+[sub_resource type="BoxMesh" id="BoxMesh_c6xj6"]
 
-[node name="Label" type="Label" parent="." unique_id=818398667]
+[sub_resource type="Environment" id="Environment_c6xj6"]
+background_mode = 1
+background_color = Color(0.2740718, 0.34661934, 0.5357618, 1)
+
+[node name="Node3D" type="Node3D" unique_id=979723603]
+
+[node name="Obj" type="MeshInstance3D" parent="." unique_id=94332250]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.40306807)
+mesh = SubResource("BoxMesh_c6xj6")
+skeleton = NodePath("../Camera3D")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=27622588 node_paths=PackedStringArray("my_obj")]
+transform = Transform3D(1, 0, 0, 0, 0.9453651, 0.32601368, 0, -0.32601368, 0.9453651, 0, 3.1540008, 3.242431)
+script = ExtResource("4_c6xj6")
+my_obj = NodePath("../Obj")
+
+[node name="Node" type="Node2D" parent="." unique_id=1576522687]
+visible = false
+
+[node name="Label" type="Label" parent="Node" unique_id=818398667]
 offset_right = 17.0
 offset_bottom = 57.0
 theme_override_font_sizes/font_size = 80
 text = "test"
 metadata/_edit_use_anchors_ = true
 
-[node name="Sprite2D" type="Sprite2D" parent="." unique_id=143685121]
+[node name="Sprite2D" type="Sprite2D" parent="Node" unique_id=143685121]
 position = Vector2(496, 315)
 texture = ExtResource("1_wvpun")
-script = ExtResource("2_0bhed")
 
-[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=214986247]
+[node name="Sprite2D2" type="Sprite2D" parent="Node" unique_id=214986247]
 position = Vector2(672, 310)
 texture = ExtResource("1_wvpun")
-script = ExtResource("2_0bhed")
-direita = true
 
-[node name="Node" type="Node" parent="." unique_id=2080766891]
+[node name="Node" type="Node" parent="Node" unique_id=2080766891]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=274402458]
+environment = SubResource("Environment_c6xj6")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment" unique_id=744811915]
+transform = Transform3D(-0.68369794, -0.7046318, 0.18987152, 0.5664214, -0.3483384, 0.7468783, -0.46013463, 0.6181866, 0.6372767, 0, 4.1857615, 2.2082815)

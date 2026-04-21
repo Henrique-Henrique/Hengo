@@ -249,4 +249,7 @@ func _find_vc_by_cnode_id(_id: StringName) -> HenVirtualCNode:
 static func get_singleton() -> HenVCActionButtons:
 	if not Engine.has_singleton(&'Global'):
 		return null
-	return (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_node('%VCActionButtons') as HenVCActionButtons
+	var global := Engine.get_singleton(&'Global') as HenGlobal
+	if not global or not global.CAM:
+		return null
+	return global.CAM.get_node_or_null('VCActionButtons') as HenVCActionButtons

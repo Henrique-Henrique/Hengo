@@ -271,7 +271,14 @@ func get_inputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
 				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if existing.name != data.get('name'): existing.name = data.get('name')
 				if existing.type != data.get('type'): existing.type = data.get('type')
-				if existing.value != data.get('default_value'): existing.value = data.get('default_value')
+
+				var value_to_use = data.get('default_value')
+				if input_code_value_map.has(data.get('id')):
+					var map_value: Dictionary = input_code_value_map.get(data.get('id'))
+					if map_value.get('type') == data.get('type'):
+						value_to_use = map_value.get('value')
+
+				if existing.value != value_to_use: existing.value = value_to_use
 			else:
 				create_io(true, data)
 		
@@ -295,7 +302,14 @@ func get_outputs(_save_data: HenSaveData) -> Array[HenVCInOutData]:
 				if existing.id != str(data.get('id')): existing.id = str(data.get('id'))
 				if existing.name != str(data.get('name')): existing.name = str(data.get('name'))
 				if existing.type != str(data.get('type')): existing.type = str(data.get('type'))
-				if existing.value != data.get('default_value'): existing.value = data.get('default_value')
+
+				var value_to_use = data.get('default_value')
+				if input_code_value_map.has(data.get('id')):
+					var map_value: Dictionary = input_code_value_map.get(data.get('id'))
+					if map_value.get('type') == data.get('type'):
+						value_to_use = map_value.get('value')
+
+				if existing.value != value_to_use: existing.value = value_to_use
 			else:
 				create_io(false, data)
 		

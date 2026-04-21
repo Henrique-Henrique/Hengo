@@ -47,7 +47,7 @@ func _on_go_to(error: Dictionary) -> void:
 	if error.has('script_id') and str(error.script_id) != str(global.SAVE_DATA.identity.id):
 		HenSaver.save_new()
 		
-		if (Engine.get_singleton(&'Loader') as HenLoader).load(error.script_id):
+		if await (Engine.get_singleton(&'Loader') as HenLoader).load(error.script_id):
 			await get_tree().process_frame
 
 	if error.has('route_id'):

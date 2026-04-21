@@ -214,6 +214,13 @@ static func map_all_macros(_save_data: HenSaveData, _refs: HenTypeReferences) ->
 						if script:
 							var instance: HenScriptMacroBase = script.new()
 							if instance:
+								# inject class-level declarations from get_script_base
+								var script_base: String = instance.get_script_base()
+								if not script_base.is_empty():
+									var use_self: bool = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
+									script_base = HenVirtualCNodeCode.process_script_macro_body(script_base, use_self, macro_ref.id)
+									code += script_base.strip_edges() + '\n'
+
 								var overrides: Array[Dictionary] = instance.get_function_overrides()
 								for override: Dictionary in overrides:
 									var func_name: String = override.get('name', '')
@@ -228,19 +235,23 @@ static func map_all_macros(_save_data: HenSaveData, _refs: HenTypeReferences) ->
 									var body: Variant = override.get('body', 'pass')
 									
 									if body is Callable:
-										var method_name: String = (body as Callable).get_method()
-										var object: Object = (body as Callable).get_object()
-										var script_source: String = ''
-										
-										if object and object.get_script():
-											script_source = object.get_script().source_code
-										
-										var parsed: Dictionary = HenVirtualCNodeCode.parse_script_function(script_source, method_name)
-										if parsed.has('body'):
-											body = parsed.body
+										var callable_body: Callable = body as Callable
+										# if callable returns a string template, use it directly
+										var call_result: Variant = callable_body.call()
+										if call_result is String:
+											body = call_result as String
 										else:
-											body = '# error: could not find body for callable ' + method_name
-									
+											var method_name: String = callable_body.get_method()
+											var object: Object = callable_body.get_object()
+											var script_source: String = ''
+											if object and object.get_script():
+												script_source = object.get_script().source_code
+											var parsed: Dictionary = HenVirtualCNodeCode.parse_script_function(script_source, method_name)
+											if parsed.has('body'):
+												body = parsed.body
+											else:
+												body = '# error: could not find body for callable ' + method_name
+
 									var body_str: String = str(body)
 									var use_self: bool = macro_ref.route_type != HenRouter.ROUTE_TYPE.STATE
 									

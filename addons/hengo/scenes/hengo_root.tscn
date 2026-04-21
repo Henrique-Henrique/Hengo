@@ -40,30 +40,16 @@
 [ext_resource type="PackedScene" uid="uid://c714cqsys4rsq" path="res://addons/hengo/scenes/dashboard.tscn" id="44_33cyo"]
 [ext_resource type="Script" uid="uid://cqqhq6il7n5su" path="res://addons/hengo/scripts/utils/toast/toast_container.gd" id="47_h1p8r"]
 [ext_resource type="Script" uid="uid://yk1vflpkmh60" path="res://addons/hengo/scripts/general_popup.gd" id="48_popup"]
+[ext_resource type="Texture2D" uid="uid://cguqtcpwfbkqk" path="res://addons/hengo/assets/new_icons/chevrons-right-left.svg" id="51_sidebar"]
+[ext_resource type="Texture2D" uid="uid://bgn3xw8r67mqv" path="res://addons/hengo/assets/new_icons/align-horizontal-distribute-start.svg" id="52_layout"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
-bg_color = Color(0.050000183, 0.049998, 0.068913735, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_48snx"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1gx8m"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_5c7h0"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3680e"]
+bg_color = Color(0.039215688, 0.039215688, 0.05490196, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_52efy"]
 content_margin_left = 8.0
 content_margin_right = 8.0
 bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.2)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
 border_color = Color(0.4745098, 0.4745098, 0.4745098, 0.44313726)
 border_blend = true
 corner_radius_top_left = 8
@@ -86,6 +72,15 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3680e"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lxtpw"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1gx8m"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_72kn2"]
+bg_color = Color(0.050000183, 0.049998, 0.068913735, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_onj4m"]
 bg_color = Color(1, 1, 1, 1)
 corner_radius_top_left = 12
@@ -95,9 +90,9 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_r8ipe"]
 shader = ExtResource("9_5sxro")
-shader_parameter/screen_size = Vector2(2428, 1975)
-shader_parameter/offset = Vector2(916.8984, 87.88893)
-shader_parameter/zoom_factor = 1.4650834
+shader_parameter/screen_size = Vector2(3438, 1948)
+shader_parameter/offset = Vector2(403.73172, -27.007286)
+shader_parameter/zoom_factor = 0.69827753
 shader_parameter/alpha = 0.2
 shader_parameter/text = ExtResource("17_lxtpw")
 shader_parameter/text_size = 400.0
@@ -107,6 +102,9 @@ colors = PackedColorArray(0.74509805, 0.74509805, 0.74509805, 1, 1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ehx0"]
 bg_color = Color(1, 1, 1, 0.0862745)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backdrop"]
+bg_color = Color(0, 0, 0, 0.25)
 
 [node name="HengoRoot" type="Control" unique_id=706706338]
 layout_mode = 3
@@ -179,80 +177,232 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("12_5c7h0")
 
-[node name="Panel" type="Panel" parent="Content/UIBase" unique_id=1116617169]
+[node name="BackgroundPanel" type="Panel" parent="Content/UIBase" unique_id=1116617169]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_3680e")
 
-[node name="MarginContainer" type="MarginContainer" parent="Content/UIBase/Panel" unique_id=276706326]
+[node name="MainLayout" type="VBoxContainer" parent="Content/UIBase" unique_id=2000000001]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
-
-[node name="CNodeUI" type="Panel" parent="Content/UIBase/Panel/MarginContainer" unique_id=1262400160]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
-
-[node name="HSplitContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI" unique_id=1223978220]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
 theme_override_constants/separation = 0
-split_offsets = PackedInt32Array(-5000)
-split_offset = -5000
 
-[node name="SideBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer" unique_id=116167880]
+[node name="Toolbar" type="PanelContainer" parent="Content/UIBase/MainLayout" unique_id=2000000002]
+layout_mode = 2
+theme_type_variation = &"ToolbarPanel"
+
+[node name="ActionBarMargin" type="MarginContainer" parent="Content/UIBase/MainLayout/Toolbar" unique_id=191747223]
 unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ToolbarHBox" type="HBoxContainer" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin" unique_id=2000000003]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="OpenDashboard" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=1244948004]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("40_174hx")
+flat = true
+
+[node name="VSeparator" type="VSeparator" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=2000000004]
+layout_mode = 2
+
+[node name="ClassName" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=1357072692]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
+
+[node name="Config" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=712136240]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("32_h1p8r")
+flat = true
+
+[node name="CloseBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=1259709975]
+unique_name_in_owner = true
+layout_mode = 2
+icon = ExtResource("30_hog2e")
+flat = true
+
+[node name="ScriptPathLabel" type="Label" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=2000000005]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=2000000006]
 layout_mode = 2
 size_flags_horizontal = 3
-mouse_filter = 0
 
-[node name="SidePanel" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin" unique_id=1340978270]
+[node name="TerminalContainer" type="PanelContainer" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=1642556444]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
+
+[node name="TerminalBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox/TerminalContainer" unique_id=26054358]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
+flat = true
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel" unique_id=251941409]
+[node name="TerminalInfo" type="HBoxContainer" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox/TerminalContainer" unique_id=742267508]
+unique_name_in_owner = true
+process_mode = 4
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 18
 
-[node name="MenuBar" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=2140933203]
+[node name="InfoBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox/TerminalContainer/TerminalInfo" unique_id=2121055772]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("38_onj4m")
+
+[node name="SuccessBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox/TerminalContainer/TerminalInfo" unique_id=558683972]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("39_vlu6e")
+
+[node name="ErrorBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox/TerminalContainer/TerminalInfo" unique_id=461419965]
+unique_name_in_owner = true
+process_mode = 4
+modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
+self_modulate = Color(1, 1, 1, 0.2)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
+disabled = true
+text = "0"
+icon = ExtResource("40_aqok7")
+
+[node name="VSeparator2" type="VSeparator" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=2000000007]
+layout_mode = 2
+
+[node name="ActionsBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=1964371426]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_48snx")
+text = "Actions"
+icon = ExtResource("39_174hx")
 
-[node name="CNodeActionBar" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar" unique_id=935502521]
-layout_mode = 2
-alignment = 2
-
-[node name="CompileContainer" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/MenuBar/CNodeActionBar" unique_id=1799733899]
+[node name="ToggleLayoutBt" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=2000000018]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
+text = "Split"
+icon = ExtResource("52_layout")
+flat = true
+
+[node name="CompileContainer" type="HBoxContainer" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox" unique_id=1799733899]
+unique_name_in_owner = true
+layout_mode = 2
 theme_override_constants/separation = 0
 script = ExtResource("11_35y2j")
 
-[node name="TabContainer" type="TabContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer" unique_id=908628429]
+[node name="Compile" type="Button" parent="Content/UIBase/MainLayout/Toolbar/ActionBarMargin/ToolbarHBox/CompileContainer" unique_id=760264391]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_type_variation = &"PrimaryButton"
+theme_override_fonts/font = ExtResource("23_tlngq")
+text = "Compile All"
+icon = ExtResource("18_fdf88")
+
+[node name="ContentArea" type="HSplitContainer" parent="Content/UIBase/MainLayout" unique_id=1223978220]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="SideBarMargin" type="MarginContainer" parent="Content/UIBase/MainLayout/ContentArea" unique_id=116167880]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+mouse_filter = 0
+
+[node name="SidePanel" type="PanelContainer" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin" unique_id=1340978270]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3680e")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel" unique_id=251941409]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="SidebarHeader" type="HBoxContainer" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=2000000019]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="SidebarHeaderSpacer" type="Control" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader" unique_id=2000000020]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CollapseToggleBt" type="Button" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader" unique_id=2000000021]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Collapse sidebar"
+icon = ExtResource("51_sidebar")
+flat = true
+
+[node name="SidebarIconStrip" type="VBoxContainer" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=2000000022]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="PropsIconBt" type="Button" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000023]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+tooltip_text = "Props"
+icon = ExtResource("21_5c7h0")
+flat = true
+
+[node name="CodeIconBt" type="Button" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000024]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+tooltip_text = "Code Preview"
+icon = ExtResource("22_33cyo")
+flat = true
+
+[node name="IconStripSpacer" type="Control" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000025]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="SidebarTabContainer" type="TabContainer" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=908628429]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"TabContainerInner"
 theme_override_constants/tab_separation = 12
 current_tab = 0
 tab_0/title = "Props"
@@ -261,16 +411,16 @@ tab_1/title = "Code Preview"
 tab_1/icon = ExtResource("22_33cyo")
 script = ExtResource("18_hg3xi")
 
-[node name="SideBar" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=1587614674 instance=ExtResource("22_x5h56")]
+[node name="SideBar" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarTabContainer" unique_id=1587614674 instance=ExtResource("22_x5h56")]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 metadata/_tab_index = 0
 metadata/_tab_name = "Props"
 
-[node name="CodePreview" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/SideBarMargin/SidePanel/VBoxContainer/TabContainer" unique_id=48314858 instance=ExtResource("10_vu20g")]
+[node name="CodePreview" parent="Content/UIBase/MainLayout/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarTabContainer" unique_id=48314858 instance=ExtResource("10_vu20g")]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(1000, 0)
+custom_minimum_size = Vector2(750, 0)
 layout_mode = 2
 theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
@@ -287,144 +437,35 @@ script = ExtResource("10_r5155")
 metadata/_tab_index = 1
 metadata/_tab_name = "Code Preview"
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer" unique_id=1462542696]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 0
-
-[node name="ActionBarMargin" type="MarginContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2" unique_id=191747223]
-unique_name_in_owner = true
-layout_mode = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin" unique_id=1549042612]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_5c7h0")
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer" unique_id=876575320]
-layout_mode = 2
-
-[node name="CloseBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1259709975]
-unique_name_in_owner = true
-layout_mode = 2
-icon = ExtResource("30_hog2e")
-flat = true
-
-[node name="ClassName" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1357072692]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_52efy")
-
-[node name="Config" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=712136240]
-unique_name_in_owner = true
-layout_mode = 2
-icon = ExtResource("32_h1p8r")
-
-[node name="Label" type="Label" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1867830194]
-layout_mode = 2
-text = "Base > Test"
-
-[node name="ActionsBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1964371426]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Actions"
-icon = ExtResource("39_174hx")
-
-[node name="PanelContainer" type="PanelContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1642556444]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_onj4m")
-
-[node name="TerminalBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=26054358]
-unique_name_in_owner = true
-layout_mode = 2
-mouse_default_cursor_shape = 2
-theme_override_styles/focus = SubResource("StyleBoxEmpty_vlu6e")
-flat = true
-
-[node name="TerminalInfo" type="HBoxContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer" unique_id=742267508]
-unique_name_in_owner = true
-process_mode = 4
-layout_mode = 2
-mouse_filter = 2
-
-[node name="InfoBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=2121055772]
-unique_name_in_owner = true
-process_mode = 4
-modulate = Color(0.23137255, 0.50980395, 0.9647059, 1)
-self_modulate = Color(1, 1, 1, 0.2)
-layout_mode = 2
-mouse_filter = 2
-theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("23_tlngq")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
-disabled = true
-text = "0"
-icon = ExtResource("38_onj4m")
-
-[node name="SuccessBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=558683972]
-unique_name_in_owner = true
-process_mode = 4
-modulate = Color(0.13333334, 0.77254903, 0.36862746, 1)
-self_modulate = Color(1, 1, 1, 0.2)
-layout_mode = 2
-mouse_filter = 2
-theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("23_tlngq")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
-disabled = true
-text = "0"
-icon = ExtResource("39_vlu6e")
-
-[node name="ErrorBt" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2/PanelContainer/TerminalInfo" unique_id=461419965]
-unique_name_in_owner = true
-process_mode = 4
-modulate = Color(0.9372549, 0.26666668, 0.26666668, 1)
-self_modulate = Color(1, 1, 1, 0.2)
-layout_mode = 2
-mouse_filter = 2
-theme_override_colors/font_disabled_color = Color(1, 1, 1, 1)
-theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
-theme_override_fonts/font = ExtResource("23_tlngq")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_h1p8r")
-disabled = true
-text = "0"
-icon = ExtResource("40_aqok7")
-
-[node name="OpenDashboard" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1244948004]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Dashboard"
-icon = ExtResource("40_174hx")
-
-[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=1498597782]
+[node name="CanvasVBox" type="VBoxContainer" parent="Content/UIBase/MainLayout/ContentArea" unique_id=1462542696]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="Compile" type="Button" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/ActionBarMargin/PanelContainer/HBoxContainer2" unique_id=760264391]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_default_cursor_shape = 2
-theme_override_fonts/font = ExtResource("23_tlngq")
-text = "Check and Compile All"
-icon = ExtResource("18_fdf88")
-
-[node name="VBoxContainer" type="HSplitContainer" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2" unique_id=334363352]
-layout_mode = 2
 size_flags_vertical = 3
+mouse_filter = 2
 theme_override_constants/separation = 0
-split_offsets = PackedInt32Array(50000)
-drag_area_margin_begin = -1402
-split_offset = 50000
 
-[node name="Panel" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=674967786]
+[node name="CanvasTabs" type="TabContainer" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox" unique_id=2000000008]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_type_variation = &"CanvasTabContainer"
+current_tab = 0
+tab_0/title = "CNode Graph"
+tab_1/title = "State Machine"
+
+[node name="CNodeUI" type="Panel" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs" unique_id=1262400160]
+unique_name_in_owner = true
+clip_contents = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
+metadata/_tab_index = 0
+metadata/_tab_name = "CNode Graph"
 
-[node name="CNodeContainerBG" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel" unique_id=1077183945]
+[node name="CNodeContainerBG" type="Control" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI" unique_id=1077183945]
 unique_name_in_owner = true
 clip_contents = true
 layout_mode = 1
@@ -435,7 +476,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("16_74kfo")
 
-[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG" unique_id=717265577]
+[node name="Panel" type="Panel" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG" unique_id=717265577]
 process_mode = 4
 clip_children = 1
 layout_mode = 1
@@ -447,7 +488,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_onj4m")
 
-[node name="Grid" type="TextureRect" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Panel" unique_id=1070055922]
+[node name="Grid" type="TextureRect" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Panel" unique_id=1070055922]
 process_mode = 4
 texture_filter = 1
 texture_repeat = 2
@@ -461,19 +502,19 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("17_lxtpw")
 
-[node name="Cam" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG" unique_id=95183905 node_paths=PackedStringArray("grid")]
+[node name="Cam" type="Node2D" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG" unique_id=95183905 node_paths=PackedStringArray("grid")]
 unique_name_in_owner = true
 position = Vector2(0, -8)
 script = ExtResource("3_84akk")
 grid = NodePath("../Panel/Grid")
 
-[node name="RefPoint" type="Marker2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=2087226410]
+[node name="RefPoint" type="Marker2D" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=2087226410]
 visible = false
 position = Vector2(289, 313)
 
-[node name="Lines" type="Node2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=469442060]
+[node name="Lines" type="Node2D" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=469442060]
 
-[node name="ConnectionGuide" type="Line2D" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1282222396]
+[node name="ConnectionGuide" type="Line2D" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=1282222396]
 unique_name_in_owner = true
 visible = false
 z_index = 2
@@ -483,7 +524,7 @@ texture = ExtResource("7_6jref")
 texture_mode = 1
 script = ExtResource("7_gj1gq")
 
-[node name="CommentContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=252482894]
+[node name="CommentContainer" type="Control" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=252482894]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -491,7 +532,7 @@ offset_right = 1.0
 offset_bottom = 1.0
 metadata/_edit_use_anchors_ = true
 
-[node name="CnodeContainer" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1663593833]
+[node name="CnodeContainer" type="Control" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=1663593833]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
@@ -499,7 +540,7 @@ offset_right = 1.0
 offset_bottom = 1.0
 metadata/_edit_use_anchors_ = true
 
-[node name="SelectionRect" type="ReferenceRect" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=805961561]
+[node name="SelectionRect" type="ReferenceRect" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=805961561]
 process_mode = 4
 visible = false
 offset_left = 153.0
@@ -510,7 +551,7 @@ mouse_filter = 2
 border_color = Color(0.749928, 0.915784, 0.889306, 1)
 border_width = 3.0
 
-[node name="Panel" type="Panel" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam/SelectionRect" unique_id=1630308070]
+[node name="Panel" type="Panel" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam/SelectionRect" unique_id=1630308070]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -519,11 +560,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
 
-[node name="VCActionButtons" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel/CNodeContainerBG/Cam" unique_id=1698247101 instance=ExtResource("20_w813u")]
+[node name="VCActionButtons" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=1698247101 instance=ExtResource("20_w813u")]
 unique_name_in_owner = true
 visible = false
 
-[node name="Control" type="Control" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer/Panel" unique_id=428273699]
+[node name="Control" type="Control" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs/CNodeUI" unique_id=428273699]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -534,8 +575,74 @@ size_flags_horizontal = 3
 size_flags_stretch_ratio = 4.0
 mouse_filter = 2
 
-[node name="MachineGraph" parent="Content/UIBase/Panel/MarginContainer/CNodeUI/HSplitContainer/VBoxContainer2/VBoxContainer" unique_id=2066009994 instance=ExtResource("27_dkwui")]
+[node name="MachineGraph" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox/CanvasTabs" unique_id=2066009994 instance=ExtResource("27_dkwui")]
+visible = false
 layout_mode = 2
+metadata/_tab_index = 1
+metadata/_tab_name = "State Machine"
+
+[node name="CanvasSplit" type="HSplitContainer" parent="Content/UIBase/MainLayout/ContentArea/CanvasVBox" unique_id=2000000026]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="StatusBar" type="PanelContainer" parent="Content/UIBase/MainLayout" unique_id=2000000010]
+layout_mode = 2
+theme_type_variation = &"StatusBarPanel"
+
+[node name="StatusHBox" type="HBoxContainer" parent="Content/UIBase/MainLayout/StatusBar" unique_id=2000000011]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ScriptNameLabel" type="Label" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000012]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No script loaded"
+
+[node name="VSeparatorStatus" type="VSeparator" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000013]
+layout_mode = 2
+
+[node name="ErrorStatusLabel" type="Label" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000014]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No errors"
+
+[node name="StatusSpacer" type="Control" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000015]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ZoomLabel" type="Label" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000016]
+layout_mode = 2
+text = "Zoom: 100%"
+
+[node name="DashboardBackdrop" type="Button" parent="Content/UIBase" unique_id=2000000017]
+unique_name_in_owner = true
+visible = false
+z_index = 199
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_backdrop")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_backdrop")
+theme_override_styles/hover = SubResource("StyleBoxFlat_backdrop")
+theme_override_styles/focus = SubResource("StyleBoxFlat_backdrop")
+flat = true
+
+[node name="DashBoard" parent="Content/UIBase" unique_id=179649431 instance=ExtResource("44_33cyo")]
+unique_name_in_owner = true
+visible = false
+z_index = 200
+layout_mode = 1
+anchors_preset = 9
+anchor_right = 0.0
+offset_right = 734.0
+grow_horizontal = 1
 
 [node name="Tooltip" parent="Content/UIBase" unique_id=1420862732 instance=ExtResource("23_x5h56")]
 unique_name_in_owner = true
@@ -545,24 +652,18 @@ layout_mode = 0
 offset_right = 113.0
 offset_bottom = 55.0
 
-[node name="DashBoard" parent="Content/UIBase" unique_id=179649431 instance=ExtResource("44_33cyo")]
-unique_name_in_owner = true
-visible = false
-z_index = 102
-layout_mode = 1
-
 [node name="RightSideBar" parent="Content/UIBase" unique_id=24126550 instance=ExtResource("37_hog2e")]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
 anchors_preset = 0
-anchor_right = 0.0
+anchor_left = 1.0
 anchor_bottom = 0.0
-offset_left = 1224.0
+offset_left = -250.0
 offset_top = 4.0
-offset_right = 1724.0
-offset_bottom = 968.0
-grow_horizontal = 1
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 0
 grow_vertical = 1
 
 [node name="ToastContainer" type="Control" parent="Content/UIBase" unique_id=1396520277]

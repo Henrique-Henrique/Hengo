@@ -2,22 +2,23 @@
 class_name HenSaveAll
 extends RefCounted
 
-const COMPILE_ALL_REPORT_POPUP = preload('res://addons/hengo/scenes/utils/compile_all_report_popup.tscn')
 
 var _is_compiling: bool = false
 var _report: Dictionary = {}
+var _pending_save_data: HenSaveData = null
 
 signal batch_started
 signal batch_finished
 
 
 # starts the batch compilation process
-func start() -> void:
+func start(save_data: HenSaveData = null) -> void:
 	if _is_compiling:
 		var running_toast: HenToast = Engine.get_singleton(&'ToastContainer')
 		if running_toast:
 			running_toast.notify.call_deferred('Batch compilation already running.', HenToast.MessageType.INFO)
 		return
+	_pending_save_data = save_data
 
 	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
 	if not thread_helper:
@@ -46,6 +47,11 @@ func _compile_task() -> void:
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	if signal_bus:
 		signal_bus.is_batch_loading = true
+
+	# save current script on worker thread so main thread stays responsive
+	if _pending_save_data:
+		ResourceSaver.save(_pending_save_data)
+		_pending_save_data = null
 
 	var started_at: int = Time.get_ticks_msec()
 	var report: Dictionary = {
@@ -335,9 +341,17 @@ func _on_finished() -> void:
 	_is_compiling = false
 	batch_finished.emit()
 
-	var popup: HenCompileAllReportPopup = COMPILE_ALL_REPORT_POPUP.instantiate()
-	popup.report = _report
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, 'Compile All Saves')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global and global.HENGO_ROOT:
+		var ui_base: Control = global.HENGO_ROOT.get_node_or_null('%UIBase')
+		if ui_base:
+			# remove any existing result panels before showing the new one
+			for child in ui_base.get_children():
+				if child is HenCompileResultPanel:
+					child.queue_free()
+			var panel := HenCompileResultPanel.new()
+			panel.report = _report
+			ui_base.add_child(panel)
 
 	if Engine.is_editor_hint():
 		EditorInterface.get_resource_filesystem().scan()
@@ -450,6 +464,8 @@ func _collect_identities_info(save_dirs: PackedStringArray, identity_paths: Arra
 
 
 func _fill_missing_display_names_from_saves(save_dirs: PackedStringArray, save_paths: Array[String], script_display_names: Dictionary) -> void:
+	# collect indices that actually need a fallback load
+	var missing_indices: Array[int] = []
 	for idx: int in range(save_dirs.size()):
 		var save_id: String = str(save_dirs[idx])
 		var display_name: String = str(script_display_names.get(save_id, save_id))
@@ -457,11 +473,14 @@ func _fill_missing_display_names_from_saves(save_dirs: PackedStringArray, save_p
 			continue
 		if not FileAccess.file_exists(save_paths[idx]):
 			continue
+		ResourceLoader.load_threaded_request(save_paths[idx])
+		missing_indices.append(idx)
 
-		var save_data: HenSaveData = ResourceLoader.load(save_paths[idx])
+	for idx: int in missing_indices:
+		var save_id: String = str(save_dirs[idx])
+		var save_data: HenSaveData = ResourceLoader.load_threaded_get(save_paths[idx])
 		if not save_data or not save_data.identity:
 			continue
-
 		var resolved_name: String = str(save_data.identity.name)
 		if not resolved_name.is_empty():
 			script_display_names[save_id] = resolved_name

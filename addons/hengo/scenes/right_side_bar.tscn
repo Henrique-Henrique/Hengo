@@ -1,28 +1,31 @@
-[gd_scene load_steps=4 format=3 uid="uid://c2qul21icd6bk"]
+[gd_scene format=3 uid="uid://c2qul21icd6bk"]
 
 [ext_resource type="Script" uid="uid://mnphnikfmwhe" path="res://addons/hengo/scripts/side_bar/right_side_bar.gd" id="1_vdqq6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vdqq6"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0c46b"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wrbx0"]
 
-[node name="MarginContainer2" type="MarginContainer"]
-custom_minimum_size = Vector2(500, 0)
+[node name="MarginContainer2" type="MarginContainer" unique_id=914369134]
+custom_minimum_size = Vector2(375, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 script = ExtResource("1_vdqq6")
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=1031688770]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_vdqq6")
 
-[node name="Elements" type="Tree" parent="Panel"]
+[node name="Elements" type="Tree" parent="Panel" unique_id=550144276]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_0c46b")

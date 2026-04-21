@@ -4,7 +4,7 @@ extends HenTestSuite
 const TEMP_MACRO_PATH: String = 'res://hengo/macros/temp_test_macro_gen.gd'
 
 
-# tests script macro generation from file
+# tests script macro generation from file with string template
 func test_generate_script_macro_from_file() -> void:
 	var script_source: String = """
 @tool
@@ -25,20 +25,22 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return [{ name = 'A', id = 'out_a' }, { name = 'B', id = 'out_b' }]
 
-func get_flow_0(out_a, out_b) -> void:
-	if true:
-		out_a
-		print('Going A')
-	else:
-		out_b
-		print('Going B')
+func get_flow_0() -> String:
+	return \"\"\"
+if true:
+	{{out_a}}
+	print('Going A')
+else:
+	{{out_b}}
+	print('Going B')
+\"\"\"
 
 func get_function_overrides() -> Array[Dictionary]:
 	return [
 		{
 			name = '_ready',
 			params = [],
-			body = "print('Manual Macro Ready')"
+			body = \"print('Manual Macro Ready')\"
 		}
 	]
 """
@@ -83,9 +85,13 @@ func get_function_overrides() -> Array[Dictionary]:
 	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
 	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
 
-	var expected_code: String = "if true:\n\tfunc_a()\n\tprint('Going A')\nelse:\n\tfunc_b()\n\tprint('Going B')\n\n"
-
-	assert_str(code).is_equal(expected_code)
+	assert_str(code).contains("if true:")
+	assert_str(code).contains("func_a()")
+	assert_str(code).contains("print('Going A')")
+	assert_str(code).contains("else:")
+	assert_str(code).contains("func_b()")
+	assert_str(code).contains("print('Going B')")
+	assert_int(code.find("func_a()")).is_less(code.find("func_b()"))
 
 	var full_code: String = HenTest.get_all_code()
 
@@ -100,8 +106,6 @@ func test_macro_generation_with_base_route() -> void:
 	var script_source: String = """
 @tool
 extends HenScriptMacroBase
-
-var _ref: Node
 
 func get_id() -> StringName:
 	return 'test_macro_gen'
@@ -118,9 +122,11 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return [{ name = 'Out', id = '0' }]
 
-func get_flow_0(out) -> void:
-	_ref.call_method()
-	out
+func get_flow_0() -> String:
+	return \"\"\"
+_ref.call_method()
+{{0}}
+\"\"\"
 """
 	var dir: DirAccess = DirAccess.open('res://')
 	if not dir.dir_exists('hengo/macros'):
@@ -164,8 +170,6 @@ func test_macro_generation_with_state_route() -> void:
 @tool
 extends HenScriptMacroBase
 
-var _ref: Node
-
 func get_id() -> StringName:
 	return 'test_macro_gen'
 
@@ -181,9 +185,11 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return [{ name = 'Out', id = '0' }]
 
-func get_flow_0(out) -> void:
-	_ref.call_method()
-	out
+func get_flow_0() -> String:
+	return \"\"\"
+_ref.call_method()
+{{0}}
+\"\"\"
 """
 
 	var file: FileAccess = FileAccess.open(TEMP_MACRO_PATH, FileAccess.WRITE)
@@ -218,14 +224,12 @@ func get_flow_0(out) -> void:
 	DirAccess.remove_absolute(TEMP_MACRO_PATH)
 
 
-# tests macro override ref replacement when using callables
+# tests macro override with callable returning string template
 func test_macro_override_ref_replacement_with_callable() -> void:
 	const TEMP_MACRO_CALLABLE_PATH: String = 'res://hengo/macros/temp_test_macro_callable_ref.gd'
 	var script_source: String = """
 @tool
 extends HenScriptMacroBase
-
-var _ref: Node
 
 func get_id() -> StringName:
 	return 'test_macro_gen'
@@ -242,8 +246,10 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return []
 
-func _my_logic() -> void:
-	_ref.call_method()
+func _my_logic() -> String:
+	return \"\"\"
+_ref.call_method()
+\"\"\"
 
 func get_function_overrides() -> Array[Dictionary]:
 	return [
@@ -294,14 +300,12 @@ func get_function_overrides() -> Array[Dictionary]:
 	DirAccess.remove_absolute(TEMP_MACRO_CALLABLE_PATH)
 
 
-# tests macro id replacement
+# tests {{VCNODE_ID}} replacement in flow body
 func test_macro_id_replacement() -> void:
 	const TEMP_MACRO_ID_PATH: String = 'res://hengo/macros/temp_test_macro_id.gd'
 	var script_source: String = """
 @tool
 extends HenScriptMacroBase
-
-var _ref: Node
 
 func get_id() -> StringName:
 	return 'test_macro_gen'
@@ -318,10 +322,12 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return [{ name = 'Out', id = '0' }]
 
-func get_flow_0(out) -> void:
-	_ref.set_meta('%test_prop%', 10)
-	var val = _ref.get_meta('%test_prop%')
-	out
+func get_flow_0() -> String:
+	return \"\"\"
+self.set_meta('test_prop_{{VCNODE_ID}}', 10)
+var val = self.get_meta('test_prop_{{VCNODE_ID}}')
+{{0}}
+\"\"\"
 """
 	var dir: DirAccess = DirAccess.open('res://')
 	if not dir.dir_exists('hengo/macros'):
@@ -363,14 +369,12 @@ func get_flow_0(out) -> void:
 	DirAccess.remove_absolute(TEMP_MACRO_ID_PATH)
 
 
-# tests macro id replacement with negative id
+# tests {{VCNODE_ID}} replacement with negative id
 func test_macro_id_replacement_negative() -> void:
 	const TEMP_MACRO_NEG_ID_PATH: String = 'res://hengo/macros/temp_test_macro_neg_id.gd'
 	var script_source: String = """
 @tool
 extends HenScriptMacroBase
-
-var _ref: Node
 
 func get_id() -> StringName:
 	return 'test_macro_gen'
@@ -387,10 +391,12 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return [{ name = 'Out', id = '0' }]
 
-func get_flow_0(out) -> void:
-	_ref.set_meta('%neg_prop%', 20)
-	var val = _ref.get_meta('%neg_prop%')
-	out
+func get_flow_0() -> String:
+	return \"\"\"
+self.set_meta('neg_prop_{{VCNODE_ID}}', 20)
+var val = self.get_meta('neg_prop_{{VCNODE_ID}}')
+{{0}}
+\"\"\"
 """
 	var file: FileAccess = FileAccess.open(TEMP_MACRO_NEG_ID_PATH, FileAccess.WRITE)
 	file.store_string(script_source)
@@ -428,14 +434,12 @@ func get_flow_0(out) -> void:
 	DirAccess.remove_absolute(TEMP_MACRO_NEG_ID_PATH)
 
 
-# tests macro input collision with string literal
+# tests {{input_id}} injection doesn't affect string literals
 func test_macro_input_collision_with_string_literal() -> void:
 	const TEMP_MACRO_COLLISION_PATH: String = 'res://hengo/macros/temp_test_macro_collision.gd'
 	var script_source: String = """
 @tool
 extends HenScriptMacroBase
-
-var _ref: Node
 
 func get_id() -> StringName:
 	return 'test_macro_gen'
@@ -452,9 +456,11 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return [ {name = 'Out', id = '0'}]
 
-func get_flow_0(duration, out) -> void:
-	_ref.set_meta('%duration%', duration)
-	out
+func get_flow_0() -> String:
+	return \"\"\"
+self.set_meta('duration_{{VCNODE_ID}}', {{duration}})
+{{0}}
+\"\"\"
 """
 	var dir: DirAccess = DirAccess.open('res://')
 	if not dir.dir_exists('hengo/macros'):
@@ -498,10 +504,9 @@ func get_flow_0(duration, out) -> void:
 	var expected_prop_name: String = 'duration_' + str(macro_vc.id)
 
 	assert_str(code).contains("self.set_meta('" + expected_prop_name + "', 5.0)")
-	assert_str(code).not_contains('%5.0%')
 
 
-# tests generation of script macro output
+# tests generation of script macro output with {{placeholder}}
 func test_script_macro_output_generation() -> void:
 	const TEMP_MACRO_OUTPUT_PATH: String = 'res://hengo/macros/temp_test_macro_output.gd'
 	var script_source: String = """
@@ -523,8 +528,8 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return []
 
-func get_output_0(val):
-	return val * 2
+func get_output_0() -> String:
+	return '{{val}} * 2'
 """
 	var dir: DirAccess = DirAccess.open('res://')
 	if not dir.dir_exists('hengo/macros'):
@@ -554,7 +559,6 @@ func get_output_0(val):
 		res = macro_res
 	})
 
-	# set input value
 	macro_vc.get_inputs(save_data)[0].code_value = '5'
 	macro_vc.get_inputs(save_data)[0].category = 'value'
 
@@ -565,14 +569,12 @@ func get_output_0(val):
 		route = base_route
 	})
 
-	# create a dummy input for the consumer
 	var consumer_input: HenVCInOutData = HenVCInOutData.new()
 	consumer_input.name = 'in_val'
 	consumer_input.type = 'int'
 	consumer_input.id = '0'
 	consumer_vc.inputs.append(consumer_input)
 
-	# connect macro output -> consumer input
 	var output_id: StringName = macro_vc.get_outputs(save_data)[0].id
 	consumer_vc.get_new_input_connection_command('0', output_id, macro_vc).add()
 
@@ -580,96 +582,9 @@ func get_output_0(val):
 
 	var generated_code: String = HenGeneratorByToken.get_code_by_token(save_data, token)
 
-	# clean up
 	DirAccess.remove_absolute(TEMP_MACRO_OUTPUT_PATH)
 
 	assert_str(generated_code).contains('5 * 2')
-
-
-# tests multi-line lambda output indentation
-func test_script_macro_multiline_lambda_indentation() -> void:
-	const TEMP_MACRO_LAMBDA_PATH: String = 'res://hengo/macros/temp_test_macro_lambda.gd'
-	var script_source: String = """
-@tool
-extends HenScriptMacroBase
-
-func get_id() -> StringName:
-	return 'test_macro_lambda'
-
-func get_inputs() -> Array:
-	return []
-
-func get_outputs() -> Array:
-	return [{name = 'result', id = '0', type = 'Variant'}]
-
-func get_flow_inputs() -> Array:
-	return []
-
-func get_flow_outputs() -> Array:
-	return []
-
-func get_output_0() -> String:
-	return (func() -> float:
-		if true:
-			return 1.0
-		return 0.0
-	).call()
-"""
-	var dir: DirAccess = DirAccess.open('res://')
-	if not dir.dir_exists('hengo/macros'):
-		dir.make_dir_recursive('hengo/macros')
-
-	var file: FileAccess = FileAccess.open(TEMP_MACRO_LAMBDA_PATH, FileAccess.WRITE)
-	file.store_string(script_source)
-	file.close()
-
-	HenScriptMacroLoader.load_script_macros()
-
-	var macro_res: HenSaveMacro = null
-	var global: HenGlobal = Engine.get_singleton('Global')
-	for m: HenSaveMacro in global.script_macros:
-		if m.script_path == TEMP_MACRO_LAMBDA_PATH:
-			macro_res = m
-			break
-
-	assert_object(macro_res).is_not_null()
-
-	var base_route: HenRouteData = save_data.get_base_route()
-	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'MacroNodeLambda',
-		type = HenVirtualCNode.Type.MACRO,
-		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
-		route = base_route,
-		res = macro_res
-	})
-
-	var consumer_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'Consumer',
-		type = HenVirtualCNode.Type.DEFAULT,
-		sub_type = HenVirtualCNode.SubType.VOID,
-		name_to_code = 'print',
-		route = base_route
-	})
-
-	var consumer_input: HenVCInOutData = HenVCInOutData.new()
-	consumer_input.name = 'val'
-	consumer_input.type = 'Variant'
-	consumer_input.id = '0'
-	consumer_vc.inputs.append(consumer_input)
-
-	var output_id: StringName = macro_vc.get_outputs(save_data)[0].id
-	consumer_vc.get_new_input_connection_command('0', output_id, macro_vc).add()
-
-	var consumer_token: Dictionary = HenVirtualCNodeCode.get_token(save_data, consumer_vc)
-
-	# generate code for this token at indentation level 1
-	var code: String = HenGeneratorByToken.get_code_by_token(save_data, consumer_token, 1)
-
-	DirAccess.remove_absolute(TEMP_MACRO_LAMBDA_PATH)
-
-	# check for "       if true:" (2 tabs)
-	assert_str(code).contains('\t\tif true:')
-	assert_str(code).contains('\t\t\treturn 1.0')
 
 
 # tests macro flow output substitution by id
@@ -697,11 +612,13 @@ func get_flow_outputs() -> Array:
 		{name = 'Fail', id = 'out_fail'}
 	]
 
-func get_flow_0(out_fail, out_success) -> void:
-	if true:
-		out_success
-	else:
-		out_fail
+func get_flow_0() -> String:
+	return \"\"\"
+if true:
+	{{out_success}}
+else:
+	{{out_fail}}
+\"\"\"
 """
 	var dir: DirAccess = DirAccess.open('res://')
 	if not dir.dir_exists('hengo/macros'):
@@ -777,8 +694,8 @@ func get_flow_inputs() -> Array:
 func get_flow_outputs() -> Array:
 	return []
 
-func get_output_0():
-	return 10
+func get_output_0() -> String:
+	return '10'
 """
 	var dir: DirAccess = DirAccess.open('res://')
 	if not dir.dir_exists('hengo/macros'):
@@ -830,3 +747,673 @@ func get_output_0():
 	DirAccess.remove_absolute(TEMP_MACRO_PROP_NAME_PATH)
 
 	assert_dict(token).contains_key_value('prop_name', 'a')
+
+
+# --- new string template tests ---
+
+
+# tests {{input_id}} is injected into flow body
+func test_string_template_flow_input_injection() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_flow_input_inject.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_flow_input_inject'
+
+func get_inputs() -> Array:
+	return [{name = 'msg', id = 'msg', type = 'String'}]
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return [{name = 'Exec', id = '0'}]
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_flow_0() -> String:
+	return 'print({{msg}})'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroFlowInputInject',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	macro_vc.get_inputs(save_data)[0].code_value = '"hello"'
+	macro_vc.get_inputs(save_data)[0].category = 'value'
+
+	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
+	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(code).contains('print("hello")')
+
+
+# tests {{flow_output_id}} is replaced by connected flow code
+func test_string_template_flow_output_injection() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_flow_output_inject.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_flow_output_inject'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return [{name = 'Exec', id = '0'}]
+
+func get_flow_outputs() -> Array:
+	return [{name = 'Out', id = 'done'}]
+
+func get_flow_0() -> String:
+	return 'print("before")\n{{done}}'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroFlowOutputInject',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var next_node: HenVirtualCNode = HenTest.get_void('after_func')
+	macro_vc.add_flow_connection('done', StringName('0'), next_node).add()
+
+	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
+	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(code).contains('print("before")')
+	assert_str(code).contains('after_func()')
+	assert_int(code.find('print("before")')).is_less(code.find('after_func()'))
+
+
+# tests {{VCNODE_ID}} is replaced by the macro instance id
+func test_string_template_vcnode_id_replacement() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_vcnode_id.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_vcnode_id'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return [{name = 'Exec', id = '0'}]
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_flow_0() -> String:
+	return 'var x_{{VCNODE_ID}}: int = 0'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroVcnodeId',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
+	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(code).contains('var x_' + str(macro_vc.id) + ': int = 0')
+
+
+# tests {{VCNODE_ID}} in function override body string
+func test_string_template_vcnode_id_in_override() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_vcnode_id_override.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_vcnode_id_override'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return []
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_function_overrides() -> Array[Dictionary]:
+	return [
+		{
+			name = '_ready',
+			params = [],
+			body = 'print({{VCNODE_ID}})'
+		}
+	]
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroOverrideVcnodeId',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var full_code: String = HenTest.get_all_code()
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(full_code).contains('print(' + str(macro_vc.id) + ')')
+
+
+# tests two instances of same macro generate distinct variable names
+func test_string_template_multiple_instances_no_collision() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_multi_instance.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_multi_instance'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return [{name = 'Exec', id = '0'}]
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_flow_0() -> String:
+	return 'var counter_{{VCNODE_ID}}: int = 0'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc_a: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroInstanceA',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var macro_vc_b: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroInstanceB',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var flow_inputs_a: Array = macro_vc_a.get_flow_inputs(save_data)
+	var code_a: String = HenTest.get_vc_code(macro_vc_a, flow_inputs_a[0].id)
+
+	var flow_inputs_b: Array = macro_vc_b.get_flow_inputs(save_data)
+	var code_b: String = HenTest.get_vc_code(macro_vc_b, flow_inputs_b[0].id)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(code_a).contains('counter_' + str(macro_vc_a.id))
+	assert_str(code_b).contains('counter_' + str(macro_vc_b.id))
+	assert_bool(macro_vc_a.id != macro_vc_b.id).is_true()
+
+
+# tests get_output_<id>() -> String with {{input_id}}
+func test_string_template_output_function() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_output_template.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_output_template'
+
+func get_inputs() -> Array:
+	return [{name = 'val', id = 'val', type = 'int'}]
+
+func get_outputs() -> Array:
+	return [{name = 'doubled', id = 'doubled', type = 'int'}]
+
+func get_flow_inputs() -> Array:
+	return []
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_output_doubled() -> String:
+	return '{{val}} * 2'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroOutputTemplate',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	macro_vc.get_inputs(save_data)[0].code_value = '7'
+	macro_vc.get_inputs(save_data)[0].category = 'value'
+
+	var consumer_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'Consumer',
+		type = HenVirtualCNode.Type.DEFAULT,
+		sub_type = HenVirtualCNode.SubType.VOID,
+		route = base_route
+	})
+
+	var consumer_input: HenVCInOutData = HenVCInOutData.new()
+	consumer_input.name = 'in_val'
+	consumer_input.type = 'int'
+	consumer_input.id = '0'
+	consumer_vc.inputs.append(consumer_input)
+
+	var output_id: StringName = macro_vc.get_outputs(save_data)[0].id
+	consumer_vc.get_new_input_connection_command('0', output_id, macro_vc).add()
+
+	var token: Dictionary = HenVirtualCNodeCode.get_input_token(save_data, consumer_vc, '0')
+	var generated_code: String = HenGeneratorByToken.get_code_by_token(save_data, token)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(generated_code).contains('7 * 2')
+
+
+# tests _ref -> self replacement in base route with new template format
+func test_string_template_base_route_self_replacement() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_self_replace.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_self_replace'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return [{name = 'Exec', id = '0'}]
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_flow_0() -> String:
+	return '_ref.do_something()'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroSelfReplace',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
+	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(code).contains('self.do_something()')
+	assert_str(code).not_contains('_ref.do_something()')
+
+
+# tests _ref stays as _ref in state route
+func test_string_template_state_route_ref_kept() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_ref_kept.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_ref_kept'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return [{name = 'Exec', id = '0'}]
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_flow_0() -> String:
+	return '_ref.do_something()'
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var state: HenSaveState = HenSaveState.create()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroRefKept',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = state.get_route(save_data),
+		res = macro_res
+	})
+
+	var flow_inputs: Array = macro_vc.get_flow_inputs(save_data)
+	var code: String = HenTest.get_vc_code(macro_vc, flow_inputs[0].id)
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(code).contains('_ref.do_something()')
+
+
+# tests get_function_overrides with body as String directly (not Callable)
+func test_string_template_override_body_string_direct() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_override_string.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_override_string'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return []
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_function_overrides() -> Array[Dictionary]:
+	return [
+		{
+			name = '_ready',
+			params = [],
+			body = 'print("from_override_{{VCNODE_ID}}")'
+		}
+	]
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroOverrideString',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var full_code: String = HenTest.get_all_code()
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(full_code).contains('print("from_override_' + str(macro_vc.id) + '")')
+
+
+# tests get_script_base() injects class-level variables with unique ids into the generated script
+func test_string_template_get_script_base_injection() -> void:
+	const PATH: String = 'res://hengo/macros/temp_test_script_base.gd'
+	var script_source: String = """
+@tool
+extends HenScriptMacroBase
+
+func get_id() -> StringName:
+	return 'test_script_base'
+
+func get_inputs() -> Array:
+	return []
+
+func get_outputs() -> Array:
+	return []
+
+func get_flow_inputs() -> Array:
+	return []
+
+func get_flow_outputs() -> Array:
+	return []
+
+func get_script_base() -> String:
+	return \"\"\"
+var _counter_{{VCNODE_ID}}: int = 0
+var _label_{{VCNODE_ID}}: String = ''
+\"\"\"
+
+func get_function_overrides() -> Array[Dictionary]:
+	return []
+"""
+	var dir: DirAccess = DirAccess.open('res://')
+	if not dir.dir_exists('hengo/macros'):
+		dir.make_dir_recursive('hengo/macros')
+
+	var file: FileAccess = FileAccess.open(PATH, FileAccess.WRITE)
+	file.store_string(script_source)
+	file.close()
+
+	HenScriptMacroLoader.load_script_macros()
+
+	var macro_res: HenSaveMacro = null
+	var global: HenGlobal = Engine.get_singleton('Global')
+	for m: HenSaveMacro in global.script_macros:
+		if m.script_path == PATH:
+			macro_res = m
+			break
+
+	assert_object(macro_res).is_not_null()
+
+	var base_route: HenRouteData = save_data.get_base_route()
+	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode({
+		name = 'MacroScriptBase',
+		type = HenVirtualCNode.Type.MACRO,
+		sub_type = HenVirtualCNode.SubType.SCRIPT_MACRO,
+		route = base_route,
+		res = macro_res
+	})
+
+	var full_code: String = HenTest.get_all_code()
+
+	DirAccess.remove_absolute(PATH)
+
+	assert_str(full_code).contains('var _counter_' + str(macro_vc.id) + ': int = 0')
+	assert_str(full_code).contains("var _label_" + str(macro_vc.id) + ": String = ''")

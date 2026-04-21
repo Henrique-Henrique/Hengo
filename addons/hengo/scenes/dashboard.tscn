@@ -20,19 +20,17 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_jlpx7")
 
-[node name="MarginContainer" type="Control" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2
-anchor_top = 0.05
-anchor_right = 0.8
-anchor_bottom = 0.95
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 12
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
@@ -43,7 +41,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"HeaderLarge"
 theme_override_fonts/font = ExtResource("2_l2d5o")
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 22
 text = "Hengo Script"
 
 [node name="CloseBt" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]

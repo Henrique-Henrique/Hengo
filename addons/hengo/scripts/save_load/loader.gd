@@ -59,7 +59,7 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	var save_data: HenSaveData
-	
+
 	if _override_data:
 		save_data = _override_data
 	else:
@@ -68,26 +68,26 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 	# loading hengo script data
 	if save_data:
 		global.SAVE_DATA = save_data
-		
+
 		# clean up script macros from save data
 		for i: int in range(save_data.macros.size() - 1, -1, -1):
 			if save_data.macros[i].is_script_macro:
 				save_data.macros.remove_at(i)
-		
+
 		# load script macros
 		HenScriptMacroLoader.load_script_macros()
-		
+
 		reset_to_load(_id, _headless)
 	else:
 		return false
-	
+
 	# showing current type
 	if not _headless:
 		show_class_name()
 		router.change_route(global.SAVE_DATA.get_base_route())
 
 	var end: int = Time.get_ticks_usec()
-		
+
 	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
 
 	global.CAM.can_scroll = true

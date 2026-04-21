@@ -25,8 +25,6 @@ func _on_create(_open: bool = false) -> void:
 	if script.result != OK:
 		return
 
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	
 	if _open:
 		var loader: HenLoader = Engine.get_singleton(&'Loader')
 		loader.load(str(script.id), false, script.data)

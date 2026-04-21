@@ -8,6 +8,12 @@ var cnode_selecting_rect: bool = false
 var start_select_pos: Vector2 = Vector2.ZERO
 var can_select: bool = false
 
+# sidebar collapse
+var _sidebar_collapsed: bool = false
+
+# canvas layout
+var _canvas_split_mode: bool = false
+
 func _ready() -> void:
 	if HenUtils.disable_scene(self):
 		return
@@ -63,6 +69,32 @@ func _ready() -> void:
 	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
 	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
 	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
+	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
+	(get_node('%ToggleLayoutBt') as Button).pressed.connect(_on_toggle_canvas_layout)
+
+	# Dashboard backdrop: show/hide with dashboard
+	var backdrop: Button = get_node('%DashboardBackdrop')
+	var dashboard_node = get_node('%DashBoard')
+	backdrop.pressed.connect(func():
+		var g: HenGlobal = Engine.get_singleton(&'Global')
+		if g and g.DASHBOARD:
+			g.DASHBOARD.hide_dashboard()
+	)
+	dashboard_node.visibility_changed.connect(func():
+		backdrop.visible = dashboard_node.visible
+	)
+
+	# Sidebar icon strip buttons
+	(get_node('%PropsIconBt') as Button).pressed.connect(func():
+		if _sidebar_collapsed:
+			_on_collapse_sidebar()
+		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 0
+	)
+	(get_node('%CodeIconBt') as Button).pressed.connect(func():
+		if _sidebar_collapsed:
+			_on_collapse_sidebar()
+		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 1
+	)
 	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	signal_bus.add_virtual_cnode_to_route.connect(_on_graph_changed_no_args)
@@ -264,6 +296,24 @@ func _update_ui_state(all_errors: Array) -> void:
 		actions_bt.icon = preload('res://addons/hengo/assets/new_icons/shield-alert.svg')
 		actions_bt.modulate = Color('ef4444')
 
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	var name_label: Label = get_node_or_null('%ScriptNameLabel')
+	if name_label:
+		if global and global.SAVE_DATA:
+			name_label.text = global.SAVE_DATA.identity.name
+		else:
+			name_label.text = 'No script loaded'
+
+	var err_label: Label = get_node_or_null('%ErrorStatusLabel')
+	if err_label:
+		if all_errors.is_empty():
+			err_label.text = 'No errors'
+			err_label.modulate = Color.WHITE
+		else:
+			err_label.text = '{0} error(s)'.format([all_errors.size()])
+			err_label.modulate = Color('ef4444')
+
 
 func _show_error_popup(all_errors: Array) -> void:
 	var error_popup = preload('res://addons/hengo/scenes/utils/error_list_popup.tscn').instantiate()
@@ -298,3 +348,57 @@ func _validate_script_errors(_save_data: HenSaveData) -> Array:
 func _on_actions_bt_pressed() -> void:
 	# force check and show
 	check_errors(true)
+
+
+func _on_collapse_sidebar() -> void:
+	_sidebar_collapsed = not _sidebar_collapsed
+
+	var tab_container: TabContainer = get_node_or_null('%SidebarTabContainer')
+	var icon_strip: VBoxContainer = get_node_or_null('%SidebarIconStrip')
+	var sidebar_margin: MarginContainer = get_node_or_null('%SideBarMargin')
+	var collapse_btn: Button = get_node_or_null('%CollapseToggleBt')
+
+	if not tab_container or not icon_strip or not sidebar_margin:
+		return
+
+	if _sidebar_collapsed:
+		tab_container.visible = false
+		icon_strip.visible = true
+		sidebar_margin.custom_minimum_size = Vector2(44, 0)
+		if collapse_btn:
+			collapse_btn.tooltip_text = 'Expand sidebar'
+	else:
+		tab_container.visible = true
+		icon_strip.visible = false
+		sidebar_margin.custom_minimum_size = Vector2(0, 0)
+		if collapse_btn:
+			collapse_btn.tooltip_text = 'Collapse sidebar'
+
+
+func _on_toggle_canvas_layout() -> void:
+	_canvas_split_mode = not _canvas_split_mode
+
+	var canvas_tabs: TabContainer = get_node_or_null('%CanvasTabs')
+	var canvas_split: HSplitContainer = get_node_or_null('%CanvasSplit')
+	var toggle_btn: Button = get_node_or_null('%ToggleLayoutBt')
+
+	if not canvas_tabs or not canvas_split:
+		return
+
+	if _canvas_split_mode:
+		var children := canvas_tabs.get_children().duplicate()
+		for child in children:
+			child.reparent(canvas_split, false)
+			child.visible = true
+		canvas_tabs.visible = false
+		canvas_split.visible = true
+		if toggle_btn:
+			toggle_btn.text = 'Tabs'
+	else:
+		var children := canvas_split.get_children().duplicate()
+		for child in children:
+			child.reparent(canvas_tabs, false)
+		canvas_split.visible = false
+		canvas_tabs.visible = true
+		if toggle_btn:
+			toggle_btn.text = 'Split'

@@ -262,19 +262,19 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 		HenVirtualCNode.SubType.PASS:
 			return indent + 'pass'
 		HenVirtualCNode.SubType.RAW_CODE:
-			var raw_text: String = (_token.code.value as String).trim_prefix('"').trim_suffix('"')
+			var raw_text: String = (_token.code.value as String).trim_prefix('"').trim_suffix('"').strip_edges(false, true)
 			if raw_text.is_empty(): return ''
 
 			var lines: PackedStringArray = raw_text.split('\n')
 			var indented_lines: PackedStringArray = []
-			
-			
+
+
 			for i: int in range(lines.size()):
 				if i == 0:
 					indented_lines.append(indent + lines[i])
 				else:
 					indented_lines.append(base_indent + lines[i])
-			
+
 			return '\n'.join(indented_lines)
 		HenVirtualCNode.SubType.LITERAL:
 			var lit_type: StringName = _token.literal_type

@@ -84,7 +84,7 @@ static func get_trace_value_token(_vc: HenVirtualCNode, _value_code: String) -> 
 
 
 static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _flow_id: StringName) -> Dictionary:
-	# handle script macro token generation and argument injection
+	# handle script macro token generation and placeholder injection
 	var res: HenSaveMacro = _vc.get_res(_save_data)
 
 	if not res or not FileAccess.file_exists(res.script_path):
@@ -100,66 +100,72 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 			flow_input_idx = i
 			target_flow_input = flow_inputs[i]
 			break
-	
+
 	if flow_input_idx == -1:
 		return get_invalid_token()
-	
-	var script_content: String = FileAccess.get_file_as_string(res.script_path)
+
 	var func_name: String
-	
+
 	if target_flow_input:
 		func_name = 'get_flow_' + str(target_flow_input.id)
 	else:
 		func_name = 'get_flow_' + str(flow_input_idx)
-	
-	var parsed: Dictionary = parse_script_function(script_content, func_name)
-	if parsed.is_empty():
+
+	var script: GDScript = ResourceLoader.load(res.script_path, "", ResourceLoader.CACHE_MODE_IGNORE)
+	if not script: return get_invalid_token()
+	var instance: HenScriptMacroBase = script.new() as HenScriptMacroBase
+	if not instance: return get_invalid_token()
+
+	if not instance.has_method(func_name):
 		return {
 			vc_id = _vc.id,
 			type = HenVirtualCNode.SubType.RAW_CODE,
 			code = {value = '# error: function ' + func_name + ' not found in script macro.'},
 			use_self = false
 		}
-	
-	var code_body: String = parsed.body
-	var args: Array = parsed.args
+
+	var code_body: String = instance.call(func_name)
+	var placeholders: Array = []
+	var ph_regex: RegEx = RegEx.new()
+	ph_regex.compile('\\{\\{([a-zA-Z0-9_]+)\\}\\}')
+	for result: RegExMatch in ph_regex.search_all(code_body):
+		var name: String = result.get_string(1)
+		if name != 'VCNODE_ID' and not placeholders.has(name):
+			placeholders.append(name)
 	var available_flow_outputs: Array = _vc.get_flow_outputs(_save_data)
 	var available_inputs: Array = _vc.get_inputs(_save_data)
 
-	
-	# map arguments to inputs or flow outputs based on availability
-	for arg_name: String in args:
+	# inject inputs and flow outputs into {{placeholder}} slots
+	for placeholder: String in placeholders:
 		var matched_input: HenVCInOutData = null
-		
+
 		for input: HenVCInOutData in available_inputs:
-			if input.id == arg_name:
+			if input.id == placeholder:
 				matched_input = input
 				break
-		
+
 		if matched_input:
 			var input_token: Dictionary = get_input_token(_save_data, _vc, matched_input.id)
 			var input_code: String = HenGeneratorByToken.get_code_by_token(_save_data, input_token)
-			
-			code_body = _inject_code_into_body(code_body, arg_name, input_code)
+			code_body = _inject_placeholder(code_body, placeholder, input_code)
 			continue
-		
-		# check if arg matches any available flow output by id
+
 		var matched_flow_output: HenVCFlow = null
 		for flow_out: HenVCFlow in available_flow_outputs:
-			if flow_out.id == arg_name:
+			if flow_out.id == placeholder:
 				matched_flow_output = flow_out
 				break
-		
+
 		if matched_flow_output:
 			var generated_flow_code: String = 'pass'
 			var connections: Array = _save_data.get_outgoing_flow_connection_from_vc(_vc)
 			var connection: HenVCFlowConnectionData = null
-			
+
 			for conn: HenVCFlowConnectionData in connections:
 				if conn.from_id == matched_flow_output.id:
 					connection = conn
 					break
-			
+
 			if connection:
 				var target_node: HenVirtualCNode = connection.get_to(_save_data)
 				if target_node:
@@ -169,19 +175,19 @@ static func get_script_macro_token(_save_data: HenSaveData, _vc: HenVirtualCNode
 			if debug_global.SETTINGS.debug_compilation:
 				var prefix: String = "_ref." if _vc.route_type == HenRouter.ROUTE_TYPE.STATE else ""
 				generated_flow_code = "if %sget_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')\n%s" % [prefix, _vc.id, matched_flow_output.id, generated_flow_code]
-			
-			code_body = _inject_code_into_body(code_body, arg_name, generated_flow_code)
+
+			code_body = _inject_placeholder(code_body, placeholder, generated_flow_code)
 			continue
-		
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
-	
+
 	code_body = process_script_macro_body(code_body, use_self, _vc.id)
 
 	return {
 		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
-		code = {value = code_body},
+		code = {value = code_body.strip_edges(false, true)},
 		use_self = use_self
 	}
 
@@ -201,65 +207,67 @@ static func get_script_macro_output_token(_save_data: HenSaveData, _vc: HenVirtu
 			output_idx = i
 			target_output = outputs[i]
 			break
-	
+
 	if output_idx == -1:
 		return get_invalid_token()
-	
-	var script_content: String = FileAccess.get_file_as_string(res.script_path)
+
 	var func_name: String
-	
+
 	if target_output:
 		func_name = 'get_output_' + str(target_output.id)
 	else:
 		func_name = 'get_output_' + str(output_idx)
-	
-	var parsed: Dictionary = parse_script_function(script_content, func_name)
 
-	# find by index if default function is not found
-	if parsed.is_empty():
+	var script: GDScript = ResourceLoader.load(res.script_path, "", ResourceLoader.CACHE_MODE_IGNORE)
+	if not script: return get_invalid_token()
+	var instance: HenScriptMacroBase = script.new() as HenScriptMacroBase
+	if not instance: return get_invalid_token()
+
+	if not instance.has_method(func_name):
 		func_name = 'get_output_' + str(output_idx)
-		parsed = parse_script_function(script_content, func_name)
 
-	if parsed.is_empty():
+	if not instance.has_method(func_name):
 		return {
 			vc_id = _vc.id,
 			type = HenVirtualCNode.SubType.RAW_CODE,
 			code = {value = 'null # error: function ' + func_name + ' not found in script macro.'},
 			use_self = false
 		}
-	
-	var code_body: String = parsed.body
-	var args: Array = parsed.args
+
+	var code_body: String = instance.call(func_name)
+	var placeholders: Array = []
+	var ph_regex: RegEx = RegEx.new()
+	ph_regex.compile('\\{\\{([a-zA-Z0-9_]+)\\}\\}')
+	for result: RegExMatch in ph_regex.search_all(code_body):
+		var name: String = result.get_string(1)
+		if name != 'VCNODE_ID' and not placeholders.has(name):
+			placeholders.append(name)
 	var available_inputs: Array = _vc.get_inputs(_save_data)
-	
-	# map arguments to inputs based on availability
-	for arg_name: String in args:
+
+	# inject inputs into {{placeholder}} slots
+	for placeholder: String in placeholders:
 		var matched_input: HenVCInOutData = null
-		
+
 		for input: HenVCInOutData in available_inputs:
-			if input.id == arg_name:
+			if input.id == placeholder:
 				matched_input = input
 				break
-		
+
 		if matched_input:
 			var input_token: Dictionary = get_input_token(_save_data, _vc, matched_input.id)
 			var input_code: String = HenGeneratorByToken.get_code_by_token(_save_data, input_token)
-			
-			code_body = _inject_code_into_body(code_body, arg_name, input_code)
+			code_body = _inject_placeholder(code_body, placeholder, input_code)
 			continue
-		
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var use_self: bool = (_vc.route_type != HenRouter.ROUTE_TYPE.STATE) if not global.USE_MACRO_USE_SELF else global.MACRO_USE_SELF
-	
+
 	code_body = process_script_macro_body(code_body, use_self, _vc.id)
 
-	if code_body.strip_edges().begins_with('return '):
-		code_body = code_body.strip_edges().trim_prefix('return ')
-	
 	return {
 		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
-		code = {value = code_body},
+		code = {value = code_body.strip_edges(false, true)},
 		use_self = use_self
 	}
 
@@ -269,41 +277,29 @@ static func process_script_macro_body(body: String, use_self: bool, macro_id: Va
 		var regex: RegEx = RegEx.new()
 		regex.compile('\\b_ref\\b')
 		body = regex.sub(body, 'self', true)
-	
+
 	if macro_id != null:
-		var regex: RegEx = RegEx.new()
-		regex.compile('%([a-zA-Z0-9_]+)%')
-		
-		for result: RegExMatch in regex.search_all(body):
-			var property: String = result.get_string(1)
-			body = body.replace(result.get_string(), (property + '_' + str(macro_id)).to_snake_case())
-	
+		body = body.replace('{{VCNODE_ID}}', str(macro_id))
+
 	return body
 
 
 static func parse_script_function(script: String, func_name: String) -> Dictionary:
-	# parse script text to extract args and body for a specific function
+	# parse script text to extract the string-template body and its {{placeholders}}
 	var lines: PackedStringArray = script.split('\n')
 	var found: bool = false
-	var args: Array = []
-	var body: String = ''
+	var is_string_return: bool = false
+	var raw_body: String = ''
 	var base_indent: int = 0
-	
+
 	for i: int in range(lines.size()):
 		var line: String = lines[i]
 		if not found:
 			var stripped: String = line.strip_edges()
 			if stripped.begins_with('func ' + func_name + '('):
 				found = true
-				var start: int = stripped.find('(') + 1
-				var end: int = stripped.find(')')
-				var args_str: String = stripped.substr(start, end - start)
-				var raw_args: PackedStringArray = args_str.split(',')
-				for arg: String in raw_args:
-					var a: String = arg.strip_edges()
-					if not a.is_empty():
-						args.append(a)
-				
+				is_string_return = '-> String' in stripped or '->String' in stripped
+
 				for j: int in range(i + 1, lines.size()):
 					var next_line: String = lines[j]
 					if not next_line.strip_edges().is_empty():
@@ -311,78 +307,96 @@ static func parse_script_function(script: String, func_name: String) -> Dictiona
 						break
 		else:
 			if line.strip_edges().is_empty():
-				body += '\n'
+				raw_body += '\n'
 				continue
-				
+
 			var current_indent: int = line.length() - line.strip_edges(true, false).length()
-			if current_indent < base_indent:
-				break
-			
-			body += line.substr(base_indent) + '\n'
-			
+
+			if is_string_return:
+				# keep reading until closing triple-quote is found in accumulated body
+				raw_body += line.substr(0) + '\n'
+				if raw_body.count('"""') >= 2:
+					break
+			else:
+				if current_indent < base_indent:
+					break
+				raw_body += line.substr(base_indent) + '\n'
+
 	if not found:
 		return {}
-		
-	body = body.strip_edges(false, true)
-	var body_lines: PackedStringArray = body.split('\n')
-	
+
+	var body: String
+	if is_string_return:
+		# extract content from triple-quoted string: """..."""
+		var tq_start: int = raw_body.find('"""')
+		var tq_end: int = raw_body.rfind('"""')
+		if tq_start != -1 and tq_end != tq_start:
+			body = raw_body.substr(tq_start + 3, tq_end - tq_start - 3)
+			body = body.strip_edges(false, true)
+			if body.begins_with('\n'):
+				body = body.substr(1)
+		else:
+			# single-line string return: return "code"
+			var ret_line: String = raw_body.strip_edges()
+			if ret_line.begins_with('return '):
+				body = ret_line.trim_prefix('return ').strip_edges().trim_prefix('"').trim_suffix('"')
+			else:
+				body = ret_line
+	else:
+		body = raw_body.strip_edges(false, true)
+
+	# normalize spaces to tabs
 	var indent_size: int = 4
 	if Engine.is_editor_hint():
 		var settings = EditorInterface.get_editor_settings()
 		if settings:
-			indent_size = settings.get_setting("text_editor/behavior/indent/size")
-	
-	if indent_size <= 0: indent_size = 4
-	
-	var spaces_str: String = " ".repeat(indent_size)
-	
+			indent_size = settings.get_setting('text_editor/behavior/indent/size')
+	if indent_size <= 0:
+		indent_size = 4
+
+	var spaces_str: String = ' '.repeat(indent_size)
+	var body_lines: PackedStringArray = body.split('\n')
 	for k: int in range(body_lines.size()):
-		var line: String = body_lines[k]
+		var bl: String = body_lines[k]
 		var prefix_len: int = 0
-		
-		for c_idx: int in range(line.length()):
-			if line[c_idx] != ' ' and line[c_idx] != '\t':
+		for c_idx: int in range(bl.length()):
+			if bl[c_idx] != ' ' and bl[c_idx] != '\t':
 				break
 			prefix_len += 1
-			
-		var prefix: String = line.substr(0, prefix_len)
-		var remainder: String = line.substr(prefix_len)
-		
-		var new_prefix: String = prefix.replace(spaces_str, '\t')
-		
-		body_lines[k] = new_prefix + remainder
-	
+		var prefix: String = bl.substr(0, prefix_len)
+		var remainder: String = bl.substr(prefix_len)
+		body_lines[k] = prefix.replace(spaces_str, '\t') + remainder
 	body = '\n'.join(body_lines)
-	
-	return {args = args, body = body}
+
+	# extract {{placeholder}} names from body
+	var placeholders: Array = []
+	var ph_regex: RegEx = RegEx.new()
+	ph_regex.compile('\\{\\{([a-zA-Z0-9_]+)\\}\\}')
+	for result: RegExMatch in ph_regex.search_all(body):
+		var name: String = result.get_string(1)
+		if name != 'VCNODE_ID' and not placeholders.has(name):
+			placeholders.append(name)
+
+	return {placeholders = placeholders, body = body}
 
 
-static func _inject_code_into_body(body: String, placeholder: String, injection: String) -> String:
-	# replace placeholder with injected code preserving indentation
+static func _inject_placeholder(body: String, placeholder: String, injection: String) -> String:
+	# replace {{placeholder}} with injected code preserving line indentation
 	var lines: PackedStringArray = body.split('\n')
 	var result: String = ''
-	
+	var token: String = '{{' + placeholder + '}}'
+
 	for line: String in lines:
-		var pos: int = line.find(placeholder)
-		if pos != -1:
-			var regex: RegEx = RegEx.new()
-			regex.compile('(?<!%)' + '\\b' + placeholder + '\\b' + '(?!%)')
-			if regex.search(line):
-				var injection_lines: PackedStringArray = injection.split('\n')
-				var indented_injection: String = injection_lines[0]
-				var line_indent: String = line.substr(0, line.length() - line.strip_edges(true, false).length())
-				
-				if injection_lines.size() > 1:
-					for j: int in range(1, injection_lines.size()):
-						indented_injection += '\n' + line_indent + injection_lines[j]
-				
-				var new_line: String = regex.sub(line, indented_injection, true)
-				result += new_line + '\n'
-			else:
-				result += line + '\n'
+		if line.contains(token):
+			var line_indent: String = line.substr(0, line.length() - line.strip_edges(true, false).length())
+			var injection_lines: PackedStringArray = injection.split('\n')
+			var indented: String = injection_lines[0]
+			for j: int in range(1, injection_lines.size()):
+				indented += '\n' + line_indent + injection_lines[j]
+			result += line.replace(token, indented) + '\n'
 		else:
 			result += line + '\n'
-			
+
 	return result
 
 
