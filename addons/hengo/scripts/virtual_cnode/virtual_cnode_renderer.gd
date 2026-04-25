@@ -162,7 +162,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 			continue
 		
 		if is_instance_valid(connection.line_ref) and connection.line_ref is HenConnectionLine:
-			connection.line_ref = connection.line_ref
+			pass
 		else:
 			connection.line_ref = HenPool.get_line_from_pool()
 
@@ -286,7 +286,7 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 
 	for connection: HenVCFlowConnectionData in flow_connections:
 		if is_instance_valid(connection.line_ref) and connection.line_ref is HenFlowConnectionLine:
-			connection.line_ref = connection.line_ref
+			pass
 		else:
 			connection.line_ref = HenPool.get_flow_line_from_pool()
 
@@ -387,7 +387,7 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 
 		# input positions
 		if connection.line_ref.from_pool_visible:
-			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2) + connection.line_ref.conn_size
+			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
 			connection.to_old_pos = pos
 		else:
 			if connection.line_ref.points.size() > 0:
@@ -395,13 +395,13 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 
 		# output positions
 		if connection.line_ref.to_pool_visible:
-			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2) + connection.line_ref.conn_size
+			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
 			connection.from_old_pos = pos
 		else:
 			if connection.line_ref.points.size() > 0:
 				connection.line_ref.last_to_pos = connection.line_ref.points[-1]
 
-		if not connection.line_ref.from_pool_visible and not connection.line_ref.to_pool_visible:
+		if not connection.line_ref.from_pool_visible or not connection.line_ref.to_pool_visible:
 			connection.line_ref.visible = false
 			connection.line_ref = null
 
@@ -433,7 +433,7 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 			if connection.line_ref.points.size() > 0:
 				connection.line_ref.last_to_pos = connection.line_ref.points[-1]
 
-		if not connection.line_ref.from_pool_visible and not connection.line_ref.to_pool_visible:
+		if not connection.line_ref.from_pool_visible or not connection.line_ref.to_pool_visible:
 			connection.line_ref.visible = false
 			connection.line_ref = null
 
