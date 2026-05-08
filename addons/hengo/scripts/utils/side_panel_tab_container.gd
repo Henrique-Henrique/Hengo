@@ -3,14 +3,19 @@ extends TabContainer
 
 const CONFIG = {
     0: {
+        title = 'Dashboard',
+        icon = preload('res://addons/hengo/assets/new_icons/layout-dashboard.svg')
+    },
+    1: {
         title = 'Props',
         icon = preload('res://addons/hengo/assets/icons/settings.svg')
     },
-    1: {
+    2: {
         title = 'Code Preview',
         icon = preload('res://addons/hengo/assets/icons/menu/text.svg')
     }
 }
+
 
 func _ready() -> void:
     for id in CONFIG:

@@ -40,10 +40,6 @@ func add() -> void:
 		for flow_connection: HenVCFlowConnectionData in old_flow_connections:
 			flow_connection.get_to(global.SAVE_DATA).update()
 			flow_connection.get_from(global.SAVE_DATA).update()
-		
-		if global.RIGHT_SIDE_BAR:
-			var router: HenRouter = Engine.get_singleton(&'Router')
-			global.RIGHT_SIDE_BAR.update(router.current_route)
 
 	old_connections.clear()
 	old_flow_connections.clear()
@@ -94,10 +90,6 @@ func remove() -> void:
 	for flow_connection: HenVCFlowConnectionData in remove_flow_connections:
 		flow_connection.get_to(global.SAVE_DATA).update()
 		flow_connection.get_from(global.SAVE_DATA).update()
-
-	if global.RIGHT_SIDE_BAR:
-		var router: HenRouter = Engine.get_singleton(&'Router')
-		global.RIGHT_SIDE_BAR.update(router.current_route)
 
 	var auto_router: HenRouter = Engine.get_singleton(&'Router')
 	global.AUTO_CAMERA.on_vc_removed(v_cnode, auto_router.current_route, remove_flow_connections)

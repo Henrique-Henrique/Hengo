@@ -3,6 +3,12 @@ class_name HenGeneralPopup extends Node
 
 const POPUP_CONTAINER_SCENE: PackedScene = preload('res://addons/hengo/scenes/utils/popup_container.tscn')
 
+enum Layout {
+	CENTER,
+	COMPACT,
+	ANCHORED
+}
+
 signal closed
 
 var _ui_base: Control
@@ -22,7 +28,17 @@ func setup(ui_base: Control) -> void:
 	_ui_base = ui_base
 
 
-func show_content(content: Control, name: String = '', pos: Vector2 = Vector2.INF, lod: float = 1) -> HenPopupContainer:
+# opts (all optional):
+#   layout: Layout (default CENTER)
+#   anchor_to: Control (required for ANCHORED)
+#   side: int SIDE_LEFT/RIGHT/TOP/BOTTOM (default SIDE_RIGHT for ANCHORED)
+#   fill_axis: bool (ANCHORED only — fills the axis perpendicular to side using anchor_to's size)
+#   offset: Vector2 (default ZERO)
+#   pos: Vector2 (overrides anchored placement)
+#   min_size: Vector2 (default ZERO)
+#   lod: float (default 1.0 for CENTER/COMPACT, 0.0 for ANCHORED)
+#   blur: bool (default false — soft blur backdrop, overrides lod styling)
+func show_content(content: Control, opts: Dictionary = {}) -> HenPopupContainer:
 	if not _ui_base:
 		push_error('GeneralPopup singleton is not initialized. Call setup(ui_base) first.')
 		return null
@@ -35,7 +51,7 @@ func show_content(content: Control, name: String = '', pos: Vector2 = Vector2.IN
 		_on_popup_closed(popup)
 	, CONNECT_ONE_SHOT)
 
-	popup.show_content(content, name, pos, lod)
+	popup.show_content(content, opts)
 	return popup
 
 
@@ -69,6 +85,6 @@ func _on_popup_closed(popup: HenPopupContainer) -> void:
 
 	closed.emit()
 
-	# If there are still popups open, keep canvas scroll disabled.
+	# keep canvas scroll disabled while any popup remains
 	if not _popups.is_empty():
 		(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = false

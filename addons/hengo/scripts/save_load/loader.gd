@@ -33,7 +33,6 @@ func reset_to_load(_id: StringName, _headless: bool) -> void:
 		flow_connection.visible = false
 
 	global.SELECTED_VIRTUAL_CNODE.clear()
-	global.RIGHT_SIDE_BAR.clear()
 
 	# confirming queue free before check errors
 	if not _headless: await global.CAM.get_tree().process_frame
@@ -92,6 +91,9 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 
 	global.CAM.can_scroll = true
 	global.DASHBOARD.hide_dashboard()
+
+	if global.HENGO_ROOT:
+		global.HENGO_ROOT.refresh_script_state()
 
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_list_update.emit()
 	return true

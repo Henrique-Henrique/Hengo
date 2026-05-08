@@ -78,7 +78,6 @@ func _enter_tree():
 	global.SIDE_PANEL = main_scene.get_node('%SidePanel')
 	global.CNODE_UI = cnode_ui
 	global.DASHBOARD = main_scene.get_node('%DashBoard')
-	global.RIGHT_SIDE_BAR = main_scene.get_node('%RightSideBar')
 
 	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
 	general_popup.setup(main_scene.get_node('%UIBase'))

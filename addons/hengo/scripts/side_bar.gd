@@ -325,7 +325,27 @@ func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
 			_change_route_from_meta(meta)
 		MOUSE_BUTTON_RIGHT:
 			if meta and not meta is HenRouteData:
-				HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta))
+				HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta), _get_inspect_popup_opts())
+
+
+# anchors the inspector popup to the right edge of the sidebar
+func _get_inspect_popup_opts() -> Dictionary:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var sidebar: Control = null
+	if global and global.HENGO_ROOT:
+		sidebar = global.HENGO_ROOT.get_node_or_null('%SidePanel') as Control
+
+	if not sidebar:
+		return {}
+
+	return {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = sidebar,
+		side = SIDE_RIGHT,
+		fill_axis = true,
+		blur = true,
+		min_size = Vector2(360, 0)
+	}
 
 
 func _change_route_from_meta(meta: Variant) -> void:

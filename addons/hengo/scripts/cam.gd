@@ -38,6 +38,8 @@ func _ready() -> void:
 	(grid.material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
 	(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
+	_update_zoom_label()
+
 	
 func _on_ui_size_changed() -> void:
 	(grid.material as ShaderMaterial).set_shader_parameter('screen_size', get_parent().size)
@@ -116,11 +118,32 @@ func _input(event: InputEvent) -> void:
 func _zoom_in(amount: float = ZOOM_INCREMENT) -> void:
 	target_zoom = min(target_zoom + amount, MAX_ZOOM)
 	_set_transform(get_global_mouse_position())
+	_update_zoom_label()
 
 
 func _zoom_out(amount: float = ZOOM_INCREMENT) -> void:
 	target_zoom = max(target_zoom - amount, MIN_ZOOM)
 	_set_transform(get_global_mouse_position())
+	_update_zoom_label()
+
+
+func _update_zoom_label() -> void:
+	if not is_global_cam:
+		return
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.HENGO_ROOT:
+		return
+	var label: Label = global.HENGO_ROOT.get_node_or_null('%ZoomLabel') as Label
+	if label:
+		label.text = 'Zoom: %d%%' % int(round(target_zoom * 100))
+
+
+func reset_zoom() -> void:
+	target_zoom = 1.0
+	t_x = Vector2(1, 0)
+	t_y = Vector2(0, 1)
+	set_physics_process(true)
+	_update_zoom_label()
 
 
 func _set_transform(_pos: Vector2) -> void:
@@ -214,7 +237,8 @@ func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
 		target_zoom = zoom_to_use
 		t_x = Vector2(target_zoom, 0)
 		t_y = Vector2(0, target_zoom)
-	
+		_update_zoom_label()
+
 	ignore_process = true
 	set_physics_process(true)
 

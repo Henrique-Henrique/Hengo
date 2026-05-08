@@ -38,9 +38,39 @@ const DEPTH_COLORS: Array[Color] = [
 	Color('#b826d1ff'),
 ]
 
+# semantic ui palette — color icons/text by what the action does
+const UI_COLORS = {
+	create = Color('#2ECC71'),
+	compile = Color('#3B7DE8'),
+	flow = Color('#5DADE2'),
+	state = Color('#E67E22'),
+	code = Color('#9B59B6'),
+	settings = Color('#9CA8B5'),
+	destructive = Color('#E57373'),
+	dashboard = Color('#F59E0B'),
+	rename = Color('#F39C12'),
+	info_yellow = Color('#F1C40F'),
+	web = Color('#1ABC9C'),
+	layout = Color('#5DADE2'),
+}
+
 
 static func get_depth_color(depth: int) -> Color:
 	return DEPTH_COLORS[depth % DEPTH_COLORS.size()]
+
+
+# applies a semantic color to a button's icon (and text when it has any)
+static func tint_button(_bt: Button, _color: Color, _tint_text: bool = true) -> void:
+	_bt.add_theme_color_override(&'icon_normal_color', _color)
+	_bt.add_theme_color_override(&'icon_hover_color', _color.lightened(.15))
+	_bt.add_theme_color_override(&'icon_pressed_color', _color.darkened(.15))
+	_bt.add_theme_color_override(&'icon_focus_color', _color)
+
+	if _tint_text:
+		_bt.add_theme_color_override(&'font_color', _color)
+		_bt.add_theme_color_override(&'font_hover_color', _color.lightened(.15))
+		_bt.add_theme_color_override(&'font_pressed_color', _color.darkened(.15))
+		_bt.add_theme_color_override(&'font_focus_color', _color)
 
 
 static func get_icon_for_subtype(_sub_type: int) -> Texture2D:

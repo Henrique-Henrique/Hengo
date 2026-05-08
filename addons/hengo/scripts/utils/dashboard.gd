@@ -3,8 +3,8 @@ class_name HenDashboard extends PanelContainer
 
 const ITEM_SCENE = preload('res://addons/hengo/scenes/utils/dashboard_item.tscn')
 const RENAME_POPUP_SCENE = preload('res://addons/hengo/scenes/utils/rename_script_popup.tscn')
+const TAB_INDEX: int = 0
 
-@onready var close_bt: Button = %CloseBt
 @onready var new_script_bt: Button = %NewScript
 @onready var search_edit: LineEdit = %Search
 @onready var script_list_node: VBoxContainer = %ScriptList
@@ -18,25 +18,48 @@ func _ready() -> void:
 	signal_bus.request_list_update.connect(show_dashboard)
 
 	search_edit.text_changed.connect(_on_search_change)
-	close_bt.pressed.connect(_on_close)
 	new_script_bt.pressed.connect(_on_create_script)
-	
-	visibility_changed.connect(_on_visibility_changed)
+
+	_apply_semantic_colors()
+
+	# refresh whenever the dashboard tab becomes the active one
+	var tabs: TabContainer = _get_sidebar_tabs()
+	if tabs:
+		tabs.tab_changed.connect(_on_sidebar_tab_changed)
+
+
+# tints dashboard action buttons by purpose
+func _apply_semantic_colors() -> void:
+	var c: Dictionary = HenUtils.UI_COLORS
+	var root: Node = $MarginContainer/VBoxContainer
+
+	HenUtils.tint_button(new_script_bt, c.create)
+	HenUtils.tint_button(root.get_node('QuickActionsRow/DocumentationBt'), c.code)
+	HenUtils.tint_button(root.get_node('UsefulLinksRow/HowToUseBt'), c.info_yellow)
+	HenUtils.tint_button(root.get_node('UsefulLinksRow/WebsiteBt'), c.web)
+
+
+func _get_sidebar_tabs() -> TabContainer:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.HENGO_ROOT:
+		return null
+	return global.HENGO_ROOT.get_node_or_null('%SidebarTabContainer') as TabContainer
+
+
+func _on_sidebar_tab_changed(idx: int) -> void:
+	if idx == TAB_INDEX:
+		refresh()
 
 
 func _on_create_script() -> void:
 	var c: HenCreateScript = (load('res://addons/hengo/scenes/utils/create_script.tscn') as PackedScene).instantiate()
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(c, 'Expression Editor')
-
-
-func _on_close() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	if global.SAVE_DATA:
-		hide_dashboard()
-		return
-	
-	global.HENGO_EDITOR_PLUGIN.hide_plugin()
+	var anchor: Control = new_script_bt
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(c, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = anchor,
+		side = SIDE_RIGHT,
+		min_size = Vector2(360, 0)
+	})
 
 
 func _on_open_script(meta: Dictionary) -> void:
@@ -51,7 +74,7 @@ func _on_open_script(meta: Dictionary) -> void:
 		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.base_name, HenToast.MessageType.ERROR)
 
 
-func _on_rename_script(meta: Dictionary) -> void:
+func _on_rename_script(meta: Dictionary, source: Control) -> void:
 	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name).path_join('identity' + HenEnums.SAVE_EXTENSION)
 
 	if not FileAccess.file_exists(identity_path):
@@ -65,7 +88,12 @@ func _on_rename_script(meta: Dictionary) -> void:
 
 	var popup: HenRenameScriptPopup = RENAME_POPUP_SCENE.instantiate() as HenRenameScriptPopup
 	popup.setup(identity)
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, 'Renomear Script')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = source,
+		side = SIDE_RIGHT,
+		min_size = Vector2(340, 0)
+	})
 
 
 func _on_delete_request(meta: Dictionary) -> void:
@@ -113,14 +141,14 @@ func debounce_search(delay: float, callback: Callable) -> void:
 
 
 func show_dashboard() -> void:
-	if not visible:
-		visible = true
+	var tabs: TabContainer = _get_sidebar_tabs()
+	if not tabs:
+		return
+	if tabs.current_tab == TAB_INDEX:
+		refresh()
 	else:
-		refresh()
+		tabs.current_tab = TAB_INDEX
 
-func _on_visibility_changed() -> void:
-	if is_visible_in_tree():
-		refresh()
 
 func refresh() -> void:
 	if script_list_node.get_child_count() > 0:
@@ -174,17 +202,21 @@ func _on_scripts_loaded(_data: Array[Dictionary]) -> void:
 
 
 func hide_dashboard() -> void:
-	await RenderingServer.frame_pre_draw
+	# switch to props if currently on dashboard tab
+	var tabs: TabContainer = _get_sidebar_tabs()
+	if tabs and tabs.current_tab == TAB_INDEX:
+		tabs.current_tab = 1
 	script_list.clear()
-	visible = false
 
 
 func toggle_dashboard() -> void:
-	if visible:
-		hide_dashboard()
+	var tabs: TabContainer = _get_sidebar_tabs()
+	if not tabs:
 		return
-	
-	show_dashboard()
+	if tabs.current_tab == TAB_INDEX:
+		hide_dashboard()
+	else:
+		show_dashboard()
 
 
 func update(_data: Array[Dictionary]) -> void:

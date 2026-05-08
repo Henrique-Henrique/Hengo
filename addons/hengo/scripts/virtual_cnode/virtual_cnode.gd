@@ -229,7 +229,7 @@ func request_flow_connector_connection(_id: StringName, _mouse_pos: Vector2) -> 
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenCodeSearch.load(_mouse_pos, {
 		id = _id,
 		from_flow_connector = self
-	}), '')
+	}))
 
 
 func request_io_connection(_io_type: StringName, _id: StringName, _mouse_pos: Vector2, _type: StringName) -> void:
@@ -238,7 +238,7 @@ func request_io_connection(_io_type: StringName, _id: StringName, _mouse_pos: Ve
 		id = _id,
 		vc_ref = self ,
 		type = _type
-	}), '')
+	}))
 
 
 func on_cnode_double_click() -> void:

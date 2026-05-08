@@ -16,7 +16,12 @@ func _on_press() -> void:
 			exp = text
 		}
 	
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(expression_editor, 'Expression Editor')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(expression_editor, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = self,
+		side = SIDE_RIGHT,
+		min_size = Vector2(420, 0)
+	})
 
 
 func _on_save(_code_value: String, _word_list: Array) -> void:

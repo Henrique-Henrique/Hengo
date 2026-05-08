@@ -97,12 +97,12 @@ func _init() -> void:
 
 
 # initializes the inspector within the custom popup system
-static func edit_resource(_res: Resource, _title: String = '', _actions: Array[Dictionary] = []) -> void:
+static func edit_resource(_res: Resource, _title: String = '', _actions: Array[Dictionary] = [], _popup_opts: Dictionary = {}) -> void:
 	var global: HenGlobal = Engine.get_singleton('Global')
 	var scene: PackedScene = load('res://addons/hengo/scenes/custom_inspector.tscn')
 	var inspector: HenInspector = scene.instantiate()
-	
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector)
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
 	inspector.edit(_res, _title, _actions)
 
 	global.CURRENT_INSPECTOR = inspector

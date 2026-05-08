@@ -240,7 +240,7 @@ func _toggle_expand() -> void:
 func _open_full_report() -> void:
 	var popup_content: HenCompileAllReportPopup = _COMPILE_ALL_REPORT_POPUP.instantiate()
 	popup_content.report = report
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup_content, 'Compile All — Full Report')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup_content)
 
 
 func _dismiss() -> void:

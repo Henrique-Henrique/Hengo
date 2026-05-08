@@ -51,7 +51,6 @@ func change_route(_route: HenRouteData) -> void:
 	global.AUTO_CAMERA.on_route_changed(old_route, _route)
 	
 	HenFormatter.format_current_route()
-	global.RIGHT_SIDE_BAR.update(current_route)
 
 
 func _centralize_cam(_vc: HenVirtualCNode = null) -> void:

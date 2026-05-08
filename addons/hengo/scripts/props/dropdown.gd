@@ -141,9 +141,11 @@ func _on_pressed() -> void:
 	dropdown_menu.mount(options, _selected, type)
 	dropdown_menu.custom_minimum_size.x = size.x
 
-	var popup: HenPopupContainer = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(dropdown_menu, '', Vector2.INF, 0)
-	var gp: Control = popup.get_node('%GeneralPopUp')
-	popup.move(global_position - gp.global_position)
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(dropdown_menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		pos = global_position,
+		min_size = Vector2(max(size.x, 220), 280)
+	})
 
 
 func _selected(_item: Dictionary) -> void:

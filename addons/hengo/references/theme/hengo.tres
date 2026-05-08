@@ -92,16 +92,25 @@ shadow_color = Color(0, 0, 0, 0.05)
 shadow_size = 1
 shadow_offset = Vector2(0, 1)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_canvas_panel"]
-
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_28is4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas_tab_hover"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(1, 1, 1, 0.04)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas_tab_sel"]
 content_margin_left = 12.0
 content_margin_top = 6.0
 content_margin_right = 12.0
 content_margin_bottom = 6.0
-bg_color = Color(0.05, 0.05, 0.068, 1)
+bg_color = Color(0.024, 0.024, 0.039, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas_tab_unsel"]
 content_margin_left = 12.0
@@ -110,8 +119,13 @@ content_margin_right = 12.0
 content_margin_bottom = 6.0
 bg_color = Color(0.6, 0.6, 0.6, 0)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_canvas_panel"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas_tabbar"]
-bg_color = Color(0.038, 0.038, 0.055, 1)
+bg_color = Color(0.082, 0.082, 0.105, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas_topbar"]
+bg_color = Color(0.082, 0.082, 0.105, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_input"]
 content_margin_left = 10.0
@@ -211,7 +225,7 @@ content_margin_left = 8.0
 content_margin_top = 2.0
 content_margin_right = 8.0
 content_margin_bottom = 2.0
-bg_color = Color(0.043, 0.043, 0.06, 1)
+bg_color = Color(0.082, 0.082, 0.105, 1)
 border_width_top = 1
 border_color = Color(0.18, 0.18, 0.21, 1)
 
@@ -271,17 +285,14 @@ content_margin_bottom = 2.0
 bg_color = Color(0.06271005, 0.06270754, 0.08195918, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_68px8"]
-content_margin_top = 12.0
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_40l3a"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toolbar"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_inner_tab"]
 content_margin_left = 6.0
 content_margin_top = 4.0
 content_margin_right = 6.0
 content_margin_bottom = 4.0
-bg_color = Color(0.062, 0.062, 0.082, 1)
-border_color = Color(0.18, 0.18, 0.21, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_40l3a"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vsep"]
 bg_color = Color(0.22, 0.22, 0.26, 1)
@@ -298,6 +309,16 @@ Button/styles/focus = SubResource("StyleBoxFlat_1f63k")
 Button/styles/hover = SubResource("StyleBoxFlat_btn_hover")
 Button/styles/normal = SubResource("StyleBoxFlat_btn_normal")
 Button/styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+CanvasTabBar/base_type = &"TabBar"
+CanvasTabBar/colors/font_hovered_color = Color(0.85, 0.85, 0.9, 1)
+CanvasTabBar/colors/font_selected_color = Color(1, 1, 1, 1)
+CanvasTabBar/colors/font_unselected_color = Color(0.55, 0.55, 0.6, 1)
+CanvasTabBar/constants/h_separation = 6
+CanvasTabBar/constants/icon_max_width = 14
+CanvasTabBar/styles/tab_focus = SubResource("StyleBoxEmpty_28is4")
+CanvasTabBar/styles/tab_hovered = SubResource("StyleBoxFlat_canvas_tab_hover")
+CanvasTabBar/styles/tab_selected = SubResource("StyleBoxFlat_canvas_tab_sel")
+CanvasTabBar/styles/tab_unselected = SubResource("StyleBoxFlat_canvas_tab_unsel")
 CanvasTabContainer/base_type = &"TabContainer"
 CanvasTabContainer/colors/font_hovered_color = Color(0.85, 0.85, 0.9, 1)
 CanvasTabContainer/colors/font_selected_color = Color(1, 1, 1, 1)
@@ -306,10 +327,12 @@ CanvasTabContainer/constants/side_margin = 0
 CanvasTabContainer/constants/tab_separation = 2
 CanvasTabContainer/styles/panel = SubResource("StyleBoxEmpty_canvas_panel")
 CanvasTabContainer/styles/tab_focus = SubResource("StyleBoxEmpty_28is4")
-CanvasTabContainer/styles/tab_hovered = SubResource("StyleBoxFlat_canvas_tab_sel")
+CanvasTabContainer/styles/tab_hovered = SubResource("StyleBoxFlat_canvas_tab_hover")
 CanvasTabContainer/styles/tab_selected = SubResource("StyleBoxFlat_canvas_tab_sel")
 CanvasTabContainer/styles/tab_unselected = SubResource("StyleBoxFlat_canvas_tab_unsel")
 CanvasTabContainer/styles/tabbar_background = SubResource("StyleBoxFlat_canvas_tabbar")
+CanvasTopBarPanel/base_type = &"PanelContainer"
+CanvasTopBarPanel/styles/panel = SubResource("StyleBoxFlat_canvas_topbar")
 LineEdit/colors/font_color = Color(0.9, 0.9, 0.9, 1)
 LineEdit/colors/font_placeholder_color = Color(0.5, 0.5, 0.55, 1)
 LineEdit/styles/focus = SubResource("StyleBoxFlat_input")
@@ -343,8 +366,17 @@ TabContainer/styles/tab_selected = SubResource("StyleBoxFlat_40l3a")
 TabContainer/styles/tab_unselected = SubResource("StyleBoxFlat_jtljd")
 TabContainer/styles/tabbar_background = SubResource("StyleBoxFlat_m1q4f")
 TabContainerInner/base_type = &"TabContainer"
+TabContainerInner/colors/font_disabled_color = Color(1, 1, 1, 0.18)
+TabContainerInner/colors/font_hovered_color = Color(1, 1, 1, 0.85)
+TabContainerInner/colors/font_selected_color = Color(1, 1, 1, 1)
+TabContainerInner/colors/font_unselected_color = Color(1, 1, 1, 0.4)
+TabContainerInner/constants/icon_max_width = 12
+TabContainerInner/constants/tab_separation = 4
 TabContainerInner/styles/panel = SubResource("StyleBoxEmpty_68px8")
+TabContainerInner/styles/tab_disabled = SubResource("StyleBoxEmpty_inner_tab")
+TabContainerInner/styles/tab_focus = SubResource("StyleBoxEmpty_28is4")
+TabContainerInner/styles/tab_hovered = SubResource("StyleBoxEmpty_inner_tab")
+TabContainerInner/styles/tab_selected = SubResource("StyleBoxEmpty_inner_tab")
+TabContainerInner/styles/tab_unselected = SubResource("StyleBoxEmpty_inner_tab")
 TabContainerInner/styles/tabbar_background = SubResource("StyleBoxEmpty_40l3a")
-ToolbarPanel/base_type = &"PanelContainer"
-ToolbarPanel/styles/panel = SubResource("StyleBoxFlat_toolbar")
 VSeparator/styles/separator = SubResource("StyleBoxFlat_vsep")

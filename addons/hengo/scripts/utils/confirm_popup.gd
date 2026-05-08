@@ -19,7 +19,11 @@ static func show_confirm(
 ) -> void:
 	var popup: HenConfirmPopup = HenConfirmPopup.new()
 	popup.setup(title, message, on_confirm, confirm_text, cancel_text, on_cancel)
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, title, Vector2.INF, 0.5)
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, {
+		layout = HenGeneralPopup.Layout.COMPACT,
+		lod = 0.5,
+		min_size = Vector2(420, 0)
+	})
 
 
 func setup(

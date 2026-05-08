@@ -24,13 +24,7 @@ func _ready() -> void:
 	var enums: HenEnums = Engine.get_singleton(&'Enums')
 
 	var margin: int = HenUtils.get_scaled_size(8)
-	var action_bar_margin: MarginContainer = get_node('%ActionBarMargin')
 	var side_bar_margin: MarginContainer = get_node('%SideBarMargin')
-
-	action_bar_margin.add_theme_constant_override('margin_left', margin)
-	action_bar_margin.add_theme_constant_override('margin_right', margin)
-	action_bar_margin.add_theme_constant_override('margin_top', margin)
-	action_bar_margin.add_theme_constant_override('margin_bottom', margin)
 
 	side_bar_margin.add_theme_constant_override('margin_left', margin)
 	side_bar_margin.add_theme_constant_override('margin_right', margin)
@@ -65,35 +59,40 @@ func _ready() -> void:
 			}
 	)
 	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
-	(get_node('%OpenDashboard') as Button).pressed.connect(_on_open_dashboard)
 	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
 	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
 	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
 	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
 	(get_node('%ToggleLayoutBt') as Button).pressed.connect(_on_toggle_canvas_layout)
+	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
 
-	# Dashboard backdrop: show/hide with dashboard
-	var backdrop: Button = get_node('%DashboardBackdrop')
-	var dashboard_node = get_node('%DashBoard')
-	backdrop.pressed.connect(func():
-		var g: HenGlobal = Engine.get_singleton(&'Global')
-		if g and g.DASHBOARD:
-			g.DASHBOARD.hide_dashboard()
+	_apply_semantic_colors()
+
+	# keep canvas tab bar (in CanvasTopBar) and canvas tab content in sync
+	var canvas_tabs: TabContainer = get_node('%CanvasTabs')
+	var canvas_tab_bar: TabBar = get_node('%CanvasTabBar')
+	canvas_tab_bar.tab_changed.connect(func(idx: int):
+		canvas_tabs.current_tab = idx
 	)
-	dashboard_node.visibility_changed.connect(func():
-		backdrop.visible = dashboard_node.visible
+	canvas_tabs.tab_changed.connect(func(idx: int):
+		canvas_tab_bar.current_tab = idx
 	)
 
-	# Sidebar icon strip buttons
-	(get_node('%PropsIconBt') as Button).pressed.connect(func():
+	# sidebar icon strip buttons (collapsed mode)
+	(get_node('%DashboardIconBt') as Button).pressed.connect(func():
 		if _sidebar_collapsed:
 			_on_collapse_sidebar()
 		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 0
 	)
-	(get_node('%CodeIconBt') as Button).pressed.connect(func():
+	(get_node('%PropsIconBt') as Button).pressed.connect(func():
 		if _sidebar_collapsed:
 			_on_collapse_sidebar()
 		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 1
+	)
+	(get_node('%CodeIconBt') as Button).pressed.connect(func():
+		if _sidebar_collapsed:
+			_on_collapse_sidebar()
+		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 2
 	)
 	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
@@ -106,6 +105,55 @@ func _ready() -> void:
 	signal_bus.flow_connection_removed.connect(_on_graph_changed_no_args)
 	
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).closed.connect(schedule_check_errors)
+
+	refresh_script_state()
+
+
+# updates ui parts that depend on whether a script is currently loaded
+func refresh_script_state() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var has_script: bool = global != null and global.SAVE_DATA != null
+
+	var tabs: TabContainer = get_node_or_null('%SidebarTabContainer')
+	if tabs:
+		tabs.set_tab_disabled(1, not has_script)
+		tabs.set_tab_disabled(2, not has_script)
+		if not has_script and tabs.current_tab != 0:
+			tabs.current_tab = 0
+
+	var props_icon: Button = get_node_or_null('%PropsIconBt')
+	if props_icon:
+		props_icon.disabled = not has_script
+	var code_icon: Button = get_node_or_null('%CodeIconBt')
+	if code_icon:
+		code_icon.disabled = not has_script
+
+	var cl_label: Button = get_node_or_null('%ClassName')
+	if cl_label and not has_script:
+		cl_label.text = 'No script loaded'
+		cl_label.icon = null
+		cl_label.disabled = true
+		var sb: StyleBoxFlat = cl_label.get_theme_stylebox('normal')
+		if sb:
+			sb.bg_color = Color(1, 1, 1, 0.04)
+	elif cl_label:
+		cl_label.disabled = false
+
+	var script_icon: TextureRect = get_node_or_null('%ScriptIcon')
+	if script_icon:
+		if has_script:
+			var type: String = global.SAVE_DATA.identity.type
+			script_icon.texture = HenUtils.get_icon_texture(type)
+			script_icon.modulate = HenUtils.get_type_parent_color(type, 1., Color.WHITE).lightened(.3)
+			script_icon.visible = true
+		else:
+			script_icon.visible = false
+
+
+func _on_reset_zoom() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global and global.CAM:
+		global.CAM.reset_zoom()
 
 
 func _on_graph_changed() -> void:
@@ -139,6 +187,19 @@ func schedule_check_errors() -> void:
 	_debounce_time = 0.0
 
 
+# tints toolbar/sidebar buttons with semantic colors
+func _apply_semantic_colors() -> void:
+	var c: Dictionary = HenUtils.UI_COLORS
+
+	HenUtils.tint_button(get_node('%Config') as Button, c.settings, false)
+	HenUtils.tint_button(get_node('%CloseBt') as Button, c.destructive, false)
+	HenUtils.tint_button(get_node('%ToggleLayoutBt') as Button, c.layout)
+	HenUtils.tint_button(get_node('%CollapseToggleBt') as Button, c.settings, false)
+	HenUtils.tint_button(get_node('%DashboardIconBt') as Button, c.dashboard, false)
+	HenUtils.tint_button(get_node('%PropsIconBt') as Button, c.settings, false)
+	HenUtils.tint_button(get_node('%CodeIconBt') as Button, c.code, false)
+
+
 func _on_config_pressed() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	HenInspector.edit_resource(global.SETTINGS)
@@ -146,11 +207,6 @@ func _on_config_pressed() -> void:
 
 func _on_open_terminal() -> void:
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenTerminal.new())
-
-
-func _on_open_dashboard() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.DASHBOARD.show_dashboard()
 
 
 func _on_close() -> void:
@@ -197,7 +253,13 @@ func _input(event: InputEvent) -> void:
 					get_tree().root.set_input_as_handled()
 					global.HENGO_EDITOR_PLUGIN.hide_plugin()
 				elif e.keycode == KEY_E:
-					global.DASHBOARD.toggle_dashboard()
+					if _sidebar_collapsed:
+						_on_collapse_sidebar()
+						var tabs: TabContainer = get_node_or_null('%SidebarTabContainer')
+						if tabs:
+							tabs.current_tab = HenDashboard.TAB_INDEX
+					else:
+						global.DASHBOARD.toggle_dashboard()
 				elif e.keycode == KEY_H:
 					var code_generation: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
 					print(
@@ -305,20 +367,32 @@ func _update_ui_state(all_errors: Array) -> void:
 		else:
 			name_label.text = 'No script loaded'
 
+	var ok_color: Color = Color(0.13, 0.77, 0.37, 1)
+	var fail_color: Color = Color(0.94, 0.27, 0.27, 1)
+
 	var err_label: Label = get_node_or_null('%ErrorStatusLabel')
-	if err_label:
-		if all_errors.is_empty():
+	var err_icon: TextureRect = get_node_or_null('%ErrorIcon')
+
+	if all_errors.is_empty():
+		if err_label:
 			err_label.text = 'No errors'
-			err_label.modulate = Color.WHITE
-		else:
+			err_label.modulate = ok_color
+		if err_icon:
+			err_icon.texture = preload('res://addons/hengo/assets/new_icons/circle-check.svg')
+			err_icon.modulate = ok_color
+	else:
+		if err_label:
 			err_label.text = '{0} error(s)'.format([all_errors.size()])
-			err_label.modulate = Color('ef4444')
+			err_label.modulate = fail_color
+		if err_icon:
+			err_icon.texture = preload('res://addons/hengo/assets/new_icons/shield-alert.svg')
+			err_icon.modulate = fail_color
 
 
 func _show_error_popup(all_errors: Array) -> void:
 	var error_popup = preload('res://addons/hengo/scenes/utils/error_list_popup.tscn').instantiate()
 	error_popup.errors = all_errors
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(error_popup, 'Compilation Errors')
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(error_popup)
 
 
 func _validate_script_errors(_save_data: HenSaveData) -> Array:
@@ -350,6 +424,9 @@ func _on_actions_bt_pressed() -> void:
 	check_errors(true)
 
 
+var _saved_split_offset: int = 0
+
+
 func _on_collapse_sidebar() -> void:
 	_sidebar_collapsed = not _sidebar_collapsed
 
@@ -361,16 +438,26 @@ func _on_collapse_sidebar() -> void:
 	if not tab_container or not icon_strip or not sidebar_margin:
 		return
 
+	# HSplitContainer keeps the split position cached in split_offset; we must
+	# reset it on collapse so the sidebar actually shrinks to the new minimum
+	var content_area: HSplitContainer = sidebar_margin.get_parent() as HSplitContainer
+
 	if _sidebar_collapsed:
+		if content_area:
+			_saved_split_offset = content_area.split_offset
 		tab_container.visible = false
 		icon_strip.visible = true
-		sidebar_margin.custom_minimum_size = Vector2(44, 0)
+		sidebar_margin.custom_minimum_size = Vector2(52, 0)
+		if content_area:
+			content_area.split_offset = 0
 		if collapse_btn:
 			collapse_btn.tooltip_text = 'Expand sidebar'
 	else:
 		tab_container.visible = true
 		icon_strip.visible = false
-		sidebar_margin.custom_minimum_size = Vector2(0, 0)
+		sidebar_margin.custom_minimum_size = Vector2(280, 0)
+		if content_area:
+			content_area.split_offset = _saved_split_offset
 		if collapse_btn:
 			collapse_btn.tooltip_text = 'Collapse sidebar'
 
@@ -381,9 +468,14 @@ func _on_toggle_canvas_layout() -> void:
 	var canvas_tabs: TabContainer = get_node_or_null('%CanvasTabs')
 	var canvas_split: HSplitContainer = get_node_or_null('%CanvasSplit')
 	var toggle_btn: Button = get_node_or_null('%ToggleLayoutBt')
+	var canvas_tab_bar: TabBar = get_node_or_null('%CanvasTabBar')
 
 	if not canvas_tabs or not canvas_split:
 		return
+
+	# hide the custom tab selector when both panels are visible side by side
+	if canvas_tab_bar:
+		canvas_tab_bar.visible = not _canvas_split_mode
 
 	if _canvas_split_mode:
 		var children := canvas_tabs.get_children().duplicate()

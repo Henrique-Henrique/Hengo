@@ -7,10 +7,10 @@
 [ext_resource type="Texture2D" uid="uid://bljjoldgfwwoh" path="res://addons/hengo/assets/new_icons/lightbulb.svg" id="3_ksiib"]
 [ext_resource type="FontFile" uid="uid://wd6my6keapbk" path="res://addons/hengo/assets/fonts/medium.ttf" id="3_q2m6f"]
 [ext_resource type="Texture2D" uid="uid://brdhk1mk4bmcr" path="res://addons/hengo/assets/new_icons/globe.svg" id="4_l2d5o"]
-[ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="4_tr5or"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dash_root"]
 
 [node name="Dashboard" type="PanelContainer"]
-self_modulate = Color(0.83033526, 0.83033514, 0.83033514, 1)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -18,109 +18,111 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_dash_root")
 script = ExtResource("1_jlpx7")
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"HeaderLarge"
 theme_override_fonts/font = ExtResource("2_l2d5o")
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 16
 text = "Hengo Script"
 
-[node name="CloseBt" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-unique_name_in_owner = true
+[node name="Subtitle" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-icon = ExtResource("4_tr5or")
-flat = true
-
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.5)
+theme_override_font_sizes/font_size = 11
 text = "A Visual Script that compiles to GDScript"
+autowrap_mode = 3
 
-[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="QuickActionsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 10
 theme_override_fonts/font = ExtResource("3_q2m6f")
 text = "QUICK ACTIONS"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="QuickActionsRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
-[node name="NewScript" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="NewScript" type="Button" parent="MarginContainer/VBoxContainer/QuickActionsRow"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+clip_text = true
 text = "New Script"
 icon = ExtResource("1_v3ptv")
 
-[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="DocumentationBt" type="Button" parent="MarginContainer/VBoxContainer/QuickActionsRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 disabled = true
-text = "Documentation (WIP)"
+clip_text = true
+text = "Docs (WIP)"
 icon = ExtResource("2_jlpx7")
 
-[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="UsefulLinksLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 10
+theme_override_fonts/font = ExtResource("3_q2m6f")
 text = "USEFUL LINKS"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="UsefulLinksRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_constants/separation = 4
 
-[node name="Button" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+[node name="HowToUseBt" type="Button" parent="MarginContainer/VBoxContainer/UsefulLinksRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 disabled = true
-text = "How to use (WIP)"
+clip_text = true
+text = "How to use"
 icon = ExtResource("3_ksiib")
 flat = true
 
-[node name="Button2" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+[node name="WebsiteBt" type="Button" parent="MarginContainer/VBoxContainer/UsefulLinksRow"]
 layout_mode = 2
+size_flags_horizontal = 3
 disabled = true
-text = "Website (WIP)"
+clip_text = true
+text = "Website"
 icon = ExtResource("4_l2d5o")
 flat = true
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="ScriptsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_vertical = 3
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
-layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.4)
+theme_override_font_sizes/font_size = 10
 theme_override_fonts/font = ExtResource("3_q2m6f")
-text = "SCRIPT EXPLORER"
+text = "SCRIPTS"
 
-[node name="Search" type="LineEdit" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
+[node name="Search" type="LineEdit" parent="MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-placeholder_text = "Search files..."
+placeholder_text = "Search scripts..."
 
-[node name="ScriptListScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer"]
+[node name="ScriptListScroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="ScriptList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/ScriptListScroll"]
+[node name="ScriptList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScriptListScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 2
