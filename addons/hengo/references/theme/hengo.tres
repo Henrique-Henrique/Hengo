@@ -299,6 +299,12 @@ bg_color = Color(0.22, 0.22, 0.26, 1)
 expand_margin_top = 4.0
 expand_margin_bottom = 4.0
 
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_hsep"]
+color = Color(0.8, 0.8, 0.8, 0.145)
+thickness = 1
+grow_begin = 4.0
+grow_end = 4.0
+
 [resource]
 Button/constants/align_to_largest_stylebox = 0
 Button/constants/h_separation = 4
@@ -379,4 +385,5 @@ TabContainerInner/styles/tab_hovered = SubResource("StyleBoxEmpty_inner_tab")
 TabContainerInner/styles/tab_selected = SubResource("StyleBoxEmpty_inner_tab")
 TabContainerInner/styles/tab_unselected = SubResource("StyleBoxEmpty_inner_tab")
 TabContainerInner/styles/tabbar_background = SubResource("StyleBoxEmpty_40l3a")
+HSeparator/styles/separator = SubResource("StyleBoxLine_hsep")
 VSeparator/styles/separator = SubResource("StyleBoxFlat_vsep")
