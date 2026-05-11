@@ -1,7 +1,7 @@
 @tool
 class_name HenSaveState extends HenSaveResTypeWithRoute
 
-@export var flow_outputs: Array[HenSaveParam]
+@export var flow_outputs: Array[HenSaveFlowParam]
 @export var transition_data: Array[HenSaveParam]
 @export var is_sub_state: bool
 @export var start: bool = false:

@@ -19,7 +19,7 @@ func test_state_init_generation() -> void:
 func test_state_start_state() -> void:
 	var state2: HenSaveState = save_data.add_state(false)
 
-	var first_output: HenSaveParam = HenSaveParam.new()
+	var first_output: HenSaveFlowParam = HenSaveFlowParam.new()
 	first_output.name = 'first output'
 	state.flow_outputs.append(first_output)
 

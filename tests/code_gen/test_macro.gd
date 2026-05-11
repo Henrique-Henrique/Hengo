@@ -18,7 +18,7 @@ func test_macro_without_body() -> void:
 
 
 func test_macro_flow_input_connection() -> void:
-	var first_flow_input: HenSaveParam = HenSaveParam.new()
+	var first_flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 	macro_data.flow_inputs.append(first_flow_input)
 
 	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_data.get_cnode_data(''))
@@ -33,8 +33,8 @@ func test_macro_flow_input_connection() -> void:
 
 
 func test_macro_flow_output_connection() -> void:
-	var first_flow_input: HenSaveParam = HenSaveParam.new()
-	var first_flow_output: HenSaveParam = HenSaveParam.new()
+	var first_flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
+	var first_flow_output: HenSaveFlowParam = HenSaveFlowParam.new()
 
 	macro_data.flow_inputs.append(first_flow_input)
 	macro_data.flow_outputs.append(first_flow_output)
@@ -62,7 +62,7 @@ func test_macro_flow_output_connection() -> void:
 
 func test_macro_with_input_connection() -> void:
 	var first_input: HenSaveParam = HenSaveParam.new()
-	var first_flow_input: HenSaveParam = HenSaveParam.new()
+	var first_flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 
 	macro_data.inputs.append(first_input)
 	macro_data.flow_inputs.append(first_flow_input)
@@ -85,7 +85,7 @@ func test_macro_with_input_connection() -> void:
 
 func test_macro_with_output_connection() -> void:
 	var first_output: HenSaveParam = HenSaveParam.new()
-	var first_flow_input: HenSaveParam = HenSaveParam.new()
+	var first_flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 
 	macro_data.outputs.append(first_output)
 	macro_data.flow_inputs.append(first_flow_input)
@@ -143,7 +143,7 @@ func test_macro_local_var_usage() -> void:
 	# set value
 	set_local_var.get_new_input_connection_command(StringName('0'), StringName('0'), const_vc).add()
 
-	var flow_input: HenSaveParam = HenSaveParam.new()
+	var flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 	macro_data.flow_inputs.append(flow_input)
 	macro_input.add_flow_connection(flow_input.id, StringName('0'), set_local_var).add()
 
@@ -174,7 +174,7 @@ func test_macro_override_virtual() -> void:
 func test_macro_void_call_on_base_route_uses_direct_call() -> void:
 	var macro_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(macro_data.get_cnode_data(''))
 
-	var flow_input: HenSaveParam = HenSaveParam.new()
+	var flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 	macro_data.flow_inputs.append(flow_input)
 
 	var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, macro_data)
@@ -204,7 +204,7 @@ func test_macro_void_call_on_state_route_uses_ref_prefix() -> void:
 		res_data = state_macro.get_res_data(HenSideBar.AddType.MACRO, '')
 	})
 
-	var flow_input: HenSaveParam = HenSaveParam.new()
+	var flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 	state_macro.flow_inputs.append(flow_input)
 
 	var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, state_macro)
@@ -230,7 +230,7 @@ func test_macro_local_var_on_base_route_without_ref() -> void:
 	local_var.type = 'int'
 	macro_data.local_vars.append(local_var)
 
-	var flow_input: HenSaveParam = HenSaveParam.new()
+	var flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 	macro_data.flow_inputs.append(flow_input)
 
 	var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, macro_data)
@@ -273,7 +273,7 @@ func test_macro_local_var_on_state_route_with_ref() -> void:
 	local_var.type = 'int'
 	state_macro.local_vars.append(local_var)
 
-	var flow_input: HenSaveParam = HenSaveParam.new()
+	var flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
 	state_macro.flow_inputs.append(flow_input)
 
 	var macro_input: HenVirtualCNode = HenVirtualCNodeCode.search_macro_input(save_data, state_macro)
@@ -300,9 +300,9 @@ func test_macro_local_var_on_state_route_with_ref() -> void:
 
 
 func test_macro_flow_output_with_if_inside() -> void:
-	var flow_input: HenSaveParam = HenSaveParam.new()
-	var flow_output_1: HenSaveParam = HenSaveParam.new()
-	var flow_output_2: HenSaveParam = HenSaveParam.new()
+	var flow_input: HenSaveFlowParam = HenSaveFlowParam.new()
+	var flow_output_1: HenSaveFlowParam = HenSaveFlowParam.new()
+	var flow_output_2: HenSaveFlowParam = HenSaveFlowParam.new()
 
 	macro_data.flow_inputs.append(flow_input)
 	macro_data.flow_outputs.append(flow_output_1)
@@ -330,10 +330,10 @@ func test_macro_flow_output_with_if_inside() -> void:
 
 
 func test_macro_complex_flow_routing() -> void:
-	var flow_input_1: HenSaveParam = HenSaveParam.new()
-	var flow_input_2: HenSaveParam = HenSaveParam.new()
-	var flow_output_1: HenSaveParam = HenSaveParam.new()
-	var flow_output_2: HenSaveParam = HenSaveParam.new()
+	var flow_input_1: HenSaveFlowParam = HenSaveFlowParam.new()
+	var flow_input_2: HenSaveFlowParam = HenSaveFlowParam.new()
+	var flow_output_1: HenSaveFlowParam = HenSaveFlowParam.new()
+	var flow_output_2: HenSaveFlowParam = HenSaveFlowParam.new()
 
 	macro_data.flow_inputs.append(flow_input_1)
 	macro_data.flow_inputs.append(flow_input_2)

@@ -76,9 +76,9 @@ static func _load_macro_script(path: String, global: HenGlobal) -> void:
 		macro.outputs.append(HenSaveParam.create(output))
 
 	for flow_input: Dictionary in recipe.flow_inputs:
-		macro.flow_inputs.append(HenSaveParam.create(flow_input))
+		macro.flow_inputs.append(HenSaveFlowParam.create(flow_input))
 
 	for flow_output: Dictionary in recipe.flow_outputs:
-		macro.flow_outputs.append(HenSaveParam.create(flow_output))
+		macro.flow_outputs.append(HenSaveFlowParam.create(flow_output))
 
 	global.script_macros.append(macro)

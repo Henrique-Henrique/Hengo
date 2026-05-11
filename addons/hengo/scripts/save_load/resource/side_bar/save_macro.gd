@@ -3,8 +3,8 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 
 @export var inputs: Array[HenSaveParam]
 @export var outputs: Array[HenSaveParam]
-@export var flow_inputs: Array[HenSaveParam]
-@export var flow_outputs: Array[HenSaveParam]
+@export var flow_inputs: Array[HenSaveFlowParam]
+@export var flow_outputs: Array[HenSaveFlowParam]
 @export var script_path: String
 @export var is_script_macro: bool = false
 

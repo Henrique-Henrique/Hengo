@@ -39,14 +39,14 @@ func get_data() -> Dictionary:
 func _get_property_list() -> Array[Dictionary]:
 	var list: Array[Dictionary] = []
 	var variant_type_int: int = HenUtils.get_variant_type_from_string(type)
-	
+
 	if variant_type_int != TYPE_NIL or type == &'Variant':
 		list.append({
 			name = 'default_value',
 			type = variant_type_int if variant_type_int != TYPE_NIL else TYPE_STRING,
 			usage = PROPERTY_USAGE_DEFAULT
 		})
-	
+
 	return list
 
 
