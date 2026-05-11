@@ -8,6 +8,7 @@
 
 [node name="SideBarCategory" type="VBoxContainer"]
 size_flags_horizontal = 3
+theme_override_constants/separation = 0
 script = ExtResource("1_b4epu")
 
 [node name="HeaderPanel" type="PanelContainer" parent="."]
@@ -18,18 +19,20 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_h8v1j")
 [node name="Header" type="MarginContainer" parent="HeaderPanel"]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/margin_left = 0
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 3
 
 [node name="HeaderRow" type="HBoxContainer" parent="HeaderPanel/Header"]
 layout_mode = 2
+theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="HeaderPanel/Header/HeaderRow"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(14, 14)
+custom_minimum_size = Vector2(13, 13)
 layout_mode = 2
+size_flags_vertical = 4
 stretch_mode = 5
 
 [node name="Title" type="Label" parent="HeaderPanel/Header/HeaderRow"]
@@ -62,4 +65,4 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 size_flags_horizontal = 3
-color = Color(0.376471, 0.376471, 0.376471, 0.35)
+color = Color(0.172549, 0.192157, 0.219608, 0.4)

@@ -11,6 +11,7 @@ enum SideBarItem {
 }
 
 var list: VBoxContainer
+var base_route_slot: VBoxContainer
 
 const SIDE_BAR_CATEGORY_SCENE = preload('res://addons/hengo/scenes/side_bar_category.tscn')
 const SIDE_BAR_ROW_SCENE = preload('res://addons/hengo/scenes/side_bar_row.tscn')
@@ -145,6 +146,7 @@ func _ready() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	list = get_node('%List')
+	base_route_slot = get_node('%BaseRouteSlot')
 	list.mouse_exited.connect(_on_exit)
 
 	custom_minimum_size = Vector2(HenUtils.get_scaled_size(250), 0)
@@ -171,7 +173,7 @@ func update() -> void:
 	var base_row: HenSideBarRow = _create_row('Base Route', base_route, HenUtils.ICON_ROUTE, Color('#9fb2c7'))
 	base_row.set_primary_emphasis(true)
 	base_row.set_selected(_is_meta_selected(base_route))
-	list.add_child(base_row)
+	base_route_slot.add_child(base_row)
 
 	var categories: Array[Dictionary] = [
 		{name = 'States', type = AddType.STATE},
@@ -192,6 +194,10 @@ func _clear_list() -> void:
 		list.remove_child(child)
 		child.queue_free()
 
+	for child: Node in base_route_slot.get_children():
+		base_route_slot.remove_child(child)
+		child.queue_free()
+
 
 func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -210,39 +216,50 @@ func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
 					ICONS[_type],
 					BG_COLOR[_type],
 					true,
-					12,
+					8,
 					'New Substate'
 				)
 				item.set_start_badge(state_data.start)
 				_add_category_row(category, item)
-				_add_sub_states(category, state_data, _type, 1)
+				_add_sub_states_card(category.items_container, state_data, _type, BG_COLOR[_type], 1)
 		AddType.VAR:
 			for var_data: HenSaveVar in global.SAVE_DATA.variables:
-				_add_category_row(category, _create_row(
+				var row: HenSideBarRow = _create_row(
 					var_data.name,
 					var_data,
 					HenUtils.get_icon_texture(var_data.type),
 					BG_COLOR[_type],
 					false,
-					12
-				))
+					8
+				)
+				row.set_type_badge(var_data.type)
+				_add_category_row(category, row)
 		AddType.FUNC:
 			for func_data: HenSaveFunc in global.SAVE_DATA.functions:
-				_add_category_row(category, _create_row(func_data.name, func_data, ICONS[_type], BG_COLOR[_type], false, 12))
+				_add_category_row(category, _create_row(func_data.name, func_data, ICONS[_type], BG_COLOR[_type], false, 8))
 		AddType.SIGNAL_CALLBACK:
 			for db_data: HenSaveSignalCallback in global.SAVE_DATA.signals_callback:
-				_add_category_row(category, _create_row(db_data.name, db_data, ICONS[_type], BG_COLOR[_type], false, 12))
+				_add_category_row(category, _create_row(db_data.name, db_data, ICONS[_type], BG_COLOR[_type], false, 8))
 		AddType.SIGNAL:
 			for signal_data: HenSaveSignal in global.SAVE_DATA.signals:
-				_add_category_row(category, _create_row(signal_data.name, signal_data, ICONS[_type], BG_COLOR[_type], false, 12))
+				_add_category_row(category, _create_row(signal_data.name, signal_data, ICONS[_type], BG_COLOR[_type], false, 8))
 		AddType.MACRO:
 			for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
-				_add_category_row(category, _create_row(macro_data.name, macro_data, ICONS[_type], BG_COLOR[_type], false, 12))
+				_add_category_row(category, _create_row(macro_data.name, macro_data, ICONS[_type], BG_COLOR[_type], false, 8))
 
 
-func _add_sub_states(category: HenSideBarCategory, state: HenSaveState, type: AddType, depth: int) -> void:
+func _add_sub_states_card(parent_container: Node, state: HenSaveState, type: AddType, tint: Color, depth: int) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var sub_states: Array = state.get_sub_states(global.SAVE_DATA)
+	if sub_states.is_empty():
+		return
+
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override('panel', _build_nested_card_style(tint, depth))
+	var inner := VBoxContainer.new()
+	inner.add_theme_constant_override('separation', 2)
+	card.add_child(inner)
+	parent_container.add_child(card)
 
 	for sub_state: HenSaveState in sub_states:
 		var item: HenSideBarRow = _create_row(
@@ -251,12 +268,32 @@ func _add_sub_states(category: HenSideBarCategory, state: HenSaveState, type: Ad
 			ICONS[type],
 			BG_COLOR[type],
 			true,
-			12 + (depth * 24),
+			6,
 			'New Substate'
 		)
 		item.set_start_badge(sub_state.start)
-		_add_category_row(category, item)
-		_add_sub_states(category, sub_state, type, depth + 1)
+		inner.add_child(item)
+		_add_sub_states_card(inner, sub_state, type, tint, depth + 1)
+
+
+func _build_nested_card_style(tint: Color, depth: int) -> StyleBoxFlat:
+	var editor_scale: float = EditorInterface.get_editor_scale() if Engine.is_editor_hint() else 1.0
+	var bg_alpha: float = 0.06 + min(depth, 4) * 0.03
+	var border_alpha: float = 0.22 + min(depth, 4) * 0.04
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(tint.r, tint.g, tint.b, bg_alpha)
+	style.border_color = Color(tint.r, tint.g, tint.b, border_alpha)
+	style.set_border_width_all(int(max(1, roundi(1 * editor_scale))))
+	var radius: int = int(max(10, roundi(10 * editor_scale)))
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.content_margin_left = int(max(6, roundi(6 * editor_scale)))
+	style.content_margin_right = int(max(6, roundi(6 * editor_scale)))
+	style.content_margin_top = int(max(4, roundi(4 * editor_scale)))
+	style.content_margin_bottom = int(max(4, roundi(4 * editor_scale)))
+	return style
 
 
 func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_color: Color = Color.WHITE, show_add: bool = false, indent: int = 0, add_label: String = 'New') -> HenSideBarRow:
@@ -265,6 +302,11 @@ func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_c
 	row.row_pressed.connect(_on_row_pressed)
 	row.add_pressed.connect(_on_row_add_pressed)
 	row.set_selected(_is_meta_selected(_meta))
+
+	# pointing hand cursor for rows that navigate to a route
+	if _meta is HenSaveResTypeWithRoute or _meta is HenRouteData:
+		row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
 	return row
 
 
