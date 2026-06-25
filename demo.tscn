@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://1bliul3auruy" path="res://hengo/scripts/seila.gd" id="4_c6xj6"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_c6xj6"]
 
@@ -16,10 +15,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.40306807)
 mesh = SubResource("BoxMesh_c6xj6")
 skeleton = NodePath("../Camera3D")
 
-[node name="Camera3D" type="Camera3D" parent="." unique_id=27622588 node_paths=PackedStringArray("my_obj")]
+[node name="Camera3D" type="Camera3D" parent="." unique_id=27622588]
 transform = Transform3D(1, 0, 0, 0, 0.9453651, 0.32601368, 0, -0.32601368, 0.9453651, 0, 3.1540008, 3.242431)
-script = ExtResource("4_c6xj6")
-my_obj = NodePath("../Obj")
 
 [node name="Node" type="Node2D" parent="." unique_id=1576522687]
 visible = false

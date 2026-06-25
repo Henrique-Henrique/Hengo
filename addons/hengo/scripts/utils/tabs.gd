@@ -1,52 +1,48 @@
 @tool
-class_name HenTabs extends TabBar
+class_name HenTabs extends VBoxContainer
 
-class TabData:
-	var id: int
-	var name: StringName
+# vertical list showing the currently open script as a single row. visual only;
+# multi-document logic is intentionally out of scope for now.
+
+var _is_collapsed: bool = false
 
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self ):
+	if HenUtils.disable_scene_with_owner(self):
 		return
-	
+
+	add_theme_constant_override('separation', 2)
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global:
+		global.TABS = self
+
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	tab_clicked.connect(_on_tab_selected)
-	signal_bus.scripts_generation_started.connect(_on_scripts_generation_started)
-	signal_bus.scripts_generation_finished.connect(_on_scripts_generation_finished)
+	if signal_bus:
+		signal_bus.request_list_update.connect(refresh)
+
+	refresh()
 
 
-func _on_scripts_generation_started() -> void:
-	for idx in tab_count:
-		set_tab_disabled(idx, true)
+# rebuilds the row list from the active script (global.SAVE_DATA)
+func refresh() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	
-func _on_scripts_generation_finished() -> void:
-	for idx in tab_count:
-		set_tab_disabled(idx, false)
+	for child: Node in get_children():
+		child.queue_free()
 
+	if not global or not global.SAVE_DATA:
+		return
 
-func _on_tab_selected(_index: int) -> void:
-	var meta: TabData = get_tab_metadata(_index)
-
-	if meta:
-		var loader: HenLoader = Engine.get_singleton(&'Loader')
-		if not loader.load(ResourceUID.get_id_path(meta.id)):
-			(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + ResourceUID.get_id_path(meta.id), HenToast.MessageType.ERROR)
+	var row: HenScriptTabRow = HenScriptTabRow.new()
+	add_child(row)
+	row.setup(global.SAVE_DATA.identity.name, global.SAVE_DATA.identity.type)
+	row.set_collapsed(_is_collapsed)
+	row.set_active(true)
 
 
-func add_script_tab(id: int) -> void:
-	var tab: TabData = TabData.new()
-
-	tab.id = id
-	tab.name = ResourceUID.get_id_path(id).get_basename()
-
-	for idx in tab_count:
-		var meta = get_tab_metadata(idx)
-		if meta and meta.id == id:
-			current_tab = idx
-			return
-
-	add_tab(tab.name)
-	set_tab_metadata(tab_count - 1, tab)
-	select_next_available()
+func set_collapsed(_collapsed: bool) -> void:
+	_is_collapsed = _collapsed
+	for child: Node in get_children():
+		if child is HenScriptTabRow:
+			(child as HenScriptTabRow).set_collapsed(_collapsed)

@@ -11,6 +11,12 @@ var can_select: bool = false
 # sidebar collapse
 var _sidebar_collapsed: bool = false
 
+# script-tabs panel collapse
+var _script_tabs_collapsed: bool = false
+
+const SCRIPT_TABS_COLLAPSED_WIDTH: int = 44
+const SCRIPT_TABS_EXPANDED_WIDTH: int = 220
+
 # canvas layout
 var _canvas_split_mode: bool = false
 
@@ -65,6 +71,14 @@ func _ready() -> void:
 	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
 	(get_node('%ToggleLayoutBt') as Button).pressed.connect(_on_toggle_canvas_layout)
 	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
+
+	var toggle_tabs_bt: Button = get_node_or_null('%ToggleScriptTabsBt')
+	if toggle_tabs_bt:
+		toggle_tabs_bt.pressed.connect(_on_toggle_script_tabs)
+	var new_tab_bt: Button = get_node_or_null('%NewScriptTabBt')
+	if new_tab_bt:
+		new_tab_bt.pressed.connect(_on_new_script_tab)
+	_apply_script_tabs_collapse()
 
 	_apply_semantic_colors()
 
@@ -460,6 +474,36 @@ func _on_collapse_sidebar() -> void:
 			content_area.split_offset = _saved_split_offset
 		if collapse_btn:
 			collapse_btn.tooltip_text = 'Collapse sidebar'
+
+
+func _on_toggle_script_tabs() -> void:
+	_script_tabs_collapsed = not _script_tabs_collapsed
+	_apply_script_tabs_collapse()
+
+
+func _apply_script_tabs_collapse() -> void:
+	var panel: PanelContainer = get_node_or_null('%ScriptTabsPanel')
+	var title: Label = get_node_or_null('%ScriptTabsTitle')
+	var new_bt: Button = get_node_or_null('%NewScriptTabBt')
+	var toggle_bt: Button = get_node_or_null('%ToggleScriptTabsBt')
+	var tab_list: HenTabs = get_node_or_null('%ScriptTabList') as HenTabs
+
+	if panel:
+		panel.custom_minimum_size.x = SCRIPT_TABS_COLLAPSED_WIDTH if _script_tabs_collapsed else SCRIPT_TABS_EXPANDED_WIDTH
+	if title:
+		title.visible = not _script_tabs_collapsed
+	if new_bt:
+		new_bt.visible = not _script_tabs_collapsed
+	if toggle_bt:
+		toggle_bt.tooltip_text = 'Expand script tabs' if _script_tabs_collapsed else 'Collapse script tabs'
+	if tab_list:
+		tab_list.set_collapsed(_script_tabs_collapsed)
+
+
+func _on_new_script_tab() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global and global.DASHBOARD:
+		global.DASHBOARD.show_dashboard()
 
 
 func _on_toggle_canvas_layout() -> void:

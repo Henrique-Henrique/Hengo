@@ -225,6 +225,15 @@ corner_radius_bottom_left = 12
 shadow_color = Color(0, 0, 0, 0.05)
 shadow_size = 1
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_scripttabs"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+bg_color = Color(0.063, 0.063, 0.086, 1)
+border_width_right = 1
+border_color = Color(0.18, 0.18, 0.21, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_statusbar"]
 content_margin_left = 8.0
 content_margin_top = 2.0
@@ -357,6 +366,8 @@ PrimaryButton/styles/normal = SubResource("StyleBoxFlat_primary_normal")
 PrimaryButton/styles/pressed = SubResource("StyleBoxFlat_primary_pressed")
 RichTextLabel/styles/focus = SubResource("StyleBoxFlat_panel")
 RichTextLabel/styles/normal = SubResource("StyleBoxFlat_panel")
+ScriptTabsPanel/base_type = &"PanelContainer"
+ScriptTabsPanel/styles/panel = SubResource("StyleBoxFlat_scripttabs")
 StatusBarPanel/base_type = &"PanelContainer"
 StatusBarPanel/styles/panel = SubResource("StyleBoxFlat_statusbar")
 TabContainer/colors/font_hovered_color = Color(0.95, 0.95, 0.95, 1)
