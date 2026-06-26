@@ -3,6 +3,10 @@ extends EditorDebuggerPlugin
 
 const PREFIX = 'hengo'
 
+# per-script chosen instance (script_id -> instance_id); drives state focus for
+# every script, and flow focus for whichever script is active
+var _targets_by_script: Dictionary = {}
+
 
 func _init() -> void:
 	EditorInterface.get_inspector().edited_object_changed.connect(_on_edited_object_changed)
@@ -38,7 +42,7 @@ func _capture(_message: String, _data: Array, _session_id: int) -> bool:
 		'hengo:state':
 			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 			if signal_bus:
-				signal_bus.debug_state_changed.emit(StringName(_data[0]))
+				signal_bus.debug_state_changed.emit(StringName(_data[0]), String(_data[1]) if _data.size() > 1 else '')
 			return true
 		'hengo:flow':
 			var id: int = _data[0]
@@ -69,8 +73,52 @@ func _capture(_message: String, _data: Array, _session_id: int) -> bool:
 				vc.cnode_instance.show_debug_value(value)
 
 			return true
+		'hengo:nodes_list':
+			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+			if signal_bus:
+				signal_bus.debug_nodes_listed.emit(String(_data[0]), _data[1])
+			return true
 
 	return false
+
+
+# asks every active session for the live nodes of EVERY open script
+func send_list_nodes() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global:
+		return
+
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if not save_data or not save_data.identity:
+			continue
+		var script_id: String = String(save_data.identity.id)
+		for session: EditorDebuggerSession in get_sessions():
+			if session.is_active():
+				session.send_message('hengo:list_nodes', [script_id])
+
+
+# flow focus: a single instance (the active script's chosen one)
+func set_target(_instance_id: int) -> void:
+	for session: EditorDebuggerSession in get_sessions():
+		if session.is_active():
+			session.send_message('hengo:set_target', [_instance_id])
+
+
+# state focus: chosen instance for a given script (its machine highlights it)
+func set_state_target(_script_id: String, _instance_id: int) -> void:
+	_targets_by_script[_script_id] = _instance_id
+	_send_state_targets()
+
+
+func _send_state_targets() -> void:
+	for session: EditorDebuggerSession in get_sessions():
+		if session.is_active():
+			session.send_message('hengo:set_state_targets', [_targets_by_script])
+
+
+# flow focus follows the active script's chosen instance (called on script switch)
+func on_active_script_changed(_script_id: String) -> void:
+	set_target(int(_targets_by_script.get(_script_id, -1)))
 
 
 func get_debug_ids(_num: int) -> Array:
@@ -130,15 +178,20 @@ func _get_flow_line(vc: HenVirtualCNode, port: StringName) -> HenFlowConnectionL
 func _on_started() -> void:
 	(Engine.get_singleton(&'Global') as HenGlobal).HENGO_DEBUGGER_PLUGIN = self
 
-	print('Hengo Debugger Started!')
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	if signal_bus:
+		signal_bus.debug_session_started.emit()
+
+	send_list_nodes()
 
 
 func _on_stopped() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	global.HENGO_DEBUGGER_PLUGIN = null
 
+	_targets_by_script.clear()
+
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	if signal_bus:
-		signal_bus.debug_state_changed.emit(&'')
-
-	print('Hengo Debugger Stopped!')
+		signal_bus.debug_state_changed.emit(&'', '')
+		signal_bus.debug_session_stopped.emit()

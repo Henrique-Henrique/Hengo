@@ -39,6 +39,13 @@ position = Vector2(672, 310)
 texture = ExtResource("1_wvpun")
 script = ExtResource("3_c6xj6")
 
+[node name="Sprite2D3" type="Sprite2D" parent="Node" unique_id=1633947888]
+modulate = Color(0.34442037, 0.431032, 0.6603756, 1)
+position = Vector2(618, 445)
+texture = ExtResource("1_wvpun")
+script = ExtResource("3_c6xj6")
+quer_girar = true
+
 [node name="Node" type="Node" parent="Node" unique_id=2080766891]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=274402458]

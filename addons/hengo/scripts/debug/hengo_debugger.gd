@@ -1,6 +1,11 @@
 class_name HengoDebugger extends Node
 
+# flow/value focus: a single instance (the active script's chosen one)
 static var target_instance_id: int = -1
+
+# state focus: one instance per script (script_id -> instance_id), so every open
+# script's state machine can highlight at once
+static var state_targets: Dictionary = {}
 
 
 static func _on_message_capture(message: String, data: Array) -> bool:
@@ -19,7 +24,60 @@ static func _on_message_capture(message: String, data: Array) -> bool:
 		else:
 			target_instance_id = -1
 		return true
+	if message == 'set_state_targets':
+		state_targets = data[0] if data[0] is Dictionary else {}
+		_emit_current_states()
+		return true
+	if message == 'list_nodes':
+		EngineDebugger.send_message('hengo:nodes_list', [String(data[0]), _collect_nodes_for_script(String(data[0]))])
+		return true
 	return false
+
+
+# asks each targeted instance to re-emit its current state, so newly-chosen
+# targets light up immediately instead of waiting for the next transition
+static func _emit_current_states() -> void:
+	for sid in state_targets:
+		var inst: Object = instance_from_id(int(state_targets[sid]))
+		if is_instance_valid(inst):
+			var ctrl = inst.get('_STATE_CONTROLLER')
+			if ctrl:
+				ctrl.debug_emit_current()
+
+
+# reads the HENGO_DEBUG_SCRIPT_ID const off a node's script (empty if absent)
+static func resolve_script_id(node: Object) -> String:
+	if not node:
+		return ''
+	var scr: Script = node.get_script()
+	if scr is GDScript:
+		return String((scr as GDScript).get_script_constant_map().get('HENGO_DEBUG_SCRIPT_ID', ''))
+	return ''
+
+
+# walks the live scene tree collecting nodes whose script declares HENGO_DEBUG_SCRIPT_ID == script_id
+static func _collect_nodes_for_script(script_id: String) -> Array:
+	var result: Array = []
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if not tree or not tree.root:
+		return result
+
+	var stack: Array = [tree.root]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		for child in node.get_children():
+			stack.push_back(child)
+
+		var scr: Script = node.get_script()
+		if scr is GDScript:
+			var sid = (scr as GDScript).get_script_constant_map().get('HENGO_DEBUG_SCRIPT_ID', null)
+			if sid != null and String(sid) == script_id:
+				result.append({
+					name = String(node.name),
+					path = String(tree.root.get_path_to(node)),
+					id = node.get_instance_id(),
+				})
+	return result
 
 
 static func trace_flow(node_id: int, port: StringName = &'0', data: Dictionary = {}) -> void:

@@ -1,0 +1,52 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/debug/debug_nodes_panel.gd" id="1_panel"]
+[ext_resource type="PackedScene" uid="uid://6urv5rx15yye" path="res://addons/hengo/scenes/utils/virtual_list.tscn" id="2_vlist"]
+[ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_list_item.tscn" id="3_item"]
+
+[node name="DebugNodesPanel" type="PanelContainer"]
+script = ExtResource("1_panel")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Header" type="HBoxContainer" parent="Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Search" type="LineEdit" parent="Margin/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Search nodes..."
+clear_button_enabled = true
+
+[node name="RefreshBt" type="Button" parent="Margin/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "Refresh instance list"
+text = "Refresh"
+flat = true
+
+[node name="Hint" type="Label" parent="Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "No live instances. Press Play and use Refresh after the scene loads."
+autowrap_mode = 3
+theme_override_colors/font_color = Color(1, 1, 1, 0.5)
+
+[node name="VirtualList" parent="Margin/VBox" instance=ExtResource("2_vlist")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+item_scene = ExtResource("3_item")

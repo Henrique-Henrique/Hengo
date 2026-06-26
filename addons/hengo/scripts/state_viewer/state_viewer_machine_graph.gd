@@ -21,7 +21,8 @@ var _panels: Dictionary = {}
 var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _active_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
 
-var _debug_active_state_name: StringName = &''
+# script display name -> active state (snake_case) for that script's machine
+var _debug_active_states: Dictionary = {}
 
 
 func _ready() -> void:
@@ -169,9 +170,24 @@ func _find_state_by_id(id: Variant, save_data: HenSaveData) -> HenSaveState:
 				
 	return null
 
-func _on_debug_state_changed(state_name: StringName) -> void:
-	_debug_active_state_name = state_name
+func _on_debug_state_changed(state_name: StringName, script_id: String) -> void:
+	if state_name == &'' and script_id == '':
+		_debug_active_states.clear()
+	else:
+		var script_name: String = _script_name_from_id(script_id)
+		if not script_name.is_empty():
+			_debug_active_states[script_name] = String(state_name)
 	_update_debug_highlight()
+
+
+func _script_name_from_id(script_id: String) -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global:
+		return ''
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if save_data and save_data.identity and String(save_data.identity.id) == script_id:
+			return save_data.identity.name
+	return ''
 
 func _on_debug_flow_transition(vc_id: int, _port: StringName) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -240,11 +256,15 @@ func _update_debug_highlight() -> void:
 		if not style: continue
 		
 		var node_id: String = node.id
-		var short_id: String = node_id.get_slice('.', node_id.get_slice_count('.') - 1)
+		var slices: int = node_id.get_slice_count('.')
+		var short_id: String = node_id.get_slice('.', slices - 1)
+		# node.id is "collection.<script_name>.<state>..."; segment 1 scopes the script
+		var script_seg: String = node_id.get_slice('.', 1) if slices > 1 else ''
 		var is_compound: bool = not node.children.is_empty()
 
-		var short_id_snake: String = short_id.strip_edges().to_lower().replace(" ", "_")
-		if _debug_active_state_name != &'' and short_id_snake == String(_debug_active_state_name):
+		var short_id_snake: String = short_id.strip_edges().to_snake_case()
+		var active_state: String = _debug_active_states.get(script_seg, '')
+		if active_state != '' and short_id_snake == active_state:
 			style.border_color = Color('#63ff92')
 			style.set_border_width_all(2)
 		else:

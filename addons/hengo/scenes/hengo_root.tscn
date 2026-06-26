@@ -47,6 +47,7 @@
 [ext_resource type="Script" path="res://addons/hengo/scripts/utils/tabs.gd" id="tabs_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/saving_pill.tscn" id="savpill_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/loading_overlay.tscn" id="loadovlay_inst"]
+[ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_nodes_panel.tscn" id="dbgpanel_inst"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3680e"]
 bg_color = Color(0.082, 0.082, 0.105, 1)
@@ -372,6 +373,13 @@ code_completion_enabled = false
 script = ExtResource("10_r5155")
 metadata/_tab_index = 2
 metadata/_tab_name = "Code Preview"
+
+[node name="DebugNodesPanel" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarTabContainer" unique_id=2000000060 instance=ExtResource("dbgpanel_inst")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+metadata/_tab_index = 3
+metadata/_tab_name = "Debug"
 
 [node name="CanvasVBox" type="VBoxContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea" unique_id=1462542696]
 layout_mode = 2

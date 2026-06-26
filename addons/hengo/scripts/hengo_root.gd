@@ -163,6 +163,10 @@ func refresh_script_state() -> void:
 		else:
 			script_icon.visible = false
 
+	# flow focus follows the active script during a debug session
+	if global and global.HENGO_DEBUGGER_PLUGIN and global.SAVE_DATA:
+		global.HENGO_DEBUGGER_PLUGIN.on_active_script_changed(String(global.SAVE_DATA.identity.id))
+
 
 func _on_reset_zoom() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
