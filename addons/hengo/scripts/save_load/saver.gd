@@ -10,16 +10,20 @@ static func save() -> void:
 static func save_new() -> void:
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
-	
-	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
-		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
-	
+
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_COLLECTION_PATH)
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var toast: HenToast = Engine.get_singleton(&'ToastContainer')
-	var save_data: HenSaveData = global.SAVE_DATA
-	var result: int = ResourceSaver.save(save_data)
-	
-	toast.notify.call_deferred(('Saved SAVE DATA: ' + str(save_data.identity.id)) if result == OK else 'Erro saving' + str(save_data.identity.id))
+
+	# persist every open script of the collection
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if not save_data:
+			continue
+		var result: int = ResourceSaver.save(save_data)
+		if result != OK:
+			toast.notify.call_deferred('Error saving ' + str(save_data.identity.id), HenToast.MessageType.ERROR)
 
 
 static func start_generate(_regenerate: bool = false) -> void:
@@ -30,34 +34,41 @@ static func start_generate(_regenerate: bool = false) -> void:
 	if not DirAccess.dir_exists_absolute('res://hengo'):
 		DirAccess.make_dir_absolute('res://hengo')
 
-	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
-		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_COLLECTION_PATH)
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global.OPEN_SCRIPTS.is_empty():
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_finished.emit.call_deferred()
+		return
 
 	save_new()
-	
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var current_save_data: HenSaveData = global.SAVE_DATA
-	var current_id: StringName = str(current_save_data.identity.id)
-	
-	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-	map_deps.update_project_data(current_id)
-	
-	# validates compilation
+
+	# validates the active script graph (ui-based check)
 	var hengo_root: HenHengoRoot = global.HENGO_ROOT
 	if hengo_root and not hengo_root.check_errors(true):
 		toast.notify.call_deferred("Compilation blocked due to errors.", HenToast.MessageType.ERROR)
 		(Engine.get_singleton(&'SignalBus') as HenSignalBus).scripts_generation_finished.emit.call_deferred()
 		return
 
-	_compile_script(current_id)
-	
-	var scripts_to_recompile: Array[StringName] = map_deps.check_dependencies(current_id)
-	var recompiled_count: int = 0
-	
-	for script_id: StringName in scripts_to_recompile:
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	var compiled: Dictionary = {}
+
+	# compile every open script of the collection
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		var script_id: StringName = StringName(str(save_data.identity.id))
 		_compile_script(script_id)
-		recompiled_count += 1
-	
+		compiled[script_id] = true
+
+	# recompile external dependents not already compiled
+	var recompiled_count: int = 0
+	for open_script: HenSaveData in global.OPEN_SCRIPTS:
+		for dependent_id: StringName in map_deps.check_dependencies(open_script.identity.id):
+			if not compiled.has(dependent_id):
+				_compile_script(dependent_id)
+				compiled[dependent_id] = true
+				recompiled_count += 1
+
 	var end_time: int = Time.get_ticks_msec()
 	var compilation_time: float = (end_time - start_time)
 	
@@ -75,7 +86,8 @@ static func start_generate(_regenerate: bool = false) -> void:
 
 
 static func _compile_script(_id: StringName) -> void:
-	var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('save' + HenEnums.SAVE_EXTENSION)
+	var save_dir: String = HenUtils.get_script_dir(_id)
+	var save_path: String = save_dir.path_join(HenEnums.SAVE_FILE)
 	if not FileAccess.file_exists(save_path):
 		push_error("Cannot compile script, save data not found: " + save_path)
 		return
@@ -87,7 +99,7 @@ static func _compile_script(_id: StringName) -> void:
 	
 	recalculate_dependencies(save_data)
 	
-	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
+	var identity_path: String = save_dir.path_join(HenEnums.IDENTITY_FILE)
 	ResourceSaver.save(save_data.identity, identity_path)
 	
 	var map_deps: HenMapDependencies = Engine.get_singleton('MapDependencies')

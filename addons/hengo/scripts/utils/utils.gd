@@ -527,9 +527,48 @@ static func is_circular_dependent(_sub_type: HenVirtualCNode.SubType) -> bool:
 	return false
 
 
+# index of script_id -> script directory, resolved across all collections
+static var _script_dir_index: Dictionary = {}
+
+
+# rebuilds the script_id -> directory index by scanning every collection folder
+static func rebuild_script_index() -> void:
+	var fresh: Dictionary = {}
+
+	if DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
+		for collection_id: String in DirAccess.get_directories_at(HenEnums.HENGO_COLLECTION_PATH):
+			var collection_path: String = HenEnums.HENGO_COLLECTION_PATH.path_join(collection_id)
+			for script_id: String in DirAccess.get_directories_at(collection_path):
+				fresh[StringName(script_id)] = collection_path.path_join(script_id)
+
+	# single reference swap so concurrent readers never see a half-built index
+	_script_dir_index = fresh
+
+
+# resolves a script's directory by id, rebuilding the index on a cache miss
+static func get_script_dir(_id: StringName) -> String:
+	if _script_dir_index.has(_id):
+		var cached: String = _script_dir_index[_id]
+		if DirAccess.dir_exists_absolute(cached):
+			return cached
+
+	rebuild_script_index()
+	return str(_script_dir_index.get(_id, ''))
+
+
+# returns every known script id across all collections
+static func get_all_script_ids() -> Array[StringName]:
+	rebuild_script_index()
+
+	var ids: Array[StringName] = []
+	for id: StringName in _script_dir_index:
+		ids.append(id)
+	return ids
+
+
 # returns the specific path based on the provided enum type
 static func get_side_bar_item_path(_save_data_id: StringName, _type: HenSideBar.SideBarItem) -> StringName:
-	var base_path: StringName = HenEnums.HENGO_SAVE_PATH + _save_data_id
+	var base_path: StringName = get_script_dir(_save_data_id)
 	var suffix: String = ''
 
 	match _type:

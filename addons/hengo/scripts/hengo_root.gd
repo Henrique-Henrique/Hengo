@@ -501,9 +501,14 @@ func _apply_script_tabs_collapse() -> void:
 
 
 func _on_new_script_tab() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if global and global.DASHBOARD:
-		global.DASHBOARD.show_dashboard()
+	var anchor: Button = get_node_or_null('%NewScriptTabBt')
+	var c: HenCreateScript = (load('res://addons/hengo/scenes/utils/create_script.tscn') as PackedScene).instantiate()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(c, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = anchor,
+		side = SIDE_RIGHT,
+		min_size = Vector2(360, 0)
+	})
 
 
 func _on_toggle_canvas_layout() -> void:

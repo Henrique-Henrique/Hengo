@@ -1,7 +1,11 @@
 @tool
 class_name HenScriptTabRow extends PanelContainer
 
+signal pressed(save_data: HenSaveData)
+
 const ROW_HEIGHT: int = 32
+
+var save_data: HenSaveData
 
 var _is_active: bool = false
 var _is_collapsed: bool = false
@@ -16,13 +20,20 @@ var _active_sb: StyleBoxFlat
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	custom_minimum_size.y = ROW_HEIGHT
 	_build_styles()
 	_build_children()
 	_apply_visual_state()
+	gui_input.connect(_on_gui_input)
 
 
-func setup(_name: String, _type: StringName) -> void:
+func setup(_save_data: HenSaveData) -> void:
+	save_data = _save_data
+
+	var _name: String = _save_data.identity.name
+	var _type: StringName = _save_data.identity.type
+
 	if _name_label:
 		_name_label.text = _name
 	if _icon:
@@ -32,6 +43,12 @@ func setup(_name: String, _type: StringName) -> void:
 			_icon.visible = true
 		else:
 			_icon.visible = false
+
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			pressed.emit(save_data)
 
 
 func set_active(_active: bool) -> void:

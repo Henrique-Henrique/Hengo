@@ -38,8 +38,14 @@ func setup(_meta: Dictionary) -> void:
 	if meta.has('type'):
 		icon.texture = HenUtils.get_icon_texture(meta.type)
 		icon.modulate = HenUtils.get_type_parent_color(meta.type, 1., Color.WHITE).lightened(.3)
+	else:
+		# collection entry: generic icon
+		icon.texture = HenUtils.ICON_LAYERS
+		icon.modulate = Color(0.62, 0.7, 1.0)
 
-	if meta.has('time'):
+	if meta.has('script_count'):
+		%Time.text = '%d scripts' % meta.script_count
+	elif meta.has('time'):
 		%Time.text = _format_time(meta.time)
 
 

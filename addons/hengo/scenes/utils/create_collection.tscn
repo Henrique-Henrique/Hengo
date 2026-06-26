@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" uid="uid://lad66re0b55x" path="res://addons/hengo/assets/new_icons/plus.svg" id="1_plus"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/utils/create_collection.gd" id="2_script"]
+
+[node name="VBoxContainer" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+script = ExtResource("2_script")
+
+[node name="CollectionName" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Collection name"
+
+[node name="CreateBt" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Create"
+icon = ExtResource("1_plus")

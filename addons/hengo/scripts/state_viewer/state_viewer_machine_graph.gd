@@ -58,14 +58,27 @@ func _on_graph_changed_no_args(_a = null, _b = null) -> void:
 
 func _update_graph() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if not global or not global.SAVE_DATA:
+	if not global:
 		return
-		
-	var machine_dict: Dictionary = _build_dynamic_dict(global.SAVE_DATA)
-	if machine_dict.is_empty():
-		return
-		
-	build_graph(machine_dict)
+
+	build_graph(_build_collection_dict(global.OPEN_SCRIPTS))
+
+
+# wraps every open script as a labeled compound machine under a single root
+func _build_collection_dict(open_scripts: Array) -> Dictionary:
+	var root: Dictionary = { id = 'collection', states = {} }
+
+	for save_data: HenSaveData in open_scripts:
+		if not save_data:
+			continue
+
+		var script_dict: Dictionary = _build_dynamic_dict(save_data)
+		if (script_dict.get('states', {}) as Dictionary).is_empty():
+			continue
+
+		root.states[save_data.identity.name] = script_dict
+
+	return root
 
 func _on_cnode_changed(_id: String, _vc: HenVirtualCNode) -> void:
 	if _vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION:
@@ -285,7 +298,14 @@ func build_graph(dict: Dictionary) -> void:
 	_panels.clear()
 
 	graph_root = parser.parse_machine(dict)
-	parser.resolve_edges(graph_root)
+
+	# resolve transitions within each script subtree so equally-named states
+	# in different scripts never cross-link
+	if graph_root.children.is_empty():
+		parser.resolve_edges(graph_root)
+	else:
+		for machine_node in graph_root.children:
+			parser._resolve_node_edges(machine_node, machine_node)
 
 	var all_nodes: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
 	_collect_draw_order(graph_root, all_nodes)

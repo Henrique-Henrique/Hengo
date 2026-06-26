@@ -93,7 +93,7 @@ func _on_confirm() -> void:
 		DirAccess.rename_absolute(current_uid_path, target_uid_path)
 
 	_identity.script_path = target_path
-	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(str(_identity.id)).path_join('identity' + HenEnums.SAVE_EXTENSION)
+	var identity_path: String = HenUtils.get_script_dir(_identity.id).path_join(HenEnums.IDENTITY_FILE)
 	ResourceSaver.save(_identity, identity_path)
 
 	if Engine.is_editor_hint():

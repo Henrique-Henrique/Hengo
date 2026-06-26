@@ -13,17 +13,12 @@ class ProjectAST:
 	var states: Array[HenSaveState]
 
 
-# iterates over project directories to build the dependency map
+# iterates over every script of every collection to build the dependency map
 func start_map() -> void:
 	var start: int = Time.get_ticks_usec()
 	ast_list.clear()
-	var root_dir: DirAccess = DirAccess.open(HenEnums.HENGO_SAVE_PATH)
-	
-	if not root_dir:
-		push_error('Failed to access save path.')
-		return
 
-	for id_dir: String in root_dir.get_directories():
+	for id_dir: StringName in HenUtils.get_all_script_ids():
 		_map_project_data(id_dir)
 
 	var end: int = Time.get_ticks_usec()
@@ -63,7 +58,7 @@ func get_real_ast_size() -> void:
 func _map_project_data(_id: StringName) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 
-	var identity_path = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
+	var identity_path = HenUtils.get_script_dir(_id).path_join(HenEnums.IDENTITY_FILE)
 	if FileAccess.file_exists(identity_path):
 		var res_identity: HenSaveDataIdentity = load(identity_path)
 

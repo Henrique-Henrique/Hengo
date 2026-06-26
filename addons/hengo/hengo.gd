@@ -18,11 +18,11 @@ func _enter_tree():
 	# creating hengo folder
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_PATH)
-		 
-	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
-		DirAccess.make_dir_absolute(HenEnums.HENGO_SAVE_PATH)
-	
-	var ignore_path: String = HenEnums.HENGO_SAVE_PATH.path_join('.gdignore')
+
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
+		DirAccess.make_dir_absolute(HenEnums.HENGO_COLLECTION_PATH)
+
+	var ignore_path: String = HenEnums.HENGO_COLLECTION_PATH.path_join('.gdignore')
 	var dev_mode: bool = ProjectSettings.get_setting(HenSettings.DEVELOPMENT_MODE_PATH, false)
 
 	# handling .gdignore based on development setting

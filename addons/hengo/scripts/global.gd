@@ -20,6 +20,9 @@ var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
 var CNODE_UI: Panel
 var DASHBOARD: HenDashboard
 var SAVE_DATA: HenSaveData
+# all scripts of the active collection kept in memory
+var OPEN_SCRIPTS: Array[HenSaveData] = []
+var ACTIVE_COLLECTION: HenSaveCollection
 var CURRENT_INSPECTOR: HenInspector
 var CODE_SEARCH: HenCodeSearch
 

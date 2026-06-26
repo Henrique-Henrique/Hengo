@@ -65,13 +65,13 @@ func _compile_task() -> void:
 		elapsed_ms = 0
 	}
 
-	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
 		report.items.append({
 			script_id = '-',
 			script_name = '-',
 			status = 'failed',
-			message = 'Save folder not found: ' + str(HenEnums.HENGO_SAVE_PATH),
-			errors = ['Missing save directory']
+			message = 'Collections folder not found: ' + str(HenEnums.HENGO_COLLECTION_PATH),
+			errors = ['Missing collections directory']
 		})
 		report.total = 1
 		report.failed_count = 1
@@ -82,7 +82,9 @@ func _compile_task() -> void:
 			signal_bus.is_batch_loading = false
 		return
 
-	var save_dirs: PackedStringArray = DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH)
+	var save_dirs: PackedStringArray = PackedStringArray()
+	for script_id: StringName in HenUtils.get_all_script_ids():
+		save_dirs.append(str(script_id))
 	save_dirs.sort()
 	report.total = save_dirs.size()
 
@@ -99,8 +101,9 @@ func _compile_task() -> void:
 
 	for idx: int in range(save_dirs.size()):
 		var save_id: String = save_dirs[idx]
-		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_dirs[idx]).path_join('save' + HenEnums.SAVE_EXTENSION)
-		var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
+		var script_dir: String = HenUtils.get_script_dir(StringName(save_id))
+		var save_path: String = script_dir.path_join(HenEnums.SAVE_FILE)
+		var identity_path: String = script_dir.path_join(HenEnums.IDENTITY_FILE)
 		var exists: bool = FileAccess.file_exists(save_path)
 
 		save_paths.append(save_path)

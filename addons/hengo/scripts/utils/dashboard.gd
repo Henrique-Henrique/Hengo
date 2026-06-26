@@ -15,7 +15,7 @@ var script_list: Array[Dictionary]
 
 func _ready() -> void:
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	signal_bus.request_list_update.connect(show_dashboard)
+	signal_bus.request_list_update.connect(_on_list_update)
 
 	search_edit.text_changed.connect(_on_search_change)
 	new_script_bt.pressed.connect(_on_create_script)
@@ -52,7 +52,7 @@ func _on_sidebar_tab_changed(idx: int) -> void:
 
 
 func _on_create_script() -> void:
-	var c: HenCreateScript = (load('res://addons/hengo/scenes/utils/create_script.tscn') as PackedScene).instantiate()
+	var c: HenCreateCollection = (load('res://addons/hengo/scenes/utils/create_collection.tscn') as PackedScene).instantiate()
 	var anchor: Control = new_script_bt
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(c, {
 		layout = HenGeneralPopup.Layout.ANCHORED,
@@ -65,29 +65,29 @@ func _on_create_script() -> void:
 func _on_open_script(meta: Dictionary) -> void:
 	if not meta is Dictionary:
 		return
-	
+
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 
-	if loader.load(str(meta.id)):
+	if loader.load_collection(str(meta.id)):
 		hide_dashboard()
 	else:
-		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load script: " + meta.base_name, HenToast.MessageType.ERROR)
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load collection: " + meta.base_name, HenToast.MessageType.ERROR)
 
 
 func _on_rename_script(meta: Dictionary, source: Control) -> void:
-	var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name).path_join('identity' + HenEnums.SAVE_EXTENSION)
+	var collection_path: String = HenEnums.HENGO_COLLECTION_PATH.path_join(meta.dir_name).path_join(HenEnums.COLLECTION_FILE)
 
-	if not FileAccess.file_exists(identity_path):
-		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to find identity file for: " + meta.base_name, HenToast.MessageType.ERROR)
+	if not FileAccess.file_exists(collection_path):
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to find collection: " + meta.base_name, HenToast.MessageType.ERROR)
 		return
 
-	var identity: HenSaveDataIdentity = ResourceLoader.load(identity_path, '', ResourceLoader.CACHE_MODE_REPLACE)
-	if not identity:
-		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load identity for: " + meta.base_name, HenToast.MessageType.ERROR)
+	var collection: HenSaveCollection = ResourceLoader.load(collection_path, '', ResourceLoader.CACHE_MODE_REPLACE)
+	if not collection:
+		(Engine.get_singleton(&'ToastContainer') as HenToast).notify.call_deferred("Failed to load collection: " + meta.base_name, HenToast.MessageType.ERROR)
 		return
 
-	var popup: HenRenameScriptPopup = RENAME_POPUP_SCENE.instantiate() as HenRenameScriptPopup
-	popup.setup(identity)
+	var popup: HenCreateCollection = (load('res://addons/hengo/scenes/utils/create_collection.tscn') as PackedScene).instantiate()
+	popup.setup_rename(collection)
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup, {
 		layout = HenGeneralPopup.Layout.ANCHORED,
 		anchor_to = source,
@@ -98,19 +98,16 @@ func _on_rename_script(meta: Dictionary, source: Control) -> void:
 
 func _on_delete_request(meta: Dictionary) -> void:
 	HenConfirmPopup.show_confirm(
-		"Are you sure you want to delete '%s'?" % meta.base_name,
+		"Are you sure you want to delete the collection '%s' and all its scripts?" % meta.base_name,
 		_on_delete_confirmed.bind(meta),
-		'Delete Script',
+		'Delete Collection',
 		'Delete',
 		'Cancel'
 	)
 
 
 func _on_delete_confirmed(meta: Dictionary) -> void:
-	var path = HenEnums.HENGO_SAVE_PATH.path_join(meta.dir_name)
-	var global_path = ProjectSettings.globalize_path(path)
-	
-	OS.move_to_trash(global_path)
+	HenCollectionManager.delete_collection(StringName(meta.dir_name))
 	show_dashboard()
 
 
@@ -140,6 +137,13 @@ func debounce_search(delay: float, callback: Callable) -> void:
 	timer.timeout.connect(callback)
 
 
+# refreshes the list only when the dashboard is already visible; never pops it open
+func _on_list_update() -> void:
+	var tabs: TabContainer = _get_sidebar_tabs()
+	if tabs and tabs.current_tab == TAB_INDEX:
+		refresh()
+
+
 func show_dashboard() -> void:
 	var tabs: TabContainer = _get_sidebar_tabs()
 	if not tabs:
@@ -164,34 +168,31 @@ func refresh() -> void:
 
 func _load_scripts_thread() -> void:
 	var new_script_list: Array[Dictionary] = []
-	
-	for dir_name: StringName in DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH):
-		var identity_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('identity' + HenEnums.SAVE_EXTENSION)
 
-		if not FileAccess.file_exists(identity_path):
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
+		_on_scripts_loaded.call_deferred(new_script_list)
+		return
+
+	for dir_name: StringName in DirAccess.get_directories_at(HenEnums.HENGO_COLLECTION_PATH):
+		var collection_path: StringName = HenEnums.HENGO_COLLECTION_PATH.path_join(dir_name).path_join(HenEnums.COLLECTION_FILE)
+
+		if not FileAccess.file_exists(collection_path):
 			continue
-		
-		var save_path: StringName = HenEnums.HENGO_SAVE_PATH.path_join(dir_name).path_join('save' + HenEnums.SAVE_EXTENSION)
-		
-		# check both identity and save file to get the latest edit time
-		var time: int = FileAccess.get_modified_time(identity_path)
-		if FileAccess.file_exists(save_path):
-			var save_time: int = FileAccess.get_modified_time(save_path)
-			if save_time > time:
-				time = save_time
 
-		var identity: HenSaveDataIdentity = ResourceLoader.load(identity_path)
+		var collection: HenSaveCollection = ResourceLoader.load(collection_path)
+		if not collection:
+			continue
 
 		new_script_list.append(
 			{
-				id = identity.id,
-				base_name = identity.name,
-				time = time,
+				id = collection.id,
+				base_name = collection.name,
+				time = FileAccess.get_modified_time(collection_path),
 				dir_name = dir_name,
-				type = identity.type
+				script_count = collection.script_ids.size()
 			}
 		)
-	
+
 	new_script_list.sort_custom(func(a, b): return a.time > b.time)
 	_on_scripts_loaded.call_deferred(new_script_list)
 
