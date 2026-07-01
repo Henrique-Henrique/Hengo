@@ -82,7 +82,7 @@ func _build_collection_dict(open_scripts: Array) -> Dictionary:
 	return root
 
 func _on_cnode_changed(_id: String, _vc: HenVirtualCNode) -> void:
-	if _vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION:
+	if _vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION or _vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
 		_update_graph()
 
 func _build_dynamic_dict(save_data: HenSaveData) -> Dictionary:
@@ -135,26 +135,45 @@ func _build_state_dict(state: HenSaveState, save_data: HenSaveData) -> Dictionar
 	var route: HenRouteData = state.get_route(save_data)
 	if route and route.virtual_cnode_list:
 		for vc: HenVirtualCNode in route.virtual_cnode_list:
-			if vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION:
+			var is_from: bool = vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM
+			if vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION or is_from:
 				var target_res: HenSaveState = null
-				
+
 				if vc.has_method('get_res'):
 					target_res = vc.get_res(save_data) as HenSaveState
-				
-				if not target_res and vc.get('res_data') and vc.res_data.has('id'):
+
+				if not target_res and not is_from and vc.get('res_data') and vc.res_data.has('id'):
 					target_res = _find_state_by_id(vc.res_data.id, save_data)
-					
+
 				if target_res:
 					var event_name: String = vc.name_to_code if vc.name_to_code and not vc.name_to_code.is_empty() else 'go_to_' + target_res.name
-					
+
 					var target_path: String = target_res.name
-						
+
+					# cross-script: qualify the target with the owning script name so the
+					# edge resolves against the global graph (draws between machines)
+					if is_from and vc.get('res_data') and vc.res_data.has('save_data_id'):
+						var owner: String = _script_name_for_id(vc.res_data.save_data_id)
+						if not owner.is_empty():
+							target_path = owner + '.' + target_res.name
+
 					on_dict[event_name] = target_path
 
 	if not on_dict.is_empty():
 		s_dict.on = on_dict
-		
+
 	return s_dict
+
+
+# resolves a script's display name (the key used in the collection dict) from its id
+func _script_name_for_id(save_data_id: StringName) -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global:
+		return ''
+	for sd: HenSaveData in global.OPEN_SCRIPTS:
+		if sd and sd.identity and str(sd.identity.id) == str(save_data_id):
+			return sd.identity.name
+	return ''
 
 func _find_state_by_id(id: Variant, save_data: HenSaveData) -> HenSaveState:
 	var target_id := str(id)
@@ -325,7 +344,7 @@ func build_graph(dict: Dictionary) -> void:
 		parser.resolve_edges(graph_root)
 	else:
 		for machine_node in graph_root.children:
-			parser._resolve_node_edges(machine_node, machine_node)
+			parser._resolve_node_edges(machine_node, machine_node, graph_root)
 
 	var all_nodes: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
 	_collect_draw_order(graph_root, all_nodes)

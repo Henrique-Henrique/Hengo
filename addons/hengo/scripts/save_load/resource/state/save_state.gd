@@ -8,11 +8,16 @@ class_name HenSaveState extends HenSaveResTypeWithRoute
 	set(value):
 		if start == value: return
 		start = value
-		if start:
-			_set_other_states_start_false()
-		
+
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-		if signal_bus and not signal_bus.is_batch_loading:
+		var batch_loading: bool = signal_bus != null and signal_bus.is_batch_loading
+
+		# during load the persisted flags are authoritative; mutating siblings here
+		# corrupts them (property load order can misfire this setter)
+		if start and not batch_loading:
+			_set_other_states_start_false()
+
+		if signal_bus and not batch_loading:
 			signal_bus.request_structural_update.emit()
 @export_multiline var description: String = ''
 
@@ -94,8 +99,36 @@ func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
 	if _type == HenVirtualCNode.SubType.STATE_TRANSITION:
 		for param: HenSaveParam in transition_data:
 			arr.append(param.get_data())
+	elif _type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
+		var info: Dictionary = _get_resource_info()
+
+		arr.append({
+			id = 0,
+			name = info.name,
+			type = info.type,
+			is_ref = true
+		})
+
+		for param: HenSaveParam in transition_data:
+			arr.append(param.get_data())
 
 	return arr
+
+
+func _get_resource_info() -> Dictionary:
+	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+
+	if not map_dep:
+		return {name = name, type = &'Variant'}
+
+	for project_ast: HenMapDependencies.ProjectAST in map_dep.ast_list.values():
+		for state_res: HenSaveState in project_ast.states:
+			if state_res.id == id:
+				if project_ast.identity:
+					return {name = project_ast.identity.name, type = project_ast.identity.type}
+				break
+
+	return {name = name, type = &'Variant'}
 
 
 func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:

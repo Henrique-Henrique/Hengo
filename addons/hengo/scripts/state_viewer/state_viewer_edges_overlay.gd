@@ -70,6 +70,7 @@ func _build_edge_views() -> void:
 
 	var line_idx: int = 0
 	var label_idx: int = 0
+	var label_items: Array = []
 	_edge_views.clear()
 
 	for edge in edges:
@@ -131,9 +132,9 @@ func _build_edge_views() -> void:
 
 			lbl.text = label_text
 			lbl.add_theme_stylebox_override('normal', style)
-			lbl.position = pill_rect.position
 			lbl.size = pill_rect.size
 			label_idx += 1
+			label_items.append({label = lbl, rect = pill_rect})
 
 		# store everything needed for fast lookup and drawing
 		var arrow_end: Vector2 = points[points.size() - 1] if points.size() >= 2 else Vector2.ZERO
@@ -157,6 +158,31 @@ func _build_edge_views() -> void:
 	while _label_pool.size() > label_idx:
 		var unused_lbl: Label = _label_pool.pop_back()
 		unused_lbl.queue_free()
+
+	_resolve_label_overlaps(label_items)
+
+
+# nudges overlapping pills apart vertically so labels stay readable; layout's label_pos stays the ideal anchor
+func _resolve_label_overlaps(items: Array) -> void:
+	items.sort_custom(func(a, b): return a.rect.position.y < b.rect.position.y)
+
+	for _pass in range(4):
+		var moved: bool = false
+		for i in range(items.size()):
+			for j in range(i + 1, items.size()):
+				var ra: Rect2 = items[i].rect
+				var rb: Rect2 = items[j].rect
+				if ra.intersects(rb):
+					var overlap_y: float = (ra.position.y + ra.size.y) - rb.position.y
+					if overlap_y > 0.0:
+						rb.position.y += overlap_y + 2.0
+						items[j].rect = rb
+						moved = true
+		if not moved:
+			break
+
+	for it in items:
+		it.label.position = it.rect.position
 
 
 func _process(_delta: float) -> void:

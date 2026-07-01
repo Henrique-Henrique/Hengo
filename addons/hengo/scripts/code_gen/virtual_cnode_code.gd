@@ -905,11 +905,27 @@ static func get_token(_save_data: HenSaveData, _vc: HenVirtualCNode, _id: int = 
 
 			if not res:
 				return get_invalid_token()
-			
+
 			token.merge({
 				is_sub_state = res.is_sub_state,
 				name = res.name.to_snake_case(),
 				params = get_input_token_list(_save_data, _vc, true),
+			})
+		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
+			var res: HenSaveState = _vc.get_res(_save_data)
+			if not res:
+				return get_invalid_token()
+
+			# the first input is the instance of the other script; it must be connected
+			var inputs: Array = _vc.get_inputs(_save_data)
+			if inputs.is_empty() or not _vc.input_has_connection(inputs[0].id, _save_data):
+				(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.append({})
+				return get_invalid_token()
+
+			token.merge({
+				is_sub_state = res.is_sub_state,
+				name = res.name.to_snake_case(),
+				params = get_input_token_list(_save_data, _vc),
 			})
 		HenVirtualCNode.SubType.GET_PROP:
 			token.merge({

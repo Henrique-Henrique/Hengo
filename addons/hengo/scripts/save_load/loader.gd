@@ -45,7 +45,14 @@ func load_res(_res_id: StringName) -> HenSaveData:
 	var path: String = HenUtils.get_script_dir(_res_id).path_join(HenEnums.SAVE_FILE)
 
 	if FileAccess.file_exists(path):
+		# guard the deserialization so state setters don't mutate sibling start flags
+		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+		var prev_batch: bool = signal_bus.is_batch_loading if signal_bus else false
+		if signal_bus:
+			signal_bus.is_batch_loading = true
 		save_data = ResourceLoader.load(path)
+		if signal_bus:
+			signal_bus.is_batch_loading = prev_batch
 	else:
 		print('error loading save: ', path)
 
@@ -79,6 +86,12 @@ func load_collection(_collection_id: StringName, _headless: bool = false) -> boo
 		if save_data:
 			_strip_script_macros(save_data)
 			global.OPEN_SCRIPTS.append(save_data)
+
+	# refresh the dependency map from in-memory data so cross-script resolution
+	# (states, vars, funcs) works for every open script — disk mapping omits states
+	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		map_deps.update_project_data_from_save(save_data.identity.id, save_data)
 
 	if global.OPEN_SCRIPTS.is_empty():
 		global.SAVE_DATA = null

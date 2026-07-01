@@ -338,6 +338,16 @@ static func get_code_by_token(_save_data: HenSaveData, _token: Dictionary, _leve
 				state_name = _token.name,
 				params = (', ' if not (_token.params as Array).is_empty() else '') + ', '.join((_token.params as Array).map(func(x: Dictionary) -> String: return get_code_by_token(_save_data, x, _level, '', true)))
 			})
+		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
+			# the first param is the instance of the other script (is_ref) -> use it as
+			# the prefix so the OTHER node's state machine is driven
+			var values: Array = _provide_params_ref(_save_data, _token.params, prefix)
+			var from_params: Array = values[0]
+			return indent + values[1] + '_STATE_CONTROLLER.{func_name}("{state_name}"{params})'.format({
+				func_name = 'change_state' if not _token.is_sub_state else 'current_state.change_sub_state',
+				state_name = _token.name,
+				params = (', ' if not from_params.is_empty() else '') + ', '.join(from_params.map(func(x: Dictionary) -> String: return get_code_by_token(_save_data, x, _level, '', true)))
+			})
 		HenVirtualCNode.SubType.GET_PROP:
 			return indent + get_code_by_token(_save_data, _token.ref) + '.' + _token.name
 		HenVirtualCNode.SubType.SET_PROP:

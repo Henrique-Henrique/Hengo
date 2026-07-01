@@ -81,6 +81,10 @@ func show_debug() -> void:
 	if not is_inside_tree():
 		return
 
+	# pooled line may not have its arrow refs wired yet
+	if not input or not output:
+		return
+
 	if !debug_timer:
 		debug_timer = Timer.new()
 		debug_timer.wait_time = DEBUG_TIMER_TIME
@@ -109,8 +113,10 @@ func hide_debug() -> void:
 	width = 9
 
 	# arrows
-	input.modulate = Color.WHITE
-	output.modulate = Color.WHITE
+	if input:
+		input.modulate = Color.WHITE
+	if output:
+		output.modulate = Color.WHITE
 
 	# animations
 	var tween: Tween = get_tree().create_tween().parallel().set_trans(Tween.TRANS_ELASTIC)

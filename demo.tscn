@@ -3,24 +3,36 @@
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
 [ext_resource type="Script" uid="uid://cy6hnyybwpxvv" path="res://hengo/scripts/base.gd" id="2_m0rpm"]
 [ext_resource type="Script" uid="uid://d07ieimr7d5m2" path="res://hengo/scripts/outro.gd" id="3_c6xj6"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_c6xj6"]
+[ext_resource type="Script" uid="uid://c2m8k4lv3rt8g" path="res://hengo/scripts/player.gd" id="4_6bw2v"]
+[ext_resource type="Script" uid="uid://cpw7prvhwpjig" path="res://hengo/scripts/fps_camera.gd" id="5_kem5a"]
+[ext_resource type="Script" uid="uid://bhiv4jjym751w" path="res://hengo/scripts/crosshair.gd" id="6_cross"]
+[ext_resource type="Script" uid="uid://c6ucb4nbdg5fg" path="res://hengo/scripts/cube.gd" id="7_cube"]
 
 [sub_resource type="Environment" id="Environment_c6xj6"]
 background_mode = 1
 background_color = Color(0.2740718, 0.34661934, 0.5357618, 1)
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pfrsk"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_pfrsk"]
+size = Vector3(100, 0.05, 100)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_6bw2v"]
+data = PackedVector3Array(-50, 0.024999999, 50, 50, 0.024999999, 50, -50, -0.024999999, 50, 50, 0.024999999, 50, 50, -0.024999999, 50, -50, -0.024999999, 50, 50, 0.024999999, -50, -50, 0.024999999, -50, 50, -0.024999999, -50, -50, 0.024999999, -50, -50, -0.024999999, -50, 50, -0.024999999, -50, 50, 0.024999999, 50, 50, 0.024999999, -50, 50, -0.024999999, 50, 50, 0.024999999, -50, 50, -0.024999999, -50, 50, -0.024999999, 50, -50, 0.024999999, -50, -50, 0.024999999, 50, -50, -0.024999999, -50, -50, 0.024999999, 50, -50, -0.024999999, 50, -50, -0.024999999, -50, 50, 0.024999999, 50, -50, 0.024999999, 50, 50, 0.024999999, -50, -50, 0.024999999, 50, -50, 0.024999999, -50, 50, 0.024999999, -50, -50, -0.024999999, 50, 50, -0.024999999, 50, -50, -0.024999999, -50, 50, -0.024999999, 50, 50, -0.024999999, -50, -50, -0.024999999, -50)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cube"]
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_cube"]
+albedo_color = Color(0.92, 0.46, 0.2, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cube"]
+size = Vector3(0.5, 0.5, 0.5)
+
 [node name="Node3D" type="Node3D" unique_id=979723603]
 
-[node name="Obj" type="MeshInstance3D" parent="." unique_id=94332250]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.40306807)
-mesh = SubResource("BoxMesh_c6xj6")
-skeleton = NodePath("../Camera3D")
-
-[node name="Camera3D" type="Camera3D" parent="." unique_id=27622588]
-transform = Transform3D(1, 0, 0, 0, 0.9453651, 0.32601368, 0, -0.32601368, 0.9453651, 0, 3.1540008, 3.242431)
-
 [node name="Node" type="Node2D" parent="." unique_id=1576522687]
+visible = false
 
 [node name="Label" type="Label" parent="Node" unique_id=818398667]
 offset_right = 17.0
@@ -53,3 +65,90 @@ environment = SubResource("Environment_c6xj6")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment" unique_id=744811915]
 transform = Transform3D(-0.68369794, -0.7046318, 0.18987152, 0.5664214, -0.3483384, 0.7468783, -0.46013463, 0.6181866, 0.6372767, 0, 4.1857615, 2.2082815)
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." unique_id=1649577743]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 4)
+script = ExtResource("4_6bw2v")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D" unique_id=326270935]
+shape = SubResource("CapsuleShape3D_pfrsk")
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D" unique_id=1763973580]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9849591, 0)
+script = ExtResource("5_kem5a")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=177288486]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4682969, 0)
+mesh = SubResource("BoxMesh_pfrsk")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="MeshInstance3D" unique_id=1749835001]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MeshInstance3D/StaticBody3D" unique_id=1519747664]
+shape = SubResource("ConcavePolygonShape3D_6bw2v")
+
+[node name="UILayer" type="CanvasLayer" parent="." unique_id=337830734]
+
+[node name="Crosshair" type="Control" parent="UILayer" unique_id=1445829526]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_cross")
+
+[node name="V" type="ColorRect" parent="UILayer/Crosshair" unique_id=1982950442]
+layout_mode = 0
+offset_left = -1.5
+offset_top = -9.0
+offset_right = 1.5
+offset_bottom = 9.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.85)
+
+[node name="H" type="ColorRect" parent="UILayer/Crosshair" unique_id=369447619]
+layout_mode = 0
+offset_left = -9.0
+offset_top = -1.5
+offset_right = 9.0
+offset_bottom = 1.5
+mouse_filter = 2
+color = Color(1, 1, 1, 0.85)
+
+[node name="Cubes" type="Node3D" parent="." unique_id=663950767]
+
+[node name="Cube" type="RigidBody3D" parent="Cubes" unique_id=560715906]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 0)
+script = ExtResource("7_cube")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cubes/Cube" unique_id=133137010]
+mesh = SubResource("BoxMesh_cube")
+surface_material_override/0 = SubResource("Mat_cube")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Cubes/Cube" unique_id=731708173]
+shape = SubResource("BoxShape3D_cube")
+
+[node name="Cube2" type="RigidBody3D" parent="Cubes" unique_id=85379484]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -1)
+script = ExtResource("7_cube")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cubes/Cube2" unique_id=1826032122]
+mesh = SubResource("BoxMesh_cube")
+surface_material_override/0 = SubResource("Mat_cube")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Cubes/Cube2" unique_id=1046390268]
+shape = SubResource("BoxShape3D_cube")
+
+[node name="Cube3" type="RigidBody3D" parent="Cubes" unique_id=1567664273]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 0)
+script = ExtResource("7_cube")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cubes/Cube3" unique_id=8375681]
+mesh = SubResource("BoxMesh_cube")
+surface_material_override/0 = SubResource("Mat_cube")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Cubes/Cube3" unique_id=1115266313]
+shape = SubResource("BoxShape3D_cube")
