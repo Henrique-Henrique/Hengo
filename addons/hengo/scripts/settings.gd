@@ -14,6 +14,7 @@ const MAX_ZOOM_PATH = 'hengo/settings/max_zoom'
 const ZOOM_INCREMENT_PATH = 'hengo/settings/zoom_increment'
 const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
+const POOL_SIZE_PATH = 'hengo/settings/pool_size'
 
 @export_tool_button('Compile current', 'Build') var compile_current: Callable = _on_compile_current_pressed
 
@@ -36,6 +37,14 @@ const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
 		_set_value(AUTO_LAYOUT_PATH, value)
 	get:
 		return _get_value(AUTO_LAYOUT_PATH, true)
+
+@export_group('Pool')
+
+@export_range(50, 5000, 10) var pool_size: int:
+	set(value):
+		_set_value(POOL_SIZE_PATH, value)
+	get:
+		return _get_value(POOL_SIZE_PATH, 500)
 
 @export_group('Move')
 
@@ -134,7 +143,8 @@ func _property_can_revert(property: StringName) -> bool:
 		&'max_zoom',
 		&'zoom_increment',
 		&'zoom_rate',
-		&'debug_compilation'
+		&'debug_compilation',
+		&'pool_size'
 	]
 
 
@@ -166,6 +176,8 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 12.0
 		&'debug_compilation':
 			return true
+		&'pool_size':
+			return 500
 	return null
 
 

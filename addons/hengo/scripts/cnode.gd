@@ -343,7 +343,7 @@ static func instantiate_and_add_pool() -> void:
 
 	global.can_instantiate_pool = true
 
-	var total_pool_size: int = 100
+	var total_pool_size: int = ProjectSettings.get_setting(HenSettings.POOL_SIZE_PATH, 500)
 	var budget_per_frame_usec: int = 8000
 	
 	var start_time: float = Time.get_ticks_usec()
