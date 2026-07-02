@@ -225,6 +225,14 @@ static func _find_back_edges_hoisted(
 func _route_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 	var info: Dictionary = _classify_edge(edge)
 
+	# stamp the visual kind so the overlay can color edges by type
+	if info.is_cross:
+		edge.kind = &'cross'
+	elif info.is_backward:
+		edge.kind = &'back'
+	else:
+		edge.kind = &'forward'
+
 	# apply parallel-edge spread (horizontal) to the source/target anchors
 	var src_offset: float = _spread_offset(_outgoing_map[edge.source.id], edge, edge.source.layout.width)
 	var tgt_offset: float = _spread_offset(_incoming_map[edge.target.id], edge, edge.target.layout.width)
@@ -301,11 +309,15 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 	var is_backward: bool = start_y >= end_y
 	var is_complex_forward: bool = (not is_backward) and (end_y - start_y) > COMPLEX_FORWARD_THRESHOLD
 
+	var ancestor: HenStateViewerGraphTypes.DirectedGraphNode = _find_common_ancestor(edge.source, edge.target)
+	var is_cross: bool = ancestor == null or ancestor == _root
+
 	var info: Dictionary = {
 		start = Vector2(start_x, start_y),
 		end = Vector2(end_x, end_y),
 		is_highway = is_backward or is_complex_forward,
 		is_backward = is_backward,
+		is_cross = is_cross,
 		route_base = 0.0,
 		track_dir = 1.0,
 		group_key = ''
@@ -313,9 +325,6 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 
 	if not info.is_highway:
 		return info
-
-	var ancestor: HenStateViewerGraphTypes.DirectedGraphNode = _find_common_ancestor(edge.source, edge.target)
-	var is_cross: bool = ancestor == null or ancestor == _root
 
 	if is_cross:
 		# cross-machine: route just outside the source machine, on the side facing the target

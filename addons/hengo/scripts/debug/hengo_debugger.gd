@@ -89,6 +89,17 @@ static func trace_flow(node_id: int, port: StringName = &'0', data: Dictionary =
 	EngineDebugger.send_message('hengo:flow', [node_id, port, data])
 
 
+# state transitions report per-script (gated by state_targets), so every open
+# machine can flash edges at once regardless of the single flow focus
+static func trace_state_flow(node_id: int, port: StringName, script_id: String) -> void:
+	if not OS.is_debug_build():
+		return
+	if not EngineDebugger.is_active():
+		return
+
+	EngineDebugger.send_message('hengo:state_flow', [node_id, port, script_id])
+
+
 static func trace_value(node_id: int, value: Variant) -> void:
 	if not OS.is_debug_build():
 		return

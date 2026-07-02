@@ -54,6 +54,9 @@ static func get_flow_tokens(_save_data: HenSaveData, _vc: HenVirtualCNode, _inpu
 
 				if global.SETTINGS.debug_compilation:
 					token_list.append(get_trace_flow_token(vc, &"0"))
+
+					if vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION or vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
+						token_list.append(get_trace_state_flow_token(vc, &"0", _save_data))
 				var flow_connections: Array = _save_data.get_outgoing_flow_connection_from_vc(vc)
 
 				if not flow_connections.is_empty() and (flow_connections.get(0) as HenVCFlowConnectionData).get_to(_save_data):
@@ -69,6 +72,19 @@ static func get_trace_flow_token(_vc: HenVirtualCNode, _port: StringName) -> Dic
 		vc_id = _vc.id,
 		type = HenVirtualCNode.SubType.RAW_CODE,
 		code = {value = "if %sget_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_flow(%s, &'%s')" % [prefix, _vc.id, _port]},
+		use_self = false
+	}
+
+
+# per-script gate: emits whenever the owning script's state-target instance runs
+# the transition, independent of the single flow focus
+static func get_trace_state_flow_token(_vc: HenVirtualCNode, _port: StringName, _save_data: HenSaveData) -> Dictionary:
+	var prefix: String = "_ref." if _vc.route_type == HenRouter.ROUTE_TYPE.STATE else ""
+	var script_id: String = String(_save_data.identity.id) if _save_data.identity else ''
+	return {
+		vc_id = _vc.id,
+		type = HenVirtualCNode.SubType.RAW_CODE,
+		code = {value = "if %sget_instance_id() == HengoDebugger.state_targets.get('%s', -1): HengoDebugger.trace_state_flow(%s, &'%s', '%s')" % [prefix, script_id, _vc.id, _port, script_id]},
 		use_self = false
 	}
 

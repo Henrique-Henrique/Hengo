@@ -28,6 +28,7 @@ signal flow_connection_removed(_connection: HenVCFlowConnectionData)
 
 signal debug_state_changed(_state_name: StringName, _script_id: String)
 signal debug_flow_transition(_vc_id: int, _port: StringName)
+signal debug_state_flow(_vc_id: int, _port: StringName, _script_id: String)
 
 signal debug_nodes_listed(_script_id: String, _nodes: Array)
 signal debug_session_started

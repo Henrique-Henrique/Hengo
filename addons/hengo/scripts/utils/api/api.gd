@@ -702,8 +702,11 @@ func get_side_bar_categories(_ast: HenMapDependencies.ProjectAST, _from_another_
 	HenAPIProcessors.process_variables(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
 	HenAPIProcessors.process_signals(_ast, _io_type, _type, arr)
 	HenAPIProcessors.process_macros(_ast, save_data_id, _io_type, _type, _from_another_script, arr, native_props)
-	HenLiteralData.process_literals(_io_type, _type, arr)
-	HenOperatorData.process_operators(_io_type, _type, arr)
+
+	# literals and operators are language primitives, not cross-script references
+	if not _from_another_script:
+		HenLiteralData.process_literals(_io_type, _type, arr)
+		HenOperatorData.process_operators(_io_type, _type, arr)
 
 	return arr
 

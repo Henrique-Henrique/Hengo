@@ -49,6 +49,7 @@ class DirectedGraphEdge:
 		y = 0.0
 	}
 	var sections: Array = []
+	var kind: StringName = &'forward'
 
 
 	# initializes edge between source and target

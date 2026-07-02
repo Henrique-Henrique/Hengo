@@ -71,11 +71,6 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="HenStateViewerEdgesOverlay" type="Control" parent="Cam" unique_id=1916172987]
+[node name="HenStateViewerEdgesOverlay" type="Node2D" parent="Cam" unique_id=1916172987]
 unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-mouse_filter = 2
 script = ExtResource("2_2m6er")

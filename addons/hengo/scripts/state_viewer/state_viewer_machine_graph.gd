@@ -12,8 +12,9 @@ var graph_root: HenStateViewerGraphTypes.DirectedGraphNode
 
 const COMPOUND_BG: Color = Color(0.119071566, 0.119075276, 0.1496324, 1)
 const COMPOUND_BORDER: Color = Color(0.18992361, 0.18994236, 0.23241404, 1)
+const COMPOUND_BODY_BG: Color = Color(0.119071566, 0.119075276, 0.1496324, 0.35)
 const LEAF_BG: Color = Color(0.20258576, 0.2025904, 0.2280235, 1)
-const LEAF_BORDER: Color = Color(0.2, 0.2, 0.22, 1)
+const LEAF_BORDER: Color = Color(0.27, 0.27, 0.31, 1)
 const LABEL_COLOR: Color = Color(0.9, 0.9, 0.9, 1)
 const DIM_ALPHA: float = 0.2
 
@@ -51,6 +52,8 @@ func _ready() -> void:
 			signal_bus.debug_state_changed.connect(_on_debug_state_changed)
 		if not signal_bus.debug_flow_transition.is_connected(_on_debug_flow_transition):
 			signal_bus.debug_flow_transition.connect(_on_debug_flow_transition)
+		if not signal_bus.debug_state_flow.is_connected(_on_debug_state_flow):
+			signal_bus.debug_state_flow.connect(_on_debug_state_flow)
 
 	_update_graph()
 
@@ -212,61 +215,78 @@ func _on_debug_flow_transition(vc_id: int, _port: StringName) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if not global or not global.SAVE_DATA: return
 
-	var target_vc: HenVirtualCNode = null
-	for state: HenSaveState in global.SAVE_DATA.states:
-		var route = state.get_route(global.SAVE_DATA)
-		if route and route.virtual_cnode_list:
-			for vc in route.virtual_cnode_list:
-				if int(vc.id) == vc_id:
-					target_vc = vc
-					break
-		if target_vc: break
-		
-	if not target_vc:
-		for parent_id in global.SAVE_DATA.sub_states:
-			for state: HenSaveState in global.SAVE_DATA.sub_states[parent_id]:
-				var route = state.get_route(global.SAVE_DATA)
-				if route and route.virtual_cnode_list:
-					for vc in route.virtual_cnode_list:
-						if int(vc.id) == vc_id:
-							target_vc = vc
-							break
-				if target_vc: break
-			if target_vc: break
+	_flash_transition_vc(vc_id, global.SAVE_DATA)
 
-	if not target_vc or target_vc.sub_type != HenVirtualCNode.SubType.STATE_TRANSITION:
+
+# per-script transition events carry the owning script id, so any open machine can flash
+func _on_debug_state_flow(vc_id: int, _port: StringName, script_id: String) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global: return
+
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if save_data and save_data.identity and String(save_data.identity.id) == script_id:
+			_flash_transition_vc(vc_id, save_data)
+			return
+
+
+func _flash_transition_vc(vc_id: int, save_data: HenSaveData) -> void:
+	var target_vc: HenVirtualCNode = _find_transition_vc(vc_id, save_data)
+	if not target_vc:
+		return
+
+	# cross-script transitions (STATE_TRANSITION_FROM) flash the same way
+	var is_from: bool = target_vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM
+	if target_vc.sub_type != HenVirtualCNode.SubType.STATE_TRANSITION and not is_from:
 		return
 
 	var target_res: HenSaveState = null
 	if target_vc.has_method('get_res'):
-		target_res = target_vc.get_res(global.SAVE_DATA) as HenSaveState
-	
-	if not target_res and target_vc.get('res_data') and target_vc.res_data.has('id'):
-		target_res = _find_state_by_id(target_vc.res_data.id, global.SAVE_DATA)
-		
+		target_res = target_vc.get_res(save_data) as HenSaveState
+
+	if not target_res and not is_from and target_vc.get('res_data') and target_vc.res_data.has('id'):
+		target_res = _find_state_by_id(target_vc.res_data.id, save_data)
+
 	if target_res:
 		var event_name: String = target_vc.name_to_code if target_vc.name_to_code and not target_vc.name_to_code.is_empty() else 'go_to_' + target_res.name
-		
-		var source_state_name: String = ""
-		var route_id = target_vc.parent_route_id
-		
-		for state: HenSaveState in global.SAVE_DATA.states:
-			var route = state.get_route(global.SAVE_DATA)
-			if route and route.id == route_id:
-				source_state_name = state.name
-				break
-		
-		if source_state_name.is_empty():
-			for parent_id in global.SAVE_DATA.sub_states:
-				for state: HenSaveState in global.SAVE_DATA.sub_states[parent_id]:
-					var route = state.get_route(global.SAVE_DATA)
-					if route and route.id == route_id:
-						source_state_name = state.name
-						break
-				if not source_state_name.is_empty(): break
+		var source_state_name: String = _find_state_name_by_route(target_vc.parent_route_id, save_data)
 
 		if not source_state_name.is_empty():
-			edges_overlay.flash_edge(source_state_name, event_name)
+			var script_name: String = save_data.identity.name if save_data.identity else ''
+			edges_overlay.flash_edge(script_name, source_state_name, event_name)
+
+
+func _find_transition_vc(vc_id: int, save_data: HenSaveData) -> HenVirtualCNode:
+	for state: HenSaveState in save_data.states:
+		var route = state.get_route(save_data)
+		if route and route.virtual_cnode_list:
+			for vc in route.virtual_cnode_list:
+				if int(vc.id) == vc_id:
+					return vc
+
+	for parent_id in save_data.sub_states:
+		for state: HenSaveState in save_data.sub_states[parent_id]:
+			var route = state.get_route(save_data)
+			if route and route.virtual_cnode_list:
+				for vc in route.virtual_cnode_list:
+					if int(vc.id) == vc_id:
+						return vc
+
+	return null
+
+
+func _find_state_name_by_route(route_id: Variant, save_data: HenSaveData) -> String:
+	for state: HenSaveState in save_data.states:
+		var route = state.get_route(save_data)
+		if route and route.id == route_id:
+			return state.name
+
+	for parent_id in save_data.sub_states:
+		for state: HenSaveState in save_data.sub_states[parent_id]:
+			var route = state.get_route(save_data)
+			if route and route.id == route_id:
+				return state.name
+
+	return ''
 
 func _update_debug_highlight() -> void:
 	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
@@ -286,12 +306,11 @@ func _update_debug_highlight() -> void:
 		if active_state != '' and short_id_snake == active_state:
 			style.border_color = Color('#63ff92')
 			style.set_border_width_all(2)
+			style.shadow_size = 10
+			style.shadow_color = Color(0.39, 1.0, 0.57, 0.30)
+			style.shadow_offset = Vector2.ZERO
 		else:
-			style.border_color = COMPOUND_BORDER if is_compound else LEAF_BORDER
-			if is_compound:
-				style.set_border_width_all(2)
-			else:
-				style.set_border_width_all(1)
+			_apply_base_border_shadow(style, is_compound)
 
 
 func _process(_delta: float) -> void:
@@ -380,6 +399,15 @@ func _collect_draw_order(node: HenStateViewerGraphTypes.DirectedGraphNode, arr: 
 		_collect_draw_order(child, arr)
 
 
+# applies the resting border and shadow shared by spawn and debug-highlight restore
+func _apply_base_border_shadow(style: StyleBoxFlat, is_compound: bool) -> void:
+	style.border_color = COMPOUND_BORDER if is_compound else LEAF_BORDER
+	style.set_border_width_all(2 if is_compound else 1)
+	style.shadow_size = 8 if is_compound else 6
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.25 if is_compound else 0.35)
+	style.shadow_offset = Vector2(0, 2)
+
+
 # spawns a panel for the node before measuring
 func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var is_compound: bool = not node.children.is_empty()
@@ -394,16 +422,14 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	if is_compound:
 		panel = PanelContainer.new()
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		style.bg_color = Color.TRANSPARENT
-		style.border_color = COMPOUND_BORDER
-		style.set_border_width_all(2)
+		style.bg_color = COMPOUND_BODY_BG
+		_apply_base_border_shadow(style, true)
 		panel.add_theme_stylebox_override('panel', style)
 	else:
 		panel = PanelContainer.new()
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		style.bg_color = LEAF_BG
-		style.border_color = LEAF_BORDER
-		style.set_border_width_all(1)
+		_apply_base_border_shadow(style, false)
 		style.content_margin_left = 8
 		style.content_margin_right = 8
 		style.content_margin_top = 8
@@ -430,13 +456,15 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		compound_vbox.add_child(header_panel)
 
 		var header_style: StyleBoxFlat = StyleBoxFlat.new()
-		header_style.bg_color = COMPOUND_BG
+		header_style.bg_color = Color(0.155, 0.155, 0.195, 1.0)
 		header_style.corner_radius_top_left = 6
 		header_style.corner_radius_top_right = 6
-		header_style.content_margin_left = 6
-		header_style.content_margin_right = 6
-		header_style.content_margin_top = 4
-		header_style.content_margin_bottom = 4
+		header_style.border_width_bottom = 1
+		header_style.border_color = COMPOUND_BORDER.lightened(0.2)
+		header_style.content_margin_left = 8
+		header_style.content_margin_right = 8
+		header_style.content_margin_top = 5
+		header_style.content_margin_bottom = 5
 		header_panel.add_theme_stylebox_override('panel', header_style)
 
 		var vbox: VBoxContainer = VBoxContainer.new()
@@ -505,7 +533,7 @@ func _create_initial_indicator() -> TextureRect:
 	tex_rect.custom_minimum_size = Vector2(16, 16)
 	tex_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tex_rect.modulate = LABEL_COLOR
+	tex_rect.modulate = Color('#8eef97')
 	return tex_rect
 
 
@@ -520,26 +548,30 @@ func _set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		return
 		
 	var visible_nodes: Dictionary = {}
-	
+
 	# active node itself
 	visible_nodes[_active_node] = true
 	_add_descendants(visible_nodes, _active_node)
-	
+
 	var curr: HenStateViewerGraphTypes.DirectedGraphNode = _active_node
 	while curr.parent != null:
 		curr = curr.parent
 		visible_nodes[curr] = true
-		
-	# targets of active node
-	for edge in _active_node.edges:
-		var target: HenStateViewerGraphTypes.DirectedGraphNode = edge.target
-		visible_nodes[target] = true
-		_add_descendants(visible_nodes, target)
-		
-		var t_curr: HenStateViewerGraphTypes.DirectedGraphNode = target
-		while t_curr.parent != null:
-			t_curr = t_curr.parent
-			visible_nodes[t_curr] = true
+
+	# targets of the active node and of any state inside it
+	var scoped_sources: Array = visible_nodes.keys().filter(
+		func(n): return n == _active_node or _is_inside(n, _active_node)
+	)
+	for source_node: HenStateViewerGraphTypes.DirectedGraphNode in scoped_sources:
+		for edge in source_node.edges:
+			var target: HenStateViewerGraphTypes.DirectedGraphNode = edge.target
+			visible_nodes[target] = true
+			_add_descendants(visible_nodes, target)
+
+			var t_curr: HenStateViewerGraphTypes.DirectedGraphNode = target
+			while t_curr.parent != null:
+				t_curr = t_curr.parent
+				visible_nodes[t_curr] = true
 			
 	for n in _panels:
 		var p: Control = _panels[n]
@@ -591,3 +623,12 @@ func _add_descendants(dict: Dictionary, node: HenStateViewerGraphTypes.DirectedG
 	for child in node.children:
 		dict[child] = true
 		_add_descendants(dict, child)
+
+
+func _is_inside(node: HenStateViewerGraphTypes.DirectedGraphNode, ancestor: HenStateViewerGraphTypes.DirectedGraphNode) -> bool:
+	var current: HenStateViewerGraphTypes.DirectedGraphNode = node.parent
+	while current != null:
+		if current == ancestor:
+			return true
+		current = current.parent
+	return false
