@@ -90,6 +90,13 @@ var state_pool: Array = []
 var connection_line_pool: Array = []
 var flow_connection_line_pool: Array = []
 var state_connection_line_pool: Array = []
+# skeleton placeholders shown at a vcnode's spot while it waits in
+# pending_show_queue; grabbed on enqueue, released when show() runs
+var placeholder_pool: Array = []
+var placeholder_pool_free: Array = []
+# vcnodes that crossed into the viewport with configure_cnode_to_show deferred;
+# cam._process drains this under a per-frame usec budget
+var pending_show_queue: Array = []
 # virtual state list
 var vs_list: Array = []
 var can_instantiate_pool: bool = true

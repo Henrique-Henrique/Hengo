@@ -97,18 +97,49 @@ func show() -> void:
 	if not cnode:
 		return
 
+	# release the placeholder before configuring so the two never overlap
+	if is_instance_valid(placeholder_instance):
+		HenPool.release_placeholder(placeholder_instance)
+		placeholder_instance = null
+
 	cnode_instance = cnode
 	configure_cnode_to_show(self , cnode)
 	cnode.reset_signals(self )
 
 
 func hide() -> void:
+	# clear the flag even with no cnode: a still-queued vcnode holds a placeholder
+	# and a stale is_showing
+	is_showing = false
+
+	if is_instance_valid(placeholder_instance):
+		HenPool.release_placeholder(placeholder_instance)
+		placeholder_instance = null
+
 	if not cnode_instance:
 		return
-	
+
 	configure_cnode_to_hide(cnode_instance)
 	cnode_instance.reset_signals()
 	cnode_instance = null
+
+
+# shows a skeleton at the vcnode's spot until the batched show() runs
+func _spawn_placeholder() -> void:
+	if is_instance_valid(placeholder_instance):
+		return
+	var ph: ColorRect = HenPool.get_placeholder_from_pool()
+	if not ph:
+		return
+	# size is Vector2.ZERO until configure_cnode_to_show caches it, so fall back
+	# to a default
+	var ph_size: Vector2 = size
+	if ph_size.x <= 0.0 or ph_size.y <= 0.0:
+		ph_size = Vector2(200, 80)
+	ph.position = position
+	ph.size = ph_size
+	ph.visible = true
+	placeholder_instance = ph
 
 
 func update() -> void:
@@ -124,18 +155,36 @@ func update() -> void:
 	hide()
 
 	if not should_hide:
-		check_visibility()
+		# structural reconfigure must reappear the same frame; bypass the queue
+		check_visibility(global.CAM.get_rect(), true)
 
 
-func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_rect()) -> void:
+# when true, bypasses the batched-show queue for the synchronous show path
+# (bisect helper)
+const _BATCH_SHOW_DISABLED: bool = false
+
+
+# _force_immediate=true skips the batched-show queue and runs show() inline;
+# used by update() for structural edits
+func check_visibility(_rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_rect(), _force_immediate: bool = false) -> void:
 	is_showing = _rect.intersects(Rect2(
 		position,
 		size
 	))
 
-	if is_showing and not is_instance_valid(cnode_instance):
-		show()
-	elif not is_showing:
+	if is_showing:
+		if is_instance_valid(cnode_instance):
+			return
+		if _force_immediate or _BATCH_SHOW_DISABLED:
+			show()
+			return
+		if is_queued_for_show:
+			return
+		is_queued_for_show = true
+		var global: HenGlobal = Engine.get_singleton(&'Global')
+		global.pending_show_queue.push_back(self )
+		_spawn_placeholder()
+	else:
 		hide()
 
 

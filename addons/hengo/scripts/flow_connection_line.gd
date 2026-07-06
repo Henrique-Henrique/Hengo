@@ -31,32 +31,53 @@ var to_pool_visible: bool = true
 var last_from_pos: Vector2
 var last_to_pos: Vector2
 
+# instance id of the flow connection bound to this pooled line, 0 = unbound;
+# detects a pool recycle that is_instance_valid(line_ref) can't
+var owner_conn_id: int = 0
+
+# connector offset from the node origin (world units), captured while visible
+# and reused as the anchor when offscreen
+var from_offset: Vector2
+var to_offset: Vector2
+var has_from_offset: bool = false
+var has_to_offset: bool = false
+
 
 # generates a smooth vertical cubic bezier for flow connections
 func update_line() -> void:
-	if not input or not output: return
-
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if not global.CAM: return
+
+	if not from or not to: return
 	
 	var from_ref: HenVirtualCNode = from.get_ref()
 	var to_ref: HenVirtualCNode = to.get_ref()
 	
 	if not from_ref or not to_ref: return
 
+	# endpoint priority: live connector -> captured offset while offscreen ->
+	# rough anchor before first render
 	var start_pos: Vector2
-	if from_pool_visible:
+	if from_pool_visible and is_instance_valid(input):
 		start_pos = global.CAM.get_relative_vec2(input.global_position) + input.size / 2 + Vector2(0, 20)
 		last_from_pos = start_pos
+		from_offset = start_pos - from_ref.position
+		has_from_offset = true
+	elif has_from_offset:
+		start_pos = from_ref.position + from_offset
 	else:
-		start_pos = last_from_pos if last_from_pos != Vector2.ZERO else from_ref.position + Vector2(from_ref.size.x / 2.0, 0)
+		start_pos = from_ref.position + Vector2(from_ref.size.x / 2.0, from_ref.size.y)
 	
 	var end_pos: Vector2
-	if to_pool_visible:
+	if to_pool_visible and is_instance_valid(output):
 		end_pos = global.CAM.get_relative_vec2(output.global_position) + output.size / 2 - Vector2(0, 20)
 		last_to_pos = end_pos
+		to_offset = end_pos - to_ref.position
+		has_to_offset = true
+	elif has_to_offset:
+		end_pos = to_ref.position + to_offset
 	else:
-		end_pos = last_to_pos if last_to_pos != Vector2.ZERO else to_ref.position + Vector2(to_ref.size.x / 2.0, to_ref.size.y)
+		end_pos = to_ref.position + Vector2(to_ref.size.x / 2.0, 0)
 	
 	# calculate vertical curvature
 	var distance_y: float = abs(end_pos.y - start_pos.y)

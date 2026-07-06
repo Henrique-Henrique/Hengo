@@ -19,6 +19,19 @@ var ignore_process: bool = false
 
 var can_scroll: bool = true
 
+# per-frame usec budget for draining pending_show_queue; caps show() cost so a
+# dense graph doesn't stutter the pan
+const SHOW_BUDGET_USEC: int = 4000
+
+# _check_virtual_cnodes throttle: skip re-checks until the viewport moves enough
+# or a few frames pass, to avoid iterating every node each tick
+const CHECK_MIN_DELTA_PX: float = 16.0
+const CHECK_MIN_DELTA_ZOOM: float = 0.01
+const CHECK_MAX_FRAMES_SKIP: int = 3
+var _last_check_pos: Vector2 = Vector2.INF
+var _last_check_zoom: float = -1.0
+var _frames_since_check: int = 0
+
 @onready var ref_point: Marker2D = get_node('RefPoint')
 var initial: Vector2 = Vector2.ZERO
 
@@ -185,13 +198,59 @@ func _physics_process(_delta: float) -> void:
 			ignore_process = false
 
 
-# checks virtual cnodes visibility
-
-
-func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x) -> void:
+# drains the batched-show queue under SHOW_BUDGET_USEC each frame; sorts
+# farthest-first so pop_back shows the closest-to-center vcnodes first
+func _process(_delta: float) -> void:
 	if not is_global_cam:
 		return
-		
+	var global: HenGlobal = Engine.get_singleton(&'Global') as HenGlobal
+	if not global or global.pending_show_queue.is_empty():
+		return
+
+	var start: int = Time.get_ticks_usec()
+	var queue: Array = global.pending_show_queue
+	if queue.size() > 1:
+		var parent: Control = get_parent() as Control
+		var viewport_size: Vector2 = parent.size if parent else Vector2.ZERO
+		var center: Vector2 = (transform.origin / -transform.x.x) + viewport_size * 0.5 / transform.x.x
+		queue.sort_custom(func(_a: HenVirtualCNode, _b: HenVirtualCNode) -> bool:
+			var ca: Vector2 = _a.position + _a.size * 0.5
+			var cb: Vector2 = _b.position + _b.size * 0.5
+			return (ca - center).length_squared() > (cb - center).length_squared()
+		)
+
+	while not queue.is_empty():
+		var vc: HenVirtualCNode = queue.pop_back()
+		if not is_instance_valid(vc):
+			continue
+		vc.is_queued_for_show = false
+		# skip if it left the viewport after being queued
+		if not vc.is_showing:
+			continue
+		if is_instance_valid(vc.cnode_instance):
+			continue
+		vc.show()
+		if (Time.get_ticks_usec() - start) >= SHOW_BUDGET_USEC:
+			return
+
+
+# checks virtual cnode visibility; _force=true bypasses the pos/zoom throttle
+# (lerp settle, route change)
+func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x, _force: bool = false) -> void:
+	if not is_global_cam:
+		return
+
+	if not _force:
+		var moved_px: float = (_pos - _last_check_pos).length() * _zoom
+		var zoom_delta: float = absf(_zoom - _last_check_zoom)
+		if moved_px < CHECK_MIN_DELTA_PX and zoom_delta < CHECK_MIN_DELTA_ZOOM and _frames_since_check < CHECK_MAX_FRAMES_SKIP:
+			_frames_since_check += 1
+			return
+
+	_last_check_pos = _pos
+	_last_check_zoom = _zoom
+	_frames_since_check = 0
+
 	var rect: Rect2 = Rect2(
 		_pos / -_zoom,
 		(get_parent() as Control).size / _zoom

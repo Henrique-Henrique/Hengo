@@ -6,6 +6,7 @@ const CNODE_OUTPUT = preload('res://addons/hengo/scenes/cnode_output.tscn')
 const CNODE_SCENE_PATH: String = 'res://addons/hengo/scenes/cnode.tscn'
 const CONNECTION_LINE = preload('res://addons/hengo/scenes/connection_line.tscn')
 const FLOW_CONNECTION_LINE = preload('res://addons/hengo/scenes/flow_connection_line.tscn')
+const CNODE_PLACEHOLDER = preload('res://addons/hengo/scenes/cnode_placeholder.tscn')
 
 
 var flow_to: Dictionary = {}
@@ -398,6 +399,25 @@ static func instantiate_and_add_pool() -> void:
 		line.position = Vector2(50000, 50000)
 		global.flow_connection_line_pool.append(line)
 		global.CAM.get_node('Lines').add_child(line)
+
+		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
+			await global.CNODE_CONTAINER.get_tree().process_frame
+			if not global or global.is_queued_for_deletion() or not global.is_inside_tree(): return
+			start_time = Time.get_ticks_usec()
+
+	# placeholder pool: a light ColorRect+shader shown at a vcnode's spot while it
+	# waits in the batched-show queue; small pool since only pending nodes hold one
+	var placeholder_pool_size: int = mini(total_pool_size, 120)
+	for i in range(placeholder_pool_size):
+		if not global or global.is_queued_for_deletion() or not global.is_inside_tree() or not global.can_instantiate_pool:
+			return
+
+		var ph: ColorRect = CNODE_PLACEHOLDER.instantiate()
+		ph.visible = false
+		ph.position = Vector2(50000, 50000)
+		global.placeholder_pool.append(ph)
+		global.placeholder_pool_free.push_back(ph)
+		global.CNODE_CONTAINER.add_child(ph)
 
 		if (Time.get_ticks_usec() - start_time) > budget_per_frame_usec:
 			await global.CNODE_CONTAINER.get_tree().process_frame

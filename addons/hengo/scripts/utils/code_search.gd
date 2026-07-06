@@ -428,7 +428,8 @@ func _on_select(_data: Dictionary) -> void:
 	global.history.commit_action()
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 
-	global.CAM._check_virtual_cnodes()
+	# force: structural change with a still camera; the throttle would skip it
+	global.CAM._check_virtual_cnodes(global.CAM.transform.origin, global.CAM.transform.x.x, true)
 	await RenderingServer.frame_pre_draw
 	if vc_return.v_cnode:
 		HenFormatter.format_current_route()

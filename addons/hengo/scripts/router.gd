@@ -43,9 +43,18 @@ func change_route(_route: HenRouteData) -> void:
 	for flow_connection: HenFlowConnectionLine in global.flow_connection_line_pool:
 		flow_connection.visible = false
 
+	# drop the old route's pending shows and hide its leftover placeholders
+	for vc: HenVirtualCNode in global.pending_show_queue:
+		if is_instance_valid(vc):
+			vc.is_queued_for_show = false
+	global.pending_show_queue.clear()
+	for ph: ColorRect in global.placeholder_pool:
+		ph.visible = false
+
 	current_route = _route
 
-	global.CAM._check_virtual_cnodes()
+	# force: the camera didn't move, but the new route's vcnodes must be checked now
+	global.CAM._check_virtual_cnodes(global.CAM.transform.origin, global.CAM.transform.x.x, true)
 	global.SIDE_BAR.update()
 	
 	global.AUTO_CAMERA.on_route_changed(old_route, _route)

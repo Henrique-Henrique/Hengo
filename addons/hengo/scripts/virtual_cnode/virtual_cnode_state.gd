@@ -9,6 +9,8 @@ var is_showing: bool = false
 var is_deleted: bool = false
 var showing_action_menu: bool = false
 var selected: bool = false
+# true while this vcnode sits in pending_show_queue; prevents double-enqueue
+var is_queued_for_show: bool = false
 
 signal cnode_need_update
 

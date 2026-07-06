@@ -161,13 +161,21 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 			connection.line_ref = null
 			continue
 		
-		if is_instance_valid(connection.line_ref) and connection.line_ref is HenConnectionLine:
-			pass
-		else:
+		# reuse the bound line only if this connection still owns it; the pool may
+		# have recycled it to another (aliasing: two connections, one Line2D)
+		var can_reuse: bool = (
+			is_instance_valid(connection.line_ref)
+			and connection.line_ref is HenConnectionLine
+			and connection.line_ref.visible
+			and connection.line_ref.owner_conn_id == connection.get_instance_id()
+		)
+		if not can_reuse:
 			connection.line_ref = HenPool.get_line_from_pool()
 
 			if not connection.line_ref:
 				continue
+
+			connection.line_ref.owner_conn_id = connection.get_instance_id()
 		
 		connection.line_ref.points = []
 		
@@ -285,13 +293,20 @@ func configure_cnode_to_show(_vc: HenVirtualCNode, _cnode: HenCnode) -> void:
 	var flow_connections: Array = global.SAVE_DATA.get_flow_connections_by_id(id)
 
 	for connection: HenVCFlowConnectionData in flow_connections:
-		if is_instance_valid(connection.line_ref) and connection.line_ref is HenFlowConnectionLine:
-			pass
-		else:
+		# same ownership-guarded reuse as the data lines above (aliasing fix).
+		var can_reuse: bool = (
+			is_instance_valid(connection.line_ref)
+			and connection.line_ref is HenFlowConnectionLine
+			and connection.line_ref.visible
+			and connection.line_ref.owner_conn_id == connection.get_instance_id()
+		)
+		if not can_reuse:
 			connection.line_ref = HenPool.get_flow_line_from_pool()
 
 			if not connection.line_ref:
 				continue
+
+			connection.line_ref.owner_conn_id = connection.get_instance_id()
 		
 		connection.line_ref.points = []
 
@@ -382,28 +397,41 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
 		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
-		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
-		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
-
-		# input positions
-		if connection.line_ref.from_pool_visible:
-			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
-			connection.to_old_pos = pos
-		else:
-			if connection.line_ref.points.size() > 0:
-				connection.line_ref.last_from_pos = connection.line_ref.points[0]
-
-		# output positions
-		if connection.line_ref.to_pool_visible:
-			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
-			connection.from_old_pos = pos
-		else:
-			if connection.line_ref.points.size() > 0:
-				connection.line_ref.last_to_pos = connection.line_ref.points[-1]
-
-		if not connection.line_ref.from_pool_visible or not connection.line_ref.to_pool_visible:
+		if not from or not to:
 			connection.line_ref.visible = false
 			connection.line_ref = null
+			continue
+
+		var line: HenConnectionLine = connection.line_ref
+
+		# never mutate a line the pool recycled to another connection
+		if line.owner_conn_id != connection.get_instance_id():
+			connection.line_ref = null
+			continue
+
+		if line.points.size() > 0:
+			line.last_from_pos = line.points[0]
+			line.last_to_pos = line.points[-1]
+
+		if from == self:
+			line.input = null
+		if to == self:
+			line.output = null
+
+		line.from_pool_visible = from.is_showing_on_screen()
+		line.to_pool_visible = to.is_showing_on_screen()
+
+		# release only when both endpoints are offscreen and the connection bbox
+		# is fully outside the viewport (the curve can't be visible either)
+		if not line.from_pool_visible and not line.to_pool_visible:
+			var view: Rect2 = global.CAM.get_rect()
+			var conn_rect: Rect2 = Rect2(from.position, from.size).merge(Rect2(to.position, to.size))
+			if not view.intersects(conn_rect):
+				line.visible = false
+				connection.line_ref = null
+				continue
+
+		line.update_line()
 
 	# flow
 	for connection: HenVCFlowConnectionData in global.SAVE_DATA.get_flow_connections_by_id(id):
@@ -414,27 +442,37 @@ func configure_cnode_to_hide(_cnode: HenCnode) -> void:
 		var from: HenVirtualCNode = connection.get_from(global.SAVE_DATA)
 		var to: HenVirtualCNode = connection.get_to(global.SAVE_DATA)
 
-		connection.line_ref.to_pool_visible = to.is_showing_on_screen()
-		connection.line_ref.from_pool_visible = from.is_showing_on_screen()
-
-		# input positions
-		if connection.line_ref.from_pool_visible:
-			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.input.global_position as Vector2)
-			connection.to_old_pos = pos
-		else:
-			if connection.line_ref.points.size() > 0:
-				connection.line_ref.last_from_pos = connection.line_ref.points[0]
-
-		# output positions
-		if connection.line_ref.to_pool_visible:
-			var pos: Vector2 = (Engine.get_singleton(&'Global') as HenGlobal).CAM.get_relative_vec2(connection.line_ref.output.global_position as Vector2)
-			connection.from_old_pos = pos
-		else:
-			if connection.line_ref.points.size() > 0:
-				connection.line_ref.last_to_pos = connection.line_ref.points[-1]
-
-		if not connection.line_ref.from_pool_visible or not connection.line_ref.to_pool_visible:
+		if not from or not to:
 			connection.line_ref.visible = false
 			connection.line_ref = null
+			continue
+
+		var line: HenFlowConnectionLine = connection.line_ref
+
+		if line.owner_conn_id != connection.get_instance_id():
+			connection.line_ref = null
+			continue
+
+		if line.points.size() > 0:
+			line.last_from_pos = line.points[0]
+			line.last_to_pos = line.points[-1]
+
+		if from == self:
+			line.input = null
+		if to == self:
+			line.output = null
+
+		line.from_pool_visible = from.is_showing_on_screen()
+		line.to_pool_visible = to.is_showing_on_screen()
+
+		if not line.from_pool_visible and not line.to_pool_visible:
+			var view: Rect2 = global.CAM.get_rect()
+			var conn_rect: Rect2 = Rect2(from.position, from.size).merge(Rect2(to.position, to.size))
+			if not view.intersects(conn_rect):
+				line.visible = false
+				connection.line_ref = null
+				continue
+
+		line.update_line()
 
 	_cnode.visible = false

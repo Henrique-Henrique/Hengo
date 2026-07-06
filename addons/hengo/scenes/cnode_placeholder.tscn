@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/cnode_placeholder.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_placeholder"]
+shader = ExtResource("1_shader")
+shader_parameter/border_color = Color(0.78, 0.82, 0.95, 0.85)
+shader_parameter/border_thickness = 0.008
+shader_parameter/corner_radius = 0.08
+shader_parameter/dash_count = 24.0
+shader_parameter/dash_ratio = 0.55
+shader_parameter/fill_color = Color(0.6, 0.7, 1, 0)
+
+[node name="CnodePlaceholder" type="ColorRect"]
+material = SubResource("ShaderMaterial_placeholder")
+offset_right = 200.0
+offset_bottom = 100.0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.78, 0.82, 0.95, 0.7)
+theme_override_font_sizes/font_size = 24
+text = "Loading…"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
