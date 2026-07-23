@@ -63,6 +63,15 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 
 	code += map_all_macros(_save_data, _refs)
 
+	# an action may reach script scope too: declarations first, then the virtual
+	# overrides it contributes (mouse look needs _input, which a state cannot have)
+	var action_scope: Array = HenGeneratorAction.get_script_scope_lines(_save_data)
+
+	if not action_scope.is_empty():
+		code += '\n'.join(action_scope) + '\n\n'
+
+	HenGeneratorAction.merge_script_overrides(_save_data, _refs.override_virtual_data)
+
 	var ready_code: Array = []
 	var process_code: Array = []
 	var physics_process_code: Array = []
@@ -73,17 +82,11 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 
 		match key:
 			&'_ready':
-				for token: Dictionary in item.tokens:
-					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
-					if _code: ready_code.append(_code)
+				ready_code.append_array(_token_lines(_save_data, item.tokens))
 			&'_process':
-				for token: Dictionary in item.tokens:
-					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
-					if _code: process_code.append(_code)
+				process_code.append_array(_token_lines(_save_data, item.tokens))
 			&'_physics_process':
-				for token: Dictionary in item.tokens:
-					var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
-					if _code: physics_process_code.append(_code)
+				physics_process_code.append_array(_token_lines(_save_data, item.tokens))
 			_:
 				custom_virtual_code += _get_custom_virtual_code(key, item, _save_data)
 
@@ -111,10 +114,28 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 		_ready = ' \n'.join(ready_code),
 		_process = '\n'.join(process_code),
 		_physics_process = '\n'.join(physics_process_code),
-		custom_virtuals = custom_virtual_code,
+		custom_virtuals = (custom_virtual_code + '\n') if not custom_virtual_code.is_empty() else '',
 		states_dict = HenGeneratorState.get_states_start_code(_save_data),
 		states = HenGeneratorState.get_states_code(_save_data)
 	})
+
+
+# body lines of a virtual override. a cnode contributes dictionary tokens, an
+# action contributes plain lines already split, one per token
+static func _token_lines(_save_data: HenSaveData, _tokens: Array) -> Array:
+	var lines: Array = []
+
+	for token: Variant in _tokens:
+		if token is String:
+			lines.append('\t' + str(token))
+			continue
+
+		var code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
+
+		if code:
+			lines.append(code)
+
+	return lines
 
 
 # generate code for override virtuals that are not _ready, _process, or _physics_process
@@ -126,13 +147,10 @@ static func _get_custom_virtual_code(_name: StringName, _item: Dictionary, _save
 		return '{name}: {type}'.format({name = p.name, type = p.type})
 	))
 	
-	var body_code: Array = []
-	for token: Dictionary in _item.tokens:
-		var _code: String = HenGeneratorByToken.get_code_by_token(_save_data, token, 1)
-		if _code:
-			body_code.append(_code)
-	
-	var body: String = '\n'.join(body_code) if not body_code.is_empty() else '\tpass'
+	var body: String = '\n'.join(_token_lines(_save_data, _item.tokens))
+
+	if body.is_empty():
+		body = '\tpass'
 	
 	return 'func {name}({params}) -> void:\n{body}\n'.format({
 		name = _name,

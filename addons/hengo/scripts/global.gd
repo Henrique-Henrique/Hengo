@@ -108,6 +108,8 @@ var MACRO_REF: HenVirtualCNode
 var USE_MACRO_REF: bool = false
 var MACRO_USE_SELF: bool = false
 var script_macros: Array[HenSaveMacro] = []
+# native action macros shipped with the plugin (res://addons/hengo/actions)
+var action_macros: Array[HenSaveMacro] = []
 
 
 # terminal

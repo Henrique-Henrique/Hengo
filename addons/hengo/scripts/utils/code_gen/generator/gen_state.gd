@@ -1,6 +1,23 @@
 class_name HenGeneratorState extends RefCounted
 
 
+# puts hook lines at the top of a lifecycle method, creating it when the state
+# has nothing else in that phase
+static func _prepend_hook(_save_data: HenSaveData, _state: HenSaveState, _virtual_tokens: Dictionary, _phase: StringName, _hook_tokens: Array) -> void:
+	if _hook_tokens.is_empty():
+		return
+
+	var key: String = str(_phase)
+
+	if not _virtual_tokens.has(key):
+		_virtual_tokens[key] = {
+			tokens = [],
+			params = HenGeneratorAction.get_phase_params(_save_data, _state, _phase)
+		}
+
+	_virtual_tokens[key].tokens = _hook_tokens + (_virtual_tokens[key].tokens as Array)
+
+
 static func get_states_start_code(_save_data: HenSaveData) -> String:
 	var code: String = ''
 	var idx: int = 0
@@ -25,6 +42,28 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 	for state: HenSaveState in _state_arr:
 		var virtual_tokens: Dictionary = HenGeneratorBase.parse_virtual_cnode(state.get_route(_save_data).virtual_sub_type_vc_list, _save_data)
 
+		# inject linear action bodies into the state's lifecycle methods.
+		# exit gets super() for free (the != 'enter' rule), which the base needs
+		# to tear down current_sub_state
+		for phase: StringName in HenSaveAction.PHASE_ORDER:
+			var action_tokens: Array = HenGeneratorAction.get_state_action_tokens(_save_data, state, phase)
+			if action_tokens.is_empty():
+				continue
+
+			var key: String = str(phase)
+			if not virtual_tokens.has(key):
+				virtual_tokens[key] = {
+					tokens = [],
+					params = HenGeneratorAction.get_phase_params(_save_data, state, phase)
+				}
+
+			(virtual_tokens[key].tokens as Array).append_array(action_tokens)
+
+		# an action that keeps state resets it on entry and undoes it on exit,
+		# whatever phase it runs in
+		_prepend_hook(_save_data, state, virtual_tokens, &'enter', HenGeneratorAction.get_state_reset_tokens(_save_data, state))
+		_prepend_hook(_save_data, state, virtual_tokens, &'exit', HenGeneratorAction.get_state_teardown_tokens(_save_data, state))
+
 		var base = '{new_line}{indent}class {name} extends HengoState:\n'.format({
 			name = state.name.to_pascal_case(),
 			new_line = '\n\n' if idx > 0 else '',
@@ -37,6 +76,13 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 		
 		# add new line if local var is not empty
 		base += '\n' if not state.local_vars.is_empty() else ''
+
+		# class-level declarations the actions need, indented line by line
+		var action_base: Array = HenGeneratorAction.get_state_base_lines(_save_data, state)
+
+		if not action_base.is_empty():
+			base += '\n'.join(action_base.map(func(line: String) -> String:
+				return ('\t'.repeat(_level + 1) + line) if not line.is_empty() else line)) + '\n'
 
 		var sub_states: Array = state.get_sub_states(_save_data)
 

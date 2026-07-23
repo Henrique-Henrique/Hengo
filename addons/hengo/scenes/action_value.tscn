@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/utils/action_value.gd" id="1_value"]
+
+[node name="ActionValue" type="HBoxContainer"]
+size_flags_horizontal = 0
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 3
+script = ExtResource("1_value")
+
+[node name="Icon" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Name" type="Label" parent="."]
+layout_mode = 2
+mouse_filter = 2
+text = "name"
+
+[node name="Value" type="Label" parent="."]
+layout_mode = 2
+mouse_filter = 2
+text = "value"

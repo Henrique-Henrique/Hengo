@@ -1,0 +1,91 @@
+@tool
+class_name HenSaveAction extends HenSaveResType
+
+# execution order of the lifecycle phases, the order codegen emits them in.
+# physics runs on the fixed tick, which is where a body must be moved
+const PHASE_ORDER: Array[StringName] = [&'enter', &'update', &'physics', &'exit']
+
+# durable link to the macro definition (get_id()) — survives file/path renames
+@export var macro_id: StringName
+# bound parameters, cloned from the macro inputs (values default for now)
+@export var inputs: Array[HenSaveParam]
+# input id -> bound value source (snake name of a var/prop); empty/absent = literal
+@export var input_bindings: Dictionary
+# input id -> HenSaveActionExpression (free-text expression); absent = not an expression
+@export var input_expressions: Dictionary
+# lifecycle phase this action runs in: enter (once) | update (per-frame) |
+# physics (fixed tick) | exit
+@export var phase: StringName = &'update'
+# flow output id -> { state_id: StringName, label: String }; a branch with no
+# entry emits `pass`. the target is stored by id so renames can't break it
+@export var branches: Dictionary
+# output id -> bind_code of the variable/property the produced value is written to;
+# an output with no entry is simply not emitted. same shape as input_bindings
+@export var output_bindings: Dictionary
+# nested action list a loop macro runs per iteration; empty for every other macro
+@export var body_actions: Array[HenSaveAction]
+
+
+static func create(_macro: HenSaveMacro) -> HenSaveAction:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var action: HenSaveAction = HenSaveAction.new()
+
+	action.id = global.get_new_node_counter()
+	action.macro_id = _macro.id
+	action.name = _macro.name
+	action.phase = default_phase(_macro)
+
+	for param: HenSaveParam in _macro.inputs:
+		action.inputs.append(HenSaveParam.create(param.get_data()))
+
+	return action
+
+
+func get_new_name() -> String:
+	return 'action_' + str(id)
+
+
+# phases the macro declares as flow inputs; update is always offered (it can fall
+# back to the _process override body). read from the pool — no disk access
+static func supported_phases(_macro: HenSaveMacro) -> Array:
+	var declared: Dictionary = {}
+	for f: HenSaveFlowParam in _macro.flow_inputs:
+		declared[str(f.id)] = true
+
+	var phases: Array = []
+	if declared.has('enter'):
+		phases.append(&'enter')
+	phases.append(&'update')
+
+	# branching from physics is safe, the ban is exit-only
+	if declared.has('physics'):
+		phases.append(&'physics')
+
+	# a branching action can't run on exit: change_state calls exit() BEFORE swapping
+	# current_state, so transitioning from there re-enters it forever
+	if declared.has('exit') and _macro.flow_outputs.is_empty():
+		phases.append(&'exit')
+
+	return phases
+
+
+# a new action starts on a phase the macro actually has a body for, so it never
+# lands on a silent phase (e.g. an enter-only macro must not default to update)
+static func default_phase(_macro: HenSaveMacro) -> StringName:
+	var declared: Dictionary = {}
+	for f: HenSaveFlowParam in _macro.flow_inputs:
+		declared[str(f.id)] = true
+
+	# the macro can name the phase it wants, as long as it has a body for it
+	if not _macro.default_phase.is_empty() and declared.has(str(_macro.default_phase)):
+		return _macro.default_phase
+
+	# no flow inputs at all -> the macro uses the _process override (update only)
+	if declared.is_empty() or declared.has('update'):
+		return &'update'
+	if declared.has('enter'):
+		return &'enter'
+	if declared.has('exit'):
+		return &'exit'
+
+	return &'update'

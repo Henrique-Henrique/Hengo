@@ -1,9 +1,10 @@
 [gd_scene format=3 uid="uid://cecxlhrb3et2l"]
 
 [ext_resource type="Texture2D" uid="uid://dc5sqlfedwhvg" path="res://icon.svg" id="1_wvpun"]
-[ext_resource type="Script" uid="uid://cy6hnyybwpxvv" path="res://hengo/scripts/base.gd" id="2_m0rpm"]
-[ext_resource type="Script" uid="uid://d07ieimr7d5m2" path="res://hengo/scripts/outro.gd" id="3_c6xj6"]
+[ext_resource type="Script" uid="uid://lo3agg06yovk" path="res://hengo/scripts/eita.gd" id="2_gxmxl"]
+[ext_resource type="Script" uid="uid://bogm7nllhrepn" path="res://hengo/scripts/holy.gd" id="2_kem5a"]
 [ext_resource type="Script" uid="uid://c2m8k4lv3rt8g" path="res://hengo/scripts/player.gd" id="4_6bw2v"]
+[ext_resource type="Script" uid="uid://byol64serw2un" path="res://hengo/scripts/bt.gd" id="4_n4w22"]
 [ext_resource type="Script" uid="uid://cpw7prvhwpjig" path="res://hengo/scripts/fps_camera.gd" id="5_kem5a"]
 [ext_resource type="Script" uid="uid://bhiv4jjym751w" path="res://hengo/scripts/crosshair.gd" id="6_cross"]
 [ext_resource type="Script" uid="uid://c6ucb4nbdg5fg" path="res://hengo/scripts/cube.gd" id="7_cube"]
@@ -32,7 +33,6 @@ size = Vector3(0.5, 0.5, 0.5)
 [node name="Node3D" type="Node3D" unique_id=979723603]
 
 [node name="Node" type="Node2D" parent="." unique_id=1576522687]
-visible = false
 
 [node name="Label" type="Label" parent="Node" unique_id=818398667]
 offset_right = 17.0
@@ -44,21 +44,28 @@ metadata/_edit_use_anchors_ = true
 [node name="Sprite2D" type="Sprite2D" parent="Node" unique_id=143685121]
 position = Vector2(496, 315)
 texture = ExtResource("1_wvpun")
-script = ExtResource("2_m0rpm")
+script = ExtResource("2_gxmxl")
 
-[node name="Sprite2D2" type="Sprite2D" parent="Node" unique_id=214986247]
+[node name="Sprite2D2" type="Sprite2D" parent="Node" unique_id=214986247 node_paths=PackedStringArray("eu_mesmo")]
 position = Vector2(672, 310)
 texture = ExtResource("1_wvpun")
-script = ExtResource("3_c6xj6")
+script = ExtResource("2_kem5a")
+eu_mesmo = NodePath("../Sprite2D")
 
 [node name="Sprite2D3" type="Sprite2D" parent="Node" unique_id=1633947888]
 modulate = Color(0.34442037, 0.431032, 0.6603756, 1)
 position = Vector2(618, 445)
 texture = ExtResource("1_wvpun")
-script = ExtResource("3_c6xj6")
-quer_girar = true
 
 [node name="Node" type="Node" parent="Node" unique_id=2080766891]
+
+[node name="Button" type="Button" parent="Node" unique_id=514096915]
+offset_left = 283.0
+offset_top = 80.0
+offset_right = 713.0
+offset_bottom = 165.0
+text = "ronaldo, donalro dosaopkdaskop dsaop dsa"
+script = ExtResource("4_n4w22")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=274402458]
 environment = SubResource("Environment_c6xj6")

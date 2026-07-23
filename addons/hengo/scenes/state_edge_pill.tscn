@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/state_viewer/state_edge_pill.gd" id="1_pill"]
+
+[node name="StateEdgePill" type="PanelContainer"]
+mouse_filter = 2
+script = ExtResource("1_pill")
+
+[node name="Box" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 4
+
+[node name="Icon" type="TextureRect" parent="Box"]
+custom_minimum_size = Vector2(12, 12)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="Label" parent="Box"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+text = "name"

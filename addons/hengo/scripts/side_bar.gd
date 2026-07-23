@@ -32,6 +32,7 @@ class DeleteResourceCommand:
 	var removed_routes: Dictionary = {}
 	var removed_items: Array[Dictionary] = []
 	var removed_sub_states: Dictionary = {}
+	var removed_state_actions: Dictionary = {}
 	var file_entries: Array[Dictionary] = []
 
 
@@ -58,6 +59,10 @@ class DeleteResourceCommand:
 			if save_data.routes.has(route_id):
 				removed_routes[route_id] = save_data.routes[route_id]
 
+		for route_id: StringName in removed_route_ids:
+			if save_data.state_actions.has(route_id):
+				removed_state_actions[route_id] = save_data.state_actions[route_id]
+
 		file_entries = side_bar._get_file_entries_for_delete(meta, removed_items, removed_route_ids)
 
 
@@ -83,6 +88,9 @@ class DeleteResourceCommand:
 		for state_id in removed_sub_states.keys():
 			save_data.sub_states.erase(state_id)
 
+		for state_id in removed_state_actions.keys():
+			save_data.state_actions.erase(state_id)
+
 		for file_info: Dictionary in file_entries:
 			side_bar._move_res_path_to_trash(str(file_info.path))
 
@@ -98,6 +106,9 @@ class DeleteResourceCommand:
 
 		for state_id in removed_sub_states.keys():
 			save_data.sub_states[state_id] = (removed_sub_states[state_id] as Array).duplicate()
+
+		for state_id in removed_state_actions.keys():
+			save_data.state_actions[state_id] = (removed_state_actions[state_id] as Array).duplicate()
 
 		var items_asc: Array = removed_items.duplicate()
 		items_asc.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -149,7 +160,7 @@ func _ready() -> void:
 	base_route_slot = get_node('%BaseRouteSlot')
 	list.mouse_exited.connect(_on_exit)
 
-	custom_minimum_size = Vector2(HenUtils.get_scaled_size(250), 0)
+	custom_minimum_size = Vector2(250, 0)
 
 	global.SIDE_BAR = self
 	
@@ -277,22 +288,21 @@ func _add_sub_states_card(parent_container: Node, state: HenSaveState, type: Add
 
 
 func _build_nested_card_style(tint: Color, depth: int) -> StyleBoxFlat:
-	var editor_scale: float = EditorInterface.get_editor_scale() if Engine.is_editor_hint() else 1.0
 	var bg_alpha: float = 0.06 + min(depth, 4) * 0.03
 	var border_alpha: float = 0.22 + min(depth, 4) * 0.04
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(tint.r, tint.g, tint.b, bg_alpha)
 	style.border_color = Color(tint.r, tint.g, tint.b, border_alpha)
-	style.set_border_width_all(int(max(1, roundi(1 * editor_scale))))
-	var radius: int = int(max(10, roundi(10 * editor_scale)))
+	style.set_border_width_all(1)
+	var radius: int = 10
 	style.corner_radius_top_left = radius
 	style.corner_radius_top_right = radius
 	style.corner_radius_bottom_left = radius
 	style.corner_radius_bottom_right = radius
-	style.content_margin_left = int(max(6, roundi(6 * editor_scale)))
-	style.content_margin_right = int(max(6, roundi(6 * editor_scale)))
-	style.content_margin_top = int(max(4, roundi(4 * editor_scale)))
-	style.content_margin_bottom = int(max(4, roundi(4 * editor_scale)))
+	style.content_margin_left = 6
+	style.content_margin_right = 6
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
 	return style
 
 

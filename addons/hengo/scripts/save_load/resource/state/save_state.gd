@@ -187,18 +187,31 @@ func _validate_property(_property: Dictionary) -> void:
 
 
 func _set_other_states_start_false() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if not global or not global.SAVE_DATA: return
+	for s: HenSaveState in _get_sibling_states():
+		if s != self and s.start:
+			s.start = false
 
-	if is_sub_state:
-		for state_id_key in global.SAVE_DATA.sub_states.keys():
-			var sub_states: Array = global.SAVE_DATA.sub_states.get(state_id_key)
-			if sub_states.has(self ):
-				for s: HenSaveState in sub_states:
-					if s != self and s.start:
-						s.start = false
-				break
-	else:
-		for s: HenSaveState in global.SAVE_DATA.states:
-			if s != self and s.start:
-				s.start = false
+
+# the list this state belongs to, searched in the open scripts. a state loaded
+# from disk (another script) belongs to none, so it can't touch their flags
+func _get_sibling_states() -> Array:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global: return []
+
+	var candidates: Array[HenSaveData] = global.OPEN_SCRIPTS.duplicate()
+
+	if global.SAVE_DATA and not candidates.has(global.SAVE_DATA):
+		candidates.append(global.SAVE_DATA)
+
+	for save_data: HenSaveData in candidates:
+		if not save_data: continue
+
+		if is_sub_state:
+			for state_id_key in save_data.sub_states.keys():
+				var sub_states: Array = save_data.sub_states.get(state_id_key)
+				if sub_states.has(self ):
+					return sub_states
+		elif save_data.states.has(self ):
+			return save_data.states
+
+	return []

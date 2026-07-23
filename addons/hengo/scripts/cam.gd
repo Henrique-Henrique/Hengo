@@ -64,8 +64,6 @@ func update_settings() -> void:
 	ZOOM_INCREMENT = ProjectSettings.get_setting(HenSettings.ZOOM_INCREMENT_PATH, 0.15)
 	ZOOM_RATE = ProjectSettings.get_setting(HenSettings.ZOOM_RATE_PATH, 12.0)
 
-	MAX_ZOOM = MAX_ZOOM * EditorInterface.get_editor_scale()
-
 
 func is_cam_active() -> bool:
 	var parent: Control = get_parent() as Control

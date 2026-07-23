@@ -58,8 +58,10 @@ func change_route(_route: HenRouteData) -> void:
 	global.SIDE_BAR.update()
 	
 	global.AUTO_CAMERA.on_route_changed(old_route, _route)
-	
+
 	HenFormatter.format_current_route()
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).route_changed.emit(_route)
 
 
 func _centralize_cam(_vc: HenVirtualCNode = null) -> void:

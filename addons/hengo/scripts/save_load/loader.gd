@@ -153,13 +153,25 @@ func _apply_active(_save_data: HenSaveData, _headless: bool) -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	HenScriptMacroLoader.load_script_macros()
+	HenScriptMacroLoader.load_native_actions()
 
 	if not _headless:
 		show_class_name()
-		router.change_route(_save_data.get_base_route())
+		router.change_route(_initial_route(_save_data))
 
 	if global.HENGO_ROOT:
 		global.HENGO_ROOT.refresh_script_state()
+
+
+# opening a script lands on its start state, falling back to the base route
+func _initial_route(_save_data: HenSaveData) -> HenRouteData:
+	for state: HenSaveState in _save_data.states:
+		if state.start and not state.is_sub_state:
+			var route: HenRouteData = state.get_route(_save_data)
+			if route:
+				return route
+
+	return _save_data.get_base_route()
 
 
 # removes script-macros baked into the save data (re-added from the macros folder)
@@ -190,6 +202,7 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 
 		# load script macros
 		HenScriptMacroLoader.load_script_macros()
+		HenScriptMacroLoader.load_native_actions()
 
 		reset_to_load(_id, _headless)
 	else:
@@ -198,7 +211,7 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 	# showing current type
 	if not _headless:
 		show_class_name()
-		router.change_route(global.SAVE_DATA.get_base_route())
+		router.change_route(_initial_route(global.SAVE_DATA))
 
 	var end: int = Time.get_ticks_usec()
 

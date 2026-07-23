@@ -14,11 +14,34 @@ var _sidebar_collapsed: bool = false
 # script-tabs panel collapse
 var _script_tabs_collapsed: bool = false
 
+# collapse state to restore when both side panels are toggled at once
+var _panels_prev_sidebar: bool = false
+var _panels_prev_script_tabs: bool = false
+
 const SCRIPT_TABS_COLLAPSED_WIDTH: int = 44
 const SCRIPT_TABS_EXPANDED_WIDTH: int = 220
 
 # canvas layout
 var _canvas_split_mode: bool = false
+
+# re-scales chrome fonts live when the font_scale setting changes; theme
+# default_font_size covers inherited text, the walk covers explicit overrides,
+# and the refresh signals rebuild code-built lists so icon sizes follow too
+func reapply_font_scale() -> void:
+	var ui_base: Control = get_node_or_null('%UIBase')
+	if not ui_base or not ui_base.theme:
+		return
+
+	ui_base.theme.default_font_size = ThemeUtils.fs(ThemeUtils.BASE_DEFAULT_FONT_SIZE)
+	# forces every child to re-resolve theme items even if the auto-notify misses
+	ui_base.propagate_notification(NOTIFICATION_THEME_CHANGED)
+	ThemeUtils.apply_font_scale(ui_base)
+
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	if signal_bus:
+		signal_bus.request_list_update.emit()
+		signal_bus.request_structural_update.emit()
+
 
 func _ready() -> void:
 	if HenUtils.disable_scene(self):
@@ -29,7 +52,7 @@ func _ready() -> void:
 	var router: HenRouter = Engine.get_singleton(&'Router')
 	var enums: HenEnums = Engine.get_singleton(&'Enums')
 
-	var margin: int = HenUtils.get_scaled_size(8)
+	var margin: int = 8
 	var side_bar_margin: MarginContainer = get_node('%SideBarMargin')
 
 	side_bar_margin.add_theme_constant_override('margin_left', margin)
@@ -71,6 +94,7 @@ func _ready() -> void:
 	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
 	(get_node('%ToggleLayoutBt') as Button).pressed.connect(_on_toggle_canvas_layout)
 	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
+	_setup_states_scope_bt()
 
 	var toggle_tabs_bt: Button = get_node_or_null('%ToggleScriptTabsBt')
 	if toggle_tabs_bt:
@@ -90,6 +114,9 @@ func _ready() -> void:
 	)
 	canvas_tabs.tab_changed.connect(func(idx: int):
 		canvas_tab_bar.current_tab = idx
+		# the flow canvas only tests node visibility while it is on screen
+		if idx == 0:
+			_recheck_flow_visibility.call_deferred()
 	)
 
 	# sidebar icon strip buttons (collapsed mode)
@@ -132,6 +159,7 @@ func refresh_script_state() -> void:
 	if tabs:
 		tabs.set_tab_disabled(1, not has_script)
 		tabs.set_tab_disabled(2, not has_script)
+		tabs.set_tab_disabled(4, not has_script)
 		if not has_script and tabs.current_tab != 0:
 			tabs.current_tab = 0
 
@@ -166,6 +194,33 @@ func refresh_script_state() -> void:
 	# flow focus follows the active script during a debug session
 	if global and global.HENGO_DEBUGGER_PLUGIN and global.SAVE_DATA:
 		global.HENGO_DEBUGGER_PLUGIN.on_active_script_changed(String(global.SAVE_DATA.identity.id))
+
+
+# forces the viewport pass after the flow canvas comes back from a hidden tab
+func _recheck_flow_visibility() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if global and global.CAM:
+		global.CAM._check_virtual_cnodes(global.CAM.transform.origin, global.CAM.transform.x.x, true)
+
+
+# the states scope toggle only makes sense while the machine graph is on screen
+func _setup_states_scope_bt() -> void:
+	var scope_bt: Button = get_node_or_null('%StatesScopeBt')
+	var machine_graph: HenStateViewerMachineGraph = get_node_or_null('%MachineGraph')
+
+	if not scope_bt or not machine_graph:
+		return
+
+	scope_bt.toggled.connect(func(pressed: bool):
+		scope_bt.text = 'Current script' if pressed else 'All scripts'
+		scope_bt.tooltip_text = 'States tab: show only the active script' if pressed else 'States tab: show every script of the collection'
+		machine_graph.set_only_current_script(pressed)
+	)
+
+	machine_graph.visibility_changed.connect(func():
+		scope_bt.visible = machine_graph.is_visible_in_tree()
+	)
+	scope_bt.visible = machine_graph.is_visible_in_tree()
 
 
 func _on_reset_zoom() -> void:
@@ -478,6 +533,24 @@ func _on_collapse_sidebar() -> void:
 			content_area.split_offset = _saved_split_offset
 		if collapse_btn:
 			collapse_btn.tooltip_text = 'Collapse sidebar'
+
+
+# collapses both side panels at once, restoring the previous state when already collapsed
+func toggle_side_panels() -> void:
+	if _sidebar_collapsed and _script_tabs_collapsed:
+		if not _panels_prev_sidebar:
+			_on_collapse_sidebar()
+		if not _panels_prev_script_tabs:
+			_on_toggle_script_tabs()
+		return
+
+	_panels_prev_sidebar = _sidebar_collapsed
+	_panels_prev_script_tabs = _script_tabs_collapsed
+
+	if not _sidebar_collapsed:
+		_on_collapse_sidebar()
+	if not _script_tabs_collapsed:
+		_on_toggle_script_tabs()
 
 
 func _on_toggle_script_tabs() -> void:

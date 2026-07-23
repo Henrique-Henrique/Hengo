@@ -1,12 +1,15 @@
 @tool
 class_name HenSaveVar extends HenSaveResType
 
-@export_custom(PROPERTY_HINT_NONE, 'all_godot_classes') var type: StringName:
+@export_custom(PROPERTY_HINT_NONE, 'var_type') var type: StringName:
 	set(v):
 		type = v
 		default_value = null
 		notify_property_list_changed()
 @export var is_export: bool
+# hengo script this variable holds an instance of; empty = plain godot type.
+# `type` still carries that script's base class, so codegen and props are unaffected
+@export var script_id: StringName
 
 var default_value: Variant = null
 
@@ -33,6 +36,14 @@ func get_data() -> Dictionary:
 		export = is_export,
 		default_value = default_value
 	}
+
+
+# the script binding rides on the type dropdown, never as its own field
+func _validate_property(_property: Dictionary) -> void:
+	super (_property)
+
+	if _property.name == &'script_id':
+		_property.usage = PROPERTY_USAGE_STORAGE
 
 
 func _get_property_list() -> Array[Dictionary]:

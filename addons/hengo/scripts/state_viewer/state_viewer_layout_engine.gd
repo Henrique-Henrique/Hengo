@@ -11,12 +11,22 @@ const HIGHWAY_MARGIN: float = 20.0
 const HIGHWAY_TRACK_STEP: float = 16.0
 const HIGHWAY_STUB: float = 24.0
 const COMPLEX_FORWARD_THRESHOLD: float = LAYER_GAP * 1.5 + 30.0
+const CHANNEL_MARGIN: float = 32.0
+const ROW_TOL: float = 6.0
+const COL_TOL: float = 2.0
+const ROW_STEP: float = 14.0
+const MIN_STUB: float = 8.0
+const TRACK_CLEAR: float = 12.0
+const MAX_ROW_SHIFT: float = ROW_STEP * 3.0
 
 
 var _incoming_map: Dictionary = {}
 var _outgoing_map: Dictionary = {}
 var _highway_tracks: Dictionary = {}
 var _root: HenStateViewerGraphTypes.DirectedGraphNode = null
+var _machine_order: Array = []
+var _machine_index: Dictionary = {}
+var _corridor_demand: Array = []
 
 # phase 1: layout all positions bottom-up, phase 2: route edges after positions are final
 func execute_layout(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
@@ -58,6 +68,7 @@ func execute_layout(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 
 	_allocate_highway_tracks(all_edges)
 	_route_recursive(root)
+	_separate_parallel_rows(all_edges)
 
 
 # bottom-up recursive layout: children first, then parent wraps them
@@ -81,6 +92,10 @@ func _route_recursive(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 
 # positions direct children top-to-bottom by layer, then resizes parent to contain them
 func _layout_children(parent: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
+	if parent == _root:
+		_layout_root_row(parent)
+		return
+
 	var children: Array = parent.children
 	var layers: Dictionary = group_by_depth(children)
 	var depth_keys: Array = layers.keys()
@@ -125,6 +140,88 @@ func _layout_children(parent: HenStateViewerGraphTypes.DirectedGraphNode) -> voi
 		max_bottom = max(max_bottom, node.layout.y + node.layout.height)
 	parent.layout.width = max(parent.layout.width, max_right + COMPOUND_PAD_SIDE)
 	parent.layout.height = max(parent.layout.height, max_bottom + COMPOUND_PAD_BOTTOM)
+
+
+# lays out top-level machines in a single row, corridors between them sized by cross-edge demand
+func _layout_root_row(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
+	_machine_order.clear()
+	_machine_index.clear()
+	_corridor_demand.clear()
+
+	var machines: Array = root.children
+	if machines.is_empty():
+		return
+
+	var machine_map: Dictionary = {}
+	var weights: Dictionary = {}
+	for m in machines:
+		machine_map[m.id] = m
+		weights[m.id] = {}
+
+	var cross_pairs: Array = []
+	for m in machines:
+		var edges_out: Array = []
+		_get_all_descendant_edges(m, edges_out)
+		for edge in edges_out:
+			var tgt_machine: HenStateViewerGraphTypes.DirectedGraphNode = _find_ancestor_in_map(edge.target, machine_map)
+			if tgt_machine != null and tgt_machine.id != m.id:
+				weights[m.id][tgt_machine.id] = int(weights[m.id].get(tgt_machine.id, 0)) + 1
+				weights[tgt_machine.id][m.id] = int(weights[tgt_machine.id].get(m.id, 0)) + 1
+				cross_pairs.append({source_id = m.id, target_id = tgt_machine.id})
+
+	# greedy chain: append the unplaced machine most connected to the placed set, ties keep base order
+	var placed: Dictionary = {}
+	while _machine_order.size() < machines.size():
+		var best: HenStateViewerGraphTypes.DirectedGraphNode = null
+		var best_w: int = 0
+		for m in machines:
+			if placed.has(m.id):
+				continue
+			var w: int = 0
+			for other_id in weights[m.id]:
+				if placed.has(other_id):
+					w += weights[m.id][other_id]
+			if best == null or w > best_w:
+				best = m
+				best_w = w
+		placed[best.id] = true
+		_machine_order.append(best)
+
+	for i in range(_machine_order.size()):
+		_machine_index[_machine_order[i].id] = i
+
+	_corridor_demand.resize(maxi(0, machines.size() - 1))
+	_corridor_demand.fill(0)
+	for pair in cross_pairs:
+		var s: int = _machine_index[pair.source_id]
+		var t: int = _machine_index[pair.target_id]
+		if absi(s - t) == 1:
+			_corridor_demand[mini(s, t)] += 1
+		else:
+			_corridor_demand[s if t > s else s - 1] += 1
+			_corridor_demand[t - 1 if t > s else t] += 1
+
+	var x: float = COMPOUND_PAD_SIDE
+	var max_bottom: float = 0.0
+	for i in range(_machine_order.size()):
+		var m: HenStateViewerGraphTypes.DirectedGraphNode = _machine_order[i]
+		m.layout.x = x
+		m.layout.y = COMPOUND_PAD_TOP
+		max_bottom = max(max_bottom, m.layout.y + m.layout.height)
+		x += m.layout.width
+		if i < _machine_order.size() - 1:
+			x += max(NODE_GAP, HIGHWAY_MARGIN * 2.0 + float(_corridor_demand[i]) * HIGHWAY_TRACK_STEP)
+
+	root.layout.width = x + COMPOUND_PAD_SIDE
+	root.layout.height = max_bottom + COMPOUND_PAD_BOTTOM
+
+
+# corridor i sits between machines i and i+1; base x clears the left machine by the margin
+func _corridor_base_x(corridor: int) -> float:
+	if corridor < 0 or corridor >= _machine_order.size():
+		return 0.0
+	var m: HenStateViewerGraphTypes.DirectedGraphNode = _machine_order[corridor]
+	return m.get_absolute().x + m.layout.width + HIGHWAY_MARGIN
 
 
 # longest-path layering with edge hoisting and cycle detection
@@ -241,6 +338,10 @@ func _route_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 	var end_pt: Vector2 = Vector2(info.end.x + tgt_offset, info.end.y)
 
 	if info.is_highway:
+		if info.is_cross and info.has('exit_corridor'):
+			_route_cross_edge(edge, info, start_pt, end_pt)
+			return
+
 		var track: Dictionary = _highway_tracks.get(edge.id, {index = 0, count = 1})
 		var route_x: float = info.route_base + info.track_dir * float(track.index) * HIGHWAY_TRACK_STEP
 
@@ -271,6 +372,47 @@ func _route_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 		}]
 
 
+# routes a cross-machine edge through corridor tracks, arcing over the top channel when machines are not adjacent
+func _route_cross_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge, info: Dictionary, start_pt: Vector2, end_pt: Vector2) -> void:
+	var exit_track: Dictionary = _highway_tracks.get(edge.id + ':exit', {index = 0, count = 1})
+	var exit_x: float = info.route_base + float(exit_track.index) * HIGHWAY_TRACK_STEP
+	var seg_top: float = start_pt.y + HIGHWAY_STUB
+	var seg_bottom: float = end_pt.y - HIGHWAY_STUB
+
+	if info.is_adjacent:
+		edge.sections = [ {
+			start_point = start_pt,
+			bend_points = [
+				Vector2(start_pt.x, seg_top),
+				Vector2(exit_x, seg_top),
+				Vector2(exit_x, seg_bottom),
+				Vector2(end_pt.x, seg_bottom)
+			],
+			end_point = end_pt,
+			label_pos = Vector2(exit_x, _track_label_y(seg_top, seg_bottom, exit_track))
+		}]
+		return
+
+	var entry_track: Dictionary = _highway_tracks.get(edge.id + ':entry', {index = 0, count = 1})
+	var chan_track: Dictionary = _highway_tracks.get(edge.id + ':chan', {index = 0, count = 1})
+	var entry_x: float = info.entry_base + float(entry_track.index) * HIGHWAY_TRACK_STEP
+	var channel_y: float = COMPOUND_PAD_TOP - CHANNEL_MARGIN - float(chan_track.index) * HIGHWAY_TRACK_STEP
+
+	edge.sections = [ {
+		start_point = start_pt,
+		bend_points = [
+			Vector2(start_pt.x, seg_top),
+			Vector2(exit_x, seg_top),
+			Vector2(exit_x, channel_y),
+			Vector2(entry_x, channel_y),
+			Vector2(entry_x, seg_bottom),
+			Vector2(end_pt.x, seg_bottom)
+		],
+		end_point = end_pt,
+		label_pos = Vector2((exit_x + entry_x) * 0.5, channel_y)
+	}]
+
+
 # walks up both ancestors to find the first common node
 static func _find_common_ancestor(
 	a: HenStateViewerGraphTypes.DirectedGraphNode,
@@ -293,6 +435,8 @@ static func _find_common_ancestor(
 func _get_edge_aim_x(edge: HenStateViewerGraphTypes.DirectedGraphEdge, is_out: bool) -> float:
 	var info: Dictionary = _classify_edge(edge)
 	if info.is_highway:
+		if info.is_cross and info.has('entry_base') and not is_out:
+			return info.entry_base
 		return info.route_base
 	return info.end.x if is_out else info.start.x
 
@@ -315,7 +459,7 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 	var info: Dictionary = {
 		start = Vector2(start_x, start_y),
 		end = Vector2(end_x, end_y),
-		is_highway = is_backward or is_complex_forward,
+		is_highway = is_backward or is_complex_forward or is_cross,
 		is_backward = is_backward,
 		is_cross = is_cross,
 		route_base = 0.0,
@@ -327,13 +471,28 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 		return info
 
 	if is_cross:
-		# cross-machine: route just outside the source machine, on the side facing the target
 		var src_machine: HenStateViewerGraphTypes.DirectedGraphNode = _top_level_machine(edge.source)
+		var tgt_machine: HenStateViewerGraphTypes.DirectedGraphNode = _top_level_machine(edge.target)
+		var s_idx: int = int(_machine_index.get(src_machine.id, -1)) if src_machine != null else -1
+		var t_idx: int = int(_machine_index.get(tgt_machine.id, -1)) if tgt_machine != null else -1
+
+		if s_idx >= 0 and t_idx >= 0 and s_idx != t_idx:
+			# corridor routing against the machine row built by _layout_root_row
+			info.src_index = s_idx
+			info.is_adjacent = absi(s_idx - t_idx) == 1
+			info.exit_corridor = s_idx if t_idx > s_idx else s_idx - 1
+			info.entry_corridor = t_idx - 1 if t_idx > s_idx else t_idx
+			info.route_base = _corridor_base_x(info.exit_corridor)
+			info.entry_base = info.route_base if info.is_adjacent else _corridor_base_x(info.entry_corridor)
+			info.track_dir = 1.0
+			info.group_key = 'corridor:' + str(info.exit_corridor)
+			return info
+
+		# fallback: machine-side routing when the row has no index for these machines
 		var ref_abs: Vector2 = src_machine.get_absolute() if src_machine != null else src_abs
 		var ref_w: float = src_machine.layout.width if src_machine != null else edge.source.layout.width
 		var machine_id: String = src_machine.id if src_machine != null else edge.source.id
 
-		var tgt_machine: HenStateViewerGraphTypes.DirectedGraphNode = _top_level_machine(edge.target)
 		var tgt_center: float = end_x
 		if tgt_machine != null:
 			tgt_center = tgt_machine.get_absolute().x + tgt_machine.layout.width * 0.5
@@ -372,7 +531,7 @@ func _top_level_machine(node: HenStateViewerGraphTypes.DirectedGraphNode) -> Hen
 	return current
 
 
-# groups highway edges by (ancestor/machine, side) and assigns each a distinct, spatially-ordered track
+# groups highway edges by machine side, corridor or channel and assigns each a distinct, spatially-ordered track
 func _allocate_highway_tracks(all_edges: Array) -> void:
 	_highway_tracks.clear()
 	var groups: Dictionary = {}
@@ -380,20 +539,35 @@ func _allocate_highway_tracks(all_edges: Array) -> void:
 		var info: Dictionary = _classify_edge(e)
 		if not info.is_highway:
 			continue
-		if not groups.has(info.group_key):
-			groups[info.group_key] = []
-		groups[info.group_key].append({edge = e, sort_x = info.start.x})
+
+		var m_idx: int = int(info.get('src_index', -1))
+		if info.is_cross and info.has('exit_corridor'):
+			# cross edges hold one track per corridor they traverse, plus one in the top channel
+			_push_track(groups, 'corridor:' + str(info.exit_corridor), e.id + ':exit', m_idx, info.start.x, e.id)
+			if not info.is_adjacent:
+				_push_track(groups, 'corridor:' + str(info.entry_corridor), e.id + ':entry', m_idx, info.start.x, e.id)
+				_push_track(groups, 'channel', e.id + ':chan', m_idx, info.start.x, e.id)
+		else:
+			_push_track(groups, info.group_key, e.id, m_idx, info.start.x, e.id)
 
 	for key in groups:
 		var arr: Array = groups[key]
 		arr.sort_custom(func(a, b):
-			if a.sort_x == b.sort_x:
-				return a.edge.id < b.edge.id
-			return a.sort_x < b.sort_x
+			if a.machine != b.machine:
+				return a.machine < b.machine
+			if a.sort_x != b.sort_x:
+				return a.sort_x < b.sort_x
+			return a.edge_id < b.edge_id
 		)
 		var count: int = arr.size()
 		for i in range(count):
-			_highway_tracks[arr[i].edge.id] = {index = i, count = count}
+			_highway_tracks[arr[i].key] = {index = i, count = count}
+
+
+func _push_track(groups: Dictionary, group_key: String, track_key: String, machine: int, sort_x: float, edge_id: String) -> void:
+	if not groups.has(group_key):
+		groups[group_key] = []
+	groups[group_key].append({key = track_key, machine = machine, sort_x = sort_x, edge_id = edge_id})
 
 
 # symmetric horizontal offset so parallel edges fan out across 70% of the node width
@@ -411,3 +585,149 @@ func _spread_offset(edges: Array, edge: HenStateViewerGraphTypes.DirectedGraphEd
 func _track_label_y(seg_top: float, seg_bottom: float, track: Dictionary) -> float:
 	var t: float = float(track.index + 1) / float(track.count + 1)
 	return lerpf(seg_top, seg_bottom, t)
+
+
+# phase 2.5: fans out coincident parallel runs so edges sharing a path never overlap
+func _separate_parallel_rows(all_edges: Array) -> void:
+	_separate_axis_runs(all_edges, 1, ROW_TOL)
+	_separate_axis_runs(all_edges, 0, COL_TOL)
+
+
+# pos_axis 1 separates horizontal rows (moves y), pos_axis 0 separates vertical columns (moves x)
+func _separate_axis_runs(all_edges: Array, pos_axis: int, tol: float) -> void:
+	var span_axis: int = 1 - pos_axis
+	var segments: Array = []
+
+	for edge in all_edges:
+		for section in edge.sections:
+			var pts: Array = [section.start_point]
+			pts.append_array(section.bend_points)
+			pts.append(section.end_point)
+
+			# only interior segments move: both endpoints must be bend points
+			for i in range(1, pts.size() - 2):
+				var a: Vector2 = pts[i]
+				var b: Vector2 = pts[i + 1]
+				if absf(a[pos_axis] - b[pos_axis]) >= 0.01 or absf(a[span_axis] - b[span_axis]) <= 1.0:
+					continue
+
+				var pos: float = a[pos_axis]
+				var lo: float = pos - MAX_ROW_SHIFT
+				var hi: float = pos + MAX_ROW_SHIFT
+				var prev: float = pts[i - 1][pos_axis]
+				var next: float = pts[i + 2][pos_axis]
+				if prev < pos - 0.01:
+					lo = max(lo, prev + MIN_STUB)
+				elif prev > pos + 0.01:
+					hi = min(hi, prev - MIN_STUB)
+				if next < pos - 0.01:
+					lo = max(lo, next + MIN_STUB)
+				elif next > pos + 0.01:
+					hi = min(hi, next - MIN_STUB)
+
+				segments.append({
+					edge = edge,
+					section = section,
+					bend_a = i - 1,
+					bend_b = i,
+					pos = pos,
+					s0 = minf(a[span_axis], b[span_axis]),
+					s1 = maxf(a[span_axis], b[span_axis]),
+					lo = lo,
+					hi = hi
+				})
+
+	segments.sort_custom(func(a, b):
+		if a.pos != b.pos:
+			return a.pos < b.pos
+		if a.s0 != b.s0:
+			return a.s0 < b.s0
+		return a.edge.id < b.edge.id
+	)
+
+	# anchor-based sweep so near-equal rows group without chain drift
+	var band: Array = []
+	var anchor: float = 0.0
+	for seg in segments:
+		if band.is_empty() or seg.pos - anchor <= tol:
+			if band.is_empty():
+				anchor = seg.pos
+			band.append(seg)
+		else:
+			_fan_out_band(band, anchor, pos_axis)
+			band = [seg]
+			anchor = seg.pos
+	if not band.is_empty():
+		_fan_out_band(band, anchor, pos_axis)
+
+
+# assigns overlapping segments of a band to distinct tracks and writes the fanned positions back
+func _fan_out_band(band: Array, anchor: float, pos_axis: int) -> void:
+	if band.size() < 2:
+		return
+
+	band.sort_custom(func(a, b):
+		if a.s0 != b.s0:
+			return a.s0 < b.s0
+		return a.edge.id < b.edge.id
+	)
+
+	# greedy interval coloring: reuse the first track with enough clearance, else open a new one
+	var track_ends: Array = []
+	for seg in band:
+		var assigned: int = -1
+		for t in range(track_ends.size()):
+			if track_ends[t] + TRACK_CLEAR <= seg.s0:
+				assigned = t
+				break
+		if assigned == -1:
+			assigned = track_ends.size()
+			track_ends.append(seg.s1)
+		else:
+			track_ends[assigned] = seg.s1
+		seg.track = assigned
+
+	var track_count: int = track_ends.size()
+	if track_count < 2:
+		return
+
+	var lo: float = -INF
+	var hi: float = INF
+	for seg in band:
+		lo = max(lo, seg.lo)
+		hi = min(hi, seg.hi)
+	if lo > hi:
+		return
+
+	var step: float = ROW_STEP
+	var span: float = float(track_count - 1) * step
+	var base: float = anchor
+	if span <= hi - lo:
+		base = clampf(anchor - span * 0.5, lo, hi - span)
+	else:
+		base = lo
+		step = (hi - lo) / float(track_count - 1)
+
+	for seg in band:
+		_shift_segment(seg, base + float(seg.track) * step, pos_axis)
+
+
+# moves both bend points of the segment and drags a label riding it along
+func _shift_segment(seg: Dictionary, new_pos: float, pos_axis: int) -> void:
+	if absf(new_pos - seg.pos) < 0.01:
+		return
+
+	var section: Dictionary = seg.section
+	var bends: Array = section.bend_points
+	for b in [seg.bend_a, seg.bend_b]:
+		var p: Vector2 = bends[b]
+		p[pos_axis] = new_pos
+		bends[b] = p
+
+	if section.has('label_pos'):
+		var label_pos: Vector2 = section.label_pos
+		var on_run: bool = absf(label_pos[pos_axis] - seg.pos) < 0.5
+		var in_span: bool = label_pos[1 - pos_axis] >= seg.s0 - 1.0 and label_pos[1 - pos_axis] <= seg.s1 + 1.0
+		if on_run and in_span:
+			label_pos[pos_axis] = new_pos
+			section.label_pos = label_pos

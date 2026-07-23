@@ -15,6 +15,9 @@ signal request_list_update
 
 signal request_structural_update
 
+# emitted whenever the active route changes
+signal route_changed(_route: HenRouteData)
+
 # set to true during batch compilation to suppress thread-unsafe UI signals
 var is_batch_loading: bool = false
 

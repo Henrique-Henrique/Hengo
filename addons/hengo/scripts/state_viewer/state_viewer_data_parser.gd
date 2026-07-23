@@ -46,6 +46,7 @@ func _extract_edges(source: HenStateViewerGraphTypes.DirectedGraphNode, dict: Di
 		return
 
 	var transitions: Dictionary = dict.on
+	var transitions_meta: Dictionary = dict.get('on_meta', {})
 	var transition_index: int = 0
 
 	# iterates transition keys to find target nodes
@@ -60,7 +61,8 @@ func _extract_edges(source: HenStateViewerGraphTypes.DirectedGraphNode, dict: Di
 				source = source,
 				target = target_node,
 				transition = {event = event_name},
-				label_text = event_name
+				label_text = event_name,
+				meta = transitions_meta.get(event_name, {})
 			})
 			source.edges.append(edge)
 

@@ -13,6 +13,8 @@ class_name HenSaveData extends Resource
 @export var connections: Dictionary
 @export var flow_connections: Dictionary
 @export var sub_states: Dictionary
+# linear action lists keyed by state id (str(state.id) -> Array[HenSaveAction])
+@export var state_actions: Dictionary
 
 var _node_cache: Dictionary = {}
 
@@ -238,13 +240,31 @@ func add_var(_save: bool = true) -> HenSaveVar:
 
 	if not v:
 		return null
-	
+
 	if _save:
 		if not HenUtils.save_side_bar_item(v, identity.id, HenSideBar.SideBarItem.VARIABLES):
 			return null
 
 	variables.append(v)
 	return v
+
+
+# a free variable name based on _base, appending 2, 3, ... when taken. compared on
+# the emitted identifier (snake_case), since that is what would collide in codegen
+func unique_var_name(_base: String) -> String:
+	var taken: Dictionary = {}
+
+	for v: HenSaveVar in variables:
+		taken[v.name.to_snake_case()] = true
+
+	if not taken.has(_base.to_snake_case()):
+		return _base
+
+	var i: int = 2
+	while taken.has((_base + str(i)).to_snake_case()):
+		i += 1
+
+	return _base + str(i)
 
 
 func add_state(_save: bool = true) -> HenSaveState:
@@ -311,3 +331,49 @@ func add_macro() -> HenSaveMacro:
 
 	macros.append(m)
 	return m
+
+
+func add_state_action(_state_id: StringName, _action: HenSaveAction) -> void:
+	if not state_actions.has(_state_id):
+		state_actions[_state_id] = []
+
+	(state_actions[_state_id] as Array).append(_action)
+
+
+func get_state_actions(_state_id: StringName) -> Array:
+	if not state_actions.has(_state_id):
+		return []
+
+	return state_actions[_state_id]
+
+
+func remove_state_action(_state_id: StringName, _action: HenSaveAction) -> void:
+	if not state_actions.has(_state_id):
+		return
+
+	(state_actions[_state_id] as Array).erase(_action)
+
+	if (state_actions[_state_id] as Array).is_empty():
+		state_actions.erase(_state_id)
+
+
+# inserts at a flat index; a negative or out of range index appends
+func insert_state_action(_state_id: StringName, _action: HenSaveAction, _index: int) -> void:
+	if not state_actions.has(_state_id):
+		state_actions[_state_id] = []
+
+	var list: Array = state_actions[_state_id]
+
+	if _index < 0 or _index > list.size():
+		list.append(_action)
+	else:
+		list.insert(_index, _action)
+
+
+# replaces the whole list, keeping the empty-means-absent invariant
+func set_state_actions(_state_id: StringName, _actions: Array) -> void:
+	if _actions.is_empty():
+		state_actions.erase(_state_id)
+		return
+
+	state_actions[_state_id] = _actions.duplicate()

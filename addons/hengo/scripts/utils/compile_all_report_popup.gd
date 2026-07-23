@@ -17,7 +17,7 @@ func _ready() -> void:
 
 	var title: Label = Label.new()
 	title.text = _get_title_text()
-	title.add_theme_font_size_override('font_size', int(18 * EditorInterface.get_editor_scale()))
+	ThemeUtils.apply_font_size(title, 18)
 	add_child(title)
 
 	var summary: Label = Label.new()

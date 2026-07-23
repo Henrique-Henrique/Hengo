@@ -32,9 +32,7 @@ func setup(res: Resource, p_name: String, val: Array, hint_string: String, p_dep
 
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		var editor_scale: float = EditorInterface.get_editor_scale()
-		add_theme_constant_override('separation', int(10 * editor_scale))
+	add_theme_constant_override('separation', 10)
 
 	call_deferred('_setup_header')
 	_refresh_list()
@@ -143,10 +141,8 @@ func _create_sub_property_editor(parent_container: Control, item: Resource, prop
 	var label: Label = container.get_node('Name')
 	label.text = prop.name.capitalize()
 	
-	if Engine.is_editor_hint():
-		var editor_scale: float = EditorInterface.get_editor_scale()
-		label.add_theme_font_size_override('font_size', int(14 * editor_scale))
-		add_theme_constant_override('separation', int(10 * editor_scale))
+	ThemeUtils.apply_font_size(label, 14)
+	add_theme_constant_override('separation', 10)
 	
 	var editor: Control = prop_scene.instantiate()
 	if not editor:

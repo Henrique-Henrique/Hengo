@@ -23,10 +23,34 @@ func make_transition(_name: String) -> void:
 
 var sub_states: Dictionary = {}
 var current_sub_state: HengoState
+# state that holds this one as a sub-state, null for a top level state. weak on
+# purpose: the parent already holds the child in sub_states, and HengoState is
+# RefCounted, so a strong link both ways would never be freed
+var _parent_ref: WeakRef
+# key this state was registered under, needed to name it when handing control back
+var _sub_name: String = ''
+# where change_sub_state came from, so a sub-state can hand control back
+var previous_sub_state_name: String = ''
 
 
 func add_sub_state(_name: String, _state: HengoState) -> void:
 	sub_states[_name] = _state
+	_state._parent_ref = weakref(self)
+	_state._sub_name = _name
+
+
+# returns to whoever was running before this state took over. a sub-state hands
+# control back to its sibling, a top level state to the previous top level one
+func go_back() -> void:
+	var parent: HengoState = _parent_ref.get_ref() if _parent_ref else null
+
+	if parent:
+		if not parent.previous_sub_state_name.is_empty():
+			parent.change_sub_state(parent.previous_sub_state_name)
+		return
+
+	if _ref:
+		_ref._STATE_CONTROLLER.go_back()
 
 
 func change_sub_state(_name: String, ..._args) -> void:
@@ -34,8 +58,9 @@ func change_sub_state(_name: String, ..._args) -> void:
 		return
 		
 	if current_sub_state:
+		previous_sub_state_name = current_sub_state._sub_name
 		current_sub_state.exit()
-		
+
 	var state: HengoState = sub_states[_name]
 	current_sub_state = state
 

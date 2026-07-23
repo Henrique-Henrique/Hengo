@@ -1,5 +1,142 @@
 class_name HenUtils extends Node
 
+# an action binding stores 'var:<id>' for a hengo variable and the bare name for a
+# native property, so renaming a variable can't silently break the generated code
+const BIND_VAR_PREFIX: String = 'var:'
+# bind to a node reached by path instead of a variable, so a sibling node can be
+# used without declaring anything
+const BIND_PATH_PREFIX: String = 'path:'
+
+# values the engine already gives away, offered in the bind picker alongside
+# variables and properties. `global` marks a code that stands alone instead of
+# reading off the owner, and needs_class limits a source to owners that have it.
+# a code must be atomic or parenthesized: it substitutes mid-expression.
+# a source with `key` takes an argument and is stored as "key:argument", its code
+# coming from code_format; label_format defaults to "name (argument)"
+const NATIVE_SOURCES: Array[Dictionary] = [
+	{
+		name = 'Self (this node)',
+		code = '_ref',
+		type = 'Node',
+		needs_class = &'',
+		global = true,
+		kind = &'node'
+	},
+	{
+		name = 'Node path',
+		key = 'path',
+		arg_prompt = 'Node Path',
+		code_format = 'get_node("{arg}")',
+		label_format = '{arg}',
+		type = 'Node',
+		needs_class = &'Node',
+		global = false,
+		kind = &'node'
+	},
+	{
+		name = 'Action strength',
+		key = 'action_strength',
+		arg_prompt = 'Input Action',
+		code_format = 'Input.get_action_strength("{arg}")',
+		type = 'float',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Action pressed',
+		key = 'action_pressed',
+		arg_prompt = 'Input Action',
+		code_format = 'Input.is_action_pressed("{arg}")',
+		type = 'bool',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Mouse Position',
+		code = 'get_global_mouse_position()',
+		type = 'Vector2',
+		needs_class = &'CanvasItem',
+		global = false
+	},
+	{
+		name = 'Mouse X',
+		code = 'get_global_mouse_position().x',
+		type = 'float',
+		needs_class = &'CanvasItem',
+		global = false
+	},
+	{
+		name = 'Mouse Y',
+		code = 'get_global_mouse_position().y',
+		type = 'float',
+		needs_class = &'CanvasItem',
+		global = false
+	},
+	{
+		name = 'Mouse Screen Position',
+		code = 'get_viewport().get_mouse_position()',
+		type = 'Vector2',
+		needs_class = &'Node',
+		global = false
+	},
+	{
+		name = 'Screen Size',
+		code = 'get_viewport().get_visible_rect().size',
+		type = 'Vector2',
+		needs_class = &'Node',
+		global = false
+	},
+	{
+		name = 'Any Key Pressed',
+		code = 'Input.is_anything_pressed()',
+		type = 'bool',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Delta',
+		code = 'get_process_delta_time()',
+		type = 'float',
+		needs_class = &'Node',
+		global = false
+	},
+	{
+		name = 'Random Float (0-1)',
+		code = 'randf()',
+		type = 'float',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Random Bool',
+		code = '(randf() < 0.5)',
+		type = 'bool',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Random Angle',
+		code = '(randf() * TAU)',
+		type = 'float',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Random Direction',
+		code = 'Vector2.from_angle(randf() * TAU)',
+		type = 'Vector2',
+		needs_class = &'',
+		global = true
+	},
+	{
+		name = 'Random Color',
+		code = 'Color(randf(), randf(), randf())',
+		type = 'Color',
+		needs_class = &'',
+		global = true
+	}
+]
+
 const NONE_ICON = preload('res://addons/hengo/assets/new_icons/full_circle.svg')
 
 const ICON_FUNCTION = preload('res://addons/hengo/assets/new_icons/square-function.svg')
@@ -332,8 +469,151 @@ static func get_variant_type_from_string(type_name: StringName) -> int:
 	for i in TYPE_MAX:
 		if type_string(i) == type_name:
 			return i
-	
+
 	return TYPE_NIL
+
+
+# resolves a bound value source (hengo variable or owner property) to its type name
+static func get_bound_source_type(_save_data: HenSaveData, _bind_code: String) -> String:
+	if not _save_data:
+		return ''
+
+	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+
+	match str(bind.kind):
+		'var':
+			return (bind.value as HenSaveVar).type
+		'native':
+			return str((bind.value as Dictionary).type)
+		'property':
+			for prop: Dictionary in ClassDB.class_get_property_list(_save_data.identity.type):
+				if prop.name == _bind_code:
+					return type_string(prop.type)
+
+	return ''
+
+
+# full expression a bind code emits: an engine-global source stands alone, every
+# other bind reads off the owner. empty when the bind no longer resolves
+static func bind_expression(_save_data: HenSaveData, _bind_code: String) -> String:
+	var resolved: String = resolve_bind_code(_save_data, _bind_code)
+
+	if resolved.is_empty():
+		return ''
+
+	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+	var is_global: bool = str(bind.kind) == 'native' and bool((bind.value as Dictionary).get('global', false))
+
+	return resolved if is_global else '_ref.' + resolved
+
+
+# THE place a bind code is read. everything else asks this instead of slicing the
+# string on its own — kind is var | native | property | none, and `arg` carries
+# the argument of a parameterized source
+static func classify_bind_code(_save_data: HenSaveData, _bind_code: String) -> Dictionary:
+	if _bind_code.is_empty():
+		return {kind = 'none', value = null, arg = ''}
+
+	if _bind_code.begins_with(BIND_VAR_PREFIX):
+		var variable: HenSaveVar = get_bind_var(_save_data, _bind_code)
+		return {kind = 'var', value = variable, arg = ''} if variable else {kind = 'none', value = null, arg = ''}
+
+	var separator: int = _bind_code.find(':')
+
+	if separator > 0:
+		var key: String = _bind_code.substr(0, separator)
+		var arg: String = _bind_code.substr(separator + 1).strip_edges()
+
+		for source: Dictionary in NATIVE_SOURCES:
+			if str(source.get('key', '')) == key:
+				# an empty argument would emit ("") and read as bound while doing nothing
+				return {kind = 'native', value = source, arg = arg} if not arg.is_empty() else {kind = 'none', value = null, arg = ''}
+
+		# an unknown key is not a property name either: `foo:bar` is not valid gdscript
+		return {kind = 'none', value = null, arg = ''}
+
+	for source: Dictionary in NATIVE_SOURCES:
+		if str(source.get('code', '')) == _bind_code:
+			return {kind = 'native', value = source, arg = ''}
+
+	# bindings saved before ids also reach a variable by its snake name
+	var by_name: HenSaveVar = get_bind_var(_save_data, _bind_code)
+
+	if by_name:
+		return {kind = 'var', value = by_name, arg = ''}
+
+	return {kind = 'property', value = _bind_code, arg = ''}
+
+
+# native source a bind code points at, empty when it is a variable or a property
+static func get_native_source(_save_data: HenSaveData, _bind_code: String) -> Dictionary:
+	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+
+	return bind.value as Dictionary if str(bind.kind) == 'native' else {}
+
+
+static func bind_code_for_var(_var: HenSaveVar) -> String:
+	return BIND_VAR_PREFIX + str(_var.id)
+
+
+# variable a bind code points at: by id, or by name for bindings stored before ids
+static func get_bind_var(_save_data: HenSaveData, _bind_code: String) -> HenSaveVar:
+	if _bind_code.is_empty() or not _save_data:
+		return null
+
+	if _bind_code.begins_with(BIND_VAR_PREFIX):
+		var var_id: String = _bind_code.substr(BIND_VAR_PREFIX.length())
+
+		for v: HenSaveVar in _save_data.variables:
+			if str(v.id) == var_id:
+				return v
+
+		return null
+
+	for v: HenSaveVar in _save_data.variables:
+		if v.name.to_snake_case() == _bind_code:
+			return v
+
+	return null
+
+
+# identifier a bind code emits; empty when it no longer resolves
+static func resolve_bind_code(_save_data: HenSaveData, _bind_code: String) -> String:
+	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+
+	match str(bind.kind):
+		'var':
+			return (bind.value as HenSaveVar).name.to_snake_case()
+		'native':
+			return native_source_code(bind.value as Dictionary, str(bind.arg))
+		'property':
+			return str(bind.value)
+
+	return ''
+
+
+# gdscript a native source emits, with the argument filled in for the ones that
+# take one
+static func native_source_code(_source: Dictionary, _arg: String) -> String:
+	if _source.has('code_format'):
+		return str(_source.code_format).replace('{arg}', _arg)
+
+	return str(_source.get('code', ''))
+
+
+# label for a bind code in the ui, so a raw id never reaches the screen
+static func get_bind_label(_save_data: HenSaveData, _bind_code: String) -> String:
+	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+
+	if str(bind.kind) == 'native':
+		var source: Dictionary = bind.value
+		var format: String = str(source.get('label_format', '{name} ({arg})')) if source.has('key') else '{name}'
+
+		return format.replace('{name}', str(source.name)).replace('{arg}', str(bind.arg))
+
+	var resolved: String = resolve_bind_code(_save_data, _bind_code)
+
+	return resolved if not resolved.is_empty() else '(missing)'
 
 
 static func reposition_control_inside(_control: Control) -> void:
@@ -508,11 +788,6 @@ static func get_dependency_type(res: Resource) -> HenEnums.DependencyType:
 		return HenEnums.DependencyType.MACRO
 		
 	return HenEnums.DependencyType.VAR
-
-
-# returns the scaled size for high dpi displays
-static func get_scaled_size(base_size: int) -> int:
-	return int(base_size * EditorInterface.get_editor_scale())
 
 
 static func is_circular_dependent(_sub_type: HenVirtualCNode.SubType) -> bool:
@@ -691,3 +966,21 @@ static func is_abstract_class_needing_connection(_type: StringName, _identity_ty
 		ClassDB.is_parent_class(_type, _identity_type) and
 		not ClassDB.can_instantiate(_type)
 	)
+
+
+# true when a variable/property declared as _holder_type can hold an instance of
+# _class. a script's extends is a lower bound — one extending Node can live on a
+# Sprite2D — so either side may be the narrower one; only sibling branches fail
+static func can_hold_instance_of(_holder_type: StringName, _class: StringName) -> bool:
+	if _holder_type == _class:
+		return true
+
+	# every new variable is born Variant, and an untyped one does hold anything
+	if _holder_type == &'Variant':
+		return true
+
+	# an unknown class on either side would filter everything out
+	if not ClassDB.class_exists(_class) or not ClassDB.class_exists(_holder_type):
+		return is_type_relation_valid(_class, _holder_type)
+
+	return ClassDB.is_parent_class(_class, _holder_type) or ClassDB.is_parent_class(_holder_type, _class)

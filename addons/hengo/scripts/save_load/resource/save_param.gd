@@ -9,6 +9,21 @@ var type: StringName = &'Variant':
 		notify_property_list_changed()
 
 var default_value: Variant = null
+# optional: this input's effective type follows another input's bound source
+@export var type_from: StringName = &''
+# optional: fixed set of code fragments this input can hold, shown as a dropdown
+@export var options: Array[String] = []
+# the value is emitted verbatim instead of being quoted as a literal
+@export var raw: bool = false
+# the input is an assignment target: it must be bound, and only to something
+# assignable — a variable or a property, never a call
+@export var lvalue: bool = false
+# the input is written to, but leaving it unbound is fine: the macro only emits
+# the assignment when it is set
+@export var optional: bool = false
+# the input is read, but a literal makes no sense for it (a node reference), so
+# it must be bound; any source works, including a node path
+@export var bind_only: bool = false
 
 
 func _init() -> void:
@@ -23,6 +38,14 @@ static func create(data: Dictionary = {}) -> HenSaveParam:
 		if data.has('name'): p.name = data.name
 		if data.has('type'): p.type = data.type
 		if data.has('id'): p.id = str(data.id)
+		if data.has('type_from'): p.type_from = StringName(str(data.type_from))
+		if data.has('raw'): p.raw = bool(data.raw)
+		if data.has('lvalue'): p.lvalue = bool(data.lvalue)
+		if data.has('bind_only'): p.bind_only = bool(data.bind_only)
+		if data.has('optional'): p.optional = bool(data.optional)
+		if data.has('options'):
+			for option: Variant in data.options:
+				p.options.append(str(option))
 		if data.has('default_value'): p.default_value = data.default_value
 	return p
 
@@ -32,8 +55,20 @@ func get_data() -> Dictionary:
 		name = name,
 		type = type,
 		id = id,
+		type_from = type_from,
+		options = options,
+		raw = raw,
+		lvalue = lvalue,
+		bind_only = bind_only,
+		optional = optional,
 		default_value = default_value
 	}
+
+
+func _validate_property(_property: Dictionary) -> void:
+	super (_property)
+	if _property.name in [&'type_from', &'options', &'raw', &'lvalue', &'bind_only', &'optional']:
+		_property.usage = PROPERTY_USAGE_STORAGE
 
 
 func _get_property_list() -> Array[Dictionary]:

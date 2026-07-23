@@ -21,7 +21,7 @@ var _active_sb: StyleBoxFlat
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	custom_minimum_size.y = ROW_HEIGHT
+	custom_minimum_size.y = ThemeUtils.fs(ROW_HEIGHT)
 	_build_styles()
 	_build_children()
 	_apply_visual_state()
@@ -89,8 +89,11 @@ func _build_children() -> void:
 	add_child(_hbox)
 
 	_icon = TextureRect.new()
-	_icon.custom_minimum_size = Vector2(18, 18)
-	_icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	var _icon_size: int = ThemeUtils.fs(16)
+	_icon.custom_minimum_size = Vector2(_icon_size, _icon_size)
+	# shrink-center keeps the icon at its size instead of stretching to row height
+	_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hbox.add_child(_icon)

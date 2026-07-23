@@ -25,7 +25,7 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 
-	default_item_height = HenUtils.get_scaled_size(50)
+	default_item_height = 50
 
 	var v_scroll: VScrollBar = scroll_container.get_v_scroll_bar()
 	if v_scroll:

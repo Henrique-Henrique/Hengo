@@ -6,7 +6,7 @@ var errors: Array = []
 func _ready() -> void:
 	var label: Label = Label.new()
 	label.text = 'Error List'
-	label.add_theme_font_size_override('font_size', 24)
+	ThemeUtils.apply_font_size(label, 24)
 	add_child(label)
 	
 	var scroll: ScrollContainer = ScrollContainer.new()

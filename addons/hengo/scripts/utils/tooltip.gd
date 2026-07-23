@@ -22,10 +22,9 @@ func go_to(_pos: Vector2, _content: String, _self_pos: Vector2 = Vector2.ZERO) -
 	reset_size()
 
 	# restrict max size based on viewport
-	var editor_scale: float = EditorInterface.get_editor_scale() if Engine.is_editor_hint() else 1.0
 	var vp_size: Vector2 = get_viewport_rect().size
-	var max_w: float = max(500.0 * editor_scale, vp_size.x * 0.4)
-	var max_h: float = max(300.0 * editor_scale, vp_size.y * 0.4)
+	var max_w: float = max(500.0, vp_size.x * 0.4)
+	var max_h: float = max(300.0, vp_size.y * 0.4)
 
 	if size.x > max_w:
 		autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

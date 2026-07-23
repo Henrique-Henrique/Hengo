@@ -50,6 +50,8 @@ class DirectedGraphEdge:
 	}
 	var sections: Array = []
 	var kind: StringName = &'forward'
+	# presentation of the transition itself: {kind, icon}; drives the edge color and pill icon
+	var meta: Dictionary = {}
 
 
 	# initializes edge between source and target
@@ -59,3 +61,4 @@ class DirectedGraphEdge:
 		target = config.target
 		transition = config.transition
 		label.text = config.label_text
+		meta = config.get('meta', {})

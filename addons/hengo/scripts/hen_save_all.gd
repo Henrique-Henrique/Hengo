@@ -387,6 +387,10 @@ func _collect_routes(save_data: HenSaveData) -> Array:
 func _validate_routes(save_data: HenSaveData, routes: Array) -> Array[String]:
 	var errors: Array[String] = []
 
+	# a script with states and no start flag would compile as change_state("")
+	if not save_data.states.is_empty() and not _has_start_state(save_data):
+		errors.append('No start state defined. Mark one state as the start state.')
+
 	for route in routes:
 		if not route:
 			continue
@@ -396,6 +400,14 @@ func _validate_routes(save_data: HenSaveData, routes: Array) -> Array[String]:
 				errors.append(str(err.get('description', 'Unknown graph error')))
 
 	return errors
+
+
+func _has_start_state(save_data: HenSaveData) -> bool:
+	for state: HenSaveState in save_data.states:
+		if state.start:
+			return true
+
+	return false
 
 
 # recalculates deps from pre-collected routes

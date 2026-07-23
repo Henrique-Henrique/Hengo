@@ -26,6 +26,7 @@ func _ready() -> void:
 
 	gui_input.connect(_on_gui_input)
 	name_label.add_theme_color_override('font_color', NAME_COLOR_NORMAL)
+	ThemeUtils.apply_font_scale(self )
 
 	HenUtils.tint_button(rename_bt, HenUtils.UI_COLORS.rename, false)
 	HenUtils.tint_button(delete_bt, HenUtils.UI_COLORS.destructive, false)

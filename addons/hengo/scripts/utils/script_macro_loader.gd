@@ -2,6 +2,7 @@
 class_name HenScriptMacroLoader extends RefCounted
 
 const MACRO_PATH: String = 'res://hengo/macros'
+const NATIVE_ACTION_PATH: String = 'res://addons/hengo/actions'
 
 # path -> { mtime: int, id: StringName, inputs: Array, outputs: Array, flow_inputs: Array, flow_outputs: Array }
 static var _cache: Dictionary = {}
@@ -13,33 +14,59 @@ static func load_script_macros() -> void:
 	if not global.SAVE_DATA:
 		return
 
-	if not DirAccess.dir_exists_absolute(MACRO_PATH):
-		DirAccess.make_dir_absolute(MACRO_PATH)
+	global.script_macros.clear()
+	_scan_dir(MACRO_PATH, global, global.script_macros, true)
+
+
+# scans the plugin-native action definitions into a separate pool
+static func load_native_actions() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global.SAVE_DATA:
 		return
 
-	global.script_macros.clear()
+	global.action_macros.clear()
+	_scan_dir(NATIVE_ACTION_PATH, global, global.action_macros, false)
 
-	var dir: DirAccess = DirAccess.open(MACRO_PATH)
-	if not dir:
+
+static func _scan_dir(base_path: String, global: HenGlobal, target: Array[HenSaveMacro], create_if_missing: bool) -> void:
+	if not DirAccess.dir_exists_absolute(base_path):
+		if create_if_missing:
+			DirAccess.make_dir_absolute(base_path)
 		return
 
 	var seen_paths: Array[String] = []
-	dir.list_dir_begin()
-	var file_name: String = dir.get_next()
-	while file_name != '':
-		if not dir.current_is_dir() and file_name.ends_with('.gd'):
-			var path: String = MACRO_PATH + '/' + file_name
-			seen_paths.append(path)
-			_load_macro_script(path, global)
-		file_name = dir.get_next()
+	_scan_recursive(base_path, '', global, target, seen_paths)
 
-	# evict cache entries for deleted files
+	# evict cache entries for deleted files under this directory only
 	for cached_path: String in _cache.keys():
-		if not seen_paths.has(cached_path):
+		if cached_path.begins_with(base_path) and not seen_paths.has(cached_path):
 			_cache.erase(cached_path)
 
 
-static func _load_macro_script(path: String, global: HenGlobal) -> void:
+# walks a macro directory; a sub-directory name becomes the category of the
+# scripts inside it, root files stay uncategorized
+static func _scan_recursive(dir_path: String, category: String, global: HenGlobal, target: Array[HenSaveMacro], seen_paths: Array[String]) -> void:
+	var dir: DirAccess = DirAccess.open(dir_path)
+	if not dir:
+		return
+
+	dir.list_dir_begin()
+	var file_name: String = dir.get_next()
+	while file_name != '':
+		var path: String = dir_path + '/' + file_name
+
+		if dir.current_is_dir():
+			if not file_name.begins_with('.'):
+				_scan_recursive(path, category if not category.is_empty() else file_name, global, target, seen_paths)
+		elif file_name.ends_with('.gd'):
+			seen_paths.append(path)
+			_load_macro_script(path, global, target, category)
+
+		file_name = dir.get_next()
+
+
+static func _load_macro_script(path: String, global: HenGlobal, target: Array[HenSaveMacro], category: String = '') -> void:
 	var mtime: int = FileAccess.get_modified_time(path)
 	var cached: Variant = _cache.get(path)
 
@@ -56,18 +83,36 @@ static func _load_macro_script(path: String, global: HenGlobal) -> void:
 		recipe = {
 			mtime = mtime,
 			id = instance.get_id(),
+			display_name = instance.get_display_name(),
+			icon = instance.get_icon(),
+			color = instance.get_color(),
 			inputs = instance.get_inputs(),
 			outputs = instance.get_outputs(),
 			flow_inputs = instance.get_flow_inputs(),
 			flow_outputs = instance.get_flow_outputs(),
+			target_classes = instance.get_target_classes(),
+			default_phase = instance.get_default_phase(),
+			has_body = instance.get_has_body(),
 		}
 		_cache[path] = recipe
 
 	var macro: HenSaveMacro = HenSaveMacro.create()
-	macro.name = path.get_file().get_basename()
+	# human name: the macro's own, else the file name capitalized (set_value -> "Set Value")
+	var display_name: String = str(recipe.get('display_name', ''))
+	macro.name = display_name if not display_name.is_empty() else path.get_file().get_basename().capitalize()
 	macro.is_script_macro = true
 	macro.script_path = path
 	macro.id = recipe.id
+	macro.category = category
+	macro.default_phase = StringName(str(recipe.get('default_phase', '')))
+	macro.has_body = bool(recipe.get('has_body', false))
+	# category supplies the presentation defaults; the macro's own declaration wins
+	var category_data: Dictionary = HenActionCategories.get_data(category)
+	macro.icon = str(recipe.get('icon', '')) if not str(recipe.get('icon', '')).is_empty() else str(category_data.icon)
+	macro.color = str(recipe.get('color', '')) if not str(recipe.get('color', '')).is_empty() else str(category_data.color)
+
+	for target_class: StringName in recipe.get('target_classes', [] as Array[StringName]):
+		macro.target_classes.append(target_class)
 
 	for input: Dictionary in recipe.inputs:
 		macro.inputs.append(HenSaveParam.create(input))
@@ -81,4 +126,4 @@ static func _load_macro_script(path: String, global: HenGlobal) -> void:
 	for flow_output: Dictionary in recipe.flow_outputs:
 		macro.flow_outputs.append(HenSaveFlowParam.create(flow_output))
 
-	global.script_macros.append(macro)
+	target.append(macro)

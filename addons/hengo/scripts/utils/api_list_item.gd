@@ -10,8 +10,8 @@ extends MarginContainer
 var data: Dictionary
 
 func _ready() -> void:
-	name_label.add_theme_font_size_override('font_size', 15 * EditorInterface.get_editor_scale())
-	type_label.add_theme_font_size_override('font_size', 12 * EditorInterface.get_editor_scale())
+	ThemeUtils.apply_font_size(name_label, 15)
+	ThemeUtils.apply_font_size(type_label, 12)
 	bt.gui_input.connect(_on_bt_gui_input)
 
 

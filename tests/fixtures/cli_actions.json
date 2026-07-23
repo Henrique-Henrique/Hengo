@@ -1,0 +1,91 @@
+{
+	"collection": "CLI Test",
+	"scripts": [
+		{
+			"name": "cli_player",
+			"extends": "CharacterBody2D",
+			"vars": [
+				{ "name": "speed", "type": "float", "value": 200.0, "export": true },
+				{ "name": "hp", "type": "int", "value": 3 },
+				{ "name": "dir", "type": "Vector2", "value": [1, 0] },
+				{ "name": "enemy_ref", "type": "Variant" }
+			],
+			"states": [
+				{
+					"name": "Idle",
+					"start": true,
+					"description": "waits for input",
+					"actions": [
+						{ "id": "set_value", "phase": "enter", "inputs": { "target": { "bind": "speed" }, "value": { "expr": "0.0" } } },
+						{ "id": "print_value", "phase": "enter", "inputs": { "value": "idle" } },
+						{
+							"id": "if_condition",
+							"phase": "update",
+							"inputs": { "condition": { "expr": "hp <= 0", "words": { "hp": { "bind": "hp" } } } },
+							"branches": { "true": "Dead" }
+						},
+						{
+							"id": "input_action",
+							"phase": "update",
+							"inputs": { "action": "ui_accept", "mode": "is_action_just_pressed" },
+							"branches": { "true": "Run" }
+						}
+					],
+					"sub_states": [
+						{
+							"name": "Breathing",
+							"start": true,
+							"actions": [
+								{ "id": "add_to_value", "phase": "update", "inputs": { "target": { "bind": "hp" }, "amount": { "expr": "0" } } }
+							]
+						}
+					]
+				},
+				{
+					"name": "Run",
+					"actions": [
+						{ "id": "set_value", "phase": "update", "inputs": { "target": { "prop": "velocity" }, "value": { "expr": "dir * speed", "words": { "dir": { "bind": "dir" }, "speed": { "bind": "speed" } } } } },
+						{ "id": "move_and_slide", "phase": "physics" },
+						{ "id": "print_value", "phase": "update", "inputs": { "value": { "native": "Delta" } } },
+						{ "id": "transition", "phase": "update", "branches": { "to": "Idle" } }
+					]
+				},
+				{
+					"name": "Dead",
+					"actions": [
+						{ "id": "print_value", "phase": "enter", "inputs": { "value": "dead" } },
+						{
+							"id": "transition",
+							"phase": "enter",
+							"branches": {
+								"to": { "script": "cli_enemy", "state": "Alert", "instance": "enemy_ref", "check_instance": true }
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "cli_enemy",
+			"extends": "Node2D",
+			"vars": [
+				{ "name": "alerted", "type": "bool", "value": false }
+			],
+			"states": [
+				{
+					"name": "Patrol",
+					"start": true,
+					"actions": [
+						{ "id": "print_value", "phase": "enter", "inputs": { "value": "patrolling" } }
+					]
+				},
+				{
+					"name": "Alert",
+					"actions": [
+						{ "id": "set_value", "phase": "enter", "inputs": { "target": { "bind": "alerted" }, "value": { "expr": "true" } } }
+					]
+				}
+			]
+		}
+	]
+}

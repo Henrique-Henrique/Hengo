@@ -21,8 +21,7 @@ func _ready() -> void:
 	z_index = 150
 	mouse_filter = MOUSE_FILTER_STOP
 
-	var w: int = HenUtils.get_scaled_size(320)
-	custom_minimum_size = Vector2(w, 0)
+	custom_minimum_size = Vector2(320, 0)
 
 	HenCompileResultPanel.last_report = report
 
@@ -45,7 +44,7 @@ func _build_ui() -> void:
 	# Header
 	var header_margin := MarginContainer.new()
 	header_margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var m: int = HenUtils.get_scaled_size(8)
+	var m: int = 8
 	header_margin.add_theme_constant_override('margin_left', m)
 	header_margin.add_theme_constant_override('margin_top', m)
 	header_margin.add_theme_constant_override('margin_right', int(m * 0.5))
@@ -68,7 +67,7 @@ func _build_ui() -> void:
 	# Summary label
 	var summary := Label.new()
 	summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	summary.add_theme_font_size_override('font_size', HenUtils.get_scaled_size(12))
+	ThemeUtils.apply_font_size(summary, 12)
 	var parts: Array[String] = []
 	if success_count > 0:
 		parts.append('%d compiled' % success_count)
@@ -84,7 +83,7 @@ func _build_ui() -> void:
 	_expand_btn = Button.new()
 	_expand_btn.icon = _ICON_EXPAND
 	_expand_btn.flat = true
-	_expand_btn.custom_minimum_size = Vector2(HenUtils.get_scaled_size(26), HenUtils.get_scaled_size(26))
+	_expand_btn.custom_minimum_size = Vector2(26, 26)
 	_expand_btn.tooltip_text = 'Show details'
 	_expand_btn.pressed.connect(_toggle_expand)
 	header.add_child(_expand_btn)
@@ -93,8 +92,8 @@ func _build_ui() -> void:
 	var close_btn := Button.new()
 	close_btn.text = '×'
 	close_btn.flat = true
-	close_btn.custom_minimum_size = Vector2(HenUtils.get_scaled_size(26), HenUtils.get_scaled_size(26))
-	close_btn.add_theme_font_size_override('font_size', HenUtils.get_scaled_size(15))
+	close_btn.custom_minimum_size = Vector2(26, 26)
+	ThemeUtils.apply_font_size(close_btn, 15)
 	close_btn.tooltip_text = 'Dismiss'
 	close_btn.pressed.connect(_dismiss)
 	header.add_child(close_btn)
@@ -119,8 +118,8 @@ func _build_detail_list() -> void:
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var max_h: int = HenUtils.get_scaled_size(220)
-	scroll.custom_minimum_size = Vector2(0, min(items.size() * HenUtils.get_scaled_size(28), max_h))
+	var max_h: int = 220
+	scroll.custom_minimum_size = Vector2(0, min(items.size() * 28, max_h))
 	_detail_container.add_child(scroll)
 
 	var list := VBoxContainer.new()
@@ -143,7 +142,7 @@ func _build_detail_list() -> void:
 
 	# footer with "Open Full Report" button
 	var footer_margin := MarginContainer.new()
-	var m: int = HenUtils.get_scaled_size(6)
+	var m: int = 6
 	footer_margin.add_theme_constant_override('margin_left', m)
 	footer_margin.add_theme_constant_override('margin_top', m)
 	footer_margin.add_theme_constant_override('margin_right', m)
@@ -160,7 +159,7 @@ func _build_detail_list() -> void:
 
 func _create_row(item_data: Dictionary) -> Control:
 	var status: String = str(item_data.get('status', '')).to_lower()
-	var m: int = HenUtils.get_scaled_size(6)
+	var m: int = 6
 	var row_margin := MarginContainer.new()
 	row_margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row_margin.add_theme_constant_override('margin_left', m)
@@ -192,7 +191,7 @@ func _create_row(item_data: Dictionary) -> Control:
 	name_label.text = str(item_data.get('script_name', item_data.get('script_id', '?')))
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_label.clip_text = true
-	name_label.add_theme_font_size_override('font_size', HenUtils.get_scaled_size(11))
+	ThemeUtils.apply_font_size(name_label, 11)
 	match status:
 		'success':
 			name_label.add_theme_color_override('font_color', Color('d1d5db'))
@@ -204,7 +203,7 @@ func _create_row(item_data: Dictionary) -> Control:
 
 	var status_label := Label.new()
 	status_label.text = status.to_upper()
-	status_label.add_theme_font_size_override('font_size', HenUtils.get_scaled_size(10))
+	ThemeUtils.apply_font_size(status_label, 10)
 	match status:
 		'success':
 			status_label.add_theme_color_override('font_color', Color('22c55e'))
@@ -246,7 +245,7 @@ func _open_full_report() -> void:
 func _dismiss() -> void:
 	var tween := get_tree().create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(self , 'position:x', position.x + HenUtils.get_scaled_size(20), 0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.tween_property(self , 'position:x', position.x + 20, 0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_property(self , 'modulate:a', 0.0, 0.18).set_trans(Tween.TRANS_SINE)
 	tween.chain().tween_callback(queue_free)
 
@@ -257,9 +256,9 @@ func _position_and_animate() -> void:
 		queue_free()
 		return
 
-	var margin: int = HenUtils.get_scaled_size(12)
-	var toolbar_h: int = HenUtils.get_scaled_size(50)
-	var w: int = HenUtils.get_scaled_size(320)
+	var margin: int = 12
+	var toolbar_h: int = 50
+	var w: int = 320
 
 	# Place at top-right, just below the toolbar
 	var target_x: float = parent.size.x - w - margin

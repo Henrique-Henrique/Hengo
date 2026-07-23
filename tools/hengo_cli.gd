@@ -2,27 +2,24 @@ extends SceneTree
 
 # this cli is just for tests purposes; it is not a supported entry point for hengo usage
 
-# headless entry point to generate a hengo script from a high-level json.
+# headless entry point to generate a hengo script from a high-level json. the json
+# describes variables, states and the actions each state runs — an action is
+# referenced by its macro id, never redeclared.
 # usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name]
+#        godot --headless -s tools/hengo_cli.gd -- --list-actions [--class=Node2D]
 
 
 const HENGO_ROOT_SCENE: String = 'res://addons/hengo/scenes/hengo_root.tscn'
-const HenHengoTranslate = preload('res://tools/hengo_translate.gd')
+const USAGE: String = 'usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name] | --list-actions [--class=Node2D]'
+# codegen marks an action it could not emit with this prefix
+const UNRESOLVED_MARKER: String = '# hengo: action '
 
 
 func _initialize() -> void:
 	var user_args: PackedStringArray = OS.get_cmdline_user_args()
 
 	if user_args.is_empty():
-		_fail('usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name]')
-		return
-
-	var json_path: String = user_args[0]
-	var collection_name: String = user_args[1] if user_args.size() > 1 else 'AI'
-
-	var json: Dictionary = _read_json(json_path)
-	if json.is_empty():
-		_fail('could not read or parse json: ' + json_path)
+		_fail(USAGE)
 		return
 
 	var root_scene: Node = await _bootstrap()
@@ -30,27 +27,36 @@ func _initialize() -> void:
 		_fail('bootstrap failed (api not ready)')
 		return
 
-	var result: Dictionary = await _generate(json, collection_name)
+	if user_args[0] == '--list-actions':
+		print(JSON.stringify(_list_actions(_arg_value(user_args, '--class', 'Node')), '\t'))
+		root_scene.free()
+		quit(0)
+		return
+
+	var json: Dictionary = _read_json(user_args[0])
+	if json.is_empty():
+		root_scene.free()
+		_fail('could not read or parse json: ' + user_args[0])
+		return
+
+	var collection_name: String = user_args[1] if user_args.size() > 1 else 'AI'
+	var result: Dictionary = _generate(json, collection_name)
 	root_scene.free()
 
 	if not result.ok:
 		_fail(result.get('error', 'unknown error'))
 		return
 
-	print('OK -> collection: ', result.collection)
-	for s: Dictionary in result.scripts:
-		var rt: String = 'round-trip ok' if s.roundtrip_ok else ('ROUND-TRIP MISMATCH: ' + str(s.roundtrip_detail))
-		print('OK -> ', s.script_path, '  [', rt, ']')
-		print('        nodes: ', s.nodes)
+	_report(result)
 
-	if result.roundtrip_ok:
+	if result.roundtrip_ok and result.resolved_ok:
 		quit(0)
 	else:
-		printerr('[hengo_cli] one or more scripts failed round-trip')
 		quit(2)
 
 
-# instantiates the hengo scene, registers singletons and waits for the native api
+# instantiates the hengo scene, registers singletons, waits for the native api and
+# loads the action pools (they need a SAVE_DATA to exist)
 func _bootstrap() -> Node:
 	var root_scene: Node = (load(HENGO_ROOT_SCENE) as PackedScene).instantiate()
 
@@ -71,7 +77,55 @@ func _bootstrap() -> Node:
 		root_scene.free()
 		return null
 
+	# macro loading creates routes in the active save data, so it runs against a
+	# scratch one instead of polluting a generated script
+	global.SAVE_DATA = HenSaveData.new()
+	HenScriptMacroLoader.load_native_actions()
+	HenScriptMacroLoader.load_script_macros()
+
 	return root_scene
+
+
+# every action the pool offers, as the contract for writing the json
+func _list_actions(_class: String) -> Array:
+	var list: Array = []
+
+	for macro: HenSaveMacro in HenHengoActions.pool():
+		if not macro.serves_class(StringName(_class)):
+			continue
+
+		list.append({
+			id = str(macro.id),
+			name = macro.name,
+			category = macro.category,
+			icon = macro.icon,
+			phases = HenSaveAction.supported_phases(macro).map(func(p: StringName) -> String: return str(p)),
+			default_phase = str(HenSaveAction.default_phase(macro)),
+			inputs = macro.inputs.map(_input_data),
+			outputs = macro.outputs.map(func(p: HenSaveParam) -> Dictionary: return {id = str(p.id), name = p.name, type = str(p.type)}),
+			has_body = macro.has_body,
+			branches = macro.flow_outputs.map(func(f: HenSaveFlowParam) -> String: return str(f.id)),
+			target_classes = macro.target_classes.map(func(c: StringName) -> String: return str(c)),
+		})
+
+	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.id < b.id)
+
+	return list
+
+
+func _input_data(_param: HenSaveParam) -> Dictionary:
+	return {
+		id = str(_param.id),
+		name = _param.name,
+		type = str(_param.type),
+		default = _param.default_value,
+		raw = _param.raw,
+		lvalue = _param.lvalue,
+		bind_only = _param.bind_only,
+		optional = _param.optional,
+		type_from = str(_param.type_from),
+		options = _param.options,
+	}
 
 
 # builds a collection of one or more scripts, persists savedata and compiles .gd.
@@ -103,13 +157,20 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 		built.append(b)
 		all_scripts[String(b.identity.name).to_snake_case()] = b.save_data
 
-	# pass 2: build graphs. scripts referenced cross-script (transition_other) must
-	# come earlier in the list so their states exist when a later script references them
+	# pass 2a: declare vars and states of every script, so a cross-script branch
+	# resolves whatever order the json lists them
+	for b: Dictionary in built:
+		global.SAVE_DATA = b.save_data
+		var err: String = HenHengoActions.declare(b.save_data, b.spec)
+		if not err.is_empty():
+			return {ok = false, error = 'in script ' + b.identity.name + ': ' + err}
+
+	# pass 2b: fill the action lists
 	for b: Dictionary in built:
 		global.SAVE_DATA = b.save_data
 		router.current_route = b.base_route
 		map_deps.ast_list.set(b.identity.id, HenUtils.get_current_ast_list())
-		var err: String = HenHengoTranslate.build(b.save_data, b.spec, all_scripts)
+		var err: String = HenHengoActions.build_actions(b.save_data, b.spec, all_scripts)
 		if not err.is_empty():
 			return {ok = false, error = 'in script ' + b.identity.name + ': ' + err}
 
@@ -150,7 +211,9 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 			save_path = b.id_path.path_join(HenEnums.SAVE_FILE),
 			script_path = b.identity.script_path,
 			code = code,
-			nodes = _tally_subtypes(b.save_data),
+			actions = _tally_actions(b.save_data),
+			unresolved = _unresolved_lines(code),
+			parse_error = _parse_error(code, b.identity.script_path),
 		})
 
 	collection.last_active_id = StringName(str(built[0].id))
@@ -159,13 +222,36 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 
 	# pass 4: round-trip verify each script (reload .res -> codegen must match)
 	var all_rt: bool = true
+	var all_resolved: bool = true
 	for s: Dictionary in scripts:
 		var rt: Dictionary = _verify_roundtrip(s.save_path, s.code)
 		s.roundtrip_ok = rt.ok
 		s.roundtrip_detail = rt.detail
 		all_rt = all_rt and rt.ok
+		all_resolved = all_resolved and (s.unresolved as Array).is_empty() and str(s.parse_error).is_empty()
 
-	return {ok = true, collection = collection.name, scripts = scripts, roundtrip_ok = all_rt}
+	return {ok = true, collection = collection.name, scripts = scripts, roundtrip_ok = all_rt, resolved_ok = all_resolved}
+
+
+func _report(_result: Dictionary) -> void:
+	print('OK -> collection: ', _result.collection)
+
+	for s: Dictionary in _result.scripts:
+		var rt: String = 'round-trip ok' if s.roundtrip_ok else ('ROUND-TRIP MISMATCH: ' + str(s.roundtrip_detail))
+		print('OK -> ', s.script_path, '  [', rt, ']')
+		print('        actions: ', s.actions)
+
+		for line: String in s.unresolved:
+			printerr('[hengo_cli] ', s.name, ': ', line)
+
+		if not str(s.parse_error).is_empty():
+			printerr('[hengo_cli] ', s.name, ': ', s.parse_error)
+
+	if not _result.resolved_ok:
+		printerr('[hengo_cli] one or more scripts could not be emitted')
+
+	if not _result.roundtrip_ok:
+		printerr('[hengo_cli] one or more scripts failed round-trip')
 
 
 # creates the on-disk folder + identity + empty save_data for one script spec
@@ -221,24 +307,47 @@ func _verify_roundtrip(_save_path: String, _expected_code: String) -> Dictionary
 	return {ok = false, detail = 'reloaded code differs from in-memory (%d vs %d chars)' % [reloaded_code.length(), _expected_code.length()]}
 
 
-# compact count of node sub_types across all routes (proves real nodes, not raw)
-func _tally_subtypes(_save_data: HenSaveData) -> String:
-	var rev: Dictionary = {}
-	for k: String in HenVirtualCNode.SubType.keys():
-		rev[HenVirtualCNode.SubType[k]] = k
-
-	var tally: Dictionary = {}
-	for route_id: StringName in _save_data.routes:
-		for vc: HenVirtualCNode in (_save_data.routes[route_id] as HenRouteData).virtual_cnode_list:
-			var nm: String = rev.get(vc.sub_type, str(vc.sub_type))
-			tally[nm] = tally.get(nm, 0) + 1
-
-	var keys: Array = tally.keys()
-	keys.sort()
+# actions per state and phase, so the report proves what was built
+func _tally_actions(_save_data: HenSaveData) -> String:
 	var parts: PackedStringArray = []
-	for k: String in keys:
-		parts.append('%s:%d' % [k, tally[k]])
-	return ' '.join(parts)
+
+	for state_id: Variant in _save_data.state_actions:
+		var state: HenSaveState = HenGeneratorAction.find_state(_save_data, StringName(str(state_id)))
+		var phases: Dictionary = {}
+
+		for action: HenSaveAction in _save_data.state_actions[state_id]:
+			var phase: String = str(action.phase)
+			phases[phase] = phases.get(phase, 0) + 1
+
+		var counts: PackedStringArray = []
+		for phase: StringName in HenSaveAction.PHASE_ORDER:
+			if phases.has(str(phase)):
+				counts.append('%s:%d' % [phase, phases[str(phase)]])
+
+		parts.append((state.name if state else str(state_id)) + ': ' + ' '.join(counts))
+
+	return ' · '.join(parts) if not parts.is_empty() else '(none)'
+
+
+# feeds the emitted source to the gdscript parser, so a broken macro body is
+# caught here instead of at runtime
+func _parse_error(_code: String, _path: String) -> String:
+	var script: GDScript = GDScript.new()
+	script.source_code = _code
+	script.take_over_path(_path)
+
+	return '' if script.reload() == OK else 'does not parse'
+
+
+# codegen leaves a comment where an action could not be emitted; those are errors here
+func _unresolved_lines(_code: String) -> Array:
+	var lines: Array = []
+
+	for line: String in _code.split('\n'):
+		if line.strip_edges().begins_with(UNRESOLVED_MARKER):
+			lines.append(line.strip_edges())
+
+	return lines
 
 
 # removes every existing collection whose manifest name matches (keeps regen idempotent)
@@ -262,6 +371,14 @@ func _read_json(_path: String) -> Dictionary:
 	var text: String = FileAccess.get_file_as_string(_path)
 	var parsed: Variant = JSON.parse_string(text)
 	return parsed if parsed is Dictionary else {}
+
+
+func _arg_value(_args: PackedStringArray, _flag: String, _fallback: String) -> String:
+	for arg: String in _args:
+		if arg.begins_with(_flag + '='):
+			return arg.substr(_flag.length() + 1)
+
+	return _fallback
 
 
 func _fail(_msg: String) -> void:

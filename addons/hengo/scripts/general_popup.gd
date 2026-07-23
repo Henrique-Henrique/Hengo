@@ -44,7 +44,9 @@ func show_content(content: Control, opts: Dictionary = {}) -> HenPopupContainer:
 		return null
 
 	var popup: HenPopupContainer = POPUP_CONTAINER_SCENE.instantiate()
-	_ui_base.add_child(popup)
+	# hosts on the editor base so popups escape the dock rect and keep window coords
+	EditorInterface.get_base_control().add_child(popup)
+	popup.theme = _ui_base.theme
 	_popups.append(popup)
 
 	popup.closed.connect(func():
@@ -73,6 +75,14 @@ func hide_all() -> void:
 			popup.hide_popup()
 		else:
 			_popups.pop_back()
+
+
+# frees every open popup right away (base_control host outlives main_scene)
+func force_close_all() -> void:
+	for popup: HenPopupContainer in _popups:
+		if is_instance_valid(popup):
+			popup.queue_free()
+	_popups.clear()
 
 
 func _on_popup_closed(popup: HenPopupContainer) -> void:

@@ -15,6 +15,9 @@ const ZOOM_INCREMENT_PATH = 'hengo/settings/zoom_increment'
 const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
 const POOL_SIZE_PATH = 'hengo/settings/pool_size'
+const DOCK_LOCATION_PATH = 'hengo/settings/dock_location'
+const ACTIONS_EXPANDED_PATH = 'hengo/settings/actions_expanded'
+const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 
 @export_tool_button('Compile current', 'Build') var compile_current: Callable = _on_compile_current_pressed
 
@@ -38,6 +41,28 @@ const POOL_SIZE_PATH = 'hengo/settings/pool_size'
 	get:
 		return _get_value(AUTO_LAYOUT_PATH, true)
 
+@export_group('Interface')
+
+# multiplies chrome ui font sizes; tuned down for 1080p, applied on reload.
+# canvas and states are excluded since they have their own zoom control
+@export_range(0.5, 1.5, 0.05) var font_scale: float:
+	set(value):
+		_set_value(FONT_SCALE_PATH, value)
+	get:
+		return _get_value(FONT_SCALE_PATH, 0.85)
+
+@export_group('Panel')
+
+# re-docks the plugin live: 0 bottom panel, 1 left dock, 2 right dock
+@export_enum('Bottom', 'Left', 'Right') var dock_location: int:
+	set(value):
+		_set_value(DOCK_LOCATION_PATH, value)
+		var global: HenGlobal = Engine.get_singleton('Global')
+		if global and global.HENGO_EDITOR_PLUGIN:
+			global.HENGO_EDITOR_PLUGIN.apply_dock_location(value)
+	get:
+		return _get_value(DOCK_LOCATION_PATH, 0)
+
 @export_group('Pool')
 
 @export_range(50, 5000, 10) var pool_size: int:
@@ -45,6 +70,15 @@ const POOL_SIZE_PATH = 'hengo/settings/pool_size'
 		_set_value(POOL_SIZE_PATH, value)
 	get:
 		return _get_value(POOL_SIZE_PATH, 500)
+
+@export_group('Actions')
+
+# whether the action list shows the value lines; written by the panel's expand/collapse all
+@export var actions_expanded: bool:
+	set(value):
+		_set_value(ACTIONS_EXPANDED_PATH, value)
+	get:
+		return _get_value(ACTIONS_EXPANDED_PATH, true)
 
 @export_group('Move')
 
@@ -121,6 +155,10 @@ func _set_value(path: String, value: Variant) -> void:
 	if global and global.get("CAM") and global.CAM.has_method("update_settings"):
 		global.CAM.update_settings()
 
+	# re-scale the ui live so the factor takes effect without a plugin reload
+	if path == FONT_SCALE_PATH and global and is_instance_valid(global.get('HENGO_ROOT')) and global.HENGO_ROOT.has_method('reapply_font_scale'):
+		global.HENGO_ROOT.reapply_font_scale()
+
 
 # gets project setting value
 func _get_value(path: String, default: Variant) -> Variant:
@@ -144,7 +182,10 @@ func _property_can_revert(property: StringName) -> bool:
 		&'zoom_increment',
 		&'zoom_rate',
 		&'debug_compilation',
-		&'pool_size'
+		&'pool_size',
+		&'dock_location',
+		&'actions_expanded',
+		&'font_scale'
 	]
 
 
@@ -178,6 +219,12 @@ func _property_get_revert(property: StringName) -> Variant:
 			return true
 		&'pool_size':
 			return 500
+		&'dock_location':
+			return 0
+		&'actions_expanded':
+			return true
+		&'font_scale':
+			return 0.85
 	return null
 
 

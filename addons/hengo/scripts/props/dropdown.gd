@@ -59,6 +59,12 @@ func _on_pressed() -> void:
 			options = (HenEnums.VARIANT_TYPES + ClassDB.get_class_list() as Array).map(func(x: String): return {
 				name = x
 			})
+		'var_type':
+			# project scripts come first: a variable holding one keeps its identity
+			options = get_hengo_script_types()
+			options.append_array((HenEnums.VARIANT_TYPES + ClassDB.get_class_list() as Array).map(func(x: String): return {
+				name = x
+			}))
 		'hengo_states':
 			options = global.SCRIPTS_STATES[custom_data] if global.SCRIPTS_STATES.has(custom_data) else []
 		'all_classes':
@@ -148,12 +154,47 @@ func _on_pressed() -> void:
 	})
 
 
+# every mapped script as a type option, labeled with the class it extends
+static func get_hengo_script_types() -> Array:
+	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var arr: Array = []
+
+	if not map_dep:
+		return arr
+
+	for script_id: StringName in map_dep.ast_list:
+		var ast: HenMapDependencies.ProjectAST = map_dep.ast_list[script_id]
+
+		if not ast.identity:
+			continue
+
+		if global and global.SAVE_DATA and global.SAVE_DATA.identity and ast.identity.id == global.SAVE_DATA.identity.id:
+			continue
+
+		arr.append({
+			name = ast.identity.name + ' (' + str(ast.identity.type) + ')',
+			type = ast.identity.type,
+			script_id = ast.identity.id
+		})
+
+	return arr
+
+
 func _selected(_item: Dictionary) -> void:
 	text = _item.name
 
 	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = true
 
 	match type:
+		'var_type':
+			# a script option carries its base class plus the identity to remember;
+			# both cases travel together so type and script_id never disagree
+			if _item.has('script_id'):
+				on_set_res_data.emit(_item)
+			else:
+				on_set_res_data.emit({type = _item.name, script_id = &''})
+			return
 		'hengo_states':
 			text = (_item.name as String).to_snake_case()
 		'state_transition':

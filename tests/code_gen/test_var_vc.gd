@@ -17,6 +17,26 @@ func test_get_var_code_generation() -> void:
 	assert_str(code).contains('var test_var = int()')
 
 
+# a variable holding another script's node starts empty: instancing its base
+# would leave a stray node around, and an export needs the type declared
+func test_script_typed_var_starts_null() -> void:
+	var_data.type = &'CharacterBody2D'
+	var_data.script_id = &'other_script'
+
+	assert_str(HenTest.get_all_code()).contains('var test_var = null')
+
+	var_data.is_export = true
+
+	assert_str(HenTest.get_all_code()).contains('@export var test_var: CharacterBody2D = null')
+
+
+# a plain node type keeps the old default, so existing scripts are untouched
+func test_plain_node_var_keeps_instanced_default() -> void:
+	var_data.type = &'Sprite2D'
+
+	assert_str(HenTest.get_all_code()).contains('var test_var = Sprite2D.new()')
+
+
 func test_var_getter() -> void:
 	var var_get_vc: HenVirtualCNode = HenVirtualCNode.instantiate_virtual_cnode(var_data.get_getter_cnode_data(''))
 	var code: String = HenTest.get_vc_code(var_get_vc)

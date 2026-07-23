@@ -7,7 +7,7 @@ extends Node2D
 var graph_root: HenStateViewerGraphTypes.DirectedGraphNode
 
 var _line_pool: Array[Line2D] = []
-var _label_pool: Array[Label] = []
+var _label_pool: Array[HenStateEdgePill] = []
 
 var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
@@ -18,9 +18,14 @@ const FORWARD_COLOR: Color = Color(0.64, 0.66, 0.72, 1.0)
 const BACK_COLOR: Color = Color('#c9a35e')
 const CROSS_COLOR: Color = Color('#c368ed')
 const FLASH_COLOR: Color = Color('#63ff92')
-const PILL_BG: Color = Color(0.13, 0.13, 0.16, 0.95)
-const LABEL_COLOR: Color = Color(0.9, 0.9, 0.9, 1.0)
+const TRANSITION_COLOR: Color = Color('#f97316')
+const CONDITION_COLOR: Color = Color('#38bdf8')
+const CROSS_SCRIPT_COLOR: Color = Color('#c368ed')
 const DIM_ALPHA: float = 0.2
+const LABEL_CLEARANCE: float = 4.0
+const SLIDE_STEP: float = 18.0
+const SLIDE_TRIES: int = 8
+const END_PAD: float = 24.0
 const NORMAL_WIDTH: float = 2.0
 const GLOW_WIDTH: float = 3.5
 const FLASH_WIDTH: float = 4.5
@@ -30,6 +35,7 @@ const FLASH_TOTAL_MS: float = 800.0
 const PULSE_LEN: float = 90.0
 const DASH_TEXTURE: Texture2D = preload('res://addons/hengo/assets/images/line_dashed.png')
 const DASH_SHADER: Shader = preload('res://addons/hengo/assets/shaders/state_dash.gdshader')
+const PILL_SCENE: PackedScene = preload('res://addons/hengo/scenes/state_edge_pill.tscn')
 
 
 func _ready() -> void:
@@ -73,8 +79,16 @@ func update_edges(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	queue_redraw()
 
 
-# maps each edge kind to its base color
+# the transition type owns the color; the routing kind only tints edges without meta
 func _kind_color(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Color:
+	match StringName(str(edge.meta.get('kind', ''))):
+		&'cross_script':
+			return CROSS_SCRIPT_COLOR
+		&'condition':
+			return CONDITION_COLOR
+		&'transition':
+			return TRANSITION_COLOR
+
 	match edge.kind:
 		&'cross':
 			return CROSS_COLOR
@@ -110,7 +124,6 @@ func _build_edge_views() -> void:
 	if graph_root == null:
 		return
 
-	var font: Font = ThemeDB.fallback_font
 	var path_util: HenStateViewerPathUtils = HenStateViewerPathUtils.new()
 	var edges: Array[HenStateViewerGraphTypes.DirectedGraphEdge] = _get_all_edges(graph_root)
 
@@ -139,48 +152,6 @@ func _build_edge_views() -> void:
 		line.points = points
 		line_idx += 1
 
-		# pill label at midpoint
-		var label_text: String = edge.label.text
-		var lbl: Label = null
-		if not label_text.is_empty():
-			var label_pos: Vector2 = section.label_pos if section.has('label_pos') \
-				else (section.start_point + section.end_point) * 0.5
-
-			var font_size_pill: int = 14
-			var text_size: Vector2 = font.get_string_size(label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size_pill)
-			var pad_x: float = 8.0
-			var pad_y: float = 3.0
-			var pill_w: float = text_size.x + pad_x * 2.0
-			var pill_h: float = text_size.y + pad_y * 2.0
-			var pill_rect: Rect2 = Rect2(label_pos - Vector2(pill_w * 0.5, pill_h * 0.5), Vector2(pill_w, pill_h))
-
-			var kc: Color = _kind_color(edge)
-			var style: StyleBoxFlat = StyleBoxFlat.new()
-			style.bg_color = PILL_BG
-			style.border_color = Color(kc.r, kc.g, kc.b, 0.55)
-			style.set_border_width_all(1)
-			style.corner_radius_top_left = 8
-			style.corner_radius_top_right = 8
-			style.corner_radius_bottom_left = 8
-			style.corner_radius_bottom_right = 8
-
-			if label_idx < _label_pool.size():
-				lbl = _label_pool[label_idx]
-			else:
-				lbl = Label.new()
-				lbl.add_theme_font_size_override('font_size', font_size_pill)
-				lbl.add_theme_color_override('font_color', LABEL_COLOR)
-				lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-				add_child(lbl)
-				_label_pool.append(lbl)
-
-			lbl.text = label_text
-			lbl.add_theme_stylebox_override('normal', style)
-			lbl.size = pill_rect.size
-			label_idx += 1
-			label_items.append({label = lbl, rect = pill_rect})
-
 		# store everything needed for fast lookup and drawing
 		var arrow_end: Vector2 = points[points.size() - 1] if points.size() >= 2 else Vector2.ZERO
 		var arrow_prev: Vector2 = points[points.size() - 2] if points.size() >= 2 else Vector2.ZERO
@@ -192,6 +163,37 @@ func _build_edge_views() -> void:
 		for i in range(1, points.size()):
 			total_len += points[i - 1].distance_to(points[i])
 			lengths[i] = total_len
+
+		# pill anchored at the route's ideal label point: transition type icon + name, tinted by the type
+		var label_text: String = edge.label.text
+		var lbl: HenStateEdgePill = null
+		if not label_text.is_empty():
+			var label_pos: Vector2 = section.label_pos if section.has('label_pos') \
+				else (section.start_point + section.end_point) * 0.5
+
+			var icon_name: String = str(edge.meta.get('icon', ''))
+			var icon: Texture2D = HenActionRow.icon_texture(icon_name) if not icon_name.is_empty() else null
+			var pill_size: Vector2 = HenStateEdgePill.measure(label_text, icon != null)
+			var pill_rect: Rect2 = Rect2(label_pos - pill_size * 0.5, pill_size)
+
+			if label_idx < _label_pool.size():
+				lbl = _label_pool[label_idx]
+			else:
+				lbl = PILL_SCENE.instantiate()
+				add_child(lbl)
+				_label_pool.append(lbl)
+
+			lbl.setup(label_text, icon, _kind_color(edge))
+			lbl.size = pill_rect.size
+			label_idx += 1
+			label_items.append({
+				label = lbl,
+				rect = pill_rect,
+				points = points,
+				lengths = lengths,
+				total_len = total_len,
+				idx = label_idx
+			})
 
 		_edge_views.append({
 			edge = edge,
@@ -211,7 +213,7 @@ func _build_edge_views() -> void:
 		unused_line.queue_free()
 
 	while _label_pool.size() > label_idx:
-		var unused_lbl: Label = _label_pool.pop_back()
+		var unused_lbl: HenStateEdgePill = _label_pool.pop_back()
 		unused_lbl.queue_free()
 
 	# drop flash entries whose edges no longer exist after a rebuild
@@ -222,30 +224,139 @@ func _build_edge_views() -> void:
 		if not valid_edges.has(key):
 			_flashed_edges.erase(key)
 
-	_resolve_label_overlaps(label_items)
+	_resolve_label_overlaps(label_items, _state_rects(graph_root))
 
 
-# nudges overlapping pills apart vertically so labels stay readable; layout's label_pos stays the ideal anchor
-func _resolve_label_overlaps(items: Array) -> void:
-	items.sort_custom(func(a, b): return a.rect.position.y < b.rect.position.y)
+# places each pill on the nearest free slot along its own edge so labels never cover each other
+func _resolve_label_overlaps(items: Array, obstacles: Array) -> void:
+	items.sort_custom(func(a, b):
+		if a.rect.position.y != b.rect.position.y:
+			return a.rect.position.y < b.rect.position.y
+		if a.rect.position.x != b.rect.position.x:
+			return a.rect.position.x < b.rect.position.x
+		return a.idx < b.idx
+	)
 
-	for _pass in range(4):
-		var moved: bool = false
-		for i in range(items.size()):
-			for j in range(i + 1, items.size()):
-				var ra: Rect2 = items[i].rect
-				var rb: Rect2 = items[j].rect
-				if ra.intersects(rb):
-					var overlap_y: float = (ra.position.y + ra.size.y) - rb.position.y
-					if overlap_y > 0.0:
-						rb.position.y += overlap_y + 2.0
-						items[j].rect = rb
-						moved = true
-		if not moved:
-			break
-
+	var placed: Array = []
 	for it in items:
-		it.label.position = it.rect.position
+		var final_rect: Rect2 = it.rect
+		if it.total_len >= END_PAD * 2.0:
+			final_rect = _find_slot_on_edge(it, obstacles, placed)
+
+		# fallback: still covered, push off the boxes and already-placed pills
+		if _overlap_area(final_rect, obstacles) + _overlap_area(final_rect, placed) > 0.0:
+			var push_item: Dictionary = {rect = final_rect}
+			var blockers: Array = obstacles + placed
+			for _i in range(4):
+				if not _push_off_obstacles(push_item, blockers):
+					break
+			final_rect = push_item.rect
+
+		it.label.position = final_rect.position
+		placed.append(final_rect)
+
+
+# slides along the edge polyline from the ideal anchor outward until a clear spot appears
+func _find_slot_on_edge(item: Dictionary, obstacles: Array, placed: Array) -> Rect2:
+	var rect: Rect2 = item.rect
+	var s0: float = _closest_arc_length(item.points, item.lengths, rect.get_center())
+	var best_rect: Rect2 = rect
+	var best_score: float = INF
+
+	for j in range(SLIDE_TRIES + 1):
+		for k in ([0] if j == 0 else [j, -j]):
+			var s: float = clampf(s0 + float(k) * SLIDE_STEP, END_PAD, item.total_len - END_PAD)
+			var center: Vector2 = _point_at_length(item.points, item.lengths, s)
+			var cand: Rect2 = Rect2(center - rect.size * 0.5, rect.size)
+			var score: float = _overlap_area(cand, obstacles) + _overlap_area(cand, placed)
+			if score <= 0.0:
+				return cand
+			if score < best_score:
+				best_score = score
+				best_rect = cand
+
+	return best_rect
+
+
+# arc length along the polyline of the point closest to p
+func _closest_arc_length(points: PackedVector2Array, lengths: PackedFloat32Array, p: Vector2) -> float:
+	var best_len: float = 0.0
+	var best_dist: float = INF
+	for i in range(points.size() - 1):
+		var a: Vector2 = points[i]
+		var b: Vector2 = points[i + 1]
+		var l2: float = a.distance_squared_to(b)
+		var t: float = 0.0
+		if l2 > 0.0:
+			t = clampf((p - a).dot(b - a) / l2, 0.0, 1.0)
+		var d: float = p.distance_squared_to(a.lerp(b, t))
+		if d < best_dist:
+			best_dist = d
+			best_len = lengths[i] + sqrt(l2) * t
+	return best_len
+
+
+# slides a pill off the state boxes; every exit is scored against all of them, so a
+# pill sandwiched between two boxes leaves sideways instead of bouncing between them
+func _push_off_obstacles(item: Dictionary, obstacles: Array) -> bool:
+	var rect: Rect2 = item.rect
+	var best: Rect2 = rect
+	var best_overlap: float = _overlap_area(rect, obstacles)
+	var best_dist: float = 0.0
+
+	if best_overlap <= 0.0:
+		return false
+
+	for obs: Rect2 in obstacles:
+		if not rect.intersects(obs):
+			continue
+
+		for candidate: Rect2 in _escape_rects(rect, obs):
+			var overlap: float = _overlap_area(candidate, obstacles)
+			var dist: float = candidate.position.distance_squared_to(rect.position)
+
+			if overlap < best_overlap or (overlap == best_overlap and dist < best_dist):
+				best = candidate
+				best_overlap = overlap
+				best_dist = dist
+
+	if best.position == rect.position:
+		return false
+
+	item.rect = best
+
+	return true
+
+
+# the four ways out of a box, each clearing it by LABEL_CLEARANCE
+func _escape_rects(rect: Rect2, obs: Rect2) -> Array:
+	return [
+		Rect2(Vector2(rect.position.x, obs.position.y - rect.size.y - LABEL_CLEARANCE), rect.size),
+		Rect2(Vector2(rect.position.x, obs.position.y + obs.size.y + LABEL_CLEARANCE), rect.size),
+		Rect2(Vector2(obs.position.x - rect.size.x - LABEL_CLEARANCE, rect.position.y), rect.size),
+		Rect2(Vector2(obs.position.x + obs.size.x + LABEL_CLEARANCE, rect.position.y), rect.size)
+	]
+
+
+func _overlap_area(rect: Rect2, obstacles: Array) -> float:
+	var total: float = 0.0
+
+	for obs: Rect2 in obstacles:
+		var clip: Rect2 = rect.intersection(obs)
+		total += clip.size.x * clip.size.y
+
+	return total
+
+
+# only leaf states block labels: edges between sub-states run inside their compound box
+func _state_rects(node: HenStateViewerGraphTypes.DirectedGraphNode, result: Array = []) -> Array:
+	if node.children.is_empty():
+		result.append(Rect2(node.get_absolute(), Vector2(node.layout.width, node.layout.height)))
+	else:
+		for child in node.children:
+			_state_rects(child, result)
+
+	return result
 
 
 # edges stay lit while the hovered node is their source or an ancestor of it

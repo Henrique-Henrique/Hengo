@@ -36,9 +36,9 @@ func _update_container_offsets() -> void:
 	if not container:
 		return
 
-	var width: float = HenUtils.get_scaled_size(TOAST_WIDTH)
-	var height: float = HenUtils.get_scaled_size(TOAST_HEIGHT)
-	var margin: float = HenUtils.get_scaled_size(BASE_MARGIN)
+	var width: float = TOAST_WIDTH
+	var height: float = TOAST_HEIGHT
+	var margin: float = BASE_MARGIN
 
 	container.offset_left = - (width + margin)
 	container.offset_top = - height
