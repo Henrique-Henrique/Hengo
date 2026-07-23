@@ -1,0 +1,67 @@
+@tool
+class_name HenActionGetDistance extends HenScriptMacroBase
+
+
+# writes the global-space distance from the owner to Target into Store.
+
+
+func get_id() -> StringName:
+	return &'get_distance'
+
+
+func get_display_name() -> String:
+	return 'Get Distance'
+
+
+func get_icon() -> String:
+	return 'ruler'
+
+
+func get_target_classes() -> Array[StringName]:
+	return [&'Node2D']
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Target',
+			type = 'Node2D',
+			id = &'target',
+			bind_only = true,
+			default_value = null
+		}
+	]
+
+
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Distance', type = 'float', id = &'distance'}
+	]
+
+
+func get_output_distance() -> String:
+	return '_ref.global_position.distance_to({{target}}.global_position)'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'},
+		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _body()
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_exit() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '{{out:distance}}'

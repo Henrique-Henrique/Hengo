@@ -1,0 +1,69 @@
+@tool
+class_name HenActionRandomFloat extends HenScriptMacroBase
+
+
+# writes a random decimal between Min and Max into Store. for a plain 0-1 value
+# with no limits, bind a slot to the Random Float source instead.
+
+
+func get_id() -> StringName:
+	return &'random_float'
+
+
+func get_display_name() -> String:
+	return 'Random Float'
+
+
+func get_icon() -> String:
+	return 'dice-5'
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Min',
+			type = 'float',
+			id = &'min',
+			default_value = 0.0
+		},
+		{
+			name = 'Max',
+			type = 'float',
+			id = &'max',
+			default_value = 1.0
+		}
+	]
+
+
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Result', type = 'float', id = &'result'}
+	]
+
+
+func get_output_result() -> String:
+	return 'randf_range({{min}}, {{max}})'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'},
+		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _body()
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_exit() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '{{out:result}}'

@@ -1,0 +1,56 @@
+@tool
+class_name HenActionApplyGravity extends HenScriptMacroBase
+
+
+# accumulates gravity into the body velocity. the body needs delta, so it runs on
+# physics (the default) or update, never on enter/exit.
+
+
+func get_id() -> StringName:
+	return &'apply_gravity'
+
+
+func get_display_name() -> String:
+	return 'Apply Gravity'
+
+
+func get_icon() -> String:
+	return 'arrow-down-to-line'
+
+
+func get_target_classes() -> Array[StringName]:
+	return [&'CharacterBody2D']
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Gravity',
+			type = 'float',
+			id = &'gravity',
+			default_value = 980.0
+		}
+	]
+
+
+func get_default_phase() -> StringName:
+	return &'physics'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Update', id = &'update'},
+		{name = 'Physics', id = &'physics'}
+	]
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_physics() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '_ref.velocity.y += {{gravity}} * delta'

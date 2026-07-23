@@ -1,0 +1,80 @@
+@tool
+class_name HenActionChangeColor extends HenScriptMacroBase
+
+
+# tints the owner, dispatching on the class the script extends: lights, sprites
+# and shape nodes each get their own color property, the rest falls back to modulate.
+
+
+func get_id() -> StringName:
+	return &'change_color'
+
+
+func get_display_name() -> String:
+	return 'Change Color'
+
+
+func get_icon() -> String:
+	return 'palette'
+
+
+# only scripts extending Node2D or Node3D (and their heirs) can use it
+func get_target_classes() -> Array[StringName]:
+	return [&'Node2D', &'Node3D']
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Color',
+			type = 'Color',
+			id = &'color',
+			default_value = Color(1, 1, 1, 1)
+		}
+	]
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'},
+		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _get_body()
+
+
+func get_flow_update() -> String:
+	return _get_body()
+
+
+func get_flow_exit() -> String:
+	return _get_body()
+
+
+# each node exposes color differently, so dispatch specific bases before the
+# generic node2d/node3d fallbacks
+func _get_body() -> String:
+	# 3d: lights and sprites own a color prop, geometry needs a material override
+	if targets(&'Light3D'):
+		return '(_ref as Light3D).light_color = {{color}}'
+	if targets(&'SpriteBase3D'):
+		return '(_ref as SpriteBase3D).modulate = {{color}}'
+	if targets(&'Label3D'):
+		return '(_ref as Label3D).modulate = {{color}}'
+	if targets(&'Node3D'):
+		return 'var material_{{VCNODE_ID}}: Material = (_ref as GeometryInstance3D).material_override if _ref is GeometryInstance3D else null\nif material_{{VCNODE_ID}} is StandardMaterial3D:\n\t(material_{{VCNODE_ID}} as StandardMaterial3D).albedo_color = {{color}}'
+
+	# 2d: lights, canvas modulate and shapes own a color prop, the rest tints
+	if targets(&'Light2D'):
+		return '(_ref as Light2D).color = {{color}}'
+	if targets(&'CanvasModulate'):
+		return '(_ref as CanvasModulate).color = {{color}}'
+	if targets(&'Polygon2D'):
+		return '(_ref as Polygon2D).color = {{color}}'
+	if targets(&'Line2D'):
+		return '(_ref as Line2D).default_color = {{color}}'
+
+	return '_ref.modulate = {{color}}'

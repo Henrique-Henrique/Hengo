@@ -1,0 +1,67 @@
+@tool
+class_name HenActionGetAngleTo extends HenScriptMacroBase
+
+
+# writes the angle (radians) from the owner toward Target into Store.
+
+
+func get_id() -> StringName:
+	return &'get_angle_to'
+
+
+func get_display_name() -> String:
+	return 'Get Angle To'
+
+
+func get_icon() -> String:
+	return 'compass'
+
+
+func get_target_classes() -> Array[StringName]:
+	return [&'Node2D']
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Target',
+			type = 'Node2D',
+			id = &'target',
+			bind_only = true,
+			default_value = null
+		}
+	]
+
+
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Angle', type = 'float', id = &'angle'}
+	]
+
+
+func get_output_angle() -> String:
+	return '_ref.get_angle_to({{target}}.global_position)'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'},
+		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _body()
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_exit() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '{{out:angle}}'

@@ -1,0 +1,63 @@
+@tool
+class_name HenActionWait extends HenScriptMacroBase
+
+
+# counts Seconds while the state runs and takes the Finished branch when the time
+# is up. the counter is zeroed on entry, so leaving and coming back starts over.
+
+
+func get_id() -> StringName:
+	return &'wait'
+
+
+func get_display_name() -> String:
+	return 'Wait'
+
+
+func get_icon() -> String:
+	return 'hourglass'
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Seconds',
+			type = 'float',
+			id = &'seconds',
+			default_value = 1.0
+		}
+	]
+
+
+# one counter per action, so two waits in the same state never share it
+func get_script_base() -> String:
+	return 'var wait_{{VCNODE_ID}}: float = 0.0'
+
+
+func get_flow_reset() -> String:
+	return 'wait_{{VCNODE_ID}} = 0.0'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Update', id = &'update'},
+		{name = 'Physics', id = &'physics'}
+	]
+
+
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Finished', id = &'finished'}
+	]
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_physics() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return 'wait_{{VCNODE_ID}} += delta\nif wait_{{VCNODE_ID}} >= {{seconds}}:\n\t{{finished}}'

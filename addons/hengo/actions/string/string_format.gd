@@ -1,0 +1,69 @@
+@tool
+class_name HenActionStringFormat extends HenScriptMacroBase
+
+
+# writes Template with Value spliced in via % into Store; bind Value to an
+# array for multiple placeholders (e.g. `%s/%s`).
+
+
+func get_id() -> StringName:
+	return &'string_format'
+
+
+func get_display_name() -> String:
+	return 'Format String'
+
+
+func get_icon() -> String:
+	return 'type'
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Template',
+			type = 'String',
+			id = &'template',
+			default_value = '%s'
+		},
+		{
+			name = 'Value',
+			type = 'Variant',
+			id = &'value',
+			default_value = ''
+		}
+	]
+
+
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Result', type = 'String', id = &'result'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{template}} % {{value}}'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'},
+		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _body()
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_exit() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '{{out:result}}'

@@ -1,0 +1,40 @@
+@tool
+class_name HenActionTransition extends HenScriptMacroBase
+
+
+# unconditional transition: its single flow output is a branch bound to a state,
+# sub-state or a state of another script, set per action in the inspector.
+
+
+func get_id() -> StringName:
+	return &'transition'
+
+
+func get_display_name() -> String:
+	return 'Transition'
+
+
+func get_icon() -> String:
+	return 'arrow-right-to-line'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'}
+	]
+
+
+# the only flow output; the action binds it to the target state
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'To', id = &'to'}
+	]
+
+
+func get_flow_enter() -> String:
+	return '{{to}}'
+
+
+func get_flow_update() -> String:
+	return '{{to}}'
