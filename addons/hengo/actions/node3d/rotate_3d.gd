@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'rotate_3d'
 
 
+func get_description() -> String:
+	return 'Rotates the node around an axis. During update or physics the speed is degrees per second; on enter or exit it turns once by that amount.'
+
+
 func get_display_name() -> String:
 	return 'Rotate'
 
@@ -28,12 +32,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Axis',
 			type = 'Vector3',
 			id = &'axis',
+			doc = 'The axis to rotate around, such as 0, 1, 0 for the up axis.',
 			default_value = Vector3(0, 1, 0)
 		},
 		{
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+			doc = 'How fast to rotate, in degrees per second.',
 			default_value = 90.0
 		}
 	]

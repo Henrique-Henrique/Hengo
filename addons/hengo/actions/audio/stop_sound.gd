@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'stop_sound'
 
 
+func get_description() -> String:
+	return 'Stops a sound that an audio player is playing.'
+
+
 func get_display_name() -> String:
 	return 'Stop Sound'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AudioStreamPlayer to stop.',
 			bind_only = true,
 			default_value = null
 		}

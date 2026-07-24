@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_animation_speed'
 
 
+func get_description() -> String:
+	return 'Changes how fast an AnimationPlayer plays. 1 is normal speed, 2 is twice as fast and a negative value plays it backwards.'
+
+
 func get_display_name() -> String:
 	return 'Set Animation Speed'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AnimationPlayer to adjust.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+				doc = 'Playback speed, where 1 is normal and 2 is twice as fast.',
 			default_value = 1.0
 		}
 	]

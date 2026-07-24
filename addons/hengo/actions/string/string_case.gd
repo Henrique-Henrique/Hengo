@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'string_case'
 
 
+func get_description() -> String:
+	return 'Transforms text using the chosen method and stores the result.'
+
+
 func get_display_name() -> String:
 	return 'String Case'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
+			doc = 'The transformation to apply to the text.',
 			raw = true,
 			options = ['to_upper', 'to_lower', 'capitalize', 'strip_edges'],
 			default_value = 'to_upper'
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'String',
 			id = &'value',
+			doc = 'The text to transform.',
 			default_value = ''
 		}
 	]
@@ -38,7 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'String', id = &'result'}
+		{name = 'Result', type = 'String', id = &'result', doc = 'Where to store the transformed text.'}
 	]
 
 

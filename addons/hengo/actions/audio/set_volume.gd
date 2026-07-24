@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_volume'
 
 
+func get_description() -> String:
+	return 'Sets how loud an audio player is, measured in decibels.'
+
+
 func get_display_name() -> String:
 	return 'Set Volume'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AudioStreamPlayer to adjust.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Volume dB',
 			type = 'float',
 			id = &'volume',
+				doc = 'Loudness in decibels, where 0 is the original volume and -80 is silent.',
 			default_value = 0.0
 		}
 	]

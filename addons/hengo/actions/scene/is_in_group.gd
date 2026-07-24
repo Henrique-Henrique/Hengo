@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'is_in_group'
 
 
+func get_description() -> String:
+	return 'Checks whether the node belongs to a named group and branches on the answer.'
+
+
 func get_display_name() -> String:
 	return 'Is In Group'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			doc = 'The group name to check for.',
 			default_value = 'enemies'
 		}
 	]
@@ -38,8 +43,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the node is in the group.'},
+		{name = 'False', id = &'false', doc = 'Where to go when the node is not in the group.'}
 	]
 
 

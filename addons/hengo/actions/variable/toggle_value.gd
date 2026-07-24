@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'toggle_value'
 
 
+func get_description() -> String:
+	return 'Flips a boolean variable or property between true and false.'
+
+
 func get_icon() -> String:
 	return 'toggle-right'
 
@@ -20,6 +24,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Variant',
 			id = &'target',
+				doc = 'The boolean variable or property to flip.',
 			lvalue = true,
 			default_value = null
 		}

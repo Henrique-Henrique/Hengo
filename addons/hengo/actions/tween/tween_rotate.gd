@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'tween_rotate'
 
 
+func get_description() -> String:
+	return 'Smoothly rotates the node to a target angle over time. Runs once when the state starts.'
+
+
 func get_display_name() -> String:
 	return 'Tween Rotate'
 
@@ -32,12 +36,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To Degrees',
 			type = 'float',
 			id = &'to',
+				doc = 'The target angle, in degrees.',
 			default_value = 0.0
 		},
 		{
 			name = 'Duration',
 			type = 'float',
 			id = &'duration',
+				doc = 'How long the rotation takes, in seconds.',
 			default_value = 0.3
 		}
 	]

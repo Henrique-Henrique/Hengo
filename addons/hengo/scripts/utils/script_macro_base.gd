@@ -109,6 +109,11 @@ func get_display_name() -> String:
 	return ''
 
 
+# optional one-line documentation shown as a tooltip on hover in the ui
+func get_description() -> String:
+	return ''
+
+
 # true when the action owns a nested list of actions run per iteration (a loop).
 # the flow body must hold {{loop_body}} where the nested actions go
 func get_has_body() -> bool:

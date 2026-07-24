@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'tween_fade'
 
 
+func get_description() -> String:
+	return 'Smoothly fades the node toward a target transparency over time. Runs once when the state starts.'
+
+
 func get_display_name() -> String:
 	return 'Tween Fade'
 
@@ -32,12 +36,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To Alpha',
 			type = 'float',
 			id = &'to',
+				doc = 'Target transparency, where 1 is fully visible and 0 is invisible.',
 			default_value = 1.0
 		},
 		{
 			name = 'Duration',
 			type = 'float',
 			id = &'duration',
+				doc = 'How long the fade takes, in seconds.',
 			default_value = 0.3
 		}
 	]

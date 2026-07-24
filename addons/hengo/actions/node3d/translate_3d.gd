@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'translate_3d'
 
 
+func get_description() -> String:
+	return 'Moves the node by an offset. During update or physics it is applied per second; on enter or exit it is applied once.'
+
+
 func get_display_name() -> String:
 	return 'Translate'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Offset',
 			type = 'Vector3',
 			id = &'offset',
+			doc = 'The amount to move, in world units.',
 			default_value = Vector3(1, 0, 0)
 		}
 	]

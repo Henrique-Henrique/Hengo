@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'vector2_transform'
 
 
+func get_description() -> String:
+	return 'Applies a function to a vector and returns a new vector, such as normalized or abs.'
+
+
 func get_display_name() -> String:
 	return 'Vector2 Transform'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
+			doc = 'The function to apply to the vector.',
 			raw = true,
 			options = ['normalized', 'abs', 'sign', 'floor', 'ceil', 'round', 'orthogonal'],
 			default_value = 'normalized'
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Vector',
 			type = 'Vector2',
 			id = &'vector',
+			doc = 'The vector to transform.',
 			default_value = Vector2.ZERO
 		}
 	]
@@ -38,7 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The resulting vector.'}
 	]
 
 

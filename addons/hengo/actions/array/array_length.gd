@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'array_length'
 
 
+func get_description() -> String:
+	return 'Counts how many items an array holds.'
+
+
 func get_display_name() -> String:
 	return 'Array Length'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Array',
 			type = 'Array',
 			id = &'array',
+				doc = 'The array to measure.',
 			bind_only = true,
 			default_value = null
 		}
@@ -31,7 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Length', type = 'int', id = &'result'}
+		{name = 'Length', type = 'int', id = &'result', doc = 'Where to store the number of items.'}
 	]
 
 

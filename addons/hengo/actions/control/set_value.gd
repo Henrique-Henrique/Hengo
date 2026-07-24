@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_control_value'
 
 
+func get_description() -> String:
+	return 'Sets the value of a Range node such as a ProgressBar, Slider or SpinBox.'
+
+
 func get_display_name() -> String:
 	return 'Set Control Value'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
+				doc = 'The Range node to write to.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'float',
 			id = &'value',
+				doc = 'The value to set, within the node min and max.',
 			default_value = 0.0
 		}
 	]

@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'spawn_scene'
 
 
+func get_description() -> String:
+	return 'Loads a scene file and adds a copy of it next to this node, placed at the given position.'
+
+
 func get_display_name() -> String:
 	return 'Spawn Scene'
 
@@ -28,12 +32,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Scene Path',
 			type = 'String',
 			id = &'path',
+			doc = 'The path to the scene file to spawn.',
 			default_value = 'res://scenes/bullet.tscn'
 		},
 		{
 			name = 'Position',
 			type = 'Vector2',
 			id = &'position',
+			doc = 'Where to place the new copy.',
 			default_value = Vector2.ZERO
 		}
 	]

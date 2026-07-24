@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'look_at_3d'
 
 
+func get_description() -> String:
+	return 'Rotates the node so its front faces a point in global space.'
+
+
 func get_display_name() -> String:
 	return 'Look At'
 
@@ -28,12 +32,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Vector3',
 			id = &'target',
+			doc = 'The point in global space to face.',
 			default_value = Vector3.ZERO
 		},
 		{
 			name = 'Up',
 			type = 'Vector3',
 			id = &'up',
+			doc = 'Which direction is up, keeping the node from rolling. It must not point along the looking direction.',
 			default_value = Vector3(0, 1, 0)
 		}
 	]

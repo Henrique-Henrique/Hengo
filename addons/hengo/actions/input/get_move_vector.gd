@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'get_move_vector'
 
 
+func get_description() -> String:
+	return 'Reads four movement input actions and stores their direction as a Vector2, already normalized for even diagonal speed.'
+
+
 func get_display_name() -> String:
 	return 'Get Move Vector'
 
@@ -24,24 +28,28 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Left',
 			type = 'StringName',
 			id = &'left',
+			doc = 'The input action for moving left.',
 			default_value = 'ui_left'
 		},
 		{
 			name = 'Right',
 			type = 'StringName',
 			id = &'right',
+			doc = 'The input action for moving right.',
 			default_value = 'ui_right'
 		},
 		{
 			name = 'Forward',
 			type = 'StringName',
 			id = &'forward',
+			doc = 'The input action for moving forward.',
 			default_value = 'ui_up'
 		},
 		{
 			name = 'Back',
 			type = 'StringName',
 			id = &'back',
+			doc = 'The input action for moving back.',
 			default_value = 'ui_down'
 		}
 	]
@@ -49,7 +57,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'Where to store the movement direction.'}
 	]
 
 

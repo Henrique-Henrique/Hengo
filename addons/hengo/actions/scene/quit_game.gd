@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'quit_game'
 
 
+func get_description() -> String:
+	return 'Closes the game. It does nothing in a web export.'
+
+
 func get_display_name() -> String:
 	return 'Quit Game'
 

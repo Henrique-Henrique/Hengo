@@ -24,6 +24,8 @@ var default_value: Variant = null
 # the input is read, but a literal makes no sense for it (a node reference), so
 # it must be bound; any source works, including a node path
 @export var bind_only: bool = false
+# optional one-line explanation of this field, shown in the hover documentation
+@export var doc: String = ''
 
 
 func _init() -> void:
@@ -46,6 +48,7 @@ static func create(data: Dictionary = {}) -> HenSaveParam:
 		if data.has('options'):
 			for option: Variant in data.options:
 				p.options.append(str(option))
+		if data.has('doc'): p.doc = str(data.doc)
 		if data.has('default_value'): p.default_value = data.default_value
 	return p
 
@@ -61,13 +64,14 @@ func get_data() -> Dictionary:
 		lvalue = lvalue,
 		bind_only = bind_only,
 		optional = optional,
+		doc = doc,
 		default_value = default_value
 	}
 
 
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
-	if _property.name in [&'type_from', &'options', &'raw', &'lvalue', &'bind_only', &'optional']:
+	if _property.name in [&'type_from', &'options', &'raw', &'lvalue', &'bind_only', &'optional', &'doc']:
 		_property.usage = PROPERTY_USAGE_STORAGE
 
 

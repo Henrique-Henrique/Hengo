@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'string_contains'
 
 
+func get_description() -> String:
+	return 'Checks whether a piece of text appears inside another and branches on the answer.'
+
+
 func get_display_name() -> String:
 	return 'String Contains'
 
@@ -23,12 +27,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'String',
 			id = &'value',
+			doc = 'The text to search within.',
 			default_value = ''
 		},
 		{
 			name = 'Substring',
 			type = 'String',
 			id = &'substring',
+			doc = 'The piece of text to look for.',
 			default_value = ''
 		}
 	]
@@ -43,8 +49,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the substring is found.'},
+		{name = 'False', id = &'false', doc = 'Where to go when the substring is not found.'}
 	]
 
 

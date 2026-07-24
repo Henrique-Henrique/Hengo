@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'move_forward'
 
 
+func get_description() -> String:
+	return 'Sets the body velocity to move along the direction it is facing. A negative speed moves it backward, and it only moves once Move And Slide runs.'
+
+
 func get_display_name() -> String:
 	return 'Move Forward'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+				doc = 'How fast to move along the facing, in pixels per second.',
 			default_value = 200.0
 		}
 	]

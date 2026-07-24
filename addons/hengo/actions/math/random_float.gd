@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'random_float'
 
 
+func get_description() -> String:
+	return 'Picks a random decimal number between Min and Max.'
+
+
 func get_display_name() -> String:
 	return 'Random Float'
 
@@ -24,12 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Min',
 			type = 'float',
 			id = &'min',
+			doc = 'The lowest possible value.',
 			default_value = 0.0
 		},
 		{
 			name = 'Max',
 			type = 'float',
 			id = &'max',
+			doc = 'The highest possible value.',
 			default_value = 1.0
 		}
 	]
@@ -37,7 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'The random number.'}
 	]
 
 

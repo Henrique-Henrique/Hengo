@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'stop_animation'
 
 
+func get_description() -> String:
+	return 'Stops an AnimationPlayer where it is.'
+
+
 func get_display_name() -> String:
 	return 'Stop Animation'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AnimationPlayer to stop.',
 			bind_only = true,
 			default_value = null
 		}

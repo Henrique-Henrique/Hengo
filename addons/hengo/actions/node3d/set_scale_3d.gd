@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'set_scale_3d'
 
 
+func get_description() -> String:
+	return 'Sets the scale of the node.'
+
+
 func get_display_name() -> String:
 	return 'Set Scale 3D'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Scale',
 			type = 'Vector3',
 			id = &'scale',
+			doc = 'The new scale, where 1, 1, 1 is the normal size.',
 			default_value = Vector3.ONE
 		}
 	]

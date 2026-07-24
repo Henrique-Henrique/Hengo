@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'get_angle_to'
 
 
+func get_description() -> String:
+	return 'Measures the angle from the node to a target and stores it, in radians.'
+
+
 func get_display_name() -> String:
 	return 'Get Angle To'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node2D',
 			id = &'target',
+			doc = 'The node to measure the angle to, such as another Node2D.',
 			bind_only = true,
 			default_value = null
 		}
@@ -35,7 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Angle', type = 'float', id = &'angle'}
+		{name = 'Angle', type = 'float', id = &'angle', doc = 'Where to store the resulting angle, in radians.'}
 	]
 
 

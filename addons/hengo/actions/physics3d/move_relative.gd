@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'move_relative'
 
 
+func get_description() -> String:
+	return 'Moves the body across the ground in a direction relative to where it is facing, leaving vertical velocity to gravity.'
+
+
 func get_display_name() -> String:
 	return 'Move Relative'
 
@@ -33,12 +37,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Direction',
 			type = 'Vector2',
 			id = &'direction',
+				doc = 'Movement direction relative to the body, with x sideways and y forward.',
 			default_value = Vector2.ZERO
 		},
 		{
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+				doc = 'How fast to move, in units per second.',
 			default_value = 6.0
 		}
 	]

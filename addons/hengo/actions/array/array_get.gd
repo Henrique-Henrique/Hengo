@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'array_get'
 
 
+func get_description() -> String:
+	return 'Reads the item at a given position in an array. An index outside the array fails at runtime.'
+
+
 func get_display_name() -> String:
 	return 'Array Get'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Array',
 			type = 'Array',
 			id = &'array',
+				doc = 'The array to read from.',
 			bind_only = true,
 			default_value = null
 		},
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Index',
 			type = 'int',
 			id = &'index',
+				doc = 'Position of the item to read, starting at 0.',
 			default_value = 0
 		}
 	]
@@ -38,7 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'Where to store the item found at the index.'}
 	]
 
 

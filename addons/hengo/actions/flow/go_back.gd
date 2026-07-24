@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'go_back'
 
 
+func get_description() -> String:
+	return 'Returns control to whichever state was running before this one took over.'
+
+
 func get_display_name() -> String:
 	return 'Go Back'
 

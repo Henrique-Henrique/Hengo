@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'set_position'
 
 
+func get_description() -> String:
+	return 'Places the node at a position, measured in its parent space.'
+
+
 func get_display_name() -> String:
 	return 'Set Position'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Position',
 			type = 'Vector2',
 			id = &'position',
+			doc = 'The new position, in parent space.',
 			default_value = Vector2.ZERO
 		}
 	]

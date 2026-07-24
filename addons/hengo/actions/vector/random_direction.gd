@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'random_direction'
 
 
+func get_description() -> String:
+	return 'Picks a random direction as a Vector2, with its angle chosen between Min Angle and Max Angle. In degrees, 0 points right and 90 points down.'
+
+
 func get_display_name() -> String:
 	return 'Random Direction'
 
@@ -24,18 +28,21 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Min Angle',
 			type = 'float',
 			id = &'min',
+			doc = 'The smallest angle to pick, in degrees.',
 			default_value = 0.0
 		},
 		{
 			name = 'Max Angle',
 			type = 'float',
 			id = &'max',
+			doc = 'The largest angle to pick, in degrees.',
 			default_value = 360.0
 		},
 		{
 			name = 'Length',
 			type = 'float',
 			id = &'length',
+			doc = 'How long the resulting vector is, in pixels.',
 			default_value = 1.0
 		}
 	]
@@ -43,7 +50,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The random direction vector.'}
 	]
 
 

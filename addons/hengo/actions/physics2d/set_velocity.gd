@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_velocity'
 
 
+func get_description() -> String:
+	return 'Sets the body velocity directly, in pixels per second. It only moves the body once Move And Slide runs.'
+
+
 func get_display_name() -> String:
 	return 'Set Velocity'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Velocity',
 			type = 'Vector2',
 			id = &'velocity',
+				doc = 'The velocity to apply, in pixels per second.',
 			default_value = Vector2.ZERO
 		}
 	]

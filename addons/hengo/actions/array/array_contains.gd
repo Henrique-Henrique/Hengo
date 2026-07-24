@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'array_contains'
 
 
+func get_description() -> String:
+	return 'Checks whether an array holds a given value and branches on the result.'
+
+
 func get_display_name() -> String:
 	return 'Array Contains'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Array',
 			type = 'Array',
 			id = &'array',
+				doc = 'The array to search.',
 			bind_only = true,
 			default_value = null
 		},
@@ -30,6 +35,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+				doc = 'The value to look for.',
 			default_value = 0
 		}
 	]
@@ -44,8 +50,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the value is found.'},
+		{name = 'False', id = &'false', doc = 'Where to go when the value is missing.'}
 	]
 
 

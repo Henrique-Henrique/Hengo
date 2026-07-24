@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'vector2_info'
 
 
+func get_description() -> String:
+	return 'Reads a single number from a vector, such as its length or angle.'
+
+
 func get_display_name() -> String:
 	return 'Vector2 Info'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
+			doc = 'Which value to read from the vector.',
 			raw = true,
 			options = ['length', 'length_squared', 'angle'],
 			default_value = 'length'
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Vector',
 			type = 'Vector2',
 			id = &'vector',
+			doc = 'The vector to read.',
 			default_value = Vector2.ZERO
 		}
 	]
@@ -38,7 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'The resulting number.'}
 	]
 
 

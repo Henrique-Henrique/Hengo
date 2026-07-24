@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'math_operator'
 
 
+func get_description() -> String:
+	return 'Combines two numbers with an arithmetic operator, such as add or multiply.'
+
+
 func get_display_name() -> String:
 	return 'Math'
 
@@ -25,6 +29,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'A',
 			type = 'Variant',
 			id = &'a',
+			doc = 'The left-hand number.',
 			type_from = &'result',
 			default_value = 0
 		},
@@ -32,6 +37,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Operator',
 			type = 'String',
 			id = &'op',
+			doc = 'The arithmetic operation to apply.',
 			raw = true,
 			options = ['+', '-', '*', '/'],
 			default_value = '+'
@@ -40,6 +46,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'B',
 			type = 'Variant',
 			id = &'b',
+			doc = 'The right-hand number.',
 			type_from = &'result',
 			default_value = 0
 		}
@@ -48,7 +55,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'The result of the operation.'}
 	]
 
 

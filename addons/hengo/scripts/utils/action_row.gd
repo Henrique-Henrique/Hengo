@@ -29,6 +29,8 @@ var is_preview: bool = false
 var _accent: Color = Color(FALLBACK_COLOR)
 var _collapsed: bool = false
 var _has_values: bool = false
+# bbcode doc shown on hover: bold name, description, then the value summary
+var _tooltip: String = ''
 var _pressed_button: int = 0
 var _drop_before: bool = false
 var _drop_hint: bool = false
@@ -42,8 +44,8 @@ func _ready() -> void:
 
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	gui_input.connect(_on_gui_input)
-	mouse_entered.connect(_set_hovered.bind(true))
-	mouse_exited.connect(_set_hovered.bind(false))
+	mouse_entered.connect(_on_hover.bind(true))
+	mouse_exited.connect(_on_hover.bind(false))
 	_collapse_bt().pressed.connect(_on_collapse_pressed)
 
 
@@ -57,6 +59,8 @@ func setup(data: Dictionary, parts: Array, collapsed: bool = false) -> void:
 	get_node('Margin').add_theme_constant_override('margin_left', 4 + int(data.get('indent', 0)) * 18)
 
 	_accent = Color(str(data.get('color', '')) if not str(data.get('color', '')).is_empty() else FALLBACK_COLOR)
+
+	_tooltip = _build_tooltip(str(data.get('doc', '')), str(data.get('values', '')))
 
 	var icon_rect: TextureRect = get_node('Margin/Body/Header/Icon')
 	icon_rect.texture = icon_texture(str(data.get('icon', '')))
@@ -118,6 +122,25 @@ func _separator() -> Label:
 	ThemeUtils.apply_font_size(label, 14)
 	label.add_theme_color_override('font_color', SEPARATOR_COLOR)
 	return label
+
+
+# drives the hover style and the doc tooltip together
+func _on_hover(hovered: bool) -> void:
+	_set_hovered(hovered)
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if hovered and not _tooltip.is_empty():
+		global.TOOLTIP.go_to(get_global_mouse_position() + Vector2(16, 16), _tooltip)
+	else:
+		global.TOOLTIP.close()
+
+
+# the macro's rich doc, followed by a dim line with the action's current values
+func _build_tooltip(doc: String, values: String) -> String:
+	var content: String = doc
+	if not values.is_empty():
+		content += ('\n\n' if not doc.is_empty() else '') + '[color=#5f6a7a]Current: ' + values + '[/color]'
+	return content
 
 
 # the background carries the category color, faint enough to stay readable

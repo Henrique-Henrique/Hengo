@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_disabled'
 
 
+func get_description() -> String:
+	return 'Enables or disables a Control node such as a Button or Slider.'
+
+
 func get_display_name() -> String:
 	return 'Set Disabled'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
+				doc = 'The Control node to enable or disable.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Disabled',
 			type = 'bool',
 			id = &'disabled',
+				doc = 'True to disable the node, false to enable it.',
 			default_value = true
 		}
 	]

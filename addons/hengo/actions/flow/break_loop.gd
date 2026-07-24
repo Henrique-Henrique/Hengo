@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'break_loop'
 
 
+func get_description() -> String:
+	return 'Leaves the surrounding loop and skips the rest of its passes. Only valid inside a For Each or Repeat.'
+
+
 func get_display_name() -> String:
 	return 'Break'
 

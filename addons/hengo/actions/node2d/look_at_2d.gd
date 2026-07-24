@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'look_at_2d'
 
 
+func get_description() -> String:
+	return 'Rotates the node so its right side faces a point in global space.'
+
+
 func get_display_name() -> String:
 	return 'Look At'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Vector2',
 			id = &'target',
+			doc = 'The point in global space to face.',
 			default_value = Vector2.ZERO
 		}
 	]

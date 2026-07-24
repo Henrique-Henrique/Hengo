@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'sprite_play'
 
 
+func get_description() -> String:
+	return 'Plays an animation on an AnimatedSprite2D, the sprite sheet kind of sprite.'
+
+
 func get_display_name() -> String:
 	return 'Sprite Play'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Sprite',
 			type = 'Node',
 			id = &'sprite',
+				doc = 'The AnimatedSprite2D to play.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Animation',
 			type = 'StringName',
 			id = &'animation',
+				doc = 'Name of the animation to play, such as walk or jump.',
 			default_value = 'default'
 		}
 	]

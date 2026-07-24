@@ -119,12 +119,12 @@ func _add_row(_action: HenSaveAction, _depth: int, _parent: HenSaveAction) -> vo
 		title = display_name(_action),
 		icon = macro.icon if macro else '',
 		color = macro.color if macro else '',
+		doc = HenActionDoc.bbcode(macro),
+		values = value_preview(_action),
 		meta = _action,
 		indent = _depth,
 		draggable = _depth == 0
 	}, value_parts(_action), _is_collapsed(_action))
-
-	row.tooltip_text = value_preview(_action)
 
 	# a loop shows its nested actions indented right below, plus a nested add
 	if macro and macro.has_body:

@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'move_sprite'
 
 
+func get_description() -> String:
+	return 'Moves the node by a velocity. During update it is applied per second; on enter or exit it is applied once.'
+
+
 func get_display_name() -> String:
 	return 'Move'
 
@@ -28,12 +32,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Velocity',
 			type = 'Vector2',
 			id = &'velocity',
+			doc = 'The direction and speed to move, in pixels.',
 			default_value = Vector2(120, 0)
 		},
 		{
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+			doc = 'Multiplier applied to the velocity.',
 			default_value = 1.0
 		}
 	]

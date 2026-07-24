@@ -12,6 +12,10 @@ func get_id() -> StringName:
 	return &'mouse_button'
 
 
+func get_description() -> String:
+	return 'Checks a mouse button and branches on its state. Reads the button directly, so nothing has to be set up in the input map.'
+
+
 func get_display_name() -> String:
 	return 'Check Mouse Button'
 
@@ -26,6 +30,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Button',
 			type = 'String',
 			id = &'button',
+			doc = 'Which mouse button to watch.',
 			raw = true,
 			options = ['MOUSE_BUTTON_LEFT', 'MOUSE_BUTTON_RIGHT', 'MOUSE_BUTTON_MIDDLE'],
 			default_value = 'MOUSE_BUTTON_LEFT'
@@ -34,6 +39,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'When',
 			type = 'String',
 			id = &'when',
+			doc = 'Whether to react continuously while the button is down or only at the moment it changes.',
 			raw = true,
 			options = ['Held', 'Clicked', 'Released', 'Double Click'],
 			default_value = 'Held'
@@ -51,8 +57,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the button check passes.'},
+		{name = 'False', id = &'false', doc = 'Where to go when it does not.'}
 	]
 
 

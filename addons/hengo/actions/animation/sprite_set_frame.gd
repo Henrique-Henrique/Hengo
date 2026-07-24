@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'sprite_set_frame'
 
 
+func get_description() -> String:
+	return 'Jumps an AnimatedSprite2D to a specific frame of its current animation.'
+
+
 func get_display_name() -> String:
 	return 'Sprite Set Frame'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Sprite',
 			type = 'Node',
 			id = &'sprite',
+				doc = 'The AnimatedSprite2D to change.',
 			bind_only = true,
 			default_value = null
 		},
@@ -34,6 +39,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Frame',
 			type = 'int',
 			id = &'frame',
+				doc = 'Index of the frame to show, starting at 0.',
 			default_value = 0
 		}
 	]

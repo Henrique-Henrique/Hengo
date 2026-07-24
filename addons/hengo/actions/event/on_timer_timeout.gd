@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'on_timer_timeout'
 
 
+func get_description() -> String:
+	return 'Runs when a Timer node reaches the end of its countdown.'
+
+
 func get_display_name() -> String:
 	return 'On Timer Timeout'
 

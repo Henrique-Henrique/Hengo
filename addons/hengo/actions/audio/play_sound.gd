@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'play_sound'
 
 
+func get_description() -> String:
+	return 'Plays a sound from an audio player.'
+
+
 func get_display_name() -> String:
 	return 'Play Sound'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AudioStreamPlayer to play.',
 			bind_only = true,
 			default_value = null
 		}

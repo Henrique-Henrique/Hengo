@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'chance'
 
 
+func get_description() -> String:
+	return 'Randomly branches to True or False based on a percentage. A chance of 50 goes True about half the time.'
+
+
 func get_display_name() -> String:
 	return 'Chance'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Chance %',
 			type = 'float',
 			id = &'chance',
+			doc = 'Percent chance of taking the True branch, from 0 to 100.',
 			default_value = 50.0
 		}
 	]
@@ -38,8 +43,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the roll succeeds.'},
+		{name = 'False', id = &'false', doc = 'Where to go when it fails.'}
 	]
 
 

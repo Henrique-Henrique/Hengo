@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'move_and_slide_3d'
 
 
+func get_description() -> String:
+	return 'Moves the body with its current velocity, resolving collisions. Place it after the actions that set the velocity.'
+
+
 func get_display_name() -> String:
 	return 'Move And Slide'
 

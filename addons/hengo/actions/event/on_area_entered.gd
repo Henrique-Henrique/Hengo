@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'on_area_entered'
 
 
+func get_description() -> String:
+	return 'Runs when another Area2D overlaps this Area2D.'
+
+
 func get_display_name() -> String:
 	return 'On Area Entered'
 

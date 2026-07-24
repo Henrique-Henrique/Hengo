@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'approach_value'
 
 
+func get_description() -> String:
+	return 'Moves a number toward a target value at a fixed speed, without overshooting.'
+
+
 func get_display_name() -> String:
 	return 'Approach'
 
@@ -25,6 +29,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Variant',
 			id = &'target',
+				doc = 'The variable or property to move.',
 			lvalue = true,
 			default_value = null
 		},
@@ -32,12 +37,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To',
 			type = 'float',
 			id = &'to',
+				doc = 'The value to move toward.',
 			default_value = 0.0
 		},
 		{
 			name = 'Step',
 			type = 'float',
 			id = &'step',
+				doc = 'How fast to move, in units per second.',
 			default_value = 1.0
 		}
 	]

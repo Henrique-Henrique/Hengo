@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_text'
 
 
+func get_description() -> String:
+	return 'Sets the text shown by a Control node such as a Label or Button.'
+
+
 func get_display_name() -> String:
 	return 'Set Text'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
+				doc = 'The Control node to write text to.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Text',
 			type = 'String',
 			id = &'text',
+				doc = 'The text to display.',
 			default_value = ''
 		}
 	]

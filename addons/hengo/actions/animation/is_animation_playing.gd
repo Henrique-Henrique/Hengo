@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'is_animation_playing'
 
 
+func get_description() -> String:
+	return 'Checks whether an AnimationPlayer is still running and branches on the result. Useful for holding a state until an animation finishes.'
+
+
 func get_display_name() -> String:
 	return 'Is Animation Playing'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AnimationPlayer to check.',
 			bind_only = true,
 			default_value = null
 		}
@@ -40,8 +45,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go while the animation is still playing.'},
+		{name = 'False', id = &'false', doc = 'Where to go once the animation has stopped.'}
 	]
 
 

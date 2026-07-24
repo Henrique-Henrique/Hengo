@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'tween_scale'
 
 
+func get_description() -> String:
+	return 'Smoothly scales the node to a target size over time. Runs once when the state starts.'
+
+
 func get_display_name() -> String:
 	return 'Tween Scale'
 
@@ -32,12 +36,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To',
 			type = 'Vector2',
 			id = &'to',
+				doc = 'The target scale, where 1, 1 is the normal size.',
 			default_value = Vector2.ONE
 		},
 		{
 			name = 'Duration',
 			type = 'float',
 			id = &'duration',
+				doc = 'How long the scaling takes, in seconds.',
 			default_value = 0.3
 		}
 	]

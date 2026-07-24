@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'raw_code'
 
 
+func get_description() -> String:
+	return 'Runs a line of GDScript exactly as written. An escape hatch for anything the other actions do not cover.'
+
+
 func get_icon() -> String:
 	return 'code'
 
@@ -21,6 +25,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Code',
 			type = 'String',
 			id = &'code',
+			doc = 'The GDScript line to run. Use _ref to reach the owner node.',
 			raw = true,
 			default_value = 'pass'
 		}

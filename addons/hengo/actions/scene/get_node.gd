@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'get_node'
 
 
+func get_description() -> String:
+	return 'Looks up a node by its path and stores it so later actions can use it. Stores null when nothing is found at that path.'
+
+
 func get_display_name() -> String:
 	return 'Get Node'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Path',
 			type = 'String',
 			id = &'path',
+			doc = 'The path to the node, relative to this node.',
 			default_value = 'Sprite2D'
 		}
 	]
@@ -34,7 +39,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Node', type = 'Variant', id = &'result'}
+		{name = 'Node', type = 'Variant', id = &'result', doc = 'Where to store the node that was found.'}
 	]
 
 

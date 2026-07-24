@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'is_sound_playing'
 
 
+func get_description() -> String:
+	return 'Checks whether an audio player is still playing and branches on the result. Useful for waiting until a sound finishes before continuing.'
+
+
 func get_display_name() -> String:
 	return 'Is Sound Playing'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AudioStreamPlayer to check.',
 			bind_only = true,
 			default_value = null
 		}
@@ -40,8 +45,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go while the sound is still playing.'},
+		{name = 'False', id = &'false', doc = 'Where to go once the sound has stopped.'}
 	]
 
 

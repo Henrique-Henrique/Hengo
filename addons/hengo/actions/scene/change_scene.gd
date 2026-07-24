@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'change_scene'
 
 
+func get_description() -> String:
+	return 'Replaces the running scene with another one. The current scene is freed, including the node this action runs on.'
+
+
 func get_display_name() -> String:
 	return 'Change Scene'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Scene Path',
 			type = 'String',
 			id = &'path',
+			doc = 'The path to the scene file to load.',
 			default_value = 'res://scenes/main.tscn'
 		}
 	]

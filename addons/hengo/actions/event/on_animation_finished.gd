@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'on_animation_finished'
 
 
+func get_description() -> String:
+	return 'Runs when an AnimationPlayer finishes playing its current clip.'
+
+
 func get_display_name() -> String:
 	return 'On Animation Finished'
 

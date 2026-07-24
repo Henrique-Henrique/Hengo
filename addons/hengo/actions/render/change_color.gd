@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'change_color'
 
 
+func get_description() -> String:
+	return 'Sets the color of the node, choosing the right property for its type such as a light, sprite or shape. Falls back to tinting through modulate for other nodes.'
+
+
 func get_display_name() -> String:
 	return 'Change Color'
 
@@ -29,6 +33,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Color',
 			type = 'Color',
 			id = &'color',
+				doc = 'The color to apply.',
 			default_value = Color(1, 1, 1, 1)
 		}
 	]

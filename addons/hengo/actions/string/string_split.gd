@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'string_split'
 
 
+func get_description() -> String:
+	return 'Splits text into pieces wherever a separator appears and stores them as an array.'
+
+
 func get_display_name() -> String:
 	return 'String Split'
 
@@ -23,12 +27,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'String',
 			id = &'value',
+			doc = 'The text to split.',
 			default_value = ''
 		},
 		{
 			name = 'Separator',
 			type = 'String',
 			id = &'sep',
+			doc = 'The text that marks where to split.',
 			default_value = ' '
 		}
 	]
@@ -36,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Array', id = &'result'}
+		{name = 'Result', type = 'Array', id = &'result', doc = 'Where to store the array of pieces.'}
 	]
 
 

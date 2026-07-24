@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'steer'
 
 
+func get_description() -> String:
+	return 'Turns the node left or right from a steering input, useful for car-like or top-down movement.'
+
+
 func get_display_name() -> String:
 	return 'Steer'
 
@@ -28,12 +32,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Amount',
 			type = 'float',
 			id = &'amount',
+			doc = 'Steering input from -1 to 1, where negative turns one way and positive the other.',
 			default_value = 0.0
 		},
 		{
 			name = 'Degrees',
 			type = 'float',
 			id = &'degrees',
+			doc = 'Maximum turn rate, in degrees per second.',
 			default_value = 180.0
 		}
 	]

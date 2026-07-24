@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'on_body_exited'
 
 
+func get_description() -> String:
+	return 'Runs when a physics body leaves this Area2D or RigidBody2D.'
+
+
 func get_display_name() -> String:
 	return 'On Body Exited'
 

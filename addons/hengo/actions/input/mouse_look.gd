@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'mouse_look'
 
 
+func get_description() -> String:
+	return 'Turns the body left and right and tilts a camera up and down from mouse motion, for a first person view.'
+
+
 func get_display_name() -> String:
 	return 'Mouse Look'
 
@@ -33,6 +37,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Camera',
 			type = 'Node',
 			id = &'camera',
+			doc = 'The camera node that tilts up and down.',
 			bind_only = true,
 			default_value = null
 		},
@@ -40,12 +45,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Sensitivity',
 			type = 'float',
 			id = &'sensitivity',
+			doc = 'How much the view moves per pixel of mouse motion.',
 			default_value = 0.003
 		},
 		{
 			name = 'Max Pitch',
 			type = 'float',
 			id = &'max_pitch',
+			doc = 'How far the camera can look up or down, in degrees.',
 			default_value = 85.0
 		}
 	]

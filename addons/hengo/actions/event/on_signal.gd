@@ -15,6 +15,10 @@ func get_display_name() -> String:
 	return 'On Signal'
 
 
+func get_description() -> String:
+	return 'Reacts to a signal coming from a node while this state runs. The connection is made when the state starts and dropped when it ends, so it only fires here.'
+
+
 func get_icon() -> String:
 	return 'radio-tower'
 
@@ -26,12 +30,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Signal',
 			type = 'String',
 			id = &'signal_name',
+				doc = 'Name of the signal to listen for, like body_entered or pressed.',
 			default_value = 'body_entered'
 		},
 		{
 			name = 'Sends',
 			type = 'String',
 			id = &'args',
+				doc = 'Whether the signal also carries a value to capture.',
 			raw = true,
 			options = ['nothing', 'one value'],
 			default_value = 'nothing'

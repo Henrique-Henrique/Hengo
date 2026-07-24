@@ -12,6 +12,10 @@ func get_id() -> StringName:
 	return &'set_value'
 
 
+func get_description() -> String:
+	return 'Sets a variable or property to a value.'
+
+
 func get_icon() -> String:
 	return 'equal'
 
@@ -22,6 +26,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Variant',
 			id = &'target',
+				doc = 'The variable or property to write to.',
 			lvalue = true,
 			default_value = null
 		},
@@ -29,6 +34,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+				doc = 'The value to store.',
 			# effective type follows whatever Target is bound to (var/prop)
 			type_from = &'target',
 			default_value = 0

@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'vibrate'
 
 
+func get_description() -> String:
+	return 'Vibrates the gamepad for a set time, then stops on its own.'
+
+
 func get_display_name() -> String:
 	return 'Vibrate'
 
@@ -28,18 +32,21 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Weak',
 			type = 'float',
 			id = &'weak',
+			doc = 'Strength of the light motor, from 0 to 1.',
 			default_value = 0.5
 		},
 		{
 			name = 'Strong',
 			type = 'float',
 			id = &'strong',
+			doc = 'Strength of the heavy motor, from 0 to 1.',
 			default_value = 0.5
 		},
 		{
 			name = 'Duration',
 			type = 'float',
 			id = &'duration',
+			doc = 'How long the vibration lasts, in seconds.',
 			default_value = 0.2
 		}
 	]

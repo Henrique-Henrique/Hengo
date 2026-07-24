@@ -7,6 +7,7 @@ static func create(data: Dictionary = {}) -> HenSaveFlowParam:
 	if data:
 		if data.has('name'): p.name = data.name
 		if data.has('id'): p.id = str(data.id)
+		if data.has('doc'): p.doc = str(data.doc)
 	return p
 
 
@@ -14,6 +15,7 @@ func get_data() -> Dictionary:
 	return {
 		name = name,
 		id = id,
+		doc = doc,
 	}
 
 

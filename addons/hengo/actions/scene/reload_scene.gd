@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'reload_scene'
 
 
+func get_description() -> String:
+	return 'Restarts the current scene from scratch, the usual choice for a game over and retry.'
+
+
 func get_display_name() -> String:
 	return 'Reload Scene'
 

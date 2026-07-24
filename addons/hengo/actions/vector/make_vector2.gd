@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'make_vector2'
 
 
+func get_description() -> String:
+	return 'Builds a Vector2 from separate X and Y numbers.'
+
+
 func get_display_name() -> String:
 	return 'Make Vector2'
 
@@ -23,12 +27,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'X',
 			type = 'float',
 			id = &'x',
+			doc = 'The horizontal component.',
 			default_value = 0.0
 		},
 		{
 			name = 'Y',
 			type = 'float',
 			id = &'y',
+			doc = 'The vertical component.',
 			default_value = 0.0
 		}
 	]
@@ -36,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The built vector.'}
 	]
 
 

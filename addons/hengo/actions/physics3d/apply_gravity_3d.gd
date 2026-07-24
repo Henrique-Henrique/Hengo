@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'apply_gravity_3d'
 
 
+func get_description() -> String:
+	return 'Pulls the body downward by subtracting gravity from its velocity every physics frame, so it falls faster the longer it drops.'
+
+
 func get_display_name() -> String:
 	return 'Apply Gravity'
 
@@ -32,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Gravity',
 			type = 'float',
 			id = &'gravity',
+				doc = 'How strong the downward pull is, in units per second squared.',
 			default_value = 24.0
 		}
 	]

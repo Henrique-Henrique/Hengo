@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'queue_free'
 
 
+func get_description() -> String:
+	return 'Removes this node from the scene at the end of the frame. Later actions still run, but the node is gone on the next frame.'
+
+
 func get_display_name() -> String:
 	return 'Destroy Self'
 

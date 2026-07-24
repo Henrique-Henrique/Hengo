@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'raycast_check'
 
 
+func get_description() -> String:
+	return 'Checks what a RayCast node is touching right now and branches on the result. It works with RayCast3D and RayCast2D.'
+
+
 func get_display_name() -> String:
 	return 'Raycast Check'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Ray',
 			type = 'Node',
 			id = &'ray',
+				doc = 'The RayCast node to read, such as a RayCast3D or RayCast2D.',
 			bind_only = true,
 			default_value = null
 		}
@@ -32,9 +37,9 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Collider', type = 'Object', id = &'collider'},
-		{name = 'Point', type = 'Vector3', id = &'point'},
-		{name = 'Normal', type = 'Vector3', id = &'normal'}
+		{name = 'Collider', type = 'Object', id = &'collider', doc = 'The node the ray hit.'},
+		{name = 'Point', type = 'Vector3', id = &'point', doc = 'The world position where the ray hit.'},
+		{name = 'Normal', type = 'Vector3', id = &'normal', doc = 'The direction the hit surface faces.'}
 	]
 
 
@@ -60,8 +65,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Hit', id = &'hit'},
-		{name = 'Miss', id = &'miss'}
+		{name = 'Hit', id = &'hit', doc = 'Where to go when the ray touches something.'},
+		{name = 'Miss', id = &'miss', doc = 'Where to go when the ray touches nothing.'}
 	]
 
 

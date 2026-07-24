@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'random_int'
 
 
+func get_description() -> String:
+	return 'Picks a random whole number between Min and Max, both included, like rolling dice.'
+
+
 func get_display_name() -> String:
 	return 'Random Int'
 
@@ -24,12 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Min',
 			type = 'int',
 			id = &'min',
+			doc = 'The lowest possible value, included.',
 			default_value = 1
 		},
 		{
 			name = 'Max',
 			type = 'int',
 			id = &'max',
+			doc = 'The highest possible value, included.',
 			default_value = 6
 		}
 	]
@@ -37,7 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'int', id = &'result'}
+		{name = 'Result', type = 'int', id = &'result', doc = 'The random number.'}
 	]
 
 

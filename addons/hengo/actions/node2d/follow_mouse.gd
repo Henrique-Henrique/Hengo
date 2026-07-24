@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'follow_mouse'
 
 
+func get_description() -> String:
+	return 'Continuously moves the node toward the mouse, optionally turning to face it.'
+
+
 func get_display_name() -> String:
 	return 'Follow Mouse'
 
@@ -28,12 +32,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+			doc = 'How fast to move toward the mouse, in pixels per second.',
 			default_value = 200.0
 		},
 		{
 			name = 'Rotate To Face',
 			type = 'bool',
 			id = &'rotate',
+			doc = 'When true, the node turns to face the mouse.',
 			default_value = true
 		}
 	]

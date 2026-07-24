@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'lerp_value'
 
 
+func get_description() -> String:
+	return 'Smoothly eases a variable or property toward a target value each frame.'
+
+
 func get_display_name() -> String:
 	return 'Lerp Toward'
 
@@ -25,6 +29,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Variant',
 			id = &'target',
+				doc = 'The variable or property to ease.',
 			lvalue = true,
 			default_value = null
 		},
@@ -32,6 +37,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To',
 			type = 'Variant',
 			id = &'to',
+				doc = 'The value to ease toward.',
 			# effective type follows whatever Target is bound to (var/prop)
 			type_from = &'target',
 			default_value = 0
@@ -40,6 +46,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Weight',
 			type = 'float',
 			id = &'weight',
+				doc = 'How much to move each call, from 0 to 1. Higher is faster.',
 			default_value = 0.1
 		}
 	]

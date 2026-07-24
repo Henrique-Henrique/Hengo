@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'continue_loop'
 
 
+func get_description() -> String:
+	return 'Skips to the next pass of the surrounding loop. Only valid inside a For Each or Repeat.'
+
+
 func get_display_name() -> String:
 	return 'Continue'
 

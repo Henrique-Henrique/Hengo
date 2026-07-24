@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'add_to_group'
 
 
+func get_description() -> String:
+	return 'Adds the node to a named group, a common way to tag it as something like an enemy or a pickup.'
+
+
 func get_display_name() -> String:
 	return 'Add To Group'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			doc = 'The group name to tag the node with.',
 			default_value = 'enemies'
 		}
 	]

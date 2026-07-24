@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'get_nearest'
 
 
+func get_description() -> String:
+	return 'Finds the closest node in a group and stores it, measured by distance in global space. The node itself is skipped so it never matches itself.'
+
+
 func get_display_name() -> String:
 	return 'Get Nearest'
 
@@ -32,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			doc = 'The group to search for the closest node.',
 			default_value = 'enemies'
 		}
 	]
@@ -39,7 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Nearest', type = 'Object', id = &'nearest'}
+		{name = 'Nearest', type = 'Object', id = &'nearest', doc = 'Where to store the closest node found.'}
 	]
 
 

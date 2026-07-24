@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'is_on_floor'
 
 
+func get_description() -> String:
+	return 'Checks whether the body is standing on the floor and branches on the result. It uses the floor contact from the last Move And Slide.'
+
+
 func get_display_name() -> String:
 	return 'Is On Floor'
 
@@ -35,8 +39,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the body is on the floor.'},
+		{name = 'False', id = &'false', doc = 'Where to go when the body is in the air.'}
 	]
 
 

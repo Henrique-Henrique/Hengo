@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'array_random'
 
 
+func get_description() -> String:
+	return 'Picks one item at random from an array. An empty array returns null.'
+
+
 func get_display_name() -> String:
 	return 'Array Get Random'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Array',
 			type = 'Array',
 			id = &'array',
+				doc = 'The array to pick from.',
 			bind_only = true,
 			default_value = null
 		}
@@ -32,7 +37,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'Where to store the randomly picked item.'}
 	]
 
 

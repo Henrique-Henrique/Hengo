@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'vector2_rotated'
 
 
+func get_description() -> String:
+	return 'Rotates a vector by an angle and returns the turned vector.'
+
+
 func get_display_name() -> String:
 	return 'Vector2 Rotated'
 
@@ -23,12 +27,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Vector',
 			type = 'Vector2',
 			id = &'vector',
+			doc = 'The vector to rotate.',
 			default_value = Vector2.RIGHT
 		},
 		{
 			name = 'Angle',
 			type = 'float',
 			id = &'angle',
+			doc = 'How far to turn it, in radians.',
 			default_value = 0.0
 		}
 	]
@@ -36,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The rotated vector.'}
 	]
 
 

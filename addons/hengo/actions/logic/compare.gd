@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'compare'
 
 
+func get_description() -> String:
+	return 'Compares two values with the chosen operator and branches on the result.'
+
+
 func get_display_name() -> String:
 	return 'Compare'
 
@@ -24,12 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'A',
 			type = 'Variant',
 			id = &'a',
+				doc = 'The left value in the comparison.',
 			default_value = 0
 		},
 		{
 			name = 'Operator',
 			type = 'String',
 			id = &'op',
+				doc = 'How to compare the two values.',
 			raw = true,
 			options = ['==', '!=', '>', '>=', '<', '<='],
 			default_value = '=='
@@ -38,6 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'B',
 			type = 'Variant',
 			id = &'b',
+				doc = 'The right value in the comparison.',
 			type_from = &'a',
 			default_value = 0
 		}
@@ -53,8 +60,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the comparison is true.'},
+		{name = 'False', id = &'false', doc = 'Where to go when the comparison is false.'}
 	]
 
 

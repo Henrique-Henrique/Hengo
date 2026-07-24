@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'math_function2'
 
 
+func get_description() -> String:
+	return 'Applies a two-number math function to A and B, such as min, max or pow.'
+
+
 func get_display_name() -> String:
 	return 'Math Function 2'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
+			doc = 'The math function to apply.',
 			raw = true,
 			options = ['min', 'max', 'pow', 'snapped', 'fmod'],
 			default_value = 'min'
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'A',
 			type = 'Variant',
 			id = &'a',
+			doc = 'The first number.',
 			type_from = &'result',
 			default_value = 0.0
 		},
@@ -38,6 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'B',
 			type = 'Variant',
 			id = &'b',
+			doc = 'The second number.',
 			type_from = &'result',
 			default_value = 0.0
 		}
@@ -46,7 +53,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'The function result.'}
 	]
 
 

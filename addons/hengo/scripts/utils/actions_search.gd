@@ -97,6 +97,9 @@ func _build_row(_macro: HenSaveMacro) -> HenSideBarRow:
 	var color: Color = Color(_macro.color) if not _macro.color.is_empty() else ACTION_COLOR
 
 	row.setup(_macro.name, _macro, HenActionRow.icon_texture(_macro.icon), color, false, 4)
+	# native tooltip: the search popup lives on the editor base control, above the
+	# custom HenTooltip, so only the native one renders on top of it
+	row.tooltip_text = HenActionDoc.plain(_macro)
 	row.row_pressed.connect(_on_result_pressed)
 
 	return row

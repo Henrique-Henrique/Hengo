@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'add_to_value'
 
 
+func get_description() -> String:
+	return 'Adds an amount to a variable or property, accumulating the result each time it runs.'
+
+
 func get_icon() -> String:
 	return 'plus'
 
@@ -21,6 +25,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Variant',
 			id = &'target',
+				doc = 'The variable or property to add to.',
 			lvalue = true,
 			default_value = null
 		},
@@ -28,6 +33,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Amount',
 			type = 'Variant',
 			id = &'amount',
+				doc = 'The amount to add each time.',
 			# effective type follows whatever Target is bound to (var/prop)
 			type_from = &'target',
 			default_value = 1

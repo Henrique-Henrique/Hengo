@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'random_vector2'
 
 
+func get_description() -> String:
+	return 'Picks a random point inside the rectangle between Min and Max.'
+
+
 func get_display_name() -> String:
 	return 'Random Vector2'
 
@@ -24,12 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Min',
 			type = 'Vector2',
 			id = &'min',
+			doc = 'The top-left corner of the area.',
 			default_value = Vector2.ZERO
 		},
 		{
 			name = 'Max',
 			type = 'Vector2',
 			id = &'max',
+			doc = 'The bottom-right corner of the area.',
 			default_value = Vector2(100, 100)
 		}
 	]
@@ -37,7 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The random point.'}
 	]
 
 

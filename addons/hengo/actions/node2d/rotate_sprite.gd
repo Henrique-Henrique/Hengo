@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'rotate_sprite'
 
 
+func get_description() -> String:
+	return 'Rotates the node. During update the speed is degrees per second; on enter or exit it turns once by that amount.'
+
+
 func get_display_name() -> String:
 	return 'Rotate'
 
@@ -29,6 +33,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
+			doc = 'How fast to rotate, in degrees per second.',
 			default_value = 90.0
 		}
 	]

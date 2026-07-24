@@ -24,7 +24,7 @@ func get_arg_count() -> int:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Received', id = &'received'}
+		{name = 'Received', id = &'received', doc = 'Where to go when the signal is received.'}
 	]
 
 
@@ -106,6 +106,7 @@ func _emitter_input() -> Dictionary:
 		name = 'Emitter',
 		type = 'Node',
 		id = &'emitter',
+			doc = 'The node that emits the signal, such as an Area2D or a Button.',
 		bind_only = true,
 		default_value = null
 	}
@@ -117,6 +118,7 @@ func _store_input(_name: String) -> Dictionary:
 		name = _name,
 		type = 'Variant',
 		id = ARG_SLOT,
+			doc = 'Variable that receives the value the signal sends. Optional.',
 		lvalue = true,
 		optional = true,
 		default_value = null

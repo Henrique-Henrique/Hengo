@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'transition'
 
 
+func get_description() -> String:
+	return 'Immediately transitions to another state, sub-state, or a state of another script.'
+
+
 func get_display_name() -> String:
 	return 'Transition'
 
@@ -28,7 +32,7 @@ func get_flow_inputs() -> Array[Dictionary]:
 # the only flow output; the action binds it to the target state
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'To', id = &'to'}
+		{name = 'To', id = &'to', doc = 'Where to transition to.'}
 	]
 
 

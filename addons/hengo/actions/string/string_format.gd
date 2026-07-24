@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'string_format'
 
 
+func get_description() -> String:
+	return 'Fills placeholders in a template with a value and stores the result. A value bound to an array fills several placeholders at once.'
+
+
 func get_display_name() -> String:
 	return 'Format String'
 
@@ -24,12 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Template',
 			type = 'String',
 			id = &'template',
+			doc = 'The text with placeholders such as %s to fill in.',
 			default_value = '%s'
 		},
 		{
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+			doc = 'The value to place into the template.',
 			default_value = ''
 		}
 	]
@@ -37,7 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'String', id = &'result'}
+		{name = 'Result', type = 'String', id = &'result', doc = 'Where to store the filled-in text.'}
 	]
 
 

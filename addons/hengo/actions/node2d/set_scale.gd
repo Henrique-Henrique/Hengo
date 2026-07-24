@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'set_scale'
 
 
+func get_description() -> String:
+	return 'Sets the scale of the node.'
+
+
 func get_display_name() -> String:
 	return 'Set Scale'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Scale',
 			type = 'Vector2',
 			id = &'scale',
+			doc = 'The new scale, where 1 by 1 is the normal size.',
 			default_value = Vector2.ONE
 		}
 	]

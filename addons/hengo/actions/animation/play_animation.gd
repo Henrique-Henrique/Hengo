@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'play_animation'
 
 
+func get_description() -> String:
+	return 'Plays a named animation on an AnimationPlayer.'
+
+
 func get_display_name() -> String:
 	return 'Play Animation'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AnimationPlayer to play.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Animation',
 			type = 'StringName',
 			id = &'animation',
+				doc = 'Name of the animation to play, such as idle or run.',
 			default_value = 'idle'
 		}
 	]

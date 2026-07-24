@@ -10,6 +10,8 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 # presentation, mirroring the native_items vocabulary: icon name + category color
 @export var icon: String
 @export var color: String
+# one-line documentation shown as a tooltip on hover
+@export var description: String
 # folder the definition lives in; empty means uncategorized
 @export var category: String
 # lifecycle phase a new action of this macro lands on; empty picks it from the

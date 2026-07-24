@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'math_function'
 
 
+func get_description() -> String:
+	return 'Applies a single-number math function to Value, such as abs or sqrt.'
+
+
 func get_display_name() -> String:
 	return 'Math Function'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
+			doc = 'The math function to apply.',
 			raw = true,
 			options = ['abs', 'sign', 'round', 'floor', 'ceil', 'sqrt'],
 			default_value = 'abs'
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+			doc = 'The number to feed into the function.',
 			type_from = &'result',
 			default_value = 0.0
 		}
@@ -39,7 +45,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'The function result.'}
 	]
 
 

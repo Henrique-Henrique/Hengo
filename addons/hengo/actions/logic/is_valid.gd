@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'is_valid'
 
 
+func get_description() -> String:
+	return 'Checks whether an object still points at a live instance and branches on the result. Helps catch a freed node before using it.'
+
+
 func get_display_name() -> String:
 	return 'Is Valid'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Object',
 			type = 'Variant',
 			id = &'object',
+				doc = 'The variable holding the object to check.',
 			bind_only = true,
 			default_value = null
 		}
@@ -39,8 +44,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the object is still valid.'},
+		{name = 'False', id = &'false', doc = 'Where to go when the object has been freed.'}
 	]
 
 

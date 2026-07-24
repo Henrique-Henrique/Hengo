@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'for_each'
 
 
+func get_description() -> String:
+	return 'Runs its nested actions once for every element in a collection, all in the same frame.'
+
+
 func get_display_name() -> String:
 	return 'For Each'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Collection',
 			type = 'Variant',
 			id = &'collection',
+			doc = 'The array or collection to walk through.',
 			bind_only = true,
 			default_value = null
 		}
@@ -36,7 +41,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Item', type = 'Variant', id = &'item'}
+		{name = 'Item', type = 'Variant', id = &'item', doc = 'The current element, for the nested actions to read.'}
 	]
 
 

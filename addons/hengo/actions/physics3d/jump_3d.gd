@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'jump_3d'
 
 
+func get_description() -> String:
+	return 'Pushes the body upward, but only when it is standing on the floor. Sets the upward velocity to the given force.'
+
+
 func get_display_name() -> String:
 	return 'Jump'
 
@@ -33,6 +37,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Force',
 			type = 'float',
 			id = &'force',
+				doc = 'How hard the jump is, in units per second.',
 			default_value = 8.0
 		}
 	]

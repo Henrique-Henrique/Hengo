@@ -84,6 +84,7 @@ static func _load_macro_script(path: String, global: HenGlobal, target: Array[He
 			mtime = mtime,
 			id = instance.get_id(),
 			display_name = instance.get_display_name(),
+			description = instance.get_description(),
 			icon = instance.get_icon(),
 			color = instance.get_color(),
 			inputs = instance.get_inputs(),
@@ -100,6 +101,7 @@ static func _load_macro_script(path: String, global: HenGlobal, target: Array[He
 	# human name: the macro's own, else the file name capitalized (set_value -> "Set Value")
 	var display_name: String = str(recipe.get('display_name', ''))
 	macro.name = display_name if not display_name.is_empty() else path.get_file().get_basename().capitalize()
+	macro.description = str(recipe.get('description', ''))
 	macro.is_script_macro = true
 	macro.script_path = path
 	macro.id = recipe.id

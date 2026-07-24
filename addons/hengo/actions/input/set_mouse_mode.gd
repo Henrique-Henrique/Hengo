@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_mouse_mode'
 
 
+func get_description() -> String:
+	return 'Sets how the mouse cursor behaves, such as capturing it for a first person camera or making it visible again.'
+
+
 func get_display_name() -> String:
 	return 'Set Mouse Mode'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Mode',
 			type = 'String',
 			id = &'mode',
+			doc = 'How the cursor should behave.',
 			raw = true,
 			options = ['MOUSE_MODE_VISIBLE', 'MOUSE_MODE_CAPTURED', 'MOUSE_MODE_HIDDEN', 'MOUSE_MODE_CONFINED'],
 			default_value = 'MOUSE_MODE_CAPTURED'

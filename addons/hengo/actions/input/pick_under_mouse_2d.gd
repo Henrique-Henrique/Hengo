@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'pick_under_mouse_2d'
 
 
+func get_description() -> String:
+	return 'Asks the 2D physics world which collider sits under the mouse and branches on whether one is found.'
+
+
 func get_display_name() -> String:
 	return 'Pick Under Mouse'
 
@@ -29,7 +33,7 @@ func get_default_phase() -> StringName:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Collider', type = 'Object', id = &'collider'}
+		{name = 'Collider', type = 'Object', id = &'collider', doc = 'Where to store the collider found under the mouse.'}
 	]
 
 
@@ -45,8 +49,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Hit', id = &'hit'},
-		{name = 'Miss', id = &'miss'}
+		{name = 'Hit', id = &'hit', doc = 'Where to go when a collider is under the mouse.'},
+		{name = 'Miss', id = &'miss', doc = 'Where to go when nothing is under it.'}
 	]
 
 

@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'string_replace'
 
 
+func get_description() -> String:
+	return 'Replaces every occurrence of one piece of text with another and stores the result.'
+
+
 func get_display_name() -> String:
 	return 'String Replace'
 
@@ -23,18 +27,21 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'String',
 			id = &'value',
+			doc = 'The text to search through.',
 			default_value = ''
 		},
 		{
 			name = 'From',
 			type = 'String',
 			id = &'from',
+			doc = 'The piece of text to replace.',
 			default_value = ''
 		},
 		{
 			name = 'To',
 			type = 'String',
 			id = &'to',
+			doc = 'The text to put in its place.',
 			default_value = ''
 		}
 	]
@@ -42,7 +49,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'String', id = &'result'}
+		{name = 'Result', type = 'String', id = &'result', doc = 'Where to store the updated text.'}
 	]
 
 

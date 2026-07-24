@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'vector2_combine'
 
 
+func get_description() -> String:
+	return 'Combines two vectors into a single number, such as the distance or angle between them.'
+
+
 func get_display_name() -> String:
 	return 'Vector2 Combine'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
+			doc = 'How to combine the two vectors.',
 			raw = true,
 			options = ['distance_to', 'distance_squared_to', 'dot', 'angle_to', 'angle_to_point', 'cross'],
 			default_value = 'distance_to'
@@ -31,12 +36,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'A',
 			type = 'Vector2',
 			id = &'a',
+			doc = 'The first vector.',
 			default_value = Vector2.ZERO
 		},
 		{
 			name = 'B',
 			type = 'Vector2',
 			id = &'b',
+			doc = 'The second vector.',
 			default_value = Vector2.ZERO
 		}
 	]
@@ -44,7 +51,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'The resulting number.'}
 	]
 
 

@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'on_button_pressed'
 
 
+func get_description() -> String:
+	return 'Runs when a Button is pressed by mouse or keyboard.'
+
+
 func get_display_name() -> String:
 	return 'On Button Pressed'
 

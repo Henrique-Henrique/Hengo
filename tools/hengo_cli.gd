@@ -256,7 +256,8 @@ func _report(_result: Dictionary) -> void:
 		printerr('[hengo_cli] one or more scripts failed round-trip')
 
 
-# creates the on-disk folder + identity + empty save_data for one script spec
+# builds identity + empty save_data for one script spec; the folder is written
+# later in pass 3 so a failed pass 2 leaves no orphaned folders behind
 func _create_script_resource(_collection: HenSaveCollection, _spec: Dictionary) -> Dictionary:
 	var script_name: String = String(_spec.get('name', 'generated')).to_snake_case()
 	var extends_class: StringName = _spec.get('extends', 'Node')

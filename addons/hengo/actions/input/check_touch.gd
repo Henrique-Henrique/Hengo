@@ -12,6 +12,10 @@ func get_id() -> StringName:
 	return &'check_touch'
 
 
+func get_description() -> String:
+	return 'Checks the touch screen and branches when a finger touches or leaves it. Also stores where the touch happened.'
+
+
 func get_display_name() -> String:
 	return 'Check Touch'
 
@@ -26,6 +30,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'When',
 			type = 'String',
 			id = &'when',
+			doc = 'Whether to react as the finger touches down or as it lifts off.',
 			raw = true,
 			options = ['Pressed', 'Released'],
 			default_value = 'Pressed'
@@ -35,7 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Position', type = 'Vector2', id = &'position'}
+		{name = 'Position', type = 'Vector2', id = &'position', doc = 'Where to store the screen point of the touch.'}
 	]
 
 
@@ -53,8 +58,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the touch happens.'},
+		{name = 'False', id = &'false', doc = 'Where to go when it does not.'}
 	]
 
 

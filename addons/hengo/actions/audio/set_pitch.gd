@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_pitch'
 
 
+func get_description() -> String:
+	return 'Changes the playback speed of an audio player, which also shifts its pitch.'
+
+
 func get_display_name() -> String:
 	return 'Set Pitch'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Player',
 			type = 'Node',
 			id = &'player',
+				doc = 'The AudioStreamPlayer to adjust.',
 			bind_only = true,
 			default_value = null
 		},
@@ -35,6 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Pitch',
 			type = 'float',
 			id = &'pitch',
+				doc = 'Playback speed multiplier, where 1 is normal and 2 is twice as fast.',
 			default_value = 1.0
 		}
 	]

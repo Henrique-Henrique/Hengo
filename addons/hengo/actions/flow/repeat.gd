@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'repeat'
 
 
+func get_description() -> String:
+	return 'Runs its nested actions a fixed number of times, all in the same frame.'
+
+
 func get_display_name() -> String:
 	return 'Repeat'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Times',
 			type = 'int',
 			id = &'times',
+			doc = 'How many times to run the nested actions.',
 			default_value = 3
 		}
 	]
@@ -35,7 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Index', type = 'int', id = &'index'}
+		{name = 'Index', type = 'int', id = &'index', doc = 'The current pass number, starting at 0.'}
 	]
 
 

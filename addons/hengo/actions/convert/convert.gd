@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'convert'
 
 
+func get_description() -> String:
+	return 'Converts a value to another basic type, such as int, float, str, or bool.'
+
+
 func get_display_name() -> String:
 	return 'Convert'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To',
 			type = 'String',
 			id = &'to',
+				doc = 'The type to convert the value into.',
 			raw = true,
 			options = ['int', 'float', 'str', 'bool'],
 			default_value = 'int'
@@ -31,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+				doc = 'The value to convert.',
 			default_value = 0
 		}
 	]
@@ -38,7 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'Where to store the converted value.'}
 	]
 
 

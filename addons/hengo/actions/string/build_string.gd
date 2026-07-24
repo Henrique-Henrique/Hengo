@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'build_string'
 
 
+func get_description() -> String:
+	return 'Joins a prefix, a value, and a suffix into one piece of text and stores it. The value is turned into text first, so any type works.'
+
+
 func get_display_name() -> String:
 	return 'Build String'
 
@@ -24,18 +28,21 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Prefix',
 			type = 'String',
 			id = &'prefix',
+			doc = 'Text placed before the value.',
 			default_value = ''
 		},
 		{
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+			doc = 'The value to turn into text and place in the middle.',
 			default_value = ''
 		},
 		{
 			name = 'Suffix',
 			type = 'String',
 			id = &'suffix',
+			doc = 'Text placed after the value.',
 			default_value = ''
 		}
 	]
@@ -43,7 +50,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'String', id = &'result'}
+		{name = 'Result', type = 'String', id = &'result', doc = 'Where to store the joined text.'}
 	]
 
 

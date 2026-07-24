@@ -11,6 +11,10 @@ func get_id() -> StringName:
 	return &'print_value'
 
 
+func get_description() -> String:
+	return 'Prints a value to the output console for debugging.'
+
+
 func get_icon() -> String:
 	return 'terminal'
 
@@ -22,6 +26,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+				doc = 'The value to print.',
 			default_value = 'hello'
 		}
 	]

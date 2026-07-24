@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'wait'
 
 
+func get_description() -> String:
+	return 'Waits a number of seconds while staying in this state, then takes the Finished branch. The timer resets each time this state is entered.'
+
+
 func get_display_name() -> String:
 	return 'Wait'
 
@@ -24,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Seconds',
 			type = 'float',
 			id = &'seconds',
+				doc = 'How long to wait, in seconds.',
 			default_value = 1.0
 		}
 	]
@@ -47,7 +52,7 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Finished', id = &'finished'}
+		{name = 'Finished', id = &'finished', doc = 'Where to go when the time is up.'}
 	]
 
 

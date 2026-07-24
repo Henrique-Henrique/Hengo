@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'clamp_value'
 
 
+func get_description() -> String:
+	return 'Keeps a value inside a range, so it never goes below Min or above Max.'
+
+
 func get_display_name() -> String:
 	return 'Clamp'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'Variant',
 			id = &'value',
+			doc = 'The value to limit.',
 			type_from = &'result',
 			default_value = 0.0
 		},
@@ -30,6 +35,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Min',
 			type = 'Variant',
 			id = &'min',
+			doc = 'The lowest allowed value.',
 			type_from = &'result',
 			default_value = 0.0
 		},
@@ -37,6 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Max',
 			type = 'Variant',
 			id = &'max',
+			doc = 'The highest allowed value.',
 			type_from = &'result',
 			default_value = 1.0
 		}
@@ -45,7 +52,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'The clamped value.'}
 	]
 
 

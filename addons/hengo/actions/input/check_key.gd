@@ -25,6 +25,10 @@ func get_id() -> StringName:
 	return &'check_key'
 
 
+func get_description() -> String:
+	return 'Checks a keyboard key and branches on whether it is down. Reads the key directly, so nothing has to be set up in the input map.'
+
+
 func get_display_name() -> String:
 	return 'Check Key'
 
@@ -39,6 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Key',
 			type = 'String',
 			id = &'key',
+			doc = 'Which keyboard key to watch.',
 			raw = true,
 			options = KEYS,
 			default_value = 'KEY_SPACE'
@@ -47,6 +52,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'When',
 			type = 'String',
 			id = &'when',
+			doc = 'Whether to react continuously while the key is down or only at the moment it changes.',
 			raw = true,
 			options = ['Held', 'Pressed', 'Released'],
 			default_value = 'Held'
@@ -64,8 +70,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true'},
-		{name = 'False', id = &'false'}
+		{name = 'True', id = &'true', doc = 'Where to go when the key check passes.'},
+		{name = 'False', id = &'false', doc = 'Where to go when it does not.'}
 	]
 
 

@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'set_visible'
 
 
+func get_description() -> String:
+	return 'Shows or hides the node. A hidden node keeps running, it just is not drawn.'
+
+
 func get_display_name() -> String:
 	return 'Set Visible'
 
@@ -31,6 +35,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Visible',
 			type = 'bool',
 			id = &'visible',
+				doc = 'On to show the node, off to hide it.',
 			default_value = true
 		}
 	]

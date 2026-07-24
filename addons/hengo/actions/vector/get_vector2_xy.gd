@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'get_vector2_xy'
 
 
+func get_description() -> String:
+	return 'Splits a Vector2 into its separate X and Y numbers.'
+
+
 func get_display_name() -> String:
 	return 'Get Vector2 XY'
 
@@ -23,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Vector',
 			type = 'Vector2',
 			id = &'vector',
+			doc = 'The vector to split.',
 			default_value = Vector2.ZERO
 		}
 	]
@@ -30,8 +35,8 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'X', type = 'float', id = &'x'},
-		{name = 'Y', type = 'float', id = &'y'}
+		{name = 'X', type = 'float', id = &'x', doc = 'The horizontal component.'},
+		{name = 'Y', type = 'float', id = &'y', doc = 'The vertical component.'}
 	]
 
 

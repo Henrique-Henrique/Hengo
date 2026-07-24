@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'set_modulate'
 
 
+func get_description() -> String:
+	return 'Tints the node and everything drawn inside it. The alpha channel of the color controls how transparent it becomes.'
+
+
 func get_display_name() -> String:
 	return 'Set Modulate'
 
@@ -32,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Color',
 			type = 'Color',
 			id = &'color',
+				doc = 'The tint color to apply, including its alpha for transparency.',
 			default_value = Color(1, 1, 1, 1)
 		}
 	]

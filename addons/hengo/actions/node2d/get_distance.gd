@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'get_distance'
 
 
+func get_description() -> String:
+	return 'Measures the distance from the node to a target and stores it, in pixels.'
+
+
 func get_display_name() -> String:
 	return 'Get Distance'
 
@@ -27,6 +31,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node2D',
 			id = &'target',
+			doc = 'The node to measure the distance to, such as another Node2D.',
 			bind_only = true,
 			default_value = null
 		}
@@ -35,7 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Distance', type = 'float', id = &'distance'}
+		{name = 'Distance', type = 'float', id = &'distance', doc = 'Where to store the resulting distance, in pixels.'}
 	]
 
 

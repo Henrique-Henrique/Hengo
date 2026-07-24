@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'translate'
 
 
+func get_description() -> String:
+	return 'Moves the node by an offset. During update it is applied per second; on enter or exit it is applied once.'
+
+
 func get_display_name() -> String:
 	return 'Translate'
 
@@ -28,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Offset',
 			type = 'Vector2',
 			id = &'offset',
+			doc = 'The amount to move, in pixels.',
 			default_value = Vector2(100, 0)
 		}
 	]

@@ -9,6 +9,10 @@ func get_id() -> StringName:
 	return &'get_axis'
 
 
+func get_description() -> String:
+	return 'Reads two input actions and stores their combined strength as a number from -1 to 1.'
+
+
 func get_display_name() -> String:
 	return 'Get Axis'
 
@@ -23,12 +27,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Negative',
 			type = 'StringName',
 			id = &'negative',
+			doc = 'The input action that pushes the value toward -1.',
 			default_value = 'ui_left'
 		},
 		{
 			name = 'Positive',
 			type = 'StringName',
 			id = &'positive',
+			doc = 'The input action that pushes the value toward 1.',
 			default_value = 'ui_right'
 		}
 	]
@@ -36,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'Where to store the axis value, from -1 to 1.'}
 	]
 
 

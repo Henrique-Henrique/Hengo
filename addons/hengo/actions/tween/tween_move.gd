@@ -10,6 +10,10 @@ func get_id() -> StringName:
 	return &'tween_move'
 
 
+func get_description() -> String:
+	return 'Smoothly moves the node to a target position over time. Runs once when the state starts.'
+
+
 func get_display_name() -> String:
 	return 'Tween Move'
 
@@ -32,12 +36,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'To',
 			type = 'Vector2',
 			id = &'to',
+				doc = 'The position to move to.',
 			default_value = Vector2.ZERO
 		},
 		{
 			name = 'Duration',
 			type = 'float',
 			id = &'duration',
+				doc = 'How long the movement takes, in seconds.',
 			default_value = 0.3
 		}
 	]
