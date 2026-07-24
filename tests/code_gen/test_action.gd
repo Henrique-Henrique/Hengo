@@ -2680,3 +2680,189 @@ func test_stateful_action_in_a_loop_is_refused() -> void:
 	script.source_code = code
 
 	assert_int(script.reload()).is_equal(OK)
+
+
+# --- tween ------------------------------------------------------------------
+
+
+# fire-and-forget: one create_tween() call animating the owner's own property
+func test_tween_move_emits_a_property_tween() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'tween_move'), &'enter')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('_ref.create_tween().tween_property(_ref, "position",')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# fade drives the sub-property of modulate, not a whole Color
+func test_tween_fade_targets_modulate_alpha() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'tween_fade'), &'enter')
+
+	assert_str(HenTest.get_all_code()).contains('tween_property(_ref, "modulate:a",')
+
+
+# degrees are authored, radians are stored, so the value is wrapped on the way out
+func test_tween_rotate_converts_degrees() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'tween_rotate'), &'enter')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('tween_property(_ref, "rotation", deg_to_rad(')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# a fire-and-forget tween has nowhere to run per frame, so it only offers enter
+func test_tween_is_enter_only() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var macro: HenSaveMacro = HenActionsPanel.find_macro(&'tween_move')
+
+	assert_array(HenSaveAction.supported_phases(macro)).is_equal([&'enter'])
+	assert_str(str(HenSaveAction.default_phase(macro))).is_equal('enter')
+
+
+# --- control ----------------------------------------------------------------
+
+
+# the target is a bound Control node; a node path reaches it without a variable
+func test_set_text_writes_to_a_bound_node() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'set_text'), &'enter')
+	action.input_bindings['target'] = HenUtils.BIND_PATH_PREFIX + 'HUD/Label'
+	action.inputs[1].default_value = 'Score'
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains("_ref.get_node(\"HUD/Label\").text = 'Score'")
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# an unbound target has no node to write to, so it is refused instead of emitting `_ref..text`
+func test_set_text_without_a_target_is_refused() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'set_text'), &'enter')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('must be bound to a variable or property')
+	assert_str(code).not_contains('.text = ')
+
+
+# the value setter drives a Range node the same duck-typed way
+func test_set_control_value_writes_to_a_bound_node() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'set_control_value'), &'enter')
+	action.input_bindings['target'] = HenUtils.BIND_PATH_PREFIX + 'HUD/Bar'
+	action.inputs[1].default_value = 50.0
+
+	assert_str(HenTest.get_all_code()).contains('_ref.get_node("HUD/Bar").value = 50')
+
+
+# --- get nearest ------------------------------------------------------------
+
+
+# the scan produces the closest node into a bound variable
+func test_get_nearest_scans_the_group_into_a_variable() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var enemy: HenSaveVar = save_data.add_var(false)
+	enemy.name = 'closest'
+	enemy.type = 'Node2D'
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'get_nearest'), &'update')
+	action.output_bindings['nearest'] = HenUtils.bind_code_for_var(enemy)
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains("_ref.get_tree().get_nodes_in_group('enemies')")
+	assert_str(code).contains('_ref.closest = best_' + str(action.id))
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# a producer with its own for-loop nests inside a For Each without being treated
+# as a stateful hook — the proof loops only made viable
+func test_get_nearest_runs_inside_a_for_each() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var coll: HenSaveVar = save_data.add_var(false)
+	coll.name = 'waves'
+	coll.type = 'Array'
+	var enemy: HenSaveVar = save_data.add_var(false)
+	enemy.name = 'closest'
+	enemy.type = 'Node2D'
+
+	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'for_each'), &'update')
+	loop.input_bindings['collection'] = HenUtils.bind_code_for_var(coll)
+
+	var near: HenSaveAction = _nested(&'get_nearest')
+	near.inputs = [HenSaveParam.create({name = 'Group', type = 'StringName', id = &'group', default_value = 'enemies'})]
+	near.output_bindings['nearest'] = HenUtils.bind_code_for_var(enemy)
+	loop.body_actions.append(near)
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains("get_nodes_in_group('enemies')")
+	assert_str(code).not_contains('# hengo:')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# --- new categories ---------------------------------------------------------
+
+
+# the two new folders carry their label, icon and color
+func test_tween_and_control_categories_are_registered() -> void:
+	var tween: Dictionary = HenActionCategories.get_data('tween')
+	var control: Dictionary = HenActionCategories.get_data('control')
+
+	assert_str(str(tween.name)).is_equal('Tween')
+	assert_str(str(tween.icon)).is_equal('sparkles')
+	assert_str(str(tween.color)).is_equal('#fb7185')
+
+	assert_str(str(control.name)).is_equal('Control')
+	assert_str(str(control.icon)).is_equal('sliders-horizontal')
+	assert_str(str(control.color)).is_equal('#60a5fa')
+
+
+# the category is the folder, so the loader tags the new actions from where they live
+func test_new_actions_take_their_folder_category() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var by_id: Dictionary = {}
+	for macro: HenSaveMacro in (Engine.get_singleton(&'Global') as HenGlobal).action_macros:
+		by_id[str(macro.id)] = macro
+
+	assert_str(by_id['tween_move'].category).is_equal('tween')
+	assert_str(by_id['tween_fade'].category).is_equal('tween')
+	assert_str(by_id['set_text'].category).is_equal('control')
+	assert_str(by_id['set_control_value'].category).is_equal('control')
+	assert_str(by_id['get_nearest'].category).is_equal('scene')

@@ -55,7 +55,11 @@ static func supported_phases(_macro: HenSaveMacro) -> Array:
 	var phases: Array = []
 	if declared.has('enter'):
 		phases.append(&'enter')
-	phases.append(&'update')
+
+	# update is offered when the macro declares it, or has no flow inputs (its body
+	# comes from the _process override); an enter-only tween must not land there
+	if declared.is_empty() or declared.has('update'):
+		phases.append(&'update')
 
 	# branching from physics is safe, the ban is exit-only
 	if declared.has('physics'):

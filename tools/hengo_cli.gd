@@ -189,6 +189,8 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 
 	var scripts: Array = []
 	for b: Dictionary in built:
+		if not DirAccess.dir_exists_absolute(b.id_path):
+			DirAccess.make_dir_recursive_absolute(b.id_path)
 		b.identity.take_over_path(b.id_path.path_join(HenEnums.IDENTITY_FILE))
 		b.save_data.take_over_path(b.id_path.path_join(HenEnums.SAVE_FILE))
 		var r1: int = ResourceSaver.save(b.identity)
@@ -263,8 +265,6 @@ func _create_script_resource(_collection: HenSaveCollection, _spec: Dictionary) 
 
 	var id: int = ResourceUID.create_id()
 	var id_path: String = HenEnums.HENGO_COLLECTION_PATH.path_join(_collection.id).path_join(str(id))
-	if not DirAccess.dir_exists_absolute(id_path):
-		DirAccess.make_dir_recursive_absolute(id_path)
 
 	var identity: HenSaveDataIdentity = HenSaveDataIdentity.create(str(id), extends_class, script_name)
 	identity.script_path = HenEnums.HENGO_SCRIPTS_PATH + script_name + '.gd'

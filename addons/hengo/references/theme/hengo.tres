@@ -314,7 +314,7 @@ expand_margin_top = 4.0
 expand_margin_bottom = 4.0
 
 [resource]
-default_font_size = 13
+default_font_size = 16
 Button/constants/align_to_largest_stylebox = 0
 Button/constants/h_separation = 4
 Button/constants/icon_max_width = 0

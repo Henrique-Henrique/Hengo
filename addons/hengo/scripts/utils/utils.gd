@@ -814,7 +814,10 @@ static func rebuild_script_index() -> void:
 		for collection_id: String in DirAccess.get_directories_at(HenEnums.HENGO_COLLECTION_PATH):
 			var collection_path: String = HenEnums.HENGO_COLLECTION_PATH.path_join(collection_id)
 			for script_id: String in DirAccess.get_directories_at(collection_path):
-				fresh[StringName(script_id)] = collection_path.path_join(script_id)
+				var script_path: String = collection_path.path_join(script_id)
+				# a folder is only a script if it carries an identity file
+				if FileAccess.file_exists(script_path.path_join(HenEnums.IDENTITY_FILE)):
+					fresh[StringName(script_id)] = script_path
 
 	# single reference swap so concurrent readers never see a half-built index
 	_script_dir_index = fresh
