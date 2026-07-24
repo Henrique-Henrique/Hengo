@@ -130,7 +130,7 @@ func _on_hover(hovered: bool) -> void:
 
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if hovered and not _tooltip.is_empty():
-		global.TOOLTIP.go_to(get_global_mouse_position() + Vector2(16, 16), _tooltip)
+		global.TOOLTIP.go_to(get_global_mouse_position(), _tooltip)
 	else:
 		global.TOOLTIP.close()
 
