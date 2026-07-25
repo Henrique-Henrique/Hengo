@@ -33,6 +33,18 @@ func _initialize() -> void:
 		quit(0)
 		return
 
+	if user_args[0] == '--export-actions':
+		var out_path: String = user_args[1] if user_args.size() > 1 else 'res://data/actions.json'
+		var export_err: String = _export_actions(out_path)
+		root_scene.free()
+
+		if export_err.is_empty():
+			quit(0)
+		else:
+			_fail(export_err)
+
+		return
+
 	var json: Dictionary = _read_json(user_args[0])
 	if json.is_empty():
 		root_scene.free()
@@ -126,6 +138,85 @@ func _input_data(_param: HenSaveParam) -> Dictionary:
 		type_from = str(_param.type_from),
 		options = _param.options,
 	}
+
+
+# writes the full actions catalog (categories + actions) as json for the docs site
+func _export_actions(_out_path: String) -> String:
+	var actions: Array = []
+	var present: Dictionary = {}
+
+	for macro: HenSaveMacro in HenHengoActions.pool():
+		present[macro.category] = true
+		actions.append({
+			id = str(macro.id),
+			name = macro.name,
+			category = macro.category,
+			color = macro.color,
+			icon = macro.icon,
+			description = macro.description,
+			default_phase = str(HenSaveAction.default_phase(macro)),
+			phases = HenSaveAction.supported_phases(macro).map(func(p: StringName) -> String: return str(p)),
+			inputs = macro.inputs.map(_export_input),
+			outputs = macro.outputs.map(func(p: HenSaveParam) -> Dictionary: return {id = str(p.id), name = p.name, type = str(p.type), doc = p.doc}),
+			branches = macro.flow_outputs.map(func(f: HenSaveFlowParam) -> Dictionary: return {id = str(f.id), name = f.name, doc = f.doc}),
+			has_body = macro.has_body,
+			target_classes = macro.target_classes.map(func(c: StringName) -> String: return str(c)),
+		})
+
+	actions.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.id < b.id)
+
+	# category metadata (label/icon/color/count), sorted by the plugin's own order
+	var categories: Array = []
+
+	for cid: String in HenActionCategories.sorted(present.keys()):
+		var data: Dictionary = HenActionCategories.get_data(cid)
+		var count: int = actions.filter(func(a: Dictionary) -> bool: return a.category == cid).size()
+		categories.append({id = cid, name = data.name, icon = data.icon, color = data.color, count = count})
+
+	var doc: Dictionary = {version = Engine.get_version_info().string, categories = categories, actions = actions}
+
+	DirAccess.make_dir_recursive_absolute(_out_path.get_base_dir())
+	var file: FileAccess = FileAccess.open(_out_path, FileAccess.WRITE)
+
+	if not file:
+		return 'could not write ' + _out_path
+
+	file.store_string(JSON.stringify(doc, '\t'))
+	file.close()
+	print('exported ', actions.size(), ' actions to ', _out_path)
+
+	return ''
+
+
+func _export_input(_param: HenSaveParam) -> Dictionary:
+	return {
+		id = str(_param.id),
+		name = _param.name,
+		type = str(_param.type),
+		default = _fmt_default(_param.default_value),
+		doc = _param.doc,
+		lvalue = _param.lvalue,
+		optional = _param.optional,
+		type_from = str(_param.type_from),
+		options = _param.options,
+	}
+
+
+# a readable string for a default value, or null when there is none
+func _fmt_default(_value: Variant) -> Variant:
+	if _value == null:
+		return null
+
+	if _value is String or _value is StringName:
+		return "'" + str(_value) + "'"
+
+	if _value is bool:
+		return 'true' if _value else 'false'
+
+	if _value is float and is_equal_approx(_value, floorf(_value)):
+		return '%.1f' % _value
+
+	return str(_value)
 
 
 # builds a collection of one or more scripts, persists savedata and compiles .gd.

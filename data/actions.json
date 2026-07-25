@@ -1,0 +1,5494 @@
+{
+	"actions": [
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Adds the node to a named group, a common way to tag it as something like an enemy or a pickup.",
+			"has_body": false,
+			"icon": "users",
+			"id": "add_to_group",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The group name to tag the node with.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Add To Group",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "variable",
+			"color": "#1dd1a1",
+			"default_phase": "update",
+			"description": "Adds an amount to a variable or property, accumulating the result each time it runs.",
+			"has_body": false,
+			"icon": "plus",
+			"id": "add_to_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The variable or property to add to.",
+					"id": "target",
+					"lvalue": true,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "1",
+					"doc": "The amount to add each time.",
+					"id": "amount",
+					"lvalue": false,
+					"name": "Amount",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "target"
+				}
+			],
+			"name": "Add To Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Pulls the body downward by adding gravity to its velocity every physics frame, so it falls faster the longer it drops.",
+			"has_body": false,
+			"icon": "arrow-down-to-line",
+			"id": "apply_gravity",
+			"inputs": [
+				{
+					"default": "980.0",
+					"doc": "How strong the downward pull is, in pixels per second squared.",
+					"id": "gravity",
+					"lvalue": false,
+					"name": "Gravity",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Apply Gravity",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Pulls the body downward by subtracting gravity from its velocity every physics frame, so it falls faster the longer it drops.",
+			"has_body": false,
+			"icon": "arrow-down-to-line",
+			"id": "apply_gravity_3d",
+			"inputs": [
+				{
+					"default": "24.0",
+					"doc": "How strong the downward pull is, in units per second squared.",
+					"id": "gravity",
+					"lvalue": false,
+					"name": "Gravity",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Apply Gravity",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "variable",
+			"color": "#1dd1a1",
+			"default_phase": "update",
+			"description": "Moves a number toward a target value at a fixed speed, without overshooting.",
+			"has_body": false,
+			"icon": "trending-up",
+			"id": "approach_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The variable or property to move.",
+					"id": "target",
+					"lvalue": true,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The value to move toward.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How fast to move, in units per second.",
+					"id": "step",
+					"lvalue": false,
+					"name": "Step",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Approach",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Appends a value to the end of an array.",
+			"has_body": false,
+			"icon": "list-plus",
+			"id": "array_add",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to append to. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to add to the array.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Array Add",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the value is found.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the value is missing.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Checks whether an array holds a given value and branches on the result.",
+			"has_body": false,
+			"icon": "list-checks",
+			"id": "array_contains",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to search.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to look for.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Array Contains",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Reads the item at a given position in an array. An index outside the array fails at runtime.",
+			"has_body": false,
+			"icon": "list",
+			"id": "array_get",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to read from.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "Position of the item to read, starting at 0.",
+					"id": "index",
+					"lvalue": false,
+					"name": "Index",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Array Get",
+			"outputs": [
+				{
+					"doc": "Where to store the item found at the index.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Counts how many items an array holds.",
+			"has_body": false,
+			"icon": "list-ordered",
+			"id": "array_length",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to measure.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				}
+			],
+			"name": "Array Length",
+			"outputs": [
+				{
+					"doc": "Where to store the number of items.",
+					"id": "result",
+					"name": "Length",
+					"type": "int"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Picks one item at random from an array. An empty array returns null.",
+			"has_body": false,
+			"icon": "shuffle",
+			"id": "array_random",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to pick from.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				}
+			],
+			"name": "Array Get Random",
+			"outputs": [
+				{
+					"doc": "Where to store the randomly picked item.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Leaves the surrounding loop and skips the rest of its passes. Only valid inside a For Each or Repeat.",
+			"has_body": false,
+			"icon": "circle-slash",
+			"id": "break_loop",
+			"inputs": [],
+			"name": "Break",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Joins a prefix, a value, and a suffix into one piece of text and stores it. The value is turned into text first, so any type works.",
+			"has_body": false,
+			"icon": "type",
+			"id": "build_string",
+			"inputs": [
+				{
+					"default": "''",
+					"doc": "Text placed before the value.",
+					"id": "prefix",
+					"lvalue": false,
+					"name": "Prefix",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The value to turn into text and place in the middle.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "Text placed after the value.",
+					"id": "suffix",
+					"lvalue": false,
+					"name": "Suffix",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Build String",
+			"outputs": [
+				{
+					"doc": "Where to store the joined text.",
+					"id": "result",
+					"name": "Result",
+					"type": "String"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the roll succeeds.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when it fails.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Randomly branches to True or False based on a percentage. A chance of 50 goes True about half the time.",
+			"has_body": false,
+			"icon": "dice-5",
+			"id": "chance",
+			"inputs": [
+				{
+					"default": "50.0",
+					"doc": "Percent chance of taking the True branch, from 0 to 100.",
+					"id": "chance",
+					"lvalue": false,
+					"name": "Chance %",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Chance",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "render",
+			"color": "#f368e0",
+			"default_phase": "update",
+			"description": "Sets the color of the node, choosing the right property for its type such as a light, sprite or shape. Falls back to tinting through modulate for other nodes.",
+			"has_body": false,
+			"icon": "palette",
+			"id": "change_color",
+			"inputs": [
+				{
+					"default": "(1.0, 1.0, 1.0, 1.0)",
+					"doc": "The color to apply.",
+					"id": "color",
+					"lvalue": false,
+					"name": "Color",
+					"optional": false,
+					"options": [],
+					"type": "Color",
+					"type_from": ""
+				}
+			],
+			"name": "Change Color",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D",
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Replaces the running scene with another one. The current scene is freed, including the node this action runs on.",
+			"has_body": false,
+			"icon": "replace",
+			"id": "change_scene",
+			"inputs": [
+				{
+					"default": "'res://scenes/main.tscn'",
+					"doc": "The path to the scene file to load.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Scene Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Change Scene",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the key check passes.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when it does not.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Checks a keyboard key and branches on whether it is down. Reads the key directly, so nothing has to be set up in the input map.",
+			"has_body": false,
+			"icon": "keyboard",
+			"id": "check_key",
+			"inputs": [
+				{
+					"default": "'KEY_SPACE'",
+					"doc": "Which keyboard key to watch.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [
+						"KEY_SPACE",
+						"KEY_ENTER",
+						"KEY_ESCAPE",
+						"KEY_TAB",
+						"KEY_BACKSPACE",
+						"KEY_SHIFT",
+						"KEY_CTRL",
+						"KEY_ALT",
+						"KEY_LEFT",
+						"KEY_RIGHT",
+						"KEY_UP",
+						"KEY_DOWN",
+						"KEY_A",
+						"KEY_B",
+						"KEY_C",
+						"KEY_D",
+						"KEY_E",
+						"KEY_F",
+						"KEY_G",
+						"KEY_H",
+						"KEY_I",
+						"KEY_J",
+						"KEY_K",
+						"KEY_L",
+						"KEY_M",
+						"KEY_N",
+						"KEY_O",
+						"KEY_P",
+						"KEY_Q",
+						"KEY_R",
+						"KEY_S",
+						"KEY_T",
+						"KEY_U",
+						"KEY_V",
+						"KEY_W",
+						"KEY_X",
+						"KEY_Y",
+						"KEY_Z",
+						"KEY_0",
+						"KEY_1",
+						"KEY_2",
+						"KEY_3",
+						"KEY_4",
+						"KEY_5",
+						"KEY_6",
+						"KEY_7",
+						"KEY_8",
+						"KEY_9",
+						"KEY_F1",
+						"KEY_F2",
+						"KEY_F3",
+						"KEY_F4",
+						"KEY_F5"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "'Held'",
+					"doc": "Whether to react continuously while the key is down or only at the moment it changes.",
+					"id": "when",
+					"lvalue": false,
+					"name": "When",
+					"optional": false,
+					"options": [
+						"Held",
+						"Pressed",
+						"Released"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Check Key",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the touch happens.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when it does not.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Checks the touch screen and branches when a finger touches or leaves it. Also stores where the touch happened.",
+			"has_body": false,
+			"icon": "hand",
+			"id": "check_touch",
+			"inputs": [
+				{
+					"default": "'Pressed'",
+					"doc": "Whether to react as the finger touches down or as it lifts off.",
+					"id": "when",
+					"lvalue": false,
+					"name": "When",
+					"optional": false,
+					"options": [
+						"Pressed",
+						"Released"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Check Touch",
+			"outputs": [
+				{
+					"doc": "Where to store the screen point of the touch.",
+					"id": "position",
+					"name": "Position",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Keeps a value inside a range, so it never goes below Min or above Max.",
+			"has_body": false,
+			"icon": "ruler",
+			"id": "clamp_value",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The value to limit.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "0.0",
+					"doc": "The lowest allowed value.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "1.0",
+					"doc": "The highest allowed value.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				}
+			],
+			"name": "Clamp",
+			"outputs": [
+				{
+					"doc": "The clamped value.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the comparison is true.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the comparison is false.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Compares two values with the chosen operator and branches on the result.",
+			"has_body": false,
+			"icon": "git-compare",
+			"id": "compare",
+			"inputs": [
+				{
+					"default": "0",
+					"doc": "The left value in the comparison.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "'=='",
+					"doc": "How to compare the two values.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"==",
+						"!=",
+						">",
+						">=",
+						"<",
+						"<="
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The right value in the comparison.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "a"
+				}
+			],
+			"name": "Compare",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Skips to the next pass of the surrounding loop. Only valid inside a For Each or Repeat.",
+			"has_body": false,
+			"icon": "fast-forward",
+			"id": "continue_loop",
+			"inputs": [],
+			"name": "Continue",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "convert",
+			"color": "#d946ef",
+			"default_phase": "update",
+			"description": "Converts a value to another basic type, such as int, float, str, or bool.",
+			"has_body": false,
+			"icon": "binary",
+			"id": "convert",
+			"inputs": [
+				{
+					"default": "'int'",
+					"doc": "The type to convert the value into.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [
+						"int",
+						"float",
+						"str",
+						"bool"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to convert.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Convert",
+			"outputs": [
+				{
+					"doc": "Where to store the converted value.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Continuously moves the node toward the mouse, optionally turning to face it.",
+			"has_body": false,
+			"icon": "mouse-pointer-2",
+			"id": "follow_mouse",
+			"inputs": [
+				{
+					"default": "200.0",
+					"doc": "How fast to move toward the mouse, in pixels per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "When true, the node turns to face the mouse.",
+					"id": "rotate",
+					"lvalue": false,
+					"name": "Rotate To Face",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Follow Mouse",
+			"outputs": [],
+			"phases": [
+				"update"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Runs its nested actions once for every element in a collection, all in the same frame.",
+			"has_body": true,
+			"icon": "repeat",
+			"id": "for_each",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array or collection to walk through.",
+					"id": "collection",
+					"lvalue": false,
+					"name": "Collection",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "For Each",
+			"outputs": [
+				{
+					"doc": "The current element, for the nested actions to read.",
+					"id": "item",
+					"name": "Item",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Measures the angle from the node to a target and stores it, in radians.",
+			"has_body": false,
+			"icon": "compass",
+			"id": "get_angle_to",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to measure the angle to, such as another Node2D.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node2D",
+					"type_from": ""
+				}
+			],
+			"name": "Get Angle To",
+			"outputs": [
+				{
+					"doc": "Where to store the resulting angle, in radians.",
+					"id": "angle",
+					"name": "Angle",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Reads two input actions and stores their combined strength as a number from -1 to 1.",
+			"has_body": false,
+			"icon": "move-horizontal",
+			"id": "get_axis",
+			"inputs": [
+				{
+					"default": "'ui_left'",
+					"doc": "The input action that pushes the value toward -1.",
+					"id": "negative",
+					"lvalue": false,
+					"name": "Negative",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				},
+				{
+					"default": "'ui_right'",
+					"doc": "The input action that pushes the value toward 1.",
+					"id": "positive",
+					"lvalue": false,
+					"name": "Positive",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Get Axis",
+			"outputs": [
+				{
+					"doc": "Where to store the axis value, from -1 to 1.",
+					"id": "result",
+					"name": "Result",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Measures the distance from the node to a target and stores it, in pixels.",
+			"has_body": false,
+			"icon": "ruler",
+			"id": "get_distance",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to measure the distance to, such as another Node2D.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node2D",
+					"type_from": ""
+				}
+			],
+			"name": "Get Distance",
+			"outputs": [
+				{
+					"doc": "Where to store the resulting distance, in pixels.",
+					"id": "distance",
+					"name": "Distance",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Measures the distance from the node to a target and stores it, in world units.",
+			"has_body": false,
+			"icon": "ruler",
+			"id": "get_distance_3d",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to measure the distance to, such as another Node3D.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node3D",
+					"type_from": ""
+				}
+			],
+			"name": "Get Distance 3D",
+			"outputs": [
+				{
+					"doc": "Where to store the resulting distance, in world units.",
+					"id": "distance",
+					"name": "Distance",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Reads four movement input actions and stores their direction as a Vector2, already normalized for even diagonal speed.",
+			"has_body": false,
+			"icon": "move",
+			"id": "get_move_vector",
+			"inputs": [
+				{
+					"default": "'ui_left'",
+					"doc": "The input action for moving left.",
+					"id": "left",
+					"lvalue": false,
+					"name": "Left",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				},
+				{
+					"default": "'ui_right'",
+					"doc": "The input action for moving right.",
+					"id": "right",
+					"lvalue": false,
+					"name": "Right",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				},
+				{
+					"default": "'ui_up'",
+					"doc": "The input action for moving forward.",
+					"id": "forward",
+					"lvalue": false,
+					"name": "Forward",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				},
+				{
+					"default": "'ui_down'",
+					"doc": "The input action for moving back.",
+					"id": "back",
+					"lvalue": false,
+					"name": "Back",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Get Move Vector",
+			"outputs": [
+				{
+					"doc": "Where to store the movement direction.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Finds the closest node in a group and stores it, measured by distance in global space. The node itself is skipped so it never matches itself.",
+			"has_body": false,
+			"icon": "radar",
+			"id": "get_nearest",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The group to search for the closest node.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Get Nearest",
+			"outputs": [
+				{
+					"doc": "Where to store the closest node found.",
+					"id": "nearest",
+					"name": "Nearest",
+					"type": "Object"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D",
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Looks up a node by its path and stores it so later actions can use it. Stores null when nothing is found at that path.",
+			"has_body": false,
+			"icon": "list-tree",
+			"id": "get_node",
+			"inputs": [
+				{
+					"default": "'Sprite2D'",
+					"doc": "The path to the node, relative to this node.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Get Node",
+			"outputs": [
+				{
+					"doc": "Where to store the node that was found.",
+					"id": "result",
+					"name": "Node",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Splits a Vector2 into its separate X and Y numbers.",
+			"has_body": false,
+			"icon": "move-diagonal-2",
+			"id": "get_vector2_xy",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The vector to split.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Get Vector2 XY",
+			"outputs": [
+				{
+					"doc": "The horizontal component.",
+					"id": "x",
+					"name": "X",
+					"type": "float"
+				},
+				{
+					"doc": "The vertical component.",
+					"id": "y",
+					"name": "Y",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "enter",
+			"description": "Returns control to whichever state was running before this one took over.",
+			"has_body": false,
+			"icon": "rotate-ccw",
+			"id": "go_back",
+			"inputs": [],
+			"name": "Go Back",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the condition is true.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when it is false.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Branches to one of two targets based on a condition. Each branch transitions to a state or sub-state set per action.",
+			"has_body": false,
+			"icon": "git-branch",
+			"id": "if_condition",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "The test that decides which branch runs.",
+					"id": "condition",
+					"lvalue": false,
+					"name": "Condition",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "If",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the action check passes.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when it does not.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Checks an input action and branches on whether it is active. Mode chooses between held, pressed this frame, and released this frame.",
+			"has_body": false,
+			"icon": "gamepad-2",
+			"id": "input_action",
+			"inputs": [
+				{
+					"default": "'ui_accept'",
+					"doc": "The input action to check, as named in the input map.",
+					"id": "action",
+					"lvalue": false,
+					"name": "Action",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				},
+				{
+					"default": "'is_action_pressed'",
+					"doc": "How to test the action, from held down to the single frame it changes.",
+					"id": "mode",
+					"lvalue": false,
+					"name": "Mode",
+					"optional": false,
+					"options": [
+						"is_action_pressed",
+						"is_action_just_pressed",
+						"is_action_just_released"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Check Action",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go while the animation is still playing.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go once the animation has stopped.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "animation",
+			"color": "#f472b6",
+			"default_phase": "update",
+			"description": "Checks whether an AnimationPlayer is still running and branches on the result. Useful for holding a state until an animation finishes.",
+			"has_body": false,
+			"icon": "film",
+			"id": "is_animation_playing",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AnimationPlayer to check.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Is Animation Playing",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the node is in the group.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the node is not in the group.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Checks whether the node belongs to a named group and branches on the answer.",
+			"has_body": false,
+			"icon": "users",
+			"id": "is_in_group",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The group name to check for.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Is In Group",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the body is on the floor.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the body is in the air.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Checks whether the body is standing on the floor and branches on the result. It uses the floor contact from the last Move And Slide.",
+			"has_body": false,
+			"icon": "chevrons-right",
+			"id": "is_on_floor",
+			"inputs": [],
+			"name": "Is On Floor",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the body is on the floor.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the body is in the air.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Checks whether the body is standing on the floor and branches on the result. It uses the floor contact from the last Move And Slide.",
+			"has_body": false,
+			"icon": "chevrons-right",
+			"id": "is_on_floor_3d",
+			"inputs": [],
+			"name": "Is On Floor",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go while the sound is still playing.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go once the sound has stopped.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "update",
+			"description": "Checks whether an audio player is still playing and branches on the result. Useful for waiting until a sound finishes before continuing.",
+			"has_body": false,
+			"icon": "volume-2",
+			"id": "is_sound_playing",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AudioStreamPlayer to check.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Is Sound Playing",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the object is still valid.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the object has been freed.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Checks whether an object still points at a live instance and branches on the result. Helps catch a freed node before using it.",
+			"has_body": false,
+			"icon": "circle-check",
+			"id": "is_valid",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The variable holding the object to check.",
+					"id": "object",
+					"lvalue": false,
+					"name": "Object",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Is Valid",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "enter",
+			"description": "Pushes the body upward, but only when it is standing on the floor. Sets the upward velocity to the given force.",
+			"has_body": false,
+			"icon": "move-up",
+			"id": "jump_3d",
+			"inputs": [
+				{
+					"default": "8.0",
+					"doc": "How hard the jump is, in units per second.",
+					"id": "force",
+					"lvalue": false,
+					"name": "Force",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Jump",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Blends between two values by a weight, where 0 gives From and 1 gives To.",
+			"has_body": false,
+			"icon": "spline",
+			"id": "lerp",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The value returned when Weight is 0.",
+					"id": "from",
+					"lvalue": false,
+					"name": "From",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "1.0",
+					"doc": "The value returned when Weight is 1.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "0.5",
+					"doc": "How far to blend from From to To, from 0 to 1.",
+					"id": "weight",
+					"lvalue": false,
+					"name": "Weight",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Lerp",
+			"outputs": [
+				{
+					"doc": "The blended value.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "variable",
+			"color": "#1dd1a1",
+			"default_phase": "update",
+			"description": "Smoothly eases a variable or property toward a target value each frame.",
+			"has_body": false,
+			"icon": "spline",
+			"id": "lerp_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The variable or property to ease.",
+					"id": "target",
+					"lvalue": true,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to ease toward.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "target"
+				},
+				{
+					"default": "0.1",
+					"doc": "How much to move each call, from 0 to 1. Higher is faster.",
+					"id": "weight",
+					"lvalue": false,
+					"name": "Weight",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Lerp Toward",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Rotates the node so its right side faces a point in global space.",
+			"has_body": false,
+			"icon": "crosshair",
+			"id": "look_at_2d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The point in global space to face.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Look At",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Rotates the node so its front faces a point in global space.",
+			"has_body": false,
+			"icon": "crosshair",
+			"id": "look_at_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The point in global space to face.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 1.0, 0.0)",
+					"doc": "Which direction is up, keeping the node from rolling. It must not point along the looking direction.",
+					"id": "up",
+					"lvalue": false,
+					"name": "Up",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Look At",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Builds a Vector2 from separate X and Y numbers.",
+			"has_body": false,
+			"icon": "move-diagonal",
+			"id": "make_vector2",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The horizontal component.",
+					"id": "x",
+					"lvalue": false,
+					"name": "X",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The vertical component.",
+					"id": "y",
+					"lvalue": false,
+					"name": "Y",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Make Vector2",
+			"outputs": [
+				{
+					"doc": "The built vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Applies a single-number math function to Value, such as abs or sqrt.",
+			"has_body": false,
+			"icon": "square-function",
+			"id": "math_function",
+			"inputs": [
+				{
+					"default": "'abs'",
+					"doc": "The math function to apply.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"abs",
+						"sign",
+						"round",
+						"floor",
+						"ceil",
+						"sqrt"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The number to feed into the function.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				}
+			],
+			"name": "Math Function",
+			"outputs": [
+				{
+					"doc": "The function result.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Applies a two-number math function to A and B, such as min, max or pow.",
+			"has_body": false,
+			"icon": "sigma",
+			"id": "math_function2",
+			"inputs": [
+				{
+					"default": "'min'",
+					"doc": "The math function to apply.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"min",
+						"max",
+						"pow",
+						"snapped",
+						"fmod"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The first number.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "0.0",
+					"doc": "The second number.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				}
+			],
+			"name": "Math Function 2",
+			"outputs": [
+				{
+					"doc": "The function result.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Combines two numbers with an arithmetic operator, such as add or multiply.",
+			"has_body": false,
+			"icon": "calculator",
+			"id": "math_operator",
+			"inputs": [
+				{
+					"default": "0",
+					"doc": "The left-hand number.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "'+'",
+					"doc": "The arithmetic operation to apply.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"+",
+						"-",
+						"*",
+						"/"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The right-hand number.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				}
+			],
+			"name": "Math",
+			"outputs": [
+				{
+					"doc": "The result of the operation.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the button check passes.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when it does not.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Checks a mouse button and branches on its state. Reads the button directly, so nothing has to be set up in the input map.",
+			"has_body": false,
+			"icon": "mouse-pointer-click",
+			"id": "mouse_button",
+			"inputs": [
+				{
+					"default": "'MOUSE_BUTTON_LEFT'",
+					"doc": "Which mouse button to watch.",
+					"id": "button",
+					"lvalue": false,
+					"name": "Button",
+					"optional": false,
+					"options": [
+						"MOUSE_BUTTON_LEFT",
+						"MOUSE_BUTTON_RIGHT",
+						"MOUSE_BUTTON_MIDDLE"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "'Held'",
+					"doc": "Whether to react continuously while the button is down or only at the moment it changes.",
+					"id": "when",
+					"lvalue": false,
+					"name": "When",
+					"optional": false,
+					"options": [
+						"Held",
+						"Clicked",
+						"Released",
+						"Double Click"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Check Mouse Button",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "physics",
+			"description": "Turns the body left and right and tilts a camera up and down from mouse motion, for a first person view.",
+			"has_body": false,
+			"icon": "eye",
+			"id": "mouse_look",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The camera node that tilts up and down.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "0.003",
+					"doc": "How much the view moves per pixel of mouse motion.",
+					"id": "sensitivity",
+					"lvalue": false,
+					"name": "Sensitivity",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "85.0",
+					"doc": "How far the camera can look up or down, in degrees.",
+					"id": "max_pitch",
+					"lvalue": false,
+					"name": "Max Pitch",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Mouse Look",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "",
+					"id": "flow_out",
+					"name": "Out"
+				}
+			],
+			"category": "",
+			"color": "#7c93ff",
+			"default_phase": "update",
+			"description": "",
+			"has_body": false,
+			"icon": "square-function",
+			"id": "mouse_orbit_camera_3d_v2",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node3D",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "",
+					"id": "distance",
+					"lvalue": false,
+					"name": "Distance",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "",
+					"id": "sensitivity",
+					"lvalue": false,
+					"name": "Sensitivity",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "",
+					"id": "click_to_orbit",
+					"lvalue": false,
+					"name": "Click to Orbit",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Orbit Mouse 2",
+			"outputs": [
+				{
+					"doc": "",
+					"id": "cam_pos",
+					"name": "Camera Position",
+					"type": "Vector3"
+				}
+			],
+			"phases": [],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Moves the body with its current velocity, resolving collisions. Place it after the actions that set the velocity.",
+			"has_body": false,
+			"icon": "footprints",
+			"id": "move_and_slide",
+			"inputs": [],
+			"name": "Move And Slide",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Moves the body with its current velocity, resolving collisions. Place it after the actions that set the velocity.",
+			"has_body": false,
+			"icon": "footprints",
+			"id": "move_and_slide_3d",
+			"inputs": [],
+			"name": "Move And Slide",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Sets the body velocity to move along the direction it is facing. A negative speed moves it backward, and it only moves once Move And Slide runs.",
+			"has_body": false,
+			"icon": "move-right",
+			"id": "move_forward",
+			"inputs": [
+				{
+					"default": "200.0",
+					"doc": "How fast to move along the facing, in pixels per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Move Forward",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Moves the body across the ground in a direction relative to where it is facing, leaving vertical velocity to gravity.",
+			"has_body": false,
+			"icon": "navigation",
+			"id": "move_relative",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "Movement direction relative to the body, with x sideways and y forward.",
+					"id": "direction",
+					"lvalue": false,
+					"name": "Direction",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "6.0",
+					"doc": "How fast to move, in units per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Move Relative",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Moves the node by a velocity. During update it is applied per second; on enter or exit it is applied once.",
+			"has_body": false,
+			"icon": "move",
+			"id": "move_sprite",
+			"inputs": [
+				{
+					"default": "(120.0, 0.0)",
+					"doc": "The direction and speed to move, in pixels.",
+					"id": "velocity",
+					"lvalue": false,
+					"name": "Velocity",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "Multiplier applied to the velocity.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Move",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Moves the node a step toward a target each frame, stopping once it arrives.",
+			"has_body": false,
+			"icon": "navigation",
+			"id": "move_towards",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The point in global space to move toward.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "200.0",
+					"doc": "How fast to move, in pixels per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Move Towards",
+			"outputs": [],
+			"phases": [
+				"update"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Moves the node a step toward a target each frame, stopping once it arrives.",
+			"has_body": false,
+			"icon": "navigation",
+			"id": "move_towards_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The point in global space to move toward.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "5.0",
+					"doc": "How fast to move, in world units per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Move Towards",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Runs when an AnimationPlayer finishes playing its current clip.",
+			"has_body": false,
+			"icon": "film",
+			"id": "on_animation_finished",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "Variable that receives the value the signal sends. Optional.",
+					"id": "store_arg",
+					"lvalue": true,
+					"name": "Store Name",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "On Animation Finished",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Runs when another Area2D overlaps this Area2D.",
+			"has_body": false,
+			"icon": "scan",
+			"id": "on_area_entered",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "Variable that receives the value the signal sends. Optional.",
+					"id": "store_arg",
+					"lvalue": true,
+					"name": "Store Area",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "On Area Entered",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Runs when a physics body enters this Area2D or RigidBody2D.",
+			"has_body": false,
+			"icon": "door-open",
+			"id": "on_body_entered",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "Variable that receives the value the signal sends. Optional.",
+					"id": "store_arg",
+					"lvalue": true,
+					"name": "Store Body",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "On Body Entered",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Runs when a physics body leaves this Area2D or RigidBody2D.",
+			"has_body": false,
+			"icon": "door-open",
+			"id": "on_body_exited",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "Variable that receives the value the signal sends. Optional.",
+					"id": "store_arg",
+					"lvalue": true,
+					"name": "Store Body",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "On Body Exited",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Runs when a Button is pressed by mouse or keyboard.",
+			"has_body": false,
+			"icon": "square-mouse-pointer",
+			"id": "on_button_pressed",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "On Button Pressed",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Reacts to a signal coming from a node while this state runs. The connection is made when the state starts and dropped when it ends, so it only fires here.",
+			"has_body": false,
+			"icon": "radio-tower",
+			"id": "on_signal",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'body_entered'",
+					"doc": "Name of the signal to listen for, like body_entered or pressed.",
+					"id": "signal_name",
+					"lvalue": false,
+					"name": "Signal",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "'nothing'",
+					"doc": "Whether the signal also carries a value to capture.",
+					"id": "args",
+					"lvalue": false,
+					"name": "Sends",
+					"optional": false,
+					"options": [
+						"nothing",
+						"one value"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "Variable that receives the value the signal sends. Optional.",
+					"id": "store_arg",
+					"lvalue": true,
+					"name": "Store Value",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "On Signal",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the signal is received.",
+					"id": "received",
+					"name": "Received"
+				}
+			],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Runs when a Timer node reaches the end of its countdown.",
+			"has_body": false,
+			"icon": "timer",
+			"id": "on_timer_timeout",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that emits the signal, such as an Area2D or a Button.",
+					"id": "emitter",
+					"lvalue": false,
+					"name": "Emitter",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "On Timer Timeout",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when a collider is under the mouse.",
+					"id": "hit",
+					"name": "Hit"
+				},
+				{
+					"doc": "Where to go when nothing is under it.",
+					"id": "miss",
+					"name": "Miss"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "physics",
+			"description": "Asks the 2D physics world which collider sits under the mouse and branches on whether one is found.",
+			"has_body": false,
+			"icon": "mouse-pointer",
+			"id": "pick_under_mouse_2d",
+			"inputs": [],
+			"name": "Pick Under Mouse",
+			"outputs": [
+				{
+					"doc": "Where to store the collider found under the mouse.",
+					"id": "collider",
+					"name": "Collider",
+					"type": "Object"
+				}
+			],
+			"phases": [
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "animation",
+			"color": "#f472b6",
+			"default_phase": "enter",
+			"description": "Plays a named animation on an AnimationPlayer.",
+			"has_body": false,
+			"icon": "film",
+			"id": "play_animation",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AnimationPlayer to play.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'idle'",
+					"doc": "Name of the animation to play, such as idle or run.",
+					"id": "animation",
+					"lvalue": false,
+					"name": "Animation",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Play Animation",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
+			"description": "Plays a sound from an audio player.",
+			"has_body": false,
+			"icon": "volume-2",
+			"id": "play_sound",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AudioStreamPlayer to play.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Play Sound",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "debug",
+			"color": "#10b981",
+			"default_phase": "update",
+			"description": "Prints a value to the output console for debugging.",
+			"has_body": false,
+			"icon": "terminal",
+			"id": "print_value",
+			"inputs": [
+				{
+					"default": "'hello'",
+					"doc": "The value to print.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Print Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Removes this node from the scene at the end of the frame. Later actions still run, but the node is gone on the next frame.",
+			"has_body": false,
+			"icon": "trash-2",
+			"id": "queue_free",
+			"inputs": [],
+			"name": "Destroy Self",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Closes the game. It does nothing in a web export.",
+			"has_body": false,
+			"icon": "power",
+			"id": "quit_game",
+			"inputs": [],
+			"name": "Quit Game",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Picks a random direction as a Vector2, with its angle chosen between Min Angle and Max Angle. In degrees, 0 points right and 90 points down.",
+			"has_body": false,
+			"icon": "navigation",
+			"id": "random_direction",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The smallest angle to pick, in degrees.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min Angle",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "360.0",
+					"doc": "The largest angle to pick, in degrees.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max Angle",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How long the resulting vector is, in pixels.",
+					"id": "length",
+					"lvalue": false,
+					"name": "Length",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Random Direction",
+			"outputs": [
+				{
+					"doc": "The random direction vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Picks a random decimal number between Min and Max.",
+			"has_body": false,
+			"icon": "dice-5",
+			"id": "random_float",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The lowest possible value.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "The highest possible value.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Random Float",
+			"outputs": [
+				{
+					"doc": "The random number.",
+					"id": "result",
+					"name": "Result",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Picks a random whole number between Min and Max, both included, like rolling dice.",
+			"has_body": false,
+			"icon": "dice-5",
+			"id": "random_int",
+			"inputs": [
+				{
+					"default": "1",
+					"doc": "The lowest possible value, included.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "6",
+					"doc": "The highest possible value, included.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Random Int",
+			"outputs": [
+				{
+					"doc": "The random number.",
+					"id": "result",
+					"name": "Result",
+					"type": "int"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Picks a random point inside the rectangle between Min and Max.",
+			"has_body": false,
+			"icon": "dice-5",
+			"id": "random_vector2",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The top-left corner of the area.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "(100.0, 100.0)",
+					"doc": "The bottom-right corner of the area.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Random Vector2",
+			"outputs": [
+				{
+					"doc": "The random point.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "script",
+			"color": "#6366f1",
+			"default_phase": "update",
+			"description": "Runs a line of GDScript exactly as written. An escape hatch for anything the other actions do not cover.",
+			"has_body": false,
+			"icon": "code",
+			"id": "raw_code",
+			"inputs": [
+				{
+					"default": "'pass'",
+					"doc": "The GDScript line to run. Use _ref to reach the owner node.",
+					"id": "code",
+					"lvalue": false,
+					"name": "Code",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Raw Code",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the ray touches something.",
+					"id": "hit",
+					"name": "Hit"
+				},
+				{
+					"doc": "Where to go when the ray touches nothing.",
+					"id": "miss",
+					"name": "Miss"
+				}
+			],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "update",
+			"description": "Checks what a RayCast node is touching right now and branches on the result. It works with RayCast3D and RayCast2D.",
+			"has_body": false,
+			"icon": "crosshair",
+			"id": "raycast_check",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The RayCast node to read, such as a RayCast3D or RayCast2D.",
+					"id": "ray",
+					"lvalue": false,
+					"name": "Ray",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Raycast Check",
+			"outputs": [
+				{
+					"doc": "The node the ray hit.",
+					"id": "collider",
+					"name": "Collider",
+					"type": "Object"
+				},
+				{
+					"doc": "The world position where the ray hit.",
+					"id": "point",
+					"name": "Point",
+					"type": "Vector3"
+				},
+				{
+					"doc": "The direction the hit surface faces.",
+					"id": "normal",
+					"name": "Normal",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Restarts the current scene from scratch, the usual choice for a game over and retry.",
+			"has_body": false,
+			"icon": "refresh-cw",
+			"id": "reload_scene",
+			"inputs": [],
+			"name": "Reload Scene",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Runs its nested actions a fixed number of times, all in the same frame.",
+			"has_body": true,
+			"icon": "repeat-2",
+			"id": "repeat",
+			"inputs": [
+				{
+					"default": "3",
+					"doc": "How many times to run the nested actions.",
+					"id": "times",
+					"lvalue": false,
+					"name": "Times",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Repeat",
+			"outputs": [
+				{
+					"doc": "The current pass number, starting at 0.",
+					"id": "index",
+					"name": "Index",
+					"type": "int"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Rotates the node around an axis. During update or physics the speed is degrees per second; on enter or exit it turns once by that amount.",
+			"has_body": false,
+			"icon": "rotate-3d",
+			"id": "rotate_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 1.0, 0.0)",
+					"doc": "The axis to rotate around, such as 0, 1, 0 for the up axis.",
+					"id": "axis",
+					"lvalue": false,
+					"name": "Axis",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "90.0",
+					"doc": "How fast to rotate, in degrees per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Rotate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Rotates the node. During update the speed is degrees per second; on enter or exit it turns once by that amount.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "rotate_sprite",
+			"inputs": [
+				{
+					"default": "90.0",
+					"doc": "How fast to rotate, in degrees per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Rotate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "animation",
+			"color": "#f472b6",
+			"default_phase": "enter",
+			"description": "Changes how fast an AnimationPlayer plays. 1 is normal speed, 2 is twice as fast and a negative value plays it backwards.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "set_animation_speed",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AnimationPlayer to adjust.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "Playback speed, where 1 is normal and 2 is twice as fast.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Animation Speed",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "control",
+			"color": "#60a5fa",
+			"default_phase": "enter",
+			"description": "Sets the value of a Range node such as a ProgressBar, Slider or SpinBox.",
+			"has_body": false,
+			"icon": "sliders-horizontal",
+			"id": "set_control_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The Range node to write to.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The value to set, within the node min and max.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Control Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "control",
+			"color": "#60a5fa",
+			"default_phase": "enter",
+			"description": "Enables or disables a Control node such as a Button or Slider.",
+			"has_body": false,
+			"icon": "toggle-left",
+			"id": "set_disabled",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The Control node to enable or disable.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "True to disable the node, false to enable it.",
+					"id": "disabled",
+					"lvalue": false,
+					"name": "Disabled",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Set Disabled",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "render",
+			"color": "#f368e0",
+			"default_phase": "enter",
+			"description": "Tints the node and everything drawn inside it. The alpha channel of the color controls how transparent it becomes.",
+			"has_body": false,
+			"icon": "droplet",
+			"id": "set_modulate",
+			"inputs": [
+				{
+					"default": "(1.0, 1.0, 1.0, 1.0)",
+					"doc": "The tint color to apply, including its alpha for transparency.",
+					"id": "color",
+					"lvalue": false,
+					"name": "Color",
+					"optional": false,
+					"options": [],
+					"type": "Color",
+					"type_from": ""
+				}
+			],
+			"name": "Set Modulate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"CanvasItem"
+			]
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "enter",
+			"description": "Sets how the mouse cursor behaves, such as capturing it for a first person camera or making it visible again.",
+			"has_body": false,
+			"icon": "mouse-pointer",
+			"id": "set_mouse_mode",
+			"inputs": [
+				{
+					"default": "'MOUSE_MODE_CAPTURED'",
+					"doc": "How the cursor should behave.",
+					"id": "mode",
+					"lvalue": false,
+					"name": "Mode",
+					"optional": false,
+					"options": [
+						"MOUSE_MODE_VISIBLE",
+						"MOUSE_MODE_CAPTURED",
+						"MOUSE_MODE_HIDDEN",
+						"MOUSE_MODE_CONFINED"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Set Mouse Mode",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
+			"description": "Changes the playback speed of an audio player, which also shifts its pitch.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "set_pitch",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AudioStreamPlayer to adjust.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "Playback speed multiplier, where 1 is normal and 2 is twice as fast.",
+					"id": "pitch",
+					"lvalue": false,
+					"name": "Pitch",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Pitch",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Places the node at a position, measured in its parent space.",
+			"has_body": false,
+			"icon": "locate-fixed",
+			"id": "set_position",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The new position, in parent space.",
+					"id": "position",
+					"lvalue": false,
+					"name": "Position",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Set Position",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Places the node at a position, measured in its parent space.",
+			"has_body": false,
+			"icon": "locate-fixed",
+			"id": "set_position_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The new position, in parent space.",
+					"id": "position",
+					"lvalue": false,
+					"name": "Position",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Set Position",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Sets the scale of the node.",
+			"has_body": false,
+			"icon": "maximize",
+			"id": "set_scale",
+			"inputs": [
+				{
+					"default": "(1.0, 1.0)",
+					"doc": "The new scale, where 1 by 1 is the normal size.",
+					"id": "scale",
+					"lvalue": false,
+					"name": "Scale",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Set Scale",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Sets the scale of the node.",
+			"has_body": false,
+			"icon": "scale-3d",
+			"id": "set_scale_3d",
+			"inputs": [
+				{
+					"default": "(1.0, 1.0, 1.0)",
+					"doc": "The new scale, where 1, 1, 1 is the normal size.",
+					"id": "scale",
+					"lvalue": false,
+					"name": "Scale",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Set Scale 3D",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "control",
+			"color": "#60a5fa",
+			"default_phase": "enter",
+			"description": "Sets the text shown by a Control node such as a Label or Button.",
+			"has_body": false,
+			"icon": "type",
+			"id": "set_text",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The Control node to write text to.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The text to display.",
+					"id": "text",
+					"lvalue": false,
+					"name": "Text",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Set Text",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "time",
+			"color": "#94a3b8",
+			"default_phase": "enter",
+			"description": "Speeds up or slows down the whole game. 1 is normal speed, 0.5 is slow motion, and 0 freezes everything that runs on delta.",
+			"has_body": false,
+			"icon": "hourglass",
+			"id": "set_time_scale",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "The time multiplier, where 1 is normal speed.",
+					"id": "scale",
+					"lvalue": false,
+					"name": "Scale",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Time Scale",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "variable",
+			"color": "#1dd1a1",
+			"default_phase": "update",
+			"description": "Sets a variable or property to a value.",
+			"has_body": false,
+			"icon": "equal",
+			"id": "set_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The variable or property to write to.",
+					"id": "target",
+					"lvalue": true,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to store.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "target"
+				}
+			],
+			"name": "Set Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Sets the body velocity directly, in pixels per second. It only moves the body once Move And Slide runs.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "set_velocity",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The velocity to apply, in pixels per second.",
+					"id": "velocity",
+					"lvalue": false,
+					"name": "Velocity",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Set Velocity",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Sets the body velocity directly, in units per second. It only moves the body once Move And Slide runs.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "set_velocity_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The velocity to apply, in units per second.",
+					"id": "velocity",
+					"lvalue": false,
+					"name": "Velocity",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Set Velocity",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "render",
+			"color": "#f368e0",
+			"default_phase": "enter",
+			"description": "Shows or hides the node. A hidden node keeps running, it just is not drawn.",
+			"has_body": false,
+			"icon": "eye",
+			"id": "set_visible",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "On to show the node, off to hide it.",
+					"id": "visible",
+					"lvalue": false,
+					"name": "Visible",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Set Visible",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D",
+				"Node3D",
+				"Control"
+			]
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
+			"description": "Sets how loud an audio player is, measured in decibels.",
+			"has_body": false,
+			"icon": "volume-2",
+			"id": "set_volume",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AudioStreamPlayer to adjust.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "Loudness in decibels, where 0 is the original volume and -80 is silent.",
+					"id": "volume",
+					"lvalue": false,
+					"name": "Volume dB",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Volume",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Loads a scene file and adds a copy of it next to this node, placed at the given position.",
+			"has_body": false,
+			"icon": "copy-plus",
+			"id": "spawn_scene",
+			"inputs": [
+				{
+					"default": "'res://scenes/bullet.tscn'",
+					"doc": "The path to the scene file to spawn.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Scene Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "Where to place the new copy.",
+					"id": "position",
+					"lvalue": false,
+					"name": "Position",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Spawn Scene",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "animation",
+			"color": "#f472b6",
+			"default_phase": "enter",
+			"description": "Plays an animation on an AnimatedSprite2D, the sprite sheet kind of sprite.",
+			"has_body": false,
+			"icon": "images",
+			"id": "sprite_play",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AnimatedSprite2D to play.",
+					"id": "sprite",
+					"lvalue": false,
+					"name": "Sprite",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'default'",
+					"doc": "Name of the animation to play, such as walk or jump.",
+					"id": "animation",
+					"lvalue": false,
+					"name": "Animation",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Sprite Play",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "animation",
+			"color": "#f472b6",
+			"default_phase": "enter",
+			"description": "Jumps an AnimatedSprite2D to a specific frame of its current animation.",
+			"has_body": false,
+			"icon": "image",
+			"id": "sprite_set_frame",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AnimatedSprite2D to change.",
+					"id": "sprite",
+					"lvalue": false,
+					"name": "Sprite",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "Index of the frame to show, starting at 0.",
+					"id": "frame",
+					"lvalue": false,
+					"name": "Frame",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Sprite Set Frame",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "physics",
+			"description": "Turns the node left or right from a steering input, useful for car-like or top-down movement.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "steer",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "Steering input from -1 to 1, where negative turns one way and positive the other.",
+					"id": "amount",
+					"lvalue": false,
+					"name": "Amount",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "180.0",
+					"doc": "Maximum turn rate, in degrees per second.",
+					"id": "degrees",
+					"lvalue": false,
+					"name": "Degrees",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Steer",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "animation",
+			"color": "#f472b6",
+			"default_phase": "enter",
+			"description": "Stops an AnimationPlayer where it is.",
+			"has_body": false,
+			"icon": "square",
+			"id": "stop_animation",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AnimationPlayer to stop.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Stop Animation",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
+			"description": "Stops a sound that an audio player is playing.",
+			"has_body": false,
+			"icon": "volume-x",
+			"id": "stop_sound",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The AudioStreamPlayer to stop.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Stop Sound",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Transforms text using the chosen method and stores the result.",
+			"has_body": false,
+			"icon": "case-upper",
+			"id": "string_case",
+			"inputs": [
+				{
+					"default": "'to_upper'",
+					"doc": "The transformation to apply to the text.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"to_upper",
+						"to_lower",
+						"capitalize",
+						"strip_edges"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The text to transform.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "String Case",
+			"outputs": [
+				{
+					"doc": "Where to store the transformed text.",
+					"id": "result",
+					"name": "Result",
+					"type": "String"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the substring is found.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the substring is not found.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Checks whether a piece of text appears inside another and branches on the answer.",
+			"has_body": false,
+			"icon": "search",
+			"id": "string_contains",
+			"inputs": [
+				{
+					"default": "''",
+					"doc": "The text to search within.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The piece of text to look for.",
+					"id": "substring",
+					"lvalue": false,
+					"name": "Substring",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "String Contains",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Fills placeholders in a template with a value and stores the result. A value bound to an array fills several placeholders at once.",
+			"has_body": false,
+			"icon": "type",
+			"id": "string_format",
+			"inputs": [
+				{
+					"default": "'%s'",
+					"doc": "The text with placeholders such as %s to fill in.",
+					"id": "template",
+					"lvalue": false,
+					"name": "Template",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The value to place into the template.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Format String",
+			"outputs": [
+				{
+					"doc": "Where to store the filled-in text.",
+					"id": "result",
+					"name": "Result",
+					"type": "String"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Replaces every occurrence of one piece of text with another and stores the result.",
+			"has_body": false,
+			"icon": "replace",
+			"id": "string_replace",
+			"inputs": [
+				{
+					"default": "''",
+					"doc": "The text to search through.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The piece of text to replace.",
+					"id": "from",
+					"lvalue": false,
+					"name": "From",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The text to put in its place.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "String Replace",
+			"outputs": [
+				{
+					"doc": "Where to store the updated text.",
+					"id": "result",
+					"name": "Result",
+					"type": "String"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Splits text into pieces wherever a separator appears and stores them as an array.",
+			"has_body": false,
+			"icon": "split",
+			"id": "string_split",
+			"inputs": [
+				{
+					"default": "''",
+					"doc": "The text to split.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "' '",
+					"doc": "The text that marks where to split.",
+					"id": "sep",
+					"lvalue": false,
+					"name": "Separator",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "String Split",
+			"outputs": [
+				{
+					"doc": "Where to store the array of pieces.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "variable",
+			"color": "#1dd1a1",
+			"default_phase": "update",
+			"description": "Flips a boolean variable or property between true and false.",
+			"has_body": false,
+			"icon": "toggle-right",
+			"id": "toggle_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The boolean variable or property to flip.",
+					"id": "target",
+					"lvalue": true,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Toggle Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to transition to.",
+					"id": "to",
+					"name": "To"
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Immediately transitions to another state, sub-state, or a state of another script.",
+			"has_body": false,
+			"icon": "arrow-right-to-line",
+			"id": "transition",
+			"inputs": [],
+			"name": "Transition",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Moves the node by an offset. During update it is applied per second; on enter or exit it is applied once.",
+			"has_body": false,
+			"icon": "move-right",
+			"id": "translate",
+			"inputs": [
+				{
+					"default": "(100.0, 0.0)",
+					"doc": "The amount to move, in pixels.",
+					"id": "offset",
+					"lvalue": false,
+					"name": "Offset",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Translate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Moves the node by an offset. During update or physics it is applied per second; on enter or exit it is applied once.",
+			"has_body": false,
+			"icon": "move-3d",
+			"id": "translate_3d",
+			"inputs": [
+				{
+					"default": "(1.0, 0.0, 0.0)",
+					"doc": "The amount to move, in world units.",
+					"id": "offset",
+					"lvalue": false,
+					"name": "Offset",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Translate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly fades the node toward a target transparency over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "eye",
+			"id": "tween_fade",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "Target transparency, where 1 is fully visible and 0 is invisible.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To Alpha",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the fade takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Fade",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"CanvasItem"
+			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly moves the node to a target position over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "move",
+			"id": "tween_move",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The position to move to.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the movement takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Move",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly rotates the node to a target angle over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "tween_rotate",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The target angle, in degrees.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To Degrees",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the rotation takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Rotate",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly scales the node to a target size over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "scaling",
+			"id": "tween_scale",
+			"inputs": [
+				{
+					"default": "(1.0, 1.0)",
+					"doc": "The target scale, where 1, 1 is the normal size.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the scaling takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Scale",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Combines two vectors into a single number, such as the distance or angle between them.",
+			"has_body": false,
+			"icon": "git-merge",
+			"id": "vector2_combine",
+			"inputs": [
+				{
+					"default": "'distance_to'",
+					"doc": "How to combine the two vectors.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"distance_to",
+						"distance_squared_to",
+						"dot",
+						"angle_to",
+						"angle_to_point",
+						"cross"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The first vector.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The second vector.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Vector2 Combine",
+			"outputs": [
+				{
+					"doc": "The resulting number.",
+					"id": "result",
+					"name": "Result",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Reads a single number from a vector, such as its length or angle.",
+			"has_body": false,
+			"icon": "ruler",
+			"id": "vector2_info",
+			"inputs": [
+				{
+					"default": "'length'",
+					"doc": "Which value to read from the vector.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"length",
+						"length_squared",
+						"angle"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The vector to read.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Vector2 Info",
+			"outputs": [
+				{
+					"doc": "The resulting number.",
+					"id": "result",
+					"name": "Result",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Rotates a vector by an angle and returns the turned vector.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "vector2_rotated",
+			"inputs": [
+				{
+					"default": "(1.0, 0.0)",
+					"doc": "The vector to rotate.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "How far to turn it, in radians.",
+					"id": "angle",
+					"lvalue": false,
+					"name": "Angle",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Vector2 Rotated",
+			"outputs": [
+				{
+					"doc": "The rotated vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Applies a function to a vector and returns a new vector, such as normalized or abs.",
+			"has_body": false,
+			"icon": "move-3d",
+			"id": "vector2_transform",
+			"inputs": [
+				{
+					"default": "'normalized'",
+					"doc": "The function to apply to the vector.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"normalized",
+						"abs",
+						"sign",
+						"floor",
+						"ceil",
+						"round",
+						"orthogonal"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The vector to transform.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Vector2 Transform",
+			"outputs": [
+				{
+					"doc": "The resulting vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "enter",
+			"description": "Vibrates the gamepad for a set time, then stops on its own.",
+			"has_body": false,
+			"icon": "gamepad",
+			"id": "vibrate",
+			"inputs": [
+				{
+					"default": "0.5",
+					"doc": "Strength of the light motor, from 0 to 1.",
+					"id": "weak",
+					"lvalue": false,
+					"name": "Weak",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.5",
+					"doc": "Strength of the heavy motor, from 0 to 1.",
+					"id": "strong",
+					"lvalue": false,
+					"name": "Strong",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.2",
+					"doc": "How long the vibration lasts, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Vibrate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the time is up.",
+					"id": "finished",
+					"name": "Finished"
+				}
+			],
+			"category": "time",
+			"color": "#94a3b8",
+			"default_phase": "update",
+			"description": "Waits a number of seconds while staying in this state, then takes the Finished branch. The timer resets each time this state is entered.",
+			"has_body": false,
+			"icon": "hourglass",
+			"id": "wait",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "How long to wait, in seconds.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Wait",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		}
+	],
+	"categories": [
+		{
+			"color": "#f97316",
+			"count": 8,
+			"icon": "git-branch",
+			"id": "flow",
+			"name": "Flow"
+		},
+		{
+			"color": "#84cc16",
+			"count": 7,
+			"icon": "radio-tower",
+			"id": "event",
+			"name": "Event"
+		},
+		{
+			"color": "#1dd1a1",
+			"count": 5,
+			"icon": "variable",
+			"id": "variable",
+			"name": "Variable"
+		},
+		{
+			"color": "#8b5cf6",
+			"count": 7,
+			"icon": "sigma",
+			"id": "math",
+			"name": "Math"
+		},
+		{
+			"color": "#d946ef",
+			"count": 1,
+			"icon": "arrow-right-left",
+			"id": "convert",
+			"name": "Convert"
+		},
+		{
+			"color": "#ef4444",
+			"count": 2,
+			"icon": "git-compare",
+			"id": "logic",
+			"name": "Logic"
+		},
+		{
+			"color": "#a855f7",
+			"count": 8,
+			"icon": "move-3d",
+			"id": "vector",
+			"name": "Vector"
+		},
+		{
+			"color": "#eab308",
+			"count": 6,
+			"icon": "type",
+			"id": "string",
+			"name": "String"
+		},
+		{
+			"color": "#f59e0b",
+			"count": 5,
+			"icon": "list-ordered",
+			"id": "array",
+			"name": "Array"
+		},
+		{
+			"color": "#0abde3",
+			"count": 11,
+			"icon": "move",
+			"id": "node2d",
+			"name": "Node 2D"
+		},
+		{
+			"color": "#06b6d4",
+			"count": 7,
+			"icon": "axis-3d",
+			"id": "node3d",
+			"name": "Node 3D"
+		},
+		{
+			"color": "#22d3ee",
+			"count": 5,
+			"icon": "shapes",
+			"id": "physics2d",
+			"name": "Physics 2D"
+		},
+		{
+			"color": "#2dd4bf",
+			"count": 7,
+			"icon": "box",
+			"id": "physics3d",
+			"name": "Physics 3D"
+		},
+		{
+			"color": "#38bdf8",
+			"count": 10,
+			"icon": "gamepad-2",
+			"id": "input",
+			"name": "Input"
+		},
+		{
+			"color": "#ec4899",
+			"count": 5,
+			"icon": "volume-2",
+			"id": "audio",
+			"name": "Audio"
+		},
+		{
+			"color": "#f472b6",
+			"count": 6,
+			"icon": "film",
+			"id": "animation",
+			"name": "Animation"
+		},
+		{
+			"color": "#fb7185",
+			"count": 4,
+			"icon": "sparkles",
+			"id": "tween",
+			"name": "Tween"
+		},
+		{
+			"color": "#f368e0",
+			"count": 3,
+			"icon": "palette",
+			"id": "render",
+			"name": "Render"
+		},
+		{
+			"color": "#60a5fa",
+			"count": 3,
+			"icon": "sliders-horizontal",
+			"id": "control",
+			"name": "Control"
+		},
+		{
+			"color": "#64748b",
+			"count": 9,
+			"icon": "layers",
+			"id": "scene",
+			"name": "Scene"
+		},
+		{
+			"color": "#94a3b8",
+			"count": 2,
+			"icon": "timer",
+			"id": "time",
+			"name": "Time"
+		},
+		{
+			"color": "#10b981",
+			"count": 1,
+			"icon": "terminal",
+			"id": "debug",
+			"name": "Debug"
+		},
+		{
+			"color": "#6366f1",
+			"count": 1,
+			"icon": "code",
+			"id": "script",
+			"name": "Script"
+		},
+		{
+			"color": "#7c93ff",
+			"count": 1,
+			"icon": "square-function",
+			"id": "",
+			"name": "General"
+		}
+	],
+	"version": "4.7-stable (official)"
+}
