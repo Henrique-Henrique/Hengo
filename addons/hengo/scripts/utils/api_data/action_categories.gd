@@ -21,6 +21,7 @@ const CATEGORIES: Dictionary = {
 	vector = {name = 'Vector', icon = 'move-3d', color = '#a855f7', order = 50},
 	string = {name = 'String', icon = 'type', color = '#eab308', order = 60},
 	array = {name = 'Array', icon = 'list-ordered', color = '#f59e0b', order = 70},
+	dictionary = {name = 'Dictionary', icon = 'braces', color = '#14b8a6', order = 75},
 	node2d = {name = 'Node 2D', icon = 'move', color = '#0abde3', order = 80},
 	node3d = {name = 'Node 3D', icon = 'axis-3d', color = '#06b6d4', order = 90},
 	physics2d = {name = 'Physics 2D', icon = 'shapes', color = '#22d3ee', order = 100},
@@ -33,8 +34,7 @@ const CATEGORIES: Dictionary = {
 	control = {name = 'Control', icon = 'sliders-horizontal', color = '#60a5fa', order = 145},
 	scene = {name = 'Scene', icon = 'layers', color = '#64748b', order = 150},
 	time = {name = 'Time', icon = 'timer', color = '#94a3b8', order = 160},
-	debug = {name = 'Debug', icon = 'terminal', color = '#10b981', order = 170},
-	script = {name = 'Script', icon = 'code', color = '#6366f1', order = 180}
+	debug = {name = 'Debug', icon = 'terminal', color = '#10b981', order = 170}
 }
 
 

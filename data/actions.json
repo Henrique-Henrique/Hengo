@@ -232,6 +232,37 @@
 			"target_classes": []
 		},
 		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Removes every item from an array, leaving it empty.",
+			"has_body": false,
+			"icon": "trash-2",
+			"id": "array_clear",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to empty. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				}
+			],
+			"name": "Array Clear",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [
 				{
 					"doc": "Where to go when the value is found.",
@@ -337,6 +368,59 @@
 			"category": "array",
 			"color": "#f59e0b",
 			"default_phase": "update",
+			"description": "Inserts a value at a given position in an array, shifting later items to the right.",
+			"has_body": false,
+			"icon": "list-plus",
+			"id": "array_insert",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to insert into. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "Position where the value is inserted, starting at 0.",
+					"id": "index",
+					"lvalue": false,
+					"name": "Index",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to insert into the array.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Array Insert",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
 			"description": "Counts how many items an array holds.",
 			"has_body": false,
 			"icon": "list-ordered",
@@ -361,6 +445,58 @@
 					"id": "result",
 					"name": "Length",
 					"type": "int"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Removes and returns the last or first item of an array. An empty array returns null.",
+			"has_body": false,
+			"icon": "list-x",
+			"id": "array_pop",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to pop from. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "'back'",
+					"doc": "Which end of the array the item is removed from.",
+					"id": "end",
+					"lvalue": false,
+					"name": "End",
+					"optional": false,
+					"options": [
+						"back",
+						"front"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Array Pop",
+			"outputs": [
+				{
+					"doc": "Where to store the removed item.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
 				}
 			],
 			"phases": [
@@ -401,6 +537,174 @@
 					"type": "Variant"
 				}
 			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Removes the first item equal to a value from an array. Does nothing when the value is not found.",
+			"has_body": false,
+			"icon": "list-x",
+			"id": "array_remove",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to remove from. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to remove. Only the first match is removed.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Array Remove",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Removes the item at a given position in an array. An index outside the array fails at runtime.",
+			"has_body": false,
+			"icon": "circle-minus",
+			"id": "array_remove_at",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to remove from. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "Position of the item to remove, starting at 0.",
+					"id": "index",
+					"lvalue": false,
+					"name": "Index",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Array Remove At",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Overwrites the item at a given position in an array. An index outside the array fails at runtime.",
+			"has_body": false,
+			"icon": "list-checks",
+			"id": "array_set",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to write into. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "Position of the item to overwrite, starting at 0.",
+					"id": "index",
+					"lvalue": false,
+					"name": "Index",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value written at the index.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Array Set",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Randomizes the order of the items in an array.",
+			"has_body": false,
+			"icon": "shuffle",
+			"id": "array_shuffle",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The array to shuffle. Must be bound to a variable or property.",
+					"id": "array",
+					"lvalue": false,
+					"name": "Array",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				}
+			],
+			"name": "Array Shuffle",
+			"outputs": [],
 			"phases": [
 				"enter",
 				"update",
@@ -960,6 +1264,371 @@
 		},
 		{
 			"branches": [],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Removes every key and value from a dictionary, leaving it empty.",
+			"has_body": false,
+			"icon": "trash-2",
+			"id": "dict_clear",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to empty. Must be bound to a variable or property.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Clear",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Removes a key and its value from a dictionary. Does nothing if the key is missing.",
+			"has_body": false,
+			"icon": "circle-minus",
+			"id": "dict_erase",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to remove from. Must be bound to a variable or property.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The key to remove.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Erase",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Reads the value stored under a given key in a dictionary. A missing key returns null.",
+			"has_body": false,
+			"icon": "key",
+			"id": "dict_get",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to read from.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The key to look up.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Get",
+			"outputs": [
+				{
+					"doc": "Where to store the value found at the key, or null when missing.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the key is found.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when the key is missing.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Checks whether a dictionary holds a given key and branches on the result.",
+			"has_body": false,
+			"icon": "key-round",
+			"id": "dict_has",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to search.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The key to look for.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Has",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Reads every key of a dictionary into an array, in insertion order.",
+			"has_body": false,
+			"icon": "list",
+			"id": "dict_keys",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to read from.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Keys",
+			"outputs": [
+				{
+					"doc": "Where to store the array of keys.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Writes a value under a given key in a dictionary. Overwrites the key if it already exists.",
+			"has_body": false,
+			"icon": "square-plus",
+			"id": "dict_set",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to write into. Must be bound to a variable or property.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The key to write the value under.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value stored at the key.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Set",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "dictionary",
+			"color": "#14b8a6",
+			"default_phase": "update",
+			"description": "Reads every value of a dictionary into an array, in insertion order.",
+			"has_body": false,
+			"icon": "layout-list",
+			"id": "dict_values",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The dictionary to read from.",
+					"id": "dict",
+					"lvalue": false,
+					"name": "Dictionary",
+					"optional": false,
+					"options": [],
+					"type": "Dictionary",
+					"type_from": ""
+				}
+			],
+			"name": "Dictionary Values",
+			"outputs": [
+				{
+					"doc": "Where to store the array of values.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "event",
+			"color": "#84cc16",
+			"default_phase": "update",
+			"description": "Emits one of this script signals, reaching everything connected to it. The signal must be declared in this script first.",
+			"has_body": false,
+			"icon": "megaphone",
+			"id": "emit_signal",
+			"inputs": [
+				{
+					"default": "''",
+					"doc": "Name of the signal to emit, matching one declared in this script.",
+					"id": "signal_name",
+					"lvalue": false,
+					"name": "Signal",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Emit Signal",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Runs the actions inside it once every so many seconds while this state runs. The timer resets each time the state is entered.",
+			"has_body": true,
+			"icon": "timer",
+			"id": "every",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "How often to run the inner actions, in seconds.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Every",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "update",
@@ -1404,6 +2073,56 @@
 		},
 		{
 			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Splits a Vector3 into its separate X, Y and Z numbers.",
+			"has_body": false,
+			"icon": "axis-3d",
+			"id": "get_vector3_xyz",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The vector to split.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Get Vector3 XYZ",
+			"outputs": [
+				{
+					"doc": "The value along the x axis.",
+					"id": "x",
+					"name": "X",
+					"type": "float"
+				},
+				{
+					"doc": "The value along the y axis.",
+					"id": "y",
+					"name": "Y",
+					"type": "float"
+				},
+				{
+					"doc": "The value along the z axis.",
+					"id": "z",
+					"name": "Z",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "enter",
@@ -1751,6 +2470,39 @@
 		},
 		{
 			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "enter",
+			"description": "Pushes the body upward, but only when it is standing on the floor. Sets the upward velocity to the given force.",
+			"has_body": false,
+			"icon": "move-up",
+			"id": "jump_2d",
+			"inputs": [
+				{
+					"default": "400.0",
+					"doc": "How hard the jump is, in pixels per second.",
+					"id": "force",
+					"lvalue": false,
+					"name": "Force",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Jump",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "physics3d",
 			"color": "#2dd4bf",
 			"default_phase": "enter",
@@ -2013,6 +2765,66 @@
 					"id": "result",
 					"name": "Result",
 					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Builds a Vector3 from separate X, Y and Z numbers.",
+			"has_body": false,
+			"icon": "move-3d",
+			"id": "make_vector3",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The value along the x axis.",
+					"id": "x",
+					"lvalue": false,
+					"name": "X",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The value along the y axis.",
+					"id": "y",
+					"lvalue": false,
+					"name": "Y",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The value along the z axis.",
+					"id": "z",
+					"lvalue": false,
+					"name": "Z",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Make Vector3",
+			"outputs": [
+				{
+					"doc": "The built vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
 				}
 			],
 			"phases": [
@@ -3356,37 +4168,6 @@
 					"type": "Vector2"
 				}
 			],
-			"phases": [
-				"enter",
-				"update",
-				"exit"
-			],
-			"target_classes": []
-		},
-		{
-			"branches": [],
-			"category": "script",
-			"color": "#6366f1",
-			"default_phase": "update",
-			"description": "Runs a line of GDScript exactly as written. An escape hatch for anything the other actions do not cover.",
-			"has_body": false,
-			"icon": "code",
-			"id": "raw_code",
-			"inputs": [
-				{
-					"default": "'pass'",
-					"doc": "The GDScript line to run. Use _ref to reach the owner node.",
-					"id": "code",
-					"lvalue": false,
-					"name": "Code",
-					"optional": false,
-					"options": [],
-					"type": "String",
-					"type_from": ""
-				}
-			],
-			"name": "Raw Code",
-			"outputs": [],
 			"phases": [
 				"enter",
 				"update",
@@ -5323,14 +6104,14 @@
 	"categories": [
 		{
 			"color": "#f97316",
-			"count": 8,
+			"count": 9,
 			"icon": "git-branch",
 			"id": "flow",
 			"name": "Flow"
 		},
 		{
 			"color": "#84cc16",
-			"count": 7,
+			"count": 8,
 			"icon": "radio-tower",
 			"id": "event",
 			"name": "Event"
@@ -5365,7 +6146,7 @@
 		},
 		{
 			"color": "#a855f7",
-			"count": 8,
+			"count": 10,
 			"icon": "move-3d",
 			"id": "vector",
 			"name": "Vector"
@@ -5379,10 +6160,17 @@
 		},
 		{
 			"color": "#f59e0b",
-			"count": 5,
+			"count": 12,
 			"icon": "list-ordered",
 			"id": "array",
 			"name": "Array"
+		},
+		{
+			"color": "#14b8a6",
+			"count": 7,
+			"icon": "braces",
+			"id": "dictionary",
+			"name": "Dictionary"
 		},
 		{
 			"color": "#0abde3",
@@ -5400,7 +6188,7 @@
 		},
 		{
 			"color": "#22d3ee",
-			"count": 5,
+			"count": 6,
 			"icon": "shapes",
 			"id": "physics2d",
 			"name": "Physics 2D"
@@ -5474,13 +6262,6 @@
 			"icon": "terminal",
 			"id": "debug",
 			"name": "Debug"
-		},
-		{
-			"color": "#6366f1",
-			"count": 1,
-			"icon": "code",
-			"id": "script",
-			"name": "Script"
 		},
 		{
 			"color": "#7c93ff",

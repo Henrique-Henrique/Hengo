@@ -804,7 +804,7 @@ func test_native_actions_load_with_human_names() -> void:
 	for macro: HenSaveMacro in (Engine.get_singleton(&'Global') as HenGlobal).action_macros:
 		names.append(macro.name)
 
-	assert_array(names).contains(['Print Value', 'Set Value', 'Raw Code', 'Lerp Toward'])
+	assert_array(names).contains(['Print Value', 'Set Value', 'Lerp Toward', 'Array Pop', 'Dictionary Get'])
 
 
 # asserts the wiring, not the palette: the exact hexes are a taste call that
@@ -1210,6 +1210,10 @@ func _assert_whole_pool_compiles(_owner: String) -> void:
 	any_out.name = 'any_out'
 	any_out.type = 'Variant'
 
+	# a declared signal, so emit_signal has a real name to fire instead of ''
+	var sig: HenSaveSignal = save_data.add_signal(false)
+	sig.name = 'swept_signal'
+
 	var target: HenSaveState = save_data.add_state(false)
 	target.name = 'other state'
 
@@ -1222,6 +1226,12 @@ func _assert_whole_pool_compiles(_owner: String) -> void:
 			continue
 
 		var action: HenSaveAction = _add_action(macro, HenSaveAction.default_phase(macro))
+
+		# emit_signal alone requires a non-empty literal name; aim it at the signal above
+		if str(macro.id) == 'emit_signal':
+			for signal_param: HenSaveParam in action.inputs:
+				if str(signal_param.id) == 'signal_name':
+					signal_param.default_value = sig.name
 
 		# every required slot gets a source, so the action is never skipped
 		for param: HenSaveParam in action.inputs:
