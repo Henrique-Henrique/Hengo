@@ -2866,3 +2866,96 @@ func test_new_actions_take_their_folder_category() -> void:
 	assert_str(by_id['set_text'].category).is_equal('control')
 	assert_str(by_id['set_control_value'].category).is_equal('control')
 	assert_str(by_id['get_nearest'].category).is_equal('scene')
+
+
+# --- debug tracing ----------------------------------------------------------
+
+
+# get_all_code() forces debug off (its codegen-accuracy hack), so a trace test
+# regenerates with the flag on, then restores it the same way the harness does
+func _code_with_debug() -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var code_generation: HenCodeGeneration = Engine.get_singleton(&'CodeGeneration')
+	var sd: HenSaveData = global.SAVE_DATA
+	global.SAVE_DATA = null
+	ProjectSettings.set_setting(HenSettings.DEBUG_COMPILATION_PATH, true)
+	var code: String = code_generation.get_code(sd)
+	ProjectSettings.set_setting(HenSettings.DEBUG_COMPILATION_PATH, false)
+	global.SAVE_DATA = sd
+	return code
+
+
+# with debug on, each action gets a guarded trace line right before its body, so
+# its row lights up only for the focused instance while the action runs
+func test_debug_emits_guarded_trace_before_body() -> void:
+	var action: HenSaveAction = _add_action(_register(FIX_PHASES), &'update')
+
+	# the trace precedes the body inside update(), guarded to the focused instance
+	assert_str(_code_with_debug()).contains(
+		"\t\tif _ref.get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_action(&'"
+		+ str(action.id) + "')\n\t\ttest_update(\"hi\")")
+
+
+# the nested case is the fragile one: a loop-body action's trace line must be
+# reindented one level deeper alongside the block, and still parse
+func test_debug_trace_indents_inside_loop_body() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var coll: HenSaveVar = save_data.add_var(false)
+	coll.name = 'enemies'
+	coll.type = 'Array'
+	var item: HenSaveVar = save_data.add_var(false)
+	item.name = 'e'
+	item.type = 'Variant'
+
+	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'for_each'), &'update')
+	loop.input_bindings['collection'] = HenUtils.bind_code_for_var(coll)
+	loop.output_bindings['item'] = HenUtils.bind_code_for_var(item)
+
+	var print_a: HenSaveAction = _nested(&'print_value')
+	print_a.inputs = [HenSaveParam.create({name = 'Value', type = 'Variant', id = &'value'})]
+	print_a.input_bindings['value'] = HenUtils.bind_code_for_var(item)
+	loop.body_actions.append(print_a)
+
+	var code: String = _code_with_debug()
+
+	# the loop's own trace sits at method indent, right before the for
+	assert_str(code).contains(
+		"\t\tif _ref.get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_action(&'"
+		+ str(loop.id) + "')\n\t\tfor __item_" + str(loop.id))
+	# the nested action's trace is one level deeper, right before its body
+	assert_str(code).contains(
+		"\t\t\tif _ref.get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_action(&'"
+		+ str(print_a.id) + "')\n\t\t\tprint(_ref.e)")
+
+	var script := GDScript.new()
+	script.source_code = code
+	assert_int(script.reload()).is_equal(OK)
+
+
+# the release-shaped path (get_all_code) carries no instrumentation
+func test_debug_off_emits_no_trace() -> void:
+	_add_action(_register(FIX_PHASES), &'update')
+
+	assert_str(HenTest.get_all_code()).not_contains('trace_action')
+
+
+# a branch action flashes its state-viewer edge (source state + branch label)
+# right before it transitions, so the arrow lights like the old cnode transition
+func test_debug_flashes_branch_transition_edge() -> void:
+	var dead: HenSaveState = save_data.add_state(false)
+	dead.name = 'dead'
+
+	var action: HenSaveAction = _add_action(_register(FIX_TRANSITION), &'update')
+	action.branches['to'] = {state_id = dead.id, label = 'morreu'}
+
+	var sid: String = str(save_data.identity.id)
+	var code: String = _code_with_debug()
+
+	assert_str(code).contains('trace_state_transition("state test", "morreu", "' + sid
+		+ '")\n\t\t_ref._STATE_CONTROLLER.change_state("dead")')
+	assert_str(code).contains('if _ref.get_instance_id() == HengoDebugger.state_targets.get("' + sid + '", -1):')
+
+	var script := GDScript.new()
+	script.source_code = code
+	assert_int(script.reload()).is_equal(OK)

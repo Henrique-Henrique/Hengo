@@ -73,6 +73,16 @@ func _capture(_message: String, _data: Array, _session_id: int) -> bool:
 				signal_bus.debug_state_flow.emit(id, port, script_id)
 
 			return true
+		'hengo:action':
+			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+			if signal_bus:
+				signal_bus.debug_action_flow.emit(StringName(_data[0]))
+			return true
+		'hengo:state_transition':
+			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+			if signal_bus:
+				signal_bus.debug_state_transition.emit(String(_data[0]), String(_data[1]), String(_data[2]))
+			return true
 		'hengo:value':
 			var id: int = _data[0]
 			var value = _data[1]

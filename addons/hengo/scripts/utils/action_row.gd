@@ -10,6 +10,10 @@ const ICON_DIR: String = 'res://addons/hengo/assets/new_icons/'
 const FALLBACK_ICON: String = 'square-function'
 const FALLBACK_COLOR: String = '#7c93ff'
 
+# debug: same green + duration the cnode border uses (cnode.gd DEBUG_EXEC_TIME)
+const RUN_COLOR := Color('#63ff92')
+const RUN_TIME: float = 0.2
+
 # colors the phase section header; the row accent is the action's category
 const PHASE_COLORS = {
 	enter = '#63d98a',
@@ -36,6 +40,11 @@ var _drop_before: bool = false
 var _drop_hint: bool = false
 # a nested (loop body) row is not draggable yet, and drops on it are refused
 var _draggable: bool = true
+
+# debug run highlight: held while the one-shot timer is up, survives hover
+var _running: bool = false
+var _hovered: bool = false
+var _run_timer: Timer
 
 
 func _ready() -> void:
@@ -143,14 +152,48 @@ func _build_tooltip(doc: String, values: String) -> String:
 	return content
 
 
-# the background carries the category color, faint enough to stay readable
 func _set_hovered(hovered: bool) -> void:
+	_hovered = hovered
+	_apply_style()
+	_grip().modulate = Color(1, 1, 1, 0.45 if hovered else 0.0)
+
+
+# the background carries the category color, faint enough to stay readable; a
+# running action overrides it with the debug green while its timer is up
+func _apply_style() -> void:
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(_accent, 0.17 if hovered else 0.1)
 	style.set_corner_radius_all(6)
+
+	if _running:
+		style.bg_color = Color(RUN_COLOR, 0.18)
+		style.border_color = RUN_COLOR
+		style.set_border_width_all(2)
+	else:
+		style.bg_color = Color(_accent, 0.17 if _hovered else 0.1)
+
 	add_theme_stylebox_override('panel', style)
 
-	_grip().modulate = Color(1, 1, 1, 0.45 if hovered else 0.0)
+
+# flashes the row green when the action runs on the focused instance. an
+# update/physics action runs every frame, re-arming the timer so it stays lit;
+# it clears ~RUN_TIME after the action stops running (e.g. the state exits)
+func set_running(on: bool) -> void:
+	if is_preview:
+		return
+
+	_running = on
+	_apply_style()
+
+	if not on:
+		return
+
+	if not _run_timer:
+		_run_timer = Timer.new()
+		_run_timer.one_shot = true
+		_run_timer.timeout.connect(set_running.bind(false))
+		add_child(_run_timer)
+
+	_run_timer.start(RUN_TIME)
 
 
 # icon name from assets/new_icons, falling back when the macro declares none

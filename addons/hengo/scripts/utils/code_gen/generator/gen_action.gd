@@ -15,6 +15,8 @@ static func get_state_action_tokens(_save_data: HenSaveData, _state: HenSaveStat
 # when the loop runs) and depth+1 so break/continue know they are inside a loop
 static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _actions: Array, _phase: StringName, _loop_depth: int, _filter_phase: bool) -> Array:
 	var tokens: Array = []
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var debug: bool = global.SETTINGS.debug_compilation
 
 	for action: HenSaveAction in _actions:
 		if _filter_phase and str(action.phase) != str(_phase):
@@ -55,6 +57,11 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		# its lines are already resolved and must not be run through it again
 		if instance.get_has_body():
 			body = _substitute_loop_body(_save_data, _state, body, action, _phase, _loop_depth)
+
+		# lights the action's row green when execution reaches it, like the cnode
+		# trace_flow; only for the focused instance, gone in release builds
+		if debug:
+			tokens.append("if _ref.get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_action(&'%s')" % str(action.id))
 
 		for line: String in body.strip_edges(false, true).split('\n'):
 			tokens.append(line)
@@ -481,9 +488,38 @@ static func _substitute_branches(_save_data: HenSaveData, _body: String, _action
 
 	for out: Dictionary in _branches:
 		var key: String = str(out.get('id', ''))
-		body = HenVirtualCNodeCode._inject_placeholder(body, key, _branch_call(_save_data, _action, key, _state))
+		var call: String = _branch_call(_save_data, _action, key, _state)
+
+		# 'pass' means no transition is taken, so there is no edge to flash
+		if call != 'pass':
+			var trace: String = _transition_trace(_save_data, _action, key, _state)
+			if not trace.is_empty():
+				call = trace + '\n' + call
+
+		body = HenVirtualCNodeCode._inject_placeholder(body, key, call)
 
 	return body
+
+
+# debug: flashes the state-viewer edge for this branch when the transition runs.
+# per-script gate (state_targets) matches the state highlight and the cnode
+# trace_state_flow; source + event key the edge like _add_action_branch_edges
+static func _transition_trace(_save_data: HenSaveData, _action: HenSaveAction, _key: String, _state: HenSaveState) -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global.SETTINGS.debug_compilation:
+		return ''
+
+	var target: HenSaveState = branch_target(_save_data, _action, _key)
+	if not target:
+		return ''
+
+	var branch: Variant = _action.branches.get(_key)
+	var label: String = str((branch as Dictionary).get('label', '')) if branch is Dictionary else ''
+	var event: String = label if not label.is_empty() else 'go_to_' + target.name
+	var script_id: String = str(_save_data.identity.id)
+
+	return 'if _ref.get_instance_id() == HengoDebugger.state_targets.get("' + script_id \
+		+ '", -1): HengoDebugger.trace_state_transition("' + _state.name + '", "' + event + '", "' + script_id + '")'
 
 
 # change_sub_state when the target is a child of the owning state, change_state otherwise

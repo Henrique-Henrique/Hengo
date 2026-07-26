@@ -20,6 +20,9 @@ var _collapsed: Dictionary = {}
 # action id -> the loop action holding it in body_actions, null when top level.
 # rebuilt each update() so delete/replace/add know which list to touch
 var _parent_of: Dictionary = {}
+# action id (str) -> its row, so the debug run highlight reaches one row without
+# a rebuild; rebuilt every update(), so an id from another state just misses
+var _rows_by_id: Dictionary = {}
 
 
 func _ready() -> void:
@@ -41,6 +44,8 @@ func _ready() -> void:
 		signal_bus.route_changed.connect(_on_route_changed)
 		if not signal_bus.request_structural_update.is_connected(update):
 			signal_bus.request_structural_update.connect(update)
+		signal_bus.debug_action_flow.connect(_on_debug_action_flow)
+		signal_bus.debug_session_stopped.connect(_on_debug_session_stopped)
 
 	# value edits commit straight to the resource, so the preview refreshes on popup close
 	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
@@ -52,6 +57,21 @@ func _ready() -> void:
 
 func _on_route_changed(_route: HenRouteData) -> void:
 	update()
+
+
+# lights the row of an action that just ran on the focused instance; an id the
+# panel does not hold (a different state is open) is a no-op, the manual flow
+func _on_debug_action_flow(_action_id: StringName) -> void:
+	var row: HenActionRow = _rows_by_id.get(str(_action_id))
+	if is_instance_valid(row):
+		row.set_running(true)
+
+
+# clears any lingering green when the debug session ends
+func _on_debug_session_stopped() -> void:
+	for row: Variant in _rows_by_id.values():
+		if is_instance_valid(row):
+			(row as HenActionRow).set_running(false)
 
 
 func update() -> void:
@@ -110,6 +130,7 @@ func _add_row(_action: HenSaveAction, _depth: int, _parent: HenSaveAction) -> vo
 	row.collapse_toggled.connect(_on_row_collapse_toggled)
 	row.action_dropped.connect(_on_row_dropped)
 	list.add_child(row)
+	_rows_by_id[str(_action.id)] = row
 
 	var macro: HenSaveMacro = find_macro(_action.macro_id)
 
@@ -600,6 +621,7 @@ func _delete_action(_action: HenSaveAction, _state_id: StringName) -> void:
 
 
 func _clear_list() -> void:
+	_rows_by_id.clear()
 	for child: Node in list.get_children():
 		list.remove_child(child)
 		child.queue_free()

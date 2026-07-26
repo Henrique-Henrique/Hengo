@@ -69,6 +69,8 @@ func _ready() -> void:
 			signal_bus.debug_flow_transition.connect(_on_debug_flow_transition)
 		if not signal_bus.debug_state_flow.is_connected(_on_debug_state_flow):
 			signal_bus.debug_state_flow.connect(_on_debug_state_flow)
+		if not signal_bus.debug_state_transition.is_connected(_on_debug_state_transition):
+			signal_bus.debug_state_transition.connect(_on_debug_state_transition)
 
 	_update_graph()
 
@@ -347,6 +349,15 @@ func _on_debug_flow_transition(vc_id: int, _port: StringName) -> void:
 	if not global or not global.SAVE_DATA: return
 
 	_flash_transition_vc(vc_id, global.SAVE_DATA)
+
+
+# a branch action carries its source state and event label directly (no vc), so
+# it flashes the edge the same way _add_action_branch_edges keyed it
+func _on_debug_state_transition(source: String, event: String, script_id: String) -> void:
+	var script_name: String = _script_name_from_id(script_id)
+	if script_name.is_empty():
+		return
+	edges_overlay.flash_edge(script_name, source, event)
 
 
 # per-script transition events carry the owning script id, so any open machine can flash
