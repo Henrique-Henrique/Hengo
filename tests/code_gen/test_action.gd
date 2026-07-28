@@ -1188,6 +1188,12 @@ func test_shipped_actions_generate_compiling_code_for_a_3d_body() -> void:
 	_assert_whole_pool_compiles('CharacterBody3D')
 
 
+# physics3d/ also holds RigidBody3D-only actions (forces, velocity), hidden from
+# the character bodies, so they get their own sweep too
+func test_shipped_actions_generate_compiling_code_for_a_rigid_body() -> void:
+	_assert_whole_pool_compiles('RigidBody3D')
+
+
 # a macro whose actions only make sense inside a loop (break, continue)
 func _needs_loop(_macro: HenSaveMacro) -> bool:
 	return str(_macro.id) in ['break_loop', 'continue_loop']
@@ -1436,7 +1442,13 @@ func test_native_sources_compile() -> void:
 		var expression: String = HenUtils.native_source_code(source, 'ui_accept')
 
 		if not bool(source.global):
-			expression = 'self.' + expression
+			# a source needing a class Node2D lacks is read off the untyped _ref, so its
+			# property access still parses without that exact base type on self
+			var needs: StringName = source.needs_class
+			if needs == &'' or ClassDB.is_parent_class(&'Node2D', needs):
+				expression = 'self.' + expression
+			else:
+				expression = '_ref.' + expression
 
 		lines.append('\tvar _v' + str(i) + ' = ' + expression)
 

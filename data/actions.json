@@ -75,6 +75,49 @@
 		},
 		{
 			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Pushes a physics body continuously every physics frame while the state runs, such as thrust or wind. For a one-shot push use Apply Impulse.",
+			"has_body": false,
+			"icon": "wind",
+			"id": "apply_force_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The push to apply each frame, in units times mass per second squared.",
+					"id": "force",
+					"lvalue": false,
+					"name": "Force",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "Where the push is applied, relative to the center. Zero pushes through the center.",
+					"id": "offset",
+					"lvalue": false,
+					"name": "Offset",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Apply Force",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"RigidBody3D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "physics2d",
 			"color": "#22d3ee",
 			"default_phase": "physics",
@@ -135,6 +178,83 @@
 			],
 			"target_classes": [
 				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "enter",
+			"description": "Gives a physics body a one-shot push, such as a jump or a boost. Best placed on enter so it fires once instead of every frame.",
+			"has_body": false,
+			"icon": "zap",
+			"id": "apply_impulse_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The push to apply, in units times mass per second.",
+					"id": "impulse",
+					"lvalue": false,
+					"name": "Impulse",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "Where the push is applied, relative to the center. Zero pushes through the center.",
+					"id": "offset",
+					"lvalue": false,
+					"name": "Offset",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Apply Impulse",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"RigidBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "enter",
+			"description": "Gives a physics body a one-shot spin around each axis, such as a flip. Best placed on enter so it fires once instead of every frame.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "apply_torque_impulse_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The spin to apply around each axis.",
+					"id": "torque",
+					"lvalue": false,
+					"name": "Torque",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Apply Torque Impulse",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"RigidBody3D"
 			]
 		},
 		{
@@ -4372,6 +4492,40 @@
 		},
 		{
 			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Sets the angular velocity (spin) of a physics body directly, in radians per second around each axis. Zero stops the spin.",
+			"has_body": false,
+			"icon": "rotate-3d",
+			"id": "set_angular_velocity_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The spin to set, in radians per second around each axis. Zero stops the spin.",
+					"id": "velocity",
+					"lvalue": false,
+					"name": "Velocity",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Set Angular Velocity",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"RigidBody3D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "animation",
 			"color": "#f472b6",
 			"default_phase": "enter",
@@ -4495,6 +4649,40 @@
 				"exit"
 			],
 			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Sets the linear velocity of a physics body directly, in units per second. Setting it to zero stops the body, which is how a reset brings it to rest.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "set_linear_velocity_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The velocity to set, in units per second. Zero stops the body.",
+					"id": "velocity",
+					"lvalue": false,
+					"name": "Velocity",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Set Linear Velocity",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"RigidBody3D"
+			]
 		},
 		{
 			"branches": [],
@@ -6013,6 +6201,337 @@
 		},
 		{
 			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Combines two 3D vectors into a single number, such as the distance or angle between them.",
+			"has_body": false,
+			"icon": "git-merge",
+			"id": "vector3_combine",
+			"inputs": [
+				{
+					"default": "'distance_to'",
+					"doc": "How to combine the two vectors.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"distance_to",
+						"distance_squared_to",
+						"dot",
+						"angle_to"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The first vector.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The second vector.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Combine",
+			"outputs": [
+				{
+					"doc": "The resulting number.",
+					"id": "result",
+					"name": "Result",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Returns the cross product of two 3D vectors, a vector perpendicular to both. Useful to find a side direction.",
+			"has_body": false,
+			"icon": "axis-3d",
+			"id": "vector3_cross",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The first vector.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The second vector.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Cross",
+			"outputs": [
+				{
+					"doc": "The perpendicular vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Returns the unit direction pointing from one point to another in 3D. Useful to aim or to steer toward a target.",
+			"has_body": false,
+			"icon": "navigation",
+			"id": "vector3_direction_to",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The starting point.",
+					"id": "from",
+					"lvalue": false,
+					"name": "From",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The point to aim at.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Direction To",
+			"outputs": [
+				{
+					"doc": "The unit direction from one point to the other.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Reads a single number from a 3D vector, such as its length.",
+			"has_body": false,
+			"icon": "ruler",
+			"id": "vector3_info",
+			"inputs": [
+				{
+					"default": "'length'",
+					"doc": "Which value to read from the vector.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"length",
+						"length_squared"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The vector to read.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Info",
+			"outputs": [
+				{
+					"doc": "The resulting number.",
+					"id": "result",
+					"name": "Result",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Rotates a 3D vector around an axis by an angle and returns the turned vector.",
+			"has_body": false,
+			"icon": "rotate-3d",
+			"id": "vector3_rotated",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, -1.0)",
+					"doc": "The vector to rotate.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 1.0, 0.0)",
+					"doc": "The axis to turn around. It is normalized before use.",
+					"id": "axis",
+					"lvalue": false,
+					"name": "Axis",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "How far to turn it, in radians.",
+					"id": "angle",
+					"lvalue": false,
+					"name": "Angle",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Rotated",
+			"outputs": [
+				{
+					"doc": "The rotated vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Applies a function to a 3D vector and returns a new vector, such as normalized or abs.",
+			"has_body": false,
+			"icon": "move-3d",
+			"id": "vector3_transform",
+			"inputs": [
+				{
+					"default": "'normalized'",
+					"doc": "The function to apply to the vector.",
+					"id": "func_name",
+					"lvalue": false,
+					"name": "Function",
+					"optional": false,
+					"options": [
+						"normalized",
+						"abs",
+						"sign",
+						"ceil",
+						"floor",
+						"round"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The vector to transform.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Transform",
+			"outputs": [
+				{
+					"doc": "The resulting vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "input",
 			"color": "#38bdf8",
 			"default_phase": "enter",
@@ -6146,7 +6665,7 @@
 		},
 		{
 			"color": "#a855f7",
-			"count": 10,
+			"count": 16,
 			"icon": "move-3d",
 			"id": "vector",
 			"name": "Vector"
@@ -6195,7 +6714,7 @@
 		},
 		{
 			"color": "#2dd4bf",
-			"count": 7,
+			"count": 12,
 			"icon": "box",
 			"id": "physics3d",
 			"name": "Physics 3D"

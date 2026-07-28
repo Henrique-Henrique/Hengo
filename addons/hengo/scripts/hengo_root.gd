@@ -343,21 +343,21 @@ func _input(event: InputEvent) -> void:
 					if line.visible:
 						line.visible = true
 			if e.ctrl_pressed:
-				if e.keycode == KEY_Z:
-					get_tree().root.set_input_as_handled()
-
-					if global.CURRENT_INSPECTOR:
-						global.CURRENT_INSPECTOR.undo_redo(true)
-					else:
-						global.history.undo()
-				elif e.keycode == KEY_Y:
-					get_tree().root.set_input_as_handled()
-
-					if global.CURRENT_INSPECTOR:
-						global.CURRENT_INSPECTOR.undo_redo(false)
-					else:
-						global.history.redo()
-				elif e.keycode == KEY_C:
+				# undo/redo disabled for now: as a bottom panel, _input grabs ctrl+z/ctrl+y
+				# editor-wide and blocks godot's own undo/redo
+				# if e.keycode == KEY_Z:
+				# 	get_tree().root.set_input_as_handled()
+				# 	if global.CURRENT_INSPECTOR:
+				# 		global.CURRENT_INSPECTOR.undo_redo(true)
+				# 	else:
+				# 		global.history.undo()
+				# elif e.keycode == KEY_Y:
+				# 	get_tree().root.set_input_as_handled()
+				# 	if global.CURRENT_INSPECTOR:
+				# 		global.CURRENT_INSPECTOR.undo_redo(false)
+				# 	else:
+				# 		global.history.redo()
+				if e.keycode == KEY_C:
 					get_tree().root.set_input_as_handled()
 					var toast: HenToast = Engine.get_singleton(&'ToastContainer')
 					var count: int = HenClipboard.copy(global.SELECTED_VIRTUAL_CNODE)

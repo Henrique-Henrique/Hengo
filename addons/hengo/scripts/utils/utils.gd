@@ -101,6 +101,20 @@ const NATIVE_SOURCES: Array[Dictionary] = [
 		global = false
 	},
 	{
+		name = 'Speed',
+		code = 'linear_velocity.length()',
+		type = 'float',
+		needs_class = &'RigidBody3D',
+		global = false
+	},
+	{
+		name = 'Velocity',
+		code = 'linear_velocity',
+		type = 'Vector3',
+		needs_class = &'RigidBody3D',
+		global = false
+	},
+	{
 		name = 'Random Float (0-1)',
 		code = 'randf()',
 		type = 'float',
