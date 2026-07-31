@@ -1003,7 +1003,9 @@ func test_macro_is_offered_only_to_declared_classes() -> void:
 
 	assert_bool(color.serves_class(&'Sprite2D')).is_true()
 	assert_bool(color.serves_class(&'MeshInstance3D')).is_true()
-	assert_bool(color.serves_class(&'Button')).is_false()
+	# change_color absorbed set_modulate, so it targets CanvasItem too (Control included)
+	assert_bool(color.serves_class(&'Button')).is_true()
+	assert_bool(color.serves_class(&'Timer')).is_false()
 
 	var only_control: HenSaveMacro = HenSaveMacro.new()
 	only_control.target_classes = [&'Control']
@@ -1028,7 +1030,7 @@ func test_native_loader_carries_target_classes() -> void:
 			color = macro
 
 	assert_object(color).is_not_null()
-	assert_array(color.target_classes).contains([&'Node2D', &'Node3D'])
+	assert_array(color.target_classes).contains([&'CanvasItem', &'Node3D'])
 
 
 # --- categories -------------------------------------------------------------
