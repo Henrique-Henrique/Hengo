@@ -21,8 +21,12 @@ const DIM_ALPHA: float = 0.2
 const DOUBLE_CLICK_MS: int = 400
 const CLICK_TOLERANCE: float = 6.0
 const TRANSITION_ICON: String = 'arrow-right-to-line'
+const TITLE_FONT_SIZE: int = 18
+const MIN_TITLE_SCREEN_PX: float = 11.0
 
 var _panels: Dictionary = {}
+# node -> icon+title hbox, counter-scaled so titles stay readable when zoomed out
+var _title_boxes: Dictionary = {}
 var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _active_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
 
@@ -522,7 +526,49 @@ func _focus_actions_tab() -> void:
 		tabs.current_tab = HenActionsPanel.TAB_INDEX
 
 
+# holds each title at natural size until it would shrink past MIN_TITLE_SCREEN_PX,
+# then counter-scales so state names stay readable when zoomed out
+func _update_title_scales() -> void:
+	var cam: Node2D = get_node_or_null('%Cam') as Node2D
+	var zoom: float = maxf(cam.transform.x.x, 0.001) if cam else 1.0
+	var factor: float = maxf(1.0, MIN_TITLE_SCREEN_PX / (TITLE_FONT_SIZE * zoom))
+
+	for box: Control in _title_boxes.values():
+		if not is_instance_valid(box):
+			continue
+
+		# pivot on the content, not the box: compound headers stretch full width and
+		# left-align the title, so box-center would slide the title sideways on scale
+		var pivot: Vector2 = _content_center(box)
+		if box.pivot_offset != pivot:
+			box.pivot_offset = pivot
+		if box.scale.x != factor:
+			box.scale = Vector2(factor, factor)
+
+
+# center of the union of a box's laid-out children, in the box's local space
+func _content_center(box: Control) -> Vector2:
+	var lo: Vector2 = Vector2.INF
+	var hi: Vector2 = -Vector2.INF
+
+	for child in box.get_children():
+		var ctrl: Control = child as Control
+		if ctrl == null:
+			continue
+		lo.x = minf(lo.x, ctrl.position.x)
+		lo.y = minf(lo.y, ctrl.position.y)
+		hi.x = maxf(hi.x, ctrl.position.x + ctrl.size.x)
+		hi.y = maxf(hi.y, ctrl.position.y + ctrl.size.y)
+
+	if lo.x > hi.x:
+		return box.size * 0.5
+
+	return (lo + hi) * 0.5
+
+
 func _process(_delta: float) -> void:
+	_update_title_scales()
+
 	# hover tracking
 	var mouse_pos: Vector2 = nodes_container.get_local_mouse_position()
 	var hovered_node: HenStateViewerGraphTypes.DirectedGraphNode = null
@@ -563,6 +609,7 @@ func build_graph(dict: Dictionary) -> void:
 	for child in nodes_container.get_children():
 		child.queue_free()
 	_panels.clear()
+	_title_boxes.clear()
 
 	graph_root = parser.parse_machine(dict)
 
@@ -690,6 +737,7 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 
 		var title_label: Label = _create_graph_label(short_id)
 		hbox.add_child(title_label)
+		_title_boxes[node] = hbox
 
 		var desc_text: String = node.data.get('description', '')
 		if not desc_text.is_empty():
@@ -713,6 +761,7 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 			hbox.add_child(_create_initial_indicator())
 
 		hbox.add_child(_create_graph_label(short_id))
+		_title_boxes[node] = hbox
 
 		var desc_text: String = node.data.get('description', '')
 		if not desc_text.is_empty():

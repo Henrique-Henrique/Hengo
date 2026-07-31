@@ -14,7 +14,7 @@ func get_description() -> String:
 
 
 func get_display_name() -> String:
-	return 'Get Distance 3D'
+	return 'Get Distance'
 
 
 func get_icon() -> String:

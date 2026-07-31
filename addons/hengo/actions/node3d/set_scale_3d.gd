@@ -14,7 +14,7 @@ func get_description() -> String:
 
 
 func get_display_name() -> String:
-	return 'Set Scale 3D'
+	return 'Set Scale'
 
 
 func get_icon() -> String:

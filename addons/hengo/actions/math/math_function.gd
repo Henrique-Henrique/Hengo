@@ -14,7 +14,7 @@ func get_description() -> String:
 
 
 func get_display_name() -> String:
-	return 'Math Function'
+	return 'Number Function'
 
 
 func get_icon() -> String:

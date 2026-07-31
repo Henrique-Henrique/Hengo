@@ -14,6 +14,10 @@ var _hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
 var _edge_views: Array[Dictionary] = []
 var _flashed_edges: Dictionary = {}
 
+# keeps line/arrow width constant on screen: >1 when zoomed out so 2px lines
+# don't shrink to sub-pixel and vanish
+var _screen_scale: float = 1.0
+
 const FORWARD_COLOR: Color = Color(0.64, 0.66, 0.72, 1.0)
 const BACK_COLOR: Color = Color('#c9a35e')
 const CROSS_COLOR: Color = Color('#c368ed')
@@ -205,7 +209,8 @@ func _build_edge_views() -> void:
 			arrow_prev = arrow_prev,
 			dash = 0.0,
 			lengths = lengths,
-			total_len = total_len
+			total_len = total_len,
+			state_width = NORMAL_WIDTH
 		})
 
 	while _line_pool.size() > line_idx:
@@ -406,6 +411,14 @@ func _process(_delta: float) -> void:
 			closest_edge = view.edge
 
 	var needs_redraw: bool = false
+
+	# only boost below 100%: keeps arrows/pulses (own _draw) constant on screen and
+	# forces a redraw while zooming since they don't self-redraw like the Line2Ds
+	var screen_scale: float = maxf(1.0, 1.0 / zoom)
+	if not is_equal_approx(screen_scale, _screen_scale):
+		_screen_scale = screen_scale
+		needs_redraw = true
+
 	if _hovered_edge != closest_edge:
 		_hovered_edge = closest_edge
 		needs_redraw = true
@@ -447,15 +460,20 @@ func _process(_delta: float) -> void:
 
 		var base_width: float = GLOW_WIDTH if is_glowing else NORMAL_WIDTH
 		var target_width: float = lerpf(base_width, FLASH_WIDTH, flash_strength)
-		var new_width: float = lerpf(view.line.width, target_width, 15.0 * _delta)
+		var new_state_width: float = lerpf(view.state_width, target_width, 15.0 * _delta)
 
-		if abs(new_width - target_width) < 0.01:
-			new_width = target_width
+		if abs(new_state_width - target_width) < 0.01:
+			new_state_width = target_width
 		else:
 			needs_redraw = true
 
-		if view.line.width != new_width:
-			view.line.width = new_width
+		view.state_width = new_state_width
+
+		# lerp the state width, then apply the zoom factor as an instant multiplier
+		# so the on-screen thickness tracks the cam without lagging its zoom animation
+		var scaled_width: float = new_state_width * screen_scale
+		if view.line.width != scaled_width:
+			view.line.width = scaled_width
 
 		# dash flows only on hover, never while a debug pulse runs
 		var target_dash: float = 1.0 if (is_glowing and flash_strength <= 0.0) else 0.0
@@ -496,8 +514,9 @@ func _draw() -> void:
 		var color: Color = (kc.lightened(0.35) if is_glowing else kc).lerp(FLASH_COLOR, flash_strength)
 		color.a = view.line.default_color.a
 
-		# arrow scales with the current line width, dampened so glow doesn't balloon it
-		var s: float = 0.5 + 0.5 * (view.line.width / NORMAL_WIDTH)
+		# glow damp from the state width (not the zoomed line width), then scaled
+		# on screen so the arrow head stays constant when zoomed out
+		var s: float = (0.5 + 0.5 * (view.state_width / NORMAL_WIDTH)) * _screen_scale
 		var end_pt: Vector2 = view.arrow_end
 		var prev_pt: Vector2 = view.arrow_prev
 		var dir: Vector2 = (end_pt - prev_pt).normalized()
@@ -528,7 +547,7 @@ func _draw_pulse(view: Dictionary, elapsed: float, strength: float) -> void:
 
 	var pulse_color: Color = FLASH_COLOR.lightened(0.3)
 	pulse_color.a = strength
-	var pulse_w: float = view.line.width + 2.5
+	var pulse_w: float = view.line.width + 2.5 * _screen_scale
 
 	draw_polyline(sub_pts, pulse_color, pulse_w, true)
 	draw_circle(sub_pts[sub_pts.size() - 1], pulse_w * 0.6, pulse_color)

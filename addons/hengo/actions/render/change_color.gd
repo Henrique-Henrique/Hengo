@@ -22,9 +22,10 @@ func get_icon() -> String:
 	return 'palette'
 
 
-# only scripts extending Node2D or Node3D (and their heirs) can use it
+# CanvasItem covers 2d nodes and Control; Node3D covers 3d. anything without a
+# dedicated color prop falls back to modulate
 func get_target_classes() -> Array[StringName]:
-	return [&'Node2D', &'Node3D']
+	return [&'CanvasItem', &'Node3D']
 
 
 func get_inputs() -> Array[Dictionary]:
