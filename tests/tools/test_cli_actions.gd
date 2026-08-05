@@ -120,6 +120,45 @@ func test_literal_follows_the_bound_target_type() -> void:
 	assert_str(HenTest.get_all_code()).contains('_ref.count += 2').not_contains('+= 2.0')
 
 
+# --- inline actions ---------------------------------------------------------
+
+
+func test_inline_action_input_emits_inline() -> void:
+	var err: String = _build_one('print_value', 'update', {
+		value = {action = {id = 'math_operator', inputs = {a = 3, op = '*', b = 2}}, output = 'result'}
+	})
+
+	assert_str(err).is_empty()
+	assert_str(HenTest.get_all_code()).contains('print((3 * 2))')
+
+
+func test_inline_action_picks_output() -> void:
+	var err: String = _build_one('print_value', 'update', {
+		value = {action = {id = 'get_vector2_xy', inputs = {vector = {bind = 'dir'}}}, output = 'y'}
+	}, {}, [ {name = 'dir', type = 'Vector2', value = [0, 0]}])
+
+	assert_str(err).is_empty()
+	assert_str(HenTest.get_all_code()).contains('print((_ref.dir.y))')
+
+
+func test_inline_action_rejects_non_producer() -> void:
+	assert_str(_build_one('print_value', 'update', {value = {action = {id = 'if_condition'}}})) \
+		.contains('not an inlinable value producer')
+
+
+func test_inline_action_on_lvalue_is_reported() -> void:
+	assert_str(_build_one('set_value', 'update', {target = {action = {id = 'math_operator'}}})) \
+		.contains('cannot feed a slot that needs a variable')
+
+
+func test_inline_action_unknown_output_is_reported() -> void:
+	var err: String = _build_one('print_value', 'update', {
+		value = {action = {id = 'get_vector2_xy', inputs = {vector = {bind = 'dir'}}}, output = 'z'}
+	}, {}, [ {name = 'dir', type = 'Vector2', value = [0, 0]}])
+
+	assert_str(err).contains('is not an output of "get_vector2_xy"')
+
+
 # --- validation -------------------------------------------------------------
 
 

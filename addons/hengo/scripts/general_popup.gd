@@ -57,6 +57,10 @@ func show_content(content: Control, opts: Dictionary = {}) -> HenPopupContainer:
 	return popup
 
 
+func has_open_popups() -> bool:
+	return not _popups.is_empty()
+
+
 func hide_popup() -> void:
 	if _popups.is_empty():
 		return
@@ -97,4 +101,4 @@ func _on_popup_closed(popup: HenPopupContainer) -> void:
 
 	# keep canvas scroll disabled while any popup remains
 	if not _popups.is_empty():
-		(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = false
+		HenCam.set_all_can_scroll(get_tree(), false)

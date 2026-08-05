@@ -19,6 +19,8 @@ var ignore_process: bool = false
 
 var can_scroll: bool = true
 
+var _left_pan: bool = false
+
 # per-frame usec budget for draining pending_show_queue; caps show() cost so a
 # dense graph doesn't stutter the pan
 const SHOW_BUDGET_USEC: int = 4000
@@ -65,6 +67,14 @@ func update_settings() -> void:
 	ZOOM_RATE = ProjectSettings.get_setting(HenSettings.ZOOM_RATE_PATH, 12.0)
 
 
+static func set_all_can_scroll(_tree: SceneTree, _value: bool) -> void:
+	if not _tree:
+		return
+
+	for node: Node in _tree.get_nodes_in_group(&'hen_cam'):
+		(node as HenCam).can_scroll = _value
+
+
 func is_cam_active() -> bool:
 	var parent: Control = get_parent() as Control
 	
@@ -93,12 +103,20 @@ func is_cam_active() -> bool:
 
 
 func _input(event: InputEvent) -> void:
+	# a release outside the canvas still has to disarm, so it comes before the gate
+	if event is InputEventMouseButton:
+		var released: InputEventMouseButton = event as InputEventMouseButton
+		if released.button_index == MOUSE_BUTTON_LEFT and not released.pressed:
+			_left_pan = false
+
 	if is_cam_active():
 		if event is InputEventMouseMotion:
 			check_vc_action_menu()
 
-			if (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_MIDDLE or \
-			   (event as InputEventMouseMotion).button_mask == MOUSE_BUTTON_MASK_RIGHT:
+			var mask: int = (event as InputEventMouseMotion).button_mask
+
+			if mask == MOUSE_BUTTON_MASK_MIDDLE or mask == MOUSE_BUTTON_MASK_RIGHT or \
+			   (_left_pan and mask == MOUSE_BUTTON_MASK_LEFT):
 				transform.origin += (event as InputEventMouseMotion).relative
 				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
@@ -118,12 +136,27 @@ func _input(event: InputEvent) -> void:
 				_zoom_out((1.0 - zoom_amount) * 2.0)
 
 		elif event is InputEventMouseButton:
-			if event.is_pressed():
+			var mb: InputEventMouseButton = event as InputEventMouseButton
+
+			if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
+				_left_pan = _can_start_left_pan()
+
+			if mb.is_pressed():
 				if can_scroll:
-					if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_UP:
+					if mb.button_index == MOUSE_BUTTON_WHEEL_UP:
 						_zoom_in()
-					if (event as InputEventMouseButton).button_index == MOUSE_BUTTON_WHEEL_DOWN:
+					if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 						_zoom_out()
+
+
+# a press on a row or a button belongs to that control, not to the pan
+func _can_start_left_pan() -> bool:
+	if is_global_cam:
+		return false
+
+	var hovered: Control = get_viewport().gui_get_hovered_control()
+
+	return hovered == null or hovered == get_parent()
 
 
 func _zoom_in(amount: float = ZOOM_INCREMENT) -> void:

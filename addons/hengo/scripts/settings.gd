@@ -73,12 +73,12 @@ const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 
 @export_group('Actions')
 
-# whether the action list shows the value lines; written by the panel's expand/collapse all
+# off by default: a folded row keeps the state card at its title width
 @export var actions_expanded: bool:
 	set(value):
 		_set_value(ACTIONS_EXPANDED_PATH, value)
 	get:
-		return _get_value(ACTIONS_EXPANDED_PATH, true)
+		return _get_value(ACTIONS_EXPANDED_PATH, false)
 
 @export_group('Move')
 
@@ -222,7 +222,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&'dock_location':
 			return 0
 		&'actions_expanded':
-			return true
+			return false
 		&'font_scale':
 			return 0.85
 	return null

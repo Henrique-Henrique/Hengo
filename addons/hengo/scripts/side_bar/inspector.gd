@@ -1,6 +1,8 @@
 @tool
 class_name HenInspector extends VBoxContainer
 
+signal inline_changed
+
 const PROP_CONTAINER: PackedScene = preload('res://addons/hengo/scenes/prop_container.tscn')
 const TITLE_FONT: Font = preload('res://addons/hengo/assets/fonts/bold.ttf')
 const DROPDOWN_HINT_TYPES: Array[String] = [
@@ -50,6 +52,10 @@ var inspector_actions: Array[Dictionary] = []
 var hide_phase: bool = false
 # running index across all rendered value slots (incl. nested word rows)
 var _slot_idx: int = 0
+var nested_producer: bool = false
+# (slot: Dictionary, chip: Control), set by the cascade
+var on_action_chip: Callable = Callable()
+var active_action_key: String = ''
 
 
 func _init() -> void:
@@ -104,13 +110,17 @@ func _init() -> void:
 
 
 # initializes the inspector within the custom popup system
-static func edit_resource(_res: Resource, _title: String = '', _actions: Array[Dictionary] = [], _popup_opts: Dictionary = {}, _hide_phase: bool = false) -> void:
+static func edit_resource(_res: Resource, _title: String = '', _actions: Array[Dictionary] = [], _popup_opts: Dictionary = {}, _hide_phase: bool = false, _flat: bool = false) -> void:
 	var global: HenGlobal = Engine.get_singleton('Global')
 	var scene: PackedScene = load('res://addons/hengo/scenes/custom_inspector.tscn')
 	var inspector: HenInspector = scene.instantiate()
 
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
 	inspector.hide_phase = _hide_phase
+
+	if _flat:
+		inspector.make_flat()
+
 	inspector.edit(_res, _title, _actions)
 
 	global.CURRENT_INSPECTOR = inspector
@@ -124,8 +134,23 @@ func edit(_res: Resource, _title: String = '', _actions: Array[Dictionary] = [])
 
 	_update_header()
 	_update_props()
-	
+
 	if not _res.property_list_changed.is_connected(_update_props): _res.property_list_changed.connect(_update_props)
+
+
+# the inner scroll has no minimum of its own and would collapse the body
+func make_flat() -> void:
+	if not is_instance_valid(body_scroll):
+		return
+
+	body_scroll.remove_child(vbox)
+	remove_child(body_scroll)
+	body_scroll.queue_free()
+	body_scroll = null
+
+	add_child(vbox)
+	size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	vbox.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 
 
 func _update_header() -> void:
@@ -211,9 +236,10 @@ func _render_action_params() -> void:
 	_migrate_name_bindings(action)
 
 	# a nested action runs at its loop's phase, so it has no phase of its own
-	if not hide_phase:
+	if not hide_phase and not nested_producer:
 		_create_phase_selector(action)
-	_create_branch_selector(action)
+	if not nested_producer:
+		_create_branch_selector(action)
 
 	var macro: HenSaveMacro = _find_macro(action.macro_id)
 	var outputs: Array[HenSaveParam] = macro.outputs if macro else [] as Array[HenSaveParam]
@@ -233,11 +259,14 @@ func _render_action_params() -> void:
 			bind_key = str(param.id),
 			expr_store = action.input_expressions,
 			expr_key = str(param.id),
+			action_store = action.input_actions,
+			action_key = str(param.id),
 			macro_params = macro_params,
 			indent = 0
 		})
 
-	_create_output_section(action, outputs)
+	if not nested_producer:
+		_create_output_section(action, outputs)
 
 
 # upgrades bindings saved by name to the id form, so opening an action once makes
@@ -286,6 +315,9 @@ func _create_value_slot(slot: Dictionary) -> void:
 
 	var has_expr: bool = expr_store != null and (expr_store as Dictionary).has(expr_key)
 	var bind_code: String = bind_store.get(bind_key, '')
+	var action_store: Variant = slot.get('action_store')
+	var action_key: String = slot.get('action_key', '')
+	var has_action: bool = action_store != null and (action_store as Dictionary).has(action_key)
 	var idx: int = _slot_idx
 	_slot_idx += 1
 
@@ -314,6 +346,20 @@ func _create_value_slot(slot: Dictionary) -> void:
 		option_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		option_bt.pressed.connect(_open_option_picker.bind(param, options, option_bt))
 		row.add_child(option_bt)
+	elif has_action:
+		var action_chip := Button.new()
+		action_chip.icon = load('res://addons/hengo/assets/new_icons/square-function.svg')
+		action_chip.text = HenActionsPanel.inline_label((action_store as Dictionary)[action_key])
+		action_chip.clip_text = true
+		action_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		action_chip.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		action_chip.pressed.connect(_on_action_chip_pressed.bind(slot, action_chip))
+
+		if not active_action_key.is_empty() and action_key == active_action_key:
+			action_chip.add_theme_color_override('font_color', Color('#ff9e64'))
+			action_chip.add_theme_color_override('icon_normal_color', Color('#ff9e64'))
+
+		row.add_child(action_chip)
 	elif has_expr:
 		var expr: HenSaveActionExpression = (expr_store as Dictionary)[expr_key]
 		var exp_bt: HenExpressionBt = load('res://addons/hengo/scenes/utils/expression_bt.tscn').instantiate()
@@ -411,6 +457,16 @@ func _create_value_slot(slot: Dictionary) -> void:
 		expr_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		expr_bt.pressed.connect(_on_expression_pressed.bind(slot))
 		row.add_child(expr_bt)
+
+	if action_store != null and not is_lvalue:
+		var action_bt := Button.new()
+		action_bt.icon = load('res://addons/hengo/assets/new_icons/square-function.svg')
+		action_bt.toggle_mode = true
+		action_bt.button_pressed = has_action
+		action_bt.tooltip_text = 'Back to a regular input' if has_action else 'Use an action as the value'
+		action_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		action_bt.pressed.connect(_on_action_toggle.bind(slot))
+		row.add_child(action_bt)
 
 	container.add_child(row)
 	_mount_slot(container, idx, indent)
@@ -570,14 +626,26 @@ func _on_bind_selected(item: Dictionary, slot: Dictionary) -> void:
 			bind_store.erase(bind_key)
 			if expr_store != null:
 				(expr_store as Dictionary).erase(expr_key)
+			_erase_action(slot)
 			_update_props()
 		'bind':
 			bind_store[bind_key] = item.code
 			if expr_store != null:
 				(expr_store as Dictionary).erase(expr_key)
+			_erase_action(slot)
 			_update_props()
 		'native_arg':
 			_prompt_source_arg(slot, str(item.source_key))
+
+
+# a slot holds one source at a time
+func _erase_action(slot: Dictionary) -> void:
+	var action_store: Variant = slot.get('action_store')
+	var key: String = slot.get('action_key', '')
+
+	if action_store != null and (action_store as Dictionary).has(key):
+		(action_store as Dictionary).erase(key)
+		inline_changed.emit()
 
 
 # switches the slot to expression mode (keeps an existing expression)
@@ -595,7 +663,57 @@ func _on_expression_pressed(slot: Dictionary) -> void:
 	else:
 		store[expr_key] = HenSaveActionExpression.new()
 		(slot.bind_store as Dictionary).erase(slot.bind_key)
+		_erase_action(slot)
 
+	_update_props()
+
+
+func _on_action_chip_pressed(slot: Dictionary, chip: Control) -> void:
+	if on_action_chip.is_valid():
+		on_action_chip.call(slot, chip)
+	else:
+		HenActionCascade.open(self, slot, chip)
+
+
+func _on_action_toggle(slot: Dictionary) -> void:
+	var action_store: Dictionary = slot.action_store
+	var action_key: String = slot.action_key
+
+	if action_store.has(action_key):
+		_erase_action(slot)
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+		_update_props()
+	else:
+		_open_producer_palette(slot)
+
+
+func _open_producer_palette(slot: Dictionary) -> void:
+	var ptype: String = _effective_slot_type(slot, slot.param)
+	var search: HenActionsSearch = load('res://addons/hengo/scenes/actions_search.tscn').instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(search, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_PANEL,
+		side = SIDE_RIGHT,
+		min_size = Vector2(320, 360)
+	})
+
+	search.setup_producer_picker(ptype, _on_producer_picked.bind(slot))
+
+
+func _on_producer_picked(macro: HenSaveMacro, slot: Dictionary) -> void:
+	var child: HenSaveAction = HenSaveAction.create(macro)
+	var output: StringName = macro.outputs[0].id if not macro.outputs.is_empty() else &''
+
+	(slot.action_store as Dictionary)[slot.action_key] = {action = child, output = output}
+
+	(slot.bind_store as Dictionary).erase(slot.bind_key)
+	var expr_store: Variant = slot.get('expr_store')
+	if expr_store != null:
+		(expr_store as Dictionary).erase(slot.get('expr_key', ''))
+
+	inline_changed.emit()
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 	_update_props()
 
 
@@ -691,6 +809,8 @@ func _on_source_arg_named(_arg: String, _type: String, slot: Dictionary, source_
 	if expr_store != null:
 		(expr_store as Dictionary).erase(slot.get('expr_key', ''))
 
+	_erase_action(slot)
+
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 	_update_props()
 
@@ -711,6 +831,7 @@ func _on_new_var_named(_name: String, _type: String, slot: Dictionary) -> void:
 	var expr_store: Variant = slot.get('expr_store')
 	if expr_store != null:
 		(expr_store as Dictionary).erase(slot.get('expr_key', ''))
+	_erase_action(slot)
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 	_update_props()
 

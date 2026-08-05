@@ -58,15 +58,22 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		if instance.get_has_body():
 			body = _substitute_loop_body(_save_data, _state, body, action, _phase, _loop_depth)
 
-		# lights the action's row green when execution reaches it, like the cnode
-		# trace_flow; only for the focused instance, gone in release builds
+		# lights the action's row when execution reaches it, gone in release builds
 		if debug:
-			tokens.append("if _ref.get_instance_id() == HengoDebugger.target_instance_id: HengoDebugger.trace_action(&'%s')" % str(action.id))
+			tokens.append(_action_trace(_save_data, action))
 
 		for line: String in body.strip_edges(false, true).split('\n'):
 			tokens.append(line)
 
 	return tokens
+
+
+# gated per script: action ids only count up inside one script
+static func _action_trace(_save_data: HenSaveData, _action: HenSaveAction) -> String:
+	var script_id: String = str(_save_data.identity.id)
+
+	return 'if _ref.get_instance_id() == HengoDebugger.state_targets.get("' + script_id \
+		+ '", -1): HengoDebugger.trace_action(&"' + str(_action.id) + '", "' + script_id + '")'
 
 
 # injects the loop's nested action lines at {{loop_body}}, one indent level deeper.
@@ -128,6 +135,11 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 	if not broken.is_empty():
 		return broken + ' binds a variable that no longer exists'
+
+	var broken_inline: String = _first_broken_inline(_save_data, _action)
+
+	if not broken_inline.is_empty():
+		return broken_inline
 
 	var branches: Array = _instance.get_flow_outputs()
 
@@ -367,6 +379,9 @@ static func _prime_instance(_save_data: HenSaveData, _instance: HenScriptMacroBa
 			_instance.bound_inputs[str(key)] = true
 
 	for key: Variant in _action.input_expressions:
+		_instance.bound_inputs[str(key)] = true
+
+	for key: Variant in _action.input_actions:
 		_instance.bound_inputs[str(key)] = true
 
 
@@ -750,6 +765,35 @@ static func _first_broken_binding(_save_data: HenSaveData, _action: HenSaveActio
 	return ''
 
 
+# a fault deep in the subtree takes the top action down, instead of emitting half of it
+static func _first_broken_inline(_save_data: HenSaveData, _action: HenSaveAction) -> String:
+	for key: Variant in _action.input_actions:
+		var child: HenSaveAction = _inline_child(_action.input_actions[key])
+
+		if not child:
+			return 'input "' + str(key) + '" inline action is empty'
+
+		var instance: HenScriptMacroBase = _instance_for(_save_data, child)
+
+		if not instance:
+			return 'input "' + str(key) + '" inline action could not be resolved'
+
+		if not is_inlinable(instance):
+			return 'input "' + str(key) + '" inline action is not a pure value producer'
+
+		var broken: String = _first_broken_binding(_save_data, child)
+
+		if not broken.is_empty():
+			return broken + ' binds a variable that no longer exists'
+
+		var deeper: String = _first_broken_inline(_save_data, child)
+
+		if not deeper.is_empty():
+			return deeper
+
+	return ''
+
+
 # first input that requires a binding and does not have a usable one. an
 # expression never qualifies, and a binding that resolves to nothing (empty node
 # path, deleted variable) counts as unbound. an `lvalue` is stricter still: it
@@ -765,7 +809,8 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 		var key: String = str(input.get('id', ''))
 		var name: String = str(input.get('name', key))
 
-		if _action.input_expressions.has(key):
+		# neither an expression nor an inline action is an assignable/bindable source
+		if _action.input_expressions.has(key) or _action.input_actions.has(key):
 			return name
 
 		var bind: String = HenUtils.bind_expression(_save_data, _action.input_bindings.get(key, ''))
@@ -862,8 +907,10 @@ static func _substitute_inputs(_save_data: HenSaveData, _body: String, _action: 
 		var key: String = str(input_id)
 		var literal: String
 
-		# priority: expression > binding > literal
-		if _action.input_expressions.has(key):
+		# priority: inline action > expression > binding > literal
+		if _action.input_actions.has(key):
+			literal = '(' + _emit_inline_action(_save_data, _action.input_actions[key]) + ')'
+		elif _action.input_expressions.has(key):
 			literal = '(' + _resolve_expression(_save_data, _action.input_expressions[key]) + ')'
 		else:
 			var bind: String = HenUtils.bind_expression(_save_data, _action.input_bindings.get(key, ''))
@@ -886,6 +933,86 @@ static func _substitute_inputs(_save_data: HenSaveData, _body: String, _action: 
 		body = HenVirtualCNodeCode._inject_placeholder(body, key, literal)
 
 	return body
+
+
+# the child's own id feeds {{VCNODE_ID}}, so a nested producer never collides
+static func _emit_inline_action(_save_data: HenSaveData, _ref: Variant) -> String:
+	var child: HenSaveAction = _inline_child(_ref)
+
+	if not child:
+		return 'null'
+
+	var instance: HenScriptMacroBase = _instance_for(_save_data, child)
+
+	if not instance:
+		return 'null'
+
+	var output_id: String = _inline_output(_ref, instance)
+
+	if output_id.is_empty():
+		return 'null'
+
+	var rhs: String = _output_rhs(instance, output_id)
+	rhs = _substitute_inputs(_save_data, rhs, child, instance)
+	rhs = HenVirtualCNodeCode.process_script_macro_body(rhs, false, child.id)
+
+	# _inject_placeholder trails a newline per input, which would break the expression
+	return rhs.strip_edges()
+
+
+# tolerates the {action, output} dict and a bare action (older data)
+static func _inline_child(_ref: Variant) -> HenSaveAction:
+	if _ref is HenSaveAction:
+		return _ref as HenSaveAction
+
+	if _ref is Dictionary:
+		return (_ref as Dictionary).get('action') as HenSaveAction
+
+	return null
+
+
+static func _inline_output(_ref: Variant, _instance: HenScriptMacroBase) -> String:
+	var output_id: String = str((_ref as Dictionary).get('output', '')) if _ref is Dictionary else ''
+
+	if not output_id.is_empty():
+		return output_id
+
+	var outputs: Array = _instance.get_outputs()
+
+	return str(outputs[0].get('id', '')) if not outputs.is_empty() else ''
+
+
+# a pure value producer: an output to read, no branch, no body, no state hook
+static func is_inlinable(_instance: HenScriptMacroBase) -> bool:
+	if _instance.get_outputs().is_empty() or not _instance.get_flow_outputs().is_empty():
+		return false
+
+	if _instance.get_has_body() or _instance.get_needs_loop() or _declares_hook(_instance):
+		return false
+
+	var found_body: bool = false
+
+	for phase: StringName in HenSaveAction.PHASE_ORDER:
+		var body: String = _get_phase_body(_instance, phase)
+
+		if body.is_empty():
+			continue
+
+		found_body = true
+
+		if not _body_is_only_outputs(body, _instance):
+			return false
+
+	return found_body
+
+
+static func _body_is_only_outputs(_body: String, _instance: HenScriptMacroBase) -> bool:
+	var stripped: String = _body
+
+	for output: Dictionary in _instance.get_outputs():
+		stripped = _drop_placeholder_line(stripped, 'out:' + str(output.get('id', '')))
+
+	return stripped.strip_edges().is_empty()
 
 
 # an input's effective type: follows type_from to whatever another slot is bound

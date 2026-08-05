@@ -33,7 +33,6 @@ func clean() -> void:
 func show_content(_content: Control, opts: Dictionary = {}) -> HenPopupContainer:
 	var gp: PanelContainer = get_node('%GeneralPopUp')
 	var container = gp.get_child(0)
-	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	_layout = opts.get('layout', HenGeneralPopup.Layout.CENTER)
 	var lod: float = opts.get('lod', _default_lod_for(_layout))
@@ -62,7 +61,7 @@ func show_content(_content: Control, opts: Dictionary = {}) -> HenPopupContainer
 	tween.tween_property(gp, 'scale', Vector2.ONE, .4).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(gp, 'modulate:a', 1.0, .4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 
-	global.CAM.can_scroll = false
+	HenCam.set_all_can_scroll(get_tree(), false)
 
 	return self
 
@@ -154,7 +153,7 @@ func _position_anchored(gp: PanelContainer, opts: Dictionary) -> void:
 
 	# fill the axis perpendicular to `side` using anchor_to's size
 	if opts.get('fill_axis', false) and anchor_to and is_instance_valid(anchor_to):
-		var anchor_rect: Rect2 = anchor_to.get_global_rect()
+		var anchor_rect: Rect2 = _rendered_rect(anchor_to)
 		if side == SIDE_LEFT or side == SIDE_RIGHT:
 			sz.y = anchor_rect.size.y
 		else:
@@ -176,8 +175,15 @@ func _position_anchored(gp: PanelContainer, opts: Dictionary) -> void:
 	HenUtils.reposition_control_inside(gp)
 
 
+# get_global_rect() reports the scaled origin with the unscaled size
+func _rendered_rect(anchor_to: Control) -> Rect2:
+	var xform: Transform2D = anchor_to.get_global_transform()
+
+	return Rect2(xform.origin, anchor_to.size * xform.get_scale())
+
+
 func _pos_relative_to(anchor_to: Control, side: int, sz: Vector2) -> Vector2:
-	var rect: Rect2 = anchor_to.get_global_rect()
+	var rect: Rect2 = _rendered_rect(anchor_to)
 	match side:
 		SIDE_LEFT:
 			return Vector2(rect.position.x - sz.x - ANCHOR_GAP, rect.position.y)
@@ -197,13 +203,13 @@ func move(_pos: Vector2) -> void:
 
 
 func show_container() -> void:
-	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = false
+	HenCam.set_all_can_scroll(get_tree(), false)
 	show()
 
 
 func hide_popup() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.CAM.can_scroll = true
+	HenCam.set_all_can_scroll(get_tree(), true)
 	global.CURRENT_INSPECTOR = null
 	hide()
 

@@ -23,10 +23,15 @@ const CLICK_TOLERANCE: float = 6.0
 const TRANSITION_ICON: String = 'arrow-right-to-line'
 const TITLE_FONT_SIZE: int = 18
 const MIN_TITLE_SCREEN_PX: float = 11.0
+const ACTIONS_LIST_SCENE = preload('res://addons/hengo/scenes/state_actions_list.tscn')
+const LAYOUT_SETTLE_PASSES: int = 4
 
 var _panels: Dictionary = {}
 # node -> icon+title hbox, counter-scaled so titles stay readable when zoomed out
 var _title_boxes: Dictionary = {}
+var _action_lists: Dictionary = {}
+var _rebuild_pending: bool = false
+var _layout_settling: bool = false
 var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _active_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
 
@@ -75,8 +80,60 @@ func _ready() -> void:
 			signal_bus.debug_state_flow.connect(_on_debug_state_flow)
 		if not signal_bus.debug_state_transition.is_connected(_on_debug_state_transition):
 			signal_bus.debug_state_transition.connect(_on_debug_state_transition)
+		if not signal_bus.debug_action_flow.is_connected(_on_debug_action_flow):
+			signal_bus.debug_action_flow.connect(_on_debug_action_flow)
+		if not signal_bus.debug_session_stopped.is_connected(_on_debug_session_stopped):
+			signal_bus.debug_session_stopped.connect(_on_debug_session_stopped)
+
+	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
+	if general_popup and not general_popup.closed.is_connected(_on_popup_closed):
+		general_popup.closed.connect(_on_popup_closed)
 
 	_update_graph()
+
+
+# an inner picker closing is not the edit ending, so it waits for the whole stack
+func _on_popup_closed() -> void:
+	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
+
+	if general_popup and general_popup.has_open_popups():
+		return
+
+	if _rebuild_pending:
+		_rebuild_pending = false
+		_update_graph()
+		return
+
+	var edited: bool = false
+
+	for actions_list: Variant in _action_lists.values():
+		if not is_instance_valid(actions_list) or not (actions_list as HenStateActionsList).is_editing:
+			continue
+
+		(actions_list as HenStateActionsList).is_editing = false
+		(actions_list as HenStateActionsList).refresh()
+		edited = true
+
+	if edited:
+		# an expanded row rewraps its chips, so the card only settles a pass later
+		_on_actions_structure_changed()
+
+
+func _on_debug_action_flow(action_id: StringName, script_id: String) -> void:
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in _action_lists:
+		if not script_id.is_empty() and String(node.data.get('script_id', '')) != script_id:
+			continue
+
+		var actions_list: HenStateActionsList = _action_lists[node]
+
+		if is_instance_valid(actions_list) and actions_list.flash_action(action_id):
+			return
+
+
+func _on_debug_session_stopped() -> void:
+	for actions_list: Variant in _action_lists.values():
+		if is_instance_valid(actions_list):
+			(actions_list as HenStateActionsList).clear_flash()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -94,7 +151,6 @@ func _gui_input(event: InputEvent) -> void:
 	# drags never count as a click
 	var is_click: bool = mb.position.distance_to(_click_press_pos) <= CLICK_TOLERANCE
 
-	# a state under the cursor gets selected; only the empty background toggles the panels
 	if _active_node != null or _active_edge != null:
 		_click_last_time = 0
 		if is_click and _is_state_node(_active_node):
@@ -111,14 +167,26 @@ func _gui_input(event: InputEvent) -> void:
 		_click_last_time = 0
 		var global: HenGlobal = Engine.get_singleton(&'Global') as HenGlobal
 		if global and global.HENGO_ROOT:
-			global.HENGO_ROOT.toggle_side_panels()
+			global.HENGO_ROOT.toggle_fullscreen()
 	else:
 		_click_last_time = now
 		_click_last_pos = mb.position
 
 
 func _on_graph_changed_no_args(_a = null, _b = null) -> void:
+	_request_rebuild()
+
+
+# a rebuild frees every card, so it waits instead of pulling a popup anchor away
+func _request_rebuild() -> void:
+	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
+
+	if general_popup and general_popup.has_open_popups():
+		_rebuild_pending = true
+		return
+
 	_update_graph()
+
 
 func _update_graph() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -142,6 +210,15 @@ func set_only_current_script(_value: bool) -> void:
 	_update_graph()
 
 
+func is_only_current_script() -> bool:
+	return _only_current_script
+
+
+# full rebuild for the toolbar button: the incremental paths keep the parsed graph
+func refresh_graph() -> void:
+	_update_graph()
+
+
 # wraps every open script as a labeled compound machine under a single root
 func _build_collection_dict(open_scripts: Array) -> Dictionary:
 	var root: Dictionary = { id = 'collection', states = {} }
@@ -160,7 +237,7 @@ func _build_collection_dict(open_scripts: Array) -> Dictionary:
 
 func _on_cnode_changed(_id: String, _vc: HenVirtualCNode) -> void:
 	if _vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION or _vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
-		_update_graph()
+		_request_rebuild()
 
 func _build_dynamic_dict(save_data: HenSaveData) -> Dictionary:
 	var root_dict: Dictionary = {
@@ -486,7 +563,6 @@ func _is_state_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> bool:
 	return node != null and node.data.has('state_id')
 
 
-# selects the clicked state: switches script when needed, routes to it and shows its actions
 func _open_state(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if not global:
@@ -512,18 +588,6 @@ func _open_state(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var route: HenRouteData = state.get_route(save_data)
 	if route:
 		(Engine.get_singleton(&'Router') as HenRouter).change_route(route)
-
-	_focus_actions_tab()
-
-
-func _focus_actions_tab() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if not global or not global.HENGO_ROOT:
-		return
-
-	var tabs: TabContainer = global.HENGO_ROOT.get_node_or_null('%SidebarTabContainer')
-	if tabs:
-		tabs.current_tab = HenActionsPanel.TAB_INDEX
 
 
 # holds each title at natural size until it would shrink past MIN_TITLE_SCREEN_PX,
@@ -610,6 +674,7 @@ func build_graph(dict: Dictionary) -> void:
 		child.queue_free()
 	_panels.clear()
 	_title_boxes.clear()
+	_action_lists.clear()
 
 	graph_root = parser.parse_machine(dict)
 
@@ -628,24 +693,70 @@ func build_graph(dict: Dictionary) -> void:
 		if node != graph_root:
 			_spawn_panel(node)
 
-	var font: Font = ThemeDB.fallback_font
-	var font_size: int = 14
-	measurer.calculate_rects(graph_root, font, font_size, true, _panels)
+	_setup_actions_lists()
+	_measure_and_layout()
+	# the containers have not sorted yet, so the first measure reads stale sizes
+	_schedule_measure_and_layout()
 
+
+func _measure_and_layout() -> void:
+	if graph_root == null:
+		return
+
+	measurer.calculate_rects(graph_root, ThemeDB.fallback_font, 14, true, _panels)
 	layout.execute_layout(graph_root)
 
-	for node in all_nodes:
-		if node != graph_root:
-			var panel: Control = _panels[node]
-			panel.position = node.get_absolute()
-			
-			if not node.children.is_empty():
-				panel.size = Vector2(node.layout.width, node.layout.height)
-			else:
-				panel.size = Vector2(node.layout.width, node.layout.height)
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
+		var panel: Control = _panels[node]
+		panel.position = node.get_absolute()
+		panel.size = Vector2(node.layout.width, node.layout.height)
 
 	edges_overlay.update_edges(graph_root)
 	_update_node_styles()
+
+
+# a container only recomputes its min size during a layout pass, so repeat until settled
+func _schedule_measure_and_layout() -> void:
+	if _layout_settling:
+		return
+
+	_layout_settling = true
+
+	var last: float = _layout_signature()
+
+	for _i: int in LAYOUT_SETTLE_PASSES:
+		if not is_inside_tree():
+			break
+
+		await get_tree().process_frame
+
+		if graph_root == null or not is_inside_tree():
+			break
+
+		_measure_and_layout()
+
+		var settled: float = _layout_signature()
+
+		if is_equal_approx(settled, last):
+			break
+
+		last = settled
+
+	_layout_settling = false
+
+
+func _layout_signature() -> float:
+	var sum: float = 0.0
+
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
+		sum += node.layout.width + node.layout.height * 7.0
+
+	return sum
+
+
+func _on_actions_structure_changed() -> void:
+	_measure_and_layout()
+	_schedule_measure_and_layout()
 
 
 # depth-first to get breadth-first draw order (parents before children)
@@ -745,6 +856,9 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 			desc.add_theme_font_size_override('font_size', 14)
 			desc.add_theme_color_override('font_color', LABEL_COLOR.darkened(0.3))
 			vbox.add_child(desc)
+
+		if _is_state_node(node):
+			vbox.add_child(_create_actions_list(node))
 	else:
 		var vbox: VBoxContainer = VBoxContainer.new()
 		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -770,6 +884,38 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 			desc.add_theme_color_override('font_color', LABEL_COLOR.darkened(0.3))
 			desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			vbox.add_child(desc)
+
+		if _is_state_node(node):
+			vbox.add_child(_create_actions_list(node))
+
+
+func _create_actions_list(node: HenStateViewerGraphTypes.DirectedGraphNode) -> HenStateActionsList:
+	var actions_list: HenStateActionsList = ACTIONS_LIST_SCENE.instantiate()
+	actions_list.structure_changed.connect(_on_actions_structure_changed)
+	actions_list.focus_requested.connect(_open_state.bind(node))
+	_action_lists[node] = actions_list
+
+	return actions_list
+
+
+func _setup_actions_lists() -> void:
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in _action_lists:
+		var actions_list: HenStateActionsList = _action_lists[node]
+		actions_list.setup(_save_data_for(node), StringName(str(node.data.get('state_id', ''))))
+
+
+func _save_data_for(node: HenStateViewerGraphTypes.DirectedGraphNode) -> HenSaveData:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var script_id: String = String(node.data.get('script_id', ''))
+
+	if not global:
+		return null
+
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if save_data and save_data.identity and String(save_data.identity.id) == script_id:
+			return save_data
+
+	return null
 
 
 # creates a reusable graph label

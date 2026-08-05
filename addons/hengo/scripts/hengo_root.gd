@@ -14,15 +14,8 @@ var _sidebar_collapsed: bool = false
 # script-tabs panel collapse
 var _script_tabs_collapsed: bool = false
 
-# collapse state to restore when both side panels are toggled at once
-var _panels_prev_sidebar: bool = false
-var _panels_prev_script_tabs: bool = false
-
 const SCRIPT_TABS_COLLAPSED_WIDTH: int = 44
 const SCRIPT_TABS_EXPANDED_WIDTH: int = 220
-
-# canvas layout
-var _canvas_split_mode: bool = false
 
 # re-scales chrome fonts live when the font_scale setting changes; theme
 # default_font_size covers inherited text, the walk covers explicit overrides,
@@ -92,7 +85,6 @@ func _ready() -> void:
 	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
 	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
 	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
-	(get_node('%ToggleLayoutBt') as Button).pressed.connect(_on_toggle_canvas_layout)
 	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
 	_setup_states_scope_bt()
 
@@ -105,19 +97,6 @@ func _ready() -> void:
 	_apply_script_tabs_collapse()
 
 	_apply_semantic_colors()
-
-	# keep canvas tab bar (in CanvasTopBar) and canvas tab content in sync
-	var canvas_tabs: TabContainer = get_node('%CanvasTabs')
-	var canvas_tab_bar: TabBar = get_node('%CanvasTabBar')
-	canvas_tab_bar.tab_changed.connect(func(idx: int):
-		canvas_tabs.current_tab = idx
-	)
-	canvas_tabs.tab_changed.connect(func(idx: int):
-		canvas_tab_bar.current_tab = idx
-		# the flow canvas only tests node visibility while it is on screen
-		if idx == 0:
-			_recheck_flow_visibility.call_deferred()
-	)
 
 	# sidebar icon strip buttons (collapsed mode)
 	(get_node('%DashboardIconBt') as Button).pressed.connect(func():
@@ -159,7 +138,6 @@ func refresh_script_state() -> void:
 	if tabs:
 		tabs.set_tab_disabled(1, not has_script)
 		tabs.set_tab_disabled(2, not has_script)
-		tabs.set_tab_disabled(4, not has_script)
 		if not has_script and tabs.current_tab != 0:
 			tabs.current_tab = 0
 
@@ -196,13 +174,6 @@ func refresh_script_state() -> void:
 		global.HENGO_DEBUGGER_PLUGIN.on_active_script_changed(String(global.SAVE_DATA.identity.id))
 
 
-# forces the viewport pass after the flow canvas comes back from a hidden tab
-func _recheck_flow_visibility() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if global and global.CAM:
-		global.CAM._check_virtual_cnodes(global.CAM.transform.origin, global.CAM.transform.x.x, true)
-
-
 # the states scope toggle only makes sense while the machine graph is on screen
 func _setup_states_scope_bt() -> void:
 	var scope_bt: Button = get_node_or_null('%StatesScopeBt')
@@ -215,12 +186,34 @@ func _setup_states_scope_bt() -> void:
 		scope_bt.text = 'Current script' if pressed else 'All scripts'
 		scope_bt.tooltip_text = 'States tab: show only the active script' if pressed else 'States tab: show every script of the collection'
 		machine_graph.set_only_current_script(pressed)
+		_update_script_tabs_visibility()
 	)
+
+	var refresh_bt: Button = get_node_or_null('%RefreshGraphBt')
+
+	if refresh_bt:
+		refresh_bt.pressed.connect(machine_graph.refresh_graph)
 
 	machine_graph.visibility_changed.connect(func():
 		scope_bt.visible = machine_graph.is_visible_in_tree()
+		if refresh_bt:
+			refresh_bt.visible = machine_graph.is_visible_in_tree()
+		_update_script_tabs_visibility()
 	)
 	scope_bt.visible = machine_graph.is_visible_in_tree()
+	if refresh_bt:
+		refresh_bt.visible = machine_graph.is_visible_in_tree()
+	_update_script_tabs_visibility()
+
+
+func _update_script_tabs_visibility() -> void:
+	var panel: PanelContainer = get_node_or_null('%ScriptTabsPanel')
+	var machine_graph: HenStateViewerMachineGraph = get_node_or_null('%MachineGraph')
+
+	if not panel or not machine_graph:
+		return
+
+	panel.visible = not (machine_graph.is_visible_in_tree() and not machine_graph.is_only_current_script())
 
 
 func _on_reset_zoom() -> void:
@@ -266,11 +259,11 @@ func _apply_semantic_colors() -> void:
 
 	HenUtils.tint_button(get_node('%Config') as Button, c.settings, false)
 	HenUtils.tint_button(get_node('%CloseBt') as Button, c.destructive, false)
-	HenUtils.tint_button(get_node('%ToggleLayoutBt') as Button, c.layout)
 	HenUtils.tint_button(get_node('%CollapseToggleBt') as Button, c.settings, false)
 	HenUtils.tint_button(get_node('%DashboardIconBt') as Button, c.dashboard, false)
 	HenUtils.tint_button(get_node('%PropsIconBt') as Button, c.settings, false)
 	HenUtils.tint_button(get_node('%CodeIconBt') as Button, c.code, false)
+	HenUtils.tint_button(get_node('%RefreshGraphBt') as Button, c.state, false)
 
 
 func _on_config_pressed() -> void:
@@ -535,22 +528,11 @@ func _on_collapse_sidebar() -> void:
 			collapse_btn.tooltip_text = 'Collapse sidebar'
 
 
-# collapses both side panels at once, restoring the previous state when already collapsed
-func toggle_side_panels() -> void:
-	if _sidebar_collapsed and _script_tabs_collapsed:
-		if not _panels_prev_sidebar:
-			_on_collapse_sidebar()
-		if not _panels_prev_script_tabs:
-			_on_toggle_script_tabs()
-		return
+func toggle_fullscreen() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	_panels_prev_sidebar = _sidebar_collapsed
-	_panels_prev_script_tabs = _script_tabs_collapsed
-
-	if not _sidebar_collapsed:
-		_on_collapse_sidebar()
-	if not _script_tabs_collapsed:
-		_on_toggle_script_tabs()
+	if global and global.HENGO_EDITOR_PLUGIN:
+		global.HENGO_EDITOR_PLUGIN.toggle_fullscreen()
 
 
 func _on_toggle_script_tabs() -> void:
@@ -586,37 +568,3 @@ func _on_new_script_tab() -> void:
 		side = SIDE_RIGHT,
 		min_size = Vector2(360, 0)
 	})
-
-
-func _on_toggle_canvas_layout() -> void:
-	_canvas_split_mode = not _canvas_split_mode
-
-	var canvas_tabs: TabContainer = get_node_or_null('%CanvasTabs')
-	var canvas_split: HSplitContainer = get_node_or_null('%CanvasSplit')
-	var toggle_btn: Button = get_node_or_null('%ToggleLayoutBt')
-	var canvas_tab_bar: TabBar = get_node_or_null('%CanvasTabBar')
-
-	if not canvas_tabs or not canvas_split:
-		return
-
-	# hide the custom tab selector when both panels are visible side by side
-	if canvas_tab_bar:
-		canvas_tab_bar.visible = not _canvas_split_mode
-
-	if _canvas_split_mode:
-		var children := canvas_tabs.get_children().duplicate()
-		for child in children:
-			child.reparent(canvas_split, false)
-			child.visible = true
-		canvas_tabs.visible = false
-		canvas_split.visible = true
-		if toggle_btn:
-			toggle_btn.text = 'Tabs'
-	else:
-		var children := canvas_split.get_children().duplicate()
-		for child in children:
-			child.reparent(canvas_tabs, false)
-		canvas_split.visible = false
-		canvas_tabs.visible = true
-		if toggle_btn:
-			toggle_btn.text = 'Split'

@@ -16,6 +16,7 @@ var _name_label: Label
 
 var _normal_sb: StyleBoxFlat
 var _active_sb: StyleBoxFlat
+var _tooltip: String = ''
 
 
 func _ready() -> void:
@@ -26,6 +27,8 @@ func _ready() -> void:
 	_build_children()
 	_apply_visual_state()
 	gui_input.connect(_on_gui_input)
+	mouse_entered.connect(_on_hover.bind(true))
+	mouse_exited.connect(_on_hover.bind(false))
 
 
 func setup(_save_data: HenSaveData) -> void:
@@ -33,6 +36,10 @@ func setup(_save_data: HenSaveData) -> void:
 
 	var _name: String = _save_data.identity.name
 	var _type: StringName = _save_data.identity.type
+
+	_tooltip = '[b]' + _name + '[/b]'
+	if not String(_type).is_empty():
+		_tooltip += '\n[color=#5f6a7a]' + String(_type) + '[/color]'
 
 	if _name_label:
 		_name_label.text = _name
@@ -43,6 +50,17 @@ func setup(_save_data: HenSaveData) -> void:
 			_icon.visible = true
 		else:
 			_icon.visible = false
+
+
+func _on_hover(hovered: bool) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.TOOLTIP:
+		return
+
+	if hovered and not _tooltip.is_empty():
+		global.TOOLTIP.go_to(get_global_mouse_position(), _tooltip)
+	else:
+		global.TOOLTIP.close()
 
 
 func _on_gui_input(event: InputEvent) -> void:

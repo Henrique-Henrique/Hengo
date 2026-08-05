@@ -194,7 +194,7 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 	if not output_err.is_empty():
 		return output_err
 
-	var input_err: String = _apply_inputs(_save_data, action, macro, _spec.get('inputs', {}))
+	var input_err: String = _apply_inputs(_save_data, _state, action, macro, _spec.get('inputs', {}), _all_scripts)
 
 	if not input_err.is_empty():
 		return input_err
@@ -276,10 +276,8 @@ static func _apply_phase(_action: HenSaveAction, _macro: HenSaveMacro, _spec: Di
 	return ''
 
 
-# a value is a literal, or a {bind|path|native|prop|expr} wrapper; the resulting
-# slot mirrors the codegen precedence expression > binding > literal.
 # sources are applied first so a literal on a type_from input knows its real type
-static func _apply_inputs(_save_data: HenSaveData, _action: HenSaveAction, _macro: HenSaveMacro, _inputs: Dictionary) -> String:
+static func _apply_inputs(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _macro: HenSaveMacro, _inputs: Dictionary, _all_scripts: Dictionary) -> String:
 	var literals: Dictionary = {}
 
 	for raw_key: Variant in _inputs:
@@ -295,7 +293,7 @@ static func _apply_inputs(_save_data: HenSaveData, _action: HenSaveAction, _macr
 			literals[key] = {value = value, declared = declared}
 			continue
 
-		var err: String = _apply_input_source(_save_data, _action, key, value as Dictionary)
+		var err: String = _apply_input_source(_save_data, _state, _action, key, value as Dictionary, declared, _all_scripts)
 
 		if not err.is_empty():
 			return err
@@ -309,7 +307,10 @@ static func _apply_inputs(_save_data: HenSaveData, _action: HenSaveAction, _macr
 	return ''
 
 
-static func _apply_input_source(_save_data: HenSaveData, _action: HenSaveAction, _key: String, _source: Dictionary) -> String:
+static func _apply_input_source(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _key: String, _source: Dictionary, _declared: HenSaveParam, _all_scripts: Dictionary) -> String:
+	if _source.has('action'):
+		return _apply_inline_action(_save_data, _state, _action, _key, _source, _declared, _all_scripts)
+
 	if _source.has('expr'):
 		var expr: Variant = _build_expression(_save_data, _source)
 
@@ -327,6 +328,56 @@ static func _apply_input_source(_save_data: HenSaveData, _action: HenSaveAction,
 	_action.input_bindings[_key] = bind.code
 
 	return ''
+
+
+# source shape: { action: {id, inputs}, output: 'x' }, output defaults to the sole one
+static func _apply_inline_action(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _key: String, _source: Dictionary, _declared: HenSaveParam, _all_scripts: Dictionary) -> String:
+	if _declared.lvalue or _declared.bind_only:
+		return 'input "' + _key + '": an inline action cannot feed a slot that needs a variable'
+
+	if not _source.action is Dictionary:
+		return 'input "' + _key + '": "action" must be an action spec {id, inputs}'
+
+	var built: Variant = _make_action(_save_data, _state, _source.action as Dictionary, _all_scripts, true)
+
+	if built is String:
+		return 'input "' + _key + '" inline action: ' + str(built)
+
+	var child: HenSaveAction = built as HenSaveAction
+	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(find_macro(child.macro_id))
+
+	if not instance or not HenGeneratorAction.is_inlinable(instance):
+		return 'input "' + _key + '": action "' + str(child.macro_id) + '" is not an inlinable value producer'
+
+	var output_id: String = str(_source.get('output', ''))
+
+	if output_id.is_empty():
+		var outputs: Array = instance.get_outputs()
+		output_id = str(outputs[0].get('id', '')) if not outputs.is_empty() else ''
+
+	if not _instance_has_output(instance, output_id):
+		return 'input "' + _key + '": "' + output_id + '" is not an output of "' + str(child.macro_id) + '" (valid: ' + _instance_output_ids(instance) + ')'
+
+	_action.input_actions[_key] = {action = child, output = StringName(output_id)}
+
+	return ''
+
+
+static func _instance_has_output(_instance: HenScriptMacroBase, _id: String) -> bool:
+	for output: Dictionary in _instance.get_outputs():
+		if str(output.get('id', '')) == _id:
+			return true
+
+	return false
+
+
+static func _instance_output_ids(_instance: HenScriptMacroBase) -> String:
+	var ids: PackedStringArray = []
+
+	for output: Dictionary in _instance.get_outputs():
+		ids.append(str(output.get('id', '')))
+
+	return ', '.join(ids) if not ids.is_empty() else '(none)'
 
 
 # {code} of a source wrapper, or {error} when it can't be resolved

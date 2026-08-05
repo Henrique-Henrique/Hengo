@@ -1,238 +1,5 @@
 @tool
-class_name HenActionsPanel extends PanelContainer
-
-const ACTION_ROW_SCENE = preload('res://addons/hengo/scenes/action_row.tscn')
-const ACTIONS_SEARCH_SCENE = preload('res://addons/hengo/scenes/actions_search.tscn')
-const PHASE_HEADER_SCENE = preload('res://addons/hengo/scenes/action_phase_header.tscn')
-const ICON_COLLAPSE_ALL = preload('res://addons/hengo/assets/new_icons/list-collapse.svg')
-const ICON_EXPAND_ALL = preload('res://addons/hengo/assets/new_icons/chevrons-up-down.svg')
-const TAB_INDEX: int = 4
-
-var state_chip: PanelContainer
-var state_name_label: Label
-var add_bt: Button
-var collapse_all_bt: Button
-var hint_label: Label
-var list: VBoxContainer
-
-# action id -> folded, ui-only state that has to survive the list rebuilds
-var _collapsed: Dictionary = {}
-# action id -> the loop action holding it in body_actions, null when top level.
-# rebuilt each update() so delete/replace/add know which list to touch
-var _parent_of: Dictionary = {}
-# action id (str) -> its row, so the debug run highlight reaches one row without
-# a rebuild; rebuilt every update(), so an id from another state just misses
-var _rows_by_id: Dictionary = {}
-
-
-func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self ):
-		return
-
-	state_chip = get_node('%StateChip')
-	state_name_label = get_node('%StateName')
-	add_bt = get_node('%AddBt')
-	collapse_all_bt = get_node('%CollapseAllBt')
-	hint_label = get_node('%Hint')
-	list = get_node('%List')
-
-	add_bt.pressed.connect(_on_add_pressed)
-	collapse_all_bt.pressed.connect(_on_collapse_all_pressed)
-
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	if signal_bus:
-		signal_bus.route_changed.connect(_on_route_changed)
-		if not signal_bus.request_structural_update.is_connected(update):
-			signal_bus.request_structural_update.connect(update)
-		signal_bus.debug_action_flow.connect(_on_debug_action_flow)
-		signal_bus.debug_session_stopped.connect(_on_debug_session_stopped)
-
-	# value edits commit straight to the resource, so the preview refreshes on popup close
-	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
-	if general_popup and not general_popup.closed.is_connected(update):
-		general_popup.closed.connect(update)
-
-	update()
-
-
-func _on_route_changed(_route: HenRouteData) -> void:
-	update()
-
-
-# lights the row of an action that just ran on the focused instance; an id the
-# panel does not hold (a different state is open) is a no-op, the manual flow
-func _on_debug_action_flow(_action_id: StringName) -> void:
-	var row: HenActionRow = _rows_by_id.get(str(_action_id))
-	if is_instance_valid(row):
-		row.set_running(true)
-
-
-# clears any lingering green when the debug session ends
-func _on_debug_session_stopped() -> void:
-	for row: Variant in _rows_by_id.values():
-		if is_instance_valid(row):
-			(row as HenActionRow).set_running(false)
-
-
-func update() -> void:
-	if not list:
-		return
-
-	_clear_list()
-
-	var state_id: StringName = _get_current_state_id()
-
-	if state_id.is_empty():
-		state_name_label.text = 'No state'
-		state_chip.visible = false
-		hint_label.visible = true
-		add_bt.disabled = true
-		collapse_all_bt.visible = false
-		return
-
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	# the route name is the id-based one it was created with; the resource holds the renamed one
-	var state: HenSaveState = HenGeneratorAction.find_state(global.SAVE_DATA, state_id)
-	state_name_label.text = state.name if state else (Engine.get_singleton(&'Router') as HenRouter).current_route.name
-	state_chip.visible = true
-	hint_label.visible = false
-	add_bt.disabled = false
-
-	# grouped by phase, in the order codegen emits them: visual order is run order
-	var groups: Dictionary = group_by_phase(global.SAVE_DATA.get_state_actions(state_id))
-
-	_parent_of.clear()
-
-	for phase: StringName in HenSaveAction.PHASE_ORDER:
-		var actions: Array = groups.get(str(phase), [])
-		_add_phase_header(phase, actions.size())
-
-		for action: HenSaveAction in actions:
-			_add_row(action, 0, null)
-
-	_refresh_collapse_all()
-
-
-func _add_phase_header(_phase: StringName, _count: int) -> void:
-	var header: HenActionPhaseHeader = PHASE_HEADER_SCENE.instantiate()
-	header.add_pressed.connect(_on_add_pressed)
-	header.action_dropped.connect(_on_header_dropped)
-	list.add_child(header)
-	header.setup(_phase, _count)
-
-
-func _add_row(_action: HenSaveAction, _depth: int, _parent: HenSaveAction) -> void:
-	_parent_of[str(_action.id)] = _parent
-
-	var row: HenActionRow = ACTION_ROW_SCENE.instantiate()
-	row.row_pressed.connect(_on_action_row_pressed)
-	row.collapse_toggled.connect(_on_row_collapse_toggled)
-	row.action_dropped.connect(_on_row_dropped)
-	list.add_child(row)
-	_rows_by_id[str(_action.id)] = row
-
-	var macro: HenSaveMacro = find_macro(_action.macro_id)
-
-	# values render inline so reading an action doesn't need opening it. a nested
-	# row is indented and, for now, not draggable
-	row.setup({
-		title = display_name(_action),
-		icon = macro.icon if macro else '',
-		color = macro.color if macro else '',
-		doc = HenActionDoc.bbcode(macro),
-		values = value_preview(_action),
-		meta = _action,
-		indent = _depth,
-		draggable = _depth == 0
-	}, value_parts(_action), _is_collapsed(_action))
-
-	# a loop shows its nested actions indented right below, plus a nested add
-	if macro and macro.has_body:
-		for child: HenSaveAction in _action.body_actions:
-			_add_row(child, _depth + 1, _action)
-
-		_add_nested_add(_action, _depth + 1)
-
-
-# a small "+" row that inserts an action into a loop's body
-func _add_nested_add(_loop: HenSaveAction, _depth: int) -> void:
-	# a MarginContainer indents it under the nested rows (Button has no margin constant)
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override('margin_left', 4 + _depth * 18)
-
-	var bt := Button.new()
-	bt.text = '+ Add to loop'
-	bt.flat = true
-	bt.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	bt.add_theme_color_override('font_color', Color(1, 1, 1, 0.45))
-	bt.pressed.connect(func() -> void: _open_search(_get_current_state_id(), &'', null, _loop))
-
-	margin.add_child(bt)
-	list.add_child(margin)
-
-
-# drop on a row: land right above or below it, inside that row's phase
-func _on_row_dropped(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool) -> void:
-	if not _dragged or not _target:
-		return
-
-	var index: int = drop_index(_current_actions(), _target, _dragged, _before)
-
-	if index >= 0:
-		_move_action(_dragged, _target.phase, index)
-
-
-# slot the target row sits on, counted without the action being dragged; -1 when
-# the target is gone from the list
-static func drop_index(_actions: Array, _target: HenSaveAction, _dragged: HenSaveAction, _before: bool) -> int:
-	var bucket: Array = []
-
-	for action: HenSaveAction in _actions:
-		if str(action.phase) == str(_target.phase) and action != _dragged:
-			bucket.append(action)
-
-	var index: int = bucket.find(_target)
-
-	return -1 if index < 0 else (index if _before else index + 1)
-
-
-# drop on a phase header: land at the top of that phase
-func _on_header_dropped(_dragged: HenSaveAction, _phase: StringName) -> void:
-	if _dragged:
-		_move_action(_dragged, _phase, 0)
-
-
-# rewrites the whole list so array order stays enter -> update -> exit
-func _move_action(_action: HenSaveAction, _phase: StringName, _index: int) -> void:
-	var state_id: StringName = _get_current_state_id()
-
-	if state_id.is_empty():
-		return
-
-	var old_order: Array = _current_actions().duplicate()
-	var old_phase: StringName = _action.phase
-	var new_order: Array = reorder(old_order, _action, _phase, _index)
-
-	if new_order == old_order and str(old_phase) == str(_phase):
-		return
-
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-
-	var apply: Callable = func(_order: Array, _target_phase: StringName) -> void:
-		_action.phase = _target_phase
-		global.SAVE_DATA.set_state_actions(state_id, _order)
-		signal_bus.request_structural_update.emit()
-
-	if global.history:
-		global.history.create_action('Move Action ' + display_name(_action))
-		global.history.add_do_method(apply.bind(new_order, _phase))
-		global.history.add_undo_method(apply.bind(old_order, old_phase))
-		global.history.commit_action()
-	else:
-		apply.call(new_order, _phase)
+class_name HenActionsPanel extends RefCounted
 
 
 # list with the action pulled out and reinserted at index inside the target phase
@@ -249,66 +16,17 @@ static func reorder(_actions: Array, _action: HenSaveAction, _phase: StringName,
 	return flatten_phases(groups)
 
 
-func _on_row_collapse_toggled(_meta: Variant, _collapsed_state: bool) -> void:
-	if _meta is HenSaveAction:
-		_collapsed[str((_meta as HenSaveAction).id)] = _collapsed_state
-		_refresh_collapse_all()
-
-
-# folds everything, or unfolds everything once nothing is left expanded
-func _on_collapse_all_pressed() -> void:
-	var actions: Array = _current_actions()
-	if actions.is_empty():
-		return
-
-	var collapse: bool = _expanded_count(actions) > 0
-
-	# the all-or-nothing state persists; individual folds stay session-only
-	var settings: HenSettings = _settings()
-	if settings:
-		settings.actions_expanded = not collapse
-
-	_collapsed.clear()
-	update()
-
-
-func _refresh_collapse_all() -> void:
-	var actions: Array = _current_actions()
-	var all_folded: bool = _expanded_count(actions) == 0
-
-	collapse_all_bt.visible = not actions.is_empty()
-	collapse_all_bt.icon = ICON_EXPAND_ALL if all_folded else ICON_COLLAPSE_ALL
-	collapse_all_bt.tooltip_text = 'Expand all' if all_folded else 'Collapse all'
-
-
-func _expanded_count(_actions: Array) -> int:
-	var count: int = 0
+# counted without the dragged action, -1 when the target left the list
+static func drop_index(_actions: Array, _target: HenSaveAction, _dragged: HenSaveAction, _before: bool) -> int:
+	var bucket: Array = []
 
 	for action: HenSaveAction in _actions:
-		if not _is_collapsed(action):
-			count += 1
+		if str(action.phase) == str(_target.phase) and action != _dragged:
+			bucket.append(action)
 
-	return count
+	var index: int = bucket.find(_target)
 
-
-# rows the session hasn't touched follow the persisted all-expanded flag
-func _is_collapsed(_action: HenSaveAction) -> bool:
-	var settings: HenSettings = _settings()
-	return _collapsed.get(str(_action.id), not (settings.actions_expanded if settings else true))
-
-
-func _settings() -> HenSettings:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	return global.SETTINGS if global else null
-
-
-func _current_actions() -> Array:
-	var state_id: StringName = _get_current_state_id()
-
-	if state_id.is_empty():
-		return []
-
-	return (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA.get_state_actions(state_id)
+	return -1 if index < 0 else (index if _before else index + 1)
 
 
 # phase key -> actions, preserving the list order inside each phase
@@ -466,8 +184,11 @@ static func value_preview(_action: HenSaveAction) -> String:
 	return ' · '.join(texts)
 
 
-# same precedence codegen uses: expression > binding > literal
+# same precedence codegen uses: inline action > expression > binding > literal
 static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _raw: bool = false) -> Dictionary:
+	if _action.input_actions.has(_key):
+		return {kind = &'action', value = inline_label(_action.input_actions[_key])}
+
 	if _action.input_expressions.has(_key):
 		return {kind = &'expression', value = (_action.input_expressions[_key] as HenSaveActionExpression).code}
 
@@ -481,6 +202,45 @@ static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _r
 		return {kind = &'literal', value = str(_value) if _value != null else '—'}
 
 	return {kind = &'literal', value = format_value(_value)}
+
+
+# e.g. Raycast 120.0, 'enemy|world', +2 actions
+static func inline_label(_ref: Variant) -> String:
+	var child: HenSaveAction = inline_child(_ref)
+
+	if not child:
+		return '?'
+
+	var macro: HenSaveMacro = find_macro(child.macro_id)
+	var literals: PackedStringArray = []
+	var nested: int = 0
+
+	for param: HenSaveParam in child.inputs:
+		var key: String = str(param.id)
+
+		if child.input_actions.has(key):
+			nested += 1
+		else:
+			var part: Dictionary = _slot_part(child, key, _seeded_value(macro, key, param.default_value), _is_raw(macro, key, param))
+			literals.append(('(' + str(part.value) + ')') if part.kind == &'expression' else str(part.value))
+
+	var summary: String = ', '.join(literals)
+
+	if nested > 0:
+		summary += (', ' if not summary.is_empty() else '') + '+%d action%s' % [nested, 's' if nested > 1 else '']
+
+	return display_name(child) + (' ' + summary if not summary.is_empty() else '')
+
+
+# tolerates the {action, output} dict and a bare action (older data)
+static func inline_child(_ref: Variant) -> HenSaveAction:
+	if _ref is HenSaveAction:
+		return _ref as HenSaveAction
+
+	if _ref is Dictionary:
+		return (_ref as Dictionary).get('action') as HenSaveAction
+
+	return null
 
 
 static func _is_raw(_macro: HenSaveMacro, _key: String, _param: HenSaveParam) -> bool:
@@ -553,112 +313,3 @@ static func _seeded_value(_macro: HenSaveMacro, _key: String, _value: Variant) -
 			return input.default_value
 
 	return null
-
-
-# left-click opens the anchored param editor (reuses HenInspector, value-only)
-func _on_action_row_pressed(_meta: Variant, _button: int) -> void:
-	if _button != MOUSE_BUTTON_LEFT or not _meta is HenSaveAction:
-		return
-
-	var state_id: StringName = _get_current_state_id()
-	if state_id.is_empty():
-		return
-
-	var action: HenSaveAction = _meta as HenSaveAction
-	# a nested action runs at the loop's phase, so it hides the phase selector
-	var nested: bool = _parent_of.get(str(action.id)) != null
-	HenInspector.edit_resource(action, display_name(action), _action_menu(action, state_id), _popup_opts(), nested)
-
-
-func _popup_opts() -> Dictionary:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	return {
-		layout = HenGeneralPopup.Layout.ANCHORED,
-		anchor_to = global.SIDE_PANEL,
-		side = SIDE_RIGHT,
-		fill_axis = true,
-		blur = true,
-		min_size = Vector2(320, 0)
-	}
-
-
-func _action_menu(_action: HenSaveAction, _state_id: StringName) -> Array[Dictionary]:
-	return [
-		{
-			name = 'Replace',
-			callable = _replace_action.bind(_action, _state_id),
-			icon = 'res://addons/hengo/assets/new_icons/replace.svg'
-		},
-		{
-			name = 'Delete',
-			callable = _delete_action.bind(_action, _state_id),
-			color = Color('#c16460'),
-			icon = 'res://addons/hengo/assets/new_icons/trash-2.svg'
-		}
-	]
-
-
-# swaps the macro keeping the slot: the search comes back in replace mode
-func _replace_action(_action: HenSaveAction, _state_id: StringName) -> void:
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
-	_open_search(_state_id, _action.phase, _action, _parent_of.get(str(_action.id)))
-
-
-func _delete_action(_action: HenSaveAction, _state_id: StringName) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var parent: HenSaveAction = _parent_of.get(str(_action.id))
-
-	if parent:
-		# a nested action is removed from its loop's body, not the state list
-		parent.body_actions.erase(_action)
-	elif global.SAVE_DATA:
-		global.SAVE_DATA.remove_state_action(_state_id, _action)
-
-	_collapsed.erase(str(_action.id))
-
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
-	update()
-
-
-func _clear_list() -> void:
-	_rows_by_id.clear()
-	for child: Node in list.get_children():
-		list.remove_child(child)
-		child.queue_free()
-
-
-# active state id, or empty when not inside a state route
-func _get_current_state_id() -> StringName:
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	if not router or not router.current_route or not global or not global.SAVE_DATA:
-		return &''
-
-	if router.current_route.type != HenRouter.ROUTE_TYPE.STATE:
-		return &''
-
-	return router.current_route.id
-
-
-# the header buttons pass their own phase; the panel button lets the macro decide
-func _on_add_pressed(_phase: StringName = &'') -> void:
-	_open_search(_get_current_state_id(), _phase, null)
-
-
-func _open_search(_state_id: StringName, _phase: StringName, _replacing: HenSaveAction, _parent: HenSaveAction = null) -> void:
-	if _state_id.is_empty():
-		return
-
-	var search: HenActionsSearch = ACTIONS_SEARCH_SCENE.instantiate()
-	search.setup(_state_id, _phase, _replacing, _parent)
-
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var opts: Dictionary = {
-		layout = HenGeneralPopup.Layout.ANCHORED,
-		anchor_to = global.SIDE_PANEL,
-		side = SIDE_RIGHT,
-		min_size = Vector2(320, 360)
-	}
-
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(search, opts)

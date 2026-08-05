@@ -13,6 +13,8 @@ const PHASE_ORDER: Array[StringName] = [&'enter', &'update', &'physics', &'exit'
 @export var input_bindings: Dictionary
 # input id -> HenSaveActionExpression (free-text expression); absent = not an expression
 @export var input_expressions: Dictionary
+# input id -> { action: HenSaveAction, output: StringName }
+@export var input_actions: Dictionary
 # lifecycle phase this action runs in: enter (once) | update (per-frame) |
 # physics (fixed tick) | exit
 @export var phase: StringName = &'update'

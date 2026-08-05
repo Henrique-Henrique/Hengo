@@ -33,6 +33,10 @@ const END_PAD: float = 24.0
 const NORMAL_WIDTH: float = 2.0
 const GLOW_WIDTH: float = 3.5
 const FLASH_WIDTH: float = 4.5
+# how much of the line's thickening the arrow head follows
+const ARROW_GROWTH: float = 0.25
+# lines need the full 1/zoom, an arrow at that rate becomes a huge triangle at min_zoom
+const ARROW_ZOOM_DAMP: float = 0.5
 const EDGE_CORNER_RADIUS: float = 14.0
 const FLASH_TRAVEL_MS: float = 450.0
 const FLASH_TOTAL_MS: float = 800.0
@@ -514,9 +518,8 @@ func _draw() -> void:
 		var color: Color = (kc.lightened(0.35) if is_glowing else kc).lerp(FLASH_COLOR, flash_strength)
 		color.a = view.line.default_color.a
 
-		# glow damp from the state width (not the zoomed line width), then scaled
-		# on screen so the arrow head stays constant when zoomed out
-		var s: float = (0.5 + 0.5 * (view.state_width / NORMAL_WIDTH)) * _screen_scale
+		var growth: float = 1.0 - ARROW_GROWTH + ARROW_GROWTH * (view.state_width / NORMAL_WIDTH)
+		var s: float = growth * pow(_screen_scale, ARROW_ZOOM_DAMP)
 		var end_pt: Vector2 = view.arrow_end
 		var prev_pt: Vector2 = view.arrow_prev
 		var dir: Vector2 = (end_pt - prev_pt).normalized()

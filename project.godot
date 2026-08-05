@@ -91,7 +91,7 @@ settings/development_mode=true
 settings/debug_compilation=true
 settings/dock_location=0
 settings/actions_expanded=false
-settings/font_scale=0.85
+settings/font_scale=1.0
 
 [input]
 

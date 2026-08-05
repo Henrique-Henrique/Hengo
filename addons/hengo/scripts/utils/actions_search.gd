@@ -17,12 +17,22 @@ var _replacing: HenSaveAction
 # loop action the new action is inserted into; null adds to the state list
 var _parent: HenSaveAction
 
+var _on_pick: Callable = Callable()
+var _producer_type: String = ''
+var _pool_cache: Array[HenSaveMacro] = []
+var _pool_built: bool = false
+
 
 func setup(_id: StringName, _target_phase: StringName = &'', _replaced: HenSaveAction = null, _parent_action: HenSaveAction = null) -> void:
 	_state_id = _id
 	_phase = _target_phase
 	_replacing = _replaced
 	_parent = _parent_action
+
+
+func setup_producer_picker(_type: String, _pick: Callable) -> void:
+	_producer_type = _type
+	_on_pick = _pick
 
 
 func _ready() -> void:
@@ -120,11 +130,50 @@ func _get_pool() -> Array[HenSaveMacro]:
 		if macro.serves_class(script_class):
 			pool.append(macro)
 
-	return pool
+	if _producer_type.is_empty():
+		return pool
+
+	# the filter loads every macro instance, so it only runs once
+	if _pool_built:
+		return _pool_cache
+
+	var producers: Array[HenSaveMacro] = []
+
+	for macro: HenSaveMacro in pool:
+		if _producer_matches(macro):
+			producers.append(macro)
+
+	_pool_cache = producers
+	_pool_built = true
+
+	return producers
+
+
+func _producer_matches(_macro: HenSaveMacro) -> bool:
+	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(_macro)
+
+	if not instance or not HenGeneratorAction.is_inlinable(instance):
+		return false
+
+	for output: Dictionary in instance.get_outputs():
+		if _output_type_ok(str(output.get('type', 'Variant'))):
+			return true
+
+	return false
+
+
+func _output_type_ok(_out_type: String) -> bool:
+	return _producer_type.is_empty() or _producer_type == 'Variant' or _out_type == 'Variant' \
+		or HenUtils.is_type_relation_valid(_producer_type, StringName(_out_type))
 
 
 func _on_result_pressed(_meta: Variant, _mouse_button_index: int) -> void:
 	if _mouse_button_index != MOUSE_BUTTON_LEFT or not _meta is HenSaveMacro:
+		return
+
+	if _on_pick.is_valid():
+		_on_pick.call(_meta as HenSaveMacro)
+		(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 		return
 
 	_add_action(_meta as HenSaveMacro)

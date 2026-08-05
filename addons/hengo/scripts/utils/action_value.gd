@@ -27,6 +27,10 @@ const KINDS = {
 		color = '#c08cff',
 		icon = preload('res://addons/hengo/assets/new_icons/parentheses.svg')
 	},
+	action = {
+		color = '#ff9e64',
+		icon = preload('res://addons/hengo/assets/new_icons/square-function.svg')
+	},
 	branch = {
 		color = '#8f86ff',
 		icon = preload('res://addons/hengo/assets/new_icons/arrow-right-left.svg')

@@ -19,10 +19,6 @@ const CONFIG = {
     3: {
         title = 'Debug',
         icon = preload('res://addons/hengo/assets/new_icons/bug.svg')
-    },
-    4: {
-        title = 'Actions',
-        icon = preload('res://addons/hengo/assets/new_icons/list-todo.svg')
     }
 }
 

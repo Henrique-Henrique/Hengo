@@ -124,7 +124,11 @@ func _measure_compound(node: HenStateViewerGraphTypes.DirectedGraphNode, font: F
 		var label_size: Vector2 = font.get_string_size(short_id, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 		node.layout.width = max(content_w + HenStateViewerLayoutEngine.COMPOUND_PAD_SIDE * 2.0, label_size.x + HenStateViewerLayoutEngine.COMPOUND_PAD_SIDE * 2.0 + 20.0)
 
-	var top_pad: float = max(HenStateViewerLayoutEngine.COMPOUND_PAD_TOP, header_min_h + 4.0)
+	var top_pad: float = max(
+		HenStateViewerLayoutEngine.COMPOUND_PAD_TOP,
+		header_min_h + HenStateViewerLayoutEngine.COMPOUND_HEADER_GAP
+	)
+	node.layout.top_pad = top_pad
 	node.layout.height = content_h + top_pad + HenStateViewerLayoutEngine.COMPOUND_PAD_BOTTOM
 	
 	var req_w: float = _edge_widths.get(node.id, 0.0)

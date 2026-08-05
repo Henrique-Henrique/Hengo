@@ -118,14 +118,14 @@ static func trace_state(state_name: StringName) -> void:
 	EngineDebugger.send_message('hengo:state', [state_name])
 
 
-# an action ran on the focused instance, so its row can flash green like a cnode
-static func trace_action(action_id: StringName) -> void:
+# script_id defaults so a build generated before it existed still parses
+static func trace_action(action_id: StringName, script_id: String = '') -> void:
 	if not OS.is_debug_build():
 		return
 	if not EngineDebugger.is_active():
 		return
 
-	EngineDebugger.send_message('hengo:action', [action_id])
+	EngineDebugger.send_message('hengo:action', [action_id, script_id])
 
 
 # a branch action took a transition, so the state viewer can flash its edge (the

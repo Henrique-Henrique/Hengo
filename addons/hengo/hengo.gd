@@ -13,6 +13,7 @@ var main_scene: HenHengoRoot
 var bottom_panel_button: Button
 var _dock_location: int = DOCK_BOTTOM
 var _did_first_show: bool = false
+var _fullscreen: bool = false
 # debug
 var debug_plugin: EditorDebuggerPlugin
 
@@ -150,6 +151,11 @@ func _dock_main_scene(location: int) -> void:
 
 # removes main_scene from its current editor area
 func _undock_main_scene() -> void:
+	if _fullscreen:
+		EditorInterface.get_base_control().remove_child(main_scene)
+		_fullscreen = false
+		return
+
 	if _dock_location == DOCK_BOTTOM:
 		remove_control_from_bottom_panel(main_scene)
 		bottom_panel_button = null
@@ -172,7 +178,33 @@ func apply_dock_location(location: int) -> void:
 		make_bottom_panel_item_visible(main_scene)
 
 
+# moves the scene root: an inner node loses its owner and every '%Name' under it
+func toggle_fullscreen() -> void:
+	if not main_scene:
+		return
+
+	# an open popup holds window coords from before the move
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).force_close_all()
+
+	if _fullscreen:
+		EditorInterface.get_base_control().remove_child(main_scene)
+		_dock_main_scene(_dock_location)
+
+		if _dock_location == DOCK_BOTTOM:
+			make_bottom_panel_item_visible(main_scene)
+	else:
+		_undock_main_scene()
+		EditorInterface.get_base_control().add_child(main_scene)
+
+	main_scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_fullscreen = not _fullscreen
+
+
 func hide_plugin() -> void:
+	if _fullscreen:
+		toggle_fullscreen()
+		return
+
 	if _dock_location == DOCK_BOTTOM:
 		hide_bottom_panel()
 

@@ -76,7 +76,7 @@ func _capture(_message: String, _data: Array, _session_id: int) -> bool:
 		'hengo:action':
 			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 			if signal_bus:
-				signal_bus.debug_action_flow.emit(StringName(_data[0]))
+				signal_bus.debug_action_flow.emit(StringName(_data[0]), String(_data[1]) if _data.size() > 1 else '')
 			return true
 		'hengo:state_transition':
 			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')

@@ -7,6 +7,7 @@ const NODE_GAP: float = 64.0
 const COMPOUND_PAD_TOP: float = 128.0
 const COMPOUND_PAD_SIDE: float = 96.0
 const COMPOUND_PAD_BOTTOM: float = 64.0
+const COMPOUND_HEADER_GAP: float = COMPOUND_PAD_BOTTOM
 const HIGHWAY_MARGIN: float = 20.0
 const HIGHWAY_TRACK_STEP: float = 16.0
 const HIGHWAY_STUB: float = 24.0
@@ -101,8 +102,8 @@ func _layout_children(parent: HenStateViewerGraphTypes.DirectedGraphNode) -> voi
 	var depth_keys: Array = layers.keys()
 	depth_keys.sort()
 
-	var current_y: float = COMPOUND_PAD_TOP
-	
+	var current_y: float = float(parent.layout.get('top_pad', COMPOUND_PAD_TOP))
+
 	# pre-calculate max width of any individual layer (the parent's inner content width)
 	var max_layer_w: float = 0.0
 	for depth in depth_keys:
