@@ -98,23 +98,6 @@ func _ready() -> void:
 
 	_apply_semantic_colors()
 
-	# sidebar icon strip buttons (collapsed mode)
-	(get_node('%DashboardIconBt') as Button).pressed.connect(func():
-		if _sidebar_collapsed:
-			_on_collapse_sidebar()
-		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 0
-	)
-	(get_node('%PropsIconBt') as Button).pressed.connect(func():
-		if _sidebar_collapsed:
-			_on_collapse_sidebar()
-		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 1
-	)
-	(get_node('%CodeIconBt') as Button).pressed.connect(func():
-		if _sidebar_collapsed:
-			_on_collapse_sidebar()
-		(get_node('%SidebarTabContainer') as TabContainer).current_tab = 2
-	)
-	
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	signal_bus.add_virtual_cnode_to_route.connect(_on_graph_changed_no_args)
 	signal_bus.remove_virtual_cnode_from_route.connect(_on_graph_changed_no_args)
@@ -259,10 +242,6 @@ func _apply_semantic_colors() -> void:
 
 	HenUtils.tint_button(get_node('%Config') as Button, c.settings, false)
 	HenUtils.tint_button(get_node('%CloseBt') as Button, c.destructive, false)
-	HenUtils.tint_button(get_node('%CollapseToggleBt') as Button, c.settings, false)
-	HenUtils.tint_button(get_node('%DashboardIconBt') as Button, c.dashboard, false)
-	HenUtils.tint_button(get_node('%PropsIconBt') as Button, c.settings, false)
-	HenUtils.tint_button(get_node('%CodeIconBt') as Button, c.code, false)
 	HenUtils.tint_button(get_node('%RefreshGraphBt') as Button, c.state, false)
 
 
@@ -320,7 +299,7 @@ func _input(event: InputEvent) -> void:
 					global.HENGO_EDITOR_PLUGIN.hide_plugin()
 				elif e.keycode == KEY_E:
 					if _sidebar_collapsed:
-						_on_collapse_sidebar()
+						expand_sidebar()
 						var tabs: TabContainer = get_node_or_null('%SidebarTabContainer')
 						if tabs:
 							tabs.current_tab = HenDashboard.TAB_INDEX
@@ -495,37 +474,51 @@ var _saved_split_offset: int = 0
 
 func _on_collapse_sidebar() -> void:
 	_sidebar_collapsed = not _sidebar_collapsed
+	_apply_sidebar_collapse()
 
-	var tab_container: TabContainer = get_node_or_null('%SidebarTabContainer')
-	var icon_strip: VBoxContainer = get_node_or_null('%SidebarIconStrip')
-	var sidebar_margin: MarginContainer = get_node_or_null('%SideBarMargin')
-	var collapse_btn: Button = get_node_or_null('%CollapseToggleBt')
 
-	if not tab_container or not icon_strip or not sidebar_margin:
+func expand_sidebar() -> void:
+	if not _sidebar_collapsed:
 		return
 
+	_sidebar_collapsed = false
+	_apply_sidebar_collapse()
+
+
+func _apply_sidebar_collapse() -> void:
+	var tab_container: TabContainer = get_node_or_null('%SidebarTabContainer')
+	var icon_strip: BoxContainer = get_node_or_null('%SidebarIconStrip')
+	var sidebar_margin: MarginContainer = get_node_or_null('%SideBarMargin')
+	var collapse_btn: Button = get_node_or_null('%CollapseToggleBt')
+	var separator: HSeparator = get_node_or_null('%SidebarTabsSep')
+
+	if not tab_container or not icon_strip or not sidebar_margin or not collapse_btn:
+		return
+
+	var header: BoxContainer = collapse_btn.get_parent() as BoxContainer
 	# HSplitContainer keeps the split position cached in split_offset; we must
 	# reset it on collapse so the sidebar actually shrinks to the new minimum
 	var content_area: HSplitContainer = sidebar_margin.get_parent() as HSplitContainer
 
+	tab_container.visible = not _sidebar_collapsed
+	header.vertical = _sidebar_collapsed
+	icon_strip.vertical = _sidebar_collapsed
+	collapse_btn.tooltip_text = 'Expand sidebar' if _sidebar_collapsed else 'Collapse sidebar'
+	header.move_child(collapse_btn, 0 if _sidebar_collapsed else header.get_child_count() - 1)
+
+	if separator:
+		separator.visible = not _sidebar_collapsed
+
 	if _sidebar_collapsed:
 		if content_area:
 			_saved_split_offset = content_area.split_offset
-		tab_container.visible = false
-		icon_strip.visible = true
 		sidebar_margin.custom_minimum_size = Vector2(52, 0)
 		if content_area:
 			content_area.split_offset = 0
-		if collapse_btn:
-			collapse_btn.tooltip_text = 'Expand sidebar'
 	else:
-		tab_container.visible = true
-		icon_strip.visible = false
 		sidebar_margin.custom_minimum_size = Vector2(280, 0)
 		if content_area:
 			content_area.split_offset = _saved_split_offset
-		if collapse_btn:
-			collapse_btn.tooltip_text = 'Collapse sidebar'
 
 
 func toggle_fullscreen() -> void:

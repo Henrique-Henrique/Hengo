@@ -47,6 +47,9 @@
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/saving_pill.tscn" id="savpill_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/loading_overlay.tscn" id="loadovlay_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_nodes_panel.tscn" id="dbgpanel_inst"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/bug.svg" id="57_bug"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_sidetabs"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3680e"]
 bg_color = Color(0.082, 0.082, 0.105, 1)
@@ -285,54 +288,89 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
 
-[node name="SidebarHeader" type="HBoxContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=2000000019]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="SidebarHeaderSpacer" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader" unique_id=2000000020]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="CollapseToggleBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader" unique_id=2000000021]
-unique_name_in_owner = true
-layout_mode = 2
-tooltip_text = "Collapse sidebar"
-icon = ExtResource("51_sidebar")
-flat = true
-
-[node name="SidebarIconStrip" type="VBoxContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=2000000022]
-unique_name_in_owner = true
-visible = false
+[node name="SidebarHeader" type="BoxContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=2000000019]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="DashboardIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000034]
+[node name="SidebarIconStrip" type="BoxContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader" unique_id=2000000022]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(36, 36)
 layout_mode = 2
-tooltip_text = "Dashboard"
-icon = ExtResource("40_174hx")
-flat = true
-
-[node name="PropsIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000023]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(36, 36)
-layout_mode = 2
-tooltip_text = "Props"
-icon = ExtResource("21_5c7h0")
-flat = true
-
-[node name="CodeIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000024]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(36, 36)
-layout_mode = 2
-tooltip_text = "Code Preview"
-icon = ExtResource("22_33cyo")
-flat = true
-
-[node name="IconStripSpacer" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarIconStrip" unique_id=2000000025]
-layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="DashboardIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader/SidebarIconStrip" unique_id=2000000034]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SidebarTabButton"
+tooltip_text = "Dashboard"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_sidetabs")
+icon = ExtResource("40_174hx")
+icon_alignment = 1
+
+[node name="PropsIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader/SidebarIconStrip" unique_id=2000000023]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SidebarTabButton"
+tooltip_text = "Props"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_sidetabs")
+icon = ExtResource("21_5c7h0")
+icon_alignment = 1
+
+[node name="CodeIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader/SidebarIconStrip" unique_id=2000000024]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SidebarTabButton"
+tooltip_text = "Code Preview"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_sidetabs")
+icon = ExtResource("22_33cyo")
+icon_alignment = 1
+
+[node name="DebugIconBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader/SidebarIconStrip" unique_id=2000000063]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(32, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SidebarTabButton"
+tooltip_text = "Debug"
+toggle_mode = true
+button_group = SubResource("ButtonGroup_sidetabs")
+icon = ExtResource("57_bug")
+icon_alignment = 1
+
+[node name="IconStripSpacer" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader/SidebarIconStrip" unique_id=2000000025]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="CollapseToggleBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarHeader" unique_id=2000000021]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 30)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme_type_variation = &"SidebarTabButton"
+tooltip_text = "Collapse sidebar"
+icon = ExtResource("51_sidebar")
+icon_alignment = 1
+
+[node name="SidebarTabsSep" type="HSeparator" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=2000000064]
+unique_name_in_owner = true
+layout_mode = 2
 
 [node name="SidebarTabContainer" type="TabContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer" unique_id=908628429]
 unique_name_in_owner = true
@@ -340,6 +378,7 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_type_variation = &"TabContainerInner"
 current_tab = 1
+tabs_visible = false
 tab_0/title = "Dashboard"
 tab_0/icon = ExtResource("40_174hx")
 tab_1/title = "Props"

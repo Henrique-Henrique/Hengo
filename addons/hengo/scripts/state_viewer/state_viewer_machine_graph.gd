@@ -23,13 +23,19 @@ const CLICK_TOLERANCE: float = 6.0
 const TRANSITION_ICON: String = 'arrow-right-to-line'
 const TITLE_FONT_SIZE: int = 18
 const MIN_TITLE_SCREEN_PX: float = 11.0
+const MIN_BORDER_SCREEN_PX: float = 3.0
+const MAX_BORDER_GROWTH: float = 4.0
+const COMPOUND_BORDER_WIDTH: float = 3.0
+const HEADER_SEPARATOR_WIDTH: float = 2.0
 const ACTIONS_LIST_SCENE = preload('res://addons/hengo/scenes/state_actions_list.tscn')
 const LAYOUT_SETTLE_PASSES: int = 4
 
 var _panels: Dictionary = {}
 # node -> icon+title hbox, counter-scaled so titles stay readable when zoomed out
 var _title_boxes: Dictionary = {}
+var _header_styles: Array[StyleBoxFlat] = []
 var _action_lists: Dictionary = {}
+var _zoom: float = 1.0
 var _rebuild_pending: bool = false
 var _layout_settling: bool = false
 var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
@@ -242,7 +248,8 @@ func _on_cnode_changed(_id: String, _vc: HenVirtualCNode) -> void:
 func _build_dynamic_dict(save_data: HenSaveData) -> Dictionary:
 	var root_dict: Dictionary = {
 		id = save_data.identity.name if save_data.identity else 'root',
-		states = {}
+		states = {},
+		script_type = String(save_data.identity.type) if save_data.identity else ''
 	}
 	
 	var root_states: Array = []
@@ -529,15 +536,17 @@ func _update_node_styles() -> void:
 
 		var short_id_snake: String = short_id.strip_edges().to_snake_case()
 		var active_state: String = _debug_active_states.get(script_seg, '')
+		var highlight_width: int = _scaled_border(COMPOUND_BORDER_WIDTH) if is_compound else 2
+
 		if active_state != '' and short_id_snake == active_state:
 			style.border_color = Color('#63ff92')
-			style.set_border_width_all(2)
+			style.set_border_width_all(highlight_width)
 			style.shadow_size = 10
 			style.shadow_color = Color(0.39, 1.0, 0.57, 0.30)
 			style.shadow_offset = Vector2.ZERO
 		elif not current_state_id.is_empty() and String(node.data.get('state_id', '')) == current_state_id:
 			style.border_color = CURRENT_BORDER
-			style.set_border_width_all(2)
+			style.set_border_width_all(highlight_width)
 			style.shadow_size = 10
 			style.shadow_color = Color(0.90, 0.49, 0.13, 0.28)
 			style.shadow_offset = Vector2.ZERO
@@ -590,11 +599,45 @@ func _open_state(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		(Engine.get_singleton(&'Router') as HenRouter).change_route(route)
 
 
-# holds each title at natural size until it would shrink past MIN_TITLE_SCREEN_PX,
-# then counter-scales so state names stay readable when zoomed out
-func _update_title_scales() -> void:
+func _update_zoom_scales() -> void:
 	var cam: Node2D = get_node_or_null('%Cam') as Node2D
 	var zoom: float = maxf(cam.transform.x.x, 0.001) if cam else 1.0
+
+	_update_title_scales(zoom)
+
+	if is_equal_approx(zoom, _zoom):
+		return
+
+	_zoom = zoom
+	_apply_border_widths()
+
+
+# a hairline border falls under a screen pixel once the cam zooms out
+func _scaled_border(base: float) -> int:
+	return int(round(clampf(MIN_BORDER_SCREEN_PX / _zoom, base, base * MAX_BORDER_GROWTH)))
+
+
+func _apply_border_widths() -> void:
+	var width: int = _scaled_border(COMPOUND_BORDER_WIDTH)
+
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
+		if node.children.is_empty():
+			continue
+
+		var style: StyleBoxFlat = (_panels[node] as Control).get_theme_stylebox('panel') as StyleBoxFlat
+
+		if style:
+			style.set_border_width_all(width)
+
+	var separator_width: int = _scaled_border(HEADER_SEPARATOR_WIDTH)
+
+	for header_style: StyleBoxFlat in _header_styles:
+		header_style.border_width_bottom = separator_width
+
+
+# holds each title at natural size until it would shrink past MIN_TITLE_SCREEN_PX,
+# then counter-scales so state names stay readable when zoomed out
+func _update_title_scales(zoom: float) -> void:
 	var factor: float = maxf(1.0, MIN_TITLE_SCREEN_PX / (TITLE_FONT_SIZE * zoom))
 
 	for box: Control in _title_boxes.values():
@@ -631,7 +674,7 @@ func _content_center(box: Control) -> Vector2:
 
 
 func _process(_delta: float) -> void:
-	_update_title_scales()
+	_update_zoom_scales()
 
 	# hover tracking
 	var mouse_pos: Vector2 = nodes_container.get_local_mouse_position()
@@ -674,6 +717,7 @@ func build_graph(dict: Dictionary) -> void:
 		child.queue_free()
 	_panels.clear()
 	_title_boxes.clear()
+	_header_styles.clear()
 	_action_lists.clear()
 
 	graph_root = parser.parse_machine(dict)
@@ -769,7 +813,7 @@ func _collect_draw_order(node: HenStateViewerGraphTypes.DirectedGraphNode, arr: 
 # applies the resting border and shadow shared by spawn and debug-highlight restore
 func _apply_base_border_shadow(style: StyleBoxFlat, is_compound: bool) -> void:
 	style.border_color = COMPOUND_BORDER if is_compound else LEAF_BORDER
-	style.set_border_width_all(2 if is_compound else 1)
+	style.set_border_width_all(_scaled_border(COMPOUND_BORDER_WIDTH) if is_compound else 1)
 	style.shadow_size = 8 if is_compound else 6
 	style.shadow_color = Color(0.0, 0.0, 0.0, 0.25 if is_compound else 0.35)
 	style.shadow_offset = Vector2(0, 2)
@@ -826,13 +870,14 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		header_style.bg_color = Color(0.155, 0.155, 0.195, 1.0)
 		header_style.corner_radius_top_left = 6
 		header_style.corner_radius_top_right = 6
-		header_style.border_width_bottom = 1
+		header_style.border_width_bottom = _scaled_border(HEADER_SEPARATOR_WIDTH)
 		header_style.border_color = COMPOUND_BORDER.lightened(0.2)
 		header_style.content_margin_left = 8
 		header_style.content_margin_right = 8
 		header_style.content_margin_top = 5
 		header_style.content_margin_bottom = 5
 		header_panel.add_theme_stylebox_override('panel', header_style)
+		_header_styles.append(header_style)
 
 		var vbox: VBoxContainer = VBoxContainer.new()
 		vbox.add_theme_constant_override('separation', 0)
@@ -840,8 +885,13 @@ func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		header_panel.add_child(vbox)
 
 		var hbox: HBoxContainer = HBoxContainer.new()
+		hbox.add_theme_constant_override('separation', 6)
 		hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		vbox.add_child(hbox)
+
+		var script_type: String = String(node.data.get('script_type', ''))
+		if not script_type.is_empty():
+			hbox.add_child(_create_type_icon(StringName(script_type)))
 
 		if is_initial:
 			hbox.add_child(_create_initial_indicator())
@@ -926,6 +976,18 @@ func _create_graph_label(text: String) -> Label:
 	label.add_theme_font_size_override('font_size', 18)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
+
+
+func _create_type_icon(type: StringName) -> TextureRect:
+	var tex_rect: TextureRect = TextureRect.new()
+	tex_rect.texture = HenUtils.get_icon_texture(type)
+	tex_rect.modulate = HenUtils.get_type_parent_color(type, 1.0, Color.WHITE).lightened(0.25)
+	tex_rect.custom_minimum_size = Vector2(TITLE_FONT_SIZE, TITLE_FONT_SIZE)
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tex_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return tex_rect
 
 
 # creates a panel that visually represents an initial state

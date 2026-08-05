@@ -54,14 +54,16 @@ text = "type"
 
 [node name="AddButton" type="Button" parent="Margin/Body"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(72, 18)
+custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 size_flags_horizontal = 0
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 theme_override_styles/normal = SubResource("StyleBoxEmpty_btnrow")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_btnrow")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_btnrow")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_btnrow")
 theme_override_styles/disabled = SubResource("StyleBoxEmpty_btnrow")
-text = "New"
 icon = ExtResource("2_h4mou")
 flat = true
+icon_alignment = 1

@@ -180,11 +180,7 @@ func update() -> void:
 	if not global or not global.SAVE_DATA:
 		return
 
-	var base_route: HenRouteData = global.SAVE_DATA.get_base_route()
-	var base_row: HenSideBarRow = _create_row('Base Route', base_route, HenUtils.ICON_ROUTE, Color('#9fb2c7'))
-	base_row.set_primary_emphasis(true)
-	base_row.set_selected(_is_meta_selected(base_route))
-	base_route_slot.add_child(base_row)
+	# the base route row is gone from the sidebar, so base_route_slot and set_primary_emphasis are dead
 
 	var categories: Array[Dictionary] = [
 		{name = 'States', type = AddType.STATE},
@@ -289,12 +285,9 @@ func _add_sub_states_card(parent_container: Node, state: HenSaveState, type: Add
 
 func _build_nested_card_style(tint: Color, depth: int) -> StyleBoxFlat:
 	var bg_alpha: float = 0.06 + min(depth, 4) * 0.03
-	var border_alpha: float = 0.22 + min(depth, 4) * 0.04
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(tint.r, tint.g, tint.b, bg_alpha)
-	style.border_color = Color(tint.r, tint.g, tint.b, border_alpha)
-	style.set_border_width_all(1)
-	var radius: int = 10
+	var radius: int = 8
 	style.corner_radius_top_left = radius
 	style.corner_radius_top_right = radius
 	style.corner_radius_bottom_left = radius

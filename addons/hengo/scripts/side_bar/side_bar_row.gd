@@ -38,10 +38,11 @@ func setup(_title: String, _meta: Variant, _icon: Texture2D = null, _icon_color:
 	icon_rect.texture = _icon
 	icon_rect.modulate = Color(_icon_color.r, _icon_color.g, _icon_color.b, 1.0)
 	add_button.visible = show_add
-	add_button.text = add_label
-	ThemeUtils.apply_font_size(add_button, 10)
-	add_button.add_theme_constant_override('icon_max_width', 14)
-	add_button.add_theme_constant_override('h_separation', 4)
+	add_button.tooltip_text = add_label
+	add_button.add_theme_constant_override('icon_max_width', 12)
+	add_button.add_theme_color_override('icon_normal_color', Color(1, 1, 1, 0.28))
+	add_button.add_theme_color_override('icon_hover_color', Color(1, 1, 1, 0.9))
+	add_button.add_theme_color_override('icon_pressed_color', Color(1, 1, 1, 1))
 	margin_container.add_theme_constant_override('margin_left', indent)
 
 	var add_style := StyleBoxEmpty.new()
@@ -61,9 +62,7 @@ func set_type_badge(type_name: String) -> void:
 	var color: Color = HenUtils.get_type_parent_color(type_name, 1.0, Color('#72788a'))
 
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(color.r, color.g, color.b, 0.18)
-	style.border_color = Color(color.r, color.g, color.b, 0.55)
-	style.set_border_width_all(1)
+	style.bg_color = Color(color.r, color.g, color.b, 0.22)
 	var radius: int = 5
 	style.corner_radius_top_left = radius
 	style.corner_radius_top_right = radius
@@ -89,9 +88,7 @@ func set_start_badge(is_start: bool) -> void:
 		badge_label.add_theme_color_override('font_color', Color('#63ff92'))
 
 		var badge_style := StyleBoxFlat.new()
-		badge_style.bg_color = Color('#1e3d29')
-		badge_style.border_color = Color('#3b8855')
-		badge_style.set_border_width_all(1)
+		badge_style.bg_color = Color('#26482f')
 		badge_style.corner_radius_top_left = 4
 		badge_style.corner_radius_top_right = 4
 		badge_style.corner_radius_bottom_left = 4
@@ -143,17 +140,12 @@ func set_primary_emphasis(enable: bool = true) -> void:
 	custom_minimum_size = Vector2(0, 36)
 
 	var primary_bg := StyleBoxFlat.new()
-	primary_bg.bg_color = Color(accent.r, accent.g, accent.b, 0.16)
-	primary_bg.border_color = Color(accent.r, accent.g, accent.b, 0.45)
-	primary_bg.set_border_width_all(1)
-	var radius: int = 10
+	primary_bg.bg_color = Color(accent.r, accent.g, accent.b, 0.12)
+	var radius: int = 8
 	primary_bg.corner_radius_top_left = radius
 	primary_bg.corner_radius_top_right = radius
 	primary_bg.corner_radius_bottom_left = radius
 	primary_bg.corner_radius_bottom_right = radius
-	primary_bg.shadow_color = Color(0, 0, 0, 0.35)
-	primary_bg.shadow_size = 4
-	primary_bg.shadow_offset = Vector2(0, 2)
 	add_theme_stylebox_override('panel', primary_bg)
 
 	margin_container.add_theme_constant_override('margin_left', 10)
