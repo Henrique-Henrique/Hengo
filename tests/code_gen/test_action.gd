@@ -614,11 +614,9 @@ func test_producer_palette_filters_by_output_type() -> void:
 	save_data.identity.type = 'CharacterBody2D'
 	HenScriptMacroLoader.load_native_actions()
 
-	var search: HenActionsSearch = load('res://addons/hengo/scenes/actions_search.tscn').instantiate()
+	var search: HenActionsSearch = auto_free(load('res://addons/hengo/scenes/actions_search.tscn').instantiate())
 	search.setup(state.id)
 	search.setup_producer_picker('Vector2', func(_m: HenSaveMacro) -> void: pass )
-	add_child(search)
-	auto_free(search)
 
 	var ids: Array = []
 	for macro: HenSaveMacro in search._get_pool():
