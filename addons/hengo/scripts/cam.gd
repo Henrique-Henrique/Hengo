@@ -20,10 +20,13 @@ var ignore_process: bool = false
 var can_scroll: bool = true
 
 var _left_pan: bool = false
+var _panning: bool = false
 
 # per-frame usec budget for draining pending_show_queue; caps show() cost so a
 # dense graph doesn't stutter the pan
 const SHOW_BUDGET_USEC: int = 4000
+
+const PAN_BUTTONS: Array[int] = [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_MIDDLE, MOUSE_BUTTON_RIGHT]
 
 # _check_virtual_cnodes throttle: skip re-checks until the viewport moves enough
 # or a few frames pass, to avoid iterating every node each tick
@@ -106,8 +109,12 @@ func _input(event: InputEvent) -> void:
 	# a release outside the canvas still has to disarm, so it comes before the gate
 	if event is InputEventMouseButton:
 		var released: InputEventMouseButton = event as InputEventMouseButton
-		if released.button_index == MOUSE_BUTTON_LEFT and not released.pressed:
-			_left_pan = false
+		if not released.pressed:
+			if released.button_index == MOUSE_BUTTON_LEFT:
+				_left_pan = false
+
+			if released.button_index in PAN_BUTTONS:
+				_panning = false
 
 	if is_cam_active():
 		if event is InputEventMouseMotion:
@@ -117,6 +124,8 @@ func _input(event: InputEvent) -> void:
 
 			if mask == MOUSE_BUTTON_MASK_MIDDLE or mask == MOUSE_BUTTON_MASK_RIGHT or \
 			   (_left_pan and mask == MOUSE_BUTTON_MASK_LEFT):
+				# arms on the drag, not on the press, so a click on a card never flashes the grab cursor
+				_panning = true
 				transform.origin += (event as InputEventMouseMotion).relative
 				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
@@ -147,6 +156,10 @@ func _input(event: InputEvent) -> void:
 						_zoom_in()
 					if mb.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 						_zoom_out()
+
+
+func is_panning() -> bool:
+	return _panning
 
 
 # a press on a row or a button belongs to that control, not to the pan

@@ -312,7 +312,8 @@ func _build_state_dict(state: HenSaveState, save_data: HenSaveData) -> Dictionar
 					target_res = _find_state_by_id(vc.res_data.id, save_data)
 
 				if target_res:
-					var event_name: String = vc.name_to_code if vc.name_to_code and not vc.name_to_code.is_empty() else 'go_to_' + target_res.name
+					var custom_name: String = str(vc.name_to_code) if vc.name_to_code else ''
+					var event_name: String = custom_name if not custom_name.is_empty() else 'go_to_' + target_res.name
 
 					var target_path: String = target_res.name
 
@@ -326,7 +327,8 @@ func _build_state_dict(state: HenSaveState, save_data: HenSaveData) -> Dictionar
 					on_dict[event_name] = target_path
 					on_meta[event_name] = {
 						kind = &'cross_script' if is_from else &'transition',
-						icon = TRANSITION_ICON
+						icon = TRANSITION_ICON,
+						auto_label = custom_name.is_empty()
 					}
 
 	_add_action_branch_edges(state, save_data, on_dict, on_meta)
@@ -371,12 +373,12 @@ func _add_action_branch_edges(state: HenSaveState, save_data: HenSaveData, on_di
 			var event_name: String = label if not label.is_empty() else 'go_to_' + target.name
 
 			on_dict[event_name] = target_path
-			on_meta[event_name] = _branch_meta(macro, script_id)
+			on_meta[event_name] = _branch_meta(macro, script_id, label.is_empty())
 
 
 # a branch reads as cross-script first, then conditional when the macro forks. the
 # icon stays the macro's own so the action type is still recognizable on the line
-func _branch_meta(macro: HenSaveMacro, script_id: StringName) -> Dictionary:
+func _branch_meta(macro: HenSaveMacro, script_id: StringName, auto_label: bool) -> Dictionary:
 	var kind: StringName = &'transition'
 
 	if not script_id.is_empty():
@@ -385,8 +387,9 @@ func _branch_meta(macro: HenSaveMacro, script_id: StringName) -> Dictionary:
 		kind = &'condition'
 
 	var icon: String = macro.icon if macro and not macro.icon.is_empty() else TRANSITION_ICON
+	var color: String = macro.color if macro else ''
 
-	return {kind = kind, icon = icon}
+	return {kind = kind, icon = icon, color = color, auto_label = auto_label}
 
 
 # resolves a script's display name (the key used in the collection dict) from its id
@@ -710,6 +713,22 @@ func _process(_delta: float) -> void:
 	else:
 		_active_edge = null
 
+	_update_cursor()
+
+
+# panels ignore the mouse, so the cursor hint lives on the graph itself
+func _update_cursor() -> void:
+	var cam: HenCam = get_node_or_null('%Cam') as HenCam
+	var shape: CursorShape = Control.CURSOR_ARROW
+
+	if cam and cam.is_panning():
+		shape = Control.CURSOR_DRAG
+	elif _is_state_node(_active_node):
+		shape = Control.CURSOR_POINTING_HAND
+
+	if mouse_default_cursor_shape != shape:
+		mouse_default_cursor_shape = shape
+
 
 # orchestrates: parse -> build ui -> measure -> layout -> render
 func build_graph(dict: Dictionary) -> void:
@@ -1006,9 +1025,6 @@ func _create_initial_indicator() -> TextureRect:
 func _set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	_active_node = node
 	edges_overlay.set_active_node(node)
-
-	# panels ignore the mouse, so the cursor hint lives on the graph itself
-	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if _is_state_node(node) else Control.CURSOR_ARROW
 
 	if _active_node == null:
 		for p in _panels.values():

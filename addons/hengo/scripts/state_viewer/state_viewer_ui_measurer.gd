@@ -42,11 +42,13 @@ func _precalc_edge_widths(root: HenStateViewerGraphTypes.DirectedGraphNode) -> v
 		var group: Dictionary = groups[pair]
 		var total_w: float = 0.0
 		for e in group.edges:
-			if e.label.text.is_empty():
+			var label_text: String = e.display_label()
+
+			if label_text.is_empty():
 				total_w += 32.0
 			else:
 				# the reserved lane has to fit the whole pill, icon included
-				var pill_w: float = HenStateEdgePill.measure(e.label.text, not str(e.meta.get('icon', '')).is_empty()).x
+				var pill_w: float = HenStateEdgePill.measure(label_text, not str(e.meta.get('icon', '')).is_empty()).x
 				total_w += max(32.0, pill_w + 6.0)
 		
 		# ensure both the source and target node are wide enough to host these parallel edges

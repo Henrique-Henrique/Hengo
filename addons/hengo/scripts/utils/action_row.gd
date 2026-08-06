@@ -1,14 +1,10 @@
 @tool
 class_name HenActionRow extends PanelContainer
 
-const VALUE_SCENE = preload('res://addons/hengo/scenes/action_value.tscn')
-const SEPARATOR_COLOR: Color = Color('#454e5c')
-const ICON_EXPANDED = preload('res://addons/hengo/assets/new_icons/chevron-down.svg')
-const ICON_COLLAPSED = preload('res://addons/hengo/assets/new_icons/chevron-right.svg')
-
 const ICON_DIR: String = 'res://addons/hengo/assets/new_icons/'
 const FALLBACK_ICON: String = 'square-function'
 const FALLBACK_COLOR: String = '#7c93ff'
+const TITLE_SIZE: int = 18
 
 # debug: same green + duration the cnode border uses (cnode.gd DEBUG_EXEC_TIME)
 const RUN_COLOR := Color('#63ff92')
@@ -23,7 +19,6 @@ const PHASE_COLORS = {
 }
 
 signal row_pressed(meta: Variant, mouse_button_index: int)
-signal collapse_toggled(meta: Variant, collapsed: bool)
 signal action_dropped(action: HenSaveAction, target: HenSaveAction, before: bool)
 
 var meta: Variant
@@ -31,8 +26,6 @@ var meta: Variant
 var is_preview: bool = false
 
 var _accent: Color = Color(FALLBACK_COLOR)
-var _collapsed: bool = false
-var _has_values: bool = false
 # bbcode doc shown on hover: bold name, description, then the value summary
 var _tooltip: String = ''
 var _pressed_button: int = 0
@@ -55,12 +48,12 @@ func _ready() -> void:
 	gui_input.connect(_on_gui_input)
 	mouse_entered.connect(_on_hover.bind(true))
 	mouse_exited.connect(_on_hover.bind(false))
-	_collapse_bt().pressed.connect(_on_collapse_pressed)
 
 
-# data carries title/icon/color/meta; parts are {kind, label, value} dicts.
-# indent shifts a loop-body row right; draggable off disables drag on it
-func setup(data: Dictionary, parts: Array, collapsed: bool = false) -> void:
+# data carries title/icon/color/meta; parts come from HenActionsPanel.value_parts.
+# indent shifts a loop-body row right; draggable off disables drag on it. every
+# text-editable chip built here lands in sink, which is the tab order
+func setup(data: Dictionary, parts: Array, sink: Array = [], on_chip: Callable = Callable()) -> void:
 	meta = data.get('meta')
 	_draggable = bool(data.get('draggable', true))
 
@@ -71,66 +64,33 @@ func setup(data: Dictionary, parts: Array, collapsed: bool = false) -> void:
 
 	_tooltip = _build_tooltip(str(data.get('doc', '')), str(data.get('values', '')))
 
-	var icon_rect: TextureRect = get_node('Margin/Body/Header/Icon')
+	var icon_rect: TextureRect = get_node('Margin/Line/Icon')
 	icon_rect.texture = icon_texture(str(data.get('icon', '')))
 	icon_rect.modulate = _accent
 
-	# no font_size override on the title: it inherits the theme default, like every other list row
-	var title_label: Label = get_node('Margin/Body/Header/Title')
+	var title_label: Label = get_node('Margin/Line/Title')
 	title_label.text = str(data.get('title', ''))
 	title_label.add_theme_color_override('font_color', Color('#dde4ed'))
+	ThemeUtils.apply_font_size(title_label, TITLE_SIZE)
 
-	var values: HFlowContainer = get_node('Margin/Body/ValuesMargin/Values')
-	for child: Node in values.get_children():
-		values.remove_child(child)
+	# an HBox, not a flow: the whole action reads as a single running line, and the
+	# card widens instead of wrapping
+	var line: HBoxContainer = get_node('Margin/Line')
+
+	for child: Node in line.get_children():
+		if child == icon_rect or child == title_label or child == _grip():
+			continue
+
+		line.remove_child(child)
 		child.queue_free()
 
-	for part: Dictionary in parts:
-		if values.get_child_count() > 0:
-			values.add_child(_separator())
+	HenActionLine.fill(line, parts, 0, sink, on_chip)
 
-		var value: HenActionValue = VALUE_SCENE.instantiate()
-		values.add_child(value)
-		value.setup(part.get('kind', &'literal'), str(part.get('label', '')), str(part.get('value', '')))
-
-	_has_values = not parts.is_empty()
-
-	# nothing to fold on an action without inputs: keep the slot, drop the affordance
-	var collapse_bt: Button = _collapse_bt()
-	collapse_bt.disabled = not _has_values
-	collapse_bt.modulate = Color(1, 1, 1, 1.0 if _has_values else 0.0)
-
-	set_collapsed(collapsed)
 	_set_hovered(false)
 
 
-func set_collapsed(collapsed: bool) -> void:
-	_collapsed = collapsed
-	_collapse_bt().icon = ICON_COLLAPSED if collapsed else ICON_EXPANDED
-	get_node('Margin/Body/ValuesMargin').visible = _has_values and not collapsed
-
-
-func _collapse_bt() -> Button:
-	return get_node('Margin/Body/Header/CollapseBt')
-
-
 func _grip() -> TextureRect:
-	return get_node('Margin/Body/Header/Grip')
-
-
-func _on_collapse_pressed() -> void:
-	set_collapsed(not _collapsed)
-	collapse_toggled.emit(meta, _collapsed)
-
-
-func _separator() -> Label:
-	var label := Label.new()
-	label.text = '|'
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ThemeUtils.apply_font_size(label, 14)
-	label.add_theme_color_override('font_color', SEPARATOR_COLOR)
-	return label
+	return get_node('Margin/Line/Grip')
 
 
 # drives the hover style and the doc tooltip together
@@ -275,10 +235,6 @@ func _on_gui_input(event: InputEvent) -> void:
 		return
 
 	var mb := event as InputEventMouseButton
-	var collapse_bt: Button = _collapse_bt()
-
-	if not collapse_bt.disabled and collapse_bt.get_global_rect().has_point(mb.global_position):
-		return
 
 	if mb.button_index != MOUSE_BUTTON_LEFT and mb.button_index != MOUSE_BUTTON_RIGHT:
 		return

@@ -4,9 +4,11 @@ class_name HenStateActionsList extends VBoxContainer
 const ACTION_ROW_SCENE = preload('res://addons/hengo/scenes/action_row.tscn')
 const ACTIONS_SEARCH_SCENE = preload('res://addons/hengo/scenes/actions_search.tscn')
 const PHASE_HEADER_SCENE = preload('res://addons/hengo/scenes/action_phase_header.tscn')
+const VALUE_POPUP_SCENE = preload('res://addons/hengo/scenes/action_value_popup.tscn')
+const DROPDOWN_SCENE = preload('res://addons/hengo/scenes/drop_down_menu.tscn')
 
-# fixed so editing a value never resizes the card
-const CONTENT_WIDTH: float = 260.0
+# floor of the card width; a capsule wider than this still grows it
+const CONTENT_WIDTH: float = 320.0
 
 signal structure_changed
 signal focus_requested
@@ -18,11 +20,13 @@ var is_editing: bool = false
 var list: VBoxContainer
 var add_bt: Button
 
-# static so a rebuild cannot snap an open row shut
-static var _collapsed: Dictionary = {}
 # action id -> the loop action holding it, null at top level
 var _parent_of: Dictionary = {}
 var _rows_by_id: Dictionary = {}
+# text-editable chips in reading order, at any capsule depth: the tab order
+var _chips: Array[HenActionValue] = []
+var _value_popup: HenPopupContainer
+var _value_editor: HenActionValuePopup
 
 
 func _ready() -> void:
@@ -73,6 +77,7 @@ func current_actions() -> Array:
 
 func _clear_list() -> void:
 	_rows_by_id.clear()
+	_chips.clear()
 
 	for child: Node in list.get_children():
 		list.remove_child(child)
@@ -92,7 +97,6 @@ func _add_row(_action: HenSaveAction, _depth: int, _parent: HenSaveAction) -> vo
 
 	var row: HenActionRow = ACTION_ROW_SCENE.instantiate()
 	row.row_pressed.connect(_on_action_row_pressed)
-	row.collapse_toggled.connect(_on_row_collapse_toggled)
 	row.action_dropped.connect(_on_row_dropped)
 	list.add_child(row)
 	_rows_by_id[str(_action.id)] = row
@@ -108,7 +112,7 @@ func _add_row(_action: HenSaveAction, _depth: int, _parent: HenSaveAction) -> vo
 		meta = _action,
 		indent = _depth,
 		draggable = _depth == 0
-	}, HenActionsPanel.value_parts(_action), _is_collapsed(_action))
+	}, HenActionsPanel.value_parts(_action), _chips, _on_chip_pressed)
 
 	if macro and macro.has_body:
 		for child: HenSaveAction in _action.body_actions:
@@ -135,31 +139,10 @@ func _add_nested_add(_loop: HenSaveAction, _depth: int) -> void:
 	list.add_child(margin)
 
 
-func _is_collapsed(_action: HenSaveAction) -> bool:
-	var settings: HenSettings = _settings()
-	return _collapsed.get(_fold_key(_action), not (settings.actions_expanded if settings else false))
-
-
-func _fold_key(_action: HenSaveAction) -> String:
-	var script_id: String = str(save_data.identity.id) if save_data and save_data.identity else ''
-	return script_id + ':' + str(_action.id)
-
-
-func _settings() -> HenSettings:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	return global.SETTINGS if global else null
-
-
 # mutations read the active script, so another card asks to be focused first
 func _is_active() -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	return global != null and save_data != null and global.SAVE_DATA == save_data
-
-
-func _on_row_collapse_toggled(_meta: Variant, _collapsed_state: bool) -> void:
-	if _meta is HenSaveAction:
-		_collapsed[_fold_key(_meta as HenSaveAction)] = _collapsed_state
-		structure_changed.emit()
 
 
 func _on_action_row_pressed(_meta: Variant, _button: int) -> void:
@@ -170,20 +153,170 @@ func _on_action_row_pressed(_meta: Variant, _button: int) -> void:
 		focus_requested.emit()
 		return
 
-	var action: HenSaveAction = _meta as HenSaveAction
-	var row: HenActionRow = _rows_by_id.get(str(action.id))
-	var nested: bool = _parent_of.get(str(action.id)) != null
+	_edit_action(_meta as HenSaveAction, _rows_by_id.get(str((_meta as HenSaveAction).id)), false)
+
+
+# a chip carries the whole edit: a typed literal opens the value popup, a fixed
+# option set its picker, and every other source falls back to the inspector
+func _on_chip_pressed(_part: Dictionary, _anchor: Control) -> void:
+	if not _is_active():
+		focus_requested.emit()
+		return
+
+	if _anchor is HenActionValue and (_anchor as HenActionValue).is_editable():
+		_open_value_popup(_anchor as HenActionValue)
+		return
+
+	if not (_part.get('options', []) as Array).is_empty():
+		_open_option_picker(_part, _anchor)
+		return
+
+	var slot: Dictionary = _part.get('slot', {})
+	var owner: Variant = slot.get('action')
+
+	if owner is HenSaveAction:
+		_edit_action(owner as HenSaveAction, _anchor, bool(slot.get('inline', false)))
+
+
+func _edit_action(_action: HenSaveAction, _anchor: Control, _inline: bool) -> void:
+	var nested: bool = _inline or _parent_of.get(str(_action.id)) != null
+	var menu: Array[Dictionary] = []
+
+	# an inline producer is not in the state list, so replace/delete would look
+	# there and miss it
+	if not _inline:
+		menu = _action_menu(_action)
 
 	is_editing = true
 
 	HenInspector.edit_resource(
-		action,
-		HenActionsPanel.display_name(action),
-		_action_menu(action),
-		_popup_opts(row),
+		_action,
+		HenActionsPanel.display_name(_action),
+		menu,
+		_popup_opts(_anchor),
 		nested,
 		true
 	)
+
+
+func _open_option_picker(_part: Dictionary, _anchor: Control) -> void:
+	var param: HenSaveParam = (_part.get('slot', {}) as Dictionary).get('param')
+
+	if not param:
+		return
+
+	var menu: HenDropDownMenu = DROPDOWN_SCENE.instantiate()
+	var options: Array = []
+
+	for option: String in _part.get('options', []):
+		options.append({name = option})
+
+	is_editing = true
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = _anchor,
+		side = SIDE_TOP,
+		min_size = Vector2(180, 220)
+	})
+
+	menu.mount(options, func(item: Dictionary) -> void:
+		param.default_value = str(item.name)
+	, 'item_type')
+
+
+# a small field right above the chip; the container is kept alive across tabs so
+# hopping down a line does not respawn (and re-animate) the popup
+func _open_value_popup(_chip: HenActionValue) -> void:
+	var slot: Dictionary = _chip.part.get('slot', {})
+	var text: String = HenActionsPanel.edit_text(HenActionsPanel.literal_value(slot))
+
+	is_editing = true
+
+	var opts: Dictionary = {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_to = _chip.value_anchor(),
+		side = SIDE_TOP,
+		blur = false,
+		min_size = Vector2(150, 0)
+	}
+
+	if is_instance_valid(_value_popup) and is_instance_valid(_value_editor):
+		_set_editing_chip(_chip)
+		_value_editor.edit(_chip, text)
+		_value_popup.reanchor(opts)
+		# queued after the reanchor above, which defers the move itself
+		_value_editor.focus_field.call_deferred()
+		return
+
+	_value_editor = VALUE_POPUP_SCENE.instantiate()
+	_value_editor.confirmed.connect(_on_value_confirmed)
+	_value_editor.tabbed.connect(_on_value_tabbed)
+	_value_editor.cancelled.connect(_close_value_popup)
+
+	_value_popup = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(_value_editor, opts)
+	_value_popup.closed.connect(_on_value_popup_closed, CONNECT_ONE_SHOT)
+
+	_set_editing_chip(_chip)
+	_value_editor.edit(_chip, text)
+	_value_editor.focus_field.call_deferred()
+
+
+func _on_value_confirmed(_chip: HenActionValue, _text: String) -> void:
+	_commit_value(_chip, _text)
+	_close_value_popup()
+
+
+func _on_value_tabbed(_chip: HenActionValue, _text: String) -> void:
+	_commit_value(_chip, _text)
+
+	var next: HenActionValue = _next_chip(_chip)
+
+	if next:
+		_open_value_popup(next)
+	else:
+		_close_value_popup()
+
+
+func _commit_value(_chip: HenActionValue, _text: String) -> void:
+	if not is_instance_valid(_chip):
+		return
+
+	var slot: Dictionary = _chip.part.get('slot', {})
+	var param: HenSaveParam = slot.get('param')
+
+	if not param:
+		return
+
+	param.default_value = HenActionsPanel.parse_literal(_text, str(slot.get('type', param.type)))
+	_chip.set_value_text(HenActionsPanel.format_value(param.default_value))
+
+
+# wraps around, so tab keeps cycling instead of dead-ending on the last chip
+func _next_chip(_chip: HenActionValue) -> HenActionValue:
+	var index: int = _chips.find(_chip)
+
+	if index < 0 or _chips.size() < 2:
+		return null
+
+	return _chips[(index + 1) % _chips.size()]
+
+
+func _set_editing_chip(_chip: HenActionValue) -> void:
+	for chip: HenActionValue in _chips:
+		if is_instance_valid(chip):
+			chip.set_editing(chip == _chip)
+
+
+func _close_value_popup() -> void:
+	if is_instance_valid(_value_popup):
+		_value_popup.hide_popup()
+
+
+func _on_value_popup_closed() -> void:
+	_value_popup = null
+	_value_editor = null
+	_set_editing_chip(null)
 
 
 func _popup_opts(_anchor: Control) -> Dictionary:
@@ -229,8 +362,6 @@ func _delete_action(_action: HenSaveAction) -> void:
 		parent.body_actions.erase(_action)
 	elif save_data:
 		save_data.remove_state_action(state_id, _action)
-
-	_collapsed.erase(_fold_key(_action))
 
 	# the refresh below covers it, so closing must not trigger a second one
 	is_editing = false

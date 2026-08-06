@@ -50,7 +50,7 @@ class DirectedGraphEdge:
 	}
 	var sections: Array = []
 	var kind: StringName = &'forward'
-	# presentation of the transition itself: {kind, icon}; drives the edge color and pill icon
+	# presentation of the transition itself: {kind, icon, color, auto_label}
 	var meta: Dictionary = {}
 
 
@@ -62,3 +62,8 @@ class DirectedGraphEdge:
 		transition = config.transition
 		label.text = config.label_text
 		meta = config.get('meta', {})
+
+
+	# label.text keys the debug flash even when the name was auto-generated, so it stays set
+	func display_label() -> String:
+		return '' if bool(meta.get('auto_label', false)) else label.text

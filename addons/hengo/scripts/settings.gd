@@ -16,7 +16,6 @@ const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
 const POOL_SIZE_PATH = 'hengo/settings/pool_size'
 const DOCK_LOCATION_PATH = 'hengo/settings/dock_location'
-const ACTIONS_EXPANDED_PATH = 'hengo/settings/actions_expanded'
 const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 
 @export_tool_button('Compile current', 'Build') var compile_current: Callable = _on_compile_current_pressed
@@ -70,15 +69,6 @@ const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 		_set_value(POOL_SIZE_PATH, value)
 	get:
 		return _get_value(POOL_SIZE_PATH, 500)
-
-@export_group('Actions')
-
-# off by default: a folded row keeps the state card at its title width
-@export var actions_expanded: bool:
-	set(value):
-		_set_value(ACTIONS_EXPANDED_PATH, value)
-	get:
-		return _get_value(ACTIONS_EXPANDED_PATH, false)
 
 @export_group('Move')
 
@@ -184,7 +174,6 @@ func _property_can_revert(property: StringName) -> bool:
 		&'debug_compilation',
 		&'pool_size',
 		&'dock_location',
-		&'actions_expanded',
 		&'font_scale'
 	]
 
@@ -221,8 +210,6 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 500
 		&'dock_location':
 			return 0
-		&'actions_expanded':
-			return false
 		&'font_scale':
 			return 0.85
 	return null

@@ -4,6 +4,7 @@ class_name TestHenStateActionsList extends HenTestSuite
 
 const LIST_SCENE = preload('res://addons/hengo/scenes/state_actions_list.tscn')
 const FIX_PHASES: String = 'res://tests/fixtures/action_phases.gd'
+const FIX_MATH: String = 'res://addons/hengo/actions/math/math_operator.gd'
 
 var state: HenSaveState
 var macro: HenSaveMacro
@@ -112,43 +113,68 @@ func test_flash_only_takes_its_own_action_id() -> void:
 	assert_bool(actions_list.flash_action(&'no_such_action')).is_false()
 
 
-# a container recomputes its minimum size only during the layout pass
-func test_unfolding_a_row_only_measures_a_pass_later() -> void:
+# the chip list is the tab order, so it has to follow the rows top to bottom
+func test_editable_chips_follow_the_row_order() -> void:
+	var first: HenSaveAction = _add_action(&'enter')
+	var second: HenSaveAction = _add_action(&'update')
+
+	first.inputs[0].default_value = 'one'
+	second.inputs[0].default_value = 'two'
+
+	var actions_list: HenStateActionsList = _build_list()
+
+	assert_int(actions_list._chips.size()).is_equal(2)
+	assert_str(actions_list._chips[0].part.value).is_equal("'one'")
+	assert_str(actions_list._chips[1].part.value).is_equal("'two'")
+
+
+# a slot fed by another action renders as a capsule, and the chips inside it are
+# editable like any other
+func test_inline_action_renders_a_capsule_with_its_own_chips() -> void:
+	var action: HenSaveAction = _add_action(&'update')
+	action.input_actions['value'] = {action = _math_child(), output = &'result'}
+
+	var actions_list: HenStateActionsList = _build_list()
+	var row: HenActionRow = actions_list._rows_by_id[str(action.id)]
+	var capsules: Array = _capsules_of(row)
+
+	assert_int(capsules.size()).is_equal(1)
+	# a + b, with op picked from a fixed option set
+	assert_int(actions_list._chips.size()).is_equal(2)
+
+
+func test_tab_wraps_around_the_chip_list() -> void:
+	_add_action(&'update')
 	_add_action(&'update')
 
-	var panel: PanelContainer = auto_free(PanelContainer.new())
-	add_child(panel)
+	var actions_list: HenStateActionsList = _build_list()
+	var first: HenActionValue = actions_list._chips[0]
+	var last: HenActionValue = actions_list._chips[1]
 
-	var actions_list: HenStateActionsList = LIST_SCENE.instantiate()
-	panel.add_child(actions_list)
-	actions_list.setup(save_data, state.id)
-
-	await get_tree().process_frame
-	await get_tree().process_frame
-
-	var folded: float = panel.get_combined_minimum_size().y
-	var row: HenActionRow = actions_list._rows_by_id.values()[0]
-
-	row.set_collapsed(false)
-
-	assert_float(panel.get_combined_minimum_size().y).is_equal(folded)
-
-	await get_tree().process_frame
-	await get_tree().process_frame
-
-	assert_float(panel.get_combined_minimum_size().y).is_greater(folded)
+	assert_object(actions_list._next_chip(first)).is_same(last)
+	assert_object(actions_list._next_chip(last)).is_same(first)
 
 
-# the graph rebuilds every card on any structural change
-func test_fold_state_survives_a_rebuilt_list() -> void:
-	var action: HenSaveAction = _add_action(&'update')
+func _math_child() -> HenSaveAction:
+	var child: HenSaveAction = HenSaveAction.create(_register(FIX_MATH))
 
-	_build_list()._on_row_collapse_toggled(action, false)
+	for param: HenSaveParam in child.inputs:
+		match str(param.id):
+			'a': param.default_value = 1.0
+			'op': param.default_value = '+'
+			'b': param.default_value = 2.0
 
-	var rebuilt: HenStateActionsList = _build_list()
-	var row: HenActionRow = rebuilt._rows_by_id[str(action.id)]
+	return child
 
-	assert_bool(row._collapsed).is_false()
+
+func _capsules_of(_row: HenActionRow) -> Array:
+	var found: Array = []
+
+	for child: Node in _row.get_node('Margin/Line').get_children():
+		if child is HenActionCapsule:
+			found.append(child)
+
+	return found
 
 
 func test_delete_removes_the_action_and_its_row() -> void:

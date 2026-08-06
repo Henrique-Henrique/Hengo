@@ -66,6 +66,14 @@ func show_content(_content: Control, opts: Dictionary = {}) -> HenPopupContainer
 	return self
 
 
+# moves an open popup to another anchor, skipping the spawn tween and the
+# restyling, so hopping between value chips does not respawn the container
+func reanchor(opts: Dictionary) -> void:
+	var gp: PanelContainer = get_node('%GeneralPopUp')
+
+	_position_anchored.call_deferred(gp, opts)
+
+
 func _default_lod_for(layout: HenGeneralPopup.Layout) -> float:
 	if layout == HenGeneralPopup.Layout.ANCHORED:
 		return 0.0

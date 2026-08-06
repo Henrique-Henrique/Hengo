@@ -97,11 +97,14 @@ static func display_name(_action: HenSaveAction) -> String:
 	return macro.name if macro else _action.name
 
 
-# one {kind, label, value} per input; kind picks the chip icon/color, and the
-# label is dropped on single-input actions (the value alone already reads)
+# one {kind, label, value} per input; kind picks the chip color, and the label is
+# dropped on single-input actions (the value alone already reads). a part also
+# carries `slot` (what the value editor writes to), `options`, `editable` and,
+# when another action feeds it, the recursive `capsule`
 static func value_parts(_action: HenSaveAction) -> Array[Dictionary]:
 	var macro: HenSaveMacro = find_macro(_action.macro_id)
 	var show_names: bool = _action.inputs.size() > 1
+	var params: Dictionary = macro_params(macro)
 	var parts: Array[Dictionary] = []
 
 	for param: HenSaveParam in _action.inputs:
@@ -110,17 +113,141 @@ static func value_parts(_action: HenSaveAction) -> Array[Dictionary]:
 
 		# a slot that needs a source is unusable until bound, so say it out loud
 		var declared: HenSaveParam = _macro_param(macro, key, param)
+		var needs_bind: bool = declared.lvalue or declared.bind_only
 
-		if part.kind == &'literal' and (declared.lvalue or declared.bind_only):
+		if part.kind == &'literal' and needs_bind:
 			part.value = '(none)' if declared.optional else 'not set'
 
 		part.label = param.name if show_names else ''
+		part.options = declared.options if not declared.options.is_empty() else param.options
+		part.slot = input_slot(_action, param, declared, params)
+		part.editable = part.kind == &'literal' and not needs_bind and (part.options as Array).is_empty() and is_text_type(str(part.slot.type))
+
 		parts.append(part)
 
 	parts.append_array(output_parts(_action, macro))
 	parts.append_array(branch_parts(_action, macro))
 
 	return parts
+
+
+# what the value editor of an input slot writes to, in the shape the inspector
+# builds for the same input
+static func input_slot(_action: HenSaveAction, _param: HenSaveParam, _declared: HenSaveParam, _params: Dictionary) -> Dictionary:
+	var key: String = str(_param.id)
+
+	return {
+		action = _action,
+		param = _param,
+		type = slot_type(_action, _declared, _param),
+		bind_store = _action.input_bindings,
+		bind_key = key,
+		expr_store = _action.input_expressions,
+		expr_key = key,
+		action_store = _action.input_actions,
+		action_key = key,
+		macro_params = _params
+	}
+
+
+# input id -> the macro's own param, which carries the flags an action clone may
+# predate (options, lvalue, type_from)
+static func macro_params(_macro: HenSaveMacro) -> Dictionary:
+	var params: Dictionary = {}
+
+	if not _macro:
+		return params
+
+	for param: HenSaveParam in _macro.inputs:
+		params[str(param.id)] = param
+
+	return params
+
+
+# declared type, unless type_from points at another input whose bound source
+# dictates it (set_value's Value follows Target)
+static func slot_type(_action: HenSaveAction, _declared: HenSaveParam, _param: HenSaveParam) -> String:
+	var type_from: String = str(_declared.type_from)
+
+	if type_from.is_empty():
+		return str(_param.type)
+
+	var bind: String = _action.input_bindings.get(type_from, '')
+
+	if bind.is_empty():
+		return str(_param.type)
+
+	var resolved: String = HenUtils.get_bound_source_type(_save_data(), bind)
+
+	return resolved if not resolved.is_empty() else str(_param.type)
+
+
+# a type that reads and round-trips as a single line of text; anything composite
+# keeps its dedicated inspector editor
+static func is_text_type(_type: String) -> bool:
+	return HenUtils.get_variant_type_from_string(_type) in [TYPE_NIL, TYPE_STRING, TYPE_STRING_NAME, TYPE_INT, TYPE_FLOAT]
+
+
+# text typed in a value chip, converted to the slot type. an untyped slot stays a
+# string, which is what the inspector's editor does for Variant
+static func parse_literal(_text: String, _type: String) -> Variant:
+	match HenUtils.get_variant_type_from_string(_type):
+		TYPE_STRING_NAME:
+			return StringName(_text)
+		TYPE_INT:
+			return int(_text)
+		TYPE_FLOAT:
+			return float(_text)
+
+	return _text
+
+
+# what a chip shows once it is being typed into: the stored text without the
+# quotes format_value adds
+static func edit_text(_value: Variant) -> String:
+	return '' if _value == null else str(_value)
+
+
+# the literal a chip edits, seeded from the macro default the same way the
+# inspector seeds it before showing an editor
+static func literal_value(_slot: Dictionary) -> Variant:
+	var param: HenSaveParam = _slot.get('param')
+
+	if not param:
+		return null
+
+	if param.default_value == null:
+		var declared: HenSaveParam = (_slot.get('macro_params', {}) as Dictionary).get(str(_slot.get('bind_key', '')))
+
+		if declared and declared.default_value != null:
+			param.default_value = declared.default_value
+
+	return param.default_value
+
+
+# recursive {action, title, icon, color, parts} of the action feeding a slot, so
+# a row can render it as a nested capsule instead of a flat label
+static func capsule_data(_ref: Variant) -> Dictionary:
+	var child: HenSaveAction = inline_child(_ref)
+
+	if not child:
+		return {}
+
+	var macro: HenSaveMacro = find_macro(child.macro_id)
+	var parts: Array[Dictionary] = value_parts(child)
+
+	# a producer runs at the phase of the action it feeds, so its own editor has
+	# no phase to offer
+	for part: Dictionary in parts:
+		(part.slot as Dictionary).inline = true
+
+	return {
+		action = child,
+		title = display_name(child),
+		icon = macro.icon if macro else '',
+		color = macro.color if macro else '',
+		parts = parts
+	}
 
 
 # where each stored output lands, so a producer's reason to exist reads on the
@@ -142,7 +269,8 @@ static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[
 		parts.append({
 			kind = _bind_kind(bind),
 			label = output.name if show_names else '',
-			value = '-> ' + _bind_label(bind)
+			value = '-> ' + _bind_label(bind),
+			slot = {action = _action}
 		})
 
 	return parts
@@ -168,7 +296,12 @@ static func branch_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[
 			var source: Dictionary = HenGeneratorAction.branch_instance_source(save_data, _action, str(flow.id))
 			var source_name: String = _bind_label(str(source.value)) if str(source.get('kind', '')) == 'bind' else str(source.get('value', ''))
 			var suffix: String = (' @ ' + source_name) if not source.is_empty() else ''
-			parts.append({kind = &'branch', label = flow.name, value = '-> ' + target.name + suffix})
+			parts.append({
+				kind = &'branch',
+				label = flow.name,
+				value = '-> ' + target.name + suffix,
+				slot = {action = _action}
+			})
 
 	return parts
 
@@ -187,7 +320,11 @@ static func value_preview(_action: HenSaveAction) -> String:
 # same precedence codegen uses: inline action > expression > binding > literal
 static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _raw: bool = false) -> Dictionary:
 	if _action.input_actions.has(_key):
-		return {kind = &'action', value = inline_label(_action.input_actions[_key])}
+		return {
+			kind = &'action',
+			value = inline_label(_action.input_actions[_key]),
+			capsule = capsule_data(_action.input_actions[_key])
+		}
 
 	if _action.input_expressions.has(_key):
 		return {kind = &'expression', value = (_action.input_expressions[_key] as HenSaveActionExpression).code}

@@ -87,8 +87,12 @@ func update_edges(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	queue_redraw()
 
 
-# the transition type owns the color; the routing kind only tints edges without meta
 func _kind_color(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Color:
+	var action_color: String = str(edge.meta.get('color', ''))
+
+	if action_color.is_valid_html_color():
+		return Color(action_color)
+
 	match StringName(str(edge.meta.get('kind', ''))):
 		&'cross_script':
 			return CROSS_SCRIPT_COLOR
@@ -173,7 +177,7 @@ func _build_edge_views() -> void:
 			lengths[i] = total_len
 
 		# pill anchored at the route's ideal label point: transition type icon + name, tinted by the type
-		var label_text: String = edge.label.text
+		var label_text: String = edge.display_label()
 		var lbl: HenStateEdgePill = null
 		if not label_text.is_empty():
 			var label_pos: Vector2 = section.label_pos if section.has('label_pos') \

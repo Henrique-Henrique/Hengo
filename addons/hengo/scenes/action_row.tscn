@@ -18,17 +18,12 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 4
 
-[node name="Body" type="VBoxContainer" parent="Margin"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 0
-
-[node name="Header" type="HBoxContainer" parent="Margin/Body"]
+[node name="Line" type="HBoxContainer" parent="Margin"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="Grip" type="TextureRect" parent="Margin/Body/Header"]
+[node name="Grip" type="TextureRect" parent="Margin/Line"]
 custom_minimum_size = Vector2(10, 14)
 layout_mode = 2
 size_flags_vertical = 4
@@ -37,34 +32,16 @@ texture = ExtResource("2_grip")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="CollapseBt" type="Button" parent="Margin/Body/Header"]
+[node name="Icon" type="TextureRect" parent="Margin/Line"]
 custom_minimum_size = Vector2(18, 18)
 layout_mode = 2
 size_flags_vertical = 4
-mouse_default_cursor_shape = 2
-theme_override_constants/icon_max_width = 14
-flat = true
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Icon" type="TextureRect" parent="Margin/Body/Header"]
+[node name="Title" type="Label" parent="Margin/Line"]
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
-stretch_mode = 5
-
-[node name="Title" type="Label" parent="Margin/Body/Header"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
 text = "Action"
-clip_text = true
-
-[node name="ValuesMargin" type="MarginContainer" parent="Margin/Body"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 32
-
-[node name="Values" type="HFlowContainer" parent="Margin/Body/ValuesMargin"]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/h_separation = 6
-theme_override_constants/v_separation = 2
