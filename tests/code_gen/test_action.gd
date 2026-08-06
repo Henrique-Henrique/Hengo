@@ -18,7 +18,7 @@ var state: HenSaveState
 
 
 func before_test() -> void:
-	super ()
+	super()
 	# a type that actually has float/vector props, so property binding has a target
 	save_data.identity.type = 'Sprite2D'
 	state = save_data.add_state(false)
@@ -595,11 +595,9 @@ func test_producer_palette_filters_to_inlinable() -> void:
 	save_data.identity.type = 'CharacterBody2D'
 	HenScriptMacroLoader.load_native_actions()
 
-	var search: HenActionsSearch = load('res://addons/hengo/scenes/actions_search.tscn').instantiate()
+	var search: HenActionsSearch = auto_free(load('res://addons/hengo/scenes/actions_search.tscn').instantiate())
 	search.setup(state.id)
-	search.setup_producer_picker('Variant', func(_m: HenSaveMacro) -> void: pass)
-	add_child(search)
-	auto_free(search)
+	search.setup_producer_picker('Variant', func(_m: HenSaveMacro) -> void: pass )
 
 	var ids: Array = []
 	for macro: HenSaveMacro in search._get_pool():
@@ -618,7 +616,7 @@ func test_producer_palette_filters_by_output_type() -> void:
 
 	var search: HenActionsSearch = load('res://addons/hengo/scenes/actions_search.tscn').instantiate()
 	search.setup(state.id)
-	search.setup_producer_picker('Vector2', func(_m: HenSaveMacro) -> void: pass)
+	search.setup_producer_picker('Vector2', func(_m: HenSaveMacro) -> void: pass )
 	add_child(search)
 	auto_free(search)
 
@@ -3257,7 +3255,7 @@ func _trace_line(_action: HenSaveAction) -> String:
 	var script_id: String = str(save_data.identity.id)
 
 	return 'if _ref.get_instance_id() == HengoDebugger.state_targets.get("' + script_id \
-		+ '", -1): HengoDebugger.trace_action(&"' + str(_action.id) + '", "' + script_id + '")'
+		+'", -1): HengoDebugger.trace_action(&"' + str(_action.id) + '", "' + script_id + '")'
 
 
 # with debug on, each action gets a guarded trace line right before its body, so
@@ -3325,7 +3323,7 @@ func test_debug_flashes_branch_transition_edge() -> void:
 	var code: String = _code_with_debug()
 
 	assert_str(code).contains('trace_state_transition("state test", "morreu", "' + sid
-		+ '")\n\t\t_ref._STATE_CONTROLLER.change_state("dead")')
+		+'")\n\t\t_ref._STATE_CONTROLLER.change_state("dead")')
 	assert_str(code).contains('if _ref.get_instance_id() == HengoDebugger.state_targets.get("' + sid + '", -1):')
 
 	var script := GDScript.new()
