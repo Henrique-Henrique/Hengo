@@ -234,6 +234,24 @@ bg_color = Color(0.063, 0.063, 0.086, 1)
 border_width_right = 1
 border_color = Color(0.18, 0.18, 0.21, 1)
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_sidetab"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidetab_hover"]
+bg_color = Color(1, 1, 1, 0.06)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidetab_pressed"]
+bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.22)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+corner_detail = 5
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_statusbar"]
 content_margin_left = 8.0
 content_margin_top = 2.0
@@ -313,26 +331,8 @@ bg_color = Color(0.22, 0.22, 0.26, 1)
 expand_margin_top = 4.0
 expand_margin_bottom = 4.0
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_sidetab"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidetab_hover"]
-bg_color = Color(1, 1, 1, 0.06)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-corner_detail = 5
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidetab_pressed"]
-bg_color = Color(0.43137255, 0.5647059, 0.90588236, 0.22)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-corner_detail = 5
-
 [resource]
-default_font_size = 14
+default_font_size = 16
 Button/constants/align_to_largest_stylebox = 0
 Button/constants/h_separation = 4
 Button/constants/icon_max_width = 0

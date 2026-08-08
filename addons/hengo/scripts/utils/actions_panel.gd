@@ -101,7 +101,9 @@ static func display_name(_action: HenSaveAction) -> String:
 # dropped on single-input actions (the value alone already reads). a part also
 # carries `slot` (what the value editor writes to), `options`, `editable` and,
 # when another action feeds it, the recursive `capsule`
-static func value_parts(_action: HenSaveAction) -> Array[Dictionary]:
+# _owner is the save data the action belongs to: with several scripts open, the
+# active one is not always it, and a binding only resolves against its own
+static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> Array[Dictionary]:
 	var macro: HenSaveMacro = find_macro(_action.macro_id)
 	var show_names: bool = _action.inputs.size() > 1
 	var params: Dictionary = macro_params(macro)
@@ -109,7 +111,7 @@ static func value_parts(_action: HenSaveAction) -> Array[Dictionary]:
 
 	for param: HenSaveParam in _action.inputs:
 		var key: String = str(param.id)
-		var part: Dictionary = _slot_part(_action, key, _seeded_value(macro, key, param.default_value), _is_raw(macro, key, param))
+		var part: Dictionary = _slot_part(_action, key, _seeded_value(macro, key, param.default_value), _is_raw(macro, key, param), _owner)
 
 		# a slot that needs a source is unusable until bound, so say it out loud
 		var declared: HenSaveParam = _macro_param(macro, key, param)
@@ -125,8 +127,8 @@ static func value_parts(_action: HenSaveAction) -> Array[Dictionary]:
 
 		parts.append(part)
 
-	parts.append_array(output_parts(_action, macro))
-	parts.append_array(branch_parts(_action, macro))
+	parts.append_array(output_parts(_action, macro, _owner))
+	parts.append_array(branch_parts(_action, macro, _owner))
 
 	return parts
 
@@ -227,14 +229,14 @@ static func literal_value(_slot: Dictionary) -> Variant:
 
 # recursive {action, title, icon, color, parts} of the action feeding a slot, so
 # a row can render it as a nested capsule instead of a flat label
-static func capsule_data(_ref: Variant) -> Dictionary:
+static func capsule_data(_ref: Variant, _owner: HenSaveData = null) -> Dictionary:
 	var child: HenSaveAction = inline_child(_ref)
 
 	if not child:
 		return {}
 
 	var macro: HenSaveMacro = find_macro(child.macro_id)
-	var parts: Array[Dictionary] = value_parts(child)
+	var parts: Array[Dictionary] = value_parts(child, _owner)
 
 	# a producer runs at the phase of the action it feeds, so its own editor has
 	# no phase to offer
@@ -252,7 +254,7 @@ static func capsule_data(_ref: Variant) -> Dictionary:
 
 # where each stored output lands, so a producer's reason to exist reads on the
 # row; an unbound output is left out
-static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[Dictionary]:
+static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro, _owner: HenSaveData = null) -> Array[Dictionary]:
 	var parts: Array[Dictionary] = []
 
 	if not _macro or _macro.outputs.is_empty():
@@ -267,9 +269,9 @@ static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[
 			continue
 
 		parts.append({
-			kind = _bind_kind(bind),
+			kind = _bind_kind(bind, _owner),
 			label = output.name if show_names else '',
-			value = '-> ' + _bind_label(bind),
+			value = '-> ' + _bind_label(bind, _owner),
 			slot = {action = _action}
 		})
 
@@ -277,14 +279,13 @@ static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[
 
 
 # where each configured branch goes; unset branches are left out of the row
-static func branch_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[Dictionary]:
+static func branch_parts(_action: HenSaveAction, _macro: HenSaveMacro, _owner: HenSaveData = null) -> Array[Dictionary]:
 	var parts: Array[Dictionary] = []
 
 	if not _macro:
 		return parts
 
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var save_data: HenSaveData = global.SAVE_DATA if global else null
+	var save_data: HenSaveData = _save_data(_owner)
 
 	if not save_data:
 		return parts
@@ -294,7 +295,7 @@ static func branch_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[
 
 		if target:
 			var source: Dictionary = HenGeneratorAction.branch_instance_source(save_data, _action, str(flow.id))
-			var source_name: String = _bind_label(str(source.value)) if str(source.get('kind', '')) == 'bind' else str(source.get('value', ''))
+			var source_name: String = _bind_label(str(source.value), _owner) if str(source.get('kind', '')) == 'bind' else str(source.get('value', ''))
 			var suffix: String = (' @ ' + source_name) if not source.is_empty() else ''
 			parts.append({
 				kind = &'branch',
@@ -307,10 +308,10 @@ static func branch_parts(_action: HenSaveAction, _macro: HenSaveMacro) -> Array[
 
 
 # flattened parts, used as the row tooltip when the chips clip
-static func value_preview(_action: HenSaveAction) -> String:
+static func value_preview(_action: HenSaveAction, _owner: HenSaveData = null) -> String:
 	var texts: PackedStringArray = []
 
-	for part: Dictionary in value_parts(_action):
+	for part: Dictionary in value_parts(_action, _owner):
 		var value: String = ('(' + str(part.value) + ')') if part.kind == &'expression' else str(part.value)
 		texts.append((str(part.label) + ': ' + value) if not str(part.label).is_empty() else value)
 
@@ -318,12 +319,12 @@ static func value_preview(_action: HenSaveAction) -> String:
 
 
 # same precedence codegen uses: inline action > expression > binding > literal
-static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _raw: bool = false) -> Dictionary:
+static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _raw: bool = false, _owner: HenSaveData = null) -> Dictionary:
 	if _action.input_actions.has(_key):
 		return {
 			kind = &'action',
-			value = inline_label(_action.input_actions[_key]),
-			capsule = capsule_data(_action.input_actions[_key])
+			value = inline_label(_action.input_actions[_key], _owner),
+			capsule = capsule_data(_action.input_actions[_key], _owner)
 		}
 
 	if _action.input_expressions.has(_key):
@@ -332,7 +333,7 @@ static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _r
 	var bind: String = _action.input_bindings.get(_key, '')
 
 	if not bind.is_empty():
-		return {kind = _bind_kind(bind), value = _bind_label(bind)}
+		return {kind = _bind_kind(bind, _owner), value = _bind_label(bind, _owner)}
 
 	# a raw input is emitted verbatim, so quoting it here would misread as a string
 	if _raw:
@@ -342,7 +343,7 @@ static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _r
 
 
 # e.g. Raycast 120.0, 'enemy|world', +2 actions
-static func inline_label(_ref: Variant) -> String:
+static func inline_label(_ref: Variant, _owner: HenSaveData = null) -> String:
 	var child: HenSaveAction = inline_child(_ref)
 
 	if not child:
@@ -358,7 +359,7 @@ static func inline_label(_ref: Variant) -> String:
 		if child.input_actions.has(key):
 			nested += 1
 		else:
-			var part: Dictionary = _slot_part(child, key, _seeded_value(macro, key, param.default_value), _is_raw(macro, key, param))
+			var part: Dictionary = _slot_part(child, key, _seeded_value(macro, key, param.default_value), _is_raw(macro, key, param), _owner)
 			literals.append(('(' + str(part.value) + ')') if part.kind == &'expression' else str(part.value))
 
 	var summary: String = ', '.join(literals)
@@ -399,8 +400,51 @@ static func _macro_param(_macro: HenSaveMacro, _key: String, _param: HenSavePara
 
 # a bound slot is one of the script's variables, an engine-provided value or a
 # native property
-static func _bind_kind(_bind: String) -> StringName:
-	var save_data: HenSaveData = _save_data()
+# the open script holding this action, which is not always the active one. a
+# binding is stored by variable id and ids repeat across scripts, so reading one
+# against the wrong save data silently shows another script's variable
+static func owner_of(_action: HenSaveAction) -> HenSaveData:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global or not _action:
+		return _save_data()
+
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if save_data and _holds_action(save_data, _action):
+			return save_data
+
+	return global.SAVE_DATA
+
+
+static func _holds_action(_save_data: HenSaveData, _target: HenSaveAction) -> bool:
+	for state_id: Variant in _save_data.state_actions:
+		for action: HenSaveAction in _save_data.state_actions[state_id]:
+			if _contains_action(action, _target):
+				return true
+
+	return false
+
+
+# an action may be nested in a loop body or feeding an input, so the search walks both
+static func _contains_action(_root: HenSaveAction, _target: HenSaveAction) -> bool:
+	if _root == _target:
+		return true
+
+	for child: HenSaveAction in _root.body_actions:
+		if _contains_action(child, _target):
+			return true
+
+	for key: Variant in _root.input_actions:
+		var child: HenSaveAction = inline_child(_root.input_actions[key])
+
+		if child and _contains_action(child, _target):
+			return true
+
+	return false
+
+
+static func _bind_kind(_bind: String, _owner: HenSaveData = null) -> StringName:
+	var save_data: HenSaveData = _save_data(_owner)
 
 	var bind: Dictionary = HenUtils.classify_bind_code(save_data, _bind)
 
@@ -416,11 +460,14 @@ static func _bind_kind(_bind: String) -> StringName:
 
 
 # bindings are stored by id, so the row shows the variable's current name
-static func _bind_label(_bind: String) -> String:
-	return HenUtils.get_bind_label(_save_data(), _bind)
+static func _bind_label(_bind: String, _owner: HenSaveData = null) -> String:
+	return HenUtils.get_bind_label(_save_data(_owner), _bind)
 
 
-static func _save_data() -> HenSaveData:
+static func _save_data(_owner: HenSaveData = null) -> HenSaveData:
+	if _owner:
+		return _owner
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	return global.SAVE_DATA if global else null

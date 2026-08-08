@@ -1212,6 +1212,71 @@
 		},
 		{
 			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Picks one number out of a list: the smallest, the biggest, or the one nearest to a target.",
+			"has_body": false,
+			"icon": "list-checks",
+			"id": "best_in_list",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The list of numbers to choose from.",
+					"id": "list",
+					"lvalue": false,
+					"name": "List",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "'lowest'",
+					"doc": "Which one to take.",
+					"id": "mode",
+					"lvalue": false,
+					"name": "Pick",
+					"optional": false,
+					"options": [
+						"lowest",
+						"highest",
+						"nearest"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The number to be near, used only by nearest.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Near",
+					"optional": true,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Best In List",
+			"outputs": [
+				{
+					"doc": "The chosen number, or null when the list is empty.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node3d",
 			"color": "#06b6d4",
 			"default_phase": "update",
@@ -1347,6 +1412,60 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Calls a method on a node, with an optional argument. It reaches methods no dedicated action covers, such as queue_free or a custom one.",
+			"has_body": false,
+			"icon": "phone-forwarded",
+			"id": "call_method",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node whose method is called.",
+					"id": "node",
+					"lvalue": false,
+					"name": "Node",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'queue_free'",
+					"doc": "The name of the method to call, such as queue_free.",
+					"id": "method",
+					"lvalue": false,
+					"name": "Method",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "A single value passed to the method. Leave it empty for a method that takes none.",
+					"id": "arg",
+					"lvalue": false,
+					"name": "Argument",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Call Method",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -1531,6 +1650,74 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Compares two values and keeps the true or false answer as a value. Unlike Compare, it does not change state, so the answer can feed another action.",
+			"has_body": false,
+			"icon": "equal",
+			"id": "check",
+			"inputs": [
+				{
+					"default": "0",
+					"doc": "The left value in the comparison.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "'=='",
+					"doc": "How to compare the two values.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"==",
+						"!=",
+						">",
+						">=",
+						"<",
+						"<="
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The right value in the comparison.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "a"
+				}
+			],
+			"name": "Check",
+			"outputs": [
+				{
+					"doc": "True when the comparison holds, false otherwise.",
+					"id": "result",
+					"name": "Result",
+					"type": "bool"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -1754,6 +1941,70 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Joins two tests into one, demanding both or accepting either. It is what a condition with two parts needs before reaching Do If or Pick Value.",
+			"has_body": false,
+			"icon": "git-branch-plus",
+			"id": "combine_checks",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "The first test.",
+					"id": "a",
+					"lvalue": false,
+					"name": "First",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				},
+				{
+					"default": "'and'",
+					"doc": "Whether both tests have to pass, or just one of them.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Mode",
+					"optional": false,
+					"options": [
+						"and",
+						"or"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "The second test.",
+					"id": "b",
+					"lvalue": false,
+					"name": "Second",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Combine Checks",
+			"outputs": [
+				{
+					"doc": "The answer of the two tests together.",
+					"id": "result",
+					"name": "Result",
+					"type": "bool"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -2020,7 +2271,7 @@
 			"category": "dictionary",
 			"color": "#14b8a6",
 			"default_phase": "update",
-			"description": "Reads the value stored under a given key in a dictionary. A missing key returns null.",
+			"description": "Reads the value stored under a given key in a dictionary. A missing key returns the default value.",
 			"has_body": false,
 			"icon": "key",
 			"id": "dict_get",
@@ -2046,12 +2297,23 @@
 					"options": [],
 					"type": "String",
 					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The value returned when the key is not in the dictionary.",
+					"id": "default",
+					"lvalue": false,
+					"name": "Default",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
 				}
 			],
 			"name": "Dictionary Get",
 			"outputs": [
 				{
-					"doc": "Where to store the value found at the key, or null when missing.",
+					"doc": "Where to store the value found at the key, or the default when missing.",
 					"id": "result",
 					"name": "Result",
 					"type": "Variant"
@@ -2337,6 +2599,37 @@
 			"target_classes": []
 		},
 		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Runs its nested actions only when the condition is true, staying in the same state.",
+			"has_body": true,
+			"icon": "git-branch",
+			"id": "do_if",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "The test to run, such as a comparison kept in a variable or a Check action placed right here.",
+					"id": "condition",
+					"lvalue": false,
+					"name": "Condition",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Do If",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [
 				{
 					"doc": "Where to go the first time only.",
@@ -2429,6 +2722,45 @@
 		},
 		{
 			"branches": [],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Stores whether an object still points at a live instance. It is the Is Valid answer as a value, to feed Do If or Combine Checks.",
+			"has_body": false,
+			"icon": "circle-check",
+			"id": "exists",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The variable holding the object to check.",
+					"id": "object",
+					"lvalue": false,
+					"name": "Object",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Exists",
+			"outputs": [
+				{
+					"doc": "True while the object is alive.",
+					"id": "result",
+					"name": "Result",
+					"type": "bool"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "audio",
 			"color": "#ec4899",
 			"default_phase": "enter",
@@ -2475,6 +2807,164 @@
 			"outputs": [],
 			"phases": [
 				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Keeps only the items of a list that pass a test, and stores the shorter list. Chaining two of them is how a filter with two conditions is written.",
+			"has_body": false,
+			"icon": "list-filter",
+			"id": "filter_list",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The list to walk through.",
+					"id": "list",
+					"lvalue": false,
+					"name": "List",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "''",
+					"doc": "The property tested on each item, with a colon to reach a part of it, as in position:y. Leave it empty to test the item itself.",
+					"id": "property",
+					"lvalue": false,
+					"name": "Property",
+					"optional": true,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "'=='",
+					"doc": "How the value is compared.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"==",
+						"!=",
+						">",
+						">=",
+						"<",
+						"<="
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "What each item is compared against.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Filter List",
+			"outputs": [
+				{
+					"doc": "The items that passed the test.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Collects the nodes of a group whose property passes a comparison and stores them as an array. Pair it with For Each to act only on the ones that matched.",
+			"has_body": false,
+			"icon": "list-filter",
+			"id": "filter_nodes",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The group whose nodes are looked at.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				},
+				{
+					"default": "'visible'",
+					"doc": "The property read on each node, such as visible or health.",
+					"id": "property",
+					"lvalue": false,
+					"name": "Property",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "'=='",
+					"doc": "How the property is compared to the value.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"==",
+						"!=",
+						">",
+						">=",
+						"<",
+						"<="
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value the property is compared against.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Get Nodes Where",
+			"outputs": [
+				{
+					"doc": "Where to store the array of nodes that matched.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
 			],
 			"target_classes": []
 		},
@@ -2642,6 +3132,12 @@
 					"id": "item",
 					"name": "Item",
 					"type": "Variant"
+				},
+				{
+					"doc": "The position of the current element, starting at 0.",
+					"id": "index",
+					"name": "Index",
+					"type": "int"
 				}
 			],
 			"phases": [
@@ -3136,6 +3632,56 @@
 		},
 		{
 			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Reads a property or a variable of any node by its name and stores the value. It reaches values no dedicated action covers, on this node or on another one.",
+			"has_body": false,
+			"icon": "sliders-horizontal",
+			"id": "get_property",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to read the value from.",
+					"id": "node",
+					"lvalue": false,
+					"name": "Node",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'position'",
+					"doc": "The name of the property or variable, such as health. Reach a part of it with a colon, as in position:y.",
+					"id": "name",
+					"lvalue": false,
+					"name": "Name",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Get Property",
+			"outputs": [
+				{
+					"doc": "Where to store the value that was read.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "control",
 			"color": "#60a5fa",
 			"default_phase": "update",
@@ -3463,6 +4009,45 @@
 			"phases": [
 				"enter",
 				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Stores whether this node belongs to a named group. It is the Is In Group answer as a value, to feed Do If or Combine Checks.",
+			"has_body": false,
+			"icon": "users",
+			"id": "in_group",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The name of the group to look for.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "In Group",
+			"outputs": [
+				{
+					"doc": "True while this node is in the group.",
+					"id": "result",
+					"name": "Result",
+					"type": "bool"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
 			],
 			"target_classes": []
 		},
@@ -3814,6 +4399,56 @@
 			"phases": [
 				"enter",
 				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Puts two lists together into a new one, such as pouring a discard pile back into a deck.",
+			"has_body": false,
+			"icon": "list-plus",
+			"id": "join_lists",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The list that comes first.",
+					"id": "a",
+					"lvalue": false,
+					"name": "First",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The list added after it.",
+					"id": "b",
+					"lvalue": false,
+					"name": "Second",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				}
+			],
+			"name": "Join Lists",
+			"outputs": [
+				{
+					"doc": "The two lists, one after the other.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
 			],
 			"target_classes": []
 		},
@@ -4179,6 +4814,56 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Reads one property from every item of a list and stores the values as a new list, such as turning a list of nodes into a list of their scores.",
+			"has_body": false,
+			"icon": "list-plus",
+			"id": "map_list",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The list to read from.",
+					"id": "list",
+					"lvalue": false,
+					"name": "List",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": "'name'",
+					"doc": "The property read from each item, with a colon to reach a part of it, as in position:x.",
+					"id": "property",
+					"lvalue": false,
+					"name": "Property",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Collect Property",
+			"outputs": [
+				{
+					"doc": "One value per item, in the same order.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -4933,6 +5618,106 @@
 			]
 		},
 		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Stores whether a node exists at a path below this one. It is the Has Node answer as a value, to feed Do If or Combine Checks.",
+			"has_body": false,
+			"icon": "search",
+			"id": "node_exists",
+			"inputs": [
+				{
+					"default": "''",
+					"doc": "The path to look for, counted from this node.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Node Exists",
+			"outputs": [
+				{
+					"doc": "True while a node sits at that path.",
+					"id": "result",
+					"name": "Result",
+					"type": "bool"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Builds a list of numbers, ready to walk with For Each or to use as indexes.",
+			"has_body": false,
+			"icon": "list-ordered",
+			"id": "number_list",
+			"inputs": [
+				{
+					"default": "0",
+					"doc": "The first number of the list.",
+					"id": "from",
+					"lvalue": false,
+					"name": "From",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "10",
+					"doc": "The number to stop before, so it is never part of the list.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "1",
+					"doc": "How much to advance between numbers. Negative counts down.",
+					"id": "step",
+					"lvalue": false,
+					"name": "Step",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Number List",
+			"outputs": [
+				{
+					"doc": "The built list of numbers.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [
 				{
 					"doc": "Where to go when the signal is received.",
@@ -5610,6 +6395,67 @@
 		},
 		{
 			"branches": [],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Picks between two values depending on a condition and keeps the chosen one.",
+			"has_body": false,
+			"icon": "split",
+			"id": "pick_value",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "The test that decides which value is taken.",
+					"id": "condition",
+					"lvalue": false,
+					"name": "Condition",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value taken when the condition is true.",
+					"id": "if_true",
+					"lvalue": false,
+					"name": "If True",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value taken when the condition is false.",
+					"id": "if_false",
+					"lvalue": false,
+					"name": "If False",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "if_true"
+				}
+			],
+			"name": "Pick Value",
+			"outputs": [
+				{
+					"doc": "The value that was picked.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
@@ -6089,6 +6935,56 @@
 			"target_classes": []
 		},
 		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Picks a random point inside the box between Min and Max, useful to spawn something at a random spot.",
+			"has_body": false,
+			"icon": "dice-5",
+			"id": "random_vector3",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The lowest corner of the box.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(10.0, 10.0, 10.0)",
+					"doc": "The highest corner of the box.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Random Vector3",
+			"outputs": [
+				{
+					"doc": "The random point.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [
 				{
 					"doc": "Where to go when the ray touches something.",
@@ -6254,6 +7150,37 @@
 			"category": "scene",
 			"color": "#64748b",
 			"default_phase": "enter",
+			"description": "Removes the node from a named group, so group checks and group calls no longer reach it.",
+			"has_body": false,
+			"icon": "user-round-x",
+			"id": "remove_from_group",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The group name to drop from the node.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Remove From Group",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
 			"description": "Moves a node under a new parent while keeping it in the same place on screen. Useful to pick up an item into a hand or a slot.",
 			"has_body": false,
 			"icon": "move",
@@ -6326,6 +7253,45 @@
 				"enter",
 				"update",
 				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Rolls a percentage once and stores whether it succeeded. It is the Chance answer as a value, to feed Do If or Combine Checks.",
+			"has_body": false,
+			"icon": "dice-5",
+			"id": "roll_chance",
+			"inputs": [
+				{
+					"default": "50.0",
+					"doc": "How often it succeeds, where 50 is about half the time.",
+					"id": "chance",
+					"lvalue": false,
+					"name": "Chance %",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Roll Chance",
+			"outputs": [
+				{
+					"doc": "True when the roll succeeded.",
+					"id": "result",
+					"name": "Result",
+					"type": "bool"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
 			],
 			"target_classes": []
 		},
@@ -7013,6 +7979,60 @@
 		},
 		{
 			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Writes a value into a property or a variable of any node, found by its name. It reaches other nodes, so one script can drive the whole scene.",
+			"has_body": false,
+			"icon": "sliders-vertical",
+			"id": "set_property",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to write the value into.",
+					"id": "node",
+					"lvalue": false,
+					"name": "Node",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'position'",
+					"doc": "The name of the property or variable, such as position or health.",
+					"id": "name",
+					"lvalue": false,
+					"name": "Name",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to write.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Set Property",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "update",
@@ -7688,7 +8708,14 @@
 				}
 			],
 			"name": "Spawn Scene",
-			"outputs": [],
+			"outputs": [
+				{
+					"doc": "The copy that was just created, ready to be set up with Set Property.",
+					"id": "spawned",
+					"name": "Spawned",
+					"type": "Variant"
+				}
+			],
 			"phases": [
 				"enter",
 				"update",
@@ -8443,6 +9470,112 @@
 		},
 		{
 			"branches": [],
+			"category": "array",
+			"color": "#f59e0b",
+			"default_phase": "update",
+			"description": "Stores the items of a list that are not in a second one, such as the cards of a deck that are not in the hand.",
+			"has_body": false,
+			"icon": "list-x",
+			"id": "subtract_list",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The list to take items from.",
+					"id": "list",
+					"lvalue": false,
+					"name": "List",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The items to leave out.",
+					"id": "without",
+					"lvalue": false,
+					"name": "Without",
+					"optional": false,
+					"options": [],
+					"type": "Array",
+					"type_from": ""
+				}
+			],
+			"name": "Subtract List",
+			"outputs": [
+				{
+					"doc": "What is left of the first list.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "string",
+			"color": "#eab308",
+			"default_phase": "update",
+			"description": "Turns a number into text in the chosen format. Use it to feed a label without writing the conversion by hand.",
+			"has_body": false,
+			"icon": "hash",
+			"id": "to_text",
+			"inputs": [
+				{
+					"default": "0",
+					"doc": "The number to turn into text.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "'whole'",
+					"doc": "How much of the number to keep. Whole rounds to the nearest, cut drops the decimals.",
+					"id": "mode",
+					"lvalue": false,
+					"name": "Format",
+					"optional": false,
+					"options": [
+						"whole",
+						"cut",
+						"1 decimal",
+						"2 decimals",
+						"plain"
+					],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "To Text",
+			"outputs": [
+				{
+					"doc": "Where to store the resulting text.",
+					"id": "result",
+					"name": "Result",
+					"type": "String"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "variable",
 			"color": "#1dd1a1",
 			"default_phase": "update",
@@ -9105,6 +10238,72 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
+			"description": "Combines two vectors with an arithmetic operator, such as add or multiply. Adding is how a position gets offset.",
+			"has_body": false,
+			"icon": "calculator",
+			"id": "vector2_math",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The left-hand vector.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "'+'",
+					"doc": "The arithmetic operation to apply.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"+",
+						"-",
+						"*",
+						"/"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The right-hand vector.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Vector2 Math",
+			"outputs": [
+				{
+					"doc": "The resulting vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
 			"description": "Rotates a vector by an angle and returns the turned vector.",
 			"has_body": false,
 			"icon": "rotate-cw",
@@ -9145,6 +10344,106 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Multiplies a vector by a single number, keeping its direction and changing its length. It is how a direction becomes a speed.",
+			"has_body": false,
+			"icon": "move-diagonal",
+			"id": "vector2_scale",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The vector to grow or shrink.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How much to multiply it by. Below 1 shrinks it, and a negative number flips it.",
+					"id": "factor",
+					"lvalue": false,
+					"name": "Factor",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Scale Vector2",
+			"outputs": [
+				{
+					"doc": "The scaled vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Turns a flat direction into a 3D one lying on the ground, so a 2D input drives movement in a 3D world. The Y of the vector becomes the Z of the result.",
+			"has_body": false,
+			"icon": "move-3d",
+			"id": "vector2_to_vector3",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The flat direction, such as the one a movement input gives.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "The value the Y of the result takes.",
+					"id": "height",
+					"lvalue": false,
+					"name": "Height",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Vector2 To Vector3",
+			"outputs": [
+				{
+					"doc": "The direction on the ground plane.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -9623,6 +10922,72 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
+			"description": "Combines two 3D vectors with an arithmetic operator, such as add or multiply. Adding is how a position gets offset.",
+			"has_body": false,
+			"icon": "calculator",
+			"id": "vector3_math",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The left-hand vector.",
+					"id": "a",
+					"lvalue": false,
+					"name": "A",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "'+'",
+					"doc": "The arithmetic operation to apply.",
+					"id": "op",
+					"lvalue": false,
+					"name": "Operator",
+					"optional": false,
+					"options": [
+						"+",
+						"-",
+						"*",
+						"/"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The right-hand vector.",
+					"id": "b",
+					"lvalue": false,
+					"name": "B",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 Math",
+			"outputs": [
+				{
+					"doc": "The resulting vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
 			"description": "Rotates a 3D vector around an axis by an angle and returns the turned vector.",
 			"has_body": false,
 			"icon": "rotate-3d",
@@ -9674,6 +11039,95 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Multiplies a vector by a single number, keeping its direction and changing its length. It is how a direction becomes a speed.",
+			"has_body": false,
+			"icon": "move-3d",
+			"id": "vector3_scale",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The vector to grow or shrink.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How much to multiply it by. Below 1 shrinks it, and a negative number flips it.",
+					"id": "factor",
+					"lvalue": false,
+					"name": "Factor",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Scale Vector3",
+			"outputs": [
+				{
+					"doc": "The scaled vector.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Drops the height of a 3D vector and keeps the ground part as a flat one, such as reading how a body moves along the floor.",
+			"has_body": false,
+			"icon": "move",
+			"id": "vector3_to_vector2",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The 3D vector to flatten, such as a velocity.",
+					"id": "vector",
+					"lvalue": false,
+					"name": "Vector",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Vector3 To Vector2",
+			"outputs": [
+				{
+					"doc": "The X and Z of the vector, as a flat one.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -9877,7 +11331,7 @@
 	"categories": [
 		{
 			"color": "#f97316",
-			"count": 11,
+			"count": 13,
 			"icon": "git-branch",
 			"id": "flow",
 			"name": "Flow"
@@ -9912,28 +11366,28 @@
 		},
 		{
 			"color": "#ef4444",
-			"count": 2,
+			"count": 6,
 			"icon": "git-compare",
 			"id": "logic",
 			"name": "Logic"
 		},
 		{
 			"color": "#a855f7",
-			"count": 25,
+			"count": 32,
 			"icon": "move-3d",
 			"id": "vector",
 			"name": "Vector"
 		},
 		{
 			"color": "#eab308",
-			"count": 10,
+			"count": 11,
 			"icon": "type",
 			"id": "string",
 			"name": "String"
 		},
 		{
 			"color": "#f59e0b",
-			"count": 17,
+			"count": 23,
 			"icon": "list-ordered",
 			"id": "array",
 			"name": "Array"
@@ -10017,7 +11471,7 @@
 		},
 		{
 			"color": "#64748b",
-			"count": 15,
+			"count": 22,
 			"icon": "layers",
 			"id": "scene",
 			"name": "Scene"

@@ -108,11 +108,11 @@ func _add_row(_action: HenSaveAction, _depth: int, _parent: HenSaveAction) -> vo
 		icon = macro.icon if macro else '',
 		color = macro.color if macro else '',
 		doc = HenActionDoc.bbcode(macro),
-		values = HenActionsPanel.value_preview(_action),
+		values = HenActionsPanel.value_preview(_action, save_data),
 		meta = _action,
 		indent = _depth,
 		draggable = _depth == 0
-	}, HenActionsPanel.value_parts(_action), _chips, _on_chip_pressed)
+	}, HenActionsPanel.value_parts(_action, save_data), _chips, _on_chip_pressed)
 
 	if macro and macro.has_body:
 		for child: HenSaveAction in _action.body_actions:

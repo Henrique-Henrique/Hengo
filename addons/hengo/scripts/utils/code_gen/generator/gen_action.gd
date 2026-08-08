@@ -1058,15 +1058,58 @@ static func _sub_words(_code: String, _vals: Dictionary) -> String:
 	reg.compile('\\b(' + '|'.join(_vals.keys()) + ')\\b')
 
 	var matches: Array = reg.search_all(_code)
+	var quoted: Array = _quoted_ranges(_code)
 	var out: String = _code
 
 	for i: int in range(matches.size() - 1, -1, -1):
 		var m: RegExMatch = matches[i]
 		var w: String = m.get_string()
+
+		if _in_ranges(quoted, m.get_start()):
+			continue
+
 		if _vals.has(w):
 			out = out.substr(0, m.get_start()) + str(_vals[w]) + out.substr(m.get_end())
 
 	return out
+
+
+# text spans of the string literals in an expression: a word named `n` also matches
+# the n of a \n escape, and one named `hp` matches inside 'hp: '
+static func _quoted_ranges(_code: String) -> Array:
+	var ranges: Array = []
+	var quote: String = ''
+	var start: int = 0
+	var i: int = 0
+
+	while i < _code.length():
+		var c: String = _code[i]
+
+		if quote.is_empty():
+			if c == "'" or c == '"':
+				quote = c
+				start = i
+		elif c == '\\':
+			i += 1
+		elif c == quote:
+			ranges.append([start, i])
+			quote = ''
+
+		i += 1
+
+	# an unterminated quote runs to the end, so nothing after it is substituted
+	if not quote.is_empty():
+		ranges.append([start, _code.length()])
+
+	return ranges
+
+
+static func _in_ranges(_ranges: Array, _pos: int) -> bool:
+	for range_pair: Array in _ranges:
+		if _pos > range_pair[0] and _pos < range_pair[1]:
+			return true
+
+	return false
 
 
 static func _unresolved_token(_action: HenSaveAction, _reason: String) -> String:

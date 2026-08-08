@@ -45,6 +45,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Spawned', type = 'Variant', id = &'spawned', doc = 'The copy that was just created, ready to be set up with Set Property.'}
+	]
+
+
+func get_output_spawned() -> String:
+	return 'spawned_{{VCNODE_ID}}'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -68,4 +78,4 @@ func get_flow_physics() -> String:
 # added to the parent so the copy is a sibling, not a child that moves along.
 # deferred because spawning in enter runs during _ready, where add_child is refused
 func _body() -> String:
-	return 'var spawned_{{VCNODE_ID}} = load({{path}}).instantiate()\nspawned_{{VCNODE_ID}}.position = {{position}}\n_ref.get_parent().add_child.call_deferred(spawned_{{VCNODE_ID}})'
+	return 'var spawned_{{VCNODE_ID}} = load({{path}}).instantiate()\nspawned_{{VCNODE_ID}}.position = {{position}}\n_ref.get_parent().add_child.call_deferred(spawned_{{VCNODE_ID}})\n{{out:spawned}}'

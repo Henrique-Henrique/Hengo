@@ -45,6 +45,12 @@ func _initialize() -> void:
 
 		return
 
+	if user_args[0] == '--lint-exprs':
+		var found: int = _lint_exprs()
+		root_scene.free()
+		quit(0 if found == 0 else 3)
+		return
+
 	var json: Dictionary = _read_json(user_args[0])
 	if json.is_empty():
 		root_scene.free()
@@ -184,6 +190,138 @@ func _export_actions(_out_path: String) -> String:
 	file.store_string(JSON.stringify(doc, '\t'))
 	file.close()
 	print('exported ', actions.size(), ' actions to ', _out_path)
+
+	return ''
+
+
+# an expression that matches one of these is doing by hand what an action already
+# does. order matters: the first match wins, so the specific ones come first
+const EXPR_HINTS: Array[Dictionary] = [
+	{pattern = 'Vector2\\(randf_range', hint = 'Random Vector2'},
+	{pattern = 'Vector3\\(randf_range', hint = 'Random Vector3'},
+	{pattern = 'Vector3\\(\\s*\\w+\\.x\\s*,\\s*0(\\.0)?\\s*,\\s*\\w+\\.z\\s*\\)', hint = 'Drop Height'},
+	{pattern = 'Vector2\\(\\s*\\w+\\.x\\s*,\\s*\\w+\\.z\\s*\\)', hint = 'Vector3 To Vector2'},
+	{pattern = 'Vector3\\(\\s*\\w+\\.x\\s*,\\s*[\\w.]+\\s*,\\s*\\w+\\.y\\s*\\)', hint = 'Vector2 To Vector3'},
+	{pattern = '[+-]\\s*Vector2\\(', hint = 'Vector2 Math'},
+	{pattern = '[+-]\\s*Vector3\\(', hint = 'Vector3 Math'},
+	{pattern = '\\.reduce\\(', hint = 'Best In List'},
+	{pattern = '\\.map\\(', hint = 'Collect Property'},
+	{pattern = 'not\\s+\\w+\\s+in\\s+\\w+', hint = 'Subtract List'},
+	{pattern = '\\.filter\\(', hint = 'Filter List, or Get Nodes Where'},
+	{pattern = '\\brange\\(', hint = 'Number List'},
+	{pattern = '\\bstr\\((int|roundi|snappedf)\\(', hint = 'To Text'},
+	{pattern = '\\+\\s*str\\(|str\\(\\w+\\)\\s*\\+', hint = 'Fill Text'},
+	{pattern = '\\bif\\b.+\\belse\\b', hint = 'Pick Value, fed by a Check'},
+	{pattern = '\\s(and|or)\\s', hint = 'Combine Checks'},
+	{pattern = '^\\s*[a-zA-Z_]\\w*\\s*(==|!=|>=|<=|>|<)\\s*[^=]+$', hint = 'Check'},
+	{pattern = '^\\s*[a-zA-Z_]\\w*\\.global_position\\s*$', hint = 'Get Position'},
+	{pattern = '^\\s*[a-zA-Z_]\\w*\\.[a-zA-Z_][\\w.]*\\s*$', hint = 'Get Property'},
+	{pattern = '\\.get\\(', hint = 'Dictionary Get, which takes a default'},
+	{pattern = '^\\s*\\[.+\\]\\s*\\[', hint = 'an Array variable plus Array Get'}
+]
+
+
+# reports every expression in the saved scripts that an action could replace
+func _lint_exprs() -> int:
+	var base: String = HenEnums.HENGO_COLLECTION_PATH
+
+	if not DirAccess.dir_exists_absolute(base):
+		print('no collection to lint at ', base)
+		return 0
+
+	var total: int = 0
+	var flagged: int = 0
+
+	for collection_dir: String in DirAccess.get_directories_at(base):
+		var collection_path: String = base.path_join(collection_dir)
+
+		for script_dir: String in DirAccess.get_directories_at(collection_path):
+			var save_path: String = collection_path.path_join(script_dir).path_join(HenEnums.SAVE_FILE)
+
+			if not FileAccess.file_exists(save_path):
+				continue
+
+			var save_data: HenSaveData = ResourceLoader.load(save_path, '', ResourceLoader.CACHE_MODE_IGNORE_DEEP)
+
+			if not save_data:
+				continue
+
+			var report: Array = _lint_save(save_data)
+			total += report.size()
+
+			for line: Dictionary in report:
+				if not str(line.hint).is_empty():
+					flagged += 1
+
+			if not report.is_empty():
+				_print_lint(save_data, report)
+
+	print('')
+	print('%d expressions, %d with an action that covers them' % [total, flagged])
+	print('a hint is a suggestion: an expression that IS the logic can stay one')
+
+	return flagged
+
+
+func _print_lint(_save_data: HenSaveData, _report: Array) -> void:
+	var name: String = _save_data.identity.name if _save_data.identity else '(unnamed)'
+	print('')
+	print('--- ', name, ' ---')
+
+	for line: Dictionary in _report:
+		var where: String = '%s / %s / %s' % [line.state, line.action, line.input]
+
+		if str(line.hint).is_empty():
+			print('    ok    ', where, ': ', line.code)
+		else:
+			print('  ACTION  ', where, ': ', line.code)
+			print('          -> ', line.hint)
+
+
+# every expression of a save, each with the action that would replace it
+func _lint_save(_save_data: HenSaveData) -> Array:
+	var report: Array = []
+
+	for state_id: Variant in _save_data.state_actions:
+		var state: HenSaveState = HenGeneratorAction.find_state(_save_data, StringName(str(state_id)))
+		var state_name: String = state.name if state else str(state_id)
+
+		for action: HenSaveAction in _save_data.state_actions[state_id]:
+			_lint_action(action, state_name, report)
+
+	return report
+
+
+func _lint_action(_action: HenSaveAction, _state: String, _report: Array) -> void:
+	for key: Variant in _action.input_expressions:
+		var expr: HenSaveActionExpression = _action.input_expressions[key]
+
+		_report.append({
+			state = _state,
+			action = str(_action.macro_id),
+			input = str(key),
+			code = expr.code,
+			hint = _hint_for(expr.code)
+		})
+
+	for child: HenSaveAction in _action.body_actions:
+		_lint_action(child, _state, _report)
+
+	for key: Variant in _action.input_actions:
+		var inline: Variant = _action.input_actions[key]
+		var child_action: Variant = inline.get('action') if inline is Dictionary else inline
+
+		if child_action is HenSaveAction:
+			_lint_action(child_action as HenSaveAction, _state, _report)
+
+
+func _hint_for(_code: String) -> String:
+	for entry: Dictionary in EXPR_HINTS:
+		var reg: RegEx = RegEx.new()
+		reg.compile(str(entry.pattern))
+
+		if reg.search(_code):
+			return str(entry.hint)
 
 	return ''
 

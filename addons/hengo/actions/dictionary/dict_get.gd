@@ -2,7 +2,7 @@
 class_name HenActionDictGet extends HenScriptMacroBase
 
 
-# writes the value at Key into Result. uses .get so a missing key returns null
+# writes the value at Key into Result. uses .get so a missing key returns Default
 # instead of breaking at runtime.
 
 
@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Reads the value stored under a given key in a dictionary. A missing key returns null.'
+	return 'Reads the value stored under a given key in a dictionary. A missing key returns the default value.'
 
 
 func get_display_name() -> String:
@@ -38,18 +38,26 @@ func get_inputs() -> Array[Dictionary]:
 			id = &'key',
 			doc = 'The key to look up.',
 			default_value = ''
+		},
+		{
+			name = 'Default',
+			type = 'Variant',
+			id = &'default',
+			doc = 'The value returned when the key is not in the dictionary.',
+			optional = true,
+			default_value = null
 		}
 	]
 
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Variant', id = &'result', doc = 'Where to store the value found at the key, or null when missing.'}
+		{name = 'Result', type = 'Variant', id = &'result', doc = 'Where to store the value found at the key, or the default when missing.'}
 	]
 
 
 func get_output_result() -> String:
-	return '{{dict}}.get({{key}})'
+	return '{{dict}}.get({{key}}, {{default}})'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

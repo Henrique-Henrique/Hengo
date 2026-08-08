@@ -1010,9 +1010,15 @@ static func get_virtual_cnode_code(_save_data: HenSaveData, _vc: HenVirtualCNode
 static func get_default_value_code(_save_data: HenSaveData, _type: String, _use_self: bool, _category: String = '', _data: Variant = null, _default_value: Variant = null) -> String:
 	if _default_value != null:
 		var raw_val: String = var_to_str(_default_value)
-		# ensure single quotes for strings
-		if _type == 'String' or _type == 'NodePath' or _type == 'StringName':
-			if raw_val.begins_with('"') and raw_val.ends_with('"'):
+		# text is checked by the value, not by the declared type: a String also lands
+		# on a Variant slot, where the escaping matters just the same
+		if _default_value is String or _default_value is StringName:
+			# var_to_str keeps a line break verbatim, which ends the literal early
+			raw_val = raw_val.replace('\n', '\\n').replace('\t', '\\t').replace('\r', '\\r')
+
+			# single quotes, unless the text carries an apostrophe of its own:
+			# var_to_str only escapes the double quotes it wrapped the text in
+			if raw_val.begins_with('"') and raw_val.ends_with('"') and not raw_val.contains("'"):
 				return "'" + raw_val.substr(1, raw_val.length() - 2) + "'"
 		return raw_val
 

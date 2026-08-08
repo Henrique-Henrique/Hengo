@@ -272,7 +272,9 @@ func _render_action_params() -> void:
 # upgrades bindings saved by name to the id form, so opening an action once makes
 # its variables rename-proof. props keep their bare name
 static func _migrate_name_bindings(action: HenSaveAction) -> void:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	# the owner and not the active script: this rewrites the bindings, so resolving a
+	# name against another script would store the id of its same-named variable
+	var save_data: HenSaveData = HenActionsPanel.owner_of(action)
 
 	if not save_data:
 		return
@@ -370,7 +372,7 @@ func _create_value_slot(slot: Dictionary) -> void:
 	elif not bind_code.is_empty():
 		# bound: a clickable chip shows the source; click re-opens the picker (has None to unbind)
 		var chip := Button.new()
-		chip.text = '= ' + HenUtils.get_bind_label((Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA, bind_code)
+		chip.text = '= ' + HenUtils.get_bind_label(HenActionsPanel.owner_of(slot.get('action') as HenSaveAction), bind_code)
 		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		chip.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		chip.pressed.connect(_open_bind_picker.bind(slot, chip))
@@ -578,7 +580,8 @@ func _open_bind_picker(slot: Dictionary, anchor: Control) -> void:
 func _build_bind_options(slot: Dictionary) -> Array:
 	var param: HenSaveParam = slot.param
 	var ptype: String = _effective_slot_type(slot, param)
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	# the picker writes what it offers, so it has to offer the owner's variables
+	var save_data: HenSaveData = HenActionsPanel.owner_of(slot.get('action') as HenSaveAction)
 	var options: Array = [ {name = 'None (literal)', kind = 'none'} ]
 	# a write target must stay assignable: every call-shaped source is left out,
 	# `randf() = 5` would not compile
@@ -816,15 +819,20 @@ func _on_source_arg_named(_arg: String, _type: String, slot: Dictionary, source_
 
 
 func _on_new_var_named(_name: String, _type: String, slot: Dictionary) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var v: HenSaveVar = global.SAVE_DATA.add_var(false)
+	# the variable belongs to the script the action lives in, not to the active one
+	var save_data: HenSaveData = HenActionsPanel.owner_of(slot.get('action') as HenSaveAction)
+
+	if not save_data:
+		return
+
+	var v: HenSaveVar = save_data.add_var(false)
 	if not v:
 		return
 
 	# a chosen name that clashes gets a 2/3/... suffix, so two Raycasts do not both
 	# make a `collider` variable and break the parse
 	if not _name.strip_edges().is_empty():
-		v.name = global.SAVE_DATA.unique_var_name(_name.strip_edges())
+		v.name = save_data.unique_var_name(_name.strip_edges())
 	v.type = _type if not _type.is_empty() else 'Variant'
 
 	(slot.bind_store as Dictionary)[slot.bind_key] = HenUtils.bind_code_for_var(v)
@@ -895,7 +903,7 @@ func _effective_slot_type(slot: Dictionary, param: HenSaveParam) -> String:
 	if bind.is_empty():
 		return param.type
 
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var save_data: HenSaveData = HenActionsPanel.owner_of(action)
 	var resolved: String = HenUtils.get_bound_source_type(save_data, bind)
 	return resolved if not resolved.is_empty() else param.type
 
@@ -945,7 +953,7 @@ func _create_branch_selector(action: HenSaveAction) -> void:
 
 func _create_branch_row(action: HenSaveAction, key: String, title: String) -> void:
 	var branch: Dictionary = action.branches.get(key, {})
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var save_data: HenSaveData = HenActionsPanel.owner_of(action)
 	var target: HenSaveState = HenGeneratorAction.branch_target(save_data, action, key)
 	var script_id: StringName = HenGeneratorAction.branch_script_id(save_data, action, key)
 
@@ -987,7 +995,7 @@ func _create_branch_row(action: HenSaveAction, key: String, title: String) -> vo
 
 # second line of a cross-script branch: instance source + optional runtime check
 func _create_branch_instance_row(action: HenSaveAction, key: String, script_id: StringName) -> HBoxContainer:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var save_data: HenSaveData = HenActionsPanel.owner_of(action)
 	var branch: Dictionary = action.branches.get(key, {})
 	var bind: String = str(branch.get('instance_bind', ''))
 
@@ -1048,7 +1056,8 @@ func _open_branch_picker(key: String, anchor: Control) -> void:
 # sibling states, the sub-states of the state that owns this action, and the
 # top-level states of every other script
 func _build_branch_options() -> Array:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	# the states offered have to come from the script the action lives in
+	var save_data: HenSaveData = HenActionsPanel.owner_of(resource as HenSaveAction)
 	var options: Array = [ {name = 'Nowhere', kind = 'none'} ]
 
 	for state: HenSaveState in save_data.states:
@@ -1205,7 +1214,7 @@ func _open_branch_instance_picker(key: String, script_id: StringName, anchor: Co
 # variables and owner-class properties that can hold an instance of the target
 # script, plus the node path source (no variable kept anywhere)
 func _build_branch_instance_options(script_id: StringName) -> Array:
-	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var save_data: HenSaveData = HenActionsPanel.owner_of(resource as HenSaveAction)
 	var target_type: StringName = &''
 
 	for script: Dictionary in _other_scripts(save_data):

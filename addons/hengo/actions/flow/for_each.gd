@@ -41,12 +41,17 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Item', type = 'Variant', id = &'item', doc = 'The current element, for the nested actions to read.'}
+		{name = 'Item', type = 'Variant', id = &'item', doc = 'The current element, for the nested actions to read.'},
+		{name = 'Index', type = 'int', id = &'index', doc = 'The position of the current element, starting at 0.'}
 	]
 
 
 func get_output_item() -> String:
 	return '__item_{{VCNODE_ID}}'
+
+
+func get_output_index() -> String:
+	return '__i_{{VCNODE_ID}}'
 
 
 func get_flow_inputs() -> Array[Dictionary]:
@@ -69,5 +74,6 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# counts by hand: range() would index a dictionary by position
 func _body() -> String:
-	return 'for __item_{{VCNODE_ID}} in {{collection}}:\n\t{{out:item}}\n\t{{loop_body}}'
+	return 'var __i_{{VCNODE_ID}} = -1\nfor __item_{{VCNODE_ID}} in {{collection}}:\n\t__i_{{VCNODE_ID}} += 1\n\t{{out:index}}\n\t{{out:item}}\n\t{{loop_body}}'
