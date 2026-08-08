@@ -2920,7 +2920,7 @@ func test_nested_loops_have_distinct_locals() -> void:
 	assert_int(script.reload()).is_equal(OK)
 
 
-# an empty loop body still compiles: the for gets a pass
+# an empty loop body still compiles: the for gets a pass after the index counter
 func test_empty_loop_body_gets_pass() -> void:
 	HenScriptMacroLoader.load_native_actions()
 
@@ -2933,7 +2933,7 @@ func test_empty_loop_body_gets_pass() -> void:
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('for __item_' + str(loop.id) + ' in _ref.stuff:\n\t\t\tpass')
+	assert_str(code).contains('for __item_' + str(loop.id) + ' in _ref.stuff:\n\t\t\t__i_' + str(loop.id) + ' += 1\n\t\t\tpass')
 
 	var script := GDScript.new()
 	script.source_code = code
@@ -3289,9 +3289,9 @@ func test_debug_trace_indents_inside_loop_body() -> void:
 
 	var code: String = _code_with_debug()
 
-	# the loop's own trace sits at method indent, right before the for
+	# the loop's own trace sits at method indent, right before the block it opens
 	assert_str(code).contains(
-		'\t\t' + _trace_line(loop) + '\n\t\tfor __item_' + str(loop.id))
+		'\t\t' + _trace_line(loop) + '\n\t\tvar __i_' + str(loop.id))
 	# the nested action's trace is one level deeper, right before its body
 	assert_str(code).contains(
 		'\t\t\t' + _trace_line(print_a) + '\n\t\t\tprint(_ref.e)')
