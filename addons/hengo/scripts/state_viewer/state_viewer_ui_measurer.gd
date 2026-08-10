@@ -70,10 +70,20 @@ static func _top_machine(node: HenStateViewerGraphTypes.DirectedGraphNode, root:
 	return current
 
 
+# a card computes its size from font metrics, so one pass is already final. the
+# contract is compute_size, not the card type, so a stub can drive the layout
+static func _panel_min_size(panel: Variant) -> Vector2:
+	if panel and panel.has_method(&'compute_size'):
+		return panel.compute_size()
+
+	return Vector2.ZERO
+
+
 func _measure_leaf(node: HenStateViewerGraphTypes.DirectedGraphNode, font: Font, font_size: int, spawned_panels: Dictionary) -> void:
-	var panel: Control = spawned_panels.get(node)
-	if panel and panel is PanelContainer:
-		var min_size: Vector2 = panel.get_combined_minimum_size()
+	var panel: Variant = spawned_panels.get(node)
+	var min_size: Vector2 = _panel_min_size(panel)
+
+	if min_size != Vector2.ZERO:
 		node.layout.width = max(LEAF_MIN_W, min_size.x)
 		node.layout.height = max(LEAF_MIN_H, min_size.y)
 	else:
@@ -111,13 +121,9 @@ func _measure_compound(node: HenStateViewerGraphTypes.DirectedGraphNode, font: F
 	# add gap between layers vertically
 	content_h += max(0, depth_keys.size() - 1) * HenStateViewerLayoutEngine.LAYER_GAP
 
-	var header_min_h: float = 0.0
-	var header_min_w: float = 0.0
-	var panel: Control = spawned_panels.get(node)
-	if panel and panel is PanelContainer:
-		var h_size: Vector2 = panel.get_combined_minimum_size()
-		header_min_w = h_size.x
-		header_min_h = h_size.y
+	var h_size: Vector2 = _panel_min_size(spawned_panels.get(node))
+	var header_min_w: float = h_size.x
+	var header_min_h: float = h_size.y
 
 	if header_min_w > 0:
 		node.layout.width = max(content_w + HenStateViewerLayoutEngine.COMPOUND_PAD_SIDE * 2.0, header_min_w)

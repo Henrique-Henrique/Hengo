@@ -95,7 +95,7 @@ func _populate_grouped() -> void:
 		var color: Color = Color(str(data.color))
 		var category: HenSideBarCategory = CATEGORY_SCENE.instantiate()
 		results.add_child(category)
-		category.setup(str(data.name), -1, HenActionRow.icon_texture(str(data.icon)), color, true, '', false)
+		category.setup(str(data.name), -1, HenActionVisuals.icon_texture(str(data.icon)), color, true, '', false)
 
 		for macro: HenSaveMacro in groups[folder]:
 			category.add_row(_build_row(macro))
@@ -106,7 +106,7 @@ func _build_row(_macro: HenSaveMacro) -> HenSideBarRow:
 	var row: HenSideBarRow = SIDE_BAR_ROW_SCENE.instantiate()
 	var color: Color = Color(_macro.color) if not _macro.color.is_empty() else ACTION_COLOR
 
-	row.setup(_macro.name, _macro, HenActionRow.icon_texture(_macro.icon), color, false, 4)
+	row.setup(_macro.name, _macro, HenActionVisuals.icon_texture(_macro.icon), color, false, 4)
 	# native tooltip: the search popup lives on the editor base control, above the
 	# custom HenTooltip, so only the native one renders on top of it
 	row.tooltip_text = HenActionDoc.plain(_macro)

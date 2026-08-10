@@ -2,9 +2,15 @@
 class_name HenStateViewerPathUtils
 extends RefCounted
 
+# curve2d's 5px default bakes a 1000px straight run into 200 points
+const BAKE_INTERVAL: float = 12.0
+
+
 # processes sharp path into a godot curve2d with rounded corners
 func round_path(section: Dictionary, corner_radius: float = 6.0) -> Curve2D:
 	var curve: Curve2D = Curve2D.new()
+	curve.bake_interval = BAKE_INTERVAL
+
 	var points: Array[Vector2] = []
 
 	points.append(section.start_point)

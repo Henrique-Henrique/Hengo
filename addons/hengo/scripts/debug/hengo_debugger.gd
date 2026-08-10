@@ -7,6 +7,13 @@ static var target_instance_id: int = -1
 # script's state machine can highlight at once
 static var state_targets: Dictionary = {}
 
+# shorter than the highlights it feeds (200ms on a row, 800ms on an edge), so a
+# running trace never goes dark between sends
+const TRACE_INTERVAL_MS: int = 120
+
+# trace key -> last send, msec
+static var _traced_at: Dictionary = {}
+
 
 static func _on_message_capture(message: String, data: Array) -> bool:
 	if message == 'set_target':
@@ -85,6 +92,8 @@ static func trace_flow(node_id: int, port: StringName = &'0', data: Dictionary =
 		return
 	if not EngineDebugger.is_active():
 		return
+	if not _should_trace('f%d:%s' % [node_id, port]):
+		return
 
 	EngineDebugger.send_message('hengo:flow', [node_id, port, data])
 
@@ -95,6 +104,8 @@ static func trace_state_flow(node_id: int, port: StringName, script_id: String) 
 	if not OS.is_debug_build():
 		return
 	if not EngineDebugger.is_active():
+		return
+	if not _should_trace('s%s:%d:%s' % [script_id, node_id, port]):
 		return
 
 	EngineDebugger.send_message('hengo:state_flow', [node_id, port, script_id])
@@ -118,14 +129,33 @@ static func trace_state(state_name: StringName) -> void:
 	EngineDebugger.send_message('hengo:state', [state_name])
 
 
-# script_id defaults so a build generated before it existed still parses
+# script_id defaults so a build generated before it existed still parses.
+# an update action calls this every frame, and one message per action per frame
+# overruns network/limits/debugger/max_queued_messages, which drops the rest of
+# the trace: re-arming the highlight faster than it fades buys nothing
 static func trace_action(action_id: StringName, script_id: String = '') -> void:
 	if not OS.is_debug_build():
 		return
 	if not EngineDebugger.is_active():
 		return
 
+	if not _should_trace('a%s:%s' % [script_id, action_id]):
+		return
+
 	EngineDebugger.send_message('hengo:action', [action_id, script_id])
+
+
+# true at most once per interval per key; the highlight it feeds outlives that,
+# so nothing goes dark and the debugger queue stops overflowing
+static func _should_trace(key: String) -> bool:
+	var now: int = Time.get_ticks_msec()
+
+	if now - int(_traced_at.get(key, -TRACE_INTERVAL_MS)) < TRACE_INTERVAL_MS:
+		return false
+
+	_traced_at[key] = now
+
+	return true
 
 
 # a branch action took a transition, so the state viewer can flash its edge (the

@@ -1,11 +1,11 @@
 @tool
 class_name HenActionValuePopup extends MarginContainer
 
-signal confirmed(chip: HenActionValue, text: String)
-signal tabbed(chip: HenActionValue, text: String)
+signal confirmed(chip: Variant, text: String)
+signal tabbed(chip: Variant, text: String)
 signal cancelled
 
-var chip: HenActionValue
+var chip: Variant
 
 
 func _ready() -> void:
@@ -14,7 +14,7 @@ func _ready() -> void:
 
 # points the field at another chip without respawning the popup, which is what
 # tabbing across a whole line does
-func edit(_chip: HenActionValue, _text: String) -> void:
+func edit(_chip: Variant, _text: String) -> void:
 	chip = _chip
 	_field().text = _text
 

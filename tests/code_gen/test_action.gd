@@ -1087,14 +1087,14 @@ func test_native_actions_carry_icon_and_color() -> void:
 	for macro: HenSaveMacro in by_id.values():
 		assert_bool(macro.icon.is_empty()).override_failure_message(macro.name + ' has no icon').is_false()
 		assert_bool(macro.color.begins_with('#')).override_failure_message(macro.name + ' has no color').is_true()
-		assert_object(HenActionRow.icon_texture(macro.icon)).is_not_null()
+		assert_object(HenActionVisuals.icon_texture(macro.icon)).is_not_null()
 
 	# the var-writing family reads as a group, whatever the color ends up being
 	assert_str(by_id['toggle_value'].color).is_equal(by_id['set_value'].color)
 
 	# an unknown or missing name must fall back, never crash the row
-	assert_object(HenActionRow.icon_texture('does-not-exist')).is_not_null()
-	assert_object(HenActionRow.icon_texture('')).is_not_null()
+	assert_object(HenActionVisuals.icon_texture('does-not-exist')).is_not_null()
+	assert_object(HenActionVisuals.icon_texture('')).is_not_null()
 
 
 # --- list preview -----------------------------------------------------------

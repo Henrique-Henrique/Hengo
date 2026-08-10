@@ -15,6 +15,7 @@ static func load_script_macros() -> void:
 		return
 
 	global.script_macros.clear()
+	HenActionsPanel.invalidate_macro_index()
 	_scan_dir(MACRO_PATH, global, global.script_macros, true)
 
 
@@ -26,6 +27,7 @@ static func load_native_actions() -> void:
 		return
 
 	global.action_macros.clear()
+	HenActionsPanel.invalidate_macro_index()
 	_scan_dir(NATIVE_ACTION_PATH, global, global.action_macros, false)
 
 

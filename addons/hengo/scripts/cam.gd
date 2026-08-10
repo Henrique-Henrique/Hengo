@@ -167,9 +167,15 @@ func _can_start_left_pan() -> bool:
 	if is_global_cam:
 		return false
 
+	var parent: Node = get_parent()
+
+	# a drawn canvas has no controls to hit-test, so it answers for itself
+	if parent and parent.has_method(&'blocks_pan') and parent.call(&'blocks_pan'):
+		return false
+
 	var hovered: Control = get_viewport().gui_get_hovered_control()
 
-	return hovered == null or hovered == get_parent()
+	return hovered == null or hovered == parent
 
 
 func _zoom_in(amount: float = ZOOM_INCREMENT) -> void:

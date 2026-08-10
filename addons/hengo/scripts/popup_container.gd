@@ -156,16 +156,16 @@ func _position_anchored(gp: PanelContainer, opts: Dictionary) -> void:
 
 	# force gp to fit content (or custom_minimum_size, whichever is bigger)
 	var sz: Vector2 = gp.get_combined_minimum_size()
-	var anchor_to: Control = opts.get('anchor_to', null)
 	var side: int = opts.get('side', SIDE_RIGHT)
+	var anchor: Rect2 = _anchor_rect(opts)
+	var has_anchor: bool = is_finite(anchor.position.x)
 
-	# fill the axis perpendicular to `side` using anchor_to's size
-	if opts.get('fill_axis', false) and anchor_to and is_instance_valid(anchor_to):
-		var anchor_rect: Rect2 = _rendered_rect(anchor_to)
+	# fill the axis perpendicular to `side` using the anchor's size
+	if opts.get('fill_axis', false) and has_anchor:
 		if side == SIDE_LEFT or side == SIDE_RIGHT:
-			sz.y = anchor_rect.size.y
+			sz.y = anchor.size.y
 		else:
-			sz.x = anchor_rect.size.x
+			sz.x = anchor.size.x
 
 	gp.size = sz
 
@@ -173,14 +173,28 @@ func _position_anchored(gp: PanelContainer, opts: Dictionary) -> void:
 	var offset: Vector2 = opts.get('offset', Vector2.ZERO)
 
 	if pos == Vector2.INF:
-		if anchor_to and is_instance_valid(anchor_to):
-			pos = _pos_relative_to(anchor_to, side, gp.size)
+		if has_anchor:
+			pos = _pos_relative_to(anchor, side, gp.size)
 		else:
 			var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CNODE_UI.get_viewport_rect()
 			pos = Vector2(rect.position.x + (rect.size.x - gp.size.x) * 0.5, rect.position.y + (rect.size.y - gp.size.y) * 0.5)
 
 	gp.position = pos + offset
 	HenUtils.reposition_control_inside(gp)
+
+
+# a drawn card has no control to anchor to, so it hands over the rect directly.
+# an infinite origin means there is no anchor at all
+func _anchor_rect(opts: Dictionary) -> Rect2:
+	if opts.has('anchor_rect'):
+		return opts.anchor_rect
+
+	var anchor_to: Control = opts.get('anchor_to', null)
+
+	if anchor_to and is_instance_valid(anchor_to):
+		return _rendered_rect(anchor_to)
+
+	return Rect2(Vector2.INF, Vector2.ZERO)
 
 
 # get_global_rect() reports the scaled origin with the unscaled size
@@ -190,8 +204,7 @@ func _rendered_rect(anchor_to: Control) -> Rect2:
 	return Rect2(xform.origin, anchor_to.size * xform.get_scale())
 
 
-func _pos_relative_to(anchor_to: Control, side: int, sz: Vector2) -> Vector2:
-	var rect: Rect2 = _rendered_rect(anchor_to)
+func _pos_relative_to(rect: Rect2, side: int, sz: Vector2) -> Vector2:
 	match side:
 		SIDE_LEFT:
 			return Vector2(rect.position.x - sz.x - ANCHOR_GAP, rect.position.y)

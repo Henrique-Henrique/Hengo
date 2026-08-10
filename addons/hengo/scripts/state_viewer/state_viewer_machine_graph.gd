@@ -10,36 +10,47 @@ var layout: HenStateViewerLayoutEngine = HenStateViewerLayoutEngine.new()
 
 var graph_root: HenStateViewerGraphTypes.DirectedGraphNode
 
-const COMPOUND_BG: Color = Color(0.119071566, 0.119075276, 0.1496324, 1)
-const COMPOUND_BORDER: Color = Color(0.18992361, 0.18994236, 0.23241404, 1)
-const COMPOUND_BODY_BG: Color = Color(0.119071566, 0.119075276, 0.1496324, 0.35)
-const LEAF_BG: Color = Color(0.20258576, 0.2025904, 0.2280235, 1)
-const LEAF_BORDER: Color = Color(0.27, 0.27, 0.31, 1)
-const LABEL_COLOR: Color = Color(0.9, 0.9, 0.9, 1)
-const CURRENT_BORDER: Color = Color('#e67e22')
 const DIM_ALPHA: float = 0.2
 const DOUBLE_CLICK_MS: int = 400
 const CLICK_TOLERANCE: float = 6.0
 const TRANSITION_ICON: String = 'arrow-right-to-line'
 const TITLE_FONT_SIZE: int = 18
 const MIN_TITLE_SCREEN_PX: float = 11.0
-const MIN_BORDER_SCREEN_PX: float = 3.0
-const MAX_BORDER_GROWTH: float = 4.0
-const COMPOUND_BORDER_WIDTH: float = 3.0
-const HEADER_SEPARATOR_WIDTH: float = 2.0
-const ACTIONS_LIST_SCENE = preload('res://addons/hengo/scenes/state_actions_list.tscn')
-const LAYOUT_SETTLE_PASSES: int = 4
 
+# same window the cnode border uses for its debug flash
+const RUN_TIME_MS: int = 200
+
+# the settings value is where rows disappear; they come back a bit later so a zoom
+# resting on the threshold does not re-emit every card back and forth across it
+const COMPACT_HYSTERESIS: float = 1.25
+const CULL_MARGIN: float = 256.0
+
+# graph node -> HenStateViewerCard
 var _panels: Dictionary = {}
-# node -> icon+title hbox, counter-scaled so titles stay readable when zoomed out
-var _title_boxes: Dictionary = {}
-var _header_styles: Array[StyleBoxFlat] = []
-var _action_lists: Dictionary = {}
 var _zoom: float = 1.0
 var _rebuild_pending: bool = false
-var _layout_settling: bool = false
 var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _active_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
+var _cam_node: HenCam = null
+var _detail_level: int = HenStateViewerCard.Detail.FULL
+var _lines_hidden: bool = false
+var _structure_hash: int = 0
+var _last_cull_origin: Vector2 = Vector2.INF
+var _last_cull_zoom: float = -1.0
+
+# hit test order (deepest last) with the absolute rects resolved at layout time
+var _hover_nodes: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
+var _hover_rects: Array[Rect2] = []
+var _last_hover_pos: Vector2 = Vector2.INF
+var _last_hover_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
+var _hovered_card: HenStateViewerCard = null
+var _editing_card: HenStateViewerCard = null
+var _drop_card: HenStateViewerCard = null
+var _drag_node: HenStateViewerGraphTypes.DirectedGraphNode = null
+# card -> {action id -> expiry msec}
+var _flashes: Dictionary = {}
+var _tooltip_action: String = ''
+var _editor: HenStateViewerCardEditor = null
 
 # script display name -> active state (snake_case) for that script's machine
 var _debug_active_states: Dictionary = {}
@@ -110,36 +121,65 @@ func _on_popup_closed() -> void:
 		_update_graph()
 		return
 
-	var edited: bool = false
-
-	for actions_list: Variant in _action_lists.values():
-		if not is_instance_valid(actions_list) or not (actions_list as HenStateActionsList).is_editing:
-			continue
-
-		(actions_list as HenStateActionsList).is_editing = false
-		(actions_list as HenStateActionsList).refresh()
-		edited = true
-
-	if edited:
-		# an expanded row rewraps its chips, so the card only settles a pass later
-		_on_actions_structure_changed()
+	if _editor and _editor.is_editing:
+		_editor.is_editing = false
+		_refresh_edited_card()
 
 
 func _on_debug_action_flow(action_id: StringName, script_id: String) -> void:
-	for node: HenStateViewerGraphTypes.DirectedGraphNode in _action_lists:
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
 		if not script_id.is_empty() and String(node.data.get('script_id', '')) != script_id:
 			continue
 
-		var actions_list: HenStateActionsList = _action_lists[node]
-
-		if is_instance_valid(actions_list) and actions_list.flash_action(action_id):
+		if _arm_flash(_panels[node], action_id):
 			return
 
 
+# an update action re-arms every frame, so the expiry is pushed forward instead
+# of the card being redrawn again
+func _arm_flash(card: HenStateViewerCard, action_id: StringName) -> bool:
+	if not card.has_row(action_id):
+		return false
+
+	var entries: Dictionary = _flashes.get(card, {})
+
+	entries[str(action_id)] = Time.get_ticks_msec() + RUN_TIME_MS
+	_flashes[card] = entries
+
+	card.set_running(entries)
+
+	return true
+
+
+func _expire_flashes() -> void:
+	var now: int = Time.get_ticks_msec()
+
+	for card: Variant in _flashes.keys():
+		var entries: Dictionary = _flashes[card]
+		var changed: bool = false
+
+		for id: Variant in entries.keys():
+			if int(entries[id]) <= now:
+				entries.erase(id)
+				changed = true
+
+		if entries.is_empty():
+			_flashes.erase(card)
+
+		if changed and is_instance_valid(card):
+			(card as HenStateViewerCard).set_running(entries)
+
+
 func _on_debug_session_stopped() -> void:
-	for actions_list: Variant in _action_lists.values():
-		if is_instance_valid(actions_list):
-			(actions_list as HenStateActionsList).clear_flash()
+	_clear_flashes()
+
+
+func _clear_flashes() -> void:
+	for card: Variant in _flashes:
+		if is_instance_valid(card):
+			(card as HenStateViewerCard).set_running({})
+
+	_flashes.clear()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -156,6 +196,10 @@ func _gui_input(event: InputEvent) -> void:
 
 	# drags never count as a click
 	var is_click: bool = mb.position.distance_to(_click_press_pos) <= CLICK_TOLERANCE
+
+	if is_click and _dispatch_card_click():
+		_click_last_time = 0
+		return
 
 	if _active_node != null or _active_edge != null:
 		_click_last_time = 0
@@ -177,6 +221,230 @@ func _gui_input(event: InputEvent) -> void:
 	else:
 		_click_last_time = now
 		_click_last_pos = mb.position
+
+
+func _hit_under_mouse() -> Dictionary:
+	if not is_instance_valid(nodes_container):
+		return {}
+
+	var pos: Vector2 = nodes_container.get_local_mouse_position()
+
+	return _hit_in_card(_node_index_at(pos), pos)
+
+
+# a nested row still has no cross-level reorder, so only top-level rows drag
+func _get_drag_data(_pos: Vector2) -> Variant:
+	var hit: Dictionary = _hit_under_mouse()
+
+	if hit.get('kind', &'') != &'row' or int(hit.get('depth', 0)) != 0:
+		return null
+
+	var preview: Control = (hit.card as HenStateViewerCard).build_row_preview(hit.action)
+
+	if preview:
+		set_drag_preview(preview)
+
+	_drag_node = hit.node
+
+	return {type = &'hengo_action', action = hit.action}
+
+
+func _can_drop_data(_pos: Vector2, _data: Variant) -> bool:
+	var action: HenSaveAction = HenActionsPanel.dragged_action(_data)
+	var hit: Dictionary = _hit_under_mouse()
+
+	# reorder across cards is not a move this list knows how to make
+	if not action or hit.is_empty() or hit.node != _drag_node:
+		_clear_drop_hint()
+		return false
+
+	match StringName(str(hit.kind)):
+		&'row':
+			if hit.action == action or int(hit.depth) != 0:
+				_clear_drop_hint()
+				return false
+
+			if not HenActionsPanel.can_use_phase(action, (hit.action as HenSaveAction).phase):
+				_clear_drop_hint()
+				return false
+
+			_set_drop_hint(hit.card, &'row', hit.action, _is_upper_half(hit))
+			return true
+		&'phase', &'phase_add':
+			if not HenActionsPanel.can_use_phase(action, hit.phase):
+				_clear_drop_hint()
+				return false
+
+			_set_drop_hint(hit.card, &'phase', hit.phase, false)
+			return true
+
+	_clear_drop_hint()
+
+	return false
+
+
+func _drop_data(_pos: Vector2, _data: Variant) -> void:
+	var action: HenSaveAction = HenActionsPanel.dragged_action(_data)
+	var hit: Dictionary = _hit_under_mouse()
+
+	_clear_drop_hint()
+
+	if not action or hit.is_empty() or hit.node == null:
+		return
+
+	_editor_for(hit.node)
+
+	match StringName(str(hit.kind)):
+		&'row':
+			var target: HenSaveAction = hit.action
+			var index: int = HenActionsPanel.drop_index(
+				_editor_actions(hit.node), target, action, _is_upper_half(hit)
+			)
+
+			if index >= 0:
+				_editor.move_action(action, target.phase, index)
+		&'phase', &'phase_add':
+			_editor.move_action(action, hit.phase, 0)
+
+
+func _editor_actions(node: HenStateViewerGraphTypes.DirectedGraphNode) -> Array:
+	var save_data: HenSaveData = _save_data_for(node)
+
+	if not save_data:
+		return []
+
+	return save_data.get_state_actions(StringName(str(node.data.get('state_id', ''))))
+
+
+func _is_upper_half(hit: Dictionary) -> bool:
+	var rect: Rect2 = hit.rect
+	var local_y: float = nodes_container.get_local_mouse_position().y - (hit.origin as Vector2).y
+
+	return local_y < rect.position.y + rect.size.y * 0.5
+
+
+func _set_drop_hint(card: HenStateViewerCard, kind: StringName, ref: Variant, before: bool) -> void:
+	if is_instance_valid(_drop_card) and _drop_card != card:
+		_drop_card.set_drop_hint(&'', null, false)
+
+	_drop_card = card
+
+	if card:
+		card.set_drop_hint(kind, ref, before)
+
+
+func _clear_drop_hint() -> void:
+	if is_instance_valid(_drop_card):
+		_drop_card.set_drop_hint(&'', null, false)
+
+	_drop_card = null
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_DRAG_END:
+		_clear_drop_hint()
+		_drag_node = null
+
+
+# the drawn rows are not controls, so the cam cannot tell a row press from the
+# empty canvas by hit-testing the control tree
+func blocks_pan() -> bool:
+	return not _hit_under_mouse().is_empty()
+
+
+# routes a click by the innermost thing under it; false lets the state open
+func _dispatch_card_click() -> bool:
+	var hit: Dictionary = _hit_under_mouse()
+
+	if hit.is_empty():
+		return false
+
+	var card: HenStateViewerCard = hit.card
+	var rect: Rect2 = _screen_rect(Rect2(hit.origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
+
+	_editing_card = card
+	_editor_for(hit.node)
+
+	match StringName(str(hit.kind)):
+		&'chip':
+			_editor.chip_pressed(hit.part, int(hit.index), rect, _chip_ring.bind(card, hit.origin))
+		&'capsule':
+			_editor.edit_action(hit.action, rect, true)
+		&'row':
+			_editor.edit_action(hit.action, rect, false)
+		&'phase_add':
+			_editor.open_search(hit.phase, null, null, rect)
+		&'list_add':
+			_editor.open_search(&'', null, null, rect)
+		&'loop_add':
+			_editor.open_search(&'', null, hit.loop, rect)
+
+	return true
+
+
+func _editor_for(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
+	if _editor == null:
+		_editor = HenStateViewerCardEditor.new()
+		_editor.changed.connect(_on_editor_changed)
+		_editor.focus_requested.connect(_focus_script)
+
+	_editor.target(_save_data_for(node), StringName(str(node.data.get('state_id', ''))))
+
+
+func _on_editor_changed() -> void:
+	_refresh_edited_card()
+
+
+# a value edit usually leaves the card the same size, and then nothing outside it
+# moved: relaying the whole collection out would be the expensive way to do nothing
+func _refresh_edited_card() -> void:
+	if not is_instance_valid(_editing_card):
+		_on_actions_structure_changed()
+		return
+
+	var before: Vector2 = _editing_card.get_intrinsic_size()
+
+	_editing_card.refresh_content()
+
+	if _editing_card.get_intrinsic_size().is_equal_approx(before):
+		return
+
+	_on_actions_structure_changed()
+
+
+func _focus_script(save_data: HenSaveData) -> void:
+	if save_data:
+		(Engine.get_singleton(&'Loader') as HenLoader).set_active_script(save_data)
+
+
+# a hit rect lives in the container's space; popups position in viewport space
+func _screen_rect(local_rect: Rect2) -> Rect2:
+	var xform: Transform2D = nodes_container.get_global_transform()
+
+	return Rect2(xform * local_rect.position, local_rect.size * xform.get_scale())
+
+
+# every text-editable chip of the card, in reading order: the tab order. the card
+# is re-emitted first because a committed value resizes the line it sits on
+func _chip_ring(card: HenStateViewerCard, origin: Vector2) -> Array:
+	var ring: Array = []
+
+	if not is_instance_valid(card):
+		return ring
+
+	card.refresh_content()
+
+	for hit: Dictionary in card.get_hits():
+		if hit.kind != &'chip' or not bool((hit.part as Dictionary).get('editable', false)):
+			continue
+
+		ring.append({
+			part = hit.part,
+			index = hit.index,
+			rect = _screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
+		})
+
+	return ring
 
 
 func _on_graph_changed_no_args(_a = null, _b = null) -> void:
@@ -204,7 +472,18 @@ func _update_graph() -> void:
 	if _only_current_script:
 		scripts = [global.SAVE_DATA] if global.SAVE_DATA else []
 
-	build_graph(_build_collection_dict(scripts))
+	var dict: Dictionary = _build_collection_dict(scripts)
+	# states, names and transitions all live in this dict, so an equal hash means
+	# only action contents moved: re-measuring covers it without respawning a card
+	var signature: int = dict.hash()
+
+	if graph_root != null and signature == _structure_hash:
+		_measure_and_layout()
+		return
+
+	_structure_hash = signature
+
+	build_graph(dict)
 
 
 # switches between the whole collection and the active script only
@@ -222,6 +501,7 @@ func is_only_current_script() -> bool:
 
 # full rebuild for the toolbar button: the incremental paths keep the parsed graph
 func refresh_graph() -> void:
+	_structure_hash = 0
 	_update_graph()
 
 
@@ -526,35 +806,24 @@ func _update_node_styles() -> void:
 	var current_state_id: String = _current_state_id()
 
 	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
-		var panel: Control = _panels[node]
-		var style: StyleBoxFlat = panel.get_theme_stylebox('panel') as StyleBoxFlat
-		if not style: continue
+		(_panels[node] as HenStateViewerCard).set_highlight(_highlight_of(node, current_state_id))
 
-		var node_id: String = node.id
-		var slices: int = node_id.get_slice_count('.')
-		var short_id: String = node_id.get_slice('.', slices - 1)
-		# node.id is "collection.<script_name>.<state>..."; segment 1 scopes the script
-		var script_seg: String = node_id.get_slice('.', 1) if slices > 1 else ''
-		var is_compound: bool = not node.children.is_empty()
 
-		var short_id_snake: String = short_id.strip_edges().to_snake_case()
-		var active_state: String = _debug_active_states.get(script_seg, '')
-		var highlight_width: int = _scaled_border(COMPOUND_BORDER_WIDTH) if is_compound else 2
+# the running state wins over the one being edited
+func _highlight_of(node: HenStateViewerGraphTypes.DirectedGraphNode, current_state_id: String) -> StringName:
+	var node_id: String = node.id
+	var slices: int = node_id.get_slice_count('.')
+	# node.id is "collection.<script_name>.<state>..."; segment 1 scopes the script
+	var script_seg: String = node_id.get_slice('.', 1) if slices > 1 else ''
+	var short_id: String = node_id.get_slice('.', slices - 1)
 
-		if active_state != '' and short_id_snake == active_state:
-			style.border_color = Color('#63ff92')
-			style.set_border_width_all(highlight_width)
-			style.shadow_size = 10
-			style.shadow_color = Color(0.39, 1.0, 0.57, 0.30)
-			style.shadow_offset = Vector2.ZERO
-		elif not current_state_id.is_empty() and String(node.data.get('state_id', '')) == current_state_id:
-			style.border_color = CURRENT_BORDER
-			style.set_border_width_all(highlight_width)
-			style.shadow_size = 10
-			style.shadow_color = Color(0.90, 0.49, 0.13, 0.28)
-			style.shadow_offset = Vector2.ZERO
-		else:
-			_apply_base_border_shadow(style, is_compound)
+	if _debug_active_states.get(script_seg, '') == short_id.strip_edges().to_snake_case():
+		return &'running'
+
+	if not current_state_id.is_empty() and String(node.data.get('state_id', '')) == current_state_id:
+		return &'current'
+
+	return &''
 
 
 # id of the state route being edited, empty when the route isn't a state
@@ -602,123 +871,277 @@ func _open_state(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		(Engine.get_singleton(&'Router') as HenRouter).change_route(route)
 
 
-func _update_zoom_scales() -> void:
-	var cam: Node2D = get_node_or_null('%Cam') as Node2D
-	var zoom: float = maxf(cam.transform.x.x, 0.001) if cam else 1.0
+func _cam() -> HenCam:
+	if not is_instance_valid(_cam_node):
+		_cam_node = get_node_or_null('%Cam') as HenCam
 
-	_update_title_scales(zoom)
+	return _cam_node
+
+
+func _current_zoom() -> float:
+	var cam: HenCam = _cam()
+
+	return maxf(cam.transform.x.x, 0.001) if cam else 1.0
+
+
+func _update_zoom_scales() -> void:
+	var zoom: float = _current_zoom()
 
 	if is_equal_approx(zoom, _zoom):
 		return
 
 	_zoom = zoom
-	_apply_border_widths()
+	_update_detail_level(zoom)
 
 
-# a hairline border falls under a screen pixel once the cam zooms out
-func _scaled_border(base: float) -> int:
-	return int(round(clampf(MIN_BORDER_SCREEN_PX / _zoom, base, base * MAX_BORDER_GROWTH)))
+# holds the compact name at MIN_TITLE_SCREEN_PX once the cam shrinks it past that
+func _title_factor(zoom: float) -> float:
+	return maxf(1.0, MIN_TITLE_SCREEN_PX / (TITLE_FONT_SIZE * ThemeUtils.get_font_scale() * zoom))
 
 
-func _apply_border_widths() -> void:
-	var width: int = _scaled_border(COMPOUND_BORDER_WIDTH)
+func _update_detail_level(zoom: float) -> void:
+	var rows_at: float = ProjectSettings.get_setting(HenSettings.STATE_ROWS_ZOOM_PATH, 0.25)
+	var name_at: float = minf(ProjectSettings.get_setting(HenSettings.STATE_NAME_ZOOM_PATH, 0.15), rows_at)
+	var lines_at: float = ProjectSettings.get_setting(HenSettings.STATE_LINES_ZOOM_PATH, 0.15)
+	var level: int = _detail_level
 
-	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
-		if node.children.is_empty():
+	# stepping down uses the threshold, stepping back up needs the extra margin
+	match _detail_level:
+		HenStateViewerCard.Detail.FULL:
+			if zoom < name_at:
+				level = HenStateViewerCard.Detail.NAME
+			elif zoom < rows_at:
+				level = HenStateViewerCard.Detail.COMPACT
+		HenStateViewerCard.Detail.COMPACT:
+			if zoom < name_at:
+				level = HenStateViewerCard.Detail.NAME
+			elif zoom > rows_at * COMPACT_HYSTERESIS:
+				level = HenStateViewerCard.Detail.FULL
+		_:
+			if zoom > rows_at * COMPACT_HYSTERESIS:
+				level = HenStateViewerCard.Detail.FULL
+			elif zoom > name_at * COMPACT_HYSTERESIS:
+				level = HenStateViewerCard.Detail.COMPACT
+
+	if _lines_hidden:
+		if zoom > lines_at * COMPACT_HYSTERESIS:
+			_lines_hidden = false
+	elif zoom < lines_at:
+		_lines_hidden = true
+
+	edges_overlay.set_lines_hidden(_lines_hidden)
+
+	var factor: float = _title_factor(zoom)
+	var changed: bool = level != _detail_level
+
+	_detail_level = level
+
+	if changed:
+		# the overlay only cares whether the pills are still readable
+		edges_overlay.set_detail(
+			HenStateViewerEdgesOverlay.Detail.FULL if level == HenStateViewerCard.Detail.FULL
+			else HenStateViewerEdgesOverlay.Detail.COMPACT
+		)
+
+	for panel: Variant in _panels.values():
+		if not panel is HenStateViewerCard:
 			continue
 
-		var style: StyleBoxFlat = (_panels[node] as Control).get_theme_stylebox('panel') as StyleBoxFlat
+		var card: HenStateViewerCard = panel
 
-		if style:
-			style.set_border_width_all(width)
+		if changed:
+			card.set_detail(level)
 
-	var separator_width: int = _scaled_border(HEADER_SEPARATOR_WIDTH)
-
-	for header_style: StyleBoxFlat in _header_styles:
-		header_style.border_width_bottom = separator_width
+		# a transform, so holding the name readable never reshapes its text
+		card.set_title_scale(factor)
 
 
-# holds each title at natural size until it would shrink past MIN_TITLE_SCREEN_PX,
-# then counter-scales so state names stay readable when zoomed out
-func _update_title_scales(zoom: float) -> void:
-	var factor: float = maxf(1.0, MIN_TITLE_SCREEN_PX / (TITLE_FONT_SIZE * zoom))
+# what the cam currently shows, in the container's space
+func _view_rect() -> Rect2:
+	var cam: HenCam = _cam()
 
-	for box: Control in _title_boxes.values():
-		if not is_instance_valid(box):
-			continue
+	if not cam:
+		return Rect2(Vector2(-1e9, -1e9), Vector2(2e9, 2e9))
 
-		# pivot on the content, not the box: compound headers stretch full width and
-		# left-align the title, so box-center would slide the title sideways on scale
-		var pivot: Vector2 = _content_center(box)
-		if box.pivot_offset != pivot:
-			box.pivot_offset = pivot
-		if box.scale.x != factor:
-			box.scale = Vector2(factor, factor)
+	return cam.get_rect().grow(CULL_MARGIN)
 
 
-# center of the union of a box's laid-out children, in the box's local space
-func _content_center(box: Control) -> Vector2:
-	var lo: Vector2 = Vector2.INF
-	var hi: Vector2 = -Vector2.INF
+# cards enter and leave the view as the cam moves, and only then
+func _update_culling() -> void:
+	var cam: HenCam = _cam()
 
-	for child in box.get_children():
-		var ctrl: Control = child as Control
-		if ctrl == null:
-			continue
-		lo.x = minf(lo.x, ctrl.position.x)
-		lo.y = minf(lo.y, ctrl.position.y)
-		hi.x = maxf(hi.x, ctrl.position.x + ctrl.size.x)
-		hi.y = maxf(hi.y, ctrl.position.y + ctrl.size.y)
+	if not cam:
+		return
 
-	if lo.x > hi.x:
-		return box.size * 0.5
+	var origin: Vector2 = cam.transform.origin
+	var zoom: float = cam.transform.x.x
 
-	return (lo + hi) * 0.5
+	if origin.is_equal_approx(_last_cull_origin) and is_equal_approx(zoom, _last_cull_zoom):
+		return
+
+	_last_cull_origin = origin
+	_last_cull_zoom = zoom
+
+	var view: Rect2 = _view_rect()
+
+	for i: int in range(_hover_nodes.size()):
+		var panel: Variant = _panels.get(_hover_nodes[i])
+
+		if panel is HenStateViewerCard:
+			(panel as HenStateViewerCard).set_culled(not view.intersects(_hover_rects[i]))
 
 
 func _process(_delta: float) -> void:
 	_update_zoom_scales()
+	_update_culling()
 
-	# hover tracking
+	if not _flashes.is_empty():
+		_expire_flashes()
+
 	var mouse_pos: Vector2 = nodes_container.get_local_mouse_position()
-	var hovered_node: HenStateViewerGraphTypes.DirectedGraphNode = null
-	
-	if edges_overlay.get_hovered_edge() == null:
-		if graph_root != null:
-			var all_nodes: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
-			_collect_draw_order(graph_root, all_nodes)
-			
-			# all_nodes is ordered parents -> children
-			# iterate in reverse (children -> parents) to hit the deepest node first
-			for i in range(all_nodes.size() - 1, -1, -1):
-				var node: HenStateViewerGraphTypes.DirectedGraphNode = all_nodes[i]
-				if node == graph_root:
-					continue
-					
-				var rect: Rect2 = Rect2(node.get_absolute(), Vector2(node.layout.width, node.layout.height))
-				if rect.has_point(mouse_pos):
-					hovered_node = node
-					break
-					
+	var hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge = edges_overlay.get_hovered_edge()
+
+	if mouse_pos != _last_hover_pos or hovered_edge != _last_hover_edge:
+		_last_hover_pos = mouse_pos
+		_last_hover_edge = hovered_edge
+		_update_hover(mouse_pos, hovered_edge)
+
+	_update_cursor()
+
+
+func _update_hover(mouse_pos: Vector2, hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
+	var index: int = -1 if hovered_edge != null else _node_index_at(mouse_pos)
+	var hovered_node: HenStateViewerGraphTypes.DirectedGraphNode = _hover_nodes[index] if index >= 0 else null
+
+	_apply_card_hover(_hit_in_card(index, mouse_pos))
+
 	var active_node_changed: bool = false
 	if _active_node != hovered_node:
 		_set_active_node(hovered_node)
 		active_node_changed = true
-		
+
 	if hovered_node == null:
-		var hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge = edges_overlay.get_hovered_edge()
 		if _active_edge != hovered_edge or active_node_changed:
 			_active_edge = hovered_edge
 			_set_active_edge(hovered_edge)
 	else:
 		_active_edge = null
 
-	_update_cursor()
+
+# the cache is ordered parents -> children, so walking back hits the deepest first
+func _node_index_at(pos: Vector2) -> int:
+	for i: int in range(_hover_rects.size() - 1, -1, -1):
+		if _hover_rects[i].has_point(pos):
+			return i
+
+	return -1
+
+
+# chips and capsules are emitted before the row holding them, so the first rect
+# that contains the point is always the innermost one
+func _hit_in_card(index: int, pos: Vector2) -> Dictionary:
+	if index < 0:
+		return {}
+
+	var card: Variant = _panels.get(_hover_nodes[index])
+
+	if not card is HenStateViewerCard or not (card as HenStateViewerCard).visible:
+		return {}
+
+	var origin: Vector2 = _hover_rects[index].position
+	var local: Vector2 = pos - origin
+
+	for hit: Dictionary in (card as HenStateViewerCard).get_hits():
+		if (hit.rect as Rect2).has_point(local):
+			var out: Dictionary = hit.duplicate()
+			out.card = card
+			out.node = _hover_nodes[index]
+			out.origin = origin
+			return out
+
+	return {}
+
+
+func _apply_card_hover(hit: Dictionary) -> void:
+	var card: HenStateViewerCard = hit.get('card')
+	var kind: StringName = &''
+	var ref: Variant = null
+
+	match StringName(str(hit.get('kind', ''))):
+		&'row':
+			kind = &'row'
+			ref = hit.action
+		&'chip':
+			kind = &'chip'
+			ref = hit.index
+
+	if is_instance_valid(_hovered_card) and _hovered_card != card:
+		_hovered_card.set_hover(&'', null)
+
+	_hovered_card = card
+
+	if card:
+		card.set_hover(kind, ref)
+
+	_update_row_tooltip(hit, kind)
+
+
+# the doc is only built when a row is actually hovered, never while the card draws
+func _update_row_tooltip(hit: Dictionary, kind: StringName) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global or not global.TOOLTIP:
+		return
+
+	if kind != &'row':
+		if not _tooltip_action.is_empty():
+			_tooltip_action = ''
+			global.TOOLTIP.close()
+		return
+
+	var action: HenSaveAction = hit.action
+
+	if _tooltip_action == str(action.id):
+		return
+
+	_tooltip_action = str(action.id)
+
+	var owner: HenSaveData = _save_data_for(hit.node)
+	var doc: String = HenActionDoc.bbcode(HenActionsPanel.find_macro(action.macro_id))
+	var values: String = HenActionsPanel.value_preview(action, owner)
+	var content: String = doc
+
+	if not values.is_empty():
+		content += ('\n\n' if not doc.is_empty() else '') + '[color=#5f6a7a]Current: ' + values + '[/color]'
+
+	if not content.is_empty():
+		global.TOOLTIP.go_to(get_global_mouse_position(), content)
+
+
+# absolute positions are recursive, so they are resolved once per layout
+func _rebuild_hover_cache() -> void:
+	_hover_nodes.clear()
+	_hover_rects.clear()
+	_last_hover_pos = Vector2.INF
+	_last_cull_origin = Vector2.INF
+
+	if graph_root == null:
+		return
+
+	var all_nodes: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
+	_collect_draw_order(graph_root, all_nodes)
+
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in all_nodes:
+		if node == graph_root:
+			continue
+
+		_hover_nodes.append(node)
+		_hover_rects.append(Rect2(node.get_absolute(), Vector2(node.layout.width, node.layout.height)))
 
 
 # panels ignore the mouse, so the cursor hint lives on the graph itself
 func _update_cursor() -> void:
-	var cam: HenCam = get_node_or_null('%Cam') as HenCam
+	var cam: HenCam = _cam()
 	var shape: CursorShape = Control.CURSOR_ARROW
 
 	if cam and cam.is_panning():
@@ -734,10 +1157,12 @@ func _update_cursor() -> void:
 func build_graph(dict: Dictionary) -> void:
 	for child in nodes_container.get_children():
 		child.queue_free()
+
+	_flashes.clear()
+	_hovered_card = null
+	_editing_card = null
+	_drop_card = null
 	_panels.clear()
-	_title_boxes.clear()
-	_header_styles.clear()
-	_action_lists.clear()
 
 	graph_root = parser.parse_machine(dict)
 
@@ -754,12 +1179,10 @@ func build_graph(dict: Dictionary) -> void:
 
 	for node in all_nodes:
 		if node != graph_root:
-			_spawn_panel(node)
+			_spawn_card(node)
 
-	_setup_actions_lists()
 	_measure_and_layout()
 	# the containers have not sorted yet, so the first measure reads stale sizes
-	_schedule_measure_and_layout()
 
 
 func _measure_and_layout() -> void:
@@ -769,57 +1192,29 @@ func _measure_and_layout() -> void:
 	measurer.calculate_rects(graph_root, ThemeDB.fallback_font, 14, true, _panels)
 	layout.execute_layout(graph_root)
 
+	var view: Rect2 = _view_rect()
+	var factor: float = _title_factor(_current_zoom())
+
 	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
-		var panel: Control = _panels[node]
-		panel.position = node.get_absolute()
-		panel.size = Vector2(node.layout.width, node.layout.height)
+		var card: HenStateViewerCard = _panels[node]
+		var rect: Rect2 = Rect2(node.get_absolute(), Vector2(node.layout.width, node.layout.height))
+
+		card.position = rect.position
+		# culled before the size lands, so an offscreen card never builds a list
+		card.set_culled(not view.intersects(rect))
+		card.set_title_scale(factor)
+		card.set_detail(_detail_level)
+		card.apply_size(rect.size)
 
 	edges_overlay.update_edges(graph_root)
 	_update_node_styles()
+	_rebuild_hover_cache()
 
 
-# a container only recomputes its min size during a layout pass, so repeat until settled
-func _schedule_measure_and_layout() -> void:
-	if _layout_settling:
-		return
-
-	_layout_settling = true
-
-	var last: float = _layout_signature()
-
-	for _i: int in LAYOUT_SETTLE_PASSES:
-		if not is_inside_tree():
-			break
-
-		await get_tree().process_frame
-
-		if graph_root == null or not is_inside_tree():
-			break
-
-		_measure_and_layout()
-
-		var settled: float = _layout_signature()
-
-		if is_equal_approx(settled, last):
-			break
-
-		last = settled
-
-	_layout_settling = false
-
-
-func _layout_signature() -> float:
-	var sum: float = 0.0
-
-	for node: HenStateViewerGraphTypes.DirectedGraphNode in _panels:
-		sum += node.layout.width + node.layout.height * 7.0
-
-	return sum
-
-
+# an action changed shape, so the card it lives in resized and everything around
+# it has to move
 func _on_actions_structure_changed() -> void:
 	_measure_and_layout()
-	_schedule_measure_and_layout()
 
 
 # depth-first to get breadth-first draw order (parents before children)
@@ -829,148 +1224,16 @@ func _collect_draw_order(node: HenStateViewerGraphTypes.DirectedGraphNode, arr: 
 		_collect_draw_order(child, arr)
 
 
-# applies the resting border and shadow shared by spawn and debug-highlight restore
-func _apply_base_border_shadow(style: StyleBoxFlat, is_compound: bool) -> void:
-	style.border_color = COMPOUND_BORDER if is_compound else LEAF_BORDER
-	style.set_border_width_all(_scaled_border(COMPOUND_BORDER_WIDTH) if is_compound else 1)
-	style.shadow_size = 8 if is_compound else 6
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.25 if is_compound else 0.35)
-	style.shadow_offset = Vector2(0, 2)
-
-
-# spawns a panel for the node before measuring
-func _spawn_panel(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
-	var is_compound: bool = not node.children.is_empty()
-
-	var panel: Control
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.corner_radius_top_left = 8
-	style.corner_radius_top_right = 8
-	style.corner_radius_bottom_left = 8
-	style.corner_radius_bottom_right = 8
-
-	if is_compound:
-		panel = PanelContainer.new()
-		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		style.bg_color = COMPOUND_BODY_BG
-		_apply_base_border_shadow(style, true)
-		panel.add_theme_stylebox_override('panel', style)
-	else:
-		panel = PanelContainer.new()
-		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		style.bg_color = LEAF_BG
-		_apply_base_border_shadow(style, false)
-		style.content_margin_left = 8
-		style.content_margin_right = 8
-		style.content_margin_top = 8
-		style.content_margin_bottom = 8
-		panel.add_theme_stylebox_override('panel', style)
-
-	nodes_container.add_child(panel)
-	_panels[node] = panel
-
+func _spawn_card(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
+	var card: HenStateViewerCard = HenStateViewerCard.new()
 	var short_id: String = node.id.get_slice('.', node.id.get_slice_count('.') - 1)
-	var is_initial: bool = false
-	if node.parent != null and node.parent.data.has('initial') and node.parent.data.initial == short_id:
-		is_initial = true
+	var is_initial: bool = node.parent != null and node.parent.data.get('initial', '') == short_id
 
-	if is_compound:
-		var compound_vbox: VBoxContainer = VBoxContainer.new()
-		compound_vbox.add_theme_constant_override('separation', 0)
-		compound_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		panel.add_child(compound_vbox)
+	nodes_container.add_child(card)
+	card.setup(self, _save_data_for(node), node.data, short_id, not node.children.is_empty(), is_initial)
 
-		var header_panel: PanelContainer = PanelContainer.new()
-		header_panel.name = 'Header'
-		header_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		compound_vbox.add_child(header_panel)
+	_panels[node] = card
 
-		var header_style: StyleBoxFlat = StyleBoxFlat.new()
-		header_style.bg_color = Color(0.155, 0.155, 0.195, 1.0)
-		header_style.corner_radius_top_left = 6
-		header_style.corner_radius_top_right = 6
-		header_style.border_width_bottom = _scaled_border(HEADER_SEPARATOR_WIDTH)
-		header_style.border_color = COMPOUND_BORDER.lightened(0.2)
-		header_style.content_margin_left = 8
-		header_style.content_margin_right = 8
-		header_style.content_margin_top = 5
-		header_style.content_margin_bottom = 5
-		header_panel.add_theme_stylebox_override('panel', header_style)
-		_header_styles.append(header_style)
-
-		var vbox: VBoxContainer = VBoxContainer.new()
-		vbox.add_theme_constant_override('separation', 0)
-		vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		header_panel.add_child(vbox)
-
-		var hbox: HBoxContainer = HBoxContainer.new()
-		hbox.add_theme_constant_override('separation', 6)
-		hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vbox.add_child(hbox)
-
-		var script_type: String = String(node.data.get('script_type', ''))
-		if not script_type.is_empty():
-			hbox.add_child(_create_type_icon(StringName(script_type)))
-
-		if is_initial:
-			hbox.add_child(_create_initial_indicator())
-
-		var title_label: Label = _create_graph_label(short_id)
-		hbox.add_child(title_label)
-		_title_boxes[node] = hbox
-
-		var desc_text: String = node.data.get('description', '')
-		if not desc_text.is_empty():
-			var desc: Label = _create_graph_label(desc_text)
-			desc.add_theme_font_size_override('font_size', 14)
-			desc.add_theme_color_override('font_color', LABEL_COLOR.darkened(0.3))
-			vbox.add_child(desc)
-
-		if _is_state_node(node):
-			vbox.add_child(_create_actions_list(node))
-	else:
-		var vbox: VBoxContainer = VBoxContainer.new()
-		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-		vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		panel.add_child(vbox)
-
-		var hbox: HBoxContainer = HBoxContainer.new()
-		hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-		hbox.add_theme_constant_override('separation', 4)
-		hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vbox.add_child(hbox)
-
-		if is_initial:
-			hbox.add_child(_create_initial_indicator())
-
-		hbox.add_child(_create_graph_label(short_id))
-		_title_boxes[node] = hbox
-
-		var desc_text: String = node.data.get('description', '')
-		if not desc_text.is_empty():
-			var desc: Label = _create_graph_label(desc_text)
-			desc.add_theme_font_size_override('font_size', 14)
-			desc.add_theme_color_override('font_color', LABEL_COLOR.darkened(0.3))
-			desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			vbox.add_child(desc)
-
-		if _is_state_node(node):
-			vbox.add_child(_create_actions_list(node))
-
-
-func _create_actions_list(node: HenStateViewerGraphTypes.DirectedGraphNode) -> HenStateActionsList:
-	var actions_list: HenStateActionsList = ACTIONS_LIST_SCENE.instantiate()
-	actions_list.structure_changed.connect(_on_actions_structure_changed)
-	actions_list.focus_requested.connect(_open_state.bind(node))
-	_action_lists[node] = actions_list
-
-	return actions_list
-
-
-func _setup_actions_lists() -> void:
-	for node: HenStateViewerGraphTypes.DirectedGraphNode in _action_lists:
-		var actions_list: HenStateActionsList = _action_lists[node]
-		actions_list.setup(_save_data_for(node), StringName(str(node.data.get('state_id', ''))))
 
 
 func _save_data_for(node: HenStateViewerGraphTypes.DirectedGraphNode) -> HenSaveData:
@@ -985,42 +1248,6 @@ func _save_data_for(node: HenStateViewerGraphTypes.DirectedGraphNode) -> HenSave
 			return save_data
 
 	return null
-
-
-# creates a reusable graph label
-func _create_graph_label(text: String) -> Label:
-	var label: Label = Label.new()
-	label.text = text
-	label.add_theme_color_override('font_color', LABEL_COLOR)
-	label.add_theme_font_size_override('font_size', 18)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return label
-
-
-func _create_type_icon(type: StringName) -> TextureRect:
-	var tex_rect: TextureRect = TextureRect.new()
-	tex_rect.texture = HenUtils.get_icon_texture(type)
-	tex_rect.modulate = HenUtils.get_type_parent_color(type, 1.0, Color.WHITE).lightened(0.25)
-	tex_rect.custom_minimum_size = Vector2(TITLE_FONT_SIZE, TITLE_FONT_SIZE)
-	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	tex_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return tex_rect
-
-
-# creates a panel that visually represents an initial state
-func _create_initial_indicator() -> TextureRect:
-	var tex_rect: TextureRect = TextureRect.new()
-	tex_rect.texture = preload('res://addons/hengo/assets/new_icons/circle-play.svg')
-	tex_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	tex_rect.custom_minimum_size = Vector2(16, 16)
-	tex_rect.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	tex_rect.modulate = Color('#8eef97')
-	return tex_rect
-
 
 func _set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	_active_node = node
@@ -1059,7 +1286,7 @@ func _set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 				visible_nodes[t_curr] = true
 			
 	for n in _panels:
-		var p: Control = _panels[n]
+		var p: CanvasItem = _panels[n]
 		if visible_nodes.has(n):
 			if p.modulate.a != 1.0:
 				p.modulate.a = 1.0
@@ -1095,7 +1322,7 @@ func _set_active_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 		visible_nodes[curr] = true
 		
 	for n in _panels:
-		var p: Control = _panels[n]
+		var p: CanvasItem = _panels[n]
 		if visible_nodes.has(n):
 			if p.modulate.a != 1.0:
 				p.modulate.a = 1.0

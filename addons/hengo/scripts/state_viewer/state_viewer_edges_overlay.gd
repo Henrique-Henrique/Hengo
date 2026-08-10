@@ -18,6 +18,17 @@ var _flashed_edges: Dictionary = {}
 # don't shrink to sub-pixel and vanish
 var _screen_scale: float = 1.0
 
+# false once every line reached its target color and width
+var _animating: bool = true
+var _last_mouse_pos: Vector2 = Vector2.INF
+var _last_hover_zoom: float = -1.0
+var _last_view: Rect2 = Rect2()
+var _applied_scale: float = 1.0
+var _detail: int = Detail.FULL
+var _lines_hidden: bool = false
+
+enum Detail {FULL, COMPACT}
+
 const FORWARD_COLOR: Color = Color(0.64, 0.66, 0.72, 1.0)
 const BACK_COLOR: Color = Color('#c9a35e')
 const CROSS_COLOR: Color = Color('#c368ed')
@@ -26,6 +37,10 @@ const TRANSITION_COLOR: Color = Color('#f97316')
 const CONDITION_COLOR: Color = Color('#38bdf8')
 const CROSS_SCRIPT_COLOR: Color = Color('#c368ed')
 const DIM_ALPHA: float = 0.2
+const HOVER_SCREEN_PX: float = 15.0
+const VIEW_MARGIN: float = 256.0
+# segments per round joint and cap; the default 8 is a lot at 1400 lines
+const ROUND_PRECISION: int = 3
 const LABEL_CLEARANCE: float = 4.0
 const SLIDE_STEP: float = 18.0
 const SLIDE_TRIES: int = 8
@@ -41,9 +56,6 @@ const EDGE_CORNER_RADIUS: float = 14.0
 const FLASH_TRAVEL_MS: float = 450.0
 const FLASH_TOTAL_MS: float = 800.0
 const PULSE_LEN: float = 90.0
-const DASH_TEXTURE: Texture2D = preload('res://addons/hengo/assets/images/line_dashed.png')
-const DASH_SHADER: Shader = preload('res://addons/hengo/assets/shaders/state_dash.gdshader')
-const PILL_SCENE: PackedScene = preload('res://addons/hengo/scenes/state_edge_pill.tscn')
 
 
 func _ready() -> void:
@@ -53,6 +65,39 @@ func _ready() -> void:
 
 func get_hovered_edge() -> HenStateViewerGraphTypes.DirectedGraphEdge:
 	return _hovered_edge
+
+
+# at compact zoom a pill is unreadable and an arrow head is a few pixels, so
+# neither is worth drawing
+func set_detail(_level: int) -> void:
+	if _detail == _level:
+		return
+
+	_detail = _level
+	_animating = true
+	queue_redraw()
+
+
+# far enough out the routes read as noise over the state names, and they are the
+# heaviest thing left on screen
+func set_lines_hidden(_hidden: bool) -> void:
+	if _lines_hidden == _hidden:
+		return
+
+	_lines_hidden = _hidden
+
+	if _hidden:
+		_hovered_edge = null
+
+		for view in _edge_views:
+			(view.line as Line2D).visible = false
+
+			if view.label != null:
+				(view.label as HenStateEdgePill).visible = false
+
+	_animating = true
+	_last_view = Rect2()
+	queue_redraw()
 
 
 # matches by owning script, source state and event so same-named states across scripts never collide
@@ -71,12 +116,14 @@ func flash_edge(script_name: String, source: String, event: String) -> void:
 
 	if target_edge:
 		_flashed_edges[target_edge] = Time.get_ticks_msec()
+		_animating = true
 		queue_redraw()
 
 
 func set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	if _active_node != node:
 		_active_node = node
+		_animating = true
 		queue_redraw()
 
 
@@ -84,6 +131,8 @@ func set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 func update_edges(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	graph_root = root
 	_build_edge_views()
+	_animating = true
+	_last_mouse_pos = Vector2.INF
 	queue_redraw()
 
 
@@ -110,26 +159,20 @@ func _kind_color(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Color:
 			return FORWARD_COLOR
 
 
-# resets pooled lines fully so no width/color/dash leaks between graph rebuilds
+# resets pooled lines fully so no width or color leaks between graph rebuilds. no
+# material and no texture: every line shares one render state, which is what lets
+# the renderer batch them, and hover reads from the color and the width alone
 func _setup_line(line: Line2D, edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 	# lines render behind the overlay's own drawing so arrows and pulses stay on top
 	line.show_behind_parent = true
 	line.joint_mode = Line2D.LINE_JOINT_ROUND
 	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
 	line.end_cap_mode = Line2D.LINE_CAP_ROUND
-	line.antialiased = true
-	line.texture = DASH_TEXTURE
-	line.texture_mode = Line2D.LINE_TEXTURE_TILE
-	line.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	# the fringe geometry it adds roughly doubles the vertices of every line
+	line.antialiased = false
+	line.round_precision = ROUND_PRECISION
 	line.width = NORMAL_WIDTH
 	line.default_color = _kind_color(edge)
-
-	if line.material == null:
-		var mat: ShaderMaterial = ShaderMaterial.new()
-		mat.shader = DASH_SHADER
-		line.material = mat
-
-	(line.material as ShaderMaterial).set_shader_parameter('dash_amount', 0.0)
 
 
 func _build_edge_views() -> void:
@@ -184,14 +227,14 @@ func _build_edge_views() -> void:
 				else (section.start_point + section.end_point) * 0.5
 
 			var icon_name: String = str(edge.meta.get('icon', ''))
-			var icon: Texture2D = HenActionRow.icon_texture(icon_name) if not icon_name.is_empty() else null
+			var icon: Texture2D = HenActionVisuals.icon_texture(icon_name) if not icon_name.is_empty() else null
 			var pill_size: Vector2 = HenStateEdgePill.measure(label_text, icon != null)
 			var pill_rect: Rect2 = Rect2(label_pos - pill_size * 0.5, pill_size)
 
 			if label_idx < _label_pool.size():
 				lbl = _label_pool[label_idx]
 			else:
-				lbl = PILL_SCENE.instantiate()
+				lbl = HenStateEdgePill.new()
 				add_child(lbl)
 				_label_pool.append(lbl)
 
@@ -207,6 +250,8 @@ func _build_edge_views() -> void:
 				idx = label_idx
 			})
 
+		var hover_points: PackedVector2Array = _sharp_points(section)
+
 		_edge_views.append({
 			edge = edge,
 			points = points,
@@ -215,10 +260,14 @@ func _build_edge_views() -> void:
 			has_arrow = has_arrow,
 			arrow_end = arrow_end,
 			arrow_prev = arrow_prev,
-			dash = 0.0,
 			lengths = lengths,
 			total_len = total_len,
-			state_width = NORMAL_WIDTH
+			state_width = NORMAL_WIDTH,
+			alpha = 1.0,
+			hover_points = hover_points,
+			bounds = _bounds_of(hover_points),
+			# fixed per edge, and resolving it parses an html string
+			color = _kind_color(edge)
 		})
 
 	while _line_pool.size() > line_idx:
@@ -240,6 +289,32 @@ func _build_edge_views() -> void:
 	_resolve_label_overlaps(label_items, _state_rects(graph_root))
 
 
+# the unrounded route, which the hover test uses: 4 to 8 points instead of the
+# hundreds the bake produces, and it never strays more than a quarter of the
+# corner radius from the drawn curve
+func _sharp_points(section: Dictionary) -> PackedVector2Array:
+	var pts: PackedVector2Array = PackedVector2Array([section.start_point])
+
+	for bend: Vector2 in section.bend_points:
+		pts.append(bend)
+
+	pts.append(section.end_point)
+
+	return pts
+
+
+func _bounds_of(points: PackedVector2Array) -> Rect2:
+	if points.is_empty():
+		return Rect2()
+
+	var rect: Rect2 = Rect2(points[0], Vector2.ZERO)
+
+	for i: int in range(1, points.size()):
+		rect = rect.expand(points[i])
+
+	return rect
+
+
 # places each pill on the nearest free slot along its own edge so labels never cover each other
 func _resolve_label_overlaps(items: Array, obstacles: Array) -> void:
 	items.sort_custom(func(a, b):
@@ -250,27 +325,31 @@ func _resolve_label_overlaps(items: Array, obstacles: Array) -> void:
 		return a.idx < b.idx
 	)
 
-	var placed: Array = []
+	# a whole-collection graph has thousands of both, so neither is scanned linearly
+	var blocked: RectGrid = RectGrid.new()
+
+	for obs: Rect2 in obstacles:
+		blocked.add(obs)
+
 	for it in items:
 		var final_rect: Rect2 = it.rect
 		if it.total_len >= END_PAD * 2.0:
-			final_rect = _find_slot_on_edge(it, obstacles, placed)
+			final_rect = _find_slot_on_edge(it, blocked)
 
 		# fallback: still covered, push off the boxes and already-placed pills
-		if _overlap_area(final_rect, obstacles) + _overlap_area(final_rect, placed) > 0.0:
+		if blocked.overlap_area(final_rect) > 0.0:
 			var push_item: Dictionary = {rect = final_rect}
-			var blockers: Array = obstacles + placed
 			for _i in range(4):
-				if not _push_off_obstacles(push_item, blockers):
+				if not _push_off_obstacles(push_item, blocked):
 					break
 			final_rect = push_item.rect
 
 		it.label.position = final_rect.position
-		placed.append(final_rect)
+		blocked.add(final_rect)
 
 
 # slides along the edge polyline from the ideal anchor outward until a clear spot appears
-func _find_slot_on_edge(item: Dictionary, obstacles: Array, placed: Array) -> Rect2:
+func _find_slot_on_edge(item: Dictionary, blocked: RectGrid) -> Rect2:
 	var rect: Rect2 = item.rect
 	var s0: float = _closest_arc_length(item.points, item.lengths, rect.get_center())
 	var best_rect: Rect2 = rect
@@ -281,7 +360,7 @@ func _find_slot_on_edge(item: Dictionary, obstacles: Array, placed: Array) -> Re
 			var s: float = clampf(s0 + float(k) * SLIDE_STEP, END_PAD, item.total_len - END_PAD)
 			var center: Vector2 = _point_at_length(item.points, item.lengths, s)
 			var cand: Rect2 = Rect2(center - rect.size * 0.5, rect.size)
-			var score: float = _overlap_area(cand, obstacles) + _overlap_area(cand, placed)
+			var score: float = blocked.overlap_area(cand)
 			if score <= 0.0:
 				return cand
 			if score < best_score:
@@ -289,6 +368,78 @@ func _find_slot_on_edge(item: Dictionary, obstacles: Array, placed: Array) -> Re
 				best_rect = cand
 
 	return best_rect
+
+
+# uniform bucket grid: a label only ever measures itself against what shares a cell
+class RectGrid extends RefCounted:
+	const CELL: float = 256.0
+
+	var _rects: Array[Rect2] = []
+	var _cells: Dictionary = {}
+
+
+	func add(rect: Rect2) -> void:
+		var index: int = _rects.size()
+		_rects.append(rect)
+
+		for key: Vector2i in _keys(rect):
+			# array, not a packed one: packed arrays copy on read and the append
+			# would land on a temporary
+			if not _cells.has(key):
+				_cells[key] = ([] as Array[int])
+
+			(_cells[key] as Array[int]).append(index)
+
+
+	func overlap_area(rect: Rect2) -> float:
+		var total: float = 0.0
+
+		for i: int in _candidates(rect):
+			var clip: Rect2 = rect.intersection(_rects[i])
+			total += clip.size.x * clip.size.y
+
+		return total
+
+
+	func intersecting(rect: Rect2) -> Array[Rect2]:
+		var out: Array[Rect2] = []
+
+		for i: int in _candidates(rect):
+			if rect.intersects(_rects[i]):
+				out.append(_rects[i])
+
+		return out
+
+
+	# a rect spanning several cells shows up once per cell, so hits are deduped
+	func _candidates(rect: Rect2) -> Array[int]:
+		var seen: Dictionary = {}
+		var out: Array[int] = []
+
+		for key: Vector2i in _keys(rect):
+			for i: int in (_cells.get(key, []) as Array):
+				if seen.has(i):
+					continue
+
+				seen[i] = true
+				out.append(i)
+
+		return out
+
+
+	static func _keys(rect: Rect2) -> Array[Vector2i]:
+		var out: Array[Vector2i] = []
+		var from: Vector2i = Vector2i(floori(rect.position.x / CELL), floori(rect.position.y / CELL))
+		var to: Vector2i = Vector2i(
+			floori((rect.position.x + rect.size.x) / CELL),
+			floori((rect.position.y + rect.size.y) / CELL)
+		)
+
+		for x: int in range(from.x, to.x + 1):
+			for y: int in range(from.y, to.y + 1):
+				out.append(Vector2i(x, y))
+
+		return out
 
 
 # arc length along the polyline of the point closest to p
@@ -311,21 +462,18 @@ func _closest_arc_length(points: PackedVector2Array, lengths: PackedFloat32Array
 
 # slides a pill off the state boxes; every exit is scored against all of them, so a
 # pill sandwiched between two boxes leaves sideways instead of bouncing between them
-func _push_off_obstacles(item: Dictionary, obstacles: Array) -> bool:
+func _push_off_obstacles(item: Dictionary, blocked: RectGrid) -> bool:
 	var rect: Rect2 = item.rect
 	var best: Rect2 = rect
-	var best_overlap: float = _overlap_area(rect, obstacles)
+	var best_overlap: float = blocked.overlap_area(rect)
 	var best_dist: float = 0.0
 
 	if best_overlap <= 0.0:
 		return false
 
-	for obs: Rect2 in obstacles:
-		if not rect.intersects(obs):
-			continue
-
+	for obs: Rect2 in blocked.intersecting(rect):
 		for candidate: Rect2 in _escape_rects(rect, obs):
-			var overlap: float = _overlap_area(candidate, obstacles)
+			var overlap: float = blocked.overlap_area(candidate)
 			var dist: float = candidate.position.distance_squared_to(rect.position)
 
 			if overlap < best_overlap or (overlap == best_overlap and dist < best_dist):
@@ -349,16 +497,6 @@ func _escape_rects(rect: Rect2, obs: Rect2) -> Array:
 		Rect2(Vector2(obs.position.x - rect.size.x - LABEL_CLEARANCE, rect.position.y), rect.size),
 		Rect2(Vector2(obs.position.x + obs.size.x + LABEL_CLEARANCE, rect.position.y), rect.size)
 	]
-
-
-func _overlap_area(rect: Rect2, obstacles: Array) -> float:
-	var total: float = 0.0
-
-	for obs: Rect2 in obstacles:
-		var clip: Rect2 = rect.intersection(obs)
-		total += clip.size.x * clip.size.y
-
-	return total
 
 
 # only leaf states block labels: edges between sub-states run inside their compound box
@@ -404,36 +542,79 @@ func _process(_delta: float) -> void:
 	if _edge_views.is_empty():
 		return
 
-	var mouse_pos: Vector2 = get_local_mouse_position()
-	var closest_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
-
-	# hover threshold in screen pixels, so zooming in doesn't make edges grab the mouse
 	var cam: Node2D = get_parent() as Node2D
 	var zoom: float = maxf(cam.transform.x.x, 0.001) if cam else 1.0
-	var closest_dist: float = 15.0 / zoom
-
-	for view in _edge_views:
-		var dist: float = _point_to_polyline_dist(mouse_pos, view.points)
-		if dist < closest_dist:
-			closest_dist = dist
-			closest_edge = view.edge
-
+	var mouse_pos: Vector2 = get_local_mouse_position()
 	var needs_redraw: bool = false
+
+	# panning moves the local mouse too, so this covers cam movement as well
+	if not _lines_hidden and (mouse_pos != _last_mouse_pos or not is_equal_approx(zoom, _last_hover_zoom)):
+		_last_mouse_pos = mouse_pos
+		_last_hover_zoom = zoom
+
+		var hovered: HenStateViewerGraphTypes.DirectedGraphEdge = _pick_edge(mouse_pos, zoom)
+
+		if _hovered_edge != hovered:
+			_hovered_edge = hovered
+			_animating = true
+			needs_redraw = true
 
 	# only boost below 100%: keeps arrows/pulses (own _draw) constant on screen and
 	# forces a redraw while zooming since they don't self-redraw like the Line2Ds
 	var screen_scale: float = maxf(1.0, 1.0 / zoom)
-	if not is_equal_approx(screen_scale, _screen_scale):
+	var scale_settled: bool = is_equal_approx(screen_scale, _screen_scale)
+
+	if not scale_settled:
 		_screen_scale = screen_scale
+		_animating = true
 		needs_redraw = true
 
-	if _hovered_edge != closest_edge:
-		_hovered_edge = closest_edge
+	# the zoom stopped moving, so the line widths can take the new factor now
+	if scale_settled and not is_equal_approx(_applied_scale, screen_scale):
+		_applied_scale = screen_scale
+		_animating = true
+
+	# an edge that scrolls in was skipped while offscreen, so it still has to catch up
+	var current_view: Rect2 = _visible_rect()
+	if current_view != _last_view:
+		_last_view = current_view
+		_animating = true
 		needs_redraw = true
 
+	# nothing on screen to animate, and the lines already went invisible in one pass
+	if _lines_hidden:
+		_animating = false
+		return
+
+	if not _animating:
+		return
+
+	# lerp weights above 1 overshoot the target and ring instead of settling, which
+	# is what a heavy frame does to a rate written for 60fps
+	var alpha_step: float = minf(1.0, 15.0 * _delta)
+
+	var settled: bool = true
 	var current_time: int = Time.get_ticks_msec()
+	var view_rect: Rect2 = _visible_rect()
 
 	for view in _edge_views:
+		var line: Line2D = view.line
+
+		if not view_rect.intersects(view.bounds):
+			if line.visible:
+				line.visible = false
+
+				if view.label != null:
+					(view.label as HenStateEdgePill).visible = false
+
+			continue
+
+		if not line.visible:
+			line.visible = true
+
+		if view.label != null:
+			(view.label as HenStateEdgePill).visible = _detail == Detail.FULL
+
 		var is_dimmed: bool = _is_edge_dimmed(view.edge)
 
 		var flash_strength: float = 0.0
@@ -449,64 +630,74 @@ func _process(_delta: float) -> void:
 		var is_glowing: bool = (view.edge == _hovered_edge) and not is_dimmed
 
 		var target_alpha: float = DIM_ALPHA if is_dimmed else 1.0
-		var current_alpha: float = view.line.default_color.a
-		var alpha: float = lerpf(current_alpha, target_alpha, 15.0 * _delta)
+		var alpha: float = lerpf(view.alpha, target_alpha, alpha_step)
 
 		if abs(alpha - target_alpha) < 0.01:
 			alpha = target_alpha
 		else:
 			needs_redraw = true
+			settled = false
 
-		var kc: Color = _kind_color(view.edge)
+		view.alpha = alpha
+
+		# alpha rides modulate, which is a shader-side tint: writing it into
+		# default_color would retessellate the line every single frame
+		if not is_equal_approx(line.modulate.a, alpha):
+			line.modulate.a = alpha
+			needs_redraw = true
+
+		var kc: Color = view.color
 		var base_color: Color = kc.lightened(0.35) if is_glowing else kc
 		var line_color: Color = base_color.lerp(FLASH_COLOR, flash_strength)
-		line_color.a = alpha
+		line_color.a = 1.0
 
-		if view.line.default_color != line_color:
-			view.line.default_color = line_color
+		if line.default_color != line_color:
+			line.default_color = line_color
 			needs_redraw = true
 
 		var base_width: float = GLOW_WIDTH if is_glowing else NORMAL_WIDTH
 		var target_width: float = lerpf(base_width, FLASH_WIDTH, flash_strength)
-		var new_state_width: float = lerpf(view.state_width, target_width, 15.0 * _delta)
+		var new_state_width: float = lerpf(view.state_width, target_width, alpha_step)
 
 		if abs(new_state_width - target_width) < 0.01:
 			new_state_width = target_width
 		else:
 			needs_redraw = true
+			settled = false
 
 		view.state_width = new_state_width
 
-		# lerp the state width, then apply the zoom factor as an instant multiplier
-		# so the on-screen thickness tracks the cam without lagging its zoom animation
-		var scaled_width: float = new_state_width * screen_scale
-		if view.line.width != scaled_width:
-			view.line.width = scaled_width
-
-		# dash flows only on hover, never while a debug pulse runs
-		var target_dash: float = 1.0 if (is_glowing and flash_strength <= 0.0) else 0.0
-		var new_dash: float = lerpf(view.dash, target_dash, 10.0 * _delta)
-		if abs(new_dash - target_dash) < 0.01:
-			new_dash = target_dash
-		if new_dash != view.dash:
-			view.dash = new_dash
-			(view.line.material as ShaderMaterial).set_shader_parameter('dash_amount', new_dash)
+		# width does retessellate, so the zoom factor is only folded in once the cam
+		# settles: mid-animation every visible line would rebuild its mesh per frame
+		var scaled_width: float = new_state_width * _applied_scale
+		if line.width != scaled_width:
+			line.width = scaled_width
 
 		if view.label != null and view.label.modulate.a != alpha:
 			view.label.modulate.a = alpha
 
 	if not _flashed_edges.is_empty():
 		needs_redraw = true
+		settled = false
+
+	_animating = not settled
 
 	if needs_redraw:
 		queue_redraw()
 
 
 func _draw() -> void:
+	if _lines_hidden:
+		return
+
+	if _detail == Detail.COMPACT and _flashed_edges.is_empty():
+		return
+
 	var current_time: int = Time.get_ticks_msec()
+	var view_rect: Rect2 = _visible_rect()
 
 	for view in _edge_views:
-		if not view.has_arrow:
+		if not view.has_arrow or not view_rect.intersects(view.bounds):
 			continue
 
 		var is_dimmed: bool = _is_edge_dimmed(view.edge)
@@ -518,9 +709,9 @@ func _draw() -> void:
 			flash_elapsed = float(current_time - _flashed_edges[view.edge])
 			flash_strength = _flash_strength(flash_elapsed)
 
-		var kc: Color = _kind_color(view.edge)
+		var kc: Color = view.color
 		var color: Color = (kc.lightened(0.35) if is_glowing else kc).lerp(FLASH_COLOR, flash_strength)
-		color.a = view.line.default_color.a
+		color.a = view.alpha
 
 		var growth: float = 1.0 - ARROW_GROWTH + ARROW_GROWTH * (view.state_width / NORMAL_WIDTH)
 		var s: float = growth * pow(_screen_scale, ARROW_ZOOM_DAMP)
@@ -535,6 +726,36 @@ func _draw() -> void:
 
 		if flash_strength > 0.0:
 			_draw_pulse(view, flash_elapsed, flash_strength)
+
+
+# what the cam shows, in this node's space; a whole collection has far more edges
+# offscreen than on, and none of them need animating or drawing
+func _visible_rect() -> Rect2:
+	var cam: HenCam = get_parent() as HenCam
+
+	if not cam:
+		return Rect2(Vector2(-1e9, -1e9), Vector2(2e9, 2e9))
+
+	return cam.get_rect().grow(VIEW_MARGIN)
+
+
+# threshold in screen pixels, so zooming in doesn't make edges grab the mouse
+func _pick_edge(mouse_pos: Vector2, zoom: float) -> HenStateViewerGraphTypes.DirectedGraphEdge:
+	var threshold: float = HOVER_SCREEN_PX / zoom
+	var closest_dist: float = threshold
+	var closest: HenStateViewerGraphTypes.DirectedGraphEdge = null
+
+	for view in _edge_views:
+		if not (view.bounds as Rect2).grow(threshold).has_point(mouse_pos):
+			continue
+
+		var dist: float = _point_to_polyline_dist(mouse_pos, view.hover_points)
+
+		if dist < closest_dist:
+			closest_dist = dist
+			closest = view.edge
+
+	return closest
 
 
 # draws a bright segment traveling along the edge during a debug flash

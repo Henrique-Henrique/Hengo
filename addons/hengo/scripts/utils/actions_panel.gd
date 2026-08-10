@@ -79,16 +79,38 @@ static func can_use_phase(_action: HenSaveAction, _phase: StringName) -> bool:
 	return HenSaveAction.supported_phases(macro).has(_phase)
 
 
+# macro id -> macro, plus the pool sizes it was built from
+static var _macro_index: Dictionary = {}
+static var _macro_index_sizes: Vector2i = Vector2i(-1, -1)
+
+
+# the pools are rewritten wholesale on load, and an index keyed by id would keep
+# serving the macros they held before
+static func invalidate_macro_index() -> void:
+	_macro_index.clear()
+	_macro_index_sizes = Vector2i(-1, -1)
+
+
+# every action row resolves its macro, several times over, so this cannot scan
 static func find_macro(_macro_id: StringName) -> HenSaveMacro:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
-	if global:
+	if not global:
+		return null
+
+	var sizes: Vector2i = Vector2i(global.action_macros.size(), global.script_macros.size())
+
+	if sizes != _macro_index_sizes:
+		_macro_index.clear()
+
 		for pool: Array in [global.action_macros, global.script_macros]:
 			for macro: HenSaveMacro in pool:
-				if macro.id == _macro_id:
-					return macro
+				if not _macro_index.has(macro.id):
+					_macro_index[macro.id] = macro
 
-	return null
+		_macro_index_sizes = sizes
+
+	return _macro_index.get(_macro_id)
 
 
 # resolves the macro pool's current name so renamed macros reach already-saved actions
