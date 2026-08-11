@@ -17,6 +17,9 @@ const FRAME_DIM: float = 0.28
 const CLICK_TOLERANCE: float = 6.0
 const CULL_MARGIN: float = 256.0
 const DOUBLE_CLICK_MS: int = 400
+# HengoDebugger throttles a trace to one per 120ms per action, on purpose: an
+# update action fires every frame. a shorter fade would strobe instead of glow
+const RUN_TIME_MS: int = 200
 
 var parser: HenStateViewerDataParser = HenStateViewerDataParser.new()
 var measurer: HenStateViewerUIMeasurer = HenStateViewerUIMeasurer.new()
@@ -49,6 +52,13 @@ var _click_last_pos: Vector2 = Vector2.ZERO
 var _last_cull_origin: Vector2 = Vector2.INF
 var _last_cull_zoom: float = -1.0
 
+# action id -> expiry msec. keyed by action and not by card because a rebuild
+# frees every card, and a flash tied to one would die with it
+var _flashes: Dictionary = {}
+# action id -> HenFlowNodeCard, resolved once per layout
+var _cards_by_action: Dictionary = {}
+var _running_state: String = ''
+
 
 func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self ):
@@ -64,6 +74,15 @@ func _ready() -> void:
 		for signal_name: StringName in [&'request_list_update', &'request_structural_update', &'scripts_generation_finished']:
 			if not signal_bus.get(signal_name).is_connected(_on_changed):
 				signal_bus.get(signal_name).connect(_on_changed)
+
+		for pair: Array in [
+			[&'debug_state_changed', _on_debug_state_changed],
+			[&'debug_action_flow', _on_debug_action_flow],
+			[&'debug_state_transition', _on_debug_state_transition],
+			[&'debug_session_stopped', _on_debug_session_stopped]
+		]:
+			if not signal_bus.get(pair[0]).is_connected(pair[1]):
+				signal_bus.get(pair[0]).connect(pair[1])
 
 	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
 
@@ -116,6 +135,7 @@ func _notification(what: int) -> void:
 
 	if not showing:
 		_release_hover()
+		_clear_flashes()
 
 
 func _release_hover() -> void:
@@ -156,6 +176,9 @@ func _process(_delta: float) -> void:
 
 	_update_cursor(cam)
 	_update_culling(cam)
+
+	if not _flashes.is_empty():
+		_expire_flashes()
 
 	var zoom: float = maxf(cam.transform.x.x, 0.001)
 
@@ -346,6 +369,8 @@ func _clear() -> void:
 	_states.clear()
 	_frames.clear()
 	_hover_items.clear()
+	_cards_by_action.clear()
+	_flashes.clear()
 	_last_cull_origin = Vector2.INF
 	_hovered_card = null
 	_editing_card = null
@@ -356,10 +381,7 @@ func _clear() -> void:
 
 # pass one: every state's own graph, measured and laid out in its own space
 func _build_states(_save_data: HenSaveData) -> void:
-	for state: HenSaveState in _save_data.states:
-		if state.is_sub_state:
-			continue
-
+	for state: HenSaveState in _all_states(_save_data):
 		var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(_save_data, state)
 		var cards: Array[HenFlowNodeCard] = []
 
@@ -384,6 +406,22 @@ func _build_states(_save_data: HenSaveData) -> void:
 		}
 
 
+# a sub state is a state with its own actions, and it lives in its own dictionary
+# instead of carrying the flag: skipping it left its parent framing nothing at all
+func _all_states(_save_data: HenSaveData) -> Array[HenSaveState]:
+	var out: Array[HenSaveState] = []
+
+	for state: HenSaveState in _save_data.states:
+		out.append(state)
+
+	for key: Variant in _save_data.sub_states:
+		for state: HenSaveState in _save_data.sub_states[key]:
+			if not out.has(state):
+				out.append(state)
+
+	return out
+
+
 # pass two: the frames on the state grid, which is the state viewer's own engine
 func _build_outer(_save_data: HenSaveData) -> void:
 	var dict: Dictionary = {
@@ -396,11 +434,11 @@ func _build_outer(_save_data: HenSaveData) -> void:
 	for machine: HenStateViewerGraphTypes.DirectedGraphNode in graph_root.children:
 		parser._resolve_node_edges(machine, machine, graph_root)
 
-	var leaves: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
+	var nodes: Array[HenStateViewerGraphTypes.DirectedGraphNode] = []
 
-	_collect_leaves(graph_root, leaves)
+	_collect_states(graph_root, nodes)
 
-	for node: HenStateViewerGraphTypes.DirectedGraphNode in leaves:
+	for node: HenStateViewerGraphTypes.DirectedGraphNode in nodes:
 		_spawn_frame(node)
 
 	measurer.calculate_rects(graph_root, ThemeDB.fallback_font, 14, true, _frames)
@@ -412,16 +450,18 @@ func _build_outer(_save_data: HenSaveData) -> void:
 	_paint_edges(graph_root)
 	edges_overlay.update_edges(graph_root)
 	_rebuild_hover_cache()
+	_apply_running_state()
 
 
-func _collect_leaves(_node: HenStateViewerGraphTypes.DirectedGraphNode, _out: Array) -> void:
-	if _node.children.is_empty():
-		if _node.data.has('state_id'):
-			_out.append(_node)
-		return
+# every state, not only the childless ones: a state that owns sub states is still
+# a state with its own graph. parents come first so a sub frame draws over its own
+# parent instead of under it
+func _collect_states(_node: HenStateViewerGraphTypes.DirectedGraphNode, _out: Array) -> void:
+	if _node.data.has('state_id'):
+		_out.append(_node)
 
 	for child: HenStateViewerGraphTypes.DirectedGraphNode in _node.children:
-		_collect_leaves(child, _out)
+		_collect_states(child, _out)
 
 
 func _spawn_frame(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
@@ -471,12 +511,110 @@ func _accent_for(_state: HenSaveState) -> Color:
 	return HenActionVisuals.state_color(str(_state.id))
 
 
+# --- debug ---
+
+# the runtime reports the key of the generated state dictionary, which is the
+# state name in snake_case. comparing against the editor name never matches and
+# never errors: it just silently does nothing
+func _on_debug_state_changed(_state_name: StringName, _script_id: String) -> void:
+	if not _is_active_script(_script_id) and not String(_state_name).is_empty():
+		return
+
+	_running_state = String(_state_name)
+	_apply_running_state()
+
+
+func _apply_running_state() -> void:
+	for entry: Variant in _states.values():
+		if not entry.has('frame'):
+			continue
+
+		var state: HenSaveState = entry.state
+		var running: bool = not _running_state.is_empty() \
+			and state.name.strip_edges().to_snake_case() == _running_state
+
+		(entry.frame as HenFlowStateFrame).set_running(running)
+
+
+func _on_debug_action_flow(_action_id: StringName, _script_id: String) -> void:
+	if not _is_active_script(_script_id):
+		return
+
+	var card: Variant = _cards_by_action.get(String(_action_id))
+
+	if not card:
+		return
+
+	# an update action re-arms every frame, so the expiry is pushed forward
+	# instead of the card being re-emitted again
+	_flashes[String(_action_id)] = Time.get_ticks_msec() + RUN_TIME_MS
+
+	(card as HenFlowNodeCard).set_running(true)
+
+
+func _on_debug_state_transition(_source: String, _event: String, _script_id: String) -> void:
+	if not _is_active_script(_script_id):
+		return
+
+	edges_overlay.flash_edge(_script_name(), _source, _event)
+
+
+func _on_debug_session_stopped() -> void:
+	_clear_flashes()
+
+	_running_state = ''
+	_apply_running_state()
+
+
+func _clear_flashes() -> void:
+	for id: Variant in _flashes:
+		var card: Variant = _cards_by_action.get(id)
+
+		if card and is_instance_valid(card):
+			(card as HenFlowNodeCard).set_running(false)
+
+	_flashes.clear()
+
+
+func _expire_flashes() -> void:
+	var now: int = Time.get_ticks_msec()
+
+	for id: Variant in _flashes.keys():
+		if int(_flashes[id]) > now:
+			continue
+
+		_flashes.erase(id)
+
+		var card: Variant = _cards_by_action.get(id)
+
+		if card and is_instance_valid(card):
+			(card as HenFlowNodeCard).set_running(false)
+
+
+# the flow shows one script, so anything reported for another one is not ours
+func _is_active_script(_script_id: String) -> bool:
+	if _script_id.is_empty():
+		return true
+
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	return global != null and global.SAVE_DATA != null \
+		and String(global.SAVE_DATA.identity.id) == _script_id
+
+
+func _script_name() -> String:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	return global.SAVE_DATA.identity.name if global and global.SAVE_DATA else ''
+
+
 # --- hit map ---
 
 # a card rect is local to the card, the card is local to its frame and the frame
 # is world, so a hit crosses two offsets before it means anything to the mouse
 func _rebuild_hover_cache() -> void:
 	_hover_items.clear()
+	_cards_by_action.clear()
 
 	for node: HenStateViewerGraphTypes.DirectedGraphNode in _frames:
 		var frame: HenFlowStateFrame = _frames[node]
@@ -502,6 +640,9 @@ func _rebuild_hover_cache() -> void:
 				state = entry.state,
 				card = card
 			})
+
+			if card.node.action:
+				_cards_by_action[str(card.node.action.id)] = card
 
 	# a loop card is grown to hold its body, so the body cards are strictly smaller
 	# and sorting by area is what orders container before content

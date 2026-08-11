@@ -96,7 +96,7 @@ static func _wrap_chains(_graph: HenFlowGraphTypes.FlowGraph, _data: FormatData)
 
 				claimed[member.id] = true
 
-			steps.append({nodes = owned, box = _bounding_of(owned)})
+			steps.append({card = node, nodes = owned, box = _bounding_of(owned)})
 
 		if not steps.is_empty():
 			chains.append(steps)
@@ -124,6 +124,26 @@ static func _wrap_chains(_graph: HenFlowGraphTypes.FlowGraph, _data: FormatData)
 			_graph.bands.append(box.position.y + box.size.y + Y_GAP * 0.5)
 
 	_graph.bands.sort()
+
+	_center_entry(_graph, chains)
+
+
+# the chains were spread after the fan placed them around the entry, so the entry
+# follows to sit over the span of the heads it feeds
+static func _center_entry(_graph: HenFlowGraphTypes.FlowGraph, _chains: Array) -> void:
+	var low: float = INF
+	var high: float = -INF
+
+	for steps: Array in _chains:
+		var centre: float = _card_centre(steps[0])
+
+		low = minf(low, centre)
+		high = maxf(high, centre)
+
+	if low > high:
+		return
+
+	_graph.entry.position.x = (low + high) * 0.5 - _graph.entry.size.x * 0.5
 
 
 # one phase growing sideways would walk into the next one, so after the columns
@@ -170,16 +190,22 @@ static func _wrap_chain(_steps: Array) -> Array:
 
 	for index: int in range(columns.size()):
 		var column: Vector2i = columns[index]
-		var width: float = 0.0
+		var left: float = 0.0
+		var right: float = 0.0
 		var y: float = origin.y
 
 		for i: int in range(column.x, column.y):
-			width = maxf(width, (_steps[i].box as Rect2).size.x)
+			var box: Rect2 = _steps[i].box
+			var centre: float = _card_centre(_steps[i])
+
+			left = maxf(left, centre - box.position.x)
+			right = maxf(right, box.position.x + box.size.x - centre)
 
 		for i: int in range(column.x, column.y):
 			var box: Rect2 = _steps[i].box
-			# centred in its own column, the way a step was centred on the chain
-			var offset: Vector2 = Vector2(x + (width - box.size.x) * 0.5, y) - box.position
+			# aligned on the card centre, not the box centre: the satellites hang
+			# wider on one side and a box-centred step bends the exec spine
+			var offset: Vector2 = Vector2(x + left - _card_centre(_steps[i]), y - box.position.y)
 
 			for node: HenFlowGraphTypes.FlowNode in _steps[i].nodes:
 				node.position += offset
@@ -188,15 +214,21 @@ static func _wrap_chain(_steps: Array) -> Array:
 
 		if index < columns.size() - 1:
 			lanes.append({
-				x = x + width + COLUMN_GAP * 0.5,
+				x = x + left + right + COLUMN_GAP * 0.5,
 				# clear of the column it leaves, and clear of the one it enters
 				exit_y = y - Y_GAP * 0.5,
 				entry_y = origin.y - Y_GAP * 0.5
 			})
 
-		x += width + COLUMN_GAP
+		x += left + right + COLUMN_GAP
 
 	return lanes
+
+
+static func _card_centre(_step: Dictionary) -> float:
+	var card: HenFlowGraphTypes.FlowNode = _step.card
+
+	return card.position.x + card.size.x * 0.5
 
 
 static func _choose_columns(_steps: Array) -> Array:
@@ -441,9 +473,10 @@ static func _index(_graph: HenFlowGraphTypes.FlowGraph) -> FormatData:
 	return data
 
 
-# the connected flow outputs, in pin order; the body port is not one of them
+# the connected flow outputs, left to right by pin anchor, so a subtree lands on
+# the side its cell sits on; compute_size stamps the anchors before format runs
 static func _flow_targets(_node: HenFlowGraphTypes.FlowNode, _data: FormatData) -> Array:
-	var out: Array = []
+	var found: Array = []
 
 	for pin: HenFlowGraphTypes.FlowPin in _node.pins_of(&'exec_out'):
 		if pin.id == HenFlowGraphTypes.BODY_PIN:
@@ -452,9 +485,31 @@ static func _flow_targets(_node: HenFlowGraphTypes.FlowNode, _data: FormatData) 
 		var target: Variant = _data.exec_to.get(_key(_node.id, pin.id))
 
 		if target:
-			out.append(target)
+			found.append({x = _anchor_x(_node, pin), order = found.size(), pin = pin, target = target})
 
-	return out
+	# sort_custom is unstable, and `then` shares its x with the middle cell
+	found.sort_custom(func(_a: Dictionary, _b: Dictionary) -> bool:
+		return _a.x < _b.x if not is_equal_approx(_a.x, _b.x) else _a.order < _b.order
+	)
+
+	return found
+
+
+# a loop is inflated after the anchors were stamped, so `then` re-derives its centre
+static func _anchor_x(_node: HenFlowGraphTypes.FlowNode, _pin: HenFlowGraphTypes.FlowPin) -> float:
+	if _pin.id == HenFlowGraphTypes.THEN_PIN:
+		return _node.position.x + _node.size.x * 0.5
+
+	return _node.position.x + _pin.rect.get_center().x
+
+
+# the head card and the producers stacked beside it, without the chain below it
+static func _head_bounding(_head: HenFlowGraphTypes.FlowNode, _data: FormatData) -> Rect2:
+	var owned: Array[HenFlowGraphTypes.FlowNode] = [_head]
+
+	_collect_inputs(_data, _head, owned)
+
+	return _bounding_of(owned)
 
 
 static func _start_format(_node: HenFlowGraphTypes.FlowNode, _data: FormatData) -> Rect2:
@@ -478,60 +533,78 @@ static func _start_format(_node: HenFlowGraphTypes.FlowNode, _data: FormatData) 
 	return Rect2(min_pos, max_pos - min_pos)
 
 
+# under the anchor of the pin it leaves, so a lone branch keeps its cell's side
 static func _place_single(
 	_node: HenFlowGraphTypes.FlowNode,
-	_to: HenFlowGraphTypes.FlowNode,
+	_item: Dictionary,
 	_data: FormatData,
 	_format: NodeFormat,
 	_base_y: float
 ) -> Rect2:
-	var to_format: NodeFormat = _data.format_of(_to.id)
+	var to: HenFlowGraphTypes.FlowNode = _item.target
+	var to_format: NodeFormat = _data.format_of(to.id)
 
 	if to_format.moved:
 		return Rect2(_node.position, Vector2.ZERO)
 
 	to_format.moved = true
-	_format.tree_children.append(_to)
+	_format.tree_children.append(to)
 
-	_to.position = Vector2(
-		_node.position.x + _node.size.x * 0.5 - _to.size.x * 0.5,
-		_base_y + Y_GAP
-	)
+	to.position = Vector2(float(_item.x) - to.size.x * 0.5, _base_y + Y_GAP)
 
-	_start_format(_to, _data)
+	_start_format(to, _data)
 
-	return _tree_bounding(_to, _data)
+	return _tree_bounding(to, _data)
 
 
-# half the outputs open to the left of the parent's centre and half to the right,
-# each side pushed out until its subtree stops overlapping the previous one
+# the sequence continues straight under the card and the branch targets open to
+# the sides of it, each side pushed out until its subtree stops overlapping
 static func _place_fan(
 	_node: HenFlowGraphTypes.FlowNode,
-	_targets: Array,
+	_items: Array,
 	_data: FormatData,
 	_format: NodeFormat,
 	_base_y: float
 ) -> Rect2:
 	var centre: float = _node.position.x + _node.size.x * 0.5
-	var half: int = int(_targets.size() / 2.0)
+	var middle: Variant = null
 	var left: Array = []
 	var right: Array = []
 
-	for i: int in range(_targets.size()):
-		if i < half:
-			left.append(_targets[i])
+	for item: Dictionary in _items:
+		if (item.pin as HenFlowGraphTypes.FlowPin).id == HenFlowGraphTypes.THEN_PIN:
+			middle = item
+		elif float(item.x) < centre:
+			left.append(item)
 		else:
-			right.append(_targets[i])
-
-	left.reverse()
+			right.append(item)
 
 	var min_pos: Vector2 = _node.position
 	var max_pos: Vector2 = _node.position + _node.size
-	var limit: float = centre - MIDDLE_X_GAP
+	var limit_left: float = centre - MIDDLE_X_GAP
+	var limit_right: float = centre + MIDDLE_X_GAP
+
+	if middle != null:
+		var child: Rect2 = _place_single(_node, middle, _data, _format, _base_y)
+
+		if child.size != Vector2.ZERO:
+			min_pos = min_pos.min(child.position)
+			max_pos = max_pos.max(child.position + child.size)
+
+			# the sides only clear the head of the middle chain: the branch cards
+			# sit high, and the deeper steps are below them anyway
+			var head: Rect2 = _head_bounding(middle.target, _data)
+
+			limit_left = minf(limit_left, head.position.x - MIDDLE_X_GAP)
+			limit_right = maxf(limit_right, head.position.x + head.size.x + MIDDLE_X_GAP)
+
+	left.reverse()
+
+	var limit: float = limit_left
 	var idx: int = -left.size()
 
-	for to: HenFlowGraphTypes.FlowNode in left:
-		var box: Rect2 = _place_side(_node, to, _data, _format, _base_y, idx, limit, true)
+	for item: Dictionary in left:
+		var box: Rect2 = _place_side(_node, item.target, _data, _format, _base_y, idx, limit, true)
 		if box.size == Vector2.ZERO:
 			idx += 1
 			continue
@@ -540,11 +613,11 @@ static func _place_fan(
 		max_pos = max_pos.max(box.position + box.size)
 		idx += 1
 
-	limit = centre + MIDDLE_X_GAP
+	limit = limit_right
 	idx = -right.size()
 
-	for to: HenFlowGraphTypes.FlowNode in right:
-		var box: Rect2 = _place_side(_node, to, _data, _format, _base_y, idx, limit, false)
+	for item: Dictionary in right:
+		var box: Rect2 = _place_side(_node, item.target, _data, _format, _base_y, idx, limit, false)
 		if box.size == Vector2.ZERO:
 			idx += 1
 			continue

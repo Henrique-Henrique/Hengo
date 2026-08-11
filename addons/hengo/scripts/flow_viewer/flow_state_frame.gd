@@ -14,6 +14,13 @@ const BODY_TINT: float = 0.10
 const HEADER_TINT: float = 0.30
 const BORDER_TINT: float = 0.55
 
+# the state palette already holds greens, so a running frame cannot be told apart
+# by hue alone: it takes the border width and the glow, which nothing else uses
+const RUN_COLOR: Color = HenActionVisuals.RUN_COLOR
+const RUN_SHADOW: Color = Color(0.39, 1.0, 0.57, 0.26)
+const RUN_BORDER_WIDTH: int = 5
+const RUN_SHADOW_SIZE: int = 12
+
 const CORNER: int = 8
 const HEADER_CORNER: int = 6
 const BORDER_WIDTH: int = 3
@@ -35,6 +42,7 @@ var _accent: Color = BORDER
 var _content: Vector2 = Vector2.ZERO
 var _header_h: float = 0.0
 var _final_size: Vector2 = Vector2.ZERO
+var _running: bool = false
 
 
 func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color) -> void:
@@ -109,7 +117,37 @@ func _emit_header(_size: Vector2) -> void:
 	_painter.add_text(_meta, META_SIZE, Vector2(x, centre - _painter.line_height(META_SIZE) * 0.5), META_COLOR)
 
 
+# the state the debugger says is running right now
+func set_running(_on: bool) -> bool:
+	if _running == _on:
+		return false
+
+	_running = _on
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
+
+
+func is_running() -> bool:
+	return _running
+
+
 func _body() -> StyleBoxFlat:
+	if _running:
+		return _cached('running', func() -> StyleBoxFlat:
+			var style: StyleBoxFlat = StyleBoxFlat.new()
+			style.bg_color = CANVAS_BG.lerp(RUN_COLOR, BODY_TINT)
+			style.set_corner_radius_all(CORNER)
+			style.border_color = RUN_COLOR
+			style.set_border_width_all(RUN_BORDER_WIDTH)
+			style.shadow_color = RUN_SHADOW
+			style.shadow_size = RUN_SHADOW_SIZE
+
+			return style
+		)
+
 	return _cached('body|%d' % _accent.to_rgba32(), func() -> StyleBoxFlat:
 		var style: StyleBoxFlat = StyleBoxFlat.new()
 		style.bg_color = CANVAS_BG.lerp(_accent, BODY_TINT)

@@ -8,6 +8,7 @@ extends Node2D
 
 const CHAMFER: float = 9.0
 const STUB: float = 14.0
+const LANE_STEP: float = 10.0
 const TRUNK_GAP: float = 18.0
 const DETOUR: float = 40.0
 const WIDTH: float = 2.0
@@ -73,6 +74,9 @@ static func anchor(_node: HenFlowGraphTypes.FlowNode, _pin: HenFlowGraphTypes.Fl
 
 
 func _route_exec(_graph: HenFlowGraphTypes.FlowGraph) -> void:
+	var routed: Array[Dictionary] = []
+	var by_node: Dictionary = {}
+
 	for edge: HenFlowGraphTypes.FlowEdge in _graph.edges_of(&'exec'):
 		var from: HenFlowGraphTypes.FlowPin = edge.from_node.pin(edge.from_pin)
 		var to: HenFlowGraphTypes.FlowPin = edge.to_node.pin(edge.to_pin)
@@ -80,28 +84,83 @@ func _route_exec(_graph: HenFlowGraphTypes.FlowGraph) -> void:
 		if not from or not to:
 			continue
 
-		var a: Vector2 = anchor(edge.from_node, from)
-		var b: Vector2 = anchor(edge.to_node, to)
+		var entry: Dictionary = {
+			edge = edge,
+			a = anchor(edge.from_node, from),
+			b = anchor(edge.to_node, to),
+			order = routed.size(),
+			slot = 0
+		}
+
+		routed.append(entry)
+
+		if not by_node.has(edge.from_node):
+			by_node[edge.from_node] = []
+
+		(by_node[edge.from_node] as Array).append(entry)
+
+	for group: Array in by_node.values():
+		_assign_slots(group)
+
+	for entry: Dictionary in routed:
+		var edge: HenFlowGraphTypes.FlowEdge = entry.edge
+		var color: Color = _exec_color(edge)
 
 		_wires.append({
-			points = chamfer(_exec_path(a, b)),
-			color = EXEC_COLOR,
+			points = chamfer(_exec_path(entry.a, entry.b, entry.slot)),
+			color = color,
 			from = edge.from_node,
 			to = edge.to_node
 		})
-		_arrows.append({at = b, color = EXEC_COLOR})
+		_arrows.append({at = entry.b, color = color})
+
+
+# siblings leaving one node share the strip under it, so each gets its own depth:
+# the farthest target turns first and the runs nest instead of overlapping
+static func _assign_slots(_group: Array) -> void:
+	if _group.size() < 2:
+		return
+
+	# sort_custom is unstable, and two branches can sit at the same distance
+	_group.sort_custom(func(_x: Dictionary, _y: Dictionary) -> bool:
+		var dist_x: float = absf((_x.b as Vector2).x - (_x.a as Vector2).x)
+		var dist_y: float = absf((_y.b as Vector2).x - (_y.a as Vector2).x)
+
+		return dist_x > dist_y if not is_equal_approx(dist_x, dist_y) else _x.order < _y.order
+	)
+
+	for i: int in range(_group.size()):
+		_group[i].slot = i
+
+
+# a wire wears the colour its cell label already wears: phase colours on the
+# entry, verdict colours on true and false; the sequence stays plain
+func _exec_color(_edge: HenFlowGraphTypes.FlowEdge) -> Color:
+	if _edge.from_node.kind == &'state_entry':
+		return HenActionVisuals.phase_color(_edge.from_pin)
+
+	var pin: HenFlowGraphTypes.FlowPin = _edge.from_node.pin(_edge.from_pin)
+
+	return HenActionVisuals.branch_color(pin.id, pin.label, EXEC_COLOR) if pin else EXEC_COLOR
 
 
 # execution leaves downward and arrives downward, so a target that sits above has
 # to be reached around the side instead of straight up through the node
-func _exec_path(_a: Vector2, _b: Vector2) -> PackedVector2Array:
+func _exec_path(_a: Vector2, _b: Vector2, _slot: int = 0) -> PackedVector2Array:
 	if absf(_a.x - _b.x) < 0.5:
 		return PackedVector2Array([_a, _b])
 
 	if _b.y > _a.y + STUB * 2.0:
 		# turning right at a fixed stub cuts through whatever the step it leaves
 		# hangs beside its action, a branch transition above all
-		var mid: float = _band_between(_a.y, _b.y)
+		var mid: float = _band_between(_a.y, _b.y, _slot)
+
+		return PackedVector2Array([_a, Vector2(_a.x, mid), Vector2(_b.x, mid), _b])
+
+	# a target barely below is reached through the middle of its own gap: the side
+	# detour would overshoot it and fold back over its top edge
+	if _b.y > _a.y:
+		var mid: float = (_a.y + _b.y) * 0.5
 
 		return PackedVector2Array([_a, Vector2(_a.x, mid), Vector2(_b.x, mid), _b])
 
@@ -133,14 +192,18 @@ func _exec_path(_a: Vector2, _b: Vector2) -> PackedVector2Array:
 
 # the free strip under the step the wire leaves, or the plain stub when the run
 # is not part of a chain the formatter measured
-func _band_between(_from: float, _to: float) -> float:
+func _band_between(_from: float, _to: float, _slot: int = 0) -> float:
 	# the last strip before the target, not the first after the source: turning
 	# early leaves the wire alongside whatever the source step still occupies
 	for i: int in range(_bands.size() - 1, -1, -1):
 		if _bands[i] > _from and _bands[i] < _to:
-			return _bands[i]
+			# siblings sharing one band sink a step into its strip; deeper than
+			# that would touch the step below or overshoot a close target
+			var sunk: float = _bands[i] + LANE_STEP * minf(float(_slot), 1.0)
 
-	return _from + STUB
+			return sunk if sunk < _to - STUB else _bands[i]
+
+	return clampf(_from + STUB + LANE_STEP * float(_slot), _from + STUB, _to - STUB)
 
 
 # the lane the two ends actually straddle, nearest to where the wire leaves

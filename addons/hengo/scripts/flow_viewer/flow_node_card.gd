@@ -25,6 +25,11 @@ const COMPACT_GAP: float = 7.0
 const SHADOW_SIZE: int = 7
 const SHADOW_COLOR: Color = Color(0, 0, 0, 0.42)
 const HOVER_ALPHA: float = 0.20
+# the debug green the whole plugin already uses for a running node
+const RUN_COLOR: Color = HenActionVisuals.RUN_COLOR
+const RUN_SHADOW: Color = Color(0.39, 1.0, 0.57, 0.30)
+const RUN_BORDER_WIDTH: int = 2
+const RUN_SHADOW_SIZE: int = 10
 
 const CORNER: int = 8
 const PAD: float = 11.0
@@ -69,6 +74,7 @@ var _compact_label: CompactLabel = null
 var _hover_kind: StringName = &''
 var _hover_ref: Variant = null
 var _chip_seq: int = 0
+var _running: bool = false
 
 
 func setup(_host_control: Control, _node: HenFlowGraphTypes.FlowNode) -> void:
@@ -118,6 +124,24 @@ func set_hover(_kind: StringName, _ref: Variant) -> bool:
 		apply_size(_final_size)
 
 	return true
+
+
+# the debugger saw this action run. it outlives the trace throttle on purpose, so
+# an action running every frame glows instead of strobing
+func set_running(_on: bool) -> bool:
+	if _running == _on:
+		return false
+
+	_running = _on
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
+
+
+func is_running() -> bool:
+	return _running
 
 
 # holds the name readable while the cam zooms out, by counter-scaling instead of
@@ -222,6 +246,10 @@ func compute_size() -> Vector2:
 
 	node.size = _base_size
 
+	# the formatter orders a fan by the exec anchors, and it runs before apply_size
+	_emit_enter(_base_size)
+	_emit_anchors(_base_size)
+
 	return _base_size
 
 
@@ -288,8 +316,35 @@ func apply_size(_size: Vector2) -> void:
 
 	_hit(rect, &'node', {})
 	_emit_hover()
+	_emit_running(rect)
 
 	queue_redraw()
+
+
+# last, over everything: set_detail, set_hover and refresh_content all rebuild the
+# whole list, and a highlight painted anywhere else is wiped by an unrelated hover
+func _emit_running(_rect: Rect2) -> void:
+	if not _running:
+		return
+
+	_painter.add_style(_run_style(), _rect)
+
+
+func _run_style() -> StyleBoxFlat:
+	if _style_cache.has('running'):
+		return _style_cache['running']
+
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	style.set_corner_radius_all(CORNER)
+	style.border_color = RUN_COLOR
+	style.set_border_width_all(RUN_BORDER_WIDTH)
+	style.shadow_color = RUN_SHADOW
+	style.shadow_size = RUN_SHADOW_SIZE
+
+	_style_cache['running'] = style
+
+	return style
 
 
 # drawn last, over whatever it covers, so no part has to know it can be hovered
@@ -423,7 +478,8 @@ func _emit_flow_outs(_size: Vector2) -> void:
 	for index: int in range(_flow_outs.size()):
 		var pin: HenFlowGraphTypes.FlowPin = _flow_outs[index]
 		var label_w: float = _painter.measure(pin.label, FLOW_SIZE).x
-		var color: Color = HenActionVisuals.branch_color(pin.id, pin.label, _label_color())
+		var color: Color = HenActionVisuals.phase_color(pin.id) if node.kind == &'state_entry' \
+			else HenActionVisuals.branch_color(pin.id, pin.label, _label_color())
 
 		# the rule over the cell is the branch, the card keeps its own background
 		_painter.add_line(Vector2(x, top), Vector2(x + step, top), color, SEPARATOR_WIDTH)
@@ -500,12 +556,17 @@ func _emit_body_frame(_size: Vector2) -> void:
 		Rect2(Vector2(BODY_PAD * 0.5, top), Vector2(_size.x - BODY_PAD, _size.y - top - BODY_PAD * 0.5))
 	)
 
-	# the body port is not drawn as a slot, but it is where the wire into the first
-	# nested action starts, so it still needs an anchor
+	# the body port is not drawn as a slot, only anchored: over the first nested
+	# action's centre, so the wire into the body drops straight instead of hooking
 	var body: HenFlowGraphTypes.FlowPin = node.pin(HenFlowGraphTypes.BODY_PIN)
 
 	if body:
-		body.rect = Rect2(Vector2(BODY_PAD, top - 1.0), Vector2(2, 2))
+		var first: HenFlowGraphTypes.FlowNode = node.body[0]
+
+		body.rect = Rect2(
+			Vector2(first.position.x - node.position.x + first.size.x * 0.5 - 1.0, top - 1.0),
+			Vector2(2, 2)
+		)
 
 
 func _rule(_y: float, _width: float) -> void:

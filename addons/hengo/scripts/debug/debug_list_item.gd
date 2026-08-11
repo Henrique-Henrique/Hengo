@@ -104,6 +104,7 @@ func _build_children() -> void:
 	_hbox.add_child(_icon)
 
 	_name_label = Label.new()
+	ThemeUtils.apply_font_size(_name_label, 13)
 	_name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_name_label.size_flags_stretch_ratio = 1.6
 	_name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -112,6 +113,7 @@ func _build_children() -> void:
 	_hbox.add_child(_name_label)
 
 	_path_label = Label.new()
+	ThemeUtils.apply_font_size(_path_label, 11)
 	_path_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_path_label.size_flags_stretch_ratio = 1.0
 	_path_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT

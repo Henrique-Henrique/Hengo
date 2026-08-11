@@ -23,6 +23,10 @@ func _ready() -> void:
 	if HenUtils.disable_scene_with_owner(self):
 		return
 
+	ThemeUtils.apply_font_size(_search, 13)
+	ThemeUtils.apply_font_size(_refresh_bt, 13)
+	ThemeUtils.apply_font_size(_hint, 12)
+
 	_refresh_bt.pressed.connect(_on_refresh)
 	_search.text_changed.connect(_on_search_changed)
 
