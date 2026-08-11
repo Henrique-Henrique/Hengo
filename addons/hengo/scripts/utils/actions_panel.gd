@@ -91,6 +91,16 @@ static func invalidate_macro_index() -> void:
 	_macro_index_sizes = Vector2i(-1, -1)
 
 
+# a pool swapped for another of the same size keeps the size check quiet, and the
+# index would go on serving macros that belong to the pool that is gone
+static func _is_stale(_global: HenGlobal) -> bool:
+	for pool: Array in [_global.action_macros, _global.script_macros]:
+		if not pool.is_empty() and _macro_index.get((pool[0] as HenSaveMacro).id) != pool[0]:
+			return true
+
+	return false
+
+
 # every action row resolves its macro, several times over, so this cannot scan
 static func find_macro(_macro_id: StringName) -> HenSaveMacro:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -100,7 +110,7 @@ static func find_macro(_macro_id: StringName) -> HenSaveMacro:
 
 	var sizes: Vector2i = Vector2i(global.action_macros.size(), global.script_macros.size())
 
-	if sizes != _macro_index_sizes:
+	if sizes != _macro_index_sizes or _is_stale(global):
 		_macro_index.clear()
 
 		for pool: Array in [global.action_macros, global.script_macros]:

@@ -11,6 +11,14 @@ const FALLBACK_COLOR: String = '#7c93ff'
 const TITLE_SIZE: int = 18
 const TITLE_COLOR: Color = Color('#dde4ed')
 
+# one per state, reused around: same value and saturation so a graph full of them
+# still reads as one picture
+const STATE_PALETTE: Array[String] = [
+	'#4a8fd4', '#3f9d6a', '#c98b3f', '#a06fd0', '#d05f6f',
+	'#39a0a8', '#8f9d3f', '#d07f4a', '#6f7fd0', '#c05fa8',
+	'#5fb0c0', '#9d6f3f'
+]
+
 # colors the phase section header; the row accent is the action's category
 const PHASE_COLORS: Dictionary = {
 	enter = '#63d98a',
@@ -35,6 +43,13 @@ const KINDS: Dictionary = {
 	expression = '#c08cff',
 	action = '#ff9e64',
 	branch = '#8f86ff'
+}
+
+# a branch reads as a verdict before it reads as a word, so the two that always
+# mean the same thing get a fixed colour, in the tone of the rest of the palette
+const BRANCH_COLORS: Dictionary = {
+	'true': '#63d98a',
+	'false': '#e0736b'
 }
 
 const NAME_COLOR: Color = Color('#6e7889')
@@ -71,3 +86,17 @@ static func phase_color(_phase: StringName) -> Color:
 
 static func kind_color(_kind: String) -> Color:
 	return Color(str(KINDS.get(_kind, KINDS.literal)))
+
+
+# the same id always lands on the same colour, so a state keeps it across rebuilds
+static func state_color(_id: String) -> Color:
+	return Color(STATE_PALETTE[absi(_id.hash()) % STATE_PALETTE.size()])
+
+
+# the port id names it in the macro, the label is what the user reads
+static func branch_color(_id: StringName, _label: String, _fallback: Color) -> Color:
+	for key: String in [str(_id).to_lower(), _label.to_lower()]:
+		if BRANCH_COLORS.has(key):
+			return Color(str(BRANCH_COLORS[key]))
+
+	return _fallback

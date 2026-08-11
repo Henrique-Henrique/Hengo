@@ -647,10 +647,14 @@ static func reposition_control_inside(_control: Control) -> void:
 		_control.position.y = rect.position.y + 8
 	
 
+# EditorInterface only exists in the editor, and these scenes also run headless
 static func disable_scene_with_owner(_ref: Node) -> bool:
+	if not Engine.is_editor_hint():
+		return false
+
 	var can_disable: bool = false
 	var root: Node = EditorInterface.get_edited_scene_root()
-	
+
 	if root:
 		can_disable = (root == _ref or root == _ref.owner)
 

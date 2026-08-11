@@ -27,7 +27,7 @@
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
 [ext_resource type="FontFile" uid="uid://bidhodani4k31" path="res://addons/hengo/assets/fonts/bold.ttf" id="23_tlngq"]
 [ext_resource type="PackedScene" uid="uid://xg0nsq20dlya" path="res://addons/hengo/scenes/utils/tooltip.tscn" id="23_x5h56"]
-[ext_resource type="PackedScene" uid="uid://bsdw3ppkktst5" path="res://addons/hengo/scenes/machine_graph.tscn" id="27_dkwui"]
+[ext_resource type="PackedScene" path="res://addons/hengo/scenes/flow_viewer.tscn" id="60_flowvw"]
 [ext_resource type="Script" uid="uid://doifdm1hiujqd" path="res://addons/hengo/scripts/utils/signal_bus.gd" id="27_ji2ve"]
 [ext_resource type="Texture2D" uid="uid://c8nf0opxi6qb3" path="res://addons/hengo/assets/new_icons/minimize-2.svg" id="30_hog2e"]
 [ext_resource type="Texture2D" uid="uid://c6f7xyoyth505" path="res://addons/hengo/assets/new_icons/user-round-cog.svg" id="32_h1p8r"]
@@ -42,7 +42,6 @@
 [ext_resource type="Texture2D" uid="uid://cguqtcpwfbkqk" path="res://addons/hengo/assets/new_icons/chevrons-right-left.svg" id="51_sidebar"]
 [ext_resource type="Texture2D" uid="uid://0l4bcawtp371" path="res://addons/hengo/assets/new_icons/refresh-cw.svg" id="53_refresh"]
 [ext_resource type="Texture2D" uid="uid://cuxdwx2mic0yt" path="res://addons/hengo/assets/new_icons/focus.svg" id="55_focus"]
-[ext_resource type="Texture2D" uid="uid://daok28fgqnqkk" path="res://addons/hengo/assets/new_icons/layers.svg" id="56_scope"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/utils/tabs.gd" id="tabs_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/saving_pill.tscn" id="savpill_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/loading_overlay.tscn" id="loadovlay_inst"]
@@ -485,7 +484,7 @@ icon = ExtResource("39_174hx")
 unique_name_in_owner = true
 layout_mode = 2
 mouse_default_cursor_shape = 2
-tooltip_text = "Rebuild the state graph layout"
+tooltip_text = "Rebuild the flow layout"
 icon = ExtResource("53_refresh")
 flat = true
 
@@ -512,8 +511,8 @@ size_flags_vertical = 3
 theme_type_variation = &"CanvasTabContainer"
 tabs_visible = false
 current_tab = 1
-tab_0/title = "Flow"
-tab_1/title = "States"
+tab_0/title = "Canvas"
+tab_1/title = "Flow"
 
 [node name="CNodeUI" type="Panel" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs" unique_id=1262400160]
 unique_name_in_owner = true
@@ -640,13 +639,6 @@ mouse_filter = 2
 unique_name_in_owner = true
 layout_mode = 1
 z_index = 110
-
-[node name="MachineGraph" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs" unique_id=2066009994 instance=ExtResource("27_dkwui")]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-metadata/_tab_index = 1
-metadata/_tab_name = "States"
 
 [node name="StatusBar" type="PanelContainer" parent="Content/UIBase/MainLayout" unique_id=2000000010]
 layout_mode = 2
@@ -783,17 +775,6 @@ tooltip_text = "Reset zoom to 100%"
 icon = ExtResource("55_focus")
 flat = true
 
-[node name="StatesScopeBt" type="Button" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000041]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-mouse_default_cursor_shape = 2
-tooltip_text = "States tab: show every script of the collection"
-toggle_mode = true
-text = "All scripts"
-icon = ExtResource("56_scope")
-flat = true
-
 [node name="Tooltip" parent="Content/UIBase" unique_id=1420862732 instance=ExtResource("23_x5h56")]
 unique_name_in_owner = true
 visible = false
@@ -813,3 +794,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("47_h1p8r")
+
+[node name="FlowViewer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs" unique_id=2000000092 instance=ExtResource("60_flowvw")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+metadata/_tab_name = "Flow"

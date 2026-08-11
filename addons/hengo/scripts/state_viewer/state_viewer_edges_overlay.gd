@@ -9,7 +9,6 @@ var graph_root: HenStateViewerGraphTypes.DirectedGraphNode
 var _line_pool: Array[Line2D] = []
 var _label_pool: Array[HenStateEdgePill] = []
 
-var _active_node: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
 var _edge_views: Array[Dictionary] = []
 var _flashed_edges: Dictionary = {}
@@ -37,6 +36,9 @@ const TRANSITION_COLOR: Color = Color('#f97316')
 const CONDITION_COLOR: Color = Color('#38bdf8')
 const CROSS_SCRIPT_COLOR: Color = Color('#c368ed')
 const DIM_ALPHA: float = 0.2
+# routes are chrome, not content: at full strength they read louder than the states
+const CANVAS_BG: Color = Color('#0f1116')
+const LINE_MUTE: float = 0.42
 const HOVER_SCREEN_PX: float = 15.0
 const VIEW_MARGIN: float = 256.0
 # segments per round joint and cap; the default 8 is a lot at 1400 lines
@@ -52,7 +54,7 @@ const FLASH_WIDTH: float = 4.5
 const ARROW_GROWTH: float = 0.25
 # lines need the full 1/zoom, an arrow at that rate becomes a huge triangle at min_zoom
 const ARROW_ZOOM_DAMP: float = 0.5
-const EDGE_CORNER_RADIUS: float = 14.0
+const EDGE_CHAMFER: float = 14.0
 const FLASH_TRAVEL_MS: float = 450.0
 const FLASH_TOTAL_MS: float = 800.0
 const PULSE_LEN: float = 90.0
@@ -60,7 +62,20 @@ const PULSE_LEN: float = 90.0
 
 func _ready() -> void:
 	# ensure process is running for hover detection
-	set_process(true)
+	set_process(is_visible_in_tree())
+
+
+# the other canvas tab hides this one, and hover kept running behind it
+func _notification(what: int) -> void:
+	if what != NOTIFICATION_VISIBILITY_CHANGED:
+		return
+
+	set_process(is_visible_in_tree())
+
+	if not is_visible_in_tree() and _hovered_edge != null:
+		_hovered_edge = null
+		_animating = true
+		queue_redraw()
 
 
 func get_hovered_edge() -> HenStateViewerGraphTypes.DirectedGraphEdge:
@@ -120,12 +135,6 @@ func flash_edge(script_name: String, source: String, event: String) -> void:
 		queue_redraw()
 
 
-func set_active_node(node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
-	if _active_node != node:
-		_active_node = node
-		_animating = true
-		queue_redraw()
-
 
 # stores edges and triggers redraw
 func update_edges(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
@@ -137,6 +146,10 @@ func update_edges(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 
 
 func _kind_color(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Color:
+	return _base_color(edge).lerp(CANVAS_BG, LINE_MUTE)
+
+
+func _base_color(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Color:
 	var action_color: String = str(edge.meta.get('color', ''))
 
 	if action_color.is_valid_html_color():
@@ -179,7 +192,6 @@ func _build_edge_views() -> void:
 	if graph_root == null:
 		return
 
-	var path_util: HenStateViewerPathUtils = HenStateViewerPathUtils.new()
 	var edges: Array[HenStateViewerGraphTypes.DirectedGraphEdge] = _get_all_edges(graph_root)
 
 	var line_idx: int = 0
@@ -192,8 +204,8 @@ func _build_edge_views() -> void:
 			continue
 
 		var section: Dictionary = edge.sections[0]
-		var curve: Curve2D = path_util.round_path(section, EDGE_CORNER_RADIUS)
-		var points: PackedVector2Array = curve.get_baked_points()
+		# same 45 degree cut the node wires use, so both drawings read as one style
+		var points: PackedVector2Array = HenFlowWires.chamfer(_sharp_points(section), EDGE_CHAMFER)
 
 		var line: Line2D
 		if line_idx < _line_pool.size():
@@ -250,8 +262,6 @@ func _build_edge_views() -> void:
 				idx = label_idx
 			})
 
-		var hover_points: PackedVector2Array = _sharp_points(section)
-
 		_edge_views.append({
 			edge = edge,
 			points = points,
@@ -264,8 +274,9 @@ func _build_edge_views() -> void:
 			total_len = total_len,
 			state_width = NORMAL_WIDTH,
 			alpha = 1.0,
-			hover_points = hover_points,
-			bounds = _bounds_of(hover_points),
+			# the chamfered route is already a handful of points, and it is what is drawn
+			hover_points = points,
+			bounds = _bounds_of(points),
 			# fixed per edge, and resolving it parses an html string
 			color = _kind_color(edge)
 		})
@@ -510,22 +521,10 @@ func _state_rects(node: HenStateViewerGraphTypes.DirectedGraphNode, result: Arra
 	return result
 
 
-# edges stay lit while the hovered node is their source or an ancestor of it
+# only a hovered route lights anything: a route is a question about two states
 func _is_edge_dimmed(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> bool:
-	if _active_node != null:
-		return not _is_self_or_descendant(edge.source, _active_node)
-	if _hovered_edge != null:
-		return edge != _hovered_edge
-	return false
+	return _hovered_edge != null and edge != _hovered_edge
 
-
-func _is_self_or_descendant(node: HenStateViewerGraphTypes.DirectedGraphNode, ancestor: HenStateViewerGraphTypes.DirectedGraphNode) -> bool:
-	var current: HenStateViewerGraphTypes.DirectedGraphNode = node
-	while current != null:
-		if current == ancestor:
-			return true
-		current = current.parent
-	return false
 
 
 # fades from full strength to zero after the pulse finishes traveling

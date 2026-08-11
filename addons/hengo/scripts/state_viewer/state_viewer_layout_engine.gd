@@ -19,6 +19,15 @@ const ROW_STEP: float = 14.0
 const MIN_STUB: float = 8.0
 const TRACK_CLEAR: float = 12.0
 const MAX_ROW_SHIFT: float = ROW_STEP * 3.0
+const TARGET_ASPECT: float = 16.0 / 9.0
+# a wider band count only wins if it beats the current one by more than this, so
+# one extra state never reshuffles a whole machine
+const ASPECT_EPSILON: float = 0.08
+const BAND_GAP: float = 128.0
+const GUTTER_MARGIN: float = 24.0
+const GUTTER_TRACK_STEP: float = 16.0
+# wider than LAYER_GAP: the cross-machine channel of the next row lives in here
+const ROOT_ROW_GAP: float = 160.0
 
 
 var _incoming_map: Dictionary = {}
@@ -27,6 +36,8 @@ var _highway_tracks: Dictionary = {}
 var _root: HenStateViewerGraphTypes.DirectedGraphNode = null
 var _machine_order: Array = []
 var _machine_index: Dictionary = {}
+var _machine_row: Dictionary = {}
+var _row_top: Array = []
 var _corridor_demand: Array = []
 
 # phase 1: layout all positions bottom-up, phase 2: route edges after positions are final
@@ -69,7 +80,24 @@ func execute_layout(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 
 	_allocate_highway_tracks(all_edges)
 	_route_recursive(root)
-	_separate_parallel_rows(all_edges)
+
+	# the corridor route is kept only for what the router cannot see: an edge whose
+	# ends live in different machines never has both of them in one scope
+	var routed: Dictionary = {}
+	var router: HenStateViewerEdgeRouter = HenStateViewerEdgeRouter.new()
+	var groups: Dictionary = HenStateViewerEdgeRouter.routable(all_edges)
+
+	for scope: Variant in groups:
+		for edge: HenStateViewerGraphTypes.DirectedGraphEdge in router.route_scope(scope, groups[scope]):
+			routed[edge] = true
+
+	var remaining: Array = []
+
+	for edge in all_edges:
+		if not routed.has(edge):
+			remaining.append(edge)
+
+	_separate_parallel_rows(remaining)
 
 
 # bottom-up recursive layout: children first, then parent wraps them
@@ -98,40 +126,41 @@ func _layout_children(parent: HenStateViewerGraphTypes.DirectedGraphNode) -> voi
 		return
 
 	var children: Array = parent.children
-	var layers: Dictionary = group_by_depth(children)
-	var depth_keys: Array = layers.keys()
-	depth_keys.sort()
+	var plan: Dictionary = plan_bands(children)
+	var top: float = float(parent.layout.get('top_pad', COMPOUND_PAD_TOP))
+	var gutter_bases: Array[float] = []
 
-	var current_y: float = float(parent.layout.get('top_pad', COMPOUND_PAD_TOP))
+	for index in range(plan.bands.size()):
+		var band: Dictionary = plan.bands[index]
+		var current_y: float = top
 
-	# pre-calculate max width of any individual layer (the parent's inner content width)
-	var max_layer_w: float = 0.0
-	for depth in depth_keys:
-		var w: float = 0.0
-		for node in layers[depth]:
-			w += node.layout.width
-		w += max(0, layers[depth].size() - 1) * NODE_GAP
-		max_layer_w = max(max_layer_w, w)
+		for layer in range(band.from, band.to):
+			var nodes_in_layer: Array = plan.layers[plan.keys[layer]]
+			var layer_total_w: float = 0.0
 
-	for depth in depth_keys:
-		var nodes_in_layer: Array = layers[depth]
-		var layer_total_w: float = 0.0
-		for node in nodes_in_layer:
-			layer_total_w += node.layout.width
-		layer_total_w += max(0, nodes_in_layer.size() - 1) * NODE_GAP
+			for node in nodes_in_layer:
+				layer_total_w += node.layout.width
 
-		# center the layer horizontally within the parent's content area
-		var current_x: float = COMPOUND_PAD_SIDE + (max_layer_w - layer_total_w) * 0.5
-		var max_h: float = 0.0
+			layer_total_w += max(0, nodes_in_layer.size() - 1) * NODE_GAP
 
-		for node in nodes_in_layer:
-			node.layout.x = current_x
-			node.layout.y = current_y
-			
-			current_x += node.layout.width + NODE_GAP
-			max_h = max(max_h, node.layout.height)
+			# center the layer horizontally within its own band
+			var current_x: float = COMPOUND_PAD_SIDE + band.x + (band.width - layer_total_w) * 0.5
+			var max_h: float = 0.0
 
-		current_y += max_h + LAYER_GAP
+			for node in nodes_in_layer:
+				node.layout.x = current_x
+				node.layout.y = current_y
+				node.layout.band = index
+
+				current_x += node.layout.width + NODE_GAP
+				max_h = max(max_h, node.layout.height)
+
+			current_y += max_h + LAYER_GAP
+
+		if index < plan.bands.size() - 1:
+			gutter_bases.append(COMPOUND_PAD_SIDE + band.x + band.width + GUTTER_MARGIN)
+
+	parent.layout.gutters = gutter_bases
 
 	# resize parent to tightly wrap children
 	var max_right: float = 0.0
@@ -191,30 +220,133 @@ func _layout_root_row(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	for i in range(_machine_order.size()):
 		_machine_index[_machine_order[i].id] = i
 
+	var rows: Array = _split_machine_rows(weights)
+
+	_machine_row.clear()
+	_row_top.clear()
+
+	for r in range(rows.size()):
+		for i in range(rows[r].x, rows[r].y):
+			_machine_row[_machine_order[i].id] = r
+
+	# a pair split across rows takes the machine-side route, so it books no corridor
 	_corridor_demand.resize(maxi(0, machines.size() - 1))
 	_corridor_demand.fill(0)
 	for pair in cross_pairs:
 		var s: int = _machine_index[pair.source_id]
 		var t: int = _machine_index[pair.target_id]
+		if int(_machine_row.get(pair.source_id, 0)) != int(_machine_row.get(pair.target_id, 0)):
+			continue
 		if absi(s - t) == 1:
 			_corridor_demand[mini(s, t)] += 1
 		else:
 			_corridor_demand[s if t > s else s - 1] += 1
 			_corridor_demand[t - 1 if t > s else t] += 1
 
-	var x: float = COMPOUND_PAD_SIDE
-	var max_bottom: float = 0.0
-	for i in range(_machine_order.size()):
-		var m: HenStateViewerGraphTypes.DirectedGraphNode = _machine_order[i]
-		m.layout.x = x
-		m.layout.y = COMPOUND_PAD_TOP
-		max_bottom = max(max_bottom, m.layout.y + m.layout.height)
-		x += m.layout.width
-		if i < _machine_order.size() - 1:
-			x += max(NODE_GAP, HIGHWAY_MARGIN * 2.0 + float(_corridor_demand[i]) * HIGHWAY_TRACK_STEP)
+	var y: float = COMPOUND_PAD_TOP
+	var widest: float = 0.0
 
-	root.layout.width = x + COMPOUND_PAD_SIDE
-	root.layout.height = max_bottom + COMPOUND_PAD_BOTTOM
+	for r in range(rows.size()):
+		var x: float = COMPOUND_PAD_SIDE
+		var row_h: float = 0.0
+
+		_row_top.append(y)
+
+		for i in range(rows[r].x, rows[r].y):
+			var m: HenStateViewerGraphTypes.DirectedGraphNode = _machine_order[i]
+			m.layout.x = x
+			m.layout.y = y
+			row_h = max(row_h, m.layout.height)
+			x += m.layout.width
+			if i < rows[r].y - 1:
+				x += max(NODE_GAP, HIGHWAY_MARGIN * 2.0 + float(_corridor_demand[i]) * HIGHWAY_TRACK_STEP)
+
+		widest = max(widest, x)
+		y += row_h + ROOT_ROW_GAP
+
+	root.layout.width = widest + COMPOUND_PAD_SIDE
+	root.layout.height = y - ROOT_ROW_GAP + COMPOUND_PAD_BOTTOM
+
+
+# the machine chain wrapped into rows, same aspect rule the bands inside use. the
+# corridor router works along one row, so a row is only cut where no transition
+# crosses: the greedy chain leaves each connected group contiguous
+func _split_machine_rows(weights: Dictionary) -> Array:
+	var widths: Array[float] = []
+	var heights: Array[float] = []
+
+	for m in _machine_order:
+		widths.append(m.layout.width)
+		heights.append(m.layout.height)
+
+	var groups: Array[int] = _connected_groups(weights)
+	var allowed_cuts: Dictionary = {}
+
+	for i in range(_machine_order.size() - 1):
+		if groups[i] != groups[i + 1]:
+			allowed_cuts[i] = true
+
+	var chosen: Array = [Vector2i(0, _machine_order.size())]
+	var chosen_deviation: float = INF
+
+	for count in range(1, _machine_order.size() + 1):
+		var split: Array = _split_runs(widths, count, NODE_GAP, allowed_cuts)
+		var deviation: float = _aspect_deviation(_rows_shape(split, widths, heights))
+
+		if deviation < chosen_deviation - ASPECT_EPSILON:
+			chosen_deviation = deviation
+			chosen = split
+
+	return chosen
+
+
+# the connected component of each machine, indexed by its place in _machine_order
+func _connected_groups(weights: Dictionary) -> Array[int]:
+	var groups: Array[int] = []
+
+	groups.resize(_machine_order.size())
+	groups.fill(-1)
+
+	var next_group: int = 0
+
+	for i in range(_machine_order.size()):
+		if groups[i] != -1:
+			continue
+
+		var pending: Array = [i]
+		groups[i] = next_group
+
+		while not pending.is_empty():
+			var current: int = pending.pop_back()
+
+			for other_id in weights.get(_machine_order[current].id, {}):
+				var index: int = int(_machine_index.get(other_id, -1))
+
+				if index >= 0 and groups[index] == -1:
+					groups[index] = next_group
+					pending.append(index)
+
+		next_group += 1
+
+	return groups
+
+
+static func _rows_shape(split: Array, widths: Array[float], heights: Array[float]) -> Vector2:
+	var widest: float = 0.0
+	var total_h: float = 0.0
+
+	for row in split:
+		var row_w: float = 0.0
+		var row_h: float = 0.0
+
+		for i in range(row.x, row.y):
+			row_w += widths[i]
+			row_h = max(row_h, heights[i])
+
+		widest = max(widest, row_w + float(row.y - row.x - 1) * NODE_GAP)
+		total_h += row_h
+
+	return Vector2(widest, total_h + float(split.size() - 1) * ROOT_ROW_GAP)
 
 
 # corridor i sits between machines i and i+1; base x clears the left machine by the margin
@@ -223,6 +355,176 @@ func _corridor_base_x(corridor: int) -> float:
 		return 0.0
 	var m: HenStateViewerGraphTypes.DirectedGraphNode = _machine_order[corridor]
 	return m.get_absolute().x + m.layout.width + HIGHWAY_MARGIN
+
+
+# the layer sequence cut into contiguous bands laid side by side. a machine that
+# is one long chain fills the width instead of stretching down, and one band is
+# the old single-column layout. the measurer and the layout engine both call this,
+# so it stays a pure function of children that are already sized
+static func plan_bands(children: Array) -> Dictionary:
+	var layers: Dictionary = group_by_depth(children)
+	var keys: Array = layers.keys()
+	keys.sort()
+
+	var widths: Array[float] = []
+	var heights: Array[float] = []
+
+	for key: Variant in keys:
+		var nodes: Array = layers[key]
+		var width: float = 0.0
+		var height: float = 0.0
+
+		for node in nodes:
+			width += node.layout.width
+			height = max(height, node.layout.height)
+
+		widths.append(width + float(nodes.size() - 1) * NODE_GAP)
+		heights.append(height)
+
+	var chosen: Array = [Vector2i(0, keys.size())]
+	var chosen_deviation: float = INF
+
+	for count in range(1, keys.size() + 1):
+		var split: Array = _split_runs(heights, count, LAYER_GAP)
+		var deviation: float = _aspect_deviation(_bands_shape(split, widths, heights))
+
+		if deviation < chosen_deviation - ASPECT_EPSILON:
+			chosen_deviation = deviation
+			chosen = split
+
+	var band_of: Dictionary = {}
+
+	for index in range(chosen.size()):
+		for layer in range(chosen[index].x, chosen[index].y):
+			band_of[keys[layer]] = index
+
+	var gutters: Array[float] = _gutter_widths(children, layers, band_of, chosen.size())
+	var bands: Array = []
+	var x: float = 0.0
+	var tallest: float = 0.0
+
+	for index in range(chosen.size()):
+		var band_w: float = 0.0
+		var band_h: float = 0.0
+
+		for layer in range(chosen[index].x, chosen[index].y):
+			band_w = max(band_w, widths[layer])
+			band_h += heights[layer]
+
+		band_h += float(chosen[index].y - chosen[index].x - 1) * LAYER_GAP
+		bands.append({from = chosen[index].x, to = chosen[index].y, x = x, width = band_w, height = band_h})
+		tallest = max(tallest, band_h)
+		x += band_w
+
+		if index < chosen.size() - 1:
+			x += gutters[index]
+
+	return {
+		layers = layers,
+		keys = keys,
+		bands = bands,
+		band_of = band_of,
+		gutters = gutters,
+		content = Vector2(x, tallest)
+	}
+
+
+# contiguous runs of roughly equal extent, so no run ends up carrying the machine
+static func _split_runs(values: Array[float], count: int, gap: float, allowed_cuts: Variant = null) -> Array:
+	var total: float = 0.0
+
+	for value in values:
+		total += value + gap
+
+	var target: float = total / float(count)
+	var out: Array = []
+	var start: int = 0
+	var accumulated: float = 0.0
+
+	for i in range(values.size()):
+		accumulated += values[i] + gap
+
+		var left_items: int = values.size() - i - 1
+		var left_runs: int = count - out.size() - 1
+		var can_cut: bool = allowed_cuts == null or (allowed_cuts as Dictionary).has(i)
+
+		if can_cut and out.size() < count - 1 and accumulated >= target and left_items >= left_runs:
+			out.append(Vector2i(start, i + 1))
+			start = i + 1
+			accumulated = 0.0
+
+	out.append(Vector2i(start, values.size()))
+
+	return out
+
+
+static func _bands_shape(split: Array, widths: Array[float], heights: Array[float]) -> Vector2:
+	var width: float = 0.0
+	var tallest: float = 0.0
+
+	for band in split:
+		var band_w: float = 0.0
+		var band_h: float = 0.0
+
+		for layer in range(band.x, band.y):
+			band_w = max(band_w, widths[layer])
+			band_h += heights[layer]
+
+		width += band_w
+		tallest = max(tallest, band_h + float(band.y - band.x - 1) * LAYER_GAP)
+
+	return Vector2(width + float(split.size() - 1) * BAND_GAP, tallest)
+
+
+static func _aspect_deviation(shape: Vector2) -> float:
+	return absf(log(max(shape.x / max(shape.y, 1.0), 0.001) / TARGET_ASPECT))
+
+
+# only adjacent crossings ride a gutter, so only they reserve width in one
+static func _gutter_widths(children: Array, layers: Dictionary, band_of: Dictionary, count: int) -> Array[float]:
+	var out: Array[float] = []
+
+	out.resize(maxi(0, count - 1))
+	out.fill(BAND_GAP)
+
+	if count < 2:
+		return out
+
+	var node_band: Dictionary = {}
+	var node_map: Dictionary = {}
+
+	for key in layers:
+		for node in layers[key]:
+			node_band[node.id] = int(band_of[key])
+			node_map[node.id] = node
+
+	var demand: Array[int] = []
+
+	demand.resize(count - 1)
+	demand.fill(0)
+
+	for node in children:
+		var edges_out: Array = []
+		_get_all_descendant_edges(node, edges_out)
+
+		for edge in edges_out:
+			var target: HenStateViewerGraphTypes.DirectedGraphNode = _find_ancestor_in_map(edge.target, node_map)
+
+			if target == null or target.id == node.id:
+				continue
+
+			var source_band: int = int(node_band.get(node.id, 0))
+			var target_band: int = int(node_band.get(target.id, 0))
+
+			if absi(source_band - target_band) != 1:
+				continue
+
+			demand[mini(source_band, target_band)] += 1
+
+	for index in range(count - 1):
+		out[index] = max(BAND_GAP, GUTTER_MARGIN * 2.0 + float(demand[index]) * GUTTER_TRACK_STEP)
+
+	return out
 
 
 # longest-path layering with edge hoisting and cycle detection
@@ -326,6 +628,9 @@ func _route_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 	# stamp the visual kind so the overlay can color edges by type
 	if info.is_cross:
 		edge.kind = &'cross'
+	elif info.get('band_forward', false):
+		# the machine's own sequence, only bent because the band wrapped
+		edge.kind = &'forward'
 	elif info.is_backward:
 		edge.kind = &'back'
 	else:
@@ -397,7 +702,11 @@ func _route_cross_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge, info: D
 	var entry_track: Dictionary = _highway_tracks.get(edge.id + ':entry', {index = 0, count = 1})
 	var chan_track: Dictionary = _highway_tracks.get(edge.id + ':chan', {index = 0, count = 1})
 	var entry_x: float = info.entry_base + float(entry_track.index) * HIGHWAY_TRACK_STEP
-	var channel_y: float = COMPOUND_PAD_TOP - CHANNEL_MARGIN - float(chan_track.index) * HIGHWAY_TRACK_STEP
+	var row_top: float = float(info.get('row_top', COMPOUND_PAD_TOP))
+	# the tracks compress instead of climbing into the row above
+	var span: float = max(0.0, float(info.get('row_head', COMPOUND_PAD_TOP)) - CHANNEL_MARGIN - TRACK_CLEAR)
+	var step: float = min(HIGHWAY_TRACK_STEP, span / max(1.0, float(chan_track.count)))
+	var channel_y: float = row_top - CHANNEL_MARGIN - float(chan_track.index) * step
 
 	edge.sections = [ {
 		start_point = start_pt,
@@ -456,13 +765,16 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 
 	var ancestor: HenStateViewerGraphTypes.DirectedGraphNode = _find_common_ancestor(edge.source, edge.target)
 	var is_cross: bool = ancestor == null or ancestor == _root
+	var band: Dictionary = {} if is_cross else _band_crossing(ancestor, edge)
 
 	var info: Dictionary = {
 		start = Vector2(start_x, start_y),
 		end = Vector2(end_x, end_y),
-		is_highway = is_backward or is_complex_forward or is_cross,
+		is_highway = is_backward or is_complex_forward or is_cross or not band.is_empty(),
 		is_backward = is_backward,
 		is_cross = is_cross,
+		is_band = not band.is_empty(),
+		band_forward = bool(band.get('forward', false)),
 		route_base = 0.0,
 		track_dir = 1.0,
 		group_key = ''
@@ -471,15 +783,27 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 	if not info.is_highway:
 		return info
 
+	if not band.is_empty():
+		info.route_base = band.base
+		info.track_dir = 1.0
+		info.group_key = band.key
+		return info
+
 	if is_cross:
 		var src_machine: HenStateViewerGraphTypes.DirectedGraphNode = _top_level_machine(edge.source)
 		var tgt_machine: HenStateViewerGraphTypes.DirectedGraphNode = _top_level_machine(edge.target)
 		var s_idx: int = int(_machine_index.get(src_machine.id, -1)) if src_machine != null else -1
 		var t_idx: int = int(_machine_index.get(tgt_machine.id, -1)) if tgt_machine != null else -1
 
-		if s_idx >= 0 and t_idx >= 0 and s_idx != t_idx:
+		var s_row: int = int(_machine_row.get(src_machine.id, 0)) if src_machine != null else 0
+		var t_row: int = int(_machine_row.get(tgt_machine.id, 0)) if tgt_machine != null else 0
+
+		if s_idx >= 0 and t_idx >= 0 and s_idx != t_idx and s_row == t_row:
 			# corridor routing against the machine row built by _layout_root_row
 			info.src_index = s_idx
+			info.row_top = float(_row_top[s_row]) if s_row < _row_top.size() else COMPOUND_PAD_TOP
+			info.row_head = COMPOUND_PAD_TOP if s_row == 0 else ROOT_ROW_GAP
+			info.row = s_row
 			info.is_adjacent = absi(s_idx - t_idx) == 1
 			info.exit_corridor = s_idx if t_idx > s_idx else s_idx - 1
 			info.entry_corridor = t_idx - 1 if t_idx > s_idx else t_idx
@@ -524,6 +848,55 @@ func _classify_edge(edge: HenStateViewerGraphTypes.DirectedGraphEdge) -> Diction
 	return info
 
 
+# the gutter an edge between two neighbouring bands runs in. a jump over more than
+# one band would have to cross a band to reach its gutter, so it keeps the old
+# route around the outside of the machine
+func _band_crossing(
+	ancestor: HenStateViewerGraphTypes.DirectedGraphNode,
+	edge: HenStateViewerGraphTypes.DirectedGraphEdge
+) -> Dictionary:
+	var gutters: Array = ancestor.layout.get('gutters', [])
+
+	if gutters.is_empty():
+		return {}
+
+	var source: HenStateViewerGraphTypes.DirectedGraphNode = _child_of(ancestor, edge.source)
+	var target: HenStateViewerGraphTypes.DirectedGraphNode = _child_of(ancestor, edge.target)
+
+	if source == null or target == null:
+		return {}
+
+	var source_band: int = int(source.layout.get('band', 0))
+	var target_band: int = int(target.layout.get('band', 0))
+
+	if absi(source_band - target_band) != 1:
+		return {}
+
+	var index: int = mini(source_band, target_band)
+
+	if index >= gutters.size():
+		return {}
+
+	return {
+		base = ancestor.get_absolute().x + float(gutters[index]),
+		key = 'gutter:' + ancestor.id + ':' + str(index),
+		forward = target_band > source_band
+	}
+
+
+# walks up from node to the direct child of ancestor that contains it
+static func _child_of(
+	ancestor: HenStateViewerGraphTypes.DirectedGraphNode,
+	node: HenStateViewerGraphTypes.DirectedGraphNode
+) -> HenStateViewerGraphTypes.DirectedGraphNode:
+	var current: HenStateViewerGraphTypes.DirectedGraphNode = node
+
+	while current != null and current.parent != ancestor:
+		current = current.parent
+
+	return current
+
+
 # walks up to the ancestor whose parent is the root (the top-level machine containing node)
 func _top_level_machine(node: HenStateViewerGraphTypes.DirectedGraphNode) -> HenStateViewerGraphTypes.DirectedGraphNode:
 	var current: HenStateViewerGraphTypes.DirectedGraphNode = node
@@ -547,7 +920,7 @@ func _allocate_highway_tracks(all_edges: Array) -> void:
 			_push_track(groups, 'corridor:' + str(info.exit_corridor), e.id + ':exit', m_idx, info.start.x, e.id)
 			if not info.is_adjacent:
 				_push_track(groups, 'corridor:' + str(info.entry_corridor), e.id + ':entry', m_idx, info.start.x, e.id)
-				_push_track(groups, 'channel', e.id + ':chan', m_idx, info.start.x, e.id)
+				_push_track(groups, 'channel:' + str(info.get('row', 0)), e.id + ':chan', m_idx, info.start.x, e.id)
 		else:
 			_push_track(groups, info.group_key, e.id, m_idx, info.start.x, e.id)
 

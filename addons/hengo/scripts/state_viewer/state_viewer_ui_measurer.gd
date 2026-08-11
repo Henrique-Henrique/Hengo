@@ -97,29 +97,10 @@ func _measure_leaf(node: HenStateViewerGraphTypes.DirectedGraphNode, font: Font,
 
 
 func _measure_compound(node: HenStateViewerGraphTypes.DirectedGraphNode, font: Font, font_size: int, spawned_panels: Dictionary) -> void:
-	var layers: Dictionary = HenStateViewerLayoutEngine.group_by_depth(node.children)
-	var depth_keys: Array = layers.keys()
-	depth_keys.sort()
-
-	var content_w: float = 0.0
-	var content_h: float = 0.0
-
-	for depth in depth_keys:
-		var nodes_in_layer: Array = layers[depth]
-		var max_h: float = 0.0
-		var layer_w: float = 0.0
-
-		for child in nodes_in_layer:
-			max_h = max(max_h, child.layout.height)
-			layer_w += child.layout.width
-			
-		layer_w += max(0, nodes_in_layer.size() - 1) * HenStateViewerLayoutEngine.NODE_GAP
-		
-		content_h += max_h
-		content_w = max(content_w, layer_w)
-
-	# add gap between layers vertically
-	content_h += max(0, depth_keys.size() - 1) * HenStateViewerLayoutEngine.LAYER_GAP
+	# same plan the layout engine places against, or the parent stops wrapping it
+	var plan: Dictionary = HenStateViewerLayoutEngine.plan_bands(node.children)
+	var content_w: float = plan.content.x
+	var content_h: float = plan.content.y
 
 	var h_size: Vector2 = _panel_min_size(spawned_panels.get(node))
 	var header_min_w: float = h_size.x

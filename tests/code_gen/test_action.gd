@@ -792,11 +792,9 @@ func test_branch_feeds_state_viewer_edges() -> void:
 	action.branches['true'] = {state_id = dead.id, label = 'colidiu com player'}
 	action.branches['false'] = {state_id = idle.id, label = ''}
 
-	# built without the scene: the graph only needs save_data to derive the edges
-	var graph: Node = load('res://addons/hengo/scripts/state_viewer/state_viewer_machine_graph.gd').new()
+	# the edges come from save_data alone, with no view involved
 	var on_dict: Dictionary = {}
-	graph._add_action_branch_edges(state, save_data, on_dict, {})
-	graph.free()
+	HenStateGraphSource.add_branch_edges(state, save_data, on_dict, {})
 
 	assert_str(str(on_dict.get('colidiu com player', ''))).is_equal('dead')
 	# no custom name falls back to the same shape the transition nodes use

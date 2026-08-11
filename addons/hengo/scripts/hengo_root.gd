@@ -86,7 +86,7 @@ func _ready() -> void:
 	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
 	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
 	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
-	_setup_states_scope_bt()
+	_setup_flow_view()
 
 	var toggle_tabs_bt: Button = get_node_or_null('%ToggleScriptTabsBt')
 	if toggle_tabs_bt:
@@ -157,46 +157,20 @@ func refresh_script_state() -> void:
 		global.HENGO_DEBUGGER_PLUGIN.on_active_script_changed(String(global.SAVE_DATA.identity.id))
 
 
-# the states scope toggle only makes sense while the machine graph is on screen
-func _setup_states_scope_bt() -> void:
-	var scope_bt: Button = get_node_or_null('%StatesScopeBt')
-	var machine_graph: HenStateViewerMachineGraph = get_node_or_null('%MachineGraph')
-
-	if not scope_bt or not machine_graph:
-		return
-
-	scope_bt.toggled.connect(func(pressed: bool):
-		scope_bt.text = 'Current script' if pressed else 'All scripts'
-		scope_bt.tooltip_text = 'States tab: show only the active script' if pressed else 'States tab: show every script of the collection'
-		machine_graph.set_only_current_script(pressed)
-		_update_script_tabs_visibility()
-	)
-
+# the flow is the only graph view now, so there is nothing left to switch between
+func _setup_flow_view() -> void:
+	var flow: HenFlowViewer = get_node_or_null('%FlowViewer')
 	var refresh_bt: Button = get_node_or_null('%RefreshGraphBt')
 
-	if refresh_bt:
-		refresh_bt.pressed.connect(machine_graph.refresh_graph)
-
-	machine_graph.visibility_changed.connect(func():
-		scope_bt.visible = machine_graph.is_visible_in_tree()
-		if refresh_bt:
-			refresh_bt.visible = machine_graph.is_visible_in_tree()
-		_update_script_tabs_visibility()
-	)
-	scope_bt.visible = machine_graph.is_visible_in_tree()
-	if refresh_bt:
-		refresh_bt.visible = machine_graph.is_visible_in_tree()
-	_update_script_tabs_visibility()
-
-
-func _update_script_tabs_visibility() -> void:
-	var panel: PanelContainer = get_node_or_null('%ScriptTabsPanel')
-	var machine_graph: HenStateViewerMachineGraph = get_node_or_null('%MachineGraph')
-
-	if not panel or not machine_graph:
+	if not flow or not refresh_bt:
 		return
 
-	panel.visible = not (machine_graph.is_visible_in_tree() and not machine_graph.is_only_current_script())
+	refresh_bt.pressed.connect(flow.rebuild)
+	refresh_bt.visible = flow.is_visible_in_tree()
+
+	flow.visibility_changed.connect(func():
+		refresh_bt.visible = flow.is_visible_in_tree()
+	)
 
 
 func _on_reset_zoom() -> void:

@@ -2,9 +2,9 @@
 class_name TestHenStateViewerPath extends GdUnitTestSuite
 
 
-const CORNER_RADIUS: float = HenStateViewerEdgesOverlay.EDGE_CORNER_RADIUS
+const CHAMFER: float = HenStateViewerEdgesOverlay.EDGE_CHAMFER
 
-# the corridor route, the longest shape the router emits
+# the corridor route, the longest shape the layout engine still emits itself
 const SECTION: Dictionary = {
 	start_point = Vector2(600, 1400),
 	bend_points = [
@@ -13,13 +13,6 @@ const SECTION: Dictionary = {
 	],
 	end_point = Vector2(2800, 940)
 }
-
-
-func _baked(_interval: float) -> PackedVector2Array:
-	var curve: Curve2D = HenStateViewerPathUtils.new().round_path(SECTION, CORNER_RADIUS)
-	curve.bake_interval = _interval
-
-	return curve.get_baked_points()
 
 
 func _sharp() -> PackedVector2Array:
@@ -31,6 +24,10 @@ func _sharp() -> PackedVector2Array:
 	pts.append(SECTION.end_point)
 
 	return pts
+
+
+func _drawn() -> PackedVector2Array:
+	return HenFlowWires.chamfer(_sharp(), CHAMFER)
 
 
 func _max_deviation(_reference: PackedVector2Array, _candidate: PackedVector2Array) -> float:
@@ -58,18 +55,24 @@ func _dist_to_segment(_p: Vector2, _a: Vector2, _b: Vector2) -> float:
 	return _p.distance_to(_a + t * (_b - _a))
 
 
-# the overlay hit-tests the unrounded route, so it has to stay well inside the
-# hover threshold of the curve it stands for
-func test_sharp_route_stays_near_the_drawn_curve() -> void:
-	assert_float(_max_deviation(_baked(0.5), _sharp())) \
-		.is_less(HenStateViewerEdgesOverlay.HOVER_SCREEN_PX * 0.5)
+# the chamfer only cuts inside a corner, so the drawn route never leaves the lane
+# the router proved clear by more than the cut itself
+func test_the_chamfer_stays_within_its_own_radius() -> void:
+	assert_float(_max_deviation(_drawn(), _sharp())).is_less_equal(CHAMFER)
 
 
-func test_bake_interval_keeps_the_rounded_corners() -> void:
-	assert_float(_max_deviation(_baked(0.5), _baked(HenStateViewerPathUtils.BAKE_INTERVAL))) \
-		.is_less(1.0)
+# a corner is cut by at most the radius, so the sharp route it stands for is never
+# further than that from what gets drawn
+func test_the_drawn_route_hugs_the_sharp_one() -> void:
+	assert_float(_max_deviation(_sharp(), _drawn())).is_less_equal(CHAMFER)
 
 
-func test_bake_interval_cuts_the_point_count() -> void:
-	assert_int(_baked(HenStateViewerPathUtils.BAKE_INTERVAL).size()) \
-		.is_less(_baked(5.0).size() / 2)
+# hover reads the drawn polyline itself now, which only works while it stays small
+func test_the_drawn_route_stays_a_handful_of_points() -> void:
+	assert_int(_drawn().size()).is_equal(_sharp().size() * 2 - 2)
+
+
+func test_a_straight_route_is_left_alone() -> void:
+	var straight: PackedVector2Array = PackedVector2Array([Vector2(0, 0), Vector2(0, 400)])
+
+	assert_array(HenFlowWires.chamfer(straight, CHAMFER)).is_equal(straight)

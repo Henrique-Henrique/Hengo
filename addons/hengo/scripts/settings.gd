@@ -18,7 +18,6 @@ const POOL_SIZE_PATH = 'hengo/settings/pool_size'
 const DOCK_LOCATION_PATH = 'hengo/settings/dock_location'
 const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 const STATE_ROWS_ZOOM_PATH = 'hengo/settings/state_rows_zoom'
-const STATE_NAME_ZOOM_PATH = 'hengo/settings/state_name_zoom'
 const STATE_LINES_ZOOM_PATH = 'hengo/settings/state_lines_zoom'
 
 @export_tool_button('Compile current', 'Build') var compile_current: Callable = _on_compile_current_pressed
@@ -125,19 +124,12 @@ const STATE_LINES_ZOOM_PATH = 'hengo/settings/state_lines_zoom'
 	get:
 		return _get_value(MAX_ZOOM_PATH, 2.0)
 
-# below this the state cards drop their action rows and show a name plus a count
+# below this a node drops its slots and shows only its badge and name
 @export_range(0.05, 2.0, 0.05) var state_rows_zoom: float:
 	set(value):
 		_set_value(STATE_ROWS_ZOOM_PATH, value)
 	get:
 		return _get_value(STATE_ROWS_ZOOM_PATH, 0.25)
-
-# below this only the state name is left; the action count is noise at that size
-@export_range(0.05, 2.0, 0.05) var state_name_zoom: float:
-	set(value):
-		_set_value(STATE_NAME_ZOOM_PATH, value)
-	get:
-		return _get_value(STATE_NAME_ZOOM_PATH, 0.15)
 
 @export_range(0.05, 2.0, 0.05) var state_lines_zoom: float:
 	set(value):
@@ -199,7 +191,6 @@ func _property_can_revert(property: StringName) -> bool:
 		&'dock_location',
 		&'font_scale',
 		&'state_rows_zoom',
-		&'state_name_zoom',
 		&'state_lines_zoom'
 	]
 
@@ -240,8 +231,6 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 0.85
 		&'state_rows_zoom':
 			return 0.25
-		&'state_name_zoom':
-			return 0.15
 		&'state_lines_zoom':
 			return 0.15
 	return null

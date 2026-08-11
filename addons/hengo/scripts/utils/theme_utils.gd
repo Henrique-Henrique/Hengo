@@ -25,9 +25,9 @@ static func apply_font_size(control: Control, base: int, key: String = 'font_siz
 
 # recursively re-scales every font-size override under a chrome node from its
 # recorded base (first pass records the current value); skips the zoom-controlled
-# canvas (Cam) and the state viewer subtrees. safe to re-run on factor changes
+# canvas (Cam). safe to re-run on factor changes
 static func apply_font_scale(node: Node, scale: float = -1.0) -> void:
-	if node is HenCam or node is HenStateViewerMachineGraph:
+	if node is HenCam:
 		return
 
 	if scale < 0.0:
