@@ -143,6 +143,22 @@ static func _add_input_pins(
 		_graph.connect_pins(&'data', producer, _producer_output(ref, producer), _node, param.id)
 
 
+# the chip text is baked into the pin when the graph is built, so an edit that
+# leaves the graph alone still has to re-derive the parts before anything re-measures
+static func refresh_parts(_save_data: HenSaveData, _node: HenFlowGraphTypes.FlowNode) -> void:
+	if not _save_data or not _node or not _node.action:
+		return
+
+	var parts: Array = HenActionsPanel.value_parts(_node.action, _save_data)
+	var pins: Array[HenFlowGraphTypes.FlowPin] = _node.pins_of(&'data_in')
+
+	for i: int in range(mini(_node.action.inputs.size(), mini(parts.size(), pins.size()))):
+		if _node.action.input_actions.has(str(_node.action.inputs[i].id)):
+			continue
+
+		pins[i].part = parts[i]
+
+
 # the stored {action, output} names the port; older data stored the action alone
 static func _producer_output(_ref: Variant, _producer: HenFlowGraphTypes.FlowNode) -> StringName:
 	if _ref is Dictionary:

@@ -901,10 +901,23 @@ func _dispatch_click() -> bool:
 	var origin: Vector2 = hit.origin
 	var rect: Rect2 = screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
 
+	if hit.kind == &'pin':
+		_editing_card = card
+		_editor_for(hit.node)
+		_editor.open_producer((hit.part as Dictionary).get('slot', {}), rect)
+		return true
+
 	if hit.kind == &'chip':
 		_editing_card = card
 		_editor_for(hit.node)
-		_editor.chip_pressed(hit.part, int(hit.index), rect, _chip_ring.bind(card, origin))
+
+		# an edit with no popup (a bool toggle) never reaches _on_popup_closed, and
+		# the snapshot taken above would sit open until some later edit commits it
+		if not _editor.chip_pressed(hit.part, int(hit.index), rect, _chip_ring.bind(card, origin)):
+			var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+			_history.commit(global.SAVE_DATA if global else null, 'Edit Action')
+
 		return true
 
 	_select_card(card)
@@ -1052,11 +1065,50 @@ func _refresh_edited_card() -> void:
 		rebuild()
 		return
 
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	HenFlowGraphBuilder.refresh_parts(global.SAVE_DATA if global else null, _editing_card.node)
+
 	if _editing_card.refresh_content():
-		rebuild()
+		_rebuild_anchored(_editing_card)
 		return
 
 	_rebuild_hover_cache()
+
+
+# a value that changes the card's width re-lays the whole graph, and the picture
+# sliding under a still cursor reads as the edit having landed somewhere else
+func _rebuild_anchored(_card: HenFlowNodeCard) -> void:
+	var action: HenSaveAction = _card.node.action
+	var id: String = str(action.id) if action else ''
+	var before: Vector2 = _world_of(_card)
+
+	rebuild()
+
+	var after: Variant = _cards_by_action.get(id)
+
+	if not after or before == Vector2.INF:
+		return
+
+	var delta: Vector2 = _world_of(after) - before
+	var cam: HenCam = _cam()
+
+	if delta == Vector2.ZERO or not cam:
+		return
+
+	# both, or the lerp target pulls the graph back to where it just moved
+	var shift: Vector2 = delta * cam.transform.x.x
+
+	cam.transform.origin -= shift
+	cam.pos -= shift
+
+
+func _world_of(_card: HenFlowNodeCard) -> Vector2:
+	for item: Dictionary in _hover_items:
+		if item.get('card') == _card:
+			return (item.rect as Rect2).position
+
+	return Vector2.INF
 
 
 # every text-editable chip of the card, in reading order: the tab order. the card

@@ -42,6 +42,10 @@ func _show_custom_categories(_list: Array) -> void:
 
 
 func _search(_text: String) -> void:
+	if is_action_mode():
+		_search_actions(_text)
+		return
+
 	if _text.is_empty():
 		return
 
@@ -50,6 +54,94 @@ func _search(_text: String) -> void:
 	var type: StringName = config.get(&'type', &'')
 
 	api.on_search_change(_text, io_type, type)
+
+
+# --- actions ---
+
+func is_action_mode() -> bool:
+	return (config.get(&'on_pick', Callable()) as Callable).is_valid()
+
+
+# 253 macros filtered in memory: the api search is threaded because the native
+# class list is huge, and paying for a thread here would only add a frame
+func _search_actions(_text: String) -> void:
+	var query: String = _text.strip_edges().to_lower()
+
+	if query.is_empty():
+		_open_action_categories()
+		return
+
+	var leaves: Array = []
+
+	for macro: HenSaveMacro in HenActionPool.producers_for(str(config.get(&'type', ''))):
+		if HenSearch.score_only(query, macro.name.to_lower()) > 0:
+			leaves.append(_action_leaf(macro))
+
+	set_data.call_deferred(1, leaves)
+
+
+func _open_action_categories() -> void:
+	# once per popup: a macro edited meanwhile must not be served from the cache
+	HenActionPool.invalidate()
+
+	var groups: Dictionary = {}
+
+	for macro: HenSaveMacro in HenActionPool.producers_for(str(config.get(&'type', ''))):
+		var folder: String = macro.category if not macro.category.is_empty() else 'user'
+
+		if not groups.has(folder):
+			groups[folder] = []
+
+		(groups[folder] as Array).append(_action_leaf(macro))
+
+	var entries: Array = []
+
+	for folder: String in HenActionCategories.sorted(groups.keys()):
+		var data: Dictionary = HenActionCategories.get_data(folder)
+
+		entries.append({
+			name = str(data.name),
+			icon = str(data.icon),
+			color = Color(str(data.color)),
+			method_list = groups[folder]
+		})
+
+	set_data.call_deferred(0, [{_class_name = 'Actions', categories = entries}])
+	set_data.call_deferred(1, [])
+
+
+# force_valid is what makes the row select instead of drilling in, and
+# recursive_props is what opens the third column: an action with two usable
+# outputs asks which one feeds the input instead of silently taking the first
+func _action_leaf(_macro: HenSaveMacro) -> Dictionary:
+	var outputs: Array = HenActionPool.outputs_for(_macro, str(config.get(&'type', '')))
+
+	if outputs.size() > 1:
+		var branches: Array = []
+
+		for output: Dictionary in outputs:
+			branches.append({
+				name = str(output.name),
+				_class_name = str(output.type),
+				force_valid = true,
+				action_macro = _macro,
+				output_id = str(output.id)
+			})
+
+		return {
+			name = _macro.name,
+			_class_name = _macro.category,
+			action_macro = _macro,
+			recursive_props = branches
+		}
+
+	return {
+		name = _macro.name,
+		_class_name = _macro.category,
+		force_valid = true,
+		action_macro = _macro,
+		output_id = str(outputs[0].id) if not outputs.is_empty() else ''
+	}
 
 func _on_search_result(_list: Array) -> void:
 	set_data.call_deferred(1, _list)
@@ -64,6 +156,10 @@ func _on_list_request(_list: Array, _list_id: int = 1) -> void:
 
 
 func _open_categories() -> void:
+	if is_action_mode():
+		call_deferred(&'_open_action_categories')
+		return
+
 	var json: JSON = load('res://addons/hengo/resources/json/api_categories.json')
 	categories = json.data
 	call_deferred("update")
@@ -344,6 +440,15 @@ func get_class_parent_recursively(_class_name: StringName) -> Array[Dictionary]:
 
 
 func _on_select(_data: Dictionary) -> void:
+	if is_action_mode():
+		var macro: Variant = _data.get(&'action_macro')
+
+		if macro is HenSaveMacro:
+			(config.on_pick as Callable).call(macro as HenSaveMacro, StringName(str(_data.get(&'output_id', ''))))
+			(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
+
+		return
+
 	var data: Dictionary = _data.get(&'data', {}).duplicate()
 
 	if data.is_empty():

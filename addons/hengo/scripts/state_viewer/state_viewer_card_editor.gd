@@ -45,30 +45,103 @@ func _reject() -> bool:
 	return true
 
 
-# a chip carries the whole edit: a typed literal opens the value popup, a fixed
-# option set its picker, and every other source falls back to the inspector
+# a chip carries the whole edit: the slot type picks the small editor, a fixed
+# option set gets its picker, and every other source falls back to the inspector.
+# returns whether a popup was left open, which is what tells the caller a commit
+# is still coming
 # the ring provider re-reads the chip rects, which move as soon as a committed
 # value changes the width of its line
-func chip_pressed(_part: Dictionary, _chip_index: int, _rect: Rect2, _ring_provider: Callable) -> void:
+func chip_pressed(_part: Dictionary, _chip_index: int, _rect: Rect2, _ring_provider: Callable) -> bool:
 	if _reject():
-		return
+		return false
 
 	if bool(_part.get('editable', false)):
 		_provider = _ring_provider
 		_ring = _provider.call()
 		_ring_index = _index_of(_chip_index)
 		_open_value_popup(_part, _rect)
-		return
+		return true
 
 	if not (_part.get('options', []) as Array).is_empty():
 		_open_option_picker(_part, _rect)
-		return
+		return true
+
+	if StringName(str(_part.get('editor', &''))) == HenActionValueEditors.BOOL:
+		_toggle_bool(_part)
+		return false
 
 	var slot: Dictionary = _part.get('slot', {})
 	var owner: Variant = slot.get('action')
 
 	if owner is HenSaveAction:
-		edit_action(owner as HenSaveAction, _rect, bool(slot.get('inline', false)))
+		open_slot(owner as HenSaveAction, slot, _rect)
+
+	return true
+
+
+# a bound value, an expression or a typed editor the chip cannot hold: all of them
+# are one row of the inspector, so the popup shows that row and nothing else
+func open_slot(_action: HenSaveAction, _slot: Dictionary, _rect: Rect2) -> void:
+	if _reject() or _slot.is_empty():
+		return
+
+	var param: HenSaveParam = _slot.get('param')
+
+	is_editing = true
+
+	HenInspector.edit_slot(
+		_action,
+		_slot,
+		param.name if param else HenActionsPanel.display_name(_action),
+		_anchored_opts(_rect, Vector2(300, 0))
+	)
+
+
+# the pin is where a value comes from, so it offers the actions that produce one
+# of its type. the same picker the inspector's producer button opens
+func open_producer(_slot: Dictionary, _rect: Rect2) -> void:
+	if _reject() or _slot.is_empty():
+		return
+
+	var param: HenSaveParam = _slot.get('param')
+
+	if not param:
+		return
+
+	is_editing = true
+
+	var search: HenCodeSearch = HenCodeSearch.load(Vector2.ZERO, {
+		type = StringName(str(_slot.get('type', param.type))),
+		io_type = &'in',
+		on_pick = func(_macro: HenSaveMacro, _output: StringName) -> void:
+			HenActionsPanel.set_producer(_slot, _macro, _output)
+			(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+	})
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(
+		search, _anchored_opts(_rect, Vector2(640, 420))
+	)
+
+
+# a checkbox behind a popup is one click too many, so the chip is the checkbox
+func _toggle_bool(_part: Dictionary) -> void:
+	var param: HenSaveParam = (_part.get('slot', {}) as Dictionary).get('param')
+
+	if not param:
+		return
+
+	param.default_value = not bool(param.default_value)
+	changed.emit()
+
+
+func _anchored_opts(_rect: Rect2, _min_size: Vector2) -> Dictionary:
+	return {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_rect = _rect,
+		side = SIDE_TOP,
+		blur = false,
+		min_size = _min_size
+	}
 
 
 func edit_action(_action: HenSaveAction, _rect: Rect2, _inline: bool) -> void:

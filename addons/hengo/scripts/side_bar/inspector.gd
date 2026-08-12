@@ -127,6 +127,41 @@ static func edit_resource(_res: Resource, _title: String = '', _actions: Array[D
 	inspector.grab_focus()
 
 
+# one input of an action, with the same row the full inspector renders for it:
+# the typed editor plus the bind, expression and producer buttons, and nothing else
+static func edit_slot(_action: HenSaveAction, _slot: Dictionary, _title: String, _popup_opts: Dictionary = {}) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var inspector: HenInspector = (load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
+
+	inspector.make_flat()
+	inspector.edit_one_slot(_action, _slot, _title)
+
+	global.CURRENT_INSPECTOR = inspector
+	inspector.grab_focus()
+
+
+func edit_one_slot(_action: HenSaveAction, _slot: Dictionary, _title: String) -> void:
+	resource = _action
+	inspector_title = _title
+	inspector_actions = []
+	_slot_idx = 0
+
+	_migrate_name_bindings(_action)
+	_update_header()
+
+	for child: Node in vbox.get_children():
+		child.queue_free()
+
+	var slot: Dictionary = _slot.duplicate()
+
+	slot.macro_params = _get_macro_params(_action.macro_id)
+	slot.indent = 0
+
+	_create_value_slot(slot)
+
+
 func edit(_res: Resource, _title: String = '', _actions: Array[Dictionary] = []) -> void:
 	resource = _res
 	inspector_title = _title
@@ -694,6 +729,8 @@ func _open_producer_palette(slot: Dictionary) -> void:
 	var ptype: String = _effective_slot_type(slot, slot.param)
 	var search: HenActionsSearch = load('res://addons/hengo/scenes/actions_search.tscn').instantiate()
 
+	search.setup_producer_picker(ptype, _on_producer_picked.bind(slot))
+
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(search, {
 		layout = HenGeneralPopup.Layout.ANCHORED,
 		anchor_to = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_PANEL,
@@ -701,19 +738,9 @@ func _open_producer_palette(slot: Dictionary) -> void:
 		min_size = Vector2(320, 360)
 	})
 
-	search.setup_producer_picker(ptype, _on_producer_picked.bind(slot))
-
 
 func _on_producer_picked(macro: HenSaveMacro, slot: Dictionary) -> void:
-	var child: HenSaveAction = HenSaveAction.create(macro)
-	var output: StringName = macro.outputs[0].id if not macro.outputs.is_empty() else &''
-
-	(slot.action_store as Dictionary)[slot.action_key] = {action = child, output = output}
-
-	(slot.bind_store as Dictionary).erase(slot.bind_key)
-	var expr_store: Variant = slot.get('expr_store')
-	if expr_store != null:
-		(expr_store as Dictionary).erase(slot.get('expr_key', ''))
+	HenActionsPanel.set_producer(slot, macro)
 
 	inline_changed.emit()
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()

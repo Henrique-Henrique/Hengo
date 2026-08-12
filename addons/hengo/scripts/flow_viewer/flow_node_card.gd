@@ -46,7 +46,7 @@ const ICON_GAP: float = 8.0
 const TITLE_SIZE: int = 16
 const LABEL_SIZE: int = 14
 const FLOW_SIZE: int = 14
-const SLOT_DOT: float = 13.0
+const SLOT_DOT: float = 17.0
 const SLOT_GAP: float = 9.0
 const ROW_GAP: float = 9.0
 const COLUMN_GAP: float = 26.0
@@ -55,11 +55,15 @@ const FLOW_PAD_V: float = 7.0
 const SEPARATOR_WIDTH: float = 2.0
 const CHIP_CORNER: int = 4
 const CHIP_PAD_H: float = 6.0
+const SWATCH_CORNER: int = 3
+const SWATCH_GAP: float = 5.0
+const SWATCH_BORDER: Color = Color(0, 0, 0, 0.45)
 const MIN_WIDTH: float = 150.0
 const MIN_FLOW_CELL: float = 62.0
 const BODY_PAD: float = HenFlowFormatter.BODY_PAD
 
 static var _style_cache: Dictionary = {}
+static var _icon_cache: Dictionary = {}
 
 var node: HenFlowGraphTypes.FlowNode
 
@@ -228,6 +232,9 @@ func compute_size() -> Vector2:
 			var pin: HenFlowGraphTypes.FlowPin = inputs[i]
 			var chip: String = _chip_text(pin)
 			var chip_w: float = _painter.measure(chip, LABEL_SIZE).x + CHIP_PAD_H * 2.0 if not chip.is_empty() else 0.0
+
+			if chip_w > 0.0 and pin.part.get('swatch') is Color:
+				chip_w += _painter.line_height(LABEL_SIZE) - 2.0 + SWATCH_GAP
 
 			entry.input = pin
 			entry.label_w = _painter.measure(pin.label, LABEL_SIZE).x
@@ -475,34 +482,64 @@ func _emit_input(_entry: Dictionary, _centre: float) -> void:
 	var pin: HenFlowGraphTypes.FlowPin = _entry.input
 	var color: Color = _pin_color(pin)
 
-	_painter.add_style(_flat(color, int(SLOT_DOT * 0.5)), pin.rect)
+	_emit_slot(pin, color)
 
 	var label_h: float = _painter.line_height(LABEL_SIZE)
 	var x: float = PAD + SLOT_DOT + SLOT_GAP
 
 	_painter.add_text(pin.label, LABEL_SIZE, Vector2(x, _centre - label_h * 0.5), _label_color())
 
-	if _entry.chip_w <= 0.0:
+	if _entry.chip_w > 0.0:
+		var box: Rect2 = Rect2(
+			Vector2(x + _entry.label_w + SLOT_GAP, _centre - (label_h + 4.0) * 0.5),
+			Vector2(_entry.chip_w, label_h + 4.0)
+		)
+		var text_x: float = box.position.x + CHIP_PAD_H
+
+		_painter.add_style(_flat(Color(color, 0.16), CHIP_CORNER), box)
+
+		var swatch: Variant = pin.part.get('swatch')
+
+		if swatch is Color:
+			var side: float = label_h - 2.0
+
+			_painter.add_style(
+				_flat(swatch, SWATCH_CORNER, SWATCH_BORDER),
+				Rect2(Vector2(text_x, _centre - side * 0.5), Vector2(side, side))
+			)
+
+			text_x += side + SWATCH_GAP
+
+		_painter.add_text(_entry.chip, LABEL_SIZE, Vector2(text_x, _centre - label_h * 0.5), color)
+
+		# the editor addresses a chip by its place in the card, not by the pin
+		_hit(box, &'chip', {pin = pin, part = pin.part, index = _chip_seq})
+		_chip_seq += 1
+
+	_emit_pin_hit(pin, _entry, _centre)
+
+
+# the dot is 13px and unclickable once the cam zooms out, so the target is the dot
+# and its name, up to the chip. after the chip, which wins wherever the two meet
+func _emit_pin_hit(_pin: HenFlowGraphTypes.FlowPin, _entry: Dictionary, _centre: float) -> void:
+	# a pin already fed by a producer has a wire, and its source is that card
+	if _pin.part.is_empty():
 		return
 
-	var box: Rect2 = Rect2(
-		Vector2(x + _entry.label_w + SLOT_GAP, _centre - (label_h + 4.0) * 0.5),
-		Vector2(_entry.chip_w, label_h + 4.0)
+	var width: float = PAD + SLOT_DOT + SLOT_GAP + _entry.label_w + SLOT_GAP * 0.5
+
+	_hit(
+		Rect2(Vector2(0.0, _centre - _entry.height * 0.5), Vector2(width, _entry.height)),
+		&'pin',
+		{pin = _pin, part = _pin.part}
 	)
-
-	_painter.add_style(_flat(Color(color, 0.16), CHIP_CORNER), box)
-	_painter.add_text(_entry.chip, LABEL_SIZE, Vector2(box.position.x + CHIP_PAD_H, _centre - label_h * 0.5), color)
-
-	# the editor addresses a chip by its place in the card, not by the pin
-	_hit(box, &'chip', {pin = pin, part = pin.part, index = _chip_seq})
-	_chip_seq += 1
 
 
 func _emit_output(_entry: Dictionary, _centre: float, _width: float) -> void:
 	var pin: HenFlowGraphTypes.FlowPin = _entry.output
 	var label_h: float = _painter.line_height(LABEL_SIZE)
 
-	_painter.add_style(_flat(_pin_color(pin), int(SLOT_DOT * 0.5)), pin.rect)
+	_emit_slot(pin, _pin_color(pin))
 
 	_painter.add_text(
 		pin.label,
@@ -623,6 +660,36 @@ func _rule(_y: float, _width: float) -> void:
 
 func _rule_color() -> Color:
 	return BASE_BG.lerp(accent(), RULE_TINT)
+
+
+# the type icon says more than a coloured dot, and the editor theme already has
+# one per type. it needs the editor, so a plain dot stands in outside it
+func _emit_slot(_pin: HenFlowGraphTypes.FlowPin, _color: Color) -> void:
+	var icon: Texture2D = _slot_icon(_pin)
+
+	if icon:
+		_painter.add_texture(icon, _pin.rect, _color)
+		return
+
+	_painter.add_style(_flat(_color, int(SLOT_DOT * 0.5)), _pin.rect)
+
+
+func _slot_icon(_pin: HenFlowGraphTypes.FlowPin) -> Texture2D:
+	# outside the editor EditorInterface is not an object at all, so even asking it
+	# what it can do is a runtime error
+	if not Engine.is_editor_hint():
+		return null
+
+	var type: String = str((_pin.part.get('slot', {}) as Dictionary).get('type', ''))
+
+	if type.is_empty():
+		return null
+
+	# apply_size re-emits on every hover, and a full graph has over a thousand pins
+	if not _icon_cache.has(type):
+		_icon_cache[type] = HenUtils.get_icon_texture(StringName(type))
+
+	return _icon_cache[type]
 
 
 func _pin_color(_pin: HenFlowGraphTypes.FlowPin) -> Color:

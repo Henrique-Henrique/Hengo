@@ -1124,7 +1124,8 @@ func test_preview_labels_multiple_inputs() -> void:
 	var action: HenSaveAction = _add_action(_register(FIX_TYPED), &'update')
 	action.inputs[1].default_value = 45.0
 
-	assert_str(HenActionsPanel.value_preview(action)).is_equal('Target: — · Value: 45.0')
+	# a whole number drops its decimals: a chip is a few characters wide
+	assert_str(HenActionsPanel.value_preview(action)).is_equal('Target: — · Value: 45')
 
 
 # the chip kind is what carries icon+color, so it must tell the sources apart

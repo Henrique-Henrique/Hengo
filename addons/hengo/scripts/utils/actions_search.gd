@@ -19,8 +19,6 @@ var _parent: HenSaveAction
 
 var _on_pick: Callable = Callable()
 var _producer_type: String = ''
-var _pool_cache: Array[HenSaveMacro] = []
-var _pool_built: bool = false
 
 
 func setup(_id: StringName, _target_phase: StringName = &'', _replaced: HenSaveAction = null, _parent_action: HenSaveAction = null) -> void:
@@ -30,9 +28,16 @@ func setup(_id: StringName, _target_phase: StringName = &'', _replaced: HenSaveA
 	_parent = _parent_action
 
 
+# _ready runs inside the add_child of show_content, so a caller that configures
+# the picker afterwards gets a list that was populated with no filter at all
 func setup_producer_picker(_type: String, _pick: Callable) -> void:
 	_producer_type = _type
 	_on_pick = _pick
+
+	HenActionPool.invalidate()
+
+	if is_node_ready():
+		_populate(search_field.text if is_instance_valid(search_field) else '')
 
 
 func _ready() -> void:
@@ -118,53 +123,7 @@ func _build_row(_macro: HenSaveMacro) -> HenSideBarRow:
 # native plugin actions first, then the user's custom macros, both filtered by
 # the class the current script extends
 func _get_pool() -> Array[HenSaveMacro]:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var script_class: StringName = global.SAVE_DATA.identity.type if global.SAVE_DATA and global.SAVE_DATA.identity else &''
-	var all: Array[HenSaveMacro] = []
-	all.append_array(global.action_macros)
-	all.append_array(global.script_macros)
-
-	var pool: Array[HenSaveMacro] = []
-
-	for macro: HenSaveMacro in all:
-		if macro.serves_class(script_class):
-			pool.append(macro)
-
-	if _producer_type.is_empty():
-		return pool
-
-	# the filter loads every macro instance, so it only runs once
-	if _pool_built:
-		return _pool_cache
-
-	var producers: Array[HenSaveMacro] = []
-
-	for macro: HenSaveMacro in pool:
-		if _producer_matches(macro):
-			producers.append(macro)
-
-	_pool_cache = producers
-	_pool_built = true
-
-	return producers
-
-
-func _producer_matches(_macro: HenSaveMacro) -> bool:
-	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(_macro)
-
-	if not instance or not HenGeneratorAction.is_inlinable(instance):
-		return false
-
-	for output: Dictionary in instance.get_outputs():
-		if _output_type_ok(str(output.get('type', 'Variant'))):
-			return true
-
-	return false
-
-
-func _output_type_ok(_out_type: String) -> bool:
-	return _producer_type.is_empty() or _producer_type == 'Variant' or _out_type == 'Variant' \
-		or HenUtils.is_type_relation_valid(_producer_type, StringName(_out_type))
+	return HenActionPool.producers_for(_producer_type)
 
 
 func _on_result_pressed(_meta: Variant, _mouse_button_index: int) -> void:

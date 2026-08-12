@@ -155,7 +155,9 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 		part.label = param.name if show_names else ''
 		part.options = declared.options if not declared.options.is_empty() else param.options
 		part.slot = input_slot(_action, param, declared, params)
-		part.editable = part.kind == &'literal' and not needs_bind and (part.options as Array).is_empty() and is_text_type(str(part.slot.type))
+		part.editor = _editor_kind(part, needs_bind)
+		# only the text editor joins the tab ring: tabbing into a colour wheel is noise
+		part.editable = part.editor == HenActionValueEditors.TEXT
 
 		parts.append(part)
 
@@ -214,6 +216,37 @@ static func slot_type(_action: HenSaveAction, _declared: HenSaveParam, _param: H
 	var resolved: String = HenUtils.get_bound_source_type(_save_data(), bind)
 
 	return resolved if not resolved.is_empty() else str(_param.type)
+
+
+# feeds an input with a new producer, dropping whatever fed it before: an input
+# has one source, so the binding and the expression cannot survive it
+static func set_producer(_slot: Dictionary, _macro: HenSaveMacro, _output: StringName = &'') -> HenSaveAction:
+	var child: HenSaveAction = HenSaveAction.create(_macro)
+	var output: StringName = _output
+
+	if output.is_empty():
+		output = _macro.outputs[0].id if not _macro.outputs.is_empty() else &''
+
+	(_slot.action_store as Dictionary)[_slot.action_key] = {
+		action = child,
+		output = output
+	}
+
+	(_slot.bind_store as Dictionary).erase(_slot.bind_key)
+
+	var expr_store: Variant = _slot.get('expr_store')
+
+	if expr_store != null:
+		(expr_store as Dictionary).erase(_slot.get('expr_key', ''))
+
+	return child
+
+
+static func _editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:
+	if _part.kind != &'literal' or _needs_bind or not (_part.options as Array).is_empty():
+		return &''
+
+	return HenActionValueEditors.kind_for(str((_part.slot as Dictionary).type))
 
 
 # a type that reads and round-trips as a single line of text; anything composite
@@ -371,6 +404,10 @@ static func _slot_part(_action: HenSaveAction, _key: String, _value: Variant, _r
 	if _raw:
 		return {kind = &'literal', value = str(_value) if _value != null else '—'}
 
+	# the card draws a swatch for it: nobody reads a colour as four numbers
+	if _value is Color:
+		return {kind = &'literal', value = format_value(_value), swatch = _value}
+
 	return {kind = &'literal', value = format_value(_value)}
 
 
@@ -514,9 +551,37 @@ static func format_value(_value: Variant) -> String:
 		return "'" + str(_value) + "'"
 
 	if _value is float:
-		return str(snappedf(_value as float, 0.001))
+		return _number(_value)
+
+	if _value is Color:
+		return '#' + (_value as Color).to_html(false)
+
+	if _value is Vector2:
+		return _number((_value as Vector2).x) + ', ' + _number((_value as Vector2).y)
+
+	if _value is Vector3:
+		var vec: Vector3 = _value
+		return _number(vec.x) + ', ' + _number(vec.y) + ', ' + _number(vec.z)
+
+	if _value is Vector2i:
+		return str((_value as Vector2i).x) + ', ' + str((_value as Vector2i).y)
+
+	if _value is Vector3i:
+		var vec: Vector3i = _value
+		return str(vec.x) + ', ' + str(vec.y) + ', ' + str(vec.z)
 
 	return str(_value)
+
+
+# a chip is a few characters wide, so a trailing .0 costs a third of the room it
+# has and says nothing
+static func _number(_value: float) -> String:
+	var snapped: float = snappedf(_value, 0.001)
+
+	if is_equal_approx(snapped, roundf(snapped)):
+		return str(int(snapped))
+
+	return str(snapped)
 
 
 # pre-binding actions stored null, so the macro default is what the inspector shows
