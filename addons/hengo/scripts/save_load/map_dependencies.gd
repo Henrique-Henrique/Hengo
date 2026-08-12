@@ -24,34 +24,6 @@ func start_map() -> void:
 	var end: int = Time.get_ticks_usec()
 
 	print('Project mapped in ', (end - start) / 1000., 'ms')
-	get_real_ast_size()
-
-
-# this is a test, I don't know if its works properly
-func get_real_ast_size() -> void:
-	var total_bytes: int = 0
-	
-	# loop through all projects in the dictionary
-	for id: StringName in ast_list:
-		var project: ProjectAST = ast_list[id]
-		
-		var all_lists: Array = [
-			project.variables,
-			project.functions,
-			project.signals,
-			project.signals_callback,
-			project.macros
-		]
-		
-		for list: Array in all_lists:
-			for res: Resource in list:
-				if res:
-					# duplicate to detach from disk and force data serialization
-					var temp_res: Resource = res.duplicate(true)
-					temp_res.resource_path = ''
-					total_bytes += var_to_bytes(temp_res).size()
-
-	print('Real Data Payload: ', snappedf(total_bytes / 1024.0, 0.01), ' KB')
 
 
 # iterates through all sidebar types to load resources into ast

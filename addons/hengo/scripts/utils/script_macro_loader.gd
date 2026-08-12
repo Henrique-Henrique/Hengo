@@ -6,6 +6,55 @@ const NATIVE_ACTION_PATH: String = 'res://addons/hengo/actions'
 
 # path -> { mtime: int, id: StringName, inputs: Array, outputs: Array, flow_inputs: Array, flow_outputs: Array }
 static var _cache: Dictionary = {}
+# the recipes survive an editor restart here: cold, reading them back costs a file
+# read against loading and instantiating every action script
+const DISK_CACHE: String = 'user://hengo_macro_cache.txt'
+# bump to throw every recipe away when the shape above changes
+const DISK_CACHE_VERSION: int = 1
+static var _disk_loaded: bool = false
+static var _disk_dirty: bool = false
+
+
+# a recipe is only reused while the file it came from is untouched, so a stale
+# entry cannot outlive an edit
+static func _load_disk_cache() -> void:
+	if _disk_loaded:
+		return
+
+	_disk_loaded = true
+
+	var file: FileAccess = FileAccess.open(DISK_CACHE, FileAccess.READ)
+
+	if not file:
+		return
+
+	var stored: Variant = str_to_var(file.get_as_text())
+
+	file.close()
+
+	if not stored is Dictionary or int((stored as Dictionary).get('version', -1)) != DISK_CACHE_VERSION:
+		return
+
+	for path: Variant in (stored as Dictionary).get('recipes', {}):
+		var recipe: Variant = (stored.recipes as Dictionary)[path]
+
+		if recipe is Dictionary and FileAccess.file_exists(str(path)) 			and FileAccess.get_modified_time(str(path)) == int((recipe as Dictionary).get('mtime', -1)):
+			_cache[str(path)] = recipe
+
+
+static func _save_disk_cache() -> void:
+	if not _disk_dirty:
+		return
+
+	_disk_dirty = false
+
+	var file: FileAccess = FileAccess.open(DISK_CACHE, FileAccess.WRITE)
+
+	if not file:
+		return
+
+	file.store_string(var_to_str({version = DISK_CACHE_VERSION, recipes = _cache}))
+	file.close()
 
 
 static func load_script_macros() -> void:
@@ -14,9 +63,12 @@ static func load_script_macros() -> void:
 	if not global.SAVE_DATA:
 		return
 
+	_load_disk_cache()
+
 	global.script_macros.clear()
 	HenActionsPanel.invalidate_macro_index()
 	_scan_dir(MACRO_PATH, global, global.script_macros, true)
+	_save_disk_cache()
 
 
 # scans the plugin-native action definitions into a separate pool
@@ -26,9 +78,12 @@ static func load_native_actions() -> void:
 	if not global.SAVE_DATA:
 		return
 
+	_load_disk_cache()
+
 	global.action_macros.clear()
 	HenActionsPanel.invalidate_macro_index()
 	_scan_dir(NATIVE_ACTION_PATH, global, global.action_macros, false)
+	_save_disk_cache()
 
 
 static func _scan_dir(base_path: String, global: HenGlobal, target: Array[HenSaveMacro], create_if_missing: bool) -> void:
@@ -44,6 +99,7 @@ static func _scan_dir(base_path: String, global: HenGlobal, target: Array[HenSav
 	for cached_path: String in _cache.keys():
 		if cached_path.begins_with(base_path) and not seen_paths.has(cached_path):
 			_cache.erase(cached_path)
+			_disk_dirty = true
 
 
 # walks a macro directory; a sub-directory name becomes the category of the
@@ -98,6 +154,7 @@ static func _load_macro_script(path: String, global: HenGlobal, target: Array[He
 			has_body = instance.get_has_body(),
 		}
 		_cache[path] = recipe
+		_disk_dirty = true
 
 	var macro: HenSaveMacro = HenSaveMacro.create()
 	# human name: the macro's own, else the file name capitalized (set_value -> "Set Value")
