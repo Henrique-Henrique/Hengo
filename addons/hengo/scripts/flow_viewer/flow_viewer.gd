@@ -61,7 +61,11 @@ var _last_cull_zoom: float = -1.0
 var _flashes: Dictionary = {}
 # action id -> HenFlowNodeCard, resolved once per layout
 var _cards_by_action: Dictionary = {}
+# action id -> the state that owns it, which is the unit the history snapshots
+var _state_by_action: Dictionary = {}
 var _running_state: String = ''
+var _history: HenFlowHistory = HenFlowHistory.new()
+var _history_script: String = ''
 
 
 func _ready() -> void:
@@ -117,6 +121,10 @@ func _on_popup_closed() -> void:
 
 	if general_popup and general_popup.has_open_popups():
 		return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	_history.commit(global.SAVE_DATA if global else null, 'Edit Action')
 
 	if _rebuild_pending:
 		_rebuild_pending = false
@@ -361,6 +369,13 @@ func rebuild() -> void:
 		return
 
 	var save_data: HenSaveData = global.SAVE_DATA
+	var script_id: String = String(save_data.identity.id) if save_data.identity else ''
+
+	# an entry restores a list into the script it was taken from, so it means
+	# nothing once another script is on screen
+	if script_id != _history_script:
+		_history_script = script_id
+		_history.clear()
 
 	_clear()
 	_build_states(save_data)
@@ -375,6 +390,7 @@ func _clear() -> void:
 	_frames.clear()
 	_hover_items.clear()
 	_cards_by_action.clear()
+	_state_by_action.clear()
 	_flashes.clear()
 	_last_cull_origin = Vector2.INF
 	_hovered_card = null
@@ -621,6 +637,7 @@ func _script_name() -> String:
 func _rebuild_hover_cache() -> void:
 	_hover_items.clear()
 	_cards_by_action.clear()
+	_state_by_action.clear()
 
 	for node: HenStateViewerGraphTypes.DirectedGraphNode in _frames:
 		var frame: HenFlowStateFrame = _frames[node]
@@ -649,6 +666,7 @@ func _rebuild_hover_cache() -> void:
 
 			if card.node.action:
 				_cards_by_action[str(card.node.action.id)] = card
+				_state_by_action[str(card.node.action.id)] = (entry.state as HenSaveState).id
 
 	# a loop card is grown to hold its body, so the body cards are strictly smaller
 	# and sorting by area is what orders container before content
@@ -760,7 +778,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 	var key: InputEventKey = event
 
-	if not key.pressed or key.keycode != KEY_ESCAPE or _selected_action.is_empty():
+	if not key.pressed:
 		return
 
 	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup') if Engine.has_singleton(&'GeneralPopup') else null
@@ -768,8 +786,90 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if general_popup and general_popup.has_open_popups():
 		return
 
-	_clear_selection()
+	if not _handle_shortcut(key):
+		return
+
 	get_viewport().set_input_as_handled()
+
+
+func _handle_shortcut(_key: InputEventKey) -> bool:
+	match _key.keycode:
+		KEY_ESCAPE:
+			if _selected_action.is_empty():
+				return false
+
+			_clear_selection()
+			return true
+		KEY_DELETE:
+			return _delete_selected()
+		KEY_Z:
+			if not _key.ctrl_pressed:
+				return false
+
+			return _redo() if _key.shift_pressed else _undo()
+		KEY_Y:
+			return _redo() if _key.ctrl_pressed else false
+
+	return false
+
+
+# --- history ---
+
+func _undo() -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if not global or not _history.undo(global.SAVE_DATA):
+		return false
+
+	_notify_structural()
+
+	return true
+
+
+func _redo() -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if not global or not _history.redo(global.SAVE_DATA):
+		return false
+
+	_notify_structural()
+
+	return true
+
+
+func _delete_selected() -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+	var action: HenSaveAction = selected_action()
+
+	if not global or not global.SAVE_DATA or not action:
+		return false
+
+	var state_id: StringName = _state_by_action.get(_selected_action, &'')
+
+	if state_id.is_empty():
+		return false
+
+	_history.begin(global.SAVE_DATA, state_id)
+
+	if not global.SAVE_DATA.remove_action_anywhere(state_id, action):
+		_history.abort()
+		return false
+
+	_history.commit(global.SAVE_DATA, 'Delete Action')
+	_clear_selection()
+	_notify_structural()
+
+	return true
+
+
+# the same signal the card editor fires, so codegen and the save flow see the edit
+func _notify_structural() -> void:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus') if Engine.has_singleton(&'SignalBus') else null
+
+	if signal_bus:
+		signal_bus.request_structural_update.emit()
+	else:
+		rebuild()
 
 
 # returns whether the click landed on something, so the caller can tell a miss
@@ -939,8 +1039,10 @@ func _editor_for(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 		_editor.changed.connect(_refresh_edited_card)
 
 	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+	var state_id: StringName = StringName(str(_node.data.get('state_id', '')))
 
-	_editor.target(global.SAVE_DATA if global else null, StringName(str(_node.data.get('state_id', ''))))
+	_editor.target(global.SAVE_DATA if global else null, state_id)
+	_history.begin(global.SAVE_DATA if global else null, state_id)
 
 
 # a value edit usually leaves the card the same size, and then nothing around it

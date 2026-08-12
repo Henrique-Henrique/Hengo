@@ -357,6 +357,49 @@ func remove_state_action(_state_id: StringName, _action: HenSaveAction) -> void:
 		state_actions.erase(_state_id)
 
 
+# an action can sit at the top of the list, inside a loop body or bound to an
+# input of another action, and only the first one has an entry in state_actions
+func remove_action_anywhere(_state_id: StringName, _action: HenSaveAction) -> bool:
+	if not state_actions.has(_state_id) or not _action:
+		return false
+
+	var list: Array = state_actions[_state_id]
+
+	if not _remove_action_from(list, _action):
+		return false
+
+	if list.is_empty():
+		state_actions.erase(_state_id)
+
+	return true
+
+
+func _remove_action_from(_list: Array, _target: HenSaveAction) -> bool:
+	for i: int in range(_list.size()):
+		if _list[i] == _target:
+			_list.remove_at(i)
+			return true
+
+		if _remove_action_inside(_list[i], _target):
+			return true
+
+	return false
+
+
+func _remove_action_inside(_action: HenSaveAction, _target: HenSaveAction) -> bool:
+	for key: Variant in _action.input_actions.keys():
+		var nested: HenSaveAction = (_action.input_actions[key] as Dictionary).get('action')
+
+		if nested == _target:
+			_action.input_actions.erase(key)
+			return true
+
+		if nested and _remove_action_inside(nested, _target):
+			return true
+
+	return _remove_action_from(_action.body_actions, _target)
+
+
 # inserts at a flat index; a negative or out of range index appends
 func insert_state_action(_state_id: StringName, _action: HenSaveAction, _index: int) -> void:
 	if not state_actions.has(_state_id):
