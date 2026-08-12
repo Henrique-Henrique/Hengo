@@ -897,6 +897,22 @@ func _editor_for_state(_state_id: StringName) -> void:
 	_editor.target(global.SAVE_DATA if global else null, _state_id)
 
 
+func _duplicate_selected() -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+	var action: HenSaveAction = selected_action()
+	var state_id: StringName = _state_by_action.get(_selected_action, &'')
+
+	if not global or not action or state_id.is_empty():
+		return false
+
+	_editor_for_state(state_id)
+	_history.begin(global.SAVE_DATA, [state_id])
+	_editor._duplicate_action(action)
+	_history.commit(global.SAVE_DATA, 'Duplicate Action')
+
+	return true
+
+
 func _delete_selected() -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 	var action: HenSaveAction = selected_action()
@@ -1073,7 +1089,19 @@ func _dispatch_click() -> bool:
 	if card.node.kind == &'transition' and _focus_state(card.node.title):
 		return true
 
-	if hit.kind == &'exec_out' and _focus_branch(card, hit.pin):
+	if hit.kind == &'exec_out' and card.node.action:
+		if _focus_branch(card, hit.pin):
+			return true
+
+		_editing_card = card
+		_editor_for(hit.node)
+		_editor.open_branch(
+			card.node.action,
+			str((hit.pin as HenFlowGraphTypes.FlowPin).id),
+			(hit.pin as HenFlowGraphTypes.FlowPin).label,
+			screen_rect(Rect2((hit.origin as Vector2) + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
+		)
+
 		return true
 
 	var action: HenSaveAction = card.node.action

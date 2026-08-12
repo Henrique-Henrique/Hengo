@@ -483,3 +483,20 @@ func test_a_cross_state_drop_is_undone_on_both_sides() -> void:
 	assert_bool(viewer._undo()).is_true()
 	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
 	assert_int(save_data.get_state_actions(other.id).size()).is_equal(1)
+
+
+func test_ctrl_d_duplicates_the_selected_action() -> void:
+	var actions: Array = _add(1)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._select_card(viewer._cards_by_action.get(str((actions[0] as HenSaveAction).id)))
+
+	assert_bool(viewer._duplicate_selected()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+
+	var copy: HenSaveAction = save_data.get_state_actions(state.id)[1]
+
+	assert_str(str(copy.id)).is_not_equal(str((actions[0] as HenSaveAction).id))
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)

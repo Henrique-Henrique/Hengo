@@ -67,6 +67,13 @@ const LIST: Array[Dictionary] = [
 	},
 	{
 		group = FLOW,
+		combo = ['Ctrl', 'D'],
+		title = 'Duplicate action',
+		description = 'Drops a copy of the selected action right below it, values and all.',
+		method = '_duplicate_selected'
+	},
+	{
+		group = FLOW,
 		combo = ['Esc'],
 		title = 'Clear selection',
 		description = 'Drops the selection without touching the graph.',

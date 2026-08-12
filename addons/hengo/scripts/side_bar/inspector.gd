@@ -142,6 +142,34 @@ static func edit_slot(_action: HenSaveAction, _slot: Dictionary, _title: String,
 	inspector.grab_focus()
 
 
+# one branch of an action, with the same row the full inspector renders for it:
+# the state picker, the label and the instance binding, and nothing else
+static func edit_branch(_action: HenSaveAction, _key: String, _title: String, _popup_opts: Dictionary = {}) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var inspector: HenInspector = (load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
+
+	inspector.make_flat()
+	inspector.edit_one_branch(_action, _key, _title)
+
+	global.CURRENT_INSPECTOR = inspector
+	inspector.grab_focus()
+
+
+func edit_one_branch(_action: HenSaveAction, _key: String, _title: String) -> void:
+	resource = _action
+	inspector_title = _title
+	inspector_actions = []
+
+	_update_header()
+
+	for child: Node in vbox.get_children():
+		child.queue_free()
+
+	_create_branch_row(_action, _key, _title)
+
+
 func edit_one_slot(_action: HenSaveAction, _slot: Dictionary, _title: String) -> void:
 	resource = _action
 	inspector_title = _title

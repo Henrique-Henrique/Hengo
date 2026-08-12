@@ -123,6 +123,17 @@ func open_producer(_slot: Dictionary, _rect: Rect2) -> void:
 	)
 
 
+# a branch with nowhere to go is drawn as a loose pin, so clicking it is how the
+# hole the graph is showing gets filled
+func open_branch(_action: HenSaveAction, _key: String, _title: String, _rect: Rect2) -> void:
+	if _reject():
+		return
+
+	is_editing = true
+
+	HenInspector.edit_branch(_action, _key, _title, _anchored_opts(_rect, Vector2(320, 0)))
+
+
 # a checkbox behind a popup is one click too many, so the chip is the checkbox
 func _toggle_bool(_part: Dictionary) -> void:
 	var param: HenSaveParam = (_part.get('slot', {}) as Dictionary).get('param')
