@@ -47,6 +47,10 @@ var _tooltip_action: String = ''
 var _editor: HenStateViewerCardEditor = null
 var _editing_card: HenFlowNodeCard = null
 var _click_press_pos: Vector2 = Vector2.ZERO
+var _context_press_pos: Vector2 = Vector2.ZERO
+# action id, not the card: a rebuild frees every card, and the selection has to
+# come back on the node the user picked
+var _selected_action: String = ''
 var _click_last_time: int = 0
 var _click_last_pos: Vector2 = Vector2.ZERO
 var _last_cull_origin: Vector2 = Vector2.INF
@@ -132,6 +136,7 @@ func _notification(what: int) -> void:
 	var showing: bool = is_visible_in_tree()
 
 	set_process(showing)
+	set_process_unhandled_key_input(showing)
 
 	if not showing:
 		_release_hover()
@@ -451,6 +456,7 @@ func _build_outer(_save_data: HenSaveData) -> void:
 	edges_overlay.update_edges(graph_root)
 	_rebuild_hover_cache()
 	_apply_running_state()
+	_apply_selection()
 
 
 # every state, not only the childless ones: a state that owns sub states is still
@@ -701,6 +707,16 @@ func _gui_input(event: InputEvent) -> void:
 
 	var button: InputEventMouseButton = event
 
+	# the cam pans with the right button too, so only a press that did not travel
+	# opens the menu
+	if button.button_index == MOUSE_BUTTON_RIGHT:
+		if button.pressed:
+			_context_press_pos = button.position
+		elif button.position.distance_to(_context_press_pos) <= CLICK_TOLERANCE:
+			_dispatch_context_click()
+
+		return
+
 	if button.button_index != MOUSE_BUTTON_LEFT:
 		return
 
@@ -719,6 +735,8 @@ func _gui_input(event: InputEvent) -> void:
 		_click_last_time = 0
 		return
 
+	_clear_selection()
+
 	var now: int = Time.get_ticks_msec()
 
 	# two clicks on the empty canvas open the panel full screen
@@ -734,6 +752,24 @@ func _gui_input(event: InputEvent) -> void:
 
 	_click_last_time = now
 	_click_last_pos = button.position
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not is_visible_in_tree() or not event is InputEventKey:
+		return
+
+	var key: InputEventKey = event
+
+	if not key.pressed or key.keycode != KEY_ESCAPE or _selected_action.is_empty():
+		return
+
+	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup') if Engine.has_singleton(&'GeneralPopup') else null
+
+	if general_popup and general_popup.has_open_popups():
+		return
+
+	_clear_selection()
+	get_viewport().set_input_as_handled()
 
 
 # returns whether the click landed on something, so the caller can tell a miss
@@ -765,18 +801,78 @@ func _dispatch_click() -> bool:
 	var origin: Vector2 = hit.origin
 	var rect: Rect2 = screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
 
-	_editing_card = card
-	_editor_for(hit.node)
-
 	if hit.kind == &'chip':
+		_editing_card = card
+		_editor_for(hit.node)
 		_editor.chip_pressed(hit.part, int(hit.index), rect, _chip_ring.bind(card, origin))
 		return true
+
+	_select_card(card)
+
+	return true
+
+
+# the action menu still lives in the inspector until the card grows its own
+func _dispatch_context_click() -> bool:
+	var hit: Dictionary = hit_under_mouse()
+
+	if hit.is_empty() or not hit.has('card'):
+		return false
+
+	var card: HenFlowNodeCard = hit.card
+	var action: HenSaveAction = card.node.action
+
+	if not action:
+		return false
+
+	_select_card(card)
+
+	var origin: Vector2 = hit.origin
+	var rect: Rect2 = screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
+
+	_editing_card = card
+	_editor_for(hit.node)
 
 	# a producer is not in the state's action list, so replace and delete would
 	# look there and miss it
 	_editor.edit_action(action, rect, card.node.kind == &'producer')
 
 	return true
+
+
+# --- selection ---
+
+func _select_card(_card: HenFlowNodeCard) -> void:
+	var action: HenSaveAction = _card.node.action
+
+	if not action:
+		_clear_selection()
+		return
+
+	_selected_action = str(action.id)
+	_apply_selection()
+
+
+func _clear_selection() -> void:
+	if _selected_action.is_empty():
+		return
+
+	_selected_action = ''
+	_apply_selection()
+
+
+func _apply_selection() -> void:
+	if not _selected_action.is_empty() and not _cards_by_action.has(_selected_action):
+		_selected_action = ''
+
+	for id: String in _cards_by_action:
+		(_cards_by_action[id] as HenFlowNodeCard).set_selected(id == _selected_action)
+
+
+func selected_action() -> HenSaveAction:
+	var card: Variant = _cards_by_action.get(_selected_action)
+
+	return card.node.action if card else null
 
 
 # --- navigation ---

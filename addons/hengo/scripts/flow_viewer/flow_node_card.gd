@@ -30,6 +30,11 @@ const RUN_COLOR: Color = HenActionVisuals.RUN_COLOR
 const RUN_SHADOW: Color = Color(0.39, 1.0, 0.57, 0.30)
 const RUN_BORDER_WIDTH: int = 2
 const RUN_SHADOW_SIZE: int = 10
+# neutral on purpose: the palette owns every hue, so selection reads by being the
+# only white outline on screen
+const SELECT_COLOR: Color = Color('#eaf0ff')
+const SELECT_BORDER_WIDTH: int = 2
+const SELECT_GROW: float = 3.0
 
 const CORNER: int = 8
 const PAD: float = 11.0
@@ -75,6 +80,7 @@ var _hover_kind: StringName = &''
 var _hover_ref: Variant = null
 var _chip_seq: int = 0
 var _running: bool = false
+var _selected: bool = false
 
 
 func setup(_host_control: Control, _node: HenFlowGraphTypes.FlowNode) -> void:
@@ -142,6 +148,22 @@ func set_running(_on: bool) -> bool:
 
 func is_running() -> bool:
 	return _running
+
+
+func set_selected(_on: bool) -> bool:
+	if _selected == _on:
+		return false
+
+	_selected = _on
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
+
+
+func is_selected() -> bool:
+	return _selected
 
 
 # holds the name readable while the cam zooms out, by counter-scaling instead of
@@ -301,6 +323,7 @@ func apply_size(_size: Vector2) -> void:
 	if _detail != Detail.FULL:
 		_build_compact_label(_size)
 		_hit(rect, &'node', {})
+		_emit_selected(rect)
 		queue_redraw()
 		return
 
@@ -317,8 +340,33 @@ func apply_size(_size: Vector2) -> void:
 	_hit(rect, &'node', {})
 	_emit_hover()
 	_emit_running(rect)
+	_emit_selected(rect)
 
 	queue_redraw()
+
+
+# grown past the card so it does not sit on the running outline, and drawn at any
+# detail: a node stays selected while the cam zooms out
+func _emit_selected(_rect: Rect2) -> void:
+	if not _selected:
+		return
+
+	_painter.add_style(_select_style(), _rect.grow(SELECT_GROW))
+
+
+func _select_style() -> StyleBoxFlat:
+	if _style_cache.has('selected'):
+		return _style_cache['selected']
+
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	style.set_corner_radius_all(CORNER + int(SELECT_GROW))
+	style.border_color = SELECT_COLOR
+	style.set_border_width_all(SELECT_BORDER_WIDTH)
+
+	_style_cache['selected'] = style
+
+	return style
 
 
 # last, over everything: set_detail, set_hover and refresh_content all rebuild the

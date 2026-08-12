@@ -388,7 +388,7 @@ func _get_inspect_popup_opts() -> Dictionary:
 		anchor_to = sidebar,
 		side = SIDE_RIGHT,
 		fill_axis = true,
-		blur = true,
+		blur = false,
 		min_size = Vector2(360, 0)
 	}
 

@@ -231,7 +231,7 @@ func _popup_opts(_rect: Rect2) -> Dictionary:
 		layout = HenGeneralPopup.Layout.ANCHORED,
 		anchor_rect = _rect,
 		side = SIDE_RIGHT,
-		blur = true,
+		blur = false,
 		min_size = Vector2(320, 0)
 	}
 
