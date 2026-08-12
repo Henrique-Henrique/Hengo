@@ -37,6 +37,8 @@ const SELECT_BORDER_WIDTH: int = 2
 const SELECT_GROW: float = 3.0
 # a muted action still has to be readable, so it is greyed and not hidden
 const DISABLED_VEIL: Color = Color(0.05, 0.06, 0.08, 0.62)
+const DROP_COLOR: Color = Color('#63d98a')
+const DROP_HEIGHT: float = 3.0
 
 const CORNER: int = 8
 const PAD: float = 11.0
@@ -89,6 +91,8 @@ var _hover_ref: Variant = null
 var _chip_seq: int = 0
 var _running: bool = false
 var _selected: bool = false
+# -1 none, 0 above this card, 1 below it
+var _drop_edge: int = -1
 
 
 func setup(_host_control: Control, _node: HenFlowGraphTypes.FlowNode) -> void:
@@ -172,6 +176,18 @@ func set_selected(_on: bool) -> bool:
 
 func is_selected() -> bool:
 	return _selected
+
+
+func set_drop_edge(_edge: int) -> bool:
+	if _drop_edge == _edge:
+		return false
+
+	_drop_edge = _edge
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
 
 
 # holds the name readable while the cam zooms out, by counter-scaling instead of
@@ -358,7 +374,21 @@ func apply_size(_size: Vector2) -> void:
 	if node.action and node.action.disabled:
 		_painter.add_style(_flat(DISABLED_VEIL, CORNER), rect)
 
+	_emit_drop_edge(_size)
+
 	queue_redraw()
+
+
+func _emit_drop_edge(_size: Vector2) -> void:
+	if _drop_edge < 0:
+		return
+
+	var y: float = -DROP_HEIGHT if _drop_edge == 0 else _size.y
+
+	_painter.add_style(
+		_flat(DROP_COLOR, 2),
+		Rect2(Vector2(0.0, y), Vector2(_size.x, DROP_HEIGHT))
+	)
 
 
 # grown past the card so it does not sit on the running outline, and drawn at any

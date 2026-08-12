@@ -14,19 +14,26 @@ var _redo: Array[Dictionary] = []
 var _pending: Dictionary = {}
 
 
-func begin(_save_data: HenSaveData, _state_id: StringName) -> void:
-	if not _save_data or not _save_data.identity or _state_id.is_empty():
+# an array and not one id: moving a step to another state edits two lists, and
+# an entry that restores only one of them corrupts the graph on undo
+func begin(_save_data: HenSaveData, _state_ids: Array) -> void:
+	if not _save_data or not _save_data.identity or _state_ids.is_empty():
 		return
 
 	# a second begin before the commit would snapshot the half-edited list
 	if not _pending.is_empty():
 		return
 
-	_pending = {
-		script_id = String(_save_data.identity.id),
-		state_id = _state_id,
-		before = snapshot(_save_data, _state_id)
-	}
+	var before: Dictionary = {}
+
+	for state_id: StringName in _state_ids:
+		if not state_id.is_empty():
+			before[state_id] = snapshot(_save_data, state_id)
+
+	if before.is_empty():
+		return
+
+	_pending = {script_id = String(_save_data.identity.id), before = before}
 
 
 func abort() -> void:
@@ -39,16 +46,21 @@ func commit(_save_data: HenSaveData, _label: String) -> bool:
 	if _pending.is_empty() or not _save_data:
 		return false
 
-	var state_id: StringName = _pending.state_id
-	var after: Array = snapshot(_save_data, state_id)
+	var after: Dictionary = {}
+	var changed: bool = false
 
-	if digest(after) == digest(_pending.before):
+	for state_id: StringName in _pending.before:
+		after[state_id] = snapshot(_save_data, state_id)
+
+		if digest(after[state_id]) != digest(_pending.before[state_id]):
+			changed = true
+
+	if not changed:
 		_pending.clear()
 		return false
 
 	_undo.append({
 		script_id = _pending.script_id,
-		state_id = state_id,
 		before = _pending.before,
 		after = after,
 		label = _label
@@ -69,7 +81,7 @@ func undo(_save_data: HenSaveData) -> bool:
 
 	var entry: Dictionary = _undo.pop_back()
 
-	_restore(_save_data, entry.state_id, entry.before)
+	_restore(_save_data, entry.before)
 	_redo.append(entry)
 
 	return true
@@ -81,7 +93,7 @@ func redo(_save_data: HenSaveData) -> bool:
 
 	var entry: Dictionary = _redo.pop_back()
 
-	_restore(_save_data, entry.state_id, entry.after)
+	_restore(_save_data, entry.after)
 	_undo.append(entry)
 
 	return true
@@ -175,13 +187,14 @@ static func _action_digest(_action: HenSaveAction) -> Array:
 
 # the stack keeps the canonical copy and hands out a new one, so undoing twice
 # does not give the live tree the same objects it already mutated once
-func _restore(_save_data: HenSaveData, _state_id: StringName, _list: Array) -> void:
-	var copy: Array = []
+func _restore(_save_data: HenSaveData, _lists: Dictionary) -> void:
+	for state_id: StringName in _lists:
+		var copy: Array = []
 
-	for action: HenSaveAction in _list:
-		copy.append(action.duplicate(true))
+		for action: HenSaveAction in _lists[state_id]:
+			copy.append(action.duplicate(true))
 
-	_save_data.set_state_actions(_state_id, copy)
+		_save_data.set_state_actions(state_id, copy)
 
 
 func _matches(_save_data: HenSaveData, _entry: Dictionary) -> bool:

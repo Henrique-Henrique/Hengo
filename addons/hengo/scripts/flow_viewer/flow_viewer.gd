@@ -51,6 +51,11 @@ var _context_press_pos: Vector2 = Vector2.ZERO
 # action id, not the card: a rebuild frees every card, and the selection has to
 # come back on the node the user picked
 var _selected_action: String = ''
+# the card the press landed on, and the drop it is currently pointing at
+var _press_card: HenFlowNodeCard = null
+var _dragging: bool = false
+var _drop_card: HenFlowNodeCard = null
+var _drop_before: bool = true
 var _click_last_time: int = 0
 var _click_last_pos: Vector2 = Vector2.ZERO
 var _last_cull_origin: Vector2 = Vector2.INF
@@ -186,6 +191,9 @@ func _process(_delta: float) -> void:
 	if mouse != _last_hover_pos or edges_overlay.get_hovered_edge() != _hovered_edge:
 		_last_hover_pos = mouse
 		_update_hover(mouse)
+
+	if _press_card != null:
+		_update_drag(mouse)
 
 	_update_cursor(cam)
 	_update_culling(cam)
@@ -740,7 +748,14 @@ func _gui_input(event: InputEvent) -> void:
 
 	if button.pressed:
 		_click_press_pos = button.position
+		_press_card = _draggable_under_mouse()
 		return
+
+	if _dragging:
+		_finish_drag()
+		return
+
+	_press_card = null
 
 	# drags never count as a click
 	var is_click: bool = button.position.distance_to(_click_press_pos) <= CLICK_TOLERANCE
@@ -859,7 +874,7 @@ func _move_selected(_delta: int) -> bool:
 		return false
 
 	_editor_for_state(state_id)
-	_history.begin(global.SAVE_DATA, state_id)
+	_history.begin(global.SAVE_DATA, [state_id])
 
 	if not _editor.move_in_chain(action, _delta):
 		_history.abort()
@@ -894,7 +909,7 @@ func _delete_selected() -> bool:
 	if state_id.is_empty():
 		return false
 
-	_history.begin(global.SAVE_DATA, state_id)
+	_history.begin(global.SAVE_DATA, [state_id])
 
 	if not global.SAVE_DATA.remove_action_anywhere(state_id, action):
 		_history.abort()
@@ -919,6 +934,129 @@ func _notify_structural() -> void:
 
 # returns whether the click landed on something, so the caller can tell a miss
 # from a hit and only count the miss toward the double click
+# only a top level action reorders: a producer belongs to an input and a body
+# action to its loop, and neither is a step of the state's chain
+func _draggable_under_mouse() -> HenFlowNodeCard:
+	var hit: Dictionary = hit_under_mouse()
+
+	if hit.is_empty() or not hit.has('card'):
+		return null
+
+	var card: HenFlowNodeCard = hit.card
+
+	return card if card.node.kind == &'action' and card.node.action else null
+
+
+func _update_drag(_mouse: Vector2) -> void:
+	if not is_instance_valid(_press_card) or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		if not _dragging:
+			_press_card = null
+		return
+
+	if not _dragging:
+		if get_local_mouse_position().distance_to(_click_press_pos) <= CLICK_TOLERANCE:
+			return
+
+		_dragging = true
+
+	var target: HenFlowNodeCard = _draggable_under_mouse()
+
+	if target == null or target == _press_card:
+		_set_drop(null, true)
+		return
+
+	var rect: Rect2 = _card_world_rect(target)
+
+	_set_drop(target, _mouse.y < rect.position.y + rect.size.y * 0.5)
+
+
+func _card_world_rect(_card: HenFlowNodeCard) -> Rect2:
+	for item: Dictionary in _hover_items:
+		if item.get('card') == _card:
+			return item.rect
+
+	return Rect2()
+
+
+func _set_drop(_card: HenFlowNodeCard, _before: bool) -> void:
+	if _drop_card == _card and _drop_before == _before:
+		return
+
+	if is_instance_valid(_drop_card):
+		_drop_card.set_drop_edge(-1)
+
+	_drop_card = _card
+	_drop_before = _before
+
+	if is_instance_valid(_drop_card):
+		_drop_card.set_drop_edge(0 if _before else 1)
+
+
+func _finish_drag() -> void:
+	var dragged: HenFlowNodeCard = _press_card
+	var target: HenFlowNodeCard = _drop_card
+	var before: bool = _drop_before
+
+	_dragging = false
+	_press_card = null
+	_set_drop(null, true)
+
+	if not is_instance_valid(dragged) or not is_instance_valid(target):
+		return
+
+	_apply_drop(dragged.node.action, target.node.action, before)
+
+
+func _apply_drop(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+	var from_id: StringName = _state_by_action.get(str(_dragged.id), &'')
+	var to_id: StringName = _state_by_action.get(str(_target.id), &'')
+
+	if not global or from_id.is_empty() or to_id.is_empty():
+		return false
+
+	var index: int = HenActionsPanel.drop_index(global.SAVE_DATA.get_state_actions(to_id), _target, _dragged, _before)
+
+	if index < 0:
+		return false
+
+	# both lists, or undo puts the step back without taking the copy away
+	_history.begin(global.SAVE_DATA, [from_id, to_id])
+
+	if from_id == to_id:
+		_editor_for_state(to_id)
+		_editor.move_action(_dragged, _target.phase, index)
+	else:
+		_move_to_state(global.SAVE_DATA, _dragged, _target, from_id, to_id, index)
+
+	_history.commit(global.SAVE_DATA, 'Move Action')
+
+	return true
+
+
+# the macro decides whether it can run on the phase it was dropped into, so a
+# step that lands on a phase it has no body for keeps its own
+func _move_to_state(
+	_save_data: HenSaveData,
+	_dragged: HenSaveAction,
+	_target: HenSaveAction,
+	_from: StringName,
+	_to: StringName,
+	_index: int
+) -> void:
+	_save_data.remove_action_anywhere(_from, _dragged)
+
+	if HenActionsPanel.can_use_phase(_dragged, _target.phase):
+		_dragged.phase = _target.phase
+
+	var list: Array = _save_data.get_state_actions(_to).duplicate()
+
+	list.append(_dragged)
+	_save_data.set_state_actions(_to, HenActionsPanel.reorder(list, _dragged, _dragged.phase, _index))
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
+
 func _dispatch_click() -> bool:
 	var hit: Dictionary = hit_under_mouse()
 
@@ -1107,7 +1245,7 @@ func _editor_for(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var state_id: StringName = StringName(str(_node.data.get('state_id', '')))
 
 	_editor.target(global.SAVE_DATA if global else null, state_id)
-	_history.begin(global.SAVE_DATA if global else null, state_id)
+	_history.begin(global.SAVE_DATA if global else null, [state_id])
 
 
 # a value edit usually leaves the card the same size, and then nothing around it
@@ -1196,7 +1334,7 @@ func hit_under_mouse() -> Dictionary:
 # the cards are drawn, not controls, so the cam cannot tell a press on one from a
 # press on the empty canvas by hit-testing the control tree
 func blocks_pan() -> bool:
-	return not hit_under_mouse().is_empty()
+	return _dragging or not hit_under_mouse().is_empty()
 
 
 # a hit rect lives in the container's space; popups position in viewport space

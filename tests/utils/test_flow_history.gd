@@ -56,7 +56,7 @@ func _first() -> HenSaveAction:
 func test_a_changed_list_is_pushed() -> void:
 	var actions: Array = _add()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 9.0
 
 	assert_bool(history.commit(save_data, 'Edit')).is_true()
@@ -67,7 +67,7 @@ func test_a_changed_list_is_pushed() -> void:
 func test_an_untouched_list_is_not_pushed() -> void:
 	_add()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 
 	assert_bool(history.commit(save_data, 'Edit')).is_false()
 	assert_bool(history.can_undo()).is_false()
@@ -78,7 +78,7 @@ func test_undo_restores_the_previous_value() -> void:
 
 	(actions[0] as HenSaveAction).inputs[0].default_value = 1.0
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 2.0
 	history.commit(save_data, 'Edit')
 
@@ -91,7 +91,7 @@ func test_redo_puts_the_edit_back() -> void:
 
 	(actions[0] as HenSaveAction).inputs[0].default_value = 1.0
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 2.0
 	history.commit(save_data, 'Edit')
 	history.undo(save_data)
@@ -107,7 +107,7 @@ func test_undoing_twice_is_not_poisoned_by_the_first() -> void:
 
 	(actions[0] as HenSaveAction).inputs[0].default_value = 1.0
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 2.0
 	history.commit(save_data, 'Edit')
 
@@ -122,14 +122,14 @@ func test_undoing_twice_is_not_poisoned_by_the_first() -> void:
 func test_a_new_edit_drops_the_redo() -> void:
 	var actions: Array = _add()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 2.0
 	history.commit(save_data, 'Edit')
 	history.undo(save_data)
 
 	assert_bool(history.can_redo()).is_true()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	_first().inputs[0].default_value = 5.0
 	history.commit(save_data, 'Edit')
 
@@ -139,7 +139,7 @@ func test_a_new_edit_drops_the_redo() -> void:
 func test_an_aborted_edit_leaves_no_entry() -> void:
 	var actions: Array = _add()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 3.0
 	history.abort()
 
@@ -152,7 +152,7 @@ func test_an_aborted_edit_leaves_no_entry() -> void:
 func test_an_entry_from_another_script_is_refused() -> void:
 	var actions: Array = _add()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	(actions[0] as HenSaveAction).inputs[0].default_value = 2.0
 	history.commit(save_data, 'Edit')
 
@@ -219,7 +219,7 @@ func test_delete_then_undo_brings_the_action_back() -> void:
 	var actions: Array = _add(2)
 	var target: HenSaveAction = actions[1]
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	save_data.remove_action_anywhere(state.id, target)
 	history.commit(save_data, 'Delete Action')
 
@@ -271,7 +271,7 @@ func test_the_viewer_refuses_to_delete_with_nothing_selected() -> void:
 func test_deleting_the_last_action_and_undoing_it() -> void:
 	var actions: Array = _add()
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	save_data.remove_action_anywhere(state.id, actions[0])
 	history.commit(save_data, 'Delete Action')
 
@@ -328,7 +328,7 @@ func test_changing_the_phase_is_undone_by_the_flow_stack() -> void:
 	editor.target(save_data, state.id)
 	action.phase = &'update'
 
-	history.begin(save_data, state.id)
+	history.begin(save_data, [state.id])
 	editor.move_action(action, &'enter', -1)
 	history.commit(save_data, 'Move Action')
 
@@ -400,3 +400,86 @@ func test_the_viewer_moves_the_selected_step_and_undoes_it() -> void:
 
 	assert_bool(viewer._undo()).is_true()
 	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str(first.id))
+
+
+# dropping on a card and not on a wire: the halves say before or after, and
+# HenActionsPanel.drop_index was already there from the old sidebar drag
+func test_dropping_below_a_card_moves_the_step_after_it() -> void:
+	var actions: Array = _add(3)
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(actions[0], actions[2], false)).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[2].id)).is_equal(str((actions[0] as HenSaveAction).id))
+
+
+func test_dropping_above_a_card_moves_the_step_before_it() -> void:
+	var actions: Array = _add(3)
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(actions[2], actions[0], true)).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str((actions[2] as HenSaveAction).id))
+
+
+# dropping on another phase is a phase change, which the drop index already knows
+func test_dropping_onto_another_phase_moves_the_step_there() -> void:
+	var actions: Array = _add(2)
+
+	(actions[1] as HenSaveAction).phase = &'enter'
+
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(actions[0], actions[1], true)).is_true()
+	assert_str(str((actions[0] as HenSaveAction).phase)).is_equal('enter')
+
+
+func test_a_drop_is_undone_in_one_step() -> void:
+	var actions: Array = _add(3)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._apply_drop(actions[0], actions[2], false)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str((actions[0] as HenSaveAction).id))
+
+
+func _second_state() -> HenSaveState:
+	var other: HenSaveState = save_data.add_state(false)
+
+	other.name = 'Idle'
+
+	return other
+
+
+# the indicator showed on a card of another state but the drop was refused
+func test_dropping_onto_another_state_moves_the_step_there() -> void:
+	var actions: Array = _add(2)
+	var other: HenSaveState = _second_state()
+	var landing: HenSaveAction = HenSaveAction.create(_macro())
+
+	landing.phase = &'update'
+	save_data.add_state_action(other.id, landing)
+
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(actions[0], landing, true)).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+	assert_int(save_data.get_state_actions(other.id).size()).is_equal(2)
+	assert_str(str(save_data.get_state_actions(other.id)[0].id)).is_equal(str((actions[0] as HenSaveAction).id))
+
+
+# two lists change, and an entry that restores one of them leaves a copy behind
+func test_a_cross_state_drop_is_undone_on_both_sides() -> void:
+	var actions: Array = _add(2)
+	var other: HenSaveState = _second_state()
+	var landing: HenSaveAction = HenSaveAction.create(_macro())
+
+	landing.phase = &'update'
+	save_data.add_state_action(other.id, landing)
+
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._apply_drop(actions[0], landing, true)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+	assert_int(save_data.get_state_actions(other.id).size()).is_equal(1)
