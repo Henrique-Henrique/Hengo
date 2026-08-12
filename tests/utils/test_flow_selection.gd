@@ -158,3 +158,71 @@ func test_selected_action_returns_the_resource() -> void:
 	viewer._select_card(card)
 
 	assert_object(viewer.selected_action()).is_same(card.node.action)
+
+
+func _key(_code: Key, _ctrl: bool = false) -> InputEventKey:
+	var event: InputEventKey = InputEventKey.new()
+
+	event.keycode = _code
+	event.pressed = true
+	event.ctrl_pressed = _ctrl
+
+	return event
+
+
+# alt+up is the editor's own move-line shortcut, and the editor is bound above
+# the unhandled layer, so it won every other time
+func test_the_move_keys_are_w_and_s() -> void:
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._handle_shortcut(_key(KEY_UP))).is_false()
+	assert_bool(viewer._handle_shortcut(_key(KEY_DOWN))).is_false()
+
+
+# ctrl+s is save, and swallowing it here would cost the user the file
+func test_a_modifier_gives_the_key_back() -> void:
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._handle_shortcut(_key(KEY_S, true))).is_false()
+	assert_bool(viewer._handle_shortcut(_key(KEY_W, true))).is_false()
+
+
+func test_a_move_key_does_nothing_with_no_selection() -> void:
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._handle_shortcut(_key(KEY_S))).is_false()
+	assert_bool(viewer._handle_shortcut(_key(KEY_W))).is_false()
+
+
+# the help popup and the handler read the same list, so a binding cannot be in
+# one and missing from the other
+func test_every_flow_key_in_the_registry_is_handled() -> void:
+	var viewer: HenFlowViewer = _viewer()
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+
+	for entry: Dictionary in HenShortcuts.of_group(HenShortcuts.FLOW):
+		if not entry.has('method'):
+			continue
+
+		assert_bool(viewer.has_method(str(entry.method))).override_failure_message(
+			'no method for ' + str(entry.title)
+		).is_true()
+
+
+func test_the_registry_declares_the_move_keys() -> void:
+	var found: Array = []
+
+	for entry: Dictionary in HenShortcuts.of_group(HenShortcuts.FLOW):
+		found.append(''.join(entry.combo))
+
+	assert_array(found).contains(['W', 'S', 'Delete'])
+
+
+func test_every_entry_is_readable() -> void:
+	for entry: Dictionary in HenShortcuts.LIST:
+		assert_bool((entry.combo as Array).is_empty()).is_false()
+		assert_str(str(entry.title)).is_not_empty()
+		assert_str(str(entry.description)).is_not_empty()
+		assert_str(HenShortcuts.group_name(entry.group)).is_not_empty()

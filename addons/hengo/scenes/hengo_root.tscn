@@ -47,6 +47,7 @@
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/loading_overlay.tscn" id="loadovlay_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_nodes_panel.tscn" id="dbgpanel_inst"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/bug.svg" id="57_bug"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/command.svg" id="54_shortcuts"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_sidetabs"]
 
@@ -479,6 +480,14 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Actions"
 icon = ExtResource("39_174hx")
+
+[node name="ShortcutsBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTopBar/CanvasTopBarMargin/CanvasTopBarHBox" unique_id=2000000091]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "Keyboard shortcuts"
+icon = ExtResource("54_shortcuts")
+flat = true
 
 [node name="RefreshGraphBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTopBar/CanvasTopBarMargin/CanvasTopBarHBox" unique_id=2000000062]
 unique_name_in_owner = true

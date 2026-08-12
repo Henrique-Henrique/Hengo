@@ -280,3 +280,123 @@ func test_deleting_the_last_action_and_undoing_it() -> void:
 	history.undo(save_data)
 
 	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+
+# duplicate(true) keeps every id, and the action id is what the card index, the
+# debug flash and the selection address a node by
+func test_a_duplicated_action_gets_a_new_id() -> void:
+	var actions: Array = _add()
+	var copy: HenSaveAction = HenActionsPanel.duplicate_action(actions[0])
+
+	assert_str(str(copy.id)).is_not_equal(str((actions[0] as HenSaveAction).id))
+
+
+# the param ids are the macro's own names, and the bindings are keyed by them
+func test_a_duplicated_action_keeps_its_param_ids() -> void:
+	var actions: Array = _add()
+	var source: HenSaveAction = actions[0]
+
+	source.input_bindings[str(source.inputs[0].id)] = 'some_var'
+
+	var copy: HenSaveAction = HenActionsPanel.duplicate_action(source)
+
+	assert_str(str(copy.inputs[0].id)).is_equal(str(source.inputs[0].id))
+	assert_bool(copy.input_bindings.has(str(copy.inputs[0].id))).is_true()
+
+
+func test_a_duplicated_producer_and_body_get_new_ids_too() -> void:
+	var actions: Array = _add()
+	var source: HenSaveAction = actions[0]
+	var producer: HenSaveAction = HenSaveAction.create(_macro())
+	var inner: HenSaveAction = HenSaveAction.create(_macro())
+
+	source.input_actions[str(source.inputs[0].id)] = {action = producer, output = &'result'}
+	source.body_actions.append(inner)
+
+	var copy: HenSaveAction = HenActionsPanel.duplicate_action(source)
+
+	assert_str(str(copy.input_actions[str(copy.inputs[0].id)].action.id)).is_not_equal(str(producer.id))
+	assert_str(str(copy.body_actions[0].id)).is_not_equal(str(inner.id))
+
+
+# the phase change used to write a method pair into global.history as well
+func test_changing_the_phase_is_undone_by_the_flow_stack() -> void:
+	var actions: Array = _add()
+	var action: HenSaveAction = actions[0]
+	var editor: HenStateViewerCardEditor = HenStateViewerCardEditor.new()
+
+	editor.target(save_data, state.id)
+	action.phase = &'update'
+
+	history.begin(save_data, state.id)
+	editor.move_action(action, &'enter', -1)
+	history.commit(save_data, 'Move Action')
+
+	assert_str(str(save_data.get_state_actions(state.id)[0].phase)).is_equal('enter')
+
+	history.undo(save_data)
+
+	assert_str(str(save_data.get_state_actions(state.id)[0].phase)).is_equal('update')
+
+
+func _editor() -> HenStateViewerCardEditor:
+	var editor: HenStateViewerCardEditor = HenStateViewerCardEditor.new()
+
+	editor.target(save_data, state.id)
+
+	return editor
+
+
+func test_moving_a_step_down_its_chain() -> void:
+	var actions: Array = _add(3)
+	var editor: HenStateViewerCardEditor = _editor()
+
+	assert_bool(editor.move_in_chain(actions[0], 1)).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[1].id)).is_equal(str((actions[0] as HenSaveAction).id))
+
+
+func test_the_ends_of_the_chain_do_not_move() -> void:
+	var actions: Array = _add(2)
+	var editor: HenStateViewerCardEditor = _editor()
+
+	assert_bool(editor.move_in_chain(actions[0], -1)).is_false()
+	assert_bool(editor.move_in_chain(actions[1], 1)).is_false()
+
+
+# the chain is per phase: a step never jumps over one that runs somewhere else
+func test_a_step_only_moves_inside_its_own_phase() -> void:
+	var actions: Array = _add(2)
+	var editor: HenStateViewerCardEditor = _editor()
+
+	(actions[0] as HenSaveAction).phase = &'enter'
+
+	assert_bool(editor.move_in_chain(actions[0], 1)).is_false()
+	assert_bool(editor.move_in_chain(actions[1], -1)).is_false()
+
+
+# a loop body is its own list, and its order is not grouped by phase
+func test_moving_a_step_inside_a_loop_body() -> void:
+	var actions: Array = _add()
+	var parent: HenSaveAction = actions[0]
+	var first: HenSaveAction = HenSaveAction.create(_macro())
+	var second: HenSaveAction = HenSaveAction.create(_macro())
+
+	parent.body_actions.append(first)
+	parent.body_actions.append(second)
+
+	assert_bool(_editor().move_in_chain(first, 1)).is_true()
+	assert_str(str(parent.body_actions[0].id)).is_equal(str(second.id))
+
+
+func test_the_viewer_moves_the_selected_step_and_undoes_it() -> void:
+	var actions: Array = _add(2)
+	var viewer: HenFlowViewer = _viewer()
+	var first: HenSaveAction = actions[0]
+
+	viewer._select_card(viewer._cards_by_action.get(str(first.id)))
+
+	assert_bool(viewer._move_selected(1)).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[1].id)).is_equal(str(first.id))
+
+	assert_bool(viewer._undo()).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str(first.id))

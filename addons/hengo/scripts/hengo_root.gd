@@ -157,6 +157,15 @@ func refresh_script_state() -> void:
 		global.HENGO_DEBUGGER_PLUGIN.on_active_script_changed(String(global.SAVE_DATA.identity.id))
 
 
+func show_shortcuts() -> void:
+	var panel: HenShortcutsPanel = (load('res://addons/hengo/scenes/shortcuts_panel.tscn') as PackedScene).instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(panel, {
+		layout = HenGeneralPopup.Layout.COMPACT,
+		min_size = Vector2(660, 620)
+	})
+
+
 # the flow is the only graph view now, so there is nothing left to switch between
 func _setup_flow_view() -> void:
 	var flow: HenFlowViewer = get_node_or_null('%FlowViewer')
@@ -167,6 +176,11 @@ func _setup_flow_view() -> void:
 
 	refresh_bt.pressed.connect(flow.rebuild)
 	refresh_bt.visible = flow.is_visible_in_tree()
+
+	var shortcuts_bt: Button = get_node_or_null('%ShortcutsBt')
+
+	if shortcuts_bt:
+		shortcuts_bt.pressed.connect(show_shortcuts)
 
 	flow.visibility_changed.connect(func():
 		refresh_bt.visible = flow.is_visible_in_tree()

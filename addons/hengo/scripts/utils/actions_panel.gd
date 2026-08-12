@@ -125,6 +125,9 @@ static func find_macro(_macro_id: StringName) -> HenSaveMacro:
 
 # resolves the macro pool's current name so renamed macros reach already-saved actions
 static func display_name(_action: HenSaveAction) -> String:
+	if not _action.label.strip_edges().is_empty():
+		return _action.label
+
 	var macro: HenSaveMacro = find_macro(_action.macro_id)
 	return macro.name if macro else _action.name
 
@@ -240,6 +243,35 @@ static func set_producer(_slot: Dictionary, _macro: HenSaveMacro, _output: Strin
 		(expr_store as Dictionary).erase(_slot.get('expr_key', ''))
 
 	return child
+
+
+# duplicate(true) keeps every id, and the action id is what the card index, the
+# debug flash and the selection address a node by. the param ids are the macro's
+# own names (target, value), so those stay: the bindings are keyed by them
+static func duplicate_action(_action: HenSaveAction) -> HenSaveAction:
+	var copy: HenSaveAction = _action.duplicate(true)
+
+	_reid_action(copy)
+
+	return copy
+
+
+static func _reid_action(_action: HenSaveAction) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if not global:
+		return
+
+	_action.id = global.get_new_node_counter()
+
+	for entry: Variant in _action.input_actions.values():
+		var nested: HenSaveAction = (entry as Dictionary).get('action')
+
+		if nested:
+			_reid_action(nested)
+
+	for nested: HenSaveAction in _action.body_actions:
+		_reid_action(nested)
 
 
 static func _editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:

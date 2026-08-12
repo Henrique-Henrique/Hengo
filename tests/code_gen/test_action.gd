@@ -3326,3 +3326,38 @@ func test_debug_flashes_branch_transition_edge() -> void:
 	var script := GDScript.new()
 	script.source_code = code
 	assert_int(script.reload()).is_equal(OK)
+
+
+# a muted step keeps its values and emits nothing, the way a breakpoint does
+func test_a_disabled_action_emits_no_code() -> void:
+	var action: HenSaveAction = _add_action(_register(FIX_TYPED), &'update')
+
+	action.inputs[1].default_value = 45.0
+	action.disabled = true
+
+	assert_str(HenTest.get_all_code()).not_contains('= 45')
+
+
+func test_a_disabled_action_keeps_its_values() -> void:
+	var action: HenSaveAction = _add_action(_register(FIX_TYPED), &'update')
+
+	action.inputs[1].default_value = 45.0
+	action.disabled = true
+	action.disabled = false
+
+	assert_that(action.inputs[1].default_value).is_equal(45.0)
+
+
+# the label is what the user named this instance, so it wins over the macro name
+func test_a_labelled_action_shows_its_own_name() -> void:
+	var action: HenSaveAction = _add_action(_register(FIX_TYPED), &'update')
+
+	assert_str(HenActionsPanel.display_name(action)).is_not_equal('Hit Counter')
+
+	action.label = 'Hit Counter'
+
+	assert_str(HenActionsPanel.display_name(action)).is_equal('Hit Counter')
+
+	action.label = '   '
+
+	assert_str(HenActionsPanel.display_name(action)).is_not_equal('   ')

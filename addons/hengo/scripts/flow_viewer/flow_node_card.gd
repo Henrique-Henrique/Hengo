@@ -35,6 +35,8 @@ const RUN_SHADOW_SIZE: int = 10
 const SELECT_COLOR: Color = Color('#eaf0ff')
 const SELECT_BORDER_WIDTH: int = 2
 const SELECT_GROW: float = 3.0
+# a muted action still has to be readable, so it is greyed and not hidden
+const DISABLED_VEIL: Color = Color(0.05, 0.06, 0.08, 0.62)
 
 const CORNER: int = 8
 const PAD: float = 11.0
@@ -43,6 +45,8 @@ const ICON: float = 21.0
 const ICON_CORNER: int = 5
 const ICON_GLYPH: float = 14.0
 const ICON_GAP: float = 8.0
+const MENU_SIZE: float = 16.0
+const MENU_DOT_GAP: float = 5.0
 const TITLE_SIZE: int = 16
 const LABEL_SIZE: int = 14
 const FLOW_SIZE: int = 14
@@ -283,7 +287,9 @@ func compute_size() -> Vector2:
 
 
 func _header_width() -> float:
-	return PAD * 2.0 + ICON + ICON_GAP + _painter.measure(node.title, TITLE_SIZE, true).x
+	var menu: float = MENU_SIZE + ICON_GAP if node.action else 0.0
+
+	return PAD * 2.0 + ICON + ICON_GAP + _painter.measure(node.title, TITLE_SIZE, true).x + menu
 
 
 func _flow_width() -> float:
@@ -348,6 +354,9 @@ func apply_size(_size: Vector2) -> void:
 	_emit_hover()
 	_emit_running(rect)
 	_emit_selected(rect)
+
+	if node.action and node.action.disabled:
+		_painter.add_style(_flat(DISABLED_VEIL, CORNER), rect)
 
 	queue_redraw()
 
@@ -434,6 +443,22 @@ func _emit_header(_size: Vector2) -> void:
 	)
 
 	_rule(_header_h, _size.x)
+
+	# before the header, whose rect contains it: get_hits returns the first match
+	var menu: Rect2 = Rect2(
+		Vector2(_size.x - PAD - MENU_SIZE, centre - MENU_SIZE * 0.5),
+		Vector2(MENU_SIZE, MENU_SIZE)
+	)
+
+	if node.action:
+		for i: int in range(3):
+			_painter.add_style(
+				_flat(_label_color(), 1),
+				Rect2(menu.position + Vector2(menu.size.x * 0.5 - 1.0, i * MENU_DOT_GAP + 3.0), Vector2(2, 2))
+			)
+
+		_hit(menu, &'menu', {})
+
 	_hit(Rect2(Vector2.ZERO, Vector2(_size.x, _header_h)), &'header', {})
 
 

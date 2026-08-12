@@ -26,6 +26,10 @@ const PHASE_ORDER: Array[StringName] = [&'enter', &'update', &'physics', &'exit'
 @export var output_bindings: Dictionary
 # nested action list a loop macro runs per iteration; empty for every other macro
 @export var body_actions: Array[HenSaveAction]
+# skipped by codegen while set, so a step can be muted without losing its values
+@export var disabled: bool = false
+# optional name the user gave this instance; empty falls back to the macro name
+@export var label: String = ''
 
 
 static func create(_macro: HenSaveMacro) -> HenSaveAction:

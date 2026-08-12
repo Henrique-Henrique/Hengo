@@ -144,7 +144,7 @@ func _notification(what: int) -> void:
 	var showing: bool = is_visible_in_tree()
 
 	set_process(showing)
-	set_process_unhandled_key_input(showing)
+	set_process_shortcut_input(showing)
 
 	if not showing:
 		_release_hover()
@@ -772,18 +772,26 @@ func _gui_input(event: InputEvent) -> void:
 	_click_last_pos = button.position
 
 
-func _unhandled_key_input(event: InputEvent) -> void:
+# _shortcut_input and not _unhandled_key_input: the editor binds its own keys
+# above the unhandled layer, so alt+up reached the script editor instead
+func _shortcut_input(event: InputEvent) -> void:
 	if not is_visible_in_tree() or not event is InputEventKey:
 		return
 
 	var key: InputEventKey = event
 
-	if not key.pressed:
+	if not key.pressed or key.echo:
 		return
 
 	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup') if Engine.has_singleton(&'GeneralPopup') else null
 
 	if general_popup and general_popup.has_open_popups():
+		return
+
+	# a bare letter is a shortcut only while nothing is being typed into
+	var focus: Control = get_viewport().gui_get_focus_owner()
+
+	if focus is LineEdit or focus is TextEdit:
 		return
 
 	if not _handle_shortcut(key):
@@ -792,25 +800,30 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
 
 
+# dispatched from HenShortcuts so the help popup and the handler cannot drift
 func _handle_shortcut(_key: InputEventKey) -> bool:
-	match _key.keycode:
-		KEY_ESCAPE:
-			if _selected_action.is_empty():
-				return false
-
-			_clear_selection()
-			return true
-		KEY_DELETE:
-			return _delete_selected()
-		KEY_Z:
-			if not _key.ctrl_pressed:
-				return false
-
-			return _redo() if _key.shift_pressed else _undo()
-		KEY_Y:
-			return _redo() if _key.ctrl_pressed else false
+	for entry: Dictionary in HenShortcuts.of_group(HenShortcuts.FLOW):
+		if HenShortcuts.matches(entry, _key):
+			return call(str(entry.method))
 
 	return false
+
+
+func _move_up() -> bool:
+	return _move_selected(-1)
+
+
+func _move_down() -> bool:
+	return _move_selected(1)
+
+
+func _clear_selection_shortcut() -> bool:
+	if _selected_action.is_empty():
+		return false
+
+	_clear_selection()
+
+	return true
 
 
 # --- history ---
@@ -835,6 +848,38 @@ func _redo() -> bool:
 	_notify_structural()
 
 	return true
+
+
+func _move_selected(_delta: int) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+	var action: HenSaveAction = selected_action()
+	var state_id: StringName = _state_by_action.get(_selected_action, &'')
+
+	if not global or not action or state_id.is_empty():
+		return false
+
+	_editor_for_state(state_id)
+	_history.begin(global.SAVE_DATA, state_id)
+
+	if not _editor.move_in_chain(action, _delta):
+		_history.abort()
+		return false
+
+	_history.commit(global.SAVE_DATA, 'Move Action')
+
+	return true
+
+
+# the menu path targets the editor through a graph node; a shortcut has only the
+# state the selected action belongs to
+func _editor_for_state(_state_id: StringName) -> void:
+	if _editor == null:
+		_editor = HenStateViewerCardEditor.new()
+		_editor.changed.connect(_refresh_edited_card)
+
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	_editor.target(global.SAVE_DATA if global else null, _state_id)
 
 
 func _delete_selected() -> bool:
@@ -901,6 +946,11 @@ func _dispatch_click() -> bool:
 	var origin: Vector2 = hit.origin
 	var rect: Rect2 = screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
 
+	if hit.kind == &'menu' and card.node.action:
+		_select_card(card)
+		_open_card_menu(hit, card, card.node.action)
+		return true
+
 	if hit.kind == &'pin':
 		_editing_card = card
 		_editor_for(hit.node)
@@ -939,18 +989,20 @@ func _dispatch_context_click() -> bool:
 		return false
 
 	_select_card(card)
-
-	var origin: Vector2 = hit.origin
-	var rect: Rect2 = screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
-
-	_editing_card = card
-	_editor_for(hit.node)
-
-	# a producer is not in the state's action list, so replace and delete would
-	# look there and miss it
-	_editor.edit_action(action, rect, card.node.kind == &'producer')
+	_open_card_menu(hit, card, action)
 
 	return true
+
+
+# a producer is not in the state's action list, so replace and delete would look
+# there and miss it
+func _open_card_menu(_hit: Dictionary, _card: HenFlowNodeCard, _action: HenSaveAction) -> void:
+	var origin: Vector2 = _hit.origin
+	var rect: Rect2 = screen_rect(Rect2(origin + (_hit.rect as Rect2).position, (_hit.rect as Rect2).size))
+
+	_editing_card = _card
+	_editor_for(_hit.node)
+	_editor.open_action_menu(_action, rect, _card.node.kind == &'producer')
 
 
 # --- selection ---

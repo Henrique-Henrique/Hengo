@@ -22,6 +22,10 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		if _filter_phase and str(action.phase) != str(_phase):
 			continue
 
+		# a muted step keeps its values and emits nothing, the way a breakpoint does
+		if action.disabled:
+			continue
+
 		var macro: HenSaveMacro = _resolve_macro(action.macro_id)
 
 		if not macro or not FileAccess.file_exists(macro.script_path):
