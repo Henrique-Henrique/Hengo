@@ -500,3 +500,181 @@ func test_ctrl_d_duplicates_the_selected_action() -> void:
 
 	assert_bool(viewer._undo()).is_true()
 	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+
+func test_a_new_action_lands_on_the_chain_it_was_added_from() -> void:
+	var actions: Array = _add(2)
+	var editor: HenStateViewerCardEditor = _editor()
+
+	(actions[0] as HenSaveAction).phase = &'enter'
+
+	editor._insert_new(_macro(), state.id, null, &'update', -1)
+
+	var list: Array = save_data.get_state_actions(state.id)
+	var added: HenSaveAction = list[list.size() - 1]
+
+	assert_str(str(added.phase)).is_equal('update')
+
+
+# only actions with a body for the clicked phase are offered, so the picker can
+# never relocate the new step to another chain
+func test_the_phase_pool_only_offers_what_runs_there() -> void:
+	for macro: HenSaveMacro in HenActionPool.for_phase(&'physics'):
+		assert_bool(HenSaveAction.supported_phases(macro).has(&'physics')).is_true()
+
+
+func test_a_tail_add_lands_at_the_end_of_its_chain() -> void:
+	var actions: Array = _add(2)
+	var editor: HenStateViewerCardEditor = _editor()
+
+	editor._insert_new(_macro(), state.id, null, &'update', -1)
+
+	var list: Array = save_data.get_state_actions(state.id)
+
+	assert_str(str(list[2].id)).is_not_equal(str((actions[0] as HenSaveAction).id))
+	assert_int(list.size()).is_equal(3)
+
+
+# a popup that closed without committing used to leave _pending behind, and the
+# next delete or move silently recorded the wrong `before`
+func test_a_leftover_popup_snapshot_does_not_poison_a_delete() -> void:
+	var actions: Array = _add(2)
+	var viewer: HenFlowViewer = _viewer()
+
+	# the popup path opens a snapshot and never commits it
+	viewer._history.begin(save_data, [state.id])
+	(actions[0] as HenSaveAction).inputs[0].default_value = 99.0
+
+	viewer._select_card(viewer._cards_by_action.get(str((actions[1] as HenSaveAction).id)))
+
+	assert_bool(viewer._delete_selected()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+	# the stale edit must not ride along on the delete's undo
+	assert_that(save_data.get_state_actions(state.id)[0].inputs[0].default_value).is_equal(99.0)
+
+
+func test_two_deletes_in_a_row_each_undo() -> void:
+	var actions: Array = _add(3)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._select_card(viewer._cards_by_action.get(str((actions[2] as HenSaveAction).id)))
+	viewer._delete_selected()
+	viewer._select_card(viewer._cards_by_action.get(str((actions[1] as HenSaveAction).id)))
+	viewer._delete_selected()
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+	viewer._undo()
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+
+	viewer._undo()
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(3)
+
+
+# the menu runs its callbacks deferred, after the popup boundary closed, so the
+# delete used to mutate with no snapshot and leave the card on screen
+func test_the_menu_delete_records_and_rebuilds() -> void:
+	var actions: Array = _add(2)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._ensure_editor()
+	viewer._editor.target(save_data, state.id)
+	viewer._editor.delete_action(actions[0])
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+	assert_bool(viewer._history.can_undo()).is_true()
+
+	viewer._undo()
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+
+
+func test_the_menu_duplicate_and_toggle_are_recorded() -> void:
+	var actions: Array = _add(1)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._ensure_editor()
+	viewer._editor.target(save_data, state.id)
+
+	viewer._editor.duplicate_action(actions[0])
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+
+	viewer._undo()
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+	viewer._editor._toggle_disabled(actions[0])
+
+	assert_bool((actions[0] as HenSaveAction).disabled).is_true()
+
+	viewer._undo()
+
+	assert_bool(save_data.get_state_actions(state.id)[0].disabled).is_false()
+
+
+# the shortcut and the menu are one implementation now, and a record inside a
+# record must not push a second entry: that would cost two ctrl+z for one edit
+func test_one_edit_is_one_undo_whichever_path_ran() -> void:
+	var actions: Array = _add(2)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._select_card(viewer._cards_by_action.get(str((actions[0] as HenSaveAction).id)))
+
+	assert_bool(viewer._duplicate_selected()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(3)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+	assert_bool(viewer._undo()).is_false()
+
+
+func test_the_shortcut_move_is_one_undo_too() -> void:
+	var actions: Array = _add(3)
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._select_card(viewer._cards_by_action.get(str((actions[0] as HenSaveAction).id)))
+
+	assert_bool(viewer._move_selected(1)).is_true()
+	assert_bool(viewer._undo()).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str((actions[0] as HenSaveAction).id))
+	assert_bool(viewer._undo()).is_false()
+
+
+# replace is now insert + remove in one entry, not a second copy of the insert
+func test_replacing_a_step_is_one_undo() -> void:
+	var actions: Array = _add(2)
+	var editor: HenStateViewerCardEditor = _editor()
+	var old_id: String = str((actions[0] as HenSaveAction).id)
+
+	editor._insert_new(_macro(), state.id, null, &'update', 0, actions[0])
+
+	var list: Array = save_data.get_state_actions(state.id)
+
+	assert_int(list.size()).is_equal(2)
+	assert_str(str(list[0].id)).is_not_equal(old_id)
+
+
+# one move covers both cases, so the phase rule is not written twice
+func test_move_step_handles_both_the_same_state_and_another() -> void:
+	var actions: Array = _add(2)
+	var other: HenSaveState = save_data.add_state(false)
+	var landing: HenSaveAction = HenSaveAction.create(_macro())
+
+	other.name = 'Idle'
+	landing.phase = &'update'
+	save_data.add_state_action(other.id, landing)
+
+	var editor: HenStateViewerCardEditor = _editor()
+
+	assert_bool(editor.move_step(actions[0], actions[1], 1, state.id, state.id)).is_true()
+	assert_str(str(save_data.get_state_actions(state.id)[1].id)).is_equal(str((actions[0] as HenSaveAction).id))
+
+	assert_bool(editor.move_step(actions[0], landing, 0, state.id, other.id)).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+	assert_int(save_data.get_state_actions(other.id).size()).is_equal(2)

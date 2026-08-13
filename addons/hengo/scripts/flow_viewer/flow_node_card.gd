@@ -49,6 +49,11 @@ const ICON_GLYPH: float = 14.0
 const ICON_GAP: float = 8.0
 const MENU_SIZE: float = 16.0
 const MENU_DOT_GAP: float = 5.0
+const HEADER_BT_GAP: float = 4.0
+const PLUS_ARM: float = 4.0
+const PLUS_WIDTH: float = 1.6
+const ADD_TAIL_COLOR: Color = Color('#8fa0b8')
+const ADD_TAIL_SIZE: Vector2 = Vector2(132.0, 30.0)
 const TITLE_SIZE: int = 16
 const LABEL_SIZE: int = 14
 const FLOW_SIZE: int = 14
@@ -239,6 +244,15 @@ func compute_size() -> Vector2:
 	_rows.clear()
 	_flow_outs.clear()
 
+	if node.kind == &'add':
+		_header_h = ADD_TAIL_SIZE.y
+		_rows_h = 0.0
+		_flow_h = 0.0
+		_base_size = ADD_TAIL_SIZE
+		node.size = _base_size
+
+		return _base_size
+
 	var inputs: Array[HenFlowGraphTypes.FlowPin] = node.pins_of(&'data_in')
 	var outputs: Array[HenFlowGraphTypes.FlowPin] = node.pins_of(&'data_out')
 	var row_h: float = maxf(_painter.line_height(LABEL_SIZE), SLOT_DOT)
@@ -303,7 +317,7 @@ func compute_size() -> Vector2:
 
 
 func _header_width() -> float:
-	var menu: float = MENU_SIZE + ICON_GAP if node.action else 0.0
+	var menu: float = (MENU_SIZE * 3.0 + HEADER_BT_GAP * 2.0 + ICON_GAP) if node.action else 0.0
 
 	return PAD * 2.0 + ICON + ICON_GAP + _painter.measure(node.title, TITLE_SIZE, true).x + menu
 
@@ -349,6 +363,13 @@ func apply_size(_size: Vector2) -> void:
 	_emit_enter(_size)
 	_emit_anchors(_size)
 
+	# after the anchors: without an enter rect the wire aims at the card origin
+	if node.kind == &'add':
+		_emit_add_tail(_size)
+		_hit(rect, &'add_tail', {})
+		queue_redraw()
+		return
+
 	if _detail != Detail.FULL:
 		_build_compact_label(_size)
 		_hit(rect, &'node', {})
@@ -377,6 +398,40 @@ func apply_size(_size: Vector2) -> void:
 	_emit_drop_edge(_size)
 
 	queue_redraw()
+
+
+# a plus with a tick on the side it inserts into, so the two buttons read apart
+# without a label
+# dashed-looking outline and no plate: it is an affordance, not a step, and it
+# must not read as a node the script runs
+func _emit_add_tail(_size: Vector2) -> void:
+	var color: Color = Color(ADD_TAIL_COLOR, 0.55 if _hover_kind.is_empty() else 1.0)
+	var box: Rect2 = Rect2(Vector2.ZERO, _size)
+
+	_painter.add_style(_flat(Color(ADD_TAIL_COLOR, 0.07), CORNER, Color(ADD_TAIL_COLOR, 0.35)), box)
+
+	var label: String = 'Add action'
+	var label_h: float = _painter.line_height(LABEL_SIZE)
+	var label_w: float = _painter.measure(label, LABEL_SIZE).x
+	var centre: Vector2 = _size * 0.5
+	var start: float = centre.x - (PLUS_ARM * 2.0 + SLOT_GAP + label_w) * 0.5
+
+	_painter.add_style(_flat(color, 0), Rect2(Vector2(start, centre.y - PLUS_WIDTH * 0.5), Vector2(PLUS_ARM * 2.0, PLUS_WIDTH)))
+	_painter.add_style(_flat(color, 0), Rect2(Vector2(start + PLUS_ARM - PLUS_WIDTH * 0.5, centre.y - PLUS_ARM), Vector2(PLUS_WIDTH, PLUS_ARM * 2.0)))
+	_painter.add_text(label, LABEL_SIZE, Vector2(start + PLUS_ARM * 2.0 + SLOT_GAP, centre.y - label_h * 0.5), color)
+
+
+func _emit_plus(_rect: Rect2, _above: bool) -> void:
+	var color: Color = _label_color()
+	var centre: Vector2 = _rect.position + _rect.size * 0.5
+	var tick: float = -_rect.size.y * 0.5 + PLUS_WIDTH * 0.5 if _above else _rect.size.y * 0.5 - PLUS_WIDTH * 0.5
+
+	_painter.add_style(_flat(color, 0), Rect2(Vector2(centre.x - PLUS_ARM, centre.y - PLUS_WIDTH * 0.5), Vector2(PLUS_ARM * 2.0, PLUS_WIDTH)))
+	_painter.add_style(_flat(color, 0), Rect2(Vector2(centre.x - PLUS_WIDTH * 0.5, centre.y - PLUS_ARM), Vector2(PLUS_WIDTH, PLUS_ARM * 2.0)))
+	_painter.add_style(
+		_flat(Color(color, 0.45), 0),
+		Rect2(Vector2(centre.x - _rect.size.x * 0.35, centre.y + tick), Vector2(_rect.size.x * 0.7, PLUS_WIDTH))
+	)
 
 
 func _emit_drop_edge(_size: Vector2) -> void:
@@ -488,6 +543,15 @@ func _emit_header(_size: Vector2) -> void:
 			)
 
 		_hit(menu, &'menu', {})
+
+		var below: Rect2 = Rect2(menu.position - Vector2(MENU_SIZE + HEADER_BT_GAP, 0.0), menu.size)
+		var above: Rect2 = Rect2(below.position - Vector2(MENU_SIZE + HEADER_BT_GAP, 0.0), menu.size)
+
+		_emit_plus(above, true)
+		_emit_plus(below, false)
+
+		_hit(above, &'add_above', {})
+		_hit(below, &'add_below', {})
 
 	_hit(Rect2(Vector2.ZERO, Vector2(_size.x, _header_h)), &'header', {})
 

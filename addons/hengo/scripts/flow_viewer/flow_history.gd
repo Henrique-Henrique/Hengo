@@ -12,6 +12,7 @@ const LIMIT: int = 60
 var _undo: Array[Dictionary] = []
 var _redo: Array[Dictionary] = []
 var _pending: Dictionary = {}
+var _recording: bool = false
 
 
 # an array and not one id: moving a step to another state edits two lists, and
@@ -34,6 +35,67 @@ func begin(_save_data: HenSaveData, _state_ids: Array) -> void:
 		return
 
 	_pending = {script_id = String(_save_data.identity.id), before = before}
+
+
+# a synchronous edit never touches _pending: that field belongs to the popup
+# lifecycle, and a popup that closed without committing used to make the next
+# menu or shortcut edit silently record the wrong `before`
+func record(_save_data: HenSaveData, _state_ids: Array, _label: String, _mutation: Callable) -> bool:
+	if not _save_data or not _save_data.identity or _state_ids.is_empty():
+		return false
+
+	# an outer record already owns this edit, and it may span more states than the
+	# inner one knows about: nesting must not push a second entry
+	if _recording:
+		return _mutation.call()
+
+	var before: Dictionary = {}
+
+	for state_id: StringName in _state_ids:
+		if not state_id.is_empty():
+			before[state_id] = snapshot(_save_data, state_id)
+
+	if before.is_empty():
+		return false
+
+	_recording = true
+
+	var ok: bool = _mutation.call()
+
+	_recording = false
+
+	if not ok:
+		return false
+
+	var after: Dictionary = {}
+	var changed: bool = false
+
+	for state_id: StringName in before:
+		after[state_id] = snapshot(_save_data, state_id)
+
+		if digest(after[state_id]) != digest(before[state_id]):
+			changed = true
+
+	if not changed:
+		return false
+
+	_push({
+		script_id = String(_save_data.identity.id),
+		before = before,
+		after = after,
+		label = _label
+	})
+
+	return true
+
+
+func _push(_entry: Dictionary) -> void:
+	_undo.append(_entry)
+
+	if _undo.size() > LIMIT:
+		_undo.pop_front()
+
+	_redo.clear()
 
 
 func abort() -> void:
@@ -59,17 +121,13 @@ func commit(_save_data: HenSaveData, _label: String) -> bool:
 		_pending.clear()
 		return false
 
-	_undo.append({
+	_push({
 		script_id = _pending.script_id,
 		before = _pending.before,
 		after = after,
 		label = _label
 	})
 
-	if _undo.size() > LIMIT:
-		_undo.pop_front()
-
-	_redo.clear()
 	_pending.clear()
 
 	return true

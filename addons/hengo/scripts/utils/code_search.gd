@@ -58,6 +58,16 @@ func _search(_text: String) -> void:
 
 # --- actions ---
 
+# adding a step filters by the phase it lands on; feeding an input filters by type
+func _action_pool() -> Array[HenSaveMacro]:
+	var phase: StringName = StringName(str(config.get(&'phase', '')))
+
+	if not phase.is_empty():
+		return HenActionPool.for_phase(phase)
+
+	return HenActionPool.producers_for(str(config.get(&'type', '')))
+
+
 func is_action_mode() -> bool:
 	return (config.get(&'on_pick', Callable()) as Callable).is_valid()
 
@@ -73,7 +83,7 @@ func _search_actions(_text: String) -> void:
 
 	var leaves: Array = []
 
-	for macro: HenSaveMacro in HenActionPool.producers_for(str(config.get(&'type', ''))):
+	for macro: HenSaveMacro in _action_pool():
 		if HenSearch.score_only(query, macro.name.to_lower()) > 0:
 			leaves.append(_action_leaf(macro))
 
@@ -86,7 +96,7 @@ func _open_action_categories() -> void:
 
 	var groups: Dictionary = {}
 
-	for macro: HenSaveMacro in HenActionPool.producers_for(str(config.get(&'type', ''))):
+	for macro: HenSaveMacro in _action_pool():
 		var folder: String = macro.category if not macro.category.is_empty() else 'user'
 
 		if not groups.has(folder):

@@ -5,7 +5,6 @@ extends RefCounted
 # the action edits a card drives, anchored by rect instead of by a control,
 # because a drawn card has nothing to point a popup at
 
-const ACTIONS_SEARCH_SCENE = preload('res://addons/hengo/scenes/actions_search.tscn')
 const VALUE_POPUP_SCENE = preload('res://addons/hengo/scenes/action_value_popup.tscn')
 const DROPDOWN_SCENE = preload('res://addons/hengo/scenes/drop_down_menu.tscn')
 
@@ -13,6 +12,9 @@ signal changed
 signal focus_requested(save_data: HenSaveData)
 
 var is_editing: bool = false
+# set by the flow viewer: wraps a mutation in one undo entry. the menu runs its
+# callbacks deferred, so the popup boundary has already closed by then
+var record_hook: Callable = Callable()
 
 var _save_data: HenSaveData
 var _state_id: StringName
@@ -22,6 +24,13 @@ var _ring_index: int = -1
 var _provider: Callable = Callable()
 var _value_popup: HenPopupContainer
 var _value_editor: HenActionValuePopup
+
+
+func _record(_states: Array, _label: String, _mutation: Callable) -> bool:
+	if record_hook.is_valid():
+		return record_hook.call(_states, _label, _mutation)
+
+	return _mutation.call()
 
 
 func target(_data: HenSaveData, _id: StringName) -> void:
@@ -123,6 +132,102 @@ func open_producer(_slot: Dictionary, _rect: Rect2) -> void:
 	)
 
 
+# adding was only reachable through the sidebar tab that the cards replaced, so
+# the search opens here with no action to replace and an index to land on
+func open_add(_phase: StringName, _parent: HenSaveAction, _at: int, _rect: Rect2, _replacing: HenSaveAction = null) -> void:
+	if _state_id.is_empty() or _reject():
+		return
+
+	var state_id: StringName = _state_id
+	var parent: HenSaveAction = _parent
+	var at: int = _at
+	var phase: StringName = _phase
+	var replacing: HenSaveAction = _replacing
+
+	is_editing = true
+
+	# an empty type means no producer filter: a step of the chain can be any action,
+	# branching ones included
+	var search: HenCodeSearch = HenCodeSearch.load(Vector2.ZERO, {
+		type = &'',
+		phase = phase,
+		on_pick = func(_macro: HenSaveMacro, _output: StringName) -> void:
+			_insert_new(_macro, state_id, parent, phase, at, replacing)
+	})
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(
+		search, _anchored_opts(_rect, Vector2(640, 420))
+	)
+
+
+# replacing is the same insert with the old step removed in the same entry: the
+# search used to own a second copy of this, with its own index rules and its own
+# undo stack
+func _insert_new(
+	_macro: HenSaveMacro,
+	_state_id: StringName,
+	_parent: HenSaveAction,
+	_phase: StringName,
+	_at: int,
+	_replacing: HenSaveAction = null
+) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global or not global.SAVE_DATA:
+		return
+
+	var data: HenSaveData = global.SAVE_DATA
+
+	_record([_state_id], 'Replace Action' if _replacing else 'Add Action', func() -> bool:
+		if _replacing:
+			data.remove_action_anywhere(_state_id, _replacing)
+
+		_do_insert(_macro, data, _state_id, _parent, _phase, _at)
+
+		return true
+	)
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
+
+func _do_insert(_macro: HenSaveMacro, _data: HenSaveData, _state_id: StringName, _parent: HenSaveAction, _phase: StringName, _at: int) -> void:
+	var action: HenSaveAction = HenSaveAction.create(_macro)
+
+	# the macro decides: a phase it has no body for would emit nothing at all
+	action.phase = _phase if HenSaveAction.supported_phases(_macro).has(_phase) else HenSaveAction.default_phase(_macro)
+
+	if _parent:
+		_parent.body_actions.insert(clampi(_at if _at >= 0 else _parent.body_actions.size(), 0, _parent.body_actions.size()), action)
+		return
+
+	var list: Array = _data.get_state_actions(_state_id).duplicate()
+	var bucket: Array = HenActionsPanel.group_by_phase(list).get(str(action.phase), [])
+
+	list.append(action)
+	_data.set_state_actions(_state_id, HenActionsPanel.reorder(list, action, action.phase, _at if _at >= 0 else bucket.size()))
+
+
+# the flat index a new step lands on to sit right before or after this one
+func index_around(_action: HenSaveAction, _below: bool) -> int:
+	if not _save_data:
+		return -1
+
+	var parent: HenSaveAction = _parent_of(_action)
+	var list: Array = parent.body_actions if parent else _save_data.get_state_actions(_state_id)
+	var index: int = list.find(_action)
+
+	if index < 0:
+		return -1
+
+	if parent:
+		return index + (1 if _below else 0)
+
+	var bucket: Array = HenActionsPanel.group_by_phase(list).get(str(_action.phase), [])
+	var at: int = bucket.find(_action)
+
+	return -1 if at < 0 else at + (1 if _below else 0)
+
+
 # a branch with nowhere to go is drawn as a loose pin, so clicking it is how the
 # hole the graph is showing gets filled
 func open_branch(_action: HenSaveAction, _key: String, _title: String, _rect: Rect2) -> void:
@@ -177,20 +282,6 @@ func edit_action(_action: HenSaveAction, _rect: Rect2, _inline: bool) -> void:
 		nested,
 		true
 	)
-
-
-func open_search(_phase: StringName, _replacing: HenSaveAction, _parent: HenSaveAction, _rect: Rect2) -> void:
-	if _state_id.is_empty() or _reject():
-		return
-
-	var search: HenActionsSearch = ACTIONS_SEARCH_SCENE.instantiate()
-	search.setup(_state_id, _phase, _replacing, _parent)
-
-	var opts: Dictionary = _popup_opts(_rect)
-	opts.min_size = Vector2(320, 360)
-	opts.blur = false
-
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(search, opts)
 
 
 func _open_option_picker(_part: Dictionary, _rect: Rect2) -> void:
@@ -331,7 +422,7 @@ func open_action_menu(_action: HenSaveAction, _rect: Rect2, _inline: bool) -> vo
 		entries.append({name = 'Phase', callable = func() -> void: _open_phase_menu(_action, _rect)})
 
 	entries.append_array(_action_menu(_action, _rect))
-	entries.append({name = 'Duplicate', callable = _duplicate_action.bind(_action)})
+	entries.append({name = 'Duplicate', callable = duplicate_action.bind(_action)})
 	entries.append({name = 'Move up', callable = func() -> void: move_in_chain(_action, -1)})
 	entries.append({name = 'Move down', callable = func() -> void: move_in_chain(_action, 1)})
 	entries.append({name = 'Rename', callable = func() -> void: _prompt_label(_action, _rect)})
@@ -415,8 +506,11 @@ func _swap_in_body(_parent: HenSaveAction, _action: HenSaveAction, _delta: int) 
 	if index < 0 or target < 0 or target >= _parent.body_actions.size():
 		return false
 
-	_parent.body_actions.remove_at(index)
-	_parent.body_actions.insert(target, _action)
+	_record([_state_id], 'Move Action', func() -> bool:
+		_parent.body_actions.remove_at(index)
+		_parent.body_actions.insert(target, _action)
+		return true
+	)
 
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
@@ -424,7 +518,10 @@ func _swap_in_body(_parent: HenSaveAction, _action: HenSaveAction, _delta: int) 
 
 
 func _toggle_disabled(_action: HenSaveAction) -> void:
-	_action.disabled = not _action.disabled
+	_record([_state_id], 'Toggle Action', func() -> bool:
+		_action.disabled = not _action.disabled
+		return true
+	)
 
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
@@ -439,7 +536,10 @@ func _prompt_label(_action: HenSaveAction, _rect: Rect2) -> void:
 	)
 
 	editor.confirmed.connect(func(_chip: Variant, _text: String) -> void:
-		_action.label = _text.strip_edges()
+		_record([_state_id], 'Rename Action', func() -> bool:
+			_action.label = _text.strip_edges()
+			return true
+		)
 		popup.hide_popup()
 		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 	)
@@ -449,17 +549,24 @@ func _prompt_label(_action: HenSaveAction, _rect: Rect2) -> void:
 	editor.focus_field.call_deferred()
 
 
-func _duplicate_action(_action: HenSaveAction) -> void:
+func duplicate_action(_action: HenSaveAction) -> void:
 	if not _save_data:
 		return
 
-	var copy: HenSaveAction = HenActionsPanel.duplicate_action(_action)
+	var data: HenSaveData = _save_data
+	var state_id: StringName = _state_id
 	var parent: HenSaveAction = _parent_of(_action)
 
-	if parent:
-		parent.body_actions.insert(parent.body_actions.find(_action) + 1, copy)
-	else:
-		_save_data.insert_state_action(_state_id, copy, _save_data.get_state_actions(_state_id).find(_action) + 1)
+	_record([state_id], 'Duplicate Action', func() -> bool:
+		var copy: HenSaveAction = HenActionsPanel.duplicate_action(_action)
+
+		if parent:
+			parent.body_actions.insert(parent.body_actions.find(_action) + 1, copy)
+		else:
+			data.insert_state_action(state_id, copy, data.get_state_actions(state_id).find(_action) + 1)
+
+		return true
+	)
 
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
@@ -473,7 +580,7 @@ func _action_menu(_action: HenSaveAction, _rect: Rect2) -> Array[Dictionary]:
 		},
 		{
 			name = 'Delete',
-			callable = _delete_action.bind(_action),
+			callable = delete_action.bind(_action),
 			color = Color('#c16460'),
 			icon = 'res://addons/hengo/assets/new_icons/trash-2.svg'
 		}
@@ -485,21 +592,27 @@ func _replace_action(_action: HenSaveAction, _rect: Rect2) -> void:
 	is_editing = false
 
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
-	open_search(_action.phase, _action, _parent_of(_action), _rect)
+	open_add(_action.phase, _parent_of(_action), index_around(_action, false), _rect, _action)
 
 
-func _delete_action(_action: HenSaveAction) -> void:
-	var parent: HenSaveAction = _parent_of(_action)
-
-	if parent:
-		parent.body_actions.erase(_action)
-	elif _save_data:
-		_save_data.remove_state_action(_state_id, _action)
+func delete_action(_action: HenSaveAction) -> void:
+	if not _save_data:
+		return
 
 	is_editing = false
 
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
-	changed.emit()
+	var data: HenSaveData = _save_data
+	var state_id: StringName = _state_id
+
+	_record([state_id], 'Delete Action', func() -> bool:
+		return data.remove_action_anywhere(state_id, _action)
+	)
+
+	if (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).has_open_popups():
+		(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
+
+	# the card has to leave the graph, and `changed` only redraws the edited one
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
 
 # the loop action holding this one, null at top level
@@ -530,6 +643,39 @@ func _find_parent(_root: HenSaveAction, _target: HenSaveAction) -> HenSaveAction
 
 
 # rewrites the whole list so array order stays enter -> update -> exit
+# the only move there is: same state or across two, so the phase rule and the
+# reorder are written once
+func move_step(_action: HenSaveAction, _target: HenSaveAction, _index: int, _from: StringName, _to: StringName) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global or not global.SAVE_DATA or _from.is_empty() or _to.is_empty():
+		return false
+
+	var data: HenSaveData = global.SAVE_DATA
+
+	return _record([_from, _to], 'Move Action', func() -> bool:
+		if _from == _to:
+			target(data, _to)
+			move_action(_action, _target.phase, _index)
+
+			return true
+
+		data.remove_action_anywhere(_from, _action)
+
+		if HenActionsPanel.can_use_phase(_action, _target.phase):
+			_action.phase = _target.phase
+
+		var list: Array = data.get_state_actions(_to).duplicate()
+
+		list.append(_action)
+		data.set_state_actions(_to, HenActionsPanel.reorder(list, _action, _action.phase, _index))
+
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
+		return true
+	)
+
+
 func move_action(_action: HenSaveAction, _phase: StringName, _index: int) -> void:
 	if not _save_data or _state_id.is_empty():
 		return
@@ -543,7 +689,13 @@ func move_action(_action: HenSaveAction, _phase: StringName, _index: int) -> voi
 
 	# the flow history snapshots the whole list at the popup boundary, so a method
 	# pair on global.history would record the same edit into a second stack
-	_action.phase = _phase
-	_save_data.set_state_actions(_state_id, new_order)
+	var data: HenSaveData = _save_data
+	var state_id: StringName = _state_id
+
+	_record([state_id], 'Move Action', func() -> bool:
+		_action.phase = _phase
+		data.set_state_actions(state_id, new_order)
+		return true
+	)
 
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()

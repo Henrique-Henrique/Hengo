@@ -36,8 +36,10 @@ class FlowNode extends RefCounted:
 	var title: String
 	var icon: String
 	var accent: String
-	# null on a state_entry and on a transition
+	# null on a state_entry, a transition and an add tail
 	var action: HenSaveAction
+	# only on an add tail: the chain it ends
+	var phase: StringName = &''
 	var pins: Array[FlowPin] = []
 	# a loop macro's nested chain, laid out inside this node
 	var body: Array[FlowNode] = []

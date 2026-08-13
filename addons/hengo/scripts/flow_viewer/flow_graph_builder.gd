@@ -31,8 +31,37 @@ static func build(_save_data: HenSaveData, _state: HenSaveState) -> HenFlowGraph
 
 		entry.add_pin(HenFlowGraphTypes.FlowPin.new(phase, &'exec_out', str(phase)))
 		_chain(graph, _save_data, bucket, entry, phase)
+		_add_tail(graph, bucket, phase)
+
+	# a state with no action at all still needs somewhere to put the first one
+	if graph.nodes.size() == 1:
+		entry.add_pin(HenFlowGraphTypes.FlowPin.new(&'update', &'exec_out', 'update'))
+		_add_tail(graph, [], &'update')
 
 	return graph
+
+
+# the end of a phase chain is where a new step lands, and the graph is the only
+# place that knows where that is
+static func _add_tail(_graph: HenFlowGraphTypes.FlowGraph, _bucket: Array, _phase: StringName) -> void:
+	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
+
+	node.id = StringName('add_' + str(_phase))
+	node.kind = &'add'
+	node.title = 'Add action'
+	node.accent = HenActionVisuals.FALLBACK_COLOR
+	node.phase = _phase
+
+	node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
+
+	_graph.add_node(node)
+
+	var last: Variant = _bucket.back() if not _bucket.is_empty() else null
+
+	if last:
+		_graph.connect_pins(&'exec', _graph.nodes[_index_of(_graph, StringName('a' + str(last.id)))], HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
+	else:
+		_graph.connect_pins(&'exec', _graph.entry, _phase, node, HenFlowGraphTypes.ENTER_PIN)
 
 
 # walks one action list in order, wiring each action's `then` into the next

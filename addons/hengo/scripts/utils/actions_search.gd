@@ -17,15 +17,18 @@ var _replacing: HenSaveAction
 # loop action the new action is inserted into; null adds to the state list
 var _parent: HenSaveAction
 
+# where a brand new action lands; -1 appends to the end of its phase
+var _insert_at: int = -1
 var _on_pick: Callable = Callable()
 var _producer_type: String = ''
 
 
-func setup(_id: StringName, _target_phase: StringName = &'', _replaced: HenSaveAction = null, _parent_action: HenSaveAction = null) -> void:
+func setup(_id: StringName, _target_phase: StringName = &'', _replaced: HenSaveAction = null, _parent_action: HenSaveAction = null, _at: int = -1) -> void:
 	_state_id = _id
 	_phase = _target_phase
 	_replacing = _replaced
 	_parent = _parent_action
+	_insert_at = _at
 
 
 # _ready runs inside the add_child of show_content, so a caller that configures
@@ -130,67 +133,16 @@ func _on_result_pressed(_meta: Variant, _mouse_button_index: int) -> void:
 	if _mouse_button_index != MOUSE_BUTTON_LEFT or not _meta is HenSaveMacro:
 		return
 
-	if _on_pick.is_valid():
-		_on_pick.call(_meta as HenSaveMacro)
-		(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
+	# adding and replacing live in HenStateViewerCardEditor now: this is a picker
+	if not _on_pick.is_valid():
 		return
 
-	_add_action(_meta as HenSaveMacro)
+	_on_pick.call(_meta as HenSaveMacro)
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 
 
 # in replace mode the new action takes the slot of the old one; the inputs are not
 # migrated because each macro declares its own schema
-func _add_action(_macro: HenSaveMacro) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if not global.SAVE_DATA:
-		return
-
-	var action: HenSaveAction = HenSaveAction.create(_macro)
-	action.phase = _target_phase(_macro)
-
-	var state_id: StringName = _state_id
-	var replaced: HenSaveAction = _replacing
-	var parent: HenSaveAction = _parent
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-
-	# a loop body is its own list; everything else is the state's action list
-	var insert: Callable = func(_a: HenSaveAction, _i: int) -> void:
-		if parent:
-			parent.body_actions.insert(_i if _i >= 0 else parent.body_actions.size(), _a)
-		else:
-			global.SAVE_DATA.insert_state_action(state_id, _a, _i)
-	var remove: Callable = func(_a: HenSaveAction) -> void:
-		if parent:
-			parent.body_actions.erase(_a)
-		else:
-			global.SAVE_DATA.remove_state_action(state_id, _a)
-
-	var index: int = (parent.body_actions.find(replaced) if parent else global.SAVE_DATA.get_state_actions(state_id).find(replaced)) if replaced else -1
-
-	var do_method: Callable = func() -> void:
-		if replaced:
-			remove.call(replaced)
-
-		insert.call(action, index)
-		signal_bus.request_structural_update.emit()
-
-	if global.history:
-		global.history.create_action(('Replace Action ' if replaced else 'Add Action ') + _macro.name)
-		global.history.add_do_method(do_method)
-		global.history.add_undo_method(func() -> void:
-			remove.call(action)
-
-			if replaced:
-				insert.call(replaced, index)
-
-			signal_bus.request_structural_update.emit()
-		)
-		global.history.commit_action()
-	else:
-		do_method.call()
-
-
 # the phase asked for when the macro has a body for it, its default otherwise
 func _target_phase(_macro: HenSaveMacro) -> StringName:
 	if not _phase.is_empty() and HenSaveAction.supported_phases(_macro).has(_phase):

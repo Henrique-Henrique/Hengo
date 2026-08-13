@@ -874,23 +874,14 @@ func _move_selected(_delta: int) -> bool:
 		return false
 
 	_editor_for_state(state_id)
-	_history.begin(global.SAVE_DATA, [state_id])
 
-	if not _editor.move_in_chain(action, _delta):
-		_history.abort()
-		return false
-
-	_history.commit(global.SAVE_DATA, 'Move Action')
-
-	return true
+	return _editor.move_in_chain(action, _delta)
 
 
 # the menu path targets the editor through a graph node; a shortcut has only the
 # state the selected action belongs to
 func _editor_for_state(_state_id: StringName) -> void:
-	if _editor == null:
-		_editor = HenStateViewerCardEditor.new()
-		_editor.changed.connect(_refresh_edited_card)
+	_ensure_editor()
 
 	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 
@@ -906,9 +897,7 @@ func _duplicate_selected() -> bool:
 		return false
 
 	_editor_for_state(state_id)
-	_history.begin(global.SAVE_DATA, [state_id])
-	_editor._duplicate_action(action)
-	_history.commit(global.SAVE_DATA, 'Duplicate Action')
+	_editor.duplicate_action(action)
 
 	return true
 
@@ -925,15 +914,9 @@ func _delete_selected() -> bool:
 	if state_id.is_empty():
 		return false
 
-	_history.begin(global.SAVE_DATA, [state_id])
-
-	if not global.SAVE_DATA.remove_action_anywhere(state_id, action):
-		_history.abort()
-		return false
-
-	_history.commit(global.SAVE_DATA, 'Delete Action')
+	_editor_for_state(state_id)
+	_editor.delete_action(action)
 	_clear_selection()
-	_notify_structural()
 
 	return true
 
@@ -1036,41 +1019,9 @@ func _apply_drop(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool)
 	if index < 0:
 		return false
 
-	# both lists, or undo puts the step back without taking the copy away
-	_history.begin(global.SAVE_DATA, [from_id, to_id])
+	_ensure_editor()
 
-	if from_id == to_id:
-		_editor_for_state(to_id)
-		_editor.move_action(_dragged, _target.phase, index)
-	else:
-		_move_to_state(global.SAVE_DATA, _dragged, _target, from_id, to_id, index)
-
-	_history.commit(global.SAVE_DATA, 'Move Action')
-
-	return true
-
-
-# the macro decides whether it can run on the phase it was dropped into, so a
-# step that lands on a phase it has no body for keeps its own
-func _move_to_state(
-	_save_data: HenSaveData,
-	_dragged: HenSaveAction,
-	_target: HenSaveAction,
-	_from: StringName,
-	_to: StringName,
-	_index: int
-) -> void:
-	_save_data.remove_action_anywhere(_from, _dragged)
-
-	if HenActionsPanel.can_use_phase(_dragged, _target.phase):
-		_dragged.phase = _target.phase
-
-	var list: Array = _save_data.get_state_actions(_to).duplicate()
-
-	list.append(_dragged)
-	_save_data.set_state_actions(_to, HenActionsPanel.reorder(list, _dragged, _dragged.phase, _index))
-
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+	return _editor.move_step(_dragged, _target, index, from_id, to_id)
 
 
 func _dispatch_click() -> bool:
@@ -1084,6 +1035,25 @@ func _dispatch_click() -> bool:
 		return true
 
 	var card: HenFlowNodeCard = hit.card
+	var rect: Rect2 = screen_rect(Rect2((hit.origin as Vector2) + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
+
+	# before the action guard below: an add tail has no action of its own
+	if hit.kind == &'add_tail':
+		_editing_card = card
+		_editor_for(hit.node)
+		_editor.open_add(card.node.phase, null, -1, rect)
+		return true
+
+	if (hit.kind == &'add_above' or hit.kind == &'add_below') and card.node.action:
+		_editing_card = card
+		_editor_for(hit.node)
+		_editor.open_add(
+			card.node.action.phase,
+			null,
+			_editor.index_around(card.node.action, hit.kind == &'add_below'),
+			rect
+		)
+		return true
 
 	# a transition card names where the flow goes, so it takes the reader there
 	if card.node.kind == &'transition' and _focus_state(card.node.title):
@@ -1110,7 +1080,6 @@ func _dispatch_click() -> bool:
 		return true
 
 	var origin: Vector2 = hit.origin
-	var rect: Rect2 = screen_rect(Rect2(origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
 
 	if hit.kind == &'menu' and card.node.action:
 		_select_card(card)
@@ -1264,10 +1233,25 @@ func _focus_frame(_state: HenSaveState) -> bool:
 	return true
 
 
+# the menu runs its callbacks deferred, after the popup boundary already closed,
+# so the editor records straight into the stack instead of relying on it
+func _ensure_editor() -> void:
+	if _editor != null:
+		return
+
+	_editor = HenStateViewerCardEditor.new()
+	_editor.changed.connect(_refresh_edited_card)
+	_editor.record_hook = func(_states: Array, _label: String, _mutation: Callable) -> bool:
+		var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+		if not global:
+			return _mutation.call()
+
+		return _history.record(global.SAVE_DATA, _states, _label, _mutation)
+
+
 func _editor_for(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
-	if _editor == null:
-		_editor = HenStateViewerCardEditor.new()
-		_editor.changed.connect(_refresh_edited_card)
+	_ensure_editor()
 
 	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 	var state_id: StringName = StringName(str(_node.data.get('state_id', '')))

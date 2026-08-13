@@ -24,6 +24,21 @@ static func all() -> Array[HenSaveMacro]:
 	return pool
 
 
+# actions with a body for this phase: offering one that has none would let the
+# picker relocate the step to another chain behind the user's back
+static func for_phase(_phase: StringName) -> Array[HenSaveMacro]:
+	if _phase.is_empty():
+		return all()
+
+	var out: Array[HenSaveMacro] = []
+
+	for macro: HenSaveMacro in all():
+		if HenSaveAction.supported_phases(macro).has(_phase):
+			out.append(macro)
+
+	return out
+
+
 # actions that can feed an input of this type: a pure producer whose output the
 # type rules accept. an empty type means no filter at all
 static func producers_for(_type: String) -> Array[HenSaveMacro]:
