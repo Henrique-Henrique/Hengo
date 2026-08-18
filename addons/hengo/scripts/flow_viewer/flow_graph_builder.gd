@@ -30,7 +30,7 @@ static func build(_save_data: HenSaveData, _state: HenSaveState) -> HenFlowGraph
 			continue
 
 		entry.add_pin(HenFlowGraphTypes.FlowPin.new(phase, &'exec_out', str(phase)))
-		_chain(graph, _save_data, bucket, entry, phase)
+		_chain(graph, _save_data, bucket, entry, phase, phase)
 		_add_tail(graph, bucket, phase)
 
 	# a state with no action at all still needs somewhere to put the first one
@@ -70,13 +70,14 @@ static func _chain(
 	_save_data: HenSaveData,
 	_actions: Array,
 	_from: HenFlowGraphTypes.FlowNode,
-	_from_pin: StringName
+	_from_pin: StringName,
+	_phase: StringName
 ) -> void:
 	var previous: HenFlowGraphTypes.FlowNode = _from
 	var previous_pin: StringName = _from_pin
 
 	for action: HenSaveAction in _actions:
-		var node: HenFlowGraphTypes.FlowNode = _action_node(_graph, _save_data, action, &'action')
+		var node: HenFlowGraphTypes.FlowNode = _action_node(_graph, _save_data, action, &'action', _phase)
 
 		_graph.connect_pins(&'exec', previous, previous_pin, node, HenFlowGraphTypes.ENTER_PIN)
 
@@ -100,7 +101,8 @@ static func _action_node(
 	_graph: HenFlowGraphTypes.FlowGraph,
 	_save_data: HenSaveData,
 	_action: HenSaveAction,
-	_kind: StringName
+	_kind: StringName,
+	_phase: StringName
 ) -> HenFlowGraphTypes.FlowNode:
 	var macro: HenSaveMacro = HenActionsPanel.find_macro(_action.macro_id)
 	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
@@ -111,6 +113,7 @@ static func _action_node(
 	node.title = macro.name if macro else _action.name
 	node.icon = macro.icon if macro else ''
 	node.accent = HenActionVisuals.accent_of(macro).to_html(false)
+	node.phase = _phase
 
 	_graph.add_node(node)
 
@@ -130,7 +133,7 @@ static func _action_node(
 
 	if macro and macro.has_body:
 		node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.BODY_PIN, &'exec_out', 'Body'))
-		_chain(_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN)
+		_chain(_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase)
 
 		for child: HenSaveAction in _action.body_actions:
 			node.body.append(_graph.nodes[_index_of(_graph, StringName('a' + str(child.id)))])
@@ -167,7 +170,7 @@ static func _add_input_pins(
 		if not child:
 			continue
 
-		var producer: HenFlowGraphTypes.FlowNode = _action_node(_graph, _save_data, child, &'producer')
+		var producer: HenFlowGraphTypes.FlowNode = _action_node(_graph, _save_data, child, &'producer', _node.phase)
 
 		_graph.connect_pins(&'data', producer, _producer_output(ref, producer), _node, param.id)
 
@@ -228,6 +231,7 @@ static func _add_branch_pins(
 		transition.title = target.name
 		transition.icon = 'arrow-right-to-line'
 		transition.accent = HenActionVisuals.PHASE_COLORS.get('update', HenActionVisuals.FALLBACK_COLOR)
+		transition.phase = _node.phase
 
 		transition.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
 

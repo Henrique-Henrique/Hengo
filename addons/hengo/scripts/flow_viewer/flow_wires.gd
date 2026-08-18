@@ -134,14 +134,23 @@ static func _assign_slots(_group: Array) -> void:
 
 
 # a wire wears the colour its cell label already wears: phase colours on the
-# entry, verdict colours on true and false; the sequence stays plain
+# entry, verdict colours on true and false; the rest of a chain keeps the phase
 func _exec_color(_edge: HenFlowGraphTypes.FlowEdge) -> Color:
 	if _edge.from_node.kind == &'state_entry':
 		return HenActionVisuals.phase_color(_edge.from_pin)
 
 	var pin: HenFlowGraphTypes.FlowPin = _edge.from_node.pin(_edge.from_pin)
+	var carried: Color = _phase_tint(_edge.from_node.phase)
 
-	return HenActionVisuals.branch_color(pin.id, pin.label, EXEC_COLOR) if pin else EXEC_COLOR
+	return HenActionVisuals.branch_color(pin.id, pin.label, carried) if pin else carried
+
+
+# phase_color answers an unknown phase with the update colour
+static func _phase_tint(_phase: StringName) -> Color:
+	if HenActionVisuals.PHASE_COLORS.has(str(_phase)):
+		return HenActionVisuals.phase_color(_phase)
+
+	return EXEC_COLOR
 
 
 # execution leaves downward and arrives downward, so a target that sits above has

@@ -246,6 +246,30 @@ func test_a_wire_wears_its_cell_colour() -> void:
 	assert_that(true_color).is_not_equal(HenFlowWires.EXEC_COLOR)
 
 
+func test_a_run_keeps_the_colour_of_its_phase() -> void:
+	var wires: HenFlowWires = auto_free(HenFlowWires.new())
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
+	var entry: HenFlowGraphTypes.FlowNode = _node(graph, 'entry', &'state_entry', Vector2(150, 70))
+	var steer: HenFlowGraphTypes.FlowNode = _action(graph, 'steer', Vector2(200, 100))
+	var move: HenFlowGraphTypes.FlowNode = _action(graph, 'move', Vector2(200, 100))
+
+	_cell(entry, &'physics', 'physics', 75.0)
+	_cell(steer, &'true', 'True', 50.0)
+	_cell(move, HenFlowGraphTypes.BODY_PIN, 'Body', 100.0)
+	steer.phase = &'physics'
+	move.phase = &'physics'
+
+	var entry_color: Color = wires._exec_color(_edge(entry, &'physics', steer))
+	var then_color: Color = wires._exec_color(_edge(steer, HenFlowGraphTypes.THEN_PIN, move))
+	var body_color: Color = wires._exec_color(_edge(move, HenFlowGraphTypes.BODY_PIN, steer))
+	var true_color: Color = wires._exec_color(_edge(steer, &'true', move))
+
+	assert_that(then_color).is_equal(entry_color)
+	assert_that(body_color).is_equal(entry_color)
+	assert_that(then_color).is_not_equal(HenFlowWires.EXEC_COLOR)
+	assert_that(true_color).is_not_equal(entry_color)
+
+
 func _edge(
 	_from: HenFlowGraphTypes.FlowNode,
 	_pin: StringName,
