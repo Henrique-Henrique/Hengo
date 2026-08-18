@@ -419,6 +419,8 @@ func open_action_menu(_action: HenSaveAction, _rect: Rect2, _inline: bool) -> vo
 	var entries: Array[Dictionary] = []
 
 	if not _inline:
+		entries.append({name = 'Add above', callable = func() -> void: _add_around(_action, _rect, false)})
+		entries.append({name = 'Add below', callable = func() -> void: _add_around(_action, _rect, true)})
 		entries.append({name = 'Phase', callable = func() -> void: _open_phase_menu(_action, _rect)})
 
 	entries.append_array(_action_menu(_action, _rect))
@@ -593,6 +595,14 @@ func _replace_action(_action: HenSaveAction, _rect: Rect2) -> void:
 
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 	open_add(_action.phase, _parent_of(_action), index_around(_action, false), _rect, _action)
+
+
+# the menu closes on click, so the search it opens has to outlive that close
+func _add_around(_action: HenSaveAction, _rect: Rect2, _below: bool) -> void:
+	is_editing = false
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
+	open_add(_action.phase, _parent_of(_action), index_around(_action, _below), _rect)
 
 
 func delete_action(_action: HenSaveAction) -> void:

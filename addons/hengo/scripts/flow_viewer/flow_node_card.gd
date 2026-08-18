@@ -47,11 +47,13 @@ const ICON: float = 21.0
 const ICON_CORNER: int = 5
 const ICON_GLYPH: float = 14.0
 const ICON_GAP: float = 8.0
-const MENU_SIZE: float = 16.0
-const MENU_DOT_GAP: float = 5.0
-const HEADER_BT_GAP: float = 4.0
-const PLUS_ARM: float = 4.0
-const PLUS_WIDTH: float = 1.6
+const MENU_SIZE: float = 22.0
+const MENU_DOT: float = 3.0
+const MENU_DOT_GAP: float = 6.0
+const HEADER_BT_GAP: float = 3.0
+const PLUS_ARM: float = 5.0
+const PLUS_WIDTH: float = 1.8
+const PLUS_TICK_GAP: float = 3.5
 const ADD_TAIL_COLOR: Color = Color('#8fa0b8')
 const ADD_TAIL_SIZE: Vector2 = Vector2(132.0, 30.0)
 const TITLE_SIZE: int = 16
@@ -65,6 +67,7 @@ const FLOW_PAD_H: float = 12.0
 const FLOW_PAD_V: float = 7.0
 const SEPARATOR_WIDTH: float = 2.0
 const CHIP_CORNER: int = 4
+const HOVER_ROUNDED: Array[StringName] = [&'chip', &'menu', &'add_above', &'add_below']
 const CHIP_PAD_H: float = 6.0
 const SWATCH_CORNER: int = 3
 const SWATCH_GAP: float = 5.0
@@ -424,13 +427,13 @@ func _emit_add_tail(_size: Vector2) -> void:
 func _emit_plus(_rect: Rect2, _above: bool) -> void:
 	var color: Color = _label_color()
 	var centre: Vector2 = _rect.position + _rect.size * 0.5
-	var tick: float = -_rect.size.y * 0.5 + PLUS_WIDTH * 0.5 if _above else _rect.size.y * 0.5 - PLUS_WIDTH * 0.5
+	var tick: float = -PLUS_ARM - PLUS_TICK_GAP if _above else PLUS_ARM + PLUS_TICK_GAP
 
 	_painter.add_style(_flat(color, 0), Rect2(Vector2(centre.x - PLUS_ARM, centre.y - PLUS_WIDTH * 0.5), Vector2(PLUS_ARM * 2.0, PLUS_WIDTH)))
 	_painter.add_style(_flat(color, 0), Rect2(Vector2(centre.x - PLUS_WIDTH * 0.5, centre.y - PLUS_ARM), Vector2(PLUS_WIDTH, PLUS_ARM * 2.0)))
 	_painter.add_style(
 		_flat(Color(color, 0.45), 0),
-		Rect2(Vector2(centre.x - _rect.size.x * 0.35, centre.y + tick), Vector2(_rect.size.x * 0.7, PLUS_WIDTH))
+		Rect2(Vector2(centre.x - PLUS_ARM * 1.3, centre.y + tick), Vector2(PLUS_ARM * 2.6, PLUS_WIDTH))
 	)
 
 
@@ -506,7 +509,7 @@ func _emit_hover() -> void:
 			continue
 
 		_painter.add_style(
-			_flat(Color(accent(), HOVER_ALPHA), CHIP_CORNER if _hover_kind == &'chip' else 0),
+			_flat(Color(accent(), HOVER_ALPHA), CHIP_CORNER if _hover_kind in HOVER_ROUNDED else 0),
 			hit.rect
 		)
 		return
@@ -530,22 +533,25 @@ func _emit_header(_size: Vector2) -> void:
 	_rule(_header_h, _size.x)
 
 	# before the header, whose rect contains it: get_hits returns the first match
-	var menu: Rect2 = Rect2(
-		Vector2(_size.x - PAD - MENU_SIZE, centre - MENU_SIZE * 0.5),
-		Vector2(MENU_SIZE, MENU_SIZE)
-	)
+	var button: Vector2 = Vector2(MENU_SIZE, _header_h - HEADER_PAD_V)
+	var menu: Rect2 = Rect2(Vector2(_size.x - PAD - button.x, centre - button.y * 0.5), button)
 
 	if node.action:
+		var dots: float = centre - MENU_DOT_GAP - MENU_DOT * 0.5
+
 		for i: int in range(3):
 			_painter.add_style(
 				_flat(_label_color(), 1),
-				Rect2(menu.position + Vector2(menu.size.x * 0.5 - 1.0, i * MENU_DOT_GAP + 3.0), Vector2(2, 2))
+				Rect2(
+					Vector2(menu.position.x + (button.x - MENU_DOT) * 0.5, dots + i * MENU_DOT_GAP),
+					Vector2(MENU_DOT, MENU_DOT)
+				)
 			)
 
 		_hit(menu, &'menu', {})
 
-		var below: Rect2 = Rect2(menu.position - Vector2(MENU_SIZE + HEADER_BT_GAP, 0.0), menu.size)
-		var above: Rect2 = Rect2(below.position - Vector2(MENU_SIZE + HEADER_BT_GAP, 0.0), menu.size)
+		var below: Rect2 = Rect2(menu.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
+		var above: Rect2 = Rect2(below.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
 
 		_emit_plus(above, true)
 		_emit_plus(below, false)

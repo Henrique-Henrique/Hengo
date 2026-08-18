@@ -9,9 +9,23 @@ const FOLLOW_SPEED: float = 26.0
 
 var _tween: Tween
 var _hiding: bool = false
+var _dwell_token: int = 0
 
 
-func go_to(_pos: Vector2, _content: String, _self_pos: Vector2 = Vector2.ZERO) -> void:
+func go_to(_pos: Vector2, _content: String, _self_pos: Vector2 = Vector2.ZERO, _dwell: float = 0.0) -> void:
+	_dwell_token += 1
+
+	if _dwell > 0.0 and not visible:
+		var token: int = _dwell_token
+
+		await get_tree().create_timer(_dwell).timeout
+
+		if token != _dwell_token or not is_inside_tree():
+			return
+
+		# the cursor moved while the wait ran, and the follow would slide in from there
+		_pos = get_global_mouse_position()
+
 	var fully_hidden: bool = not visible
 	var reappear: bool = fully_hidden or _hiding
 
@@ -84,6 +98,8 @@ func _clamped(_pos: Vector2) -> Vector2:
 
 
 func close() -> void:
+	_dwell_token += 1
+
 	if not visible or _hiding:
 		return
 

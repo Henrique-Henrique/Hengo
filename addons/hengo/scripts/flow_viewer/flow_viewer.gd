@@ -15,6 +15,8 @@ const MIN_TITLE_SCREEN_PX: float = 11.0
 # a frame the hovered route does not touch steps back, the way the other routes do
 const FRAME_DIM: float = 0.28
 const CLICK_TOLERANCE: float = 6.0
+# the doc is read on purpose, and a card is crossed on the way to another one
+const DOC_DWELL: float = 0.75
 const CULL_MARGIN: float = 256.0
 const DOUBLE_CLICK_MS: int = 400
 # HengoDebugger throttles a trace to one per 120ms per action, on purpose: an
@@ -338,7 +340,7 @@ func _update_tooltip(_hit: Dictionary) -> void:
 		content += ('\n\n' if not doc.is_empty() else '') + '[color=#5f6a7a]Current: ' + values + '[/color]'
 
 	if not content.is_empty():
-		global.TOOLTIP.go_to(get_global_mouse_position(), content)
+		global.TOOLTIP.go_to(get_global_mouse_position(), content, Vector2.ZERO, DOC_DWELL)
 
 
 func _close_tooltip() -> void:

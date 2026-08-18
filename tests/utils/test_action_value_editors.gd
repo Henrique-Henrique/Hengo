@@ -285,7 +285,7 @@ func test_the_edited_card_holds_its_screen_position() -> void:
 	action.phase = &'update'
 	# the wide one owns the left edge of the box, so normalising after the relayout
 	# cannot cancel the movement of the card below it
-	first.inputs[0].default_value = Vector2(111111111.111, 222222222.222)
+	first.inputs[0].default_value = Vector2(111111111111.111, 222222222222.222)
 	save_data.add_state_action(state.id, first)
 	save_data.add_state_action(state.id, action)
 
@@ -299,7 +299,8 @@ func test_the_edited_card_holds_its_screen_position() -> void:
 	var before: Vector2 = world_before * cam.transform.x.x + cam.transform.origin
 
 	viewer._editing_card = card
-	action.inputs[0].default_value = Vector2(123.456, -987.654)
+	# the header floors the card width, so a narrow value would not relayout
+	action.inputs[0].default_value = Vector2(111111111.111, 222222222.222)
 	viewer._refresh_edited_card()
 
 	var moved: Variant = viewer._cards_by_action.get(str(action.id))
