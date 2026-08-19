@@ -3,8 +3,7 @@ class_name HenActionMath extends HenScriptMacroBase
 
 
 # writes `A <op> B` into Store. division follows gdscript semantics, so two ints
-# give an int; `%` is left out because it breaks on floats — use the expression
-# toggle with fmod() for that.
+# give an int, and `%` errors on a float operand the same way gdscript does.
 
 
 func get_id() -> StringName:
@@ -37,9 +36,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Operator',
 			type = 'String',
 			id = &'op',
-			doc = 'The arithmetic operation to apply.',
+			doc = 'The arithmetic operation to apply. The remainder only works on whole numbers.',
 			raw = true,
-			options = ['+', '-', '*', '/'],
+			options = ['+', '-', '*', '/', '%'],
 			default_value = '+'
 		},
 		{

@@ -31,7 +31,8 @@ func get_code(_save_data: HenSaveData, _build_preview: bool = false) -> String:
 	code += HenGeneratorSignalCallback.get_signals_callback_code(_save_data)
 	code += HenGeneratorBase.get_base_script_code(_save_data, refs)
 
-	return code
+	# a one-line lambda on the last line only parses when a newline closes it
+	return code if code.ends_with('\n') else code + '\n'
 
 #
 #

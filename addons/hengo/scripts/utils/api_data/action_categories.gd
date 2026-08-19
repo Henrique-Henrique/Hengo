@@ -24,8 +24,11 @@ const CATEGORIES: Dictionary = {
 	dictionary = {name = 'Dictionary', icon = 'braces', color = '#14b8a6', order = 75},
 	node2d = {name = 'Node 2D', icon = 'move', color = '#0abde3', order = 80},
 	node3d = {name = 'Node 3D', icon = 'axis-3d', color = '#06b6d4', order = 90},
+	camera = {name = 'Camera', icon = 'video', color = '#0ea5e9', order = 95},
 	physics2d = {name = 'Physics 2D', icon = 'shapes', color = '#22d3ee', order = 100},
 	physics3d = {name = 'Physics 3D', icon = 'box', color = '#2dd4bf', order = 105},
+	physics = {name = 'Physics', icon = 'atom', color = '#2bb5c4', order = 106},
+	navigation = {name = 'Navigation', icon = 'route', color = '#4ade80', order = 107},
 	input = {name = 'Input', icon = 'gamepad-2', color = '#38bdf8', order = 110},
 	audio = {name = 'Audio', icon = 'volume-2', color = '#ec4899', order = 120},
 	animation = {name = 'Animation', icon = 'film', color = '#f472b6', order = 130},
@@ -33,6 +36,7 @@ const CATEGORIES: Dictionary = {
 	render = {name = 'Render', icon = 'palette', color = '#f368e0', order = 140},
 	control = {name = 'Control', icon = 'sliders-horizontal', color = '#60a5fa', order = 145},
 	scene = {name = 'Scene', icon = 'layers', color = '#64748b', order = 150},
+	save = {name = 'Save', icon = 'save', color = '#a3a3a3', order = 155},
 	time = {name = 'Time', icon = 'timer', color = '#94a3b8', order = 160},
 	debug = {name = 'Debug', icon = 'terminal', color = '#10b981', order = 170}
 }

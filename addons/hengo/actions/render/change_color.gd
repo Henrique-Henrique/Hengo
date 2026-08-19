@@ -71,7 +71,7 @@ func _get_body() -> String:
 	if targets(&'Label3D'):
 		return '(_ref as Label3D).modulate = {{color}}'
 	if targets(&'Node3D'):
-		return 'var material_{{VCNODE_ID}}: Material = (_ref as GeometryInstance3D).material_override if _ref is GeometryInstance3D else null\nif material_{{VCNODE_ID}} is StandardMaterial3D:\n\t(material_{{VCNODE_ID}} as StandardMaterial3D).albedo_color = {{color}}'
+		return 'if _ref is GeometryInstance3D and (_ref as GeometryInstance3D).material_override == null:\n\t(_ref as GeometryInstance3D).material_override = StandardMaterial3D.new()\nvar material_{{VCNODE_ID}}: Material = (_ref as GeometryInstance3D).material_override if _ref is GeometryInstance3D else null\nif material_{{VCNODE_ID}} is StandardMaterial3D:\n\t(material_{{VCNODE_ID}} as StandardMaterial3D).albedo_color = {{color}}'
 
 	# 2d: lights, canvas modulate and shapes own a color prop, the rest tints
 	if targets(&'Light2D'):

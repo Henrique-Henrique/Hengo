@@ -123,6 +123,36 @@
 			"target_classes": []
 		},
 		{
+			"branches": [
+				{
+					"doc": "Where to go while something is pressed.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go while nothing is pressed.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Branches on whether any key, mouse button or gamepad button is down right now. It is the press any key to start check.",
+			"has_body": false,
+			"icon": "keyboard",
+			"id": "any_input",
+			"inputs": [],
+			"name": "Any Key Pressed",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [],
 			"category": "physics2d",
 			"color": "#22d3ee",
@@ -1297,6 +1327,58 @@
 		},
 		{
 			"branches": [],
+			"category": "physics",
+			"color": "#2bb5c4",
+			"default_phase": "physics",
+			"description": "Asks the physics world which bodies sit inside a circle around this node and stores them as a list. Use it for a blast, a shockwave or a scan of what is near.",
+			"has_body": false,
+			"icon": "radar",
+			"id": "bodies_in_radius",
+			"inputs": [
+				{
+					"default": "100.0",
+					"doc": "How far around the node to look, in pixels in 2D and in meters in 3D.",
+					"id": "radius",
+					"lvalue": false,
+					"name": "Radius",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "1",
+					"doc": "Which collision layers to look at, as the same number the inspector shows for a collision mask.",
+					"id": "mask",
+					"lvalue": false,
+					"name": "Mask",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Get Bodies In Radius",
+			"outputs": [
+				{
+					"doc": "The bodies found inside the circle, without this node.",
+					"id": "result",
+					"name": "Result",
+					"type": "Array"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D",
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
@@ -1469,6 +1551,514 @@
 				"exit"
 			],
 			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "enter",
+			"description": "Makes a camera the one the player looks through, replacing whichever was active. Works with a 2D and a 3D camera.",
+			"has_body": false,
+			"icon": "video",
+			"id": "camera_current",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The camera to switch to, a 2D or a 3D one.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Use This Camera",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "update",
+			"description": "Glides a camera toward a node every frame, so it trails the target instead of snapping onto it. Works with a 2D and a 3D camera.",
+			"has_body": false,
+			"icon": "target",
+			"id": "camera_follow",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The camera that moves, a 2D or a 3D one.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The node the camera chases.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "5.0",
+					"doc": "How fast the camera catches up. A bigger value follows tighter.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Follow With Camera",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "enter",
+			"description": "Sets the field of view of a 3D camera in degrees, where a wider angle exaggerates speed and a narrower one looks zoomed in. On update or physics it can ease toward the value instead of snapping.",
+			"has_body": false,
+			"icon": "aperture",
+			"id": "camera_fov",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The 3D camera to change.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "75.0",
+					"doc": "The field of view in degrees, around 75 for a normal view.",
+					"id": "fov",
+					"lvalue": false,
+					"name": "FOV",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "How fast it eases toward the value on update or physics. Zero jumps straight to it.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Field Of View",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "enter",
+			"description": "Fences a 2D camera inside a rectangle so it stops at the edges of the level instead of showing the empty space around it.",
+			"has_body": false,
+			"icon": "crop",
+			"id": "camera_limits",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The 2D camera to fence in.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "(-1000.0, -1000.0)",
+					"doc": "The top-left corner of the area the camera can reach.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "(1000.0, 1000.0)",
+					"doc": "The bottom-right corner of the area the camera can reach.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Set Camera Limits",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "enter",
+			"description": "Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. It runs once when the state starts.",
+			"has_body": false,
+			"icon": "vibrate",
+			"id": "camera_shake",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The camera to shake, a 2D or a 3D one.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "8.0",
+					"doc": "How far the camera jumps at the start, in pixels on a 2D camera and in world units on a 3D one.",
+					"id": "strength",
+					"lvalue": false,
+					"name": "Strength",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the shake takes to fade back to zero, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Shake Camera",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "enter",
+			"description": "Sets how close a 2D camera looks, where a bigger value gets closer. On update or physics it can ease toward the value instead of snapping.",
+			"has_body": false,
+			"icon": "zoom-in",
+			"id": "camera_zoom",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The 2D camera to zoom.",
+					"id": "camera",
+					"lvalue": false,
+					"name": "Camera",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "The zoom factor, where 1 is the normal view and 2 looks twice as close.",
+					"id": "zoom",
+					"lvalue": false,
+					"name": "Zoom",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "How fast it eases toward the value on update or physics. Zero jumps straight to it.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Zoom Camera",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when nothing stands between the two nodes.",
+					"id": "clear",
+					"name": "Clear"
+				},
+				{
+					"doc": "Where to go when something is in the way.",
+					"id": "blocked",
+					"name": "Blocked"
+				}
+			],
+			"category": "physics",
+			"color": "#2bb5c4",
+			"default_phase": "physics",
+			"description": "Checks whether a straight line from this node to another node is free of obstacles. It is the usual way to give an enemy a line of sight.",
+			"has_body": false,
+			"icon": "eye",
+			"id": "can_see",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to look at, such as the player. Point it at the body itself, since a parent above the collider never matches.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Can See",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D",
+				"Node3D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the line touches something.",
+					"id": "hit",
+					"name": "Hit"
+				},
+				{
+					"doc": "Where to go when the line touches nothing.",
+					"id": "miss",
+					"name": "Miss"
+				}
+			],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Shoots an invisible line between two points and branches on whether it touched anything. On a hit it reports the node that was touched, the contact point and the surface normal.",
+			"has_body": false,
+			"icon": "crosshair",
+			"id": "cast_ray",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The global point the line starts at, usually the position of this node.",
+					"id": "from",
+					"lvalue": false,
+					"name": "From",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The global point the line ends at.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "True to skip the body of this node, so a line starting inside it does not hit it.",
+					"id": "ignore_self",
+					"lvalue": false,
+					"name": "Ignore Self",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Cast Ray",
+			"outputs": [
+				{
+					"doc": "The node the line touched.",
+					"id": "collider",
+					"name": "Collider",
+					"type": "Object"
+				},
+				{
+					"doc": "The global position where the line touched it.",
+					"id": "point",
+					"name": "Point",
+					"type": "Vector2"
+				},
+				{
+					"doc": "The direction the touched surface faces.",
+					"id": "normal",
+					"name": "Normal",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the line touches something.",
+					"id": "hit",
+					"name": "Hit"
+				},
+				{
+					"doc": "Where to go when the line touches nothing.",
+					"id": "miss",
+					"name": "Miss"
+				}
+			],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Shoots an invisible line between two points and branches on whether it touched anything. On a hit it reports the node that was touched, the contact point and the surface normal.",
+			"has_body": false,
+			"icon": "crosshair",
+			"id": "cast_ray_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The global point the line starts at, usually the position of this node.",
+					"id": "from",
+					"lvalue": false,
+					"name": "From",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The global point the line ends at.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "True to skip the body of this node, so a line starting inside it does not hit it.",
+					"id": "ignore_self",
+					"lvalue": false,
+					"name": "Ignore Self",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Cast Ray",
+			"outputs": [
+				{
+					"doc": "The node the line touched.",
+					"id": "collider",
+					"name": "Collider",
+					"type": "Object"
+				},
+				{
+					"doc": "The global position where the line touched it.",
+					"id": "point",
+					"name": "Point",
+					"type": "Vector3"
+				},
+				{
+					"doc": "The direction the touched surface faces.",
+					"id": "normal",
+					"name": "Normal",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node3D"
+			]
 		},
 		{
 			"branches": [
@@ -1947,6 +2537,37 @@
 		},
 		{
 			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Removes every child of a node at the end of the frame. It is the pair of Spawn Into, which fills the same list again.",
+			"has_body": false,
+			"icon": "list-x",
+			"id": "clear_children",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node whose children are removed, such as the container holding a list.",
+					"id": "parent",
+					"lvalue": false,
+					"name": "Parent",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Clear Children",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "logic",
 			"color": "#ef4444",
 			"default_phase": "update",
@@ -2190,6 +2811,117 @@
 			"phases": [
 				"update",
 				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Erases the save file, throwing away every value stored with Save Value. It is what a reset progress button does.",
+			"has_body": false,
+			"icon": "trash-2",
+			"id": "delete_save",
+			"inputs": [],
+			"name": "Delete Save",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Removes this node from the scene once the given time has passed. It is how a bullet or a hit effect cleans itself up.",
+			"has_body": false,
+			"icon": "timer",
+			"id": "destroy_after",
+			"inputs": [
+				{
+					"default": "2.0",
+					"doc": "How long the node stays alive before it is removed.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Destroy After Seconds",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Removes every node of a group from the scene at the end of the frame. It suits clearing all enemies or all bullets when a round ends.",
+			"has_body": false,
+			"icon": "trash-2",
+			"id": "destroy_group",
+			"inputs": [
+				{
+					"default": "'enemies'",
+					"doc": "The group whose nodes are removed.",
+					"id": "group",
+					"lvalue": false,
+					"name": "Group",
+					"optional": false,
+					"options": [],
+					"type": "StringName",
+					"type_from": ""
+				}
+			],
+			"name": "Destroy Group",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Removes another node from the scene at the end of the frame. Destroy Self is the one that removes this node instead.",
+			"has_body": false,
+			"icon": "trash-2",
+			"id": "destroy_node",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to remove, such as the coin that was just picked up.",
+					"id": "node",
+					"lvalue": false,
+					"name": "Node",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Destroy Node",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
 			],
 			"target_classes": []
 		},
@@ -2660,6 +3392,76 @@
 		},
 		{
 			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Makes a copy of a node that is already in the scene and adds it next to the original. It suits repeating a card or an item that is already set up.",
+			"has_body": false,
+			"icon": "copy",
+			"id": "duplicate_node",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to copy.",
+					"id": "node",
+					"lvalue": false,
+					"name": "Node",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Clone Node",
+			"outputs": [
+				{
+					"doc": "The copy that was just created, ready to be set up with Set Property.",
+					"id": "clone",
+					"name": "Clone",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "render",
+			"color": "#f368e0",
+			"default_phase": "enter",
+			"description": "Restarts a particle node and turns its emission on, the burst a hit or an explosion shows. It works with the 2D and the 3D particle nodes.",
+			"has_body": false,
+			"icon": "sparkles",
+			"id": "emit_particles",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The particle node to fire, such as a GPUParticles2D or a CPUParticles3D.",
+					"id": "particles",
+					"lvalue": false,
+					"name": "Particles",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Emit Particles",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "event",
 			"color": "#84cc16",
 			"default_phase": "update",
@@ -2713,6 +3515,47 @@
 				}
 			],
 			"name": "Every",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Runs the actions inside it on a random interval, drawing a new wait between Min and Max after each run. Good for spawns and idle noises that should not sound metronomic.",
+			"has_body": true,
+			"icon": "dice-5",
+			"id": "every_random",
+			"inputs": [
+				{
+					"default": "0.5",
+					"doc": "The shortest wait between two runs, in seconds.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "2.0",
+					"doc": "The longest wait between two runs, in seconds.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Every Random",
 			"outputs": [],
 			"phases": [
 				"update",
@@ -2804,6 +3647,57 @@
 				}
 			],
 			"name": "Fade Sound",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Fades the screen to a solid color and then loads another scene. The overlay is freed together with the current scene.",
+			"has_body": false,
+			"icon": "blend",
+			"id": "fade_to_scene",
+			"inputs": [
+				{
+					"default": "'res://scenes/level.tscn'",
+					"doc": "The path to the scene file to load when the fade ends.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Scene Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0.5",
+					"doc": "How long the fade takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "(0.0, 0.0, 0.0, 1.0)",
+					"doc": "The color the screen fades to.",
+					"id": "color",
+					"lvalue": false,
+					"name": "Color",
+					"optional": false,
+					"options": [],
+					"type": "Color",
+					"type_from": ""
+				}
+			],
+			"name": "Fade To Scene",
 			"outputs": [],
 			"phases": [
 				"enter"
@@ -3682,6 +4576,33 @@
 		},
 		{
 			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Reads how big the visible screen is, in pixels. It is what a centering, an edge check or a random spawn spot needs to know the play area.",
+			"has_body": false,
+			"icon": "monitor",
+			"id": "get_screen_size",
+			"inputs": [],
+			"name": "Get Screen Size",
+			"outputs": [
+				{
+					"doc": "Where to store the screen size, in pixels.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "control",
 			"color": "#60a5fa",
 			"default_phase": "update",
@@ -3929,6 +4850,47 @@
 				"enter",
 				"update",
 				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when a value was saved under that name.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go when nothing was saved under that name.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Checks whether something was already saved under a name and branches on the answer. It is how a title screen tells a new game from a saved one.",
+			"has_body": false,
+			"icon": "file-search",
+			"id": "has_saved_value",
+			"inputs": [
+				{
+					"default": "'score'",
+					"doc": "The name to look for, the same one used to save it.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Has Saved Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update"
 			],
 			"target_classes": []
 		},
@@ -4290,6 +5252,38 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go while the node is on screen.",
+					"id": "true",
+					"name": "True"
+				},
+				{
+					"doc": "Where to go once the node is off screen.",
+					"id": "false",
+					"name": "False"
+				}
+			],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Checks whether the node is inside the visible screen and branches on the answer. A bullet or an enemy that left the view takes the False side.",
+			"has_body": false,
+			"icon": "eye",
+			"id": "is_on_screen",
+			"inputs": [],
+			"name": "Is On Screen",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go when the body touches a wall.",
 					"id": "true",
 					"name": "True"
@@ -4520,6 +5514,38 @@
 		},
 		{
 			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "physics",
+			"description": "Holds the node inside the screen, stopping it at the edge instead of letting it leave. Assumes a fixed screen with no scrolling camera.",
+			"has_body": false,
+			"icon": "crop",
+			"id": "keep_on_screen",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "How far inside each edge the node stops, in pixels.",
+					"id": "margin",
+					"lvalue": false,
+					"name": "Margin",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Keep On Screen",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
@@ -4624,6 +5650,55 @@
 			],
 			"name": "Lerp Toward",
 			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Reads a value saved earlier under a name and stores it. When nothing was saved under that name yet, the default value is used instead.",
+			"has_body": false,
+			"icon": "download",
+			"id": "load_value",
+			"inputs": [
+				{
+					"default": "'score'",
+					"doc": "The name the value was saved under.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to use when nothing was saved under that name.",
+					"id": "default",
+					"lvalue": false,
+					"name": "Default",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Load Value",
+			"outputs": [
+				{
+					"doc": "Where to store the value that was read.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
 			"phases": [
 				"enter",
 				"update",
@@ -5013,7 +6088,7 @@
 				},
 				{
 					"default": "'+'",
-					"doc": "The arithmetic operation to apply.",
+					"doc": "The arithmetic operation to apply. The remainder only works on whole numbers.",
 					"id": "op",
 					"lvalue": false,
 					"name": "Operator",
@@ -5022,7 +6097,8 @@
 						"+",
 						"-",
 						"*",
-						"/"
+						"/",
+						"%"
 					],
 					"type": "String",
 					"type_from": ""
@@ -5121,6 +6197,47 @@
 			"branches": [],
 			"category": "input",
 			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Reads the world point the mouse is over on a flat ground and stores it. It is what a click to move, a tower placement or an RTS order needs, and it uses the active camera.",
+			"has_body": false,
+			"icon": "map-pin",
+			"id": "mouse_ground_position",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "How high the flat ground sits on the Y axis, usually 0 for the floor.",
+					"id": "height",
+					"lvalue": false,
+					"name": "Height",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Get Mouse World Position",
+			"outputs": [
+				{
+					"doc": "Where to store the point the mouse is over. It stays at zero while no camera is active.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
 			"default_phase": "physics",
 			"description": "Turns the body left and right and tilts a camera up and down from mouse motion, for a first person view.",
 			"has_body": false,
@@ -5170,6 +6287,33 @@
 			"target_classes": [
 				"Node3D"
 			]
+		},
+		{
+			"branches": [],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "update",
+			"description": "Reads how the mouse is moving and stores it as a direction whose length is the speed in pixels per second. It stays at zero while the mouse is still.",
+			"has_body": false,
+			"icon": "mouse",
+			"id": "mouse_motion",
+			"inputs": [],
+			"name": "Get Mouse Motion",
+			"outputs": [
+				{
+					"doc": "Where to store the mouse movement, in pixels per second.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
 		},
 		{
 			"branches": [
@@ -5243,6 +6387,50 @@
 			],
 			"phases": [],
 			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "navigation",
+			"color": "#4ade80",
+			"default_phase": "physics",
+			"description": "Moves the body one step along the route a navigation agent planned, so it walks around walls instead of into them. Set Path Target picks the destination first.",
+			"has_body": false,
+			"icon": "route",
+			"id": "move_along_path",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The NavigationAgent2D or NavigationAgent3D node that plans the route.",
+					"id": "agent",
+					"lvalue": false,
+					"name": "Agent",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "100.0",
+					"doc": "How fast to follow the route, in pixels per second in 2D and in world units per second in 3D.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Move Along Path",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody2D",
+				"CharacterBody3D"
+			]
 		},
 		{
 			"branches": [
@@ -6359,6 +7547,48 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go once the agent arrived at the target.",
+					"id": "yes",
+					"name": "Yes"
+				},
+				{
+					"doc": "Where to go while the agent is still on its way.",
+					"id": "no",
+					"name": "No"
+				}
+			],
+			"category": "navigation",
+			"color": "#4ade80",
+			"default_phase": "update",
+			"description": "Checks whether the navigation agent already arrived at the target it was given, and branches on the answer.",
+			"has_body": false,
+			"icon": "flag",
+			"id": "path_finished",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The NavigationAgent2D or NavigationAgent3D node that plans the route.",
+					"id": "agent",
+					"lvalue": false,
+					"name": "Agent",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Reached Target",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go when a collider is under the mouse.",
 					"id": "hit",
 					"name": "Hit"
@@ -6391,6 +7621,49 @@
 			],
 			"target_classes": [
 				"Node2D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when a collider is under the mouse.",
+					"id": "hit",
+					"name": "Hit"
+				},
+				{
+					"doc": "Where to go when nothing is under it, which is also the case while no camera is active.",
+					"id": "miss",
+					"name": "Miss"
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "physics",
+			"description": "Asks the 3D physics world which collider sits under the mouse and branches on whether one is found. It shoots a ray from the active camera, so the scene needs one.",
+			"has_body": false,
+			"icon": "mouse-pointer",
+			"id": "pick_under_mouse_3d",
+			"inputs": [],
+			"name": "Pick Under Mouse",
+			"outputs": [
+				{
+					"doc": "Where to store the collider found under the mouse.",
+					"id": "collider",
+					"name": "Collider",
+					"type": "Object"
+				},
+				{
+					"doc": "Where to store the world position the ray touched.",
+					"id": "point",
+					"name": "Point",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"physics"
+			],
+			"target_classes": [
+				"Node3D"
 			]
 		},
 		{
@@ -6550,6 +7823,57 @@
 			"category": "audio",
 			"color": "#ec4899",
 			"default_phase": "enter",
+			"description": "Swaps the track of a music player, fading the old one out and the new one back in. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "music",
+			"id": "play_music",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The audio player that holds the music.",
+					"id": "player",
+					"lvalue": false,
+					"name": "Player",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The music file to play.",
+					"id": "sound",
+					"lvalue": false,
+					"name": "Sound",
+					"optional": false,
+					"options": [],
+					"type": "AudioStream",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How long the whole swap takes, in seconds, split between the fade out and the fade in.",
+					"id": "fade",
+					"lvalue": false,
+					"name": "Fade",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Play Music",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
 			"description": "Picks a random sound from a list and plays it on an audio player. Use it to vary a footstep or a hit so it does not sound repetitive.",
 			"has_body": false,
 			"icon": "shuffle",
@@ -6614,6 +7938,60 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
+			"description": "Plays a sound from a temporary player added to the scene, so it still plays when this node is destroyed. The player frees itself once the sound ends.",
+			"has_body": false,
+			"icon": "volume-2",
+			"id": "play_sound_at",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The sound file to play.",
+					"id": "sound",
+					"lvalue": false,
+					"name": "Sound",
+					"optional": false,
+					"options": [],
+					"type": "AudioStream",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "Where the sound comes from. Leave it empty to play at the spot of this node.",
+					"id": "position",
+					"lvalue": false,
+					"name": "Position",
+					"optional": true,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0.0",
+					"doc": "How loud the sound is in decibels, 0 for full and -80 for silence.",
+					"id": "volume",
+					"lvalue": false,
+					"name": "Volume",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Play Sound At",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -6881,6 +8259,56 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "vector",
+			"color": "#a855f7",
+			"default_phase": "update",
+			"description": "Picks a random point around a center, never farther than Radius. It picks inside a circle on a 2D script and inside a sphere on a 3D one.",
+			"has_body": false,
+			"icon": "dice-6",
+			"id": "random_point_in_radius",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The point to pick around, such as the position of a node.",
+					"id": "center",
+					"lvalue": false,
+					"name": "Center",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "100.0",
+					"doc": "How far from the center the point can land, in pixels for 2D and in units for 3D.",
+					"id": "radius",
+					"lvalue": false,
+					"name": "Radius",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Random Point In Radius",
+			"outputs": [
+				{
+					"doc": "Where to store the point, a Vector2 in 2D and a Vector3 in 3D.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -7429,6 +8857,87 @@
 		},
 		{
 			"branches": [],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Stores a value on disk under a name, so it survives closing the game. Use it for a high score, the current level or a menu option.",
+			"has_body": false,
+			"icon": "save",
+			"id": "save_value",
+			"inputs": [
+				{
+					"default": "'score'",
+					"doc": "The name this value is stored under, used again to load it.",
+					"id": "key",
+					"lvalue": false,
+					"name": "Key",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value to write, such as a number, a text or a true or false flag.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Save Value",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "camera",
+			"color": "#0ea5e9",
+			"default_phase": "update",
+			"description": "Reads where a node shows up on the screen, in pixels. It is what a health bar, a name tag or an arrow marker needs to sit on top of something in the world.",
+			"has_body": false,
+			"icon": "monitor-dot",
+			"id": "screen_position",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to locate on the screen, a 2D or a 3D one.",
+					"id": "node",
+					"lvalue": false,
+					"name": "Node",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Get Screen Position",
+			"outputs": [
+				{
+					"doc": "Where to store the screen point, in pixels. A 3D node only reports a point while a camera is active.",
+					"id": "result",
+					"name": "Result",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "physics",
@@ -7567,6 +9076,117 @@
 		},
 		{
 			"branches": [],
+			"category": "physics",
+			"color": "#2bb5c4",
+			"default_phase": "update",
+			"description": "Switches one collision layer or mask bit of a body on or off. The layer says where the body lives, the mask says what it bumps into.",
+			"has_body": false,
+			"icon": "layers",
+			"id": "set_collision_bit",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body or area to change.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'layer'",
+					"doc": "Which side to change.",
+					"id": "kind",
+					"lvalue": false,
+					"name": "Kind",
+					"optional": false,
+					"options": [
+						"layer",
+						"mask"
+					],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "1",
+					"doc": "The bit to change, counting from 1 like the numbers in the inspector.",
+					"id": "bit",
+					"lvalue": false,
+					"name": "Bit",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "True to switch the bit on, false to switch it off.",
+					"id": "on",
+					"lvalue": false,
+					"name": "On",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Set Collision Bit",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "physics",
+			"color": "#2bb5c4",
+			"default_phase": "update",
+			"description": "Turns a collision shape on or off, so a body can stop colliding without leaving the scene. Good for a hitbox that only counts during an attack.",
+			"has_body": false,
+			"icon": "shield",
+			"id": "set_collision_enabled",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The CollisionShape2D or CollisionShape3D to switch.",
+					"id": "shape",
+					"lvalue": false,
+					"name": "Shape",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "True to make the shape collide again, false to switch it off.",
+					"id": "enabled",
+					"lvalue": false,
+					"name": "Enabled",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Set Collision Enabled",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "control",
 			"color": "#60a5fa",
 			"default_phase": "enter",
@@ -7651,6 +9271,37 @@
 		},
 		{
 			"branches": [],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Puts the game window in fullscreen or back in a window. Pair it with Save Value to remember the choice on the next run.",
+			"has_body": false,
+			"icon": "maximize",
+			"id": "set_fullscreen",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "True for fullscreen, false for a normal window.",
+					"id": "on",
+					"lvalue": false,
+					"name": "On",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Set Fullscreen",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node3d",
 			"color": "#06b6d4",
 			"default_phase": "enter",
@@ -7681,6 +9332,41 @@
 			],
 			"target_classes": [
 				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics",
+			"color": "#2bb5c4",
+			"default_phase": "update",
+			"description": "Sets how strongly gravity pulls this body. 1 is normal gravity, 0 makes it float and a negative value makes it fall upwards.",
+			"has_body": false,
+			"icon": "arrow-down-to-line",
+			"id": "set_gravity_scale",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "How much gravity to apply, as a multiplier of the world gravity.",
+					"id": "scale",
+					"lvalue": false,
+					"name": "Scale",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Gravity Scale",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"RigidBody2D",
+				"RigidBody3D"
 			]
 		},
 		{
@@ -7719,6 +9405,49 @@
 		},
 		{
 			"branches": [],
+			"category": "render",
+			"color": "#f368e0",
+			"default_phase": "enter",
+			"description": "Paints a 3D mesh of the scene with a color, creating the material it needs when the mesh has none. Change Color only paints the node the script sits on.",
+			"has_body": false,
+			"icon": "paint-bucket",
+			"id": "set_mesh_color",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The mesh to paint, such as a MeshInstance3D.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "(1.0, 1.0, 1.0, 1.0)",
+					"doc": "The color to apply.",
+					"id": "color",
+					"lvalue": false,
+					"name": "Color",
+					"optional": false,
+					"options": [],
+					"type": "Color",
+					"type_from": ""
+				}
+			],
+			"name": "Set Mesh Color",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "input",
 			"color": "#38bdf8",
 			"default_phase": "enter",
@@ -7750,6 +9479,48 @@
 				"enter",
 				"update",
 				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "navigation",
+			"color": "#4ade80",
+			"default_phase": "update",
+			"description": "Tells a navigation agent where to walk to, and the agent works out a route around the walls. Move Along Path then follows that route.",
+			"has_body": false,
+			"icon": "map-pin",
+			"id": "set_path_target",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The NavigationAgent2D or NavigationAgent3D node that plans the route.",
+					"id": "agent",
+					"lvalue": false,
+					"name": "Agent",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The point to walk to, a Vector2 in 2D and a Vector3 in 3D.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Set Path Target",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -8027,6 +9798,48 @@
 				"enter",
 				"update",
 				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Resizes the game window and puts it back at the center of the screen. It only changes anything while the game runs in a window, not in fullscreen.",
+			"has_body": false,
+			"icon": "monitor-cog",
+			"id": "set_resolution",
+			"inputs": [
+				{
+					"default": "1280",
+					"doc": "The new window width in pixels.",
+					"id": "width",
+					"lvalue": false,
+					"name": "Width",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				},
+				{
+					"default": "720",
+					"doc": "The new window height in pixels.",
+					"id": "height",
+					"lvalue": false,
+					"name": "Height",
+					"optional": false,
+					"options": [],
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Set Resolution",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
 				"exit"
 			],
 			"target_classes": []
@@ -8583,6 +10396,37 @@
 		},
 		{
 			"branches": [],
+			"category": "save",
+			"color": "#a3a3a3",
+			"default_phase": "enter",
+			"description": "Turns vertical sync on or off. With it on the game matches the screen refresh rate and stops tearing, with it off the frame rate runs free.",
+			"has_body": false,
+			"icon": "refresh-cw",
+			"id": "set_vsync",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "True to sync with the screen, false to let frames run free.",
+					"id": "on",
+					"lvalue": false,
+					"name": "On",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Set VSync",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "enter",
@@ -8671,6 +10515,139 @@
 				"enter",
 				"update",
 				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "update",
+			"description": "Rounds the position of the node to the nearest grid cell, so it lines up with a tile or a board square.",
+			"has_body": false,
+			"icon": "grid-3x3",
+			"id": "snap_to_grid",
+			"inputs": [
+				{
+					"default": "32.0",
+					"doc": "How wide one grid cell is, in pixels for a 2D node and in units for a 3D one.",
+					"id": "cell",
+					"lvalue": false,
+					"name": "Cell Size",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Snap To Grid",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D",
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Loads a scene file and adds a copy of it next to this node, placed on top of another node. It works the same in 2D and 3D.",
+			"has_body": false,
+			"icon": "package-plus",
+			"id": "spawn_at",
+			"inputs": [
+				{
+					"default": "'res://scenes/bullet.tscn'",
+					"doc": "The path to the scene file to spawn.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Scene Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The node the copy is placed on, such as a muzzle marker or a spawn point.",
+					"id": "at",
+					"lvalue": false,
+					"name": "At",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Spawn At Node",
+			"outputs": [
+				{
+					"doc": "The copy that was just created, ready to be set up with Set Property.",
+					"id": "spawned",
+					"name": "Spawned",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "scene",
+			"color": "#64748b",
+			"default_phase": "enter",
+			"description": "Loads a scene file and adds a copy of it as a child of the chosen node. It fits filling a list, an inventory or a hand of cards.",
+			"has_body": false,
+			"icon": "list-plus",
+			"id": "spawn_into",
+			"inputs": [
+				{
+					"default": "'res://scenes/bullet.tscn'",
+					"doc": "The path to the scene file to spawn.",
+					"id": "path",
+					"lvalue": false,
+					"name": "Scene Path",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": null,
+					"doc": "The node the copy becomes a child of, such as a VBoxContainer.",
+					"id": "parent",
+					"lvalue": false,
+					"name": "Parent",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Spawn Into",
+			"outputs": [
+				{
+					"doc": "The copy that was just created, ready to be set up with Set Property.",
+					"id": "spawned",
+					"name": "Spawned",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -8872,6 +10849,60 @@
 		},
 		{
 			"branches": [],
+			"category": "time",
+			"color": "#94a3b8",
+			"default_phase": "enter",
+			"description": "Starts a Timer node counting down from a number of seconds. On Timer Timeout runs when the countdown ends.",
+			"has_body": false,
+			"icon": "timer",
+			"id": "start_timer",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The Timer node to start.",
+					"id": "timer",
+					"lvalue": false,
+					"name": "Timer",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How long the countdown lasts, in seconds.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				},
+				{
+					"default": "true",
+					"doc": "On, the timer fires once. Off, it repeats forever until stopped.",
+					"id": "one_shot",
+					"lvalue": false,
+					"name": "One Shot",
+					"optional": false,
+					"options": [],
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Start Timer",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "physics",
@@ -8912,6 +10943,37 @@
 			"target_classes": [
 				"Node2D"
 			]
+		},
+		{
+			"branches": [],
+			"category": "audio",
+			"color": "#ec4899",
+			"default_phase": "enter",
+			"description": "Stops every audio player under a node, whatever kind it is. Use it to silence a level at once, such as on a pause or a game over.",
+			"has_body": false,
+			"icon": "volume-x",
+			"id": "stop_all_sounds",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to search under, usually the level or the scene root.",
+					"id": "root",
+					"lvalue": false,
+					"name": "Root",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Stop All Sounds",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
 		},
 		{
 			"branches": [],
@@ -9015,6 +11077,38 @@
 			"phases": [
 				"enter",
 				"update",
+				"exit"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "time",
+			"color": "#94a3b8",
+			"default_phase": "exit",
+			"description": "Stops a Timer node before it ends, so it never fires. Starting it again runs the countdown from the beginning.",
+			"has_body": false,
+			"icon": "circle-pause",
+			"id": "stop_timer",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The Timer node to stop.",
+					"id": "timer",
+					"lvalue": false,
+					"name": "Timer",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				}
+			],
+			"name": "Stop Timer",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
 				"exit"
 			],
 			"target_classes": []
@@ -9743,6 +11837,57 @@
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
+			"description": "Smoothly blends the color of a node toward a target color over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "palette",
+			"id": "tween_color",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to tint, such as a sprite, a Control or a 3d mesh.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "(1.0, 1.0, 1.0, 1.0)",
+					"doc": "The color the node ends at.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Color",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the blend takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Color",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
 			"description": "Smoothly fades the node toward a target transparency over time. Runs once when the state starts.",
 			"has_body": false,
 			"icon": "eye",
@@ -9827,6 +11972,110 @@
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
+			"description": "Smoothly moves the node to a target position over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "move",
+			"id": "tween_move_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The position to move to.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the movement takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Move",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly animates any property of a node toward a value over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "spline",
+			"id": "tween_property",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node that owns the property.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'position'",
+					"doc": "The name of the property to animate, such as position or modulate.",
+					"id": "property",
+					"lvalue": false,
+					"name": "Property",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The value the property ends at.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0.5",
+					"doc": "How long the animation takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Property",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
 			"description": "Smoothly rotates the node to a target angle over time. Runs once when the state starts.",
 			"has_body": false,
 			"icon": "rotate-cw",
@@ -9862,6 +12111,48 @@
 			],
 			"target_classes": [
 				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly rotates the node to a target angle over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "tween_rotate_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The target angle on each axis, in degrees.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To Degrees",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the rotation takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Rotate",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"Node3D"
 			]
 		},
 		{
@@ -9905,6 +12196,99 @@
 			"target_classes": [
 				"Node2D"
 			]
+		},
+		{
+			"branches": [],
+			"category": "tween",
+			"color": "#fb7185",
+			"default_phase": "enter",
+			"description": "Smoothly scales the node to a target size over time. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "scaling",
+			"id": "tween_scale_3d",
+			"inputs": [
+				{
+					"default": "(1.0, 1.0, 1.0)",
+					"doc": "The target scale, where 1, 1, 1 is the normal size.",
+					"id": "to",
+					"lvalue": false,
+					"name": "To",
+					"optional": false,
+					"options": [],
+					"type": "Vector3",
+					"type_from": ""
+				},
+				{
+					"default": "0.3",
+					"doc": "How long the scaling takes, in seconds.",
+					"id": "duration",
+					"lvalue": false,
+					"name": "Duration",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Tween Scale",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": [
+				"Node3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "control",
+			"color": "#60a5fa",
+			"default_phase": "enter",
+			"description": "Reveals the text of a label one character at a time, the typewriter effect used in dialogue. Runs once when the state starts.",
+			"has_body": false,
+			"icon": "text-cursor",
+			"id": "type_text",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The Label or RichTextLabel that shows the text.",
+					"id": "label",
+					"lvalue": false,
+					"name": "Label",
+					"optional": false,
+					"options": [],
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": "'Hello'",
+					"doc": "The full text to reveal.",
+					"id": "text",
+					"lvalue": false,
+					"name": "Text",
+					"optional": false,
+					"options": [],
+					"type": "String",
+					"type_from": ""
+				},
+				{
+					"default": "30.0",
+					"doc": "How many characters appear per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Type Text",
+			"outputs": [],
+			"phases": [
+				"enter"
+			],
+			"target_classes": []
 		},
 		{
 			"branches": [],
@@ -11326,12 +13710,72 @@
 				"exit"
 			],
 			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "math",
+			"color": "#8b5cf6",
+			"default_phase": "update",
+			"description": "Brings a number back into a range, so a value past the end comes out at Min again. It is what cycles a menu index from the last item back to the first.",
+			"has_body": false,
+			"icon": "repeat",
+			"id": "wrap_value",
+			"inputs": [
+				{
+					"default": "0",
+					"doc": "The number to bring back into the range.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "0",
+					"doc": "The start of the range, which the result can be.",
+					"id": "min",
+					"lvalue": false,
+					"name": "Min",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				},
+				{
+					"default": "10",
+					"doc": "The end of the range, which the result never is. With a Min of 0, this is the item count.",
+					"id": "max",
+					"lvalue": false,
+					"name": "Max",
+					"optional": false,
+					"options": [],
+					"type": "Variant",
+					"type_from": "result"
+				}
+			],
+			"name": "Wrap Number",
+			"outputs": [
+				{
+					"doc": "The wrapped value, a whole number when every input is one.",
+					"id": "result",
+					"name": "Result",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"exit"
+			],
+			"target_classes": []
 		}
 	],
 	"categories": [
 		{
 			"color": "#f97316",
-			"count": 13,
+			"count": 14,
 			"icon": "git-branch",
 			"id": "flow",
 			"name": "Flow"
@@ -11352,7 +13796,7 @@
 		},
 		{
 			"color": "#8b5cf6",
-			"count": 12,
+			"count": 13,
 			"icon": "sigma",
 			"id": "math",
 			"name": "Math"
@@ -11373,7 +13817,7 @@
 		},
 		{
 			"color": "#a855f7",
-			"count": 32,
+			"count": 33,
 			"icon": "move-3d",
 			"id": "vector",
 			"name": "Vector"
@@ -11401,7 +13845,7 @@
 		},
 		{
 			"color": "#0abde3",
-			"count": 14,
+			"count": 16,
 			"icon": "move",
 			"id": "node2d",
 			"name": "Node 2D"
@@ -11414,29 +13858,50 @@
 			"name": "Node 3D"
 		},
 		{
+			"color": "#0ea5e9",
+			"count": 7,
+			"icon": "video",
+			"id": "camera",
+			"name": "Camera"
+		},
+		{
 			"color": "#22d3ee",
-			"count": 14,
+			"count": 15,
 			"icon": "shapes",
 			"id": "physics2d",
 			"name": "Physics 2D"
 		},
 		{
 			"color": "#2dd4bf",
-			"count": 13,
+			"count": 14,
 			"icon": "box",
 			"id": "physics3d",
 			"name": "Physics 3D"
 		},
 		{
+			"color": "#2bb5c4",
+			"count": 5,
+			"icon": "atom",
+			"id": "physics",
+			"name": "Physics"
+		},
+		{
+			"color": "#4ade80",
+			"count": 3,
+			"icon": "route",
+			"id": "navigation",
+			"name": "Navigation"
+		},
+		{
 			"color": "#38bdf8",
-			"count": 11,
+			"count": 15,
 			"icon": "gamepad-2",
 			"id": "input",
 			"name": "Input"
 		},
 		{
 			"color": "#ec4899",
-			"count": 8,
+			"count": 11,
 			"icon": "volume-2",
 			"id": "audio",
 			"name": "Audio"
@@ -11450,35 +13915,42 @@
 		},
 		{
 			"color": "#fb7185",
-			"count": 4,
+			"count": 9,
 			"icon": "sparkles",
 			"id": "tween",
 			"name": "Tween"
 		},
 		{
 			"color": "#f368e0",
-			"count": 4,
+			"count": 6,
 			"icon": "palette",
 			"id": "render",
 			"name": "Render"
 		},
 		{
 			"color": "#60a5fa",
-			"count": 10,
+			"count": 11,
 			"icon": "sliders-horizontal",
 			"id": "control",
 			"name": "Control"
 		},
 		{
 			"color": "#64748b",
-			"count": 22,
+			"count": 32,
 			"icon": "layers",
 			"id": "scene",
 			"name": "Scene"
 		},
 		{
+			"color": "#a3a3a3",
+			"count": 7,
+			"icon": "save",
+			"id": "save",
+			"name": "Save"
+		},
+		{
 			"color": "#94a3b8",
-			"count": 3,
+			"count": 5,
 			"icon": "timer",
 			"id": "time",
 			"name": "Time"

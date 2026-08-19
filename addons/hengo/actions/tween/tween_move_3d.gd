@@ -1,0 +1,59 @@
+@tool
+class_name HenActionTweenMove3D extends HenScriptMacroBase
+
+
+func get_id() -> StringName:
+	return &'tween_move_3d'
+
+
+func get_description() -> String:
+	return 'Smoothly moves the node to a target position over time. Runs once when the state starts.'
+
+
+func get_display_name() -> String:
+	return 'Tween Move'
+
+
+func get_icon() -> String:
+	return 'move'
+
+
+func get_target_classes() -> Array[StringName]:
+	return [&'Node3D']
+
+
+func get_default_phase() -> StringName:
+	return &'enter'
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'To',
+			type = 'Vector3',
+			id = &'to',
+			doc = 'The position to move to.',
+			default_value = Vector3.ZERO
+		},
+		{
+			name = 'Duration',
+			type = 'float',
+			id = &'duration',
+			doc = 'How long the movement takes, in seconds.',
+			default_value = 0.3
+		}
+	]
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '_ref.create_tween().tween_property(_ref, "position", {{to}}, {{duration}})'

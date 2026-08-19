@@ -63,9 +63,20 @@ func get_flow_enter() -> String:
 	return _body()
 
 
-# capture the current tint so the flash returns to it, not to plain white
+# SpriteBase3D and Label3D also inherit GeometryInstance3D
 func _body() -> String:
-	return 'var orig_{{VCNODE_ID}} = {{target}}.modulate\n' \
-		+ 'var flash_{{VCNODE_ID}} = _ref.create_tween()\n' \
-		+ 'flash_{{VCNODE_ID}}.tween_property({{target}}, "modulate", {{color}}, {{duration}} * 0.5)\n' \
-		+ 'flash_{{VCNODE_ID}}.tween_property({{target}}, "modulate", orig_{{VCNODE_ID}}, {{duration}} * 0.5)'
+	return 'var node_{{VCNODE_ID}} = {{target}}\n' \
+		+ 'if node_{{VCNODE_ID}} is CanvasItem or node_{{VCNODE_ID}} is SpriteBase3D or node_{{VCNODE_ID}} is Label3D:\n' \
+		+ '\tvar orig_{{VCNODE_ID}} = node_{{VCNODE_ID}}.modulate\n' \
+		+ '\tvar flash_{{VCNODE_ID}} = _ref.create_tween()\n' \
+		+ '\tflash_{{VCNODE_ID}}.tween_property(node_{{VCNODE_ID}}, "modulate", {{color}}, {{duration}} * 0.5)\n' \
+		+ '\tflash_{{VCNODE_ID}}.tween_property(node_{{VCNODE_ID}}, "modulate", orig_{{VCNODE_ID}}, {{duration}} * 0.5)\n' \
+		+ 'elif node_{{VCNODE_ID}} is GeometryInstance3D:\n' \
+		+ '\tif (node_{{VCNODE_ID}} as GeometryInstance3D).material_override == null:\n' \
+		+ '\t\t(node_{{VCNODE_ID}} as GeometryInstance3D).material_override = StandardMaterial3D.new()\n' \
+		+ '\tvar material_{{VCNODE_ID}} := (node_{{VCNODE_ID}} as GeometryInstance3D).material_override as StandardMaterial3D\n' \
+		+ '\tif material_{{VCNODE_ID}}:\n' \
+		+ '\t\tvar orig_{{VCNODE_ID}} = material_{{VCNODE_ID}}.albedo_color\n' \
+		+ '\t\tvar flash_{{VCNODE_ID}} = _ref.create_tween()\n' \
+		+ '\t\tflash_{{VCNODE_ID}}.tween_property(material_{{VCNODE_ID}}, "albedo_color", {{color}}, {{duration}} * 0.5)\n' \
+		+ '\t\tflash_{{VCNODE_ID}}.tween_property(material_{{VCNODE_ID}}, "albedo_color", orig_{{VCNODE_ID}}, {{duration}} * 0.5)'
