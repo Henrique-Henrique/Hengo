@@ -68,9 +68,17 @@ static func format(_graph: HenFlowGraphTypes.FlowGraph) -> Rect2:
 	_start_format(_graph.entry, data)
 
 	_place_bodies(_graph)
-	_wrap_chains(_graph, data)
+
+	if wrap_enabled():
+		_wrap_chains(_graph, data)
 
 	return _bounding_of(_graph.nodes)
+
+
+# a long run is cut into columns to keep the state readable; turning it off drops
+# the run straight down, which is what a reader following the sequence expects
+static func wrap_enabled() -> bool:
+	return bool(ProjectSettings.get_setting(HenSettings.FLOW_WRAP_PATH, true))
 
 
 # --- chain wrapping ---
@@ -372,8 +380,37 @@ static func _bounding_of(_nodes: Array) -> Rect2:
 
 # a loop's chain is laid out on its own and folded into the owner's size, so the
 # outer pass sees a loop as one box
-static func _layout_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
+# a loop grows to fit its body, so a loop nested in another has to be measured
+# first: sized in graph order, the outer one is inflated around a body that has
+# not grown yet and the inner one ends up larger than the card holding it
+static func _bodies_deepest_first(_graph: HenFlowGraphTypes.FlowGraph) -> Array:
+	var owner_of: Dictionary = {}
+	var ranked: Array = []
+
 	for node: HenFlowGraphTypes.FlowNode in _graph.nodes:
+		for member: HenFlowGraphTypes.FlowNode in node.body:
+			owner_of[member] = node
+
+	for node: HenFlowGraphTypes.FlowNode in _graph.nodes:
+		if node.body.is_empty():
+			continue
+
+		var depth: int = 0
+		var current: Variant = owner_of.get(node)
+
+		while current != null and depth < _graph.nodes.size():
+			depth += 1
+			current = owner_of.get(current)
+
+		ranked.append({node = node, depth = depth})
+
+	ranked.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.depth) > int(b.depth))
+
+	return ranked.map(func(entry: Dictionary) -> HenFlowGraphTypes.FlowNode: return entry.node)
+
+
+static func _layout_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
+	for node: HenFlowGraphTypes.FlowNode in _bodies_deepest_first(_graph):
 		if node.body.is_empty():
 			continue
 

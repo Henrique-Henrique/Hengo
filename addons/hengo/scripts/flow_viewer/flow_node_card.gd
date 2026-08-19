@@ -550,14 +550,17 @@ func _emit_header(_size: Vector2) -> void:
 
 		_hit(menu, &'menu', {})
 
-		var below: Rect2 = Rect2(menu.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
-		var above: Rect2 = Rect2(below.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
+		# a producer is pulled in by a wire instead of sitting in the chain, so there
+		# is no step above or below it to add
+		if node.kind != &'producer':
+			var below: Rect2 = Rect2(menu.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
+			var above: Rect2 = Rect2(below.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
 
-		_emit_plus(above, true)
-		_emit_plus(below, false)
+			_emit_plus(above, true)
+			_emit_plus(below, false)
 
-		_hit(above, &'add_above', {})
-		_hit(below, &'add_below', {})
+			_hit(above, &'add_above', {})
+			_hit(below, &'add_below', {})
 
 	_hit(Rect2(Vector2.ZERO, Vector2(_size.x, _header_h)), &'header', {})
 
@@ -671,6 +674,16 @@ func _emit_output(_entry: Dictionary, _centre: float, _width: float) -> void:
 		LABEL_SIZE,
 		Vector2(_width - PAD - SLOT_DOT - SLOT_GAP - _entry.output_w, _centre - label_h * 0.5),
 		_label_color()
+	)
+
+	# the dot and its name pick where the result lands, the way an input pin picks
+	# where its value comes from
+	var hit_w: float = PAD + SLOT_DOT + SLOT_GAP + _entry.output_w
+
+	_hit(
+		Rect2(Vector2(_width - hit_w, _centre - _entry.height * 0.5), Vector2(hit_w, _entry.height)),
+		&'output',
+		{pin = pin}
 	)
 
 

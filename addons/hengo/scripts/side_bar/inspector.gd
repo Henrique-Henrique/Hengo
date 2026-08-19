@@ -490,6 +490,16 @@ func _create_value_slot(slot: Dictionary) -> void:
 		_mount_slot(container, idx, indent)
 		return
 
+	var picker: StringName = _slot_picker(slot, param)
+
+	if HenSlotPickers.has(picker):
+		var suggest_bt := Button.new()
+		suggest_bt.icon = load('res://addons/hengo/assets/new_icons/list.svg')
+		suggest_bt.tooltip_text = 'Pick one the project already has'
+		suggest_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		suggest_bt.pressed.connect(_open_suggestion_picker.bind(param, picker, suggest_bt))
+		row.add_child(suggest_bt)
+
 	var bind_bt := Button.new()
 	bind_bt.icon = load('res://addons/hengo/assets/new_icons/circle-dot.svg')
 	bind_bt.tooltip_text = 'Bind to a variable or property'
@@ -604,6 +614,36 @@ func _macro_param(slot: Dictionary) -> HenSaveParam:
 	return (slot.get('macro_params', {}) as Dictionary).get(slot.get('bind_key', '')) as HenSaveParam
 
 
+# named source of suggestions of a slot, declared by the macro
+func _slot_picker(slot: Dictionary, param: HenSaveParam) -> StringName:
+	var macro_param: HenSaveParam = _macro_param(slot)
+
+	if macro_param and not macro_param.picker.is_empty():
+		return macro_param.picker
+
+	return param.picker
+
+
+# the entries are read here, not at load, so they follow the project as it is now
+func _open_suggestion_picker(param: HenSaveParam, picker: StringName, anchor: Button) -> void:
+	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
+	var list: Array = []
+
+	for entry: String in HenSlotPickers.entries(picker):
+		list.append({name = entry})
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		pos = anchor.global_position,
+		min_size = Vector2(240, 260)
+	})
+
+	menu.mount(list, func(item: Dictionary) -> void:
+		param.default_value = str(item.name)
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+	, 'item_type')
+
+
 func _open_option_picker(param: HenSaveParam, options: Array[String], anchor: Button) -> void:
 	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
 	var list: Array = []
@@ -694,14 +734,25 @@ func _on_bind_selected(item: Dictionary, slot: Dictionary) -> void:
 				(expr_store as Dictionary).erase(expr_key)
 			_erase_action(slot)
 			_update_props()
+			_notify_store_change(slot)
 		'bind':
 			bind_store[bind_key] = item.code
 			if expr_store != null:
 				(expr_store as Dictionary).erase(expr_key)
 			_erase_action(slot)
 			_update_props()
+			_notify_store_change(slot)
 		'native_arg':
 			_prompt_source_arg(slot, str(item.source_key))
+
+
+# where an output lands decides whether the flow view draws a store node for it,
+# so that edit moves the graph and not just the row
+func _notify_store_change(slot: Dictionary) -> void:
+	if not (resource is HenSaveAction) or slot.get('bind_store') != (resource as HenSaveAction).output_bindings:
+		return
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
 
 # a slot holds one source at a time

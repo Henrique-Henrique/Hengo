@@ -36,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			picker = 'group',
 			doc = 'The group to search for the closest node.',
 			default_value = 'enemies'
 		}

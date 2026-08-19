@@ -1081,6 +1081,17 @@ func _dispatch_click() -> bool:
 	if not action:
 		return true
 
+	# every port of a store node names one output of the action feeding it
+	if card.node.kind == &'store' and (hit.kind == &'pin' or hit.kind == &'chip'):
+		_editing_card = card
+		_editor_for(hit.node)
+		# binding an output adds or drops the store node itself, so the picture has
+		# to be rebuilt once the popup is done with it
+		_rebuild_pending = true
+		_editor.open_output(action, StringName(str((hit.part as Dictionary).get('output_id', ''))), rect)
+
+		return true
+
 	var origin: Vector2 = hit.origin
 
 	if hit.kind == &'menu' and card.node.action:
@@ -1092,6 +1103,13 @@ func _dispatch_click() -> bool:
 		_editing_card = card
 		_editor_for(hit.node)
 		_editor.open_producer((hit.part as Dictionary).get('slot', {}), rect)
+		return true
+
+	if hit.kind == &'output':
+		_editing_card = card
+		_editor_for(hit.node)
+		_rebuild_pending = true
+		_editor.open_output(card.node.action, (hit.pin as HenFlowGraphTypes.FlowPin).id, rect)
 		return true
 
 	if hit.kind == &'chip':

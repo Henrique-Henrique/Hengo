@@ -13,7 +13,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Eases a number toward a target like a spring, so it overshoots and settles instead of gliding in. Stiffness pulls harder and Damping bleeds off the bounce.'
+	return 'Eases a number toward a target like a spring, so it overshoots and settles instead of gliding in. Stiffness pulls harder and Damping bleeds off the bounce. It settles without landing exactly, so use Is Near to tell that it arrived.'
 
 
 func get_display_name() -> String:

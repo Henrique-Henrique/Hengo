@@ -26,6 +26,9 @@ var default_value: Variant = null
 @export var bind_only: bool = false
 # optional one-line explanation of this field, shown in the hover documentation
 @export var doc: String = ''
+# optional named source of suggestions, listed when the slot opens instead of at
+# load time, so it follows what the project holds right now
+@export var picker: StringName = &''
 
 
 func _init() -> void:
@@ -49,6 +52,7 @@ static func create(data: Dictionary = {}) -> HenSaveParam:
 			for option: Variant in data.options:
 				p.options.append(str(option))
 		if data.has('doc'): p.doc = str(data.doc)
+		if data.has('picker'): p.picker = StringName(str(data.picker))
 		if data.has('default_value'): p.default_value = data.default_value
 	return p
 
@@ -65,13 +69,14 @@ func get_data() -> Dictionary:
 		bind_only = bind_only,
 		optional = optional,
 		doc = doc,
+		picker = picker,
 		default_value = default_value
 	}
 
 
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
-	if _property.name in [&'type_from', &'options', &'raw', &'lvalue', &'bind_only', &'optional', &'doc']:
+	if _property.name in [&'type_from', &'options', &'raw', &'lvalue', &'bind_only', &'optional', &'doc', &'picker']:
 		_property.usage = PROPERTY_USAGE_STORAGE
 
 

@@ -28,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Scene Path',
 			type = 'String',
 			id = &'path',
+			picker = 'scene_path',
 			doc = 'The path to the scene file to load when the fade ends.',
 			default_value = 'res://scenes/level.tscn'
 		},

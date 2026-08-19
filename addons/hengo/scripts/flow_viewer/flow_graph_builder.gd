@@ -59,12 +59,14 @@ static func _add_tail(_graph: HenFlowGraphTypes.FlowGraph, _bucket: Array, _phas
 	var last: Variant = _bucket.back() if not _bucket.is_empty() else null
 
 	if last:
-		_graph.connect_pins(&'exec', _graph.nodes[_index_of(_graph, StringName('a' + str(last.id)))], HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
+		_graph.connect_pins(&'exec', _head_of(_graph, last.id), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
 	else:
 		_graph.connect_pins(&'exec', _graph.entry, _phase, node, HenFlowGraphTypes.ENTER_PIN)
 
 
 # walks one action list in order, wiring each action's `then` into the next
+# returns the nodes that ended up carrying the sequence, in order: an action that
+# left its place to a store is not one of them, the store is
 static func _chain(
 	_graph: HenFlowGraphTypes.FlowGraph,
 	_save_data: HenSaveData,
@@ -72,17 +74,38 @@ static func _chain(
 	_from: HenFlowGraphTypes.FlowNode,
 	_from_pin: StringName,
 	_phase: StringName
-) -> void:
+) -> Array[HenFlowGraphTypes.FlowNode]:
+	var links: Array[HenFlowGraphTypes.FlowNode] = []
 	var previous: HenFlowGraphTypes.FlowNode = _from
 	var previous_pin: StringName = _from_pin
 
 	for action: HenSaveAction in _actions:
-		var node: HenFlowGraphTypes.FlowNode = _action_node(_graph, _save_data, action, &'action', _phase)
+		var macro: HenSaveMacro = HenActionsPanel.find_macro(action.macro_id)
+		var stored: bool = wants_store(action, macro)
+		# an action that only produces a value leaves the sequence to its store; one
+		# that also runs the flow keeps its place and the store follows it
+		var pulled: bool = stored and is_pure_producer(macro)
+		var node: HenFlowGraphTypes.FlowNode = _action_node(
+			_graph, _save_data, action, &'producer' if pulled else &'action', _phase
+		)
 
-		_graph.connect_pins(&'exec', previous, previous_pin, node, HenFlowGraphTypes.ENTER_PIN)
+		if not pulled:
+			_graph.connect_pins(&'exec', previous, previous_pin, node, HenFlowGraphTypes.ENTER_PIN)
 
-		previous = node
-		previous_pin = HenFlowGraphTypes.THEN_PIN
+			previous = node
+			previous_pin = HenFlowGraphTypes.THEN_PIN
+			links.append(node)
+
+		if stored:
+			var store: HenFlowGraphTypes.FlowNode = _store_node(_graph, _save_data, action, macro, node)
+
+			_graph.connect_pins(&'exec', previous, previous_pin, store, HenFlowGraphTypes.ENTER_PIN)
+
+			previous = store
+			previous_pin = HenFlowGraphTypes.THEN_PIN
+			links.append(store)
+
+	return links
 
 
 static func _entry_node(_state: HenSaveState) -> HenFlowGraphTypes.FlowNode:
@@ -133,10 +156,10 @@ static func _action_node(
 
 	if macro and macro.has_body:
 		node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.BODY_PIN, &'exec_out', 'Body'))
-		_chain(_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase)
 
-		for child: HenSaveAction in _action.body_actions:
-			node.body.append(_graph.nodes[_index_of(_graph, StringName('a' + str(child.id)))])
+		# the body is the nodes that carry its sequence, which is not the same list
+		# as its actions: a stored action hands that place to its store
+		node.body.assign(_chain(_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase))
 
 	return node
 
@@ -204,6 +227,64 @@ static func _producer_output(_ref: Variant, _producer: HenFlowGraphTypes.FlowNod
 	return outputs[0].id if not outputs.is_empty() else &''
 
 
+# an action gets a store as soon as one of its results has somewhere to land
+static func wants_store(_action: HenSaveAction, _macro: HenSaveMacro) -> bool:
+	if not _macro or _macro.outputs.is_empty():
+		return false
+
+	for output: HenSaveParam in _macro.outputs:
+		if not str(_action.output_bindings.get(str(output.id), '')).is_empty():
+			return true
+
+	return false
+
+
+# an action whose whole job is to produce a value reads as a step of the sequence,
+# which it is not: the store takes that place and pulls the action in as a source,
+# the same shape an inline producer already has. one that branches or owns a body
+# does run the sequence, so it stays where it is
+static func is_pure_producer(_macro: HenSaveMacro) -> bool:
+	return _macro != null and not _macro.has_body and _macro.flow_outputs.is_empty()
+
+
+# where the results of an action land: one node per action, with a port per stored
+# output, standing in the chain in place of the action that feeds it
+static func _store_node(
+	_graph: HenFlowGraphTypes.FlowGraph,
+	_save_data: HenSaveData,
+	_action: HenSaveAction,
+	_macro: HenSaveMacro,
+	_node: HenFlowGraphTypes.FlowNode
+) -> HenFlowGraphTypes.FlowNode:
+	var store: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
+
+	store.id = StringName('st' + str(_action.id))
+	store.kind = &'store'
+	store.action = _action
+	store.title = 'Store In'
+	store.icon = 'save'
+	store.accent = str(HenActionCategories.get_data('variable').color)
+	store.phase = _node.phase
+
+	store.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
+
+	for part: Dictionary in HenActionsPanel.output_parts(_action, _macro, _save_data):
+		var id: StringName = StringName(str(part.get('output_id', '')))
+		var pin: HenFlowGraphTypes.FlowPin = HenFlowGraphTypes.FlowPin.new(id, &'data_in', str(part.get('output_name', '')))
+
+		pin.part = part
+		store.add_pin(pin)
+
+	store.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.THEN_PIN, &'exec_out'))
+
+	_graph.add_node(store)
+
+	for pin: HenFlowGraphTypes.FlowPin in store.pins_of(&'data_in'):
+		_graph.connect_pins(&'data', _node, pin.id, store, pin.id)
+
+	return store
+
+
 # a branch with a target leaves the state, so it gets its own node; one without a
 # target is a `pass` in the emitted code and stays a bare port
 static func _add_branch_pins(
@@ -237,6 +318,18 @@ static func _add_branch_pins(
 
 		_graph.add_node(transition)
 		_graph.connect_pins(&'exec', _node, flow.id, transition, HenFlowGraphTypes.ENTER_PIN)
+
+
+# the node that carries an action in the sequence: its store when it has one,
+# since a stored action hangs off that store instead of the chain
+static func _head_of(_graph: HenFlowGraphTypes.FlowGraph, _action_id: Variant) -> HenFlowGraphTypes.FlowNode:
+	var store_id: StringName = StringName('st' + str(_action_id))
+
+	for node: HenFlowGraphTypes.FlowNode in _graph.nodes:
+		if node.id == store_id:
+			return node
+
+	return _graph.nodes[_index_of(_graph, StringName('a' + str(_action_id)))]
 
 
 static func _index_of(_graph: HenFlowGraphTypes.FlowGraph, _id: StringName) -> int:

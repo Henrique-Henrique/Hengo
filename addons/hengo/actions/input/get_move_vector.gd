@@ -28,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Left',
 			type = 'StringName',
 			id = &'left',
+			picker = 'input_action',
 			doc = 'The input action for moving left.',
 			default_value = 'ui_left'
 		},
@@ -35,6 +36,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Right',
 			type = 'StringName',
 			id = &'right',
+			picker = 'input_action',
 			doc = 'The input action for moving right.',
 			default_value = 'ui_right'
 		},
@@ -42,6 +44,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Forward',
 			type = 'StringName',
 			id = &'forward',
+			picker = 'input_action',
 			doc = 'The input action for moving forward.',
 			default_value = 'ui_up'
 		},
@@ -49,6 +52,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Back',
 			type = 'StringName',
 			id = &'back',
+			picker = 'input_action',
 			doc = 'The input action for moving back.',
 			default_value = 'ui_down'
 		}

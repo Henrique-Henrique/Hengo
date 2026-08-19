@@ -19,6 +19,7 @@ const DOCK_LOCATION_PATH = 'hengo/settings/dock_location'
 const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 const STATE_ROWS_ZOOM_PATH = 'hengo/settings/state_rows_zoom'
 const STATE_LINES_ZOOM_PATH = 'hengo/settings/state_lines_zoom'
+const FLOW_WRAP_PATH = 'hengo/settings/flow_wrap'
 
 @export_tool_button('Compile current', 'Build') var compile_current: Callable = _on_compile_current_pressed
 
@@ -51,6 +52,13 @@ const STATE_LINES_ZOOM_PATH = 'hengo/settings/state_lines_zoom'
 		_set_value(FONT_SCALE_PATH, value)
 	get:
 		return _get_value(FONT_SCALE_PATH, 0.85)
+
+# off makes a run of actions drop straight down instead of being cut into columns
+@export var flow_wrap: bool:
+	set(value):
+		_set_value(FLOW_WRAP_PATH, value)
+	get:
+		return _get_value(FLOW_WRAP_PATH, true)
 
 @export_group('Panel')
 

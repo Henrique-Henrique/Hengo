@@ -48,6 +48,8 @@
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_nodes_panel.tscn" id="dbgpanel_inst"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/bug.svg" id="57_bug"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/command.svg" id="54_shortcuts"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/columns-3.svg" id="55_wrapon"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/unfold-vertical.svg" id="56_wrapoff"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_sidetabs"]
 
@@ -495,6 +497,15 @@ layout_mode = 2
 mouse_default_cursor_shape = 2
 tooltip_text = "Rebuild the flow layout"
 icon = ExtResource("53_refresh")
+flat = true
+
+[node name="FlowWrapBt" type="Button" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTopBar/CanvasTopBarMargin/CanvasTopBarHBox" unique_id=2000000110]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+toggle_mode = true
+tooltip_text = "Flow layout"
+icon = ExtResource("55_wrapon")
 flat = true
 
 [node name="CompileContainer" type="HBoxContainer" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTopBar/CanvasTopBarMargin/CanvasTopBarHBox" unique_id=1799733899]

@@ -7,6 +7,8 @@ extends RefCounted
 
 const VALUE_POPUP_SCENE = preload('res://addons/hengo/scenes/action_value_popup.tscn')
 const DROPDOWN_SCENE = preload('res://addons/hengo/scenes/drop_down_menu.tscn')
+# first row of a suggestion menu: falls back to the plain text field
+const TYPED_ENTRY: String = 'Type a value...'
 
 signal changed
 signal focus_requested(save_data: HenSaveData)
@@ -75,6 +77,12 @@ func chip_pressed(_part: Dictionary, _chip_index: int, _rect: Rect2, _ring_provi
 		_open_option_picker(_part, _rect)
 		return true
 
+	var picker: StringName = StringName(str(_part.get('picker', &'')))
+
+	if _part.get('kind', &'') == &'literal' and HenSlotPickers.has(picker):
+		_open_picker_menu(_part, picker, _rect)
+		return true
+
 	if StringName(str(_part.get('editor', &''))) == HenActionValueEditors.BOOL:
 		_toggle_bool(_part)
 		return false
@@ -104,6 +112,48 @@ func open_slot(_action: HenSaveAction, _slot: Dictionary, _rect: Rect2) -> void:
 		param.name if param else HenActionsPanel.display_name(_action),
 		_anchored_opts(_rect, Vector2(300, 0))
 	)
+
+
+# the same write-only slot the inspector builds for an output: a destination, with
+# no literal editor and no expression
+func open_output(_action: HenSaveAction, _output_id: StringName, _rect: Rect2) -> void:
+	if _reject() or not _action:
+		return
+
+	var macro: HenSaveMacro = HenActionsPanel.find_macro(_action.macro_id)
+
+	if not macro:
+		return
+
+	for output: HenSaveParam in macro.outputs:
+		if output.id != _output_id:
+			continue
+
+		is_editing = true
+
+		var slot_param: HenSaveParam = HenSaveParam.create({
+			name = output.name,
+			type = str(output.type),
+			id = str(output.id),
+			lvalue = true,
+			optional = true
+		})
+
+		HenInspector.edit_slot(
+			_action,
+			{
+				param = slot_param,
+				bind_store = _action.output_bindings,
+				bind_key = str(output.id),
+				macro_params = {},
+				quick_var = true,
+				indent = 0
+			},
+			output.name,
+			_anchored_opts(_rect, Vector2(300, 0))
+		)
+
+		return
 
 
 # the pin is where a value comes from, so it offers the actions that produce one
@@ -282,6 +332,37 @@ func edit_action(_action: HenSaveAction, _rect: Rect2, _inline: bool) -> void:
 		nested,
 		true
 	)
+
+
+# the list is read when the menu opens, so it follows what the project holds now
+func _open_picker_menu(_part: Dictionary, _picker: StringName, _rect: Rect2) -> void:
+	var param: HenSaveParam = (_part.get('slot', {}) as Dictionary).get('param')
+
+	if not param:
+		return
+
+	var menu: HenDropDownMenu = DROPDOWN_SCENE.instantiate()
+	var options: Array = [{name = TYPED_ENTRY}]
+
+	for entry: String in HenSlotPickers.entries(_picker):
+		options.append({name = entry})
+
+	is_editing = true
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_rect = _rect,
+		side = SIDE_TOP,
+		min_size = Vector2(240, 260)
+	})
+
+	menu.mount(options, func(item: Dictionary) -> void:
+		if str(item.name) == TYPED_ENTRY:
+			_open_value_popup.call_deferred(_part, _rect)
+			return
+
+		param.default_value = str(item.name)
+	, 'item_type')
 
 
 func _open_option_picker(_part: Dictionary, _rect: Rect2) -> void:

@@ -12,7 +12,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Smoothly eases a variable or property toward a target value each frame.'
+	return 'Smoothly eases a variable or property toward a target value each frame. It keeps getting closer without ever landing exactly, so use Is Near to tell that it arrived.'
 
 
 func get_display_name() -> String:

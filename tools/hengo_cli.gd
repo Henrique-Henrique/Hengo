@@ -143,6 +143,7 @@ func _input_data(_param: HenSaveParam) -> Dictionary:
 		optional = _param.optional,
 		type_from = str(_param.type_from),
 		options = _param.options,
+		picker = str(_param.picker),
 	}
 
 
@@ -337,6 +338,7 @@ func _export_input(_param: HenSaveParam) -> Dictionary:
 		optional = _param.optional,
 		type_from = str(_param.type_from),
 		options = _param.options,
+		picker = str(_param.picker),
 	}
 
 

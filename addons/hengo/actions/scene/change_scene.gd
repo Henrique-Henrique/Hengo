@@ -32,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Scene Path',
 			type = 'String',
 			id = &'path',
+			picker = 'scene_path',
 			doc = 'The path to the scene file to load.',
 			default_value = 'res://scenes/main.tscn'
 		}

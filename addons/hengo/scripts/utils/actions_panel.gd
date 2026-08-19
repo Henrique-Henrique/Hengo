@@ -157,6 +157,7 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 
 		part.label = param.name if show_names else ''
 		part.options = declared.options if not declared.options.is_empty() else param.options
+		part.picker = declared.picker if not declared.picker.is_empty() else param.picker
 		part.slot = input_slot(_action, param, declared, params)
 		part.editor = _editor_kind(part, needs_bind)
 		# only the text editor joins the tab ring: tabbing into a colour wheel is noise
@@ -278,6 +279,9 @@ static func _editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:
 	if _part.kind != &'literal' or _needs_bind or not (_part.options as Array).is_empty():
 		return &''
 
+	if not StringName(str(_part.get('picker', &''))).is_empty():
+		return &''
+
 	return HenActionValueEditors.kind_for(str((_part.slot as Dictionary).type))
 
 
@@ -369,6 +373,8 @@ static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro, _owner: H
 			kind = _bind_kind(bind, _owner),
 			label = output.name if show_names else '',
 			value = '-> ' + _bind_label(bind, _owner),
+			output_id = str(output.id),
+			output_name = output.name,
 			slot = {action = _action}
 		})
 

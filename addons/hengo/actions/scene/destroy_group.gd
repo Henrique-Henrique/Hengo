@@ -28,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			picker = 'group',
 			doc = 'The group whose nodes are removed.',
 			default_value = 'enemies'
 		}

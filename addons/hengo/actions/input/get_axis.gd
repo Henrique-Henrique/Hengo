@@ -27,6 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Negative',
 			type = 'StringName',
 			id = &'negative',
+			picker = 'input_action',
 			doc = 'The input action that pushes the value toward -1.',
 			default_value = 'ui_left'
 		},
@@ -34,6 +35,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Positive',
 			type = 'StringName',
 			id = &'positive',
+			picker = 'input_action',
 			doc = 'The input action that pushes the value toward 1.',
 			default_value = 'ui_right'
 		}

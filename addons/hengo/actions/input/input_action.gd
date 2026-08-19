@@ -28,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Action',
 			type = 'StringName',
 			id = &'action',
+			picker = 'input_action',
 			doc = 'The input action to check, as named in the input map.',
 			default_value = 'ui_accept'
 		},

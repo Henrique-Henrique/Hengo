@@ -28,6 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			picker = 'group',
 			doc = 'The group name to drop from the node.',
 			default_value = 'enemies'
 		}

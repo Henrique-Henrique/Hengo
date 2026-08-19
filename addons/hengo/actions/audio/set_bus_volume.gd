@@ -32,6 +32,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Bus',
 			type = 'String',
 			id = &'bus',
+			picker = 'audio_bus',
 			doc = 'The name of the audio bus to change.',
 			default_value = 'Master'
 		},

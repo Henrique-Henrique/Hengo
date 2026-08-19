@@ -182,9 +182,34 @@ func _setup_flow_view() -> void:
 	if shortcuts_bt:
 		shortcuts_bt.pressed.connect(show_shortcuts)
 
+	var wrap_bt: Button = get_node_or_null('%FlowWrapBt')
+
+	if wrap_bt:
+		wrap_bt.button_pressed = not HenFlowFormatter.wrap_enabled()
+		_sync_wrap_button(wrap_bt)
+		wrap_bt.toggled.connect(func(_pressed: bool) -> void:
+			(Engine.get_singleton(&'Global') as HenGlobal).SETTINGS.flow_wrap = not _pressed
+			_sync_wrap_button(wrap_bt)
+			flow.rebuild()
+		)
+
 	flow.visibility_changed.connect(func():
 		refresh_bt.visible = flow.is_visible_in_tree()
+
+		if wrap_bt:
+			wrap_bt.visible = flow.is_visible_in_tree()
 	)
+
+
+# pressed is the straight layout, so the icon shows the shape the click turns on
+func _sync_wrap_button(_bt: Button) -> void:
+	var straight: bool = _bt.button_pressed
+
+	_bt.icon = load(
+		'res://addons/hengo/assets/new_icons/unfold-vertical.svg' if straight
+		else 'res://addons/hengo/assets/new_icons/columns-3.svg'
+	)
+	_bt.tooltip_text = 'Straight run, one column' if straight else 'Compact run, wrapped into columns'
 
 
 func _on_reset_zoom() -> void:
@@ -231,6 +256,7 @@ func _apply_semantic_colors() -> void:
 	HenUtils.tint_button(get_node('%Config') as Button, c.settings, false)
 	HenUtils.tint_button(get_node('%CloseBt') as Button, c.destructive, false)
 	HenUtils.tint_button(get_node('%RefreshGraphBt') as Button, c.state, false)
+	HenUtils.tint_button(get_node('%FlowWrapBt') as Button, c.state, false)
 
 
 func _on_config_pressed() -> void:

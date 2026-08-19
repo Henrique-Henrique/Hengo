@@ -24,6 +24,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Group',
 			type = 'StringName',
 			id = &'group',
+			picker = 'group',
 			doc = 'The name of the group to look for.',
 			default_value = 'enemies'
 		}

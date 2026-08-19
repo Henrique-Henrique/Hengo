@@ -27,6 +27,9 @@ const CONFIG = {
 }
 
 
+var _tab_before_debug: int = 1
+
+
 func _ready() -> void:
     for id in CONFIG:
         set_tab_title(id, CONFIG[id].title)
@@ -45,6 +48,9 @@ func _ready() -> void:
 
 
 func _on_debug_started() -> void:
+    if current_tab != DEBUG_TAB_INDEX:
+        _tab_before_debug = current_tab
+
     set_tab_hidden(DEBUG_TAB_INDEX, false)
     _set_tab_button_visible(DEBUG_TAB_INDEX, true)
     current_tab = DEBUG_TAB_INDEX
@@ -53,7 +59,7 @@ func _on_debug_started() -> void:
 
 func _on_debug_stopped() -> void:
     if current_tab == DEBUG_TAB_INDEX:
-        current_tab = 0
+        current_tab = _tab_before_debug
     set_tab_hidden(DEBUG_TAB_INDEX, true)
     _set_tab_button_visible(DEBUG_TAB_INDEX, false)
     _sync_tab_buttons()
