@@ -61,6 +61,13 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_result() -> String:
+	if any_flow_connected():
+		return 'kept_{{VCNODE_ID}}'
+
+	return _filter_expr()
+
+
+func _filter_expr() -> String:
 	return '_ref.get_tree().get_nodes_in_group({{group}}).filter(func(n): return n.get({{property}}) {{op}} {{value}})'
 
 
@@ -70,6 +77,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 		{name = 'Update', id = &'update'},
 		{name = 'Physics', id = &'physics'},
 		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Any',
+			id = &'any',
+			optional = true,
+			doc = 'Where to go when at least one node passed the comparison.'
+		},
+		{
+			name = 'None',
+			id = &'none',
+			optional = true,
+			doc = 'Where to go when no node passed, which is when an empty array is stored.'
+		}
 	]
 
 
@@ -90,4 +114,12 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '{{out:result}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return 'var kept_{{VCNODE_ID}} = ' + _filter_expr() + '\n' \
+		+ '{{out:result}}\n' \
+		+ 'if not kept_{{VCNODE_ID}}.is_empty():\n' \
+		+ '\t{{any}}\n' \
+		+ 'else:\n' \
+		+ '\t{{none}}'

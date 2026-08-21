@@ -62,6 +62,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Found',
+			id = &'found',
+			optional = true,
+			doc = 'Where to go when the group had someone to pick.'
+		},
+		{
+			name = 'None',
+			id = &'none',
+			optional = true,
+			doc = 'Where to go when the group is empty, which is when nothing is stored.'
+		}
+	]
+
+
 func get_flow_enter() -> String:
 	return _body()
 
@@ -81,7 +98,7 @@ func get_flow_exit() -> String:
 # scans the group once, keeping the smallest distance; the owner is skipped so it
 # never picks itself. the result lands in {{out:nearest}} when a var is bound
 func _body() -> String:
-	return 'var best_{{VCNODE_ID}} = null\n' \
+	var body: String = 'var best_{{VCNODE_ID}} = null\n' \
 		+ 'var best_dist_{{VCNODE_ID}} = INF\n' \
 		+ 'for node_{{VCNODE_ID}} in _ref.get_tree().get_nodes_in_group({{group}}):\n' \
 		+ '\tif node_{{VCNODE_ID}} == _ref:\n' \
@@ -91,3 +108,12 @@ func _body() -> String:
 		+ '\t\tbest_dist_{{VCNODE_ID}} = d_{{VCNODE_ID}}\n' \
 		+ '\t\tbest_{{VCNODE_ID}} = node_{{VCNODE_ID}}\n' \
 		+ '{{out:nearest}}'
+
+	if not any_flow_connected():
+		return body
+
+	return body + '\n' \
+		+ 'if best_{{VCNODE_ID}} != null:\n' \
+		+ '\t{{found}}\n' \
+		+ 'else:\n' \
+		+ '\t{{none}}'

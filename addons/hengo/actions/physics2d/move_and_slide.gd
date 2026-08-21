@@ -39,6 +39,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Hit Something',
+			id = &'hit',
+			optional = true,
+			doc = 'Where to go when the move ran into a wall, a floor or another body.'
+		},
+		{
+			name = 'Clear',
+			id = &'clear',
+			optional = true,
+			doc = 'Where to go when the move touched nothing.'
+		}
+	]
+
+
 func get_flow_enter() -> String:
 	return _body()
 
@@ -55,5 +72,13 @@ func get_flow_exit() -> String:
 	return _body()
 
 
+# get_slide_collision_count reports what the last move_and_slide call ran into
 func _body() -> String:
-	return '_ref.move_and_slide()'
+	if not any_flow_connected():
+		return '_ref.move_and_slide()'
+
+	return '_ref.move_and_slide()\n' \
+		+ 'if _ref.get_slide_collision_count() > 0:\n' \
+		+ '\t{{hit}}\n' \
+		+ 'else:\n' \
+		+ '\t{{clear}}'

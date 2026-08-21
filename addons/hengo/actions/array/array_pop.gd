@@ -51,6 +51,13 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_result() -> String:
+	if any_flow_connected():
+		return 'item_{{VCNODE_ID}}'
+
+	return _pop_expr()
+
+
+func _pop_expr() -> String:
 	return '{{array}}.pop_{{end}}()'
 
 
@@ -59,6 +66,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 		{name = 'Enter', id = &'enter'},
 		{name = 'Update', id = &'update'},
 		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Got One',
+			id = &'got_one',
+			optional = true,
+			doc = 'Where to go when an item came out of the array.'
+		},
+		{
+			name = 'Empty',
+			id = &'empty',
+			optional = true,
+			doc = 'Where to go when the array had nothing left, which is when null is stored.'
+		}
 	]
 
 
@@ -75,4 +99,12 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '{{out:result}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return 'var item_{{VCNODE_ID}} = ' + _pop_expr() + '\n' \
+		+ '{{out:result}}\n' \
+		+ 'if item_{{VCNODE_ID}} != null:\n' \
+		+ '\t{{got_one}}\n' \
+		+ 'else:\n' \
+		+ '\t{{empty}}'

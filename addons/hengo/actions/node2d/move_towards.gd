@@ -51,5 +51,35 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Arrived',
+			id = &'arrived',
+			optional = true,
+			doc = 'Where to go on the frame the node lands on the target.'
+		},
+		{
+			name = 'Moving',
+			id = &'moving',
+			optional = true,
+			doc = 'Where to go while the target is still ahead.'
+		}
+	]
+
+
 func get_flow_update() -> String:
-	return '_ref.position = _ref.position.move_toward({{target}}, {{speed}} * delta)'
+	return _body()
+
+
+# move_toward returns the target itself once the step covers what is left
+func _body() -> String:
+	if not any_flow_connected():
+		return '_ref.position = _ref.position.move_toward({{target}}, {{speed}} * delta)'
+
+	return 'var to_{{VCNODE_ID}} = {{target}}\n' \
+		+ '_ref.position = _ref.position.move_toward(to_{{VCNODE_ID}}, {{speed}} * delta)\n' \
+		+ 'if _ref.position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
+		+ '\t{{arrived}}\n' \
+		+ 'else:\n' \
+		+ '\t{{moving}}'

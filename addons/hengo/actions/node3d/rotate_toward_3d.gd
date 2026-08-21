@@ -7,6 +7,10 @@ class_name HenActionRotateToward3D extends HenScriptMacroBase
 # must not point along the looking direction.
 
 
+# interpolate_with closes in asymptotically and never lands on the exact angle
+const AIM_TOLERANCE: float = 0.02
+
+
 func get_id() -> StringName:
 	return &'rotate_toward_3d'
 
@@ -64,6 +68,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Aimed',
+			id = &'aimed',
+			optional = true,
+			doc = 'Where to go once the front points at the target, give or take a degree.'
+		},
+		{
+			name = 'Turning',
+			id = &'turning',
+			optional = true,
+			doc = 'Where to go while the front is still off the target.'
+		}
+	]
+
+
 func get_flow_update() -> String:
 	return _body()
 
@@ -76,5 +97,15 @@ func get_flow_physics() -> String:
 # never drifts. the guard skips the frame target and position coincide, where
 # looking_at has no direction to face
 func _body() -> String:
-	return 'if not _ref.global_position.is_equal_approx({{target}}):\n' \
-		+ '\t_ref.global_transform = _ref.global_transform.interpolate_with(_ref.global_transform.looking_at({{target}}, {{up}}), clampf({{speed}} * delta, 0.0, 1.0))'
+	if not any_flow_connected():
+		return 'if not _ref.global_position.is_equal_approx({{target}}):\n' \
+			+ '\t_ref.global_transform = _ref.global_transform.interpolate_with(_ref.global_transform.looking_at({{target}}, {{up}}), clampf({{speed}} * delta, 0.0, 1.0))'
+
+	return 'var to_{{VCNODE_ID}} = {{target}}\n' \
+		+ 'if not _ref.global_position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
+		+ '\t_ref.global_transform = _ref.global_transform.interpolate_with(_ref.global_transform.looking_at(to_{{VCNODE_ID}}, {{up}}), clampf({{speed}} * delta, 0.0, 1.0))\n' \
+		+ 'var aim_{{VCNODE_ID}} = (-_ref.global_transform.basis.z).angle_to(to_{{VCNODE_ID}} - _ref.global_position)\n' \
+		+ 'if aim_{{VCNODE_ID}} <= ' + str(AIM_TOLERANCE) + ':\n' \
+		+ '\t{{aimed}}\n' \
+		+ 'else:\n' \
+		+ '\t{{turning}}'

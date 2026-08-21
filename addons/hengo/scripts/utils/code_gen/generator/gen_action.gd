@@ -149,19 +149,22 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 	# a pure producer whose only content is its outputs contributes nothing when
 	# none is stored: the phase method would be left empty and fail to parse
-	if branches.is_empty():
+	if not _has_branch_target(_save_data, _action, branches):
 		if _produces_nothing(_save_data, _action, _instance, phase):
 			return 'no output stored'
 
-		return ''
+		if branches.is_empty() or _branches_are_optional(branches):
+			return ''
 
 	# change_state calls exit() before swapping current_state, so a transition
-	# emitted from exit re-enters it forever
-	if str(phase) == 'exit':
+	# emitted from exit re-enters it forever. an unwired optional branch emits no
+	# transition at all, so the action is still welcome there
+	if str(phase) == 'exit' and _has_branch_target(_save_data, _action, branches):
 		return 'a branching action cannot run on exit'
 
-	# a branching action with nowhere to go would emit `if x: pass else: pass`
-	if not _has_branch_target(_save_data, _action, branches):
+	# a branching action with nowhere to go would emit `if x: pass else: pass`.
+	# an action whose branches are all optional still does its work without them
+	if not _has_branch_target(_save_data, _action, branches) and not _branches_are_optional(branches):
 		return 'no branch target set'
 
 	# a cross-script branch drives another node's machine — without the instance
@@ -387,6 +390,14 @@ static func _prime_instance(_save_data: HenSaveData, _instance: HenScriptMacroBa
 
 	for key: Variant in _action.input_actions:
 		_instance.bound_inputs[str(key)] = true
+
+	_instance.connected_flows = {}
+
+	for out: Dictionary in _instance.get_flow_outputs():
+		var id: String = str(out.get('id', ''))
+
+		if branch_target(_save_data, _action, id) or not branch_script_id(_save_data, _action, id).is_empty():
+			_instance.connected_flows[id] = true
 
 
 # params for a synthesized lifecycle method: enter mirrors the state's enter vc
@@ -740,6 +751,15 @@ static func find_state(_save_data: HenSaveData, _state_id: StringName) -> HenSav
 	return null
 
 
+# true when every branch the action declares is a shortcut it can go without
+static func _branches_are_optional(_branches: Array) -> bool:
+	for out: Dictionary in _branches:
+		if not bool(out.get('optional', false)):
+			return false
+
+	return true
+
+
 static func _has_branch_target(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:
 	for out: Dictionary in _branches:
 		if branch_target(_save_data, _action, str(out.get('id', ''))):
@@ -988,7 +1008,9 @@ static func _inline_output(_ref: Variant, _instance: HenScriptMacroBase) -> Stri
 
 # a pure value producer: an output to read, no branch, no body, no state hook
 static func is_inlinable(_instance: HenScriptMacroBase) -> bool:
-	if _instance.get_outputs().is_empty() or not _instance.get_flow_outputs().is_empty():
+	# an optional branch is a shortcut nobody wired when the action runs inline, so
+	# it still is the pure value producer an inline slot needs
+	if _instance.get_outputs().is_empty() or not _branches_are_optional(_instance.get_flow_outputs()):
 		return false
 
 	if _instance.get_has_body() or _instance.get_needs_loop() or _declares_hook(_instance):

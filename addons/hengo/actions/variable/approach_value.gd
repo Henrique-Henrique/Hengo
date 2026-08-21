@@ -61,6 +61,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Reached',
+			id = &'reached',
+			optional = true,
+			doc = 'Where to go on the frame the number lands on the target value.'
+		},
+		{
+			name = 'Going',
+			id = &'going',
+			optional = true,
+			doc = 'Where to go while the number is still short of the target value.'
+		}
+	]
+
+
 func get_flow_update() -> String:
 	return _body()
 
@@ -69,5 +86,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# move_toward returns the target itself once the step covers what is left
 func _body() -> String:
-	return '{{target}} = move_toward({{target}}, {{to}}, {{step}} * delta)'
+	if not any_flow_connected():
+		return '{{target}} = move_toward({{target}}, {{to}}, {{step}} * delta)'
+
+	return 'var to_{{VCNODE_ID}} = {{to}}\n' \
+		+ '{{target}} = move_toward({{target}}, to_{{VCNODE_ID}}, {{step}} * delta)\n' \
+		+ 'if {{target}} == to_{{VCNODE_ID}}:\n' \
+		+ '\t{{reached}}\n' \
+		+ 'else:\n' \
+		+ '\t{{going}}'

@@ -418,12 +418,28 @@ func _open_value_popup(_part: Dictionary, _rect: Rect2) -> void:
 	_value_editor.confirmed.connect(_on_value_confirmed)
 	_value_editor.tabbed.connect(_on_value_tabbed)
 	_value_editor.cancelled.connect(_close_value_popup)
+	_value_editor.bind_requested.connect(_on_bind_requested.bind(_rect))
 
 	_value_popup = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(_value_editor, opts)
 	_value_popup.closed.connect(_on_value_popup_closed, CONNECT_ONE_SHOT)
 
 	_value_editor.edit(_part, text)
 	_value_editor.focus_field.call_deferred()
+
+
+# the text field writes a literal and nothing else, so a slot that wants a variable,
+# a property or an expression hands over to the inspector row that owns those
+func _on_bind_requested(_part: Variant, _rect: Rect2) -> void:
+	if not _part is Dictionary:
+		return
+
+	var slot: Dictionary = (_part as Dictionary).get('slot', {})
+	var owner: Variant = slot.get('action')
+
+	_close_value_popup()
+
+	if owner is HenSaveAction:
+		open_slot.call_deferred(owner as HenSaveAction, slot, _rect)
 
 
 func _on_value_confirmed(_part: Variant, _text: String) -> void:

@@ -165,7 +165,7 @@ func _export_actions(_out_path: String) -> String:
 			phases = HenSaveAction.supported_phases(macro).map(func(p: StringName) -> String: return str(p)),
 			inputs = macro.inputs.map(_export_input),
 			outputs = macro.outputs.map(func(p: HenSaveParam) -> Dictionary: return {id = str(p.id), name = p.name, type = str(p.type), doc = p.doc}),
-			branches = macro.flow_outputs.map(func(f: HenSaveFlowParam) -> Dictionary: return {id = str(f.id), name = f.name, doc = f.doc}),
+			branches = macro.flow_outputs.map(func(f: HenSaveFlowParam) -> Dictionary: return {id = str(f.id), name = f.name, doc = f.doc, optional = f.optional}),
 			has_body = macro.has_body,
 			target_classes = macro.target_classes.map(func(c: StringName) -> String: return str(c)),
 		})

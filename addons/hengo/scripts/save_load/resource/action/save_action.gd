@@ -73,10 +73,20 @@ static func supported_phases(_macro: HenSaveMacro) -> Array:
 
 	# a branching action can't run on exit: change_state calls exit() BEFORE swapping
 	# current_state, so transitioning from there re-enters it forever
-	if declared.has('exit') and _macro.flow_outputs.is_empty():
+	if declared.has('exit') and _optional_branches(_macro):
 		phases.append(&'exit')
 
 	return phases
+
+
+# an action whose branches are all optional keeps working with none of them wired,
+# so exit stays on the table until one is
+static func _optional_branches(_macro: HenSaveMacro) -> bool:
+	for flow: HenSaveFlowParam in _macro.flow_outputs:
+		if not flow.optional:
+			return false
+
+	return true
 
 
 # a new action starts on a phase the macro actually has a body for, so it never

@@ -213,6 +213,11 @@ func test_turning_wrap_off_keeps_the_run_in_one_column() -> void:
 
 	assert_int(columns.size()).is_greater(1)
 
+	# the setting is global and a save() anywhere would carry it to project.godot,
+	# so what was there before is put back, absent included
+	var had: bool = ProjectSettings.has_setting(HenSettings.FLOW_WRAP_PATH)
+	var before: Variant = ProjectSettings.get_setting(HenSettings.FLOW_WRAP_PATH) if had else null
+
 	ProjectSettings.set_setting(HenSettings.FLOW_WRAP_PATH, false)
 
 	var straight: HenFlowGraphTypes.FlowGraph = _laid_out()
@@ -231,7 +236,7 @@ func test_turning_wrap_off_keeps_the_run_in_one_column() -> void:
 
 		previous = node.position.y
 
-	ProjectSettings.set_setting(HenSettings.FLOW_WRAP_PATH, true)
+	ProjectSettings.set_setting(HenSettings.FLOW_WRAP_PATH, before if had else null)
 
 	assert_int(xs.size()).is_equal(1)
 	assert_bool(ordered).is_true()

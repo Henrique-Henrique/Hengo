@@ -43,7 +43,11 @@ func get_outputs() -> Array[Dictionary]:
 	]
 
 
+# with a branch the lookup lives in a local, so the rhs reads it instead of running twice
 func get_output_result() -> String:
+	if any_flow_connected():
+		return 'node_{{VCNODE_ID}}'
+
 	return '_ref.get_node_or_null({{path}})'
 
 
@@ -51,6 +55,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
 		{name = 'Update', id = &'update'}
+	]
+
+
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Found',
+			id = &'found',
+			optional = true,
+			doc = 'Where to go when the path resolved to a node.'
+		},
+		{
+			name = 'Missing',
+			id = &'missing',
+			optional = true,
+			doc = 'Where to go when nothing sits at that path, which is when null is stored.'
+		}
 	]
 
 
@@ -63,4 +84,12 @@ func get_flow_update() -> String:
 
 
 func _body() -> String:
-	return '{{out:result}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return 'var node_{{VCNODE_ID}} = _ref.get_node_or_null({{path}})\n' \
+		+ '{{out:result}}\n' \
+		+ 'if node_{{VCNODE_ID}} != null:\n' \
+		+ '\t{{found}}\n' \
+		+ 'else:\n' \
+		+ '\t{{missing}}'

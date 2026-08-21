@@ -10,6 +10,9 @@ var target_class: StringName = &''
 var input_values: Dictionary = {}
 # input id -> true when that slot is bound to a variable, property or node path
 var bound_inputs: Dictionary = {}
+# flow output id -> true when that branch has somewhere to go. only meaningful for
+# a branch declared optional: the others are required before the action is emitted
+var connected_flows: Dictionary = {}
 
 
 # literal an input holds on the action being generated
@@ -21,6 +24,16 @@ func value_of(_id: StringName, _fallback: Variant = null) -> Variant:
 
 func is_bound(_id: StringName) -> bool:
 	return bool(bound_inputs.get(str(_id), false))
+
+
+# an optional branch nobody wired should not cost an `if` at runtime, so the body
+# can drop it and emit the plain statement instead
+func is_flow_connected(_id: StringName) -> bool:
+	return bool(connected_flows.get(str(_id), false))
+
+
+func any_flow_connected() -> bool:
+	return not connected_flows.is_empty()
 
 
 # native classes this macro supports; a script whose base inherits from any of

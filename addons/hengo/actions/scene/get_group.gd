@@ -46,6 +46,13 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_members() -> String:
+	if any_flow_connected():
+		return 'members_{{VCNODE_ID}}'
+
+	return _group_expr()
+
+
+func _group_expr() -> String:
 	return '_ref.get_tree().get_nodes_in_group({{group}})'
 
 
@@ -55,6 +62,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 		{name = 'Update', id = &'update'},
 		{name = 'Physics', id = &'physics'},
 		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Any',
+			id = &'any',
+			optional = true,
+			doc = 'Where to go when the group has at least one node.'
+		},
+		{
+			name = 'None',
+			id = &'none',
+			optional = true,
+			doc = 'Where to go when the group is empty, which is when an empty array is stored.'
+		}
 	]
 
 
@@ -75,4 +99,12 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '{{out:members}}'
+	if not any_flow_connected():
+		return '{{out:members}}'
+
+	return 'var members_{{VCNODE_ID}} = ' + _group_expr() + '\n' \
+		+ '{{out:members}}\n' \
+		+ 'if not members_{{VCNODE_ID}}.is_empty():\n' \
+		+ '\t{{any}}\n' \
+		+ 'else:\n' \
+		+ '\t{{none}}'

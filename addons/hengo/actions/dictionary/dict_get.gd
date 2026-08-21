@@ -68,6 +68,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Found',
+			id = &'found',
+			optional = true,
+			doc = 'Where to go when the key is in the dictionary.'
+		},
+		{
+			name = 'Missing',
+			id = &'missing',
+			optional = true,
+			doc = 'Where to go when the key is absent, which is when the default is stored.'
+		}
+	]
+
+
 func get_flow_enter() -> String:
 	return _body()
 
@@ -80,5 +97,13 @@ func get_flow_exit() -> String:
 	return _body()
 
 
+# has() and not the stored value: a missing key gives back Default, which can be anything
 func _body() -> String:
-	return '{{out:result}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{dict}}.has({{key}}):\n' \
+		+ '\t{{found}}\n' \
+		+ 'else:\n' \
+		+ '\t{{missing}}'

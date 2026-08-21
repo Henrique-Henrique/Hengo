@@ -77,6 +77,38 @@
 			"target_classes": []
 		},
 		{
+			"branches": [
+				{
+					"doc": "Where to go on the first run, then on the third, the fifth and so on.",
+					"id": "first",
+					"name": "First",
+					"optional": false
+				},
+				{
+					"doc": "Where to go on the second run, then on the fourth, the sixth and so on.",
+					"id": "second",
+					"name": "Second",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Switches between its two branches on every run, First then Second and back again. The side it stopped on survives leaving and coming back to this state, so a left and right footstep keeps taking turns.",
+			"has_body": false,
+			"icon": "arrow-right-left",
+			"id": "alternate",
+			"inputs": [],
+			"name": "Alternate",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [],
 			"category": "math",
 			"color": "#8b5cf6",
@@ -132,12 +164,14 @@
 				{
 					"doc": "Where to go while something is pressed.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go while nothing is pressed.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -474,7 +508,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go on the frame the number lands on the target value.",
+					"id": "reached",
+					"name": "Reached",
+					"optional": true
+				},
+				{
+					"doc": "Where to go while the number is still short of the target value.",
+					"id": "going",
+					"name": "Going",
+					"optional": true
+				}
+			],
 			"category": "variable",
 			"color": "#1dd1a1",
 			"default_phase": "update",
@@ -609,12 +656,14 @@
 				{
 					"doc": "Where to go when the value is found.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the value is missing.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "array",
@@ -659,7 +708,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the item is in the array.",
+					"id": "found",
+					"name": "Found",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the item is missing, which is when -1 is stored.",
+					"id": "not_found",
+					"name": "Not Found",
+					"optional": true
+				}
+			],
 			"category": "array",
 			"color": "#f59e0b",
 			"default_phase": "update",
@@ -856,7 +918,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when an item came out of the array.",
+					"id": "got_one",
+					"name": "Got One",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the array had nothing left, which is when null is stored.",
+					"id": "empty",
+					"name": "Empty",
+					"optional": true
+				}
+			],
 			"category": "array",
 			"color": "#f59e0b",
 			"default_phase": "update",
@@ -1379,7 +1454,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when at least one body sits inside the radius.",
+					"id": "any",
+					"name": "Any",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the radius is clear, which is when an empty list is stored.",
+					"id": "none",
+					"name": "None",
+					"optional": true
+				}
+			],
 			"category": "physics",
 			"color": "#2bb5c4",
 			"default_phase": "physics",
@@ -1929,12 +2017,14 @@
 				{
 					"doc": "Where to go when nothing stands between the two nodes.",
 					"id": "clear",
-					"name": "Clear"
+					"name": "Clear",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when something is in the way.",
 					"id": "blocked",
-					"name": "Blocked"
+					"name": "Blocked",
+					"optional": false
 				}
 			],
 			"category": "physics",
@@ -1975,12 +2065,14 @@
 				{
 					"doc": "Where to go when the line touches something.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the line touches nothing.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "physics2d",
@@ -2063,12 +2155,14 @@
 				{
 					"doc": "Where to go when the line touches something.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the line touches nothing.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "physics3d",
@@ -2151,12 +2245,14 @@
 				{
 					"doc": "Where to go when the roll succeeds.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when it fails.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "flow",
@@ -2414,12 +2510,14 @@
 				{
 					"doc": "Where to go when the key check passes.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when it does not.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -2527,12 +2625,14 @@
 				{
 					"doc": "Where to go when the touch happens.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when it does not.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -2742,12 +2842,14 @@
 				{
 					"doc": "Where to go when the comparison is true.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the comparison is false.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "logic",
@@ -2890,12 +2992,14 @@
 				{
 					"doc": "Where to go when the wait is up. It starts the wait again.",
 					"id": "ready",
-					"name": "Ready"
+					"name": "Ready",
+					"optional": false
 				},
 				{
 					"doc": "Where to go while still waiting.",
 					"id": "cooling",
-					"name": "Cooling"
+					"name": "Cooling",
+					"optional": false
 				}
 			],
 			"category": "flow",
@@ -2920,6 +3024,122 @@
 				}
 			],
 			"name": "Cooldown",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go on the run that hits Times. The count goes back to zero right after.",
+					"id": "reached",
+					"name": "Reached",
+					"optional": false
+				},
+				{
+					"doc": "Where to go while the count is still below Times.",
+					"id": "counting",
+					"name": "Counting",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Counts every run and takes the Reached branch on the run number Times, then starts counting again from zero. The count survives leaving and coming back to this state, so it fits things like the third hit killing an enemy.",
+			"has_body": false,
+			"icon": "target",
+			"id": "count_to",
+			"inputs": [
+				{
+					"default": "3",
+					"doc": "How many runs it takes to reach the target.",
+					"id": "times",
+					"lvalue": false,
+					"name": "Times",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Count To",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go on the one frame the value passes the limit.",
+					"id": "crossed",
+					"name": "Crossed",
+					"optional": false
+				},
+				{
+					"doc": "Where to go on every other frame, the ones where it stays past the limit included.",
+					"id": "not_yet",
+					"name": "Not Yet",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Fires its branch once on the frame a value passes a limit in the chosen direction, and stays quiet until the value comes back and passes it again. A value already past the limit when the state is entered counts as a crossing, so it fires once per entry.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "crossed_value",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The number to watch, such as health or a combo counter.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "0",
+					"doc": "The mark the value has to pass.",
+					"id": "limit",
+					"lvalue": false,
+					"name": "Limit",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Variant",
+					"type_from": "value"
+				},
+				{
+					"default": "'below'",
+					"doc": "Which side of the limit counts as crossed.",
+					"id": "direction",
+					"lvalue": false,
+					"name": "Direction",
+					"optional": false,
+					"options": [
+						"below",
+						"above"
+					],
+					"picker": "",
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "Crossed",
 			"outputs": [],
 			"phases": [
 				"update",
@@ -3118,7 +3338,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the key is in the dictionary.",
+					"id": "found",
+					"name": "Found",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the key is absent, which is when the default is stored.",
+					"id": "missing",
+					"name": "Missing",
+					"optional": true
+				}
+			],
 			"category": "dictionary",
 			"color": "#14b8a6",
 			"default_phase": "update",
@@ -3185,12 +3418,14 @@
 				{
 					"doc": "Where to go when the key is found.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the key is missing.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "dictionary",
@@ -3498,14 +3733,60 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go while the run count is still below Times.",
+					"id": "within",
+					"name": "Within",
+					"optional": false
+				},
+				{
+					"doc": "Where to go on every run after the first Times runs.",
+					"id": "done",
+					"name": "Done",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Runs its Within branch on the first runs, up to Times of them, and runs Done on every run after that. The count resets each time the state is entered.",
+			"has_body": false,
+			"icon": "flag-triangle-right",
+			"id": "do_n_times",
+			"inputs": [
+				{
+					"default": "3",
+					"doc": "How many runs go through the Within branch.",
+					"id": "times",
+					"lvalue": false,
+					"name": "Times",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Do N Times",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go the first time only.",
 					"id": "first",
-					"name": "First"
+					"name": "First",
+					"optional": false
 				},
 				{
 					"doc": "Where to go on every following run.",
 					"id": "rest",
-					"name": "Rest"
+					"name": "Rest",
+					"optional": false
 				}
 			],
 			"category": "flow",
@@ -3653,6 +3934,50 @@
 				}
 			],
 			"name": "Every",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go on the last run of each cycle, once every Times runs.",
+					"id": "nth",
+					"name": "Nth",
+					"optional": false
+				},
+				{
+					"doc": "Where to go on the other runs of the cycle.",
+					"id": "between",
+					"name": "Between",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Takes the Nth branch once every so many runs, and the Between branch on the runs in the middle. The cycle resets each time the state is entered.",
+			"has_body": false,
+			"icon": "repeat-1",
+			"id": "every_n_times",
+			"inputs": [
+				{
+					"default": "5",
+					"doc": "How many runs make one cycle. The last run of each cycle takes the Nth branch.",
+					"id": "times",
+					"lvalue": false,
+					"name": "Times",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "int",
+					"type_from": ""
+				}
+			],
+			"name": "Every N Times",
 			"outputs": [],
 			"phases": [
 				"update",
@@ -3852,7 +4177,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when at least one item passed the test.",
+					"id": "any",
+					"name": "Any",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when no item passed, which is when an empty list is stored.",
+					"id": "none",
+					"name": "None",
+					"optional": true
+				}
+			],
 			"category": "array",
 			"color": "#f59e0b",
 			"default_phase": "update",
@@ -3935,7 +4273,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when at least one node passed the comparison.",
+					"id": "any",
+					"name": "Any",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when no node passed, which is when an empty array is stored.",
+					"id": "none",
+					"name": "None",
+					"optional": true
+				}
+			],
 			"category": "scene",
 			"color": "#64748b",
 			"default_phase": "update",
@@ -4475,7 +4826,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the group has at least one node.",
+					"id": "any",
+					"name": "Any",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the group is empty, which is when an empty array is stored.",
+					"id": "none",
+					"name": "None",
+					"optional": true
+				}
+			],
 			"category": "scene",
 			"color": "#64748b",
 			"default_phase": "update",
@@ -4620,7 +4984,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the group had someone to pick.",
+					"id": "found",
+					"name": "Found",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the group is empty, which is when nothing is stored.",
+					"id": "none",
+					"name": "None",
+					"optional": true
+				}
+			],
 			"category": "scene",
 			"color": "#64748b",
 			"default_phase": "update",
@@ -4663,7 +5040,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the path resolved to a node.",
+					"id": "found",
+					"name": "Found",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when nothing sits at that path, which is when null is stored.",
+					"id": "missing",
+					"name": "Missing",
+					"optional": true
+				}
+			],
 			"category": "scene",
 			"color": "#64748b",
 			"default_phase": "enter",
@@ -4998,12 +5388,14 @@
 				{
 					"doc": "Where to go when the node exists.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the node is missing.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "scene",
@@ -5041,12 +5433,14 @@
 				{
 					"doc": "Where to go when a value was saved under that name.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when nothing was saved under that name.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "save",
@@ -5075,6 +5469,62 @@
 			"phases": [
 				"enter",
 				"update"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go once the condition has held long enough. It keeps firing while the condition stays true.",
+					"id": "held",
+					"name": "Held",
+					"optional": false
+				},
+				{
+					"doc": "Where to go while the time is not complete.",
+					"id": "waiting",
+					"name": "Waiting",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Takes the Held branch once the condition has stayed true for the whole time asked, such as holding a button to charge a shot. Any frame the condition fails puts the count back to zero.",
+			"has_body": false,
+			"icon": "timer-reset",
+			"id": "held_for",
+			"inputs": [
+				{
+					"default": "true",
+					"doc": "The test that has to stay true, such as a Check action placed right here.",
+					"id": "condition",
+					"lvalue": false,
+					"name": "Condition",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "bool",
+					"type_from": ""
+				},
+				{
+					"default": "1.0",
+					"doc": "How long the condition has to hold without breaking, in seconds.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Held For",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -5123,12 +5573,14 @@
 				{
 					"doc": "Where to go when the condition is true.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when it is false.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "flow",
@@ -5205,12 +5657,14 @@
 				{
 					"doc": "Where to go when the action check passes.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when it does not.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -5263,12 +5717,14 @@
 				{
 					"doc": "Where to go while the animation is still playing.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go once the animation has stopped.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "animation",
@@ -5304,14 +5760,120 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go when the value has nothing in it.",
+					"id": "empty",
+					"name": "Empty",
+					"optional": false
+				},
+				{
+					"doc": "Where to go when it holds something.",
+					"id": "has_something",
+					"name": "Has Something",
+					"optional": false
+				}
+			],
+			"category": "logic",
+			"color": "#ef4444",
+			"default_phase": "update",
+			"description": "Checks whether a value holds nothing and branches on the answer. Text, lists and dictionaries are empty when they have no items, a value that is missing counts as empty, and a number always counts as something.",
+			"has_body": false,
+			"icon": "package-open",
+			"id": "is_empty",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The text, list or dictionary to check.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "Is Empty",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go while the target is inside the cone.",
+					"id": "facing",
+					"name": "Facing",
+					"optional": false
+				},
+				{
+					"doc": "Where to go while the target is outside it.",
+					"id": "away",
+					"name": "Away",
+					"optional": false
+				}
+			],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Checks whether the node is turned toward a point, inside a cone of the given width, and branches on the answer. It fits an enemy that only notices what is in front of it, or a turret that only shoots forward.",
+			"has_body": false,
+			"icon": "radar",
+			"id": "is_facing",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The point to face. A node works too, its global position is read.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Variant",
+					"type_from": ""
+				},
+				{
+					"default": "45.0",
+					"doc": "Half the width of the cone in degrees, so 45 accepts a target up to 45 degrees off to either side.",
+					"id": "angle",
+					"lvalue": false,
+					"name": "Angle",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Is Facing",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go when the node is in the group.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the node is not in the group.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "scene",
@@ -5349,12 +5911,14 @@
 				{
 					"doc": "Where to go once the two are close enough.",
 					"id": "yes",
-					"name": "Yes"
+					"name": "Yes",
+					"optional": false
 				},
 				{
 					"doc": "Where to go while they are still apart.",
 					"id": "no",
-					"name": "No"
+					"name": "No",
+					"optional": false
 				}
 			],
 			"category": "logic",
@@ -5416,12 +5980,14 @@
 				{
 					"doc": "Where to go when the body touches a ceiling.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the body touches no ceiling.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "physics2d",
@@ -5448,12 +6014,14 @@
 				{
 					"doc": "Where to go when the body is on the floor.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the body is in the air.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "physics2d",
@@ -5480,12 +6048,14 @@
 				{
 					"doc": "Where to go when the body is on the floor.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the body is in the air.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "physics3d",
@@ -5512,12 +6082,14 @@
 				{
 					"doc": "Where to go while the node is on screen.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go once the node is off screen.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "node2d",
@@ -5544,12 +6116,14 @@
 				{
 					"doc": "Where to go when the body touches a wall.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the body touches no wall.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "physics2d",
@@ -5576,12 +6150,14 @@
 				{
 					"doc": "Where to go while the sound is still playing.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go once the sound has stopped.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "audio",
@@ -5619,12 +6195,14 @@
 				{
 					"doc": "Where to go when the object is still valid.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the object has been freed.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "logic",
@@ -5929,7 +6507,20 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when a value was saved under that name.",
+					"id": "found",
+					"name": "Found",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when nothing was saved under that name, which is when the default is stored.",
+					"id": "missing",
+					"name": "Missing",
+					"optional": true
+				}
+			],
 			"category": "save",
 			"color": "#a3a3a3",
 			"default_phase": "enter",
@@ -6427,12 +7018,14 @@
 				{
 					"doc": "Where to go when the button check passes.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when it does not.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -6617,7 +7210,8 @@
 				{
 					"doc": "",
 					"id": "flow_out",
-					"name": "Out"
+					"name": "Out",
+					"optional": false
 				}
 			],
 			"category": "",
@@ -6740,12 +7334,14 @@
 				{
 					"doc": "Where to go when the move hits something.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the move hits nothing.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "physics2d",
@@ -6803,12 +7399,14 @@
 				{
 					"doc": "Where to go when the move hits something.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the move hits nothing.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "node3d",
@@ -6862,7 +7460,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the move ran into a wall, a floor or another body.",
+					"id": "hit",
+					"name": "Hit Something",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the move touched nothing.",
+					"id": "clear",
+					"name": "Clear",
+					"optional": true
+				}
+			],
 			"category": "physics2d",
 			"color": "#22d3ee",
 			"default_phase": "physics",
@@ -6884,7 +7495,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the move ran into a wall, a floor or another body.",
+					"id": "hit",
+					"name": "Hit Something",
+					"optional": true
+				},
+				{
+					"doc": "Where to go when the move touched nothing.",
+					"id": "clear",
+					"name": "Clear",
+					"optional": true
+				}
+			],
 			"category": "physics3d",
 			"color": "#2dd4bf",
 			"default_phase": "physics",
@@ -7031,7 +7655,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go on the frame the node lands on the target.",
+					"id": "arrived",
+					"name": "Arrived",
+					"optional": true
+				},
+				{
+					"doc": "Where to go while the target is still ahead.",
+					"id": "moving",
+					"name": "Moving",
+					"optional": true
+				}
+			],
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "update",
@@ -7075,7 +7712,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go on the frame the node lands on the target.",
+					"id": "arrived",
+					"name": "Arrived",
+					"optional": true
+				},
+				{
+					"doc": "Where to go while the target is still ahead.",
+					"id": "moving",
+					"name": "Moving",
+					"optional": true
+				}
+			],
 			"category": "node3d",
 			"color": "#06b6d4",
 			"default_phase": "update",
@@ -7228,7 +7878,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7277,7 +7928,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7326,7 +7978,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7373,9 +8026,54 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go on the one frame the condition turns true.",
+					"id": "became_true",
+					"name": "Became True",
+					"optional": false
+				},
+				{
+					"doc": "Where to go on every other frame, the ones where it stays true included.",
+					"id": "not_yet",
+					"name": "Not Yet",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Fires its branch only on the frame the condition turns true, and stays quiet while it keeps being true. A condition already true when the state is entered counts as turning true, so it fires once per entry.",
+			"has_body": false,
+			"icon": "toggle-right",
+			"id": "on_became_true",
+			"inputs": [
+				{
+					"default": "false",
+					"doc": "The test to watch, such as a comparison kept in a variable or a Check action placed right here.",
+					"id": "condition",
+					"lvalue": false,
+					"name": "Condition",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "bool",
+					"type_from": ""
+				}
+			],
+			"name": "Just Became True",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7424,7 +8122,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7473,7 +8172,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7510,7 +8210,8 @@
 				{
 					"doc": "Where to go when any child button is pressed.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7557,9 +8258,59 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go when the click landed on this node.",
+					"id": "clicked",
+					"name": "Clicked",
+					"optional": false
+				},
+				{
+					"doc": "Where to go on every other frame.",
+					"id": "not_clicked",
+					"name": "Not Clicked",
+					"optional": false
+				}
+			],
+			"category": "input",
+			"color": "#38bdf8",
+			"default_phase": "physics",
+			"description": "Checks whether a mouse click landed on this node and branches on the answer. It asks the 2D physics world what sits under the cursor, so the node needs a collision shape, and it only fires on the frame the button goes down.",
+			"has_body": false,
+			"icon": "square-mouse-pointer",
+			"id": "on_clicked",
+			"inputs": [
+				{
+					"default": "'left'",
+					"doc": "Which mouse button has to go down.",
+					"id": "button",
+					"lvalue": false,
+					"name": "Button",
+					"optional": false,
+					"options": [
+						"left",
+						"right",
+						"middle"
+					],
+					"picker": "",
+					"type": "String",
+					"type_from": ""
+				}
+			],
+			"name": "On Clicked",
+			"outputs": [],
+			"phases": [
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7596,7 +8347,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7633,7 +8385,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7709,7 +8462,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7758,7 +8512,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7795,7 +8550,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7844,7 +8600,8 @@
 				{
 					"doc": "Where to go when the signal is received.",
 					"id": "received",
-					"name": "Received"
+					"name": "Received",
+					"optional": false
 				}
 			],
 			"category": "event",
@@ -7893,12 +8650,14 @@
 				{
 					"doc": "Where to go once the agent arrived at the target.",
 					"id": "yes",
-					"name": "Yes"
+					"name": "Yes",
+					"optional": false
 				},
 				{
 					"doc": "Where to go while the agent is still on its way.",
 					"id": "no",
-					"name": "No"
+					"name": "No",
+					"optional": false
 				}
 			],
 			"category": "navigation",
@@ -7936,12 +8695,14 @@
 				{
 					"doc": "Where to go when a collider is under the mouse.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when nothing is under it.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -7973,12 +8734,14 @@
 				{
 					"doc": "Where to go when a collider is under the mouse.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when nothing is under it, which is also the case while no camera is active.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "input",
@@ -8794,12 +9557,14 @@
 				{
 					"doc": "Where to go when the ray touches something.",
 					"id": "hit",
-					"name": "Hit"
+					"name": "Hit",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the ray touches nothing.",
 					"id": "miss",
-					"name": "Miss"
+					"name": "Miss",
+					"optional": false
 				}
 			],
 			"category": "physics3d",
@@ -9193,7 +9958,20 @@
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go once the front points at the target, give or take a degree.",
+					"id": "aimed",
+					"name": "Aimed",
+					"optional": true
+				},
+				{
+					"doc": "Where to go while the front is still off the target.",
+					"id": "turning",
+					"name": "Turning",
+					"optional": true
+				}
+			],
 			"category": "node3d",
 			"color": "#06b6d4",
 			"default_phase": "update",
@@ -11663,12 +12441,14 @@
 				{
 					"doc": "Where to go when the substring is found.",
 					"id": "true",
-					"name": "True"
+					"name": "True",
+					"optional": false
 				},
 				{
 					"doc": "Where to go when the substring is not found.",
 					"id": "false",
-					"name": "False"
+					"name": "False",
+					"optional": false
 				}
 			],
 			"category": "string",
@@ -12123,6 +12903,31 @@
 		},
 		{
 			"branches": [],
+			"category": "time",
+			"color": "#94a3b8",
+			"default_phase": "update",
+			"description": "Stores how many seconds this state has been running, counting from zero again every time the state is entered. Feed it to a progress bar or to anything that grows the longer the state lasts.",
+			"has_body": false,
+			"icon": "clock",
+			"id": "time_in_state",
+			"inputs": [],
+			"name": "Time In State",
+			"outputs": [
+				{
+					"doc": "Where to store the seconds spent in this state so far.",
+					"id": "result",
+					"name": "Seconds",
+					"type": "float"
+				}
+			],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [],
 			"category": "string",
 			"color": "#eab308",
 			"default_phase": "update",
@@ -12216,7 +13021,8 @@
 				{
 					"doc": "Where to transition to.",
 					"id": "to",
-					"name": "To"
+					"name": "To",
+					"optional": false
 				}
 			],
 			"category": "flow",
@@ -12827,6 +13633,57 @@
 			"outputs": [],
 			"phases": [
 				"enter"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go on the one frame the value is different.",
+					"id": "changed",
+					"name": "Changed",
+					"optional": false
+				},
+				{
+					"doc": "Where to go while the value stays the same.",
+					"id": "same",
+					"name": "Same",
+					"optional": false
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Fires its branch on the frame a value stops being what it was, and reports the value it held before. The first run after the state is entered only records the value, so it never fires on entry.",
+			"has_body": false,
+			"icon": "arrow-right-left",
+			"id": "value_changed",
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The value to watch, such as the current weapon or the phase name.",
+					"id": "value",
+					"lvalue": false,
+					"name": "Value",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Variant",
+					"type_from": ""
+				}
+			],
+			"name": "When It Changes",
+			"outputs": [
+				{
+					"doc": "The value held until this change.",
+					"id": "previous",
+					"name": "Previous",
+					"type": "Variant"
+				}
+			],
+			"phases": [
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -14226,7 +15083,8 @@
 				{
 					"doc": "Where to go when the time is up.",
 					"id": "finished",
-					"name": "Finished"
+					"name": "Finished",
+					"optional": false
 				}
 			],
 			"category": "time",
@@ -14377,7 +15235,7 @@
 	"categories": [
 		{
 			"color": "#f97316",
-			"count": 14,
+			"count": 22,
 			"icon": "git-branch",
 			"id": "flow",
 			"name": "Flow"
@@ -14412,7 +15270,7 @@
 		},
 		{
 			"color": "#ef4444",
-			"count": 7,
+			"count": 8,
 			"icon": "git-compare",
 			"id": "logic",
 			"name": "Logic"
@@ -14447,7 +15305,7 @@
 		},
 		{
 			"color": "#0abde3",
-			"count": 16,
+			"count": 17,
 			"icon": "move",
 			"id": "node2d",
 			"name": "Node 2D"
@@ -14496,7 +15354,7 @@
 		},
 		{
 			"color": "#38bdf8",
-			"count": 15,
+			"count": 16,
 			"icon": "gamepad-2",
 			"id": "input",
 			"name": "Input"
@@ -14552,7 +15410,7 @@
 		},
 		{
 			"color": "#94a3b8",
-			"count": 5,
+			"count": 6,
 			"icon": "timer",
 			"id": "time",
 			"name": "Time"

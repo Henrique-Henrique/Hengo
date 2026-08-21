@@ -4,12 +4,15 @@ class_name HenActionValuePopup extends MarginContainer
 signal confirmed(chip: Variant, text: String)
 signal tabbed(chip: Variant, text: String)
 signal cancelled
+# the field only writes a literal, so the value sources live one click away
+signal bind_requested(chip: Variant)
 
 var chip: Variant
 
 
 func _ready() -> void:
 	_field().gui_input.connect(_on_field_input)
+	(get_node('Row/BindBt') as Button).pressed.connect(func() -> void: bind_requested.emit(chip))
 
 
 # points the field at another chip without respawning the popup, which is what
@@ -28,7 +31,7 @@ func focus_field() -> void:
 
 
 func _field() -> LineEdit:
-	return get_node('Input')
+	return get_node('Row/Input')
 
 
 func _on_field_input(_event: InputEvent) -> void:

@@ -63,6 +63,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Any',
+			id = &'any',
+			optional = true,
+			doc = 'Where to go when at least one body sits inside the radius.'
+		},
+		{
+			name = 'None',
+			id = &'none',
+			optional = true,
+			doc = 'Where to go when the radius is clear, which is when an empty list is stored.'
+		}
+	]
+
+
 func get_flow_enter() -> String:
 	return _body()
 
@@ -77,6 +94,14 @@ func get_flow_physics() -> String:
 
 # intersect_shape needs a result cap
 func _body() -> String:
+	var tail: String = ''
+
+	if any_flow_connected():
+		tail = '\nif not list_{{VCNODE_ID}}.is_empty():\n' \
+			+ '\t{{any}}\n' \
+			+ 'else:\n' \
+			+ '\t{{none}}'
+
 	if targets(&'Node3D'):
 		return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
 			+ 'if _ref is CollisionObject3D:\n' \
@@ -92,7 +117,7 @@ func _body() -> String:
 			+ 'var list_{{VCNODE_ID}}: Array = []\n' \
 			+ 'for item_{{VCNODE_ID}} in found_{{VCNODE_ID}}:\n' \
 			+ '\tlist_{{VCNODE_ID}}.append(item_{{VCNODE_ID}}.collider)\n' \
-			+ '{{out:result}}'
+			+ '{{out:result}}' + tail
 
 	return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
 		+ 'if _ref is CollisionObject2D:\n' \
@@ -108,4 +133,4 @@ func _body() -> String:
 		+ 'var list_{{VCNODE_ID}}: Array = []\n' \
 		+ 'for item_{{VCNODE_ID}} in found_{{VCNODE_ID}}:\n' \
 		+ '\tlist_{{VCNODE_ID}}.append(item_{{VCNODE_ID}}.collider)\n' \
-		+ '{{out:result}}'
+		+ '{{out:result}}' + tail

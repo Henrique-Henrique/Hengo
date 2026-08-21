@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://addons/hengo/scripts/utils/action_value_popup.gd" id="1_value_popup"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/circle-dot.svg" id="2_bind_icon"]
 
 [node name="ActionValuePopup" type="MarginContainer"]
 theme_override_constants/margin_left = 2
@@ -9,7 +10,18 @@ theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
 script = ExtResource("1_value_popup")
 
-[node name="Input" type="LineEdit" parent="."]
+[node name="Row" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Input" type="LineEdit" parent="Row"]
 layout_mode = 2
 size_flags_horizontal = 3
 caret_blink = true
+
+[node name="BindBt" type="Button" parent="Row"]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+tooltip_text = "Use a variable, a property or an expression"
+icon = ExtResource("2_bind_icon")
+flat = true

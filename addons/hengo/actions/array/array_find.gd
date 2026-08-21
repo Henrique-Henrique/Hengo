@@ -49,6 +49,13 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_result() -> String:
+	if any_flow_connected():
+		return 'idx_{{VCNODE_ID}}'
+
+	return _find_expr()
+
+
+func _find_expr() -> String:
 	return '{{array}}.find({{value}})'
 
 
@@ -57,6 +64,23 @@ func get_flow_inputs() -> Array[Dictionary]:
 		{name = 'Enter', id = &'enter'},
 		{name = 'Update', id = &'update'},
 		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_outputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Found',
+			id = &'found',
+			optional = true,
+			doc = 'Where to go when the item is in the array.'
+		},
+		{
+			name = 'Not Found',
+			id = &'not_found',
+			optional = true,
+			doc = 'Where to go when the item is missing, which is when -1 is stored.'
+		}
 	]
 
 
@@ -73,4 +97,12 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '{{out:result}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return 'var idx_{{VCNODE_ID}} = ' + _find_expr() + '\n' \
+		+ '{{out:result}}\n' \
+		+ 'if idx_{{VCNODE_ID}} != -1:\n' \
+		+ '\t{{found}}\n' \
+		+ 'else:\n' \
+		+ '\t{{not_found}}'

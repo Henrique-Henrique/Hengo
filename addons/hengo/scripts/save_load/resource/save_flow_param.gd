@@ -8,6 +8,9 @@ static func create(data: Dictionary = {}) -> HenSaveFlowParam:
 		if data.has('name'): p.name = data.name
 		if data.has('id'): p.id = str(data.id)
 		if data.has('doc'): p.doc = str(data.doc)
+		# an optional branch is a shortcut the action offers, not the reason it runs:
+		# leaving it unset keeps the plain body instead of failing the action
+		if data.has('optional'): p.optional = bool(data.optional)
 	return p
 
 
@@ -16,6 +19,7 @@ func get_data() -> Dictionary:
 		name = name,
 		id = id,
 		doc = doc,
+		optional = optional,
 	}
 
 
