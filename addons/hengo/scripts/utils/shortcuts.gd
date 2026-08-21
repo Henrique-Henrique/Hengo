@@ -74,6 +74,20 @@ const LIST: Array[Dictionary] = [
 	},
 	{
 		group = FLOW,
+		combo = ['Ctrl', 'C'],
+		title = 'Copy actions',
+		description = 'Copies every selected step, values and branches included.',
+		method = '_copy_selected'
+	},
+	{
+		group = FLOW,
+		combo = ['Ctrl', 'V'],
+		title = 'Paste actions',
+		description = 'Drops the copied steps under the selected one, in the chain it runs in.',
+		method = '_paste_actions'
+	},
+	{
+		group = FLOW,
 		combo = ['Ctrl', 'A'],
 		title = 'Select the chain',
 		description = 'Extends the selection to every step of the chain the selected one runs in.',

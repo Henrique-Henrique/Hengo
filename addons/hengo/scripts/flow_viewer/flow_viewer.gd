@@ -902,6 +902,27 @@ func _editor_for_state(_state_id: StringName) -> void:
 	_editor.target(global.SAVE_DATA if global else null, _state_id)
 
 
+func _copy_selected() -> bool:
+	return HenActionClipboard.copy(selected_actions()) > 0
+
+
+# the anchor is the last selected step, so a paste lands under the bottom of the
+# selection instead of scattering from the top
+func _paste_actions() -> bool:
+	if not HenActionClipboard.has_content() or _selected_actions.is_empty():
+		return false
+
+	var anchor: HenSaveAction = _action_by_id(_selected_actions[-1])
+	var state_id: StringName = _state_by_action.get(_selected_actions[-1], &'') if anchor else &''
+
+	if not anchor or state_id.is_empty():
+		return false
+
+	_editor_for_state(state_id)
+
+	return _editor.paste_actions(HenActionClipboard.take(), anchor.phase, _editor.index_around(anchor, true))
+
+
 func _duplicate_selected() -> bool:
 	var states: Array = _states_of_selection()
 

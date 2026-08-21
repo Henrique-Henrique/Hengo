@@ -444,3 +444,146 @@ func test_the_click_dispatch_honours_the_modifiers() -> void:
 	viewer._click_select(cards[0], false, false)
 
 	assert_int(viewer._selected_actions.size()).is_equal(1)
+
+
+func _other_state() -> HenSaveState:
+	var other: HenSaveState = save_data.add_state(false)
+
+	other.name = 'Idle'
+
+	return other
+
+
+func test_copy_and_paste_adds_new_ids() -> void:
+	var viewer: HenFlowViewer = _viewer(2)
+	var cards: Array = _action_cards(viewer)
+	var original: String = str((cards[0] as HenFlowNodeCard).node.action.id)
+
+	viewer._select_card(cards[0])
+
+	assert_bool(viewer._copy_selected()).is_true()
+	assert_bool(viewer._paste_actions()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(3)
+
+	for action: HenSaveAction in save_data.get_state_actions(state.id):
+		if action != (cards[0] as HenFlowNodeCard).node.action:
+			assert_str(str(action.id)).is_not_equal(original)
+
+
+# the copy is detached: deleting the original must not empty the clipboard
+func test_the_clipboard_survives_deleting_the_original() -> void:
+	var viewer: HenFlowViewer = _viewer(2)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._copy_selected()
+	viewer._delete_selected()
+
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+	assert_bool(HenActionClipboard.has_content()).is_true()
+
+	viewer._select_card(_action_cards(viewer)[0])
+
+	assert_bool(viewer._paste_actions()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+
+
+func test_pasting_twice_never_repeats_an_id() -> void:
+	var viewer: HenFlowViewer = _viewer(1)
+
+	viewer._select_card(_action_cards(viewer)[0])
+	viewer._copy_selected()
+	viewer._paste_actions()
+	viewer._select_card(_action_cards(viewer)[0])
+	viewer._paste_actions()
+
+	var ids: Array = []
+
+	for action: HenSaveAction in save_data.get_state_actions(state.id):
+		assert_bool(ids.has(str(action.id))).is_false()
+		ids.append(str(action.id))
+
+	assert_int(ids.size()).is_equal(3)
+
+
+func test_pasting_a_batch_is_one_undo() -> void:
+	var viewer: HenFlowViewer = _viewer(2)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._toggle_card(cards[1])
+	viewer._copy_selected()
+	viewer._select_card(_action_cards(viewer)[0])
+
+	assert_bool(viewer._paste_actions()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(4)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+	assert_bool(viewer._undo()).is_false()
+
+
+func test_pasting_with_nothing_selected_does_nothing() -> void:
+	var viewer: HenFlowViewer = _viewer(1)
+
+	viewer._select_card(_action_cards(viewer)[0])
+	viewer._copy_selected()
+	viewer._clear_selection()
+
+	assert_bool(viewer._paste_actions()).is_false()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+
+# a step keeps its own phase when the macro has no body for the target chain
+func test_pasting_into_a_chain_the_macro_cannot_run_in() -> void:
+	var viewer: HenFlowViewer = _viewer(2)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._copy_selected()
+
+	(cards[1] as HenFlowNodeCard).node.action.phase = &'enter'
+	viewer.rebuild()
+
+	var anchor: HenFlowNodeCard = viewer._cards_by_action.get(str((cards[1] as HenFlowNodeCard).node.action.id))
+
+	viewer._select_card(anchor)
+
+	assert_bool(viewer._paste_actions()).is_true()
+
+	var pasted: HenSaveAction = save_data.get_state_actions(state.id).filter(
+		func(a): return a != (cards[0] as HenFlowNodeCard).node.action and a != anchor.node.action
+	)[0]
+
+	assert_bool(HenActionsPanel.can_use_phase(pasted, &'enter')).is_equal(str(pasted.phase) == 'enter')
+
+
+func test_pasting_into_another_state() -> void:
+	var viewer: HenFlowViewer = _viewer(1)
+	var other: HenSaveState = _other_state()
+	var landing: HenSaveAction = HenSaveAction.create(_register(FIX_MATH))
+
+	landing.phase = &'update'
+	save_data.add_state_action(other.id, landing)
+
+	viewer._select_card(_action_cards(viewer)[0])
+	viewer._copy_selected()
+	viewer.rebuild()
+	viewer._select_card(viewer._cards_by_action.get(str(landing.id)))
+
+	assert_bool(viewer._paste_actions()).is_true()
+	assert_int(save_data.get_state_actions(other.id).size()).is_equal(2)
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+
+# ctrl+c and ctrl+v are also the cnode canvas bindings, in hengo_root._input. the
+# flow answers first because _shortcut_input runs earlier, and the two only stay
+# apart because the handler is guarded by is_visible_in_tree
+func test_the_flow_owns_copy_and_paste_while_it_is_visible() -> void:
+	var viewer: HenFlowViewer = _viewer(1)
+
+	viewer._select_card(_action_cards(viewer)[0])
+
+	assert_bool(viewer._handle_shortcut(_key(KEY_C, true))).is_true()
+	assert_bool(viewer._handle_shortcut(_key(KEY_V, true))).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)

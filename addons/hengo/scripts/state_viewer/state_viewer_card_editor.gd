@@ -243,6 +243,40 @@ func _do_insert(_macro: HenSaveMacro, _data: HenSaveData, _state_id: StringName,
 	_data.set_state_actions(_state_id, HenActionsPanel.reorder(list, action, action.phase, _at if _at >= 0 else bucket.size()))
 
 
+# pasted steps land in run order after the anchor, each one keeping its own phase
+# when the macro has a body for the target chain
+func paste_actions(_actions: Array, _phase: StringName, _at: int) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if _actions.is_empty() or not global or not global.SAVE_DATA or _state_id.is_empty():
+		return false
+
+	var data: HenSaveData = global.SAVE_DATA
+	var state_id: StringName = _state_id
+
+	var done: bool = _record([state_id], 'Paste Action', func() -> bool:
+		var index: int = _at
+
+		for action: HenSaveAction in _actions:
+			if HenActionsPanel.can_use_phase(action, _phase):
+				action.phase = _phase
+
+			var list: Array = data.get_state_actions(state_id).duplicate()
+			var bucket: Array = HenActionsPanel.group_by_phase(list).get(str(action.phase), [])
+
+			list.append(action)
+			data.set_state_actions(state_id, HenActionsPanel.reorder(list, action, action.phase, index if index >= 0 else bucket.size()))
+
+			index += 1
+
+		return true
+	)
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
+	return done
+
+
 # the flat index a new step lands on to sit right before or after this one
 func index_around(_action: HenSaveAction, _below: bool) -> int:
 	if not _save_data:
