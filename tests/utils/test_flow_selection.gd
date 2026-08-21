@@ -109,7 +109,7 @@ func test_a_card_without_an_action_clears_the_selection() -> void:
 	viewer._select_card(entry)
 
 	assert_bool((cards[0] as HenFlowNodeCard).is_selected()).is_false()
-	assert_str(viewer._selected_action).is_empty()
+	assert_array(viewer._selected_actions).is_empty()
 
 
 func test_clearing_deselects_the_card() -> void:
@@ -145,7 +145,7 @@ func test_an_action_that_is_gone_drops_the_selection() -> void:
 	save_data.remove_state_action(state.id, card.node.action)
 	viewer.rebuild()
 
-	assert_str(viewer._selected_action).is_empty()
+	assert_array(viewer._selected_actions).is_empty()
 	assert_int(_action_cards(viewer).filter(func(c): return c.is_selected()).size()).is_equal(0)
 
 
@@ -311,3 +311,136 @@ func _drop_inspector() -> void:
 
 	# make_flat queue_frees the scroll it unparents, which lands a frame later
 	await await_idle_frame()
+
+
+func _cards_of(_viewer: HenFlowViewer, _actions: Array) -> Array:
+	var out: Array = []
+
+	for action: Variant in _actions:
+		out.append(_viewer._cards_by_action.get(str(action.node.action.id if action is HenFlowNodeCard else action.id)))
+
+	return out
+
+
+func test_ctrl_click_grows_and_shrinks_the_selection() -> void:
+	var viewer: HenFlowViewer = _viewer()
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._toggle_card(cards[1])
+
+	assert_int(viewer._selected_actions.size()).is_equal(2)
+	assert_bool((cards[1] as HenFlowNodeCard).is_selected()).is_true()
+
+	viewer._toggle_card(cards[1])
+
+	assert_int(viewer._selected_actions.size()).is_equal(1)
+	assert_bool((cards[1] as HenFlowNodeCard).is_selected()).is_false()
+
+
+# the range runs along the chain, not the flat list: two steps of different
+# phases are never neighbours in the graph
+func test_shift_click_takes_the_range_of_the_chain() -> void:
+	var viewer: HenFlowViewer = _viewer(3)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._select_range_to(cards[2])
+
+	assert_int(viewer._selected_actions.size()).is_equal(3)
+
+
+func test_a_range_across_phases_falls_back_to_a_single_pick() -> void:
+	var viewer: HenFlowViewer = _viewer(2)
+	var cards: Array = _action_cards(viewer)
+
+	(cards[1] as HenFlowNodeCard).node.action.phase = &'enter'
+
+	viewer._select_card(cards[0])
+	viewer._select_range_to(cards[1])
+
+	assert_int(viewer._selected_actions.size()).is_equal(1)
+
+
+func test_the_whole_selection_survives_a_rebuild() -> void:
+	var viewer: HenFlowViewer = _viewer(3)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._toggle_card(cards[2])
+	viewer.rebuild()
+
+	assert_int(_action_cards(viewer).filter(func(c): return c.is_selected()).size()).is_equal(2)
+
+
+# one entry for the batch: record is re-entrant, so a delete of N steps costs one
+# ctrl+z and not N
+func test_deleting_a_batch_is_one_undo() -> void:
+	var viewer: HenFlowViewer = _viewer(3)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._toggle_card(cards[1])
+
+	assert_bool(viewer._delete_selected()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(3)
+	assert_bool(viewer._undo()).is_false()
+
+
+func test_duplicating_a_batch_is_one_undo() -> void:
+	var viewer: HenFlowViewer = _viewer(2)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._toggle_card(cards[1])
+
+	assert_bool(viewer._duplicate_selected()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(4)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+	assert_bool(viewer._undo()).is_false()
+
+
+# moving a batch has to preserve the relative order of the moved steps, which is
+# a different operation from swapping with a neighbour
+func test_moving_refuses_a_batch() -> void:
+	var viewer: HenFlowViewer = _viewer(3)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._select_card(cards[0])
+	viewer._toggle_card(cards[1])
+
+	assert_bool(viewer._move_selected(1)).is_false()
+
+
+func test_ctrl_a_takes_the_chain() -> void:
+	var viewer: HenFlowViewer = _viewer(3)
+
+	viewer._select_card(_action_cards(viewer)[1])
+
+	assert_bool(viewer._select_chain_shortcut()).is_true()
+	assert_int(viewer._selected_actions.size()).is_equal(3)
+
+
+# the modifier comes from the event and not from the global Input state, so the
+# dispatch branch is reachable in a test at all
+func test_the_click_dispatch_honours_the_modifiers() -> void:
+	var viewer: HenFlowViewer = _viewer(3)
+	var cards: Array = _action_cards(viewer)
+
+	viewer._click_select(cards[0], false, false)
+	viewer._click_select(cards[1], true, false)
+
+	assert_int(viewer._selected_actions.size()).is_equal(2)
+
+	viewer._click_select(cards[2], false, true)
+
+	assert_int(viewer._selected_actions.size()).is_equal(2)
+
+	viewer._click_select(cards[0], false, false)
+
+	assert_int(viewer._selected_actions.size()).is_equal(1)

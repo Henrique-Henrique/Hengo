@@ -52,7 +52,9 @@ var _click_press_pos: Vector2 = Vector2.ZERO
 var _context_press_pos: Vector2 = Vector2.ZERO
 # action id, not the card: a rebuild frees every card, and the selection has to
 # come back on the node the user picked
-var _selected_action: String = ''
+var _selected_actions: Array[String] = []
+# where a shift click measures the range from
+var _selection_anchor: String = ''
 # the card the press landed on, and the drop it is currently pointing at
 var _press_card: HenFlowNodeCard = null
 var _dragging: bool = false
@@ -762,7 +764,7 @@ func _gui_input(event: InputEvent) -> void:
 	# drags never count as a click
 	var is_click: bool = button.position.distance_to(_click_press_pos) <= CLICK_TOLERANCE
 
-	if is_click and _dispatch_click():
+	if is_click and _dispatch_click(button.ctrl_pressed, button.shift_pressed):
 		_click_last_time = 0
 		return
 
@@ -834,8 +836,17 @@ func _move_down() -> bool:
 	return _move_selected(1)
 
 
+func _select_chain_shortcut() -> bool:
+	if _selected_actions.is_empty():
+		return false
+
+	_select_chain_of(_selected_actions[0])
+
+	return true
+
+
 func _clear_selection_shortcut() -> bool:
-	if _selected_action.is_empty():
+	if _selected_actions.is_empty():
 		return false
 
 	_clear_selection()
@@ -867,12 +878,13 @@ func _redo() -> bool:
 	return true
 
 
+# one step at a time on purpose: moving a batch has to preserve the relative order
+# of the moved steps, which is a different operation from swapping with a neighbour
 func _move_selected(_delta: int) -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 	var action: HenSaveAction = selected_action()
-	var state_id: StringName = _state_by_action.get(_selected_action, &'')
+	var state_id: StringName = _state_by_action.get(str(action.id), &'') if action else &''
 
-	if not global or not action or state_id.is_empty():
+	if _selected_actions.size() != 1 or not action or state_id.is_empty():
 		return false
 
 	_editor_for_state(state_id)
@@ -891,36 +903,60 @@ func _editor_for_state(_state_id: StringName) -> void:
 
 
 func _duplicate_selected() -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
-	var action: HenSaveAction = selected_action()
-	var state_id: StringName = _state_by_action.get(_selected_action, &'')
+	var states: Array = _states_of_selection()
 
-	if not global or not action or state_id.is_empty():
+	if states.is_empty():
 		return false
 
-	_editor_for_state(state_id)
-	_editor.duplicate_action(action)
+	var actions: Array[HenSaveAction] = selected_actions()
 
-	return true
+	_ensure_editor()
+
+	return _history.record(_save_data(), states, 'Duplicate Action', func() -> bool:
+		for action: HenSaveAction in actions:
+			var state_id: StringName = _state_by_action.get(str(action.id), &'')
+
+			if state_id.is_empty():
+				continue
+
+			_editor.target(_save_data(), state_id)
+			_editor.duplicate_action(action)
+
+		return true
+	)
 
 
 func _delete_selected() -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
-	var action: HenSaveAction = selected_action()
+	var states: Array = _states_of_selection()
 
-	if not global or not global.SAVE_DATA or not action:
+	if states.is_empty():
 		return false
 
-	var state_id: StringName = _state_by_action.get(_selected_action, &'')
+	var actions: Array[HenSaveAction] = selected_actions()
 
-	if state_id.is_empty():
-		return false
+	_ensure_editor()
 
-	_editor_for_state(state_id)
-	_editor.delete_action(action)
+	# one entry for the batch: record is re-entrant, so the per action calls inside
+	# it do not each push one, and the whole delete costs a single ctrl+z
+	var done: bool = _history.record(_save_data(), states, 'Delete Action', func() -> bool:
+		var any: bool = false
+
+		for action: HenSaveAction in actions:
+			var state_id: StringName = _state_by_action.get(str(action.id), &'')
+
+			if state_id.is_empty():
+				continue
+
+			_editor.target(_save_data(), state_id)
+			_editor.delete_action(action)
+			any = true
+
+		return any
+	)
+
 	_clear_selection()
 
-	return true
+	return done
 
 
 # the same signal the card editor fires, so codegen and the save flow see the edit
@@ -1026,11 +1062,11 @@ func _apply_drop(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool)
 	return _editor.move_step(_dragged, _target, index, from_id, to_id)
 
 
-func _dispatch_click() -> bool:
-	return _dispatch_hit(hit_under_mouse())
+func _dispatch_click(_ctrl: bool = false, _shift: bool = false) -> bool:
+	return _dispatch_hit(hit_under_mouse(), _ctrl, _shift)
 
 
-func _dispatch_hit(hit: Dictionary) -> bool:
+func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -> bool:
 	if hit.is_empty():
 		return false
 
@@ -1133,7 +1169,7 @@ func _dispatch_hit(hit: Dictionary) -> bool:
 
 		return true
 
-	_select_card(card)
+	_click_select(card, _ctrl, _shift)
 
 	return true
 
@@ -1168,8 +1204,39 @@ func _open_card_menu(_hit: Dictionary, _card: HenFlowNodeCard, _action: HenSaveA
 	_editor.open_action_menu(_action, rect, _card.node.kind == &'producer')
 
 
+func _save_data() -> HenSaveData:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	return global.SAVE_DATA if global else null
+
+
+# every state the selection touches, so one entry covers the whole batch
+func _states_of_selection() -> Array:
+	var states: Array = []
+
+	for id: String in _selected_actions:
+		var state_id: StringName = _state_by_action.get(id, &'')
+
+		if not state_id.is_empty() and not states.has(state_id):
+			states.append(state_id)
+
+	return states
+
+
 # --- selection ---
 
+# ctrl grows the selection, shift takes the range, a plain click replaces it
+func _click_select(_card: HenFlowNodeCard, _ctrl: bool, _shift: bool) -> void:
+	if _ctrl:
+		_toggle_card(_card)
+	elif _shift:
+		_select_range_to(_card)
+	else:
+		_select_card(_card)
+
+
+# ids and not cards: a rebuild frees every card, and the selection has to come
+# back on the nodes the user picked
 func _select_card(_card: HenFlowNodeCard) -> void:
 	var action: HenSaveAction = _card.node.action
 
@@ -1177,30 +1244,128 @@ func _select_card(_card: HenFlowNodeCard) -> void:
 		_clear_selection()
 		return
 
-	_selected_action = str(action.id)
+	_selected_actions = [str(action.id)]
+	_selection_anchor = str(action.id)
+	_apply_selection()
+
+
+func _toggle_card(_card: HenFlowNodeCard) -> void:
+	var action: HenSaveAction = _card.node.action
+
+	if not action:
+		return
+
+	var id: String = str(action.id)
+
+	if _selected_actions.has(id):
+		_selected_actions.erase(id)
+	else:
+		_selected_actions.append(id)
+		_selection_anchor = id
+
+	_apply_selection()
+
+
+# the range is measured along the chain the anchor belongs to: the flat list mixes
+# phases, and two steps of different phases are never neighbours in the graph
+func _select_range_to(_card: HenFlowNodeCard) -> void:
+	var action: HenSaveAction = _card.node.action
+
+	if not action:
+		return
+
+	var anchor: HenSaveAction = _action_by_id(_selection_anchor)
+
+	if not anchor or str(anchor.phase) != str(action.phase):
+		_select_card(_card)
+		return
+
+	var state_id: StringName = _state_by_action.get(str(action.id), &'')
+
+	if state_id.is_empty() or state_id != _state_by_action.get(_selection_anchor, &''):
+		_select_card(_card)
+		return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if not global or not global.SAVE_DATA:
+		return
+
+	var bucket: Array = HenActionsPanel.group_by_phase(global.SAVE_DATA.get_state_actions(state_id)).get(str(action.phase), [])
+	var from: int = bucket.find(anchor)
+	var to: int = bucket.find(action)
+
+	if from < 0 or to < 0:
+		_select_card(_card)
+		return
+
+	_selected_actions.clear()
+
+	for i: int in range(mini(from, to), maxi(from, to) + 1):
+		_selected_actions.append(str((bucket[i] as HenSaveAction).id))
+
+	_apply_selection()
+
+
+func _select_chain_of(_id: String) -> void:
+	var action: HenSaveAction = _action_by_id(_id)
+	var state_id: StringName = _state_by_action.get(_id, &'')
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if not action or state_id.is_empty() or not global or not global.SAVE_DATA:
+		return
+
+	var bucket: Array = HenActionsPanel.group_by_phase(global.SAVE_DATA.get_state_actions(state_id)).get(str(action.phase), [])
+
+	_selected_actions.clear()
+
+	for step: HenSaveAction in bucket:
+		_selected_actions.append(str(step.id))
+
 	_apply_selection()
 
 
 func _clear_selection() -> void:
-	if _selected_action.is_empty():
+	if _selected_actions.is_empty():
 		return
 
-	_selected_action = ''
+	_selected_actions.clear()
+	_selection_anchor = ''
 	_apply_selection()
 
 
 func _apply_selection() -> void:
-	if not _selected_action.is_empty() and not _cards_by_action.has(_selected_action):
-		_selected_action = ''
+	# an action deleted elsewhere leaves an id pointing at nothing
+	for i: int in range(_selected_actions.size() - 1, -1, -1):
+		if not _cards_by_action.has(_selected_actions[i]):
+			_selected_actions.remove_at(i)
 
 	for id: String in _cards_by_action:
-		(_cards_by_action[id] as HenFlowNodeCard).set_selected(id == _selected_action)
+		(_cards_by_action[id] as HenFlowNodeCard).set_selected(_selected_actions.has(id))
 
 
-func selected_action() -> HenSaveAction:
-	var card: Variant = _cards_by_action.get(_selected_action)
+func _action_by_id(_id: String) -> HenSaveAction:
+	var card: Variant = _cards_by_action.get(_id)
 
 	return card.node.action if card else null
+
+
+# the first of the selection, for the operations that still take one
+func selected_action() -> HenSaveAction:
+	return _action_by_id(_selected_actions[0]) if not _selected_actions.is_empty() else null
+
+
+# in chain order, so a batch keeps the shape it had on screen
+func selected_actions() -> Array[HenSaveAction]:
+	var out: Array[HenSaveAction] = []
+
+	for id: String in _selected_actions:
+		var action: HenSaveAction = _action_by_id(id)
+
+		if action:
+			out.append(action)
+
+	return out
 
 
 # --- navigation ---

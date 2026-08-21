@@ -41,7 +41,7 @@ const LIST: Array[Dictionary] = [
 		group = FLOW,
 		combo = ['Delete'],
 		title = 'Delete action',
-		description = 'Removes the selected action, wherever it lives: the state list, a loop body or an input.',
+		description = 'Removes every selected action, wherever it lives: the state list, a loop body or an input.',
 		method = '_delete_selected'
 	},
 	{
@@ -69,8 +69,27 @@ const LIST: Array[Dictionary] = [
 		group = FLOW,
 		combo = ['Ctrl', 'D'],
 		title = 'Duplicate action',
-		description = 'Drops a copy of the selected action right below it, values and all.',
+		description = 'Drops a copy of every selected action right below it, values and all.',
 		method = '_duplicate_selected'
+	},
+	{
+		group = FLOW,
+		combo = ['Ctrl', 'A'],
+		title = 'Select the chain',
+		description = 'Extends the selection to every step of the chain the selected one runs in.',
+		method = '_select_chain_shortcut'
+	},
+	{
+		group = FLOW,
+		combo = ['Ctrl', 'Click'],
+		title = 'Add to selection',
+		description = 'Adds a step to the selection, or takes it out when it is already in.'
+	},
+	{
+		group = FLOW,
+		combo = ['Shift', 'Click'],
+		title = 'Select a range',
+		description = 'Selects every step between the last picked one and this one, inside the same chain.'
 	},
 	{
 		group = FLOW,

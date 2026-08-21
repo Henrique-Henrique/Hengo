@@ -253,7 +253,7 @@ func test_the_viewer_deletes_the_selected_action_and_undoes_it() -> void:
 
 	assert_bool(viewer._delete_selected()).is_true()
 	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
-	assert_str(viewer._selected_action).is_empty()
+	assert_array(viewer._selected_actions).is_empty()
 
 	assert_bool(viewer._undo()).is_true()
 	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
