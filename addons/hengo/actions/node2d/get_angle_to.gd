@@ -2,7 +2,7 @@
 class_name HenActionGetAngleTo extends HenScriptMacroBase
 
 
-# writes the angle (radians) from the owner toward Target into Store.
+# writes the angle (degrees) from the owner toward Target into Store.
 
 
 func get_id() -> StringName:
@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Measures the angle from the node to a target and stores it, in radians.'
+	return 'Measures the angle from the node to a target and stores it, in degrees.'
 
 
 func get_display_name() -> String:
@@ -40,12 +40,12 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Angle', type = 'float', id = &'angle', doc = 'Where to store the resulting angle, in radians.'}
+		{name = 'Angle', type = 'float', id = &'angle', doc = 'Where to store the resulting angle, in degrees.'}
 	]
 
 
 func get_output_angle() -> String:
-	return '_ref.get_angle_to({{target}}.global_position)'
+	return 'rad_to_deg(_ref.get_angle_to({{target}}.global_position))'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

@@ -1,20 +1,21 @@
 @tool
-class_name HenActionSetAngularVelocity3D extends HenScriptMacroBase
+class_name HenActionSetRotation3D extends HenScriptMacroBase
 
 
-# sets the rigid body spin directly, in degrees per second around each axis.
+# points the owner at an angle on each axis. Rotate adds to the current one
+# instead, so zeroing a rotation was only reachable through an expression.
 
 
 func get_id() -> StringName:
-	return &'set_angular_velocity_3d'
+	return &'set_rotation_3d'
 
 
 func get_description() -> String:
-	return 'Sets the angular velocity (spin) of a physics body directly, in degrees per second around each axis. Zero stops the spin.'
+	return 'Points the node at an angle on each axis, in degrees, replacing whatever rotation it had. Zero puts it back upright. Rotate adds to the current angle instead.'
 
 
 func get_display_name() -> String:
-	return 'Set Angular Velocity'
+	return 'Set Rotation'
 
 
 func get_icon() -> String:
@@ -22,20 +23,16 @@ func get_icon() -> String:
 
 
 func get_target_classes() -> Array[StringName]:
-	return [&'RigidBody3D']
-
-
-func get_default_phase() -> StringName:
-	return &'physics'
+	return [&'Node3D']
 
 
 func get_inputs() -> Array[Dictionary]:
 	return [
 		{
-			name = 'Velocity',
+			name = 'Angle',
 			type = 'Vector3',
-			id = &'velocity',
-			doc = 'The spin to set, in degrees per second around each axis. Zero stops the spin.',
+			id = &'angle',
+			doc = 'The angle to point at on each axis, in degrees. Zero is upright.',
 			default_value = Vector3.ZERO
 		}
 	]
@@ -66,6 +63,5 @@ func get_flow_exit() -> String:
 	return _body()
 
 
-# angular_velocity is in radians, and deg_to_rad has no Vector3 form
 func _body() -> String:
-	return '_ref.angular_velocity = {{velocity}} * (PI / 180.0)'
+	return '_ref.rotation_degrees = {{angle}}'

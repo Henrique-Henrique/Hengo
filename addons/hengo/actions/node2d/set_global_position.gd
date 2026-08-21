@@ -1,42 +1,43 @@
 @tool
-class_name HenActionSetAngularVelocity3D extends HenScriptMacroBase
+class_name HenActionSetGlobalPosition extends HenScriptMacroBase
 
 
-# sets the rigid body spin directly, in degrees per second around each axis.
+# places the node at a point in global space, ignoring the parent transform.
+# Set Position uses parent space instead.
 
 
 func get_id() -> StringName:
-	return &'set_angular_velocity_3d'
+	return &'set_global_position'
 
 
 func get_description() -> String:
-	return 'Sets the angular velocity (spin) of a physics body directly, in degrees per second around each axis. Zero stops the spin.'
+	return 'Places the node at a point in global space, ignoring the parent. Set Position uses the parent space instead.'
 
 
 func get_display_name() -> String:
-	return 'Set Angular Velocity'
+	return 'Set World Position'
 
 
 func get_icon() -> String:
-	return 'rotate-3d'
+	return 'locate-fixed'
 
 
 func get_target_classes() -> Array[StringName]:
-	return [&'RigidBody3D']
+	return [&'Node2D']
 
 
 func get_default_phase() -> StringName:
-	return &'physics'
+	return &'enter'
 
 
 func get_inputs() -> Array[Dictionary]:
 	return [
 		{
-			name = 'Velocity',
-			type = 'Vector3',
-			id = &'velocity',
-			doc = 'The spin to set, in degrees per second around each axis. Zero stops the spin.',
-			default_value = Vector3.ZERO
+			name = 'Position',
+			type = 'Vector2',
+			id = &'position',
+			doc = 'The new position, in global space.',
+			default_value = Vector2.ZERO
 		}
 	]
 
@@ -66,6 +67,5 @@ func get_flow_exit() -> String:
 	return _body()
 
 
-# angular_velocity is in radians, and deg_to_rad has no Vector3 form
 func _body() -> String:
-	return '_ref.angular_velocity = {{velocity}} * (PI / 180.0)'
+	return '_ref.global_position = {{position}}'

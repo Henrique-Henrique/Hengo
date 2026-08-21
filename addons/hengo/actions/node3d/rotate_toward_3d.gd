@@ -7,7 +7,7 @@ class_name HenActionRotateToward3D extends HenScriptMacroBase
 # must not point along the looking direction.
 
 
-# interpolate_with closes in asymptotically and never lands on the exact angle
+# a frame can stop just short of the target without landing on it exactly
 const AIM_TOLERANCE: float = 0.02
 
 
@@ -48,8 +48,8 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Speed',
 			type = 'float',
 			id = &'speed',
-			doc = 'How fast to turn. Higher reaches the target sooner.',
-			default_value = 5.0
+			doc = 'How fast to turn, in degrees per second.',
+			default_value = 360.0
 		},
 		{
 			name = 'Up',
@@ -93,19 +93,27 @@ func get_flow_physics() -> String:
 	return _body()
 
 
-# looking_at keeps the same origin, so interpolate_with only turns the node, it
-# never drifts. the guard skips the frame target and position coincide, where
-# looking_at has no direction to face
-func _body() -> String:
-	if not any_flow_connected():
-		return 'if not _ref.global_position.is_equal_approx({{target}}):\n' \
-			+ '\t_ref.global_transform = _ref.global_transform.interpolate_with(_ref.global_transform.looking_at({{target}}, {{up}}), clampf({{speed}} * delta, 0.0, 1.0))'
-
+# slerping by the fraction the frame's budget covers turns at a fixed rate and
+# stops on the target, which is what the 2D one gets from the rotate_toward
+# builtin. interpolate_with closes in asymptotically and never lands
+# the guard skips the frame target and position coincide, where looking_at has no
+# direction to face
+func _turn() -> String:
 	return 'var to_{{VCNODE_ID}} = {{target}}\n' \
 		+ 'if not _ref.global_position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
-		+ '\t_ref.global_transform = _ref.global_transform.interpolate_with(_ref.global_transform.looking_at(to_{{VCNODE_ID}}, {{up}}), clampf({{speed}} * delta, 0.0, 1.0))\n' \
-		+ 'var aim_{{VCNODE_ID}} = (-_ref.global_transform.basis.z).angle_to(to_{{VCNODE_ID}} - _ref.global_position)\n' \
-		+ 'if aim_{{VCNODE_ID}} <= ' + str(AIM_TOLERANCE) + ':\n' \
+		+ '\tvar aim_{{VCNODE_ID}} = _ref.global_transform.looking_at(to_{{VCNODE_ID}}, {{up}}).basis.get_rotation_quaternion()\n' \
+		+ '\tvar spin_{{VCNODE_ID}} = _ref.global_basis.get_rotation_quaternion()\n' \
+		+ '\tvar gap_{{VCNODE_ID}} = spin_{{VCNODE_ID}}.angle_to(aim_{{VCNODE_ID}})\n' \
+		+ '\tif gap_{{VCNODE_ID}} > 0.0:\n' \
+		+ '\t\t_ref.global_basis = Basis(spin_{{VCNODE_ID}}.slerp(aim_{{VCNODE_ID}}, clampf(deg_to_rad({{speed}}) * delta / gap_{{VCNODE_ID}}, 0.0, 1.0)))'
+
+
+func _body() -> String:
+	if not any_flow_connected():
+		return _turn()
+
+	return _turn() + '\n' \
+		+ 'if (-_ref.global_basis.z).angle_to(to_{{VCNODE_ID}} - _ref.global_position) <= ' + str(AIM_TOLERANCE) + ':\n' \
 		+ '\t{{aimed}}\n' \
 		+ 'else:\n' \
 		+ '\t{{turning}}'

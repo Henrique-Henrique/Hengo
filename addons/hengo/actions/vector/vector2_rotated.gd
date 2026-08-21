@@ -2,7 +2,7 @@
 class_name HenActionVector2Rotated extends HenScriptMacroBase
 
 
-# writes Vector turned by Angle (radians) into Store.
+# writes Vector turned by Angle (degrees) into Store.
 
 
 func get_id() -> StringName:
@@ -34,7 +34,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Angle',
 			type = 'float',
 			id = &'angle',
-			doc = 'How far to turn it, in radians.',
+			doc = 'How far to turn it, in degrees.',
 			default_value = 0.0
 		}
 	]
@@ -47,7 +47,7 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_result() -> String:
-	return '{{vector}}.rotated({{angle}})'
+	return '{{vector}}.rotated(deg_to_rad({{angle}}))'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

@@ -28,14 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'From',
 			type = 'float',
 			id = &'from',
-			doc = 'The current angle, in radians.',
+			doc = 'The current angle, in degrees.',
 			default_value = 0.0
 		},
 		{
 			name = 'To',
 			type = 'float',
 			id = &'to',
-			doc = 'The target angle, in radians.',
+			doc = 'The target angle, in degrees.',
 			default_value = 0.0
 		}
 	]
@@ -43,12 +43,14 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result', doc = 'The shortest signed angle from one to the other, in radians.'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'The shortest signed angle from one to the other, in degrees.'}
 	]
 
 
+# angle_difference normalizes against PI, so feeding it degrees and reading degrees
+# back would fold the answer at the wrong place
 func get_output_result() -> String:
-	return 'angle_difference({{from}}, {{to}})'
+	return 'rad_to_deg(angle_difference(deg_to_rad({{from}}), deg_to_rad({{to}})))'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

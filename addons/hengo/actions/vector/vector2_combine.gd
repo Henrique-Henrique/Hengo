@@ -51,11 +51,16 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result', doc = 'The resulting number.'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'The resulting number. The angle functions answer in degrees.'}
 	]
 
 
+# the angle functions of Vector2 answer in radians, and the rest of the catalog
+# takes and gives degrees
 func get_output_result() -> String:
+	if str(value_of(&'func_name', '')).begins_with('angle_to'):
+		return 'rad_to_deg({{a}}.{{func_name}}({{b}}))'
+
 	return '{{a}}.{{func_name}}({{b}})'
 
 

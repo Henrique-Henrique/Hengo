@@ -120,7 +120,7 @@
 			"inputs": [
 				{
 					"default": "0.0",
-					"doc": "The current angle, in radians.",
+					"doc": "The current angle, in degrees.",
 					"id": "from",
 					"lvalue": false,
 					"name": "From",
@@ -132,7 +132,7 @@
 				},
 				{
 					"default": "0.0",
-					"doc": "The target angle, in radians.",
+					"doc": "The target angle, in degrees.",
 					"id": "to",
 					"lvalue": false,
 					"name": "To",
@@ -146,7 +146,7 @@
 			"name": "Angle Difference",
 			"outputs": [
 				{
-					"doc": "The shortest signed angle from one to the other, in radians.",
+					"doc": "The shortest signed angle from one to the other, in degrees.",
 					"id": "result",
 					"name": "Result",
 					"type": "float"
@@ -4560,7 +4560,7 @@
 			"category": "node2d",
 			"color": "#0abde3",
 			"default_phase": "update",
-			"description": "Measures the angle from the node to a target and stores it, in radians.",
+			"description": "Measures the angle from the node to a target and stores it, in degrees.",
 			"has_body": false,
 			"icon": "compass",
 			"id": "get_angle_to",
@@ -4581,7 +4581,7 @@
 			"name": "Get Angle To",
 			"outputs": [
 				{
-					"doc": "Where to store the resulting angle, in radians.",
+					"doc": "Where to store the resulting angle, in degrees.",
 					"id": "angle",
 					"name": "Angle",
 					"type": "float"
@@ -4755,6 +4755,35 @@
 				"exit"
 			],
 			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Reads the direction the node is facing and stores it, as a unit vector in global space. Useful to move or shoot straight ahead.",
+			"has_body": false,
+			"icon": "navigation",
+			"id": "get_forward",
+			"inputs": [],
+			"name": "Get Facing Direction",
+			"outputs": [
+				{
+					"doc": "Where to store the facing direction, as a unit vector.",
+					"id": "forward",
+					"name": "Forward",
+					"type": "Vector2"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
 		},
 		{
 			"branches": [],
@@ -5330,6 +5359,34 @@
 			],
 			"target_classes": [
 				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Reads the current body velocity and stores it, in units per second. Useful to react to how fast the body is moving.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "get_velocity_3d",
+			"inputs": [],
+			"name": "Get Velocity",
+			"outputs": [
+				{
+					"doc": "Where to store the current velocity, in units per second.",
+					"id": "velocity",
+					"name": "Velocity",
+					"type": "Vector3"
+				}
+			],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
 			]
 		},
 		{
@@ -6012,6 +6069,40 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go when the body touches the ceiling.",
+					"id": "true",
+					"name": "True",
+					"optional": false
+				},
+				{
+					"doc": "Where to go when the body touches no ceiling.",
+					"id": "false",
+					"name": "False",
+					"optional": false
+				}
+			],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Checks whether the body hit a ceiling and branches on the result. It uses the ceiling contact from the last Move And Slide.",
+			"has_body": false,
+			"icon": "chevrons-right",
+			"id": "is_on_ceiling_3d",
+			"inputs": [],
+			"name": "Is On Ceiling",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
+			]
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go when the body is on the floor.",
 					"id": "true",
 					"name": "True",
@@ -6143,6 +6234,40 @@
 			],
 			"target_classes": [
 				"CharacterBody2D"
+			]
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go when the body touches a wall.",
+					"id": "true",
+					"name": "True",
+					"optional": false
+				},
+				{
+					"doc": "Where to go when the body touches no wall.",
+					"id": "false",
+					"name": "False",
+					"optional": false
+				}
+			],
+			"category": "physics3d",
+			"color": "#2dd4bf",
+			"default_phase": "physics",
+			"description": "Checks whether the body pressed against a wall and branches on the result. It uses the wall contact from the last Move And Slide.",
+			"has_body": false,
+			"icon": "chevrons-right",
+			"id": "is_on_wall_3d",
+			"inputs": [],
+			"name": "Is On Wall",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"CharacterBody3D"
 			]
 		},
 		{
@@ -9960,6 +10085,64 @@
 		{
 			"branches": [
 				{
+					"doc": "Where to go once the node points at the target, give or take a degree.",
+					"id": "aimed",
+					"name": "Aimed",
+					"optional": true
+				},
+				{
+					"doc": "Where to go while the node is still off the target.",
+					"id": "turning",
+					"name": "Turning",
+					"optional": true
+				}
+			],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Turns the node smoothly each frame until it faces a point, instead of snapping like Look At. Higher speed turns faster.",
+			"has_body": false,
+			"icon": "crosshair",
+			"id": "rotate_toward",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The point in global space to face.",
+					"id": "target",
+					"lvalue": false,
+					"name": "Target",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Vector2",
+					"type_from": ""
+				},
+				{
+					"default": "360.0",
+					"doc": "How fast to turn, in degrees per second.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Rotate Toward",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [
+				{
 					"doc": "Where to go once the front points at the target, give or take a degree.",
 					"id": "aimed",
 					"name": "Aimed",
@@ -9993,8 +10176,8 @@
 					"type_from": ""
 				},
 				{
-					"default": "5.0",
-					"doc": "How fast to turn. Higher reaches the target sooner.",
+					"default": "360.0",
+					"doc": "How fast to turn, in degrees per second.",
 					"id": "speed",
 					"lvalue": false,
 					"name": "Speed",
@@ -10133,17 +10316,52 @@
 		},
 		{
 			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Sets the angular velocity (spin) of a physics body directly, in degrees per second. Zero stops the spin.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "set_angular_velocity",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The spin to set, in degrees per second. Zero stops the spin.",
+					"id": "speed",
+					"lvalue": false,
+					"name": "Speed",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Angular Velocity",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"RigidBody2D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "physics3d",
 			"color": "#2dd4bf",
 			"default_phase": "physics",
-			"description": "Sets the angular velocity (spin) of a physics body directly, in radians per second around each axis. Zero stops the spin.",
+			"description": "Sets the angular velocity (spin) of a physics body directly, in degrees per second around each axis. Zero stops the spin.",
 			"has_body": false,
 			"icon": "rotate-3d",
 			"id": "set_angular_velocity_3d",
 			"inputs": [
 				{
 					"default": "(0.0, 0.0, 0.0)",
-					"doc": "The spin to set, in radians per second around each axis. Zero stops the spin.",
+					"doc": "The spin to set, in degrees per second around each axis. Zero stops the spin.",
 					"id": "velocity",
 					"lvalue": false,
 					"name": "Velocity",
@@ -10493,6 +10711,41 @@
 		},
 		{
 			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "enter",
+			"description": "Places the node at a point in global space, ignoring the parent. Set Position uses the parent space instead.",
+			"has_body": false,
+			"icon": "locate-fixed",
+			"id": "set_global_position",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The new position, in global space.",
+					"id": "position",
+					"lvalue": false,
+					"name": "Position",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Set World Position",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
 			"category": "node3d",
 			"color": "#06b6d4",
 			"default_phase": "enter",
@@ -10560,6 +10813,41 @@
 			"target_classes": [
 				"RigidBody2D",
 				"RigidBody3D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "physics2d",
+			"color": "#22d3ee",
+			"default_phase": "physics",
+			"description": "Sets the linear velocity of a physics body directly, in pixels per second. Setting it to zero stops the body, which is how a reset brings it to rest.",
+			"has_body": false,
+			"icon": "gauge",
+			"id": "set_linear_velocity",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0)",
+					"doc": "The velocity to set, in pixels per second. Zero stops the body.",
+					"id": "velocity",
+					"lvalue": false,
+					"name": "Velocity",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Vector2",
+					"type_from": ""
+				}
+			],
+			"name": "Set Linear Velocity",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"RigidBody2D"
 			]
 		},
 		{
@@ -11056,6 +11344,76 @@
 				"exit"
 			],
 			"target_classes": []
+		},
+		{
+			"branches": [],
+			"category": "node2d",
+			"color": "#0abde3",
+			"default_phase": "update",
+			"description": "Points the node at an angle, in degrees, replacing whatever rotation it had. Zero puts it back upright. Rotate adds to the current angle instead.",
+			"has_body": false,
+			"icon": "rotate-cw",
+			"id": "set_rotation",
+			"inputs": [
+				{
+					"default": "0.0",
+					"doc": "The angle to point at, in degrees. Zero is upright.",
+					"id": "angle",
+					"lvalue": false,
+					"name": "Angle",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Set Rotation",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node2D"
+			]
+		},
+		{
+			"branches": [],
+			"category": "node3d",
+			"color": "#06b6d4",
+			"default_phase": "update",
+			"description": "Points the node at an angle on each axis, in degrees, replacing whatever rotation it had. Zero puts it back upright. Rotate adds to the current angle instead.",
+			"has_body": false,
+			"icon": "rotate-3d",
+			"id": "set_rotation_3d",
+			"inputs": [
+				{
+					"default": "(0.0, 0.0, 0.0)",
+					"doc": "The angle to point at on each axis, in degrees. Zero is upright.",
+					"id": "angle",
+					"lvalue": false,
+					"name": "Angle",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "Vector3",
+					"type_from": ""
+				}
+			],
+			"name": "Set Rotation",
+			"outputs": [],
+			"phases": [
+				"enter",
+				"update",
+				"physics",
+				"exit"
+			],
+			"target_classes": [
+				"Node3D"
+			]
 		},
 		{
 			"branches": [],
@@ -13795,7 +14153,7 @@
 			"name": "Vector2 Combine",
 			"outputs": [
 				{
-					"doc": "The resulting number.",
+					"doc": "The resulting number. The angle functions answer in degrees.",
 					"id": "result",
 					"name": "Result",
 					"type": "float"
@@ -14121,7 +14479,7 @@
 				},
 				{
 					"default": "0.0",
-					"doc": "How far to turn it, in radians.",
+					"doc": "How far to turn it, in degrees.",
 					"id": "angle",
 					"lvalue": false,
 					"name": "Angle",
@@ -14417,7 +14775,7 @@
 			"name": "Vector3 Combine",
 			"outputs": [
 				{
-					"doc": "The resulting number.",
+					"doc": "The resulting number. The angle function answers in degrees.",
 					"id": "result",
 					"name": "Result",
 					"type": "float"
@@ -14845,7 +15203,7 @@
 				},
 				{
 					"default": "0.0",
-					"doc": "How far to turn it, in radians.",
+					"doc": "How far to turn it, in degrees.",
 					"id": "angle",
 					"lvalue": false,
 					"name": "Angle",
@@ -15305,14 +15663,14 @@
 		},
 		{
 			"color": "#0abde3",
-			"count": 17,
+			"count": 21,
 			"icon": "move",
 			"id": "node2d",
 			"name": "Node 2D"
 		},
 		{
 			"color": "#06b6d4",
-			"count": 12,
+			"count": 13,
 			"icon": "axis-3d",
 			"id": "node3d",
 			"name": "Node 3D"
@@ -15326,14 +15684,14 @@
 		},
 		{
 			"color": "#22d3ee",
-			"count": 15,
+			"count": 17,
 			"icon": "shapes",
 			"id": "physics2d",
 			"name": "Physics 2D"
 		},
 		{
 			"color": "#2dd4bf",
-			"count": 14,
+			"count": 17,
 			"icon": "box",
 			"id": "physics3d",
 			"name": "Physics 3D"
