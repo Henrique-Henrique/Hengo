@@ -91,6 +91,7 @@ settings/development_mode=true
 settings/debug_compilation=true
 settings/dock_location=0
 settings/font_scale=1.0
+settings/flow_wrap=false
 
 [input]
 

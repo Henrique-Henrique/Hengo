@@ -66,7 +66,7 @@ func _action_cards(_viewer: HenFlowViewer) -> Array:
 func _entry_card(_viewer: HenFlowViewer) -> HenFlowNodeCard:
 	for entry: Variant in _viewer._states.values():
 		for card: HenFlowNodeCard in entry.cards:
-			if not card.node.action:
+			if card.node.kind == &'state_entry':
 				return card
 
 	return null

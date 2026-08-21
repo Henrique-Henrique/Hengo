@@ -565,8 +565,10 @@ func _open_phase_menu(_action: HenSaveAction, _rect: Rect2) -> void:
 	var entries: Array = []
 
 	for phase: StringName in HenSaveAction.supported_phases(macro):
+		var label: String = HenActionVisuals.phase_label(phase)
+
 		entries.append({
-			name = (str(phase) + '  •') if str(phase) == str(_action.phase) else str(phase),
+			name = (label + '  •') if str(phase) == str(_action.phase) else label,
 			callable = func() -> void: move_action(_action, phase, -1)
 		})
 

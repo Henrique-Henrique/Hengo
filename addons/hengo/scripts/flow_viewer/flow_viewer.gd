@@ -1046,6 +1046,14 @@ func _dispatch_click() -> bool:
 		_editor.open_add(card.node.phase, null, -1, rect)
 		return true
 
+	# a phase cell of the entry is where its chain is started, the same way a branch
+	# cell is where a branch is set
+	if hit.kind == &'exec_out' and card.node.kind == &'state_entry':
+		_editing_card = card
+		_editor_for(hit.node)
+		_editor.open_add(StringName(str((hit.pin as HenFlowGraphTypes.FlowPin).id)), null, -1, rect)
+		return true
+
 	if (hit.kind == &'add_above' or hit.kind == &'add_below') and card.node.action:
 		_editing_card = card
 		_editor_for(hit.node)

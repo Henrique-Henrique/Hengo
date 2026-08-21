@@ -33,6 +33,11 @@ func _register(_path: String) -> HenSaveMacro:
 	for input: Dictionary in instance.get_inputs():
 		macro.inputs.append(HenSaveParam.create(input))
 
+	# supported_phases reads these, so a macro registered without them only ever
+	# offers update
+	for flow_input: Dictionary in instance.get_flow_inputs():
+		macro.flow_inputs.append(HenSaveFlowParam.create(flow_input))
+
 	(Engine.get_singleton(&'Global') as HenGlobal).action_macros.append(macro)
 
 	return macro
@@ -77,3 +82,26 @@ func test_an_action_outside_the_state_has_no_index() -> void:
 	var macro: HenSaveMacro = _register(FIX_PHASES)
 
 	assert_int(editor.index_around(HenSaveAction.create(macro), false)).is_equal(-1)
+
+
+# the tail of an empty phase is the whole point of showing one per phase: what it
+# adds has to land there and not on the macro default
+func test_the_tail_of_a_phase_adds_to_that_phase() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+
+	editor._do_insert(macro, save_data, StringName(str(state.id)), null, &'exit', -1)
+
+	var actions: Array = save_data.get_state_actions(state.id)
+
+	assert_int(actions.size()).is_equal(1)
+	assert_str(str((actions[0] as HenSaveAction).phase)).is_equal('exit')
+
+
+func test_a_phase_the_macro_cannot_run_falls_back_to_its_default() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+
+	editor._do_insert(macro, save_data, StringName(str(state.id)), null, &'physics', -1)
+
+	var actions: Array = save_data.get_state_actions(state.id)
+
+	assert_str(str((actions[0] as HenSaveAction).phase)).is_equal('update')

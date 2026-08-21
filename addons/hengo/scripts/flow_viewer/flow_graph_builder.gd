@@ -22,21 +22,18 @@ static func build(_save_data: HenSaveData, _state: HenSaveState) -> HenFlowGraph
 	graph.entry = entry
 	graph.add_node(entry)
 
-	# phase order is run order, and a phase with no action gets no port at all
+	# every phase gets a port, used or not: the cell is what a step is added through,
+	# so a step lands on the phase it belongs to instead of on update
 	for phase: StringName in HenSaveAction.PHASE_ORDER:
 		var bucket: Array = groups.get(str(phase), [])
+
+		entry.add_pin(HenFlowGraphTypes.FlowPin.new(phase, &'exec_out', HenActionVisuals.phase_label(phase)))
 
 		if bucket.is_empty():
 			continue
 
-		entry.add_pin(HenFlowGraphTypes.FlowPin.new(phase, &'exec_out', str(phase)))
 		_chain(graph, _save_data, bucket, entry, phase, phase)
 		_add_tail(graph, bucket, phase)
-
-	# a state with no action at all still needs somewhere to put the first one
-	if graph.nodes.size() == 1:
-		entry.add_pin(HenFlowGraphTypes.FlowPin.new(&'update', &'exec_out', 'update'))
-		_add_tail(graph, [], &'update')
 
 	return graph
 
@@ -55,13 +52,7 @@ static func _add_tail(_graph: HenFlowGraphTypes.FlowGraph, _bucket: Array, _phas
 	node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
 
 	_graph.add_node(node)
-
-	var last: Variant = _bucket.back() if not _bucket.is_empty() else null
-
-	if last:
-		_graph.connect_pins(&'exec', _head_of(_graph, last.id), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
-	else:
-		_graph.connect_pins(&'exec', _graph.entry, _phase, node, HenFlowGraphTypes.ENTER_PIN)
+	_graph.connect_pins(&'exec', _head_of(_graph, _bucket.back().id), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
 
 
 # walks one action list in order, wiring each action's `then` into the next

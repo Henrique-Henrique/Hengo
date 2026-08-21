@@ -27,6 +27,14 @@ const PHASE_COLORS: Dictionary = {
 	exit = '#e08b7f'
 }
 
+# what a phase is called on screen, since the keys are the codegen's own words
+const PHASE_LABELS: Dictionary = {
+	enter = 'Start',
+	update = 'Every Frame',
+	physics = 'Physics',
+	exit = 'End'
+}
+
 const PHASE_ICONS: Dictionary = {
 	enter = 'arrow-right-to-line',
 	update = 'refresh-cw',
@@ -82,6 +90,10 @@ static func accent_of(_macro: HenSaveMacro) -> Color:
 
 static func phase_color(_phase: StringName) -> Color:
 	return Color(str(PHASE_COLORS.get(str(_phase), FALLBACK_COLOR)))
+
+
+static func phase_label(_phase: StringName) -> String:
+	return str(PHASE_LABELS.get(str(_phase), str(_phase)))
 
 
 static func kind_color(_kind: String) -> Color:
