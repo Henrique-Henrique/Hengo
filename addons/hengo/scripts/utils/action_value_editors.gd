@@ -2,21 +2,16 @@
 class_name HenActionValueEditors
 extends RefCounted
 
-# which editor a chip opens, by slot type. only the two that are worth handling on
-# the card itself live here: everything else opens the slot row of the inspector,
-# which already has a typed editor plus the bind and expression buttons
+# which editor a chip handles on the card itself. only a bool does: a checkbox
+# behind a popup is one click too many. every other type opens the slot row of the
+# inspector, which has the typed editor and the bind, expression and producer
+# buttons side by side, so one click reaches every source the slot can take
 
-const TEXT: StringName = &'text'
 const BOOL: StringName = &'bool'
 
 
 static func kind_for(_type: String) -> StringName:
-	# an unknown class name also lands on NIL, which is why Variant and a node
-	# reference read the same here: what keeps a node out is its bind_only flag
-	match HenUtils.get_variant_type_from_string(_type):
-		TYPE_NIL, TYPE_STRING, TYPE_STRING_NAME, TYPE_INT, TYPE_FLOAT:
-			return TEXT
-		TYPE_BOOL:
-			return BOOL
+	if HenUtils.get_variant_type_from_string(_type) == TYPE_BOOL:
+		return BOOL
 
 	return &''

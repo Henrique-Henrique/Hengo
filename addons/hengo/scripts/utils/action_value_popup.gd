@@ -2,21 +2,15 @@
 class_name HenActionValuePopup extends MarginContainer
 
 signal confirmed(chip: Variant, text: String)
-signal tabbed(chip: Variant, text: String)
 signal cancelled
-# the field only writes a literal, so the value sources live one click away
-signal bind_requested(chip: Variant)
 
 var chip: Variant
 
 
 func _ready() -> void:
 	_field().gui_input.connect(_on_field_input)
-	(get_node('Row/BindBt') as Button).pressed.connect(func() -> void: bind_requested.emit(chip))
 
 
-# points the field at another chip without respawning the popup, which is what
-# tabbing across a whole line does
 func edit(_chip: Variant, _text: String) -> void:
 	chip = _chip
 	_field().text = _text
@@ -47,6 +41,3 @@ func _on_field_input(_event: InputEvent) -> void:
 		KEY_ESCAPE:
 			_field().accept_event()
 			cancelled.emit()
-		KEY_TAB:
-			_field().accept_event()
-			tabbed.emit(chip, _field().text)

@@ -132,3 +132,63 @@ func test_a_loop_body_inherits_the_phase() -> void:
 	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
 
 	assert_str(str(_node_for(graph, inner).phase)).is_equal('physics')
+
+
+func _entry_card_of(_viewer: HenFlowViewer) -> HenFlowNodeCard:
+	for entry: Variant in _viewer._states.values():
+		for card: HenFlowNodeCard in entry.cards:
+			if card.node.kind == &'state_entry':
+				return card
+
+	return null
+
+
+# an even split gave every cell the same width while the widths were measured per
+# label, so the longest phase overflowed its rules and the shortest kept slack
+func test_a_phase_cell_never_crowds_its_label() -> void:
+	var viewer: HenFlowViewer = auto_free(
+		(load('res://addons/hengo/scenes/flow_viewer.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(viewer)
+	viewer.rebuild()
+
+	var card: HenFlowNodeCard = _entry_card_of(viewer)
+
+	assert_object(card).is_not_null()
+
+	var cells: int = 0
+
+	for hit: Dictionary in card.get_hits():
+		if hit.kind != &'exec_out':
+			continue
+
+		var pin: HenFlowGraphTypes.FlowPin = hit.pin
+		var slack: float = ((hit.rect as Rect2).size.x - card._painter.measure(pin.label, HenFlowNodeCard.FLOW_SIZE).x) * 0.5
+
+		assert_float(slack).is_greater_equal(HenFlowNodeCard.FLOW_PAD_H)
+		cells += 1
+
+	assert_int(cells).is_equal(HenSaveAction.PHASE_ORDER.size())
+
+
+# the wire leaves from the middle of the cell, so an uneven split has to move the
+# anchors with it
+func test_a_phase_anchor_sits_in_the_middle_of_its_cell() -> void:
+	var viewer: HenFlowViewer = auto_free(
+		(load('res://addons/hengo/scenes/flow_viewer.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(viewer)
+	viewer.rebuild()
+
+	var card: HenFlowNodeCard = _entry_card_of(viewer)
+
+	for hit: Dictionary in card.get_hits():
+		if hit.kind != &'exec_out':
+			continue
+
+		var pin: HenFlowGraphTypes.FlowPin = hit.pin
+		var cell: Rect2 = hit.rect
+
+		assert_float(pin.rect.get_center().x).is_equal_approx(cell.get_center().x, 1.5)

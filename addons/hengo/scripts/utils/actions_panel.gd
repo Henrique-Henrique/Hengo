@@ -134,8 +134,8 @@ static func display_name(_action: HenSaveAction) -> String:
 
 # one {kind, label, value} per input; kind picks the chip color, and the label is
 # dropped on single-input actions (the value alone already reads). a part also
-# carries `slot` (what the value editor writes to), `options`, `editable` and,
-# when another action feeds it, the recursive `capsule`
+# carries `slot` (what the value editor writes to), `options` and, when another
+# action feeds it, the recursive `capsule`
 # _owner is the save data the action belongs to: with several scripts open, the
 # active one is not always it, and a binding only resolves against its own
 static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> Array[Dictionary]:
@@ -160,8 +160,6 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 		part.picker = declared.picker if not declared.picker.is_empty() else param.picker
 		part.slot = input_slot(_action, param, declared, params)
 		part.editor = _editor_kind(part, needs_bind)
-		# only the text editor joins the tab ring: tabbing into a colour wheel is noise
-		part.editable = part.editor == HenActionValueEditors.TEXT
 
 		parts.append(part)
 
@@ -283,49 +281,6 @@ static func _editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:
 		return &''
 
 	return HenActionValueEditors.kind_for(str((_part.slot as Dictionary).type))
-
-
-# a type that reads and round-trips as a single line of text; anything composite
-# keeps its dedicated inspector editor
-static func is_text_type(_type: String) -> bool:
-	return HenUtils.get_variant_type_from_string(_type) in [TYPE_NIL, TYPE_STRING, TYPE_STRING_NAME, TYPE_INT, TYPE_FLOAT]
-
-
-# text typed in a value chip, converted to the slot type. an untyped slot stays a
-# string, which is what the inspector's editor does for Variant
-static func parse_literal(_text: String, _type: String) -> Variant:
-	match HenUtils.get_variant_type_from_string(_type):
-		TYPE_STRING_NAME:
-			return StringName(_text)
-		TYPE_INT:
-			return int(_text)
-		TYPE_FLOAT:
-			return float(_text)
-
-	return _text
-
-
-# what a chip shows once it is being typed into: the stored text without the
-# quotes format_value adds
-static func edit_text(_value: Variant) -> String:
-	return '' if _value == null else str(_value)
-
-
-# the literal a chip edits, seeded from the macro default the same way the
-# inspector seeds it before showing an editor
-static func literal_value(_slot: Dictionary) -> Variant:
-	var param: HenSaveParam = _slot.get('param')
-
-	if not param:
-		return null
-
-	if param.default_value == null:
-		var declared: HenSaveParam = (_slot.get('macro_params', {}) as Dictionary).get(str(_slot.get('bind_key', '')))
-
-		if declared and declared.default_value != null:
-			param.default_value = declared.default_value
-
-	return param.default_value
 
 
 # recursive {action, title, icon, color, parts} of the action feeding a slot, so

@@ -59,9 +59,13 @@ func _viewer() -> HenFlowViewer:
 	return viewer
 
 
-func test_the_text_types_keep_their_editor() -> void:
+# a text field on the card could only write a literal, so reaching a variable cost
+# a second popup: every type but bool opens the slot row, which has all of them
+func test_only_a_bool_is_handled_on_the_card() -> void:
 	for type: String in ['String', 'StringName', 'int', 'float', 'Variant']:
-		assert_str(str(HenActionValueEditors.kind_for(type))).is_equal('text')
+		assert_str(str(HenActionValueEditors.kind_for(type))).is_empty()
+
+	assert_str(str(HenActionValueEditors.kind_for('bool'))).is_equal('bool')
 
 
 func test_a_bool_input_gets_the_bool_editor() -> void:
@@ -90,12 +94,6 @@ func test_a_bind_only_input_gets_no_editor() -> void:
 	assert_str(str(part.get('editor', ''))).is_empty()
 
 
-# only the text editor joins the tab ring: tabbing into a colour wheel is noise
-func test_only_the_text_editor_stays_editable() -> void:
-	assert_bool(bool(_part_named(_action(FIX_VECTOR2), 'Position').get('editable'))).is_false()
-	assert_bool(bool(_part_named(_action(FIX_BOOL), 'Disabled').get('editable'))).is_false()
-
-
 func test_the_chip_of_an_untyped_value_is_still_drawn() -> void:
 	assert_str(str(_part_named(_action(FIX_VECTOR2), 'Position').get('value', ''))).is_not_empty()
 
@@ -112,6 +110,126 @@ func test_the_slot_popup_renders_a_single_row() -> void:
 	inspector.edit_one_slot(action, _part_named(action, 'Disabled').slot, 'Disabled')
 
 	assert_int(inspector.vbox.get_child_count()).is_equal(1)
+
+
+func _row_for(_action: HenSaveAction, _slot_name: String) -> HenInspector:
+	var inspector: HenInspector = auto_free(
+		(load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(inspector)
+	inspector.edit_one_slot(_action, _part_named(_action, _slot_name).slot, _slot_name)
+
+	return inspector
+
+
+# the chip used to open a text field whose only exit to a variable was a button
+# that opened this row anyway: the row is what the chip opens now, so typing has
+# to work the moment it appears
+func test_the_row_opens_with_the_caret_in_the_editor() -> void:
+	var inspector: HenInspector = _row_for(_action(FIX_MATH), 'A')
+
+	inspector.focus_editor()
+
+	var editor: Control = inspector._first_editor(inspector.vbox)
+
+	assert_object(editor).is_not_null()
+	assert_bool(editor.has_focus()).is_true()
+
+
+# a slot that takes no literal renders a "Choose a variable..." button, and a
+# grab_focus aimed at nothing must not throw
+func test_a_bind_only_row_has_no_editor_to_focus() -> void:
+	var inspector: HenInspector = _row_for(_action(FIX_BOOL), 'Target')
+
+	assert_object(inspector._first_editor(inspector.vbox)).is_null()
+
+	inspector.focus_editor()
+
+
+# the caret is put in the field, so the keyboard has to be able to leave it: the
+# editors write on every keystroke, so both keys are a plain dismiss
+func test_the_focused_editor_takes_enter_and_escape() -> void:
+	var inspector: HenInspector = _row_for(_action(FIX_MATH), 'A')
+
+	inspector.focus_editor()
+
+	assert_bool(inspector._first_editor(inspector.vbox).gui_input.is_connected(inspector._on_editor_input)).is_true()
+
+	for code: Key in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]:
+		assert_bool(HenInspector.is_dismiss_key(_key(code))).is_true()
+
+
+# typing is the whole point of the caret being there, so a letter must not close
+func test_a_plain_key_leaves_the_row_open() -> void:
+	assert_bool(HenInspector.is_dismiss_key(_key(KEY_A))).is_false()
+
+	var released: InputEventKey = _key(KEY_ENTER)
+
+	released.pressed = false
+
+	assert_bool(HenInspector.is_dismiss_key(released)).is_false()
+	assert_bool(HenInspector.is_dismiss_key(InputEventMouseButton.new())).is_false()
+
+
+func _key(_code: Key) -> InputEventKey:
+	var event: InputEventKey = InputEventKey.new()
+
+	event.keycode = _code
+	event.pressed = true
+
+	return event
+
+
+# picking a source redraws the row, and the redraw used to come back as the whole
+# action: phase selector, both branches and every other input
+func test_picking_a_source_keeps_the_popup_on_one_row() -> void:
+	var action: HenSaveAction = _action(FIX_MATH)
+	var slot: Dictionary = _part_named(action, 'A').slot
+	var inspector: HenInspector = _row_for(action, 'A')
+
+	inspector._on_bind_selected({kind = 'bind', code = 'rotation'}, slot)
+
+	assert_str(str(action.input_bindings.get('a', ''))).is_equal('rotation')
+	assert_int(_live_rows(inspector)).is_equal(1)
+
+
+func test_clearing_a_source_keeps_the_popup_on_one_row() -> void:
+	var action: HenSaveAction = _action(FIX_MATH)
+	var slot: Dictionary = _part_named(action, 'A').slot
+	var inspector: HenInspector = _row_for(action, 'A')
+
+	inspector._on_bind_selected({kind = 'none'}, slot)
+
+	assert_int(_live_rows(inspector)).is_equal(1)
+
+
+func test_a_branch_popup_also_redraws_as_one_row() -> void:
+	var action: HenSaveAction = _action(FIX_MATH)
+	var inspector: HenInspector = auto_free(
+		(load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(inspector)
+	inspector.edit_one_branch(action, 'true', 'Yes')
+
+	var before: int = _live_rows(inspector)
+
+	inspector._update_props()
+
+	assert_int(_live_rows(inspector)).is_equal(before)
+
+
+# _update_props frees the old rows without unparenting them, so they are still
+# children for the rest of the frame
+func _live_rows(_inspector: HenInspector) -> int:
+	var count: int = 0
+
+	for child: Node in _inspector.vbox.get_children():
+		if not child.is_queued_for_deletion():
+			count += 1
+
+	return count
 
 
 func test_the_whole_inspector_still_renders_every_row() -> void:

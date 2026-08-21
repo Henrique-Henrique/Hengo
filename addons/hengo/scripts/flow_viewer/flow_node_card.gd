@@ -328,10 +328,40 @@ func _header_width() -> float:
 func _flow_width() -> float:
 	var total: float = 0.0
 
-	for pin: HenFlowGraphTypes.FlowPin in _flow_outs:
-		total += maxf(MIN_FLOW_CELL, _painter.measure(pin.label, FLOW_SIZE).x + FLOW_PAD_H * 2.0)
+	for width: float in _flow_cell_asks():
+		total += width
 
 	return total
+
+
+func _flow_cell_asks() -> PackedFloat32Array:
+	var asks: PackedFloat32Array = PackedFloat32Array()
+
+	for pin: HenFlowGraphTypes.FlowPin in _flow_outs:
+		asks.append(maxf(MIN_FLOW_CELL, _painter.measure(pin.label, FLOW_SIZE).x + FLOW_PAD_H * 2.0))
+
+	return asks
+
+
+# splitting the row evenly crushes the widest label against its rules while the
+# short ones keep padding they never asked for, so the row is shared out in the
+# proportion each cell measured at
+func _flow_cell_widths(_width: float) -> PackedFloat32Array:
+	var widths: PackedFloat32Array = _flow_cell_asks()
+	var total: float = 0.0
+
+	for width: float in widths:
+		total += width
+
+	if total <= 0.0:
+		return widths
+
+	var scale: float = _width / total
+
+	for i: int in range(widths.size()):
+		widths[i] *= scale
+
+	return widths
 
 
 # a wired input shows no chip: the wire is the value
@@ -695,11 +725,12 @@ func _emit_flow_outs(_size: Vector2) -> void:
 
 	var top: float = _size.y - _flow_h
 	var label_h: float = _painter.line_height(FLOW_SIZE)
-	var step: float = _size.x / float(_flow_outs.size())
+	var widths: PackedFloat32Array = _flow_cell_widths(_size.x)
 	var x: float = 0.0
 
 	for index: int in range(_flow_outs.size()):
 		var pin: HenFlowGraphTypes.FlowPin = _flow_outs[index]
+		var step: float = widths[index]
 		var label_w: float = _painter.measure(pin.label, FLOW_SIZE).x
 		var color: Color = HenActionVisuals.phase_color(pin.id) if node.kind == &'state_entry' \
 			else HenActionVisuals.branch_color(pin.id, pin.label, _label_color())
@@ -752,13 +783,17 @@ func _emit_anchors(_size: Vector2) -> void:
 	if _flow_outs.is_empty():
 		return
 
-	var step: float = _size.x / float(_flow_outs.size())
+	# the same split _emit_flow_outs draws, or a wire would leave beside its cell
+	var widths: PackedFloat32Array = _flow_cell_widths(_size.x)
+	var x: float = 0.0
 
 	for index: int in range(_flow_outs.size()):
 		_flow_outs[index].rect = Rect2(
-			Vector2(step * (float(index) + 0.5) - 1.0, _size.y - 2.0),
+			Vector2(x + widths[index] * 0.5 - 1.0, _size.y - 2.0),
 			Vector2(2, 2)
 		)
+
+		x += widths[index]
 
 
 # the sequence arrives at the header, so the anchor is the top edge and there is

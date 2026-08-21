@@ -30,7 +30,9 @@ func _ready() -> void:
 	signal_bus.request_code_search_type_result.connect(_on_search_result)
 	signal_bus.request_code_search_select.connect(_on_select)
 
-	search_input.grab_focus()
+	# deferred because the popup places itself deferred too, and focus taken on the
+	# frame the container jumps is dropped
+	search_input.grab_focus.call_deferred()
 
 	var thread_helper: HenThreadHelper = Engine.get_singleton(&'ThreadHelper')
 	thread_helper.add_task(_open_categories)

@@ -20,12 +20,6 @@ var record_hook: Callable = Callable()
 
 var _save_data: HenSaveData
 var _state_id: StringName
-# {part, rect} of every text-editable chip in reading order: the tab order
-var _ring: Array = []
-var _ring_index: int = -1
-var _provider: Callable = Callable()
-var _value_popup: HenPopupContainer
-var _value_editor: HenActionValuePopup
 
 
 func _record(_states: Array, _label: String, _mutation: Callable) -> bool:
@@ -56,22 +50,14 @@ func _reject() -> bool:
 	return true
 
 
-# a chip carries the whole edit: the slot type picks the small editor, a fixed
-# option set gets its picker, and every other source falls back to the inspector.
+# a chip opens the slot row: the typed editor with the bind, expression and
+# producer buttons beside it, which is every source the slot can take at once.
+# a fixed option set and a bool are the two the row would only slow down
 # returns whether a popup was left open, which is what tells the caller a commit
 # is still coming
-# the ring provider re-reads the chip rects, which move as soon as a committed
-# value changes the width of its line
-func chip_pressed(_part: Dictionary, _chip_index: int, _rect: Rect2, _ring_provider: Callable) -> bool:
+func chip_pressed(_part: Dictionary, _rect: Rect2) -> bool:
 	if _reject():
 		return false
-
-	if bool(_part.get('editable', false)):
-		_provider = _ring_provider
-		_ring = _provider.call()
-		_ring_index = _index_of(_chip_index)
-		_open_value_popup(_part, _rect)
-		return true
 
 	if not (_part.get('options', []) as Array).is_empty():
 		_open_option_picker(_part, _rect)
@@ -96,8 +82,8 @@ func chip_pressed(_part: Dictionary, _chip_index: int, _rect: Rect2, _ring_provi
 	return true
 
 
-# a bound value, an expression or a typed editor the chip cannot hold: all of them
-# are one row of the inspector, so the popup shows that row and nothing else
+# a literal, a bound value, an expression or a producer: all of them are one row
+# of the inspector, so the popup shows that row and nothing else
 func open_slot(_action: HenSaveAction, _slot: Dictionary, _rect: Rect2) -> void:
 	if _reject() or _slot.is_empty():
 		return
@@ -356,9 +342,13 @@ func _open_picker_menu(_part: Dictionary, _picker: StringName, _rect: Rect2) -> 
 		min_size = Vector2(240, 260)
 	})
 
+	var slot: Dictionary = _part.get('slot', {})
+	var owner: Variant = slot.get('action')
+
 	menu.mount(options, func(item: Dictionary) -> void:
 		if str(item.name) == TYPED_ENTRY:
-			_open_value_popup.call_deferred(_part, _rect)
+			if owner is HenSaveAction:
+				open_slot.call_deferred(owner as HenSaveAction, slot, _rect)
 			return
 
 		param.default_value = str(item.name)
@@ -389,113 +379,6 @@ func _open_option_picker(_part: Dictionary, _rect: Rect2) -> void:
 	menu.mount(options, func(item: Dictionary) -> void:
 		param.default_value = str(item.name)
 	, 'item_type')
-
-
-# a small field right above the chip; the container is kept alive across tabs so
-# hopping down a line does not respawn (and re-animate) the popup
-func _open_value_popup(_part: Dictionary, _rect: Rect2) -> void:
-	var slot: Dictionary = _part.get('slot', {})
-	var text: String = HenActionsPanel.edit_text(HenActionsPanel.literal_value(slot))
-
-	is_editing = true
-
-	var opts: Dictionary = {
-		layout = HenGeneralPopup.Layout.ANCHORED,
-		anchor_rect = _rect,
-		side = SIDE_TOP,
-		blur = false,
-		min_size = Vector2(150, 0)
-	}
-
-	if is_instance_valid(_value_popup) and is_instance_valid(_value_editor):
-		_value_editor.edit(_part, text)
-		_value_popup.reanchor(opts)
-		# queued after the reanchor above, which defers the move itself
-		_value_editor.focus_field.call_deferred()
-		return
-
-	_value_editor = VALUE_POPUP_SCENE.instantiate()
-	_value_editor.confirmed.connect(_on_value_confirmed)
-	_value_editor.tabbed.connect(_on_value_tabbed)
-	_value_editor.cancelled.connect(_close_value_popup)
-	_value_editor.bind_requested.connect(_on_bind_requested.bind(_rect))
-
-	_value_popup = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(_value_editor, opts)
-	_value_popup.closed.connect(_on_value_popup_closed, CONNECT_ONE_SHOT)
-
-	_value_editor.edit(_part, text)
-	_value_editor.focus_field.call_deferred()
-
-
-# the text field writes a literal and nothing else, so a slot that wants a variable,
-# a property or an expression hands over to the inspector row that owns those
-func _on_bind_requested(_part: Variant, _rect: Rect2) -> void:
-	if not _part is Dictionary:
-		return
-
-	var slot: Dictionary = (_part as Dictionary).get('slot', {})
-	var owner: Variant = slot.get('action')
-
-	_close_value_popup()
-
-	if owner is HenSaveAction:
-		open_slot.call_deferred(owner as HenSaveAction, slot, _rect)
-
-
-func _on_value_confirmed(_part: Variant, _text: String) -> void:
-	_commit_value(_part, _text)
-	_close_value_popup()
-
-
-func _on_value_tabbed(_part: Variant, _text: String) -> void:
-	_commit_value(_part, _text)
-
-	if _provider.is_valid():
-		_ring = _provider.call()
-
-	if _ring.size() < 2:
-		_close_value_popup()
-		return
-
-	_ring_index = (_ring_index + 1) % _ring.size()
-
-	var next: Dictionary = _ring[_ring_index]
-
-	_open_value_popup(next.part, next.rect)
-
-
-func _commit_value(_part: Variant, _text: String) -> void:
-	if not _part is Dictionary:
-		return
-
-	var slot: Dictionary = (_part as Dictionary).get('slot', {})
-	var param: HenSaveParam = slot.get('param')
-
-	if not param:
-		return
-
-	param.default_value = HenActionsPanel.parse_literal(_text, str(slot.get('type', param.type)))
-
-
-func _index_of(_chip_index: int) -> int:
-	for i: int in range(_ring.size()):
-		if int(_ring[i].index) == _chip_index:
-			return i
-
-	return 0
-
-
-func _close_value_popup() -> void:
-	if is_instance_valid(_value_popup):
-		_value_popup.hide_popup()
-
-
-func _on_value_popup_closed() -> void:
-	_value_popup = null
-	_value_editor = null
-	_provider = Callable()
-	_ring.clear()
-	_ring_index = -1
 
 
 func _popup_opts(_rect: Rect2) -> Dictionary:

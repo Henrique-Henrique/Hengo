@@ -1169,21 +1169,6 @@ func test_capsule_data_carries_every_level() -> void:
 
 
 # a chip only takes typed text on a plain literal of a one-line type
-func test_parts_flag_which_values_a_chip_can_type() -> void:
-	var action: HenSaveAction = _add_action(_register(FIX_MATH), &'update')
-	var parts: Array = HenActionsPanel.value_parts(action)
-
-	assert_bool(parts[0].editable).is_true()
-	# the operator comes from a fixed option set, so it gets its picker instead
-	assert_bool(parts[1].editable).is_false()
-
-	action.input_bindings['b'] = 'rotation'
-
-	assert_bool(HenActionsPanel.value_parts(action)[2].editable).is_false()
-
-
-# the chip writes through the slot, so its type has to follow type_from the same
-# way codegen does
 func test_slot_type_follows_the_bound_target() -> void:
 	var my_var: HenSaveVar = save_data.add_var(false)
 	my_var.name = 'my_speed'
@@ -1193,17 +1178,6 @@ func test_slot_type_follows_the_bound_target() -> void:
 	action.input_bindings['target'] = 'my_speed'
 
 	assert_str(str(HenActionsPanel.value_parts(action)[1].slot.type)).is_equal('float')
-
-
-func test_parse_literal_follows_the_slot_type() -> void:
-	var as_float: Variant = HenActionsPanel.parse_literal('45', 'float')
-	var as_int: Variant = HenActionsPanel.parse_literal('7', 'int')
-
-	assert_bool(as_float is float).is_true()
-	assert_float(as_float).is_equal(45.0)
-	assert_int(as_int).is_equal(7)
-	# an untyped slot keeps the text, mirroring the inspector's Variant editor
-	assert_str(str(HenActionsPanel.parse_literal('45', 'Variant'))).is_equal('45')
 
 
 func test_inline_label_counts_nested_actions() -> void:

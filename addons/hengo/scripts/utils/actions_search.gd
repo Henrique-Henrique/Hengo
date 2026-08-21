@@ -57,7 +57,9 @@ func _ready() -> void:
 
 	search_field.text_changed.connect(_on_search_changed)
 	_populate('')
-	search_field.grab_focus()
+	# deferred because the popup places itself deferred too, and focus taken on the
+	# frame the container jumps is dropped
+	search_field.grab_focus.call_deferred()
 
 
 func _on_search_changed(_text: String) -> void:

@@ -53,6 +53,10 @@ var hide_phase: bool = false
 # running index across all rendered value slots (incl. nested word rows)
 var _slot_idx: int = 0
 var nested_producer: bool = false
+# the single slot or branch this inspector was opened on, so a redraw comes back
+# as the row it was showing instead of the whole action behind it
+var _single_slot: Dictionary = {}
+var _single_branch: Dictionary = {}
 # (slot: Dictionary, chip: Control), set by the cascade
 var on_action_chip: Callable = Callable()
 var active_action_key: String = ''
@@ -141,6 +145,10 @@ static func edit_slot(_action: HenSaveAction, _slot: Dictionary, _title: String,
 	global.CURRENT_INSPECTOR = inspector
 	inspector.grab_focus()
 
+	# after the row's own grab_focus, and deferred past the popup's deferred move:
+	# the chip is a value being edited, so the caret belongs in the editor
+	inspector.focus_editor.call_deferred()
+
 
 # one branch of an action, with the same row the full inspector renders for it:
 # the state picker, the label and the instance binding, and nothing else
@@ -161,39 +169,38 @@ func edit_one_branch(_action: HenSaveAction, _key: String, _title: String) -> vo
 	resource = _action
 	inspector_title = _title
 	inspector_actions = []
+	_single_slot = {}
+	_single_branch = {key = _key, title = _title}
 
 	_update_header()
-
-	for child: Node in vbox.get_children():
-		child.queue_free()
-
-	_create_branch_row(_action, _key, _title)
+	_update_props()
 
 
 func edit_one_slot(_action: HenSaveAction, _slot: Dictionary, _title: String) -> void:
 	resource = _action
 	inspector_title = _title
 	inspector_actions = []
-	_slot_idx = 0
 
 	_migrate_name_bindings(_action)
-	_update_header()
-
-	for child: Node in vbox.get_children():
-		child.queue_free()
 
 	var slot: Dictionary = _slot.duplicate()
 
 	slot.macro_params = _get_macro_params(_action.macro_id)
 	slot.indent = 0
 
-	_create_value_slot(slot)
+	_single_branch = {}
+	_single_slot = slot
+
+	_update_header()
+	_update_props()
 
 
 func edit(_res: Resource, _title: String = '', _actions: Array[Dictionary] = []) -> void:
 	resource = _res
 	inspector_title = _title
 	inspector_actions = _actions
+	_single_slot = {}
+	_single_branch = {}
 
 	_update_header()
 	_update_props()
@@ -236,6 +243,17 @@ func _update_props() -> void:
 		child.queue_free()
 
 	if not resource:
+		return
+
+	# picking a source redraws through here, and the popup opened on one row: without
+	# this it would come back as the whole action, phase selector and branches included
+	if not _single_slot.is_empty():
+		_slot_idx = 0
+		_create_value_slot(_single_slot)
+		return
+
+	if not _single_branch.is_empty():
+		_create_branch_row(resource as HenSaveAction, str(_single_branch.key), str(_single_branch.title))
 		return
 
 	# actions render as a value-only param list (schema is owned by the macro)
@@ -562,6 +580,55 @@ func _create_value_slot(slot: Dictionary) -> void:
 
 
 # wraps a built slot row in its striped panel and adds it to the list
+# a chip opens this row to edit a value, so the caret starts in the editor and
+# typing works without aiming at the field first
+func focus_editor() -> void:
+	var editor: Control = _first_editor(vbox)
+
+	if not is_instance_valid(editor):
+		return
+
+	editor.grab_focus()
+
+	if editor is LineEdit:
+		(editor as LineEdit).select_all()
+
+	if not editor.gui_input.is_connected(_on_editor_input):
+		editor.gui_input.connect(_on_editor_input)
+
+
+func _on_editor_input(_event: InputEvent) -> void:
+	if not is_dismiss_key(_event):
+		return
+
+	get_viewport().set_input_as_handled()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
+
+
+# the caret is placed in the editor, so the keyboard has to be able to leave it.
+# both keys just dismiss, because the editors write on every keystroke and there
+# is nothing left to commit by the time either is pressed
+static func is_dismiss_key(_event: InputEvent) -> bool:
+	var key := _event as InputEventKey
+
+	return key != null and key.pressed and key.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]
+
+
+# the row nests the editor inside a panel and a container, and a Vector2 nests one
+# field per component: the first that takes the keyboard is the one to type into
+func _first_editor(_node: Node) -> Control:
+	for child: Node in _node.get_children():
+		if child is LineEdit or child is SpinBox:
+			return child as Control
+
+		var deeper: Control = _first_editor(child)
+
+		if deeper:
+			return deeper
+
+	return null
+
+
 func _mount_slot(container: Control, idx: int, indent: int) -> void:
 	var panel := PanelContainer.new()
 	panel.self_modulate = Color(1, 1, 1, 0.05) if idx % 2 != 0 else Color(1, 1, 1, 0)

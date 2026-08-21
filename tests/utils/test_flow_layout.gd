@@ -5,6 +5,19 @@ class_name TestHenFlowLayout extends GdUnitTestSuite
 # on the side of the cell that feeds it, the sequence drops straight, sibling
 # runs take distinct depths and a wire never overshoots its target
 
+var _wrap_before: Variant
+
+
+# wrap is a project setting the plugin writes to disk, so whoever last touched the
+# editor decided whether these run against a wrapped layout or a straight one
+func before_test() -> void:
+	_wrap_before = ProjectSettings.get_setting(HenSettings.FLOW_WRAP_PATH) if ProjectSettings.has_setting(HenSettings.FLOW_WRAP_PATH) else null
+	ProjectSettings.set_setting(HenSettings.FLOW_WRAP_PATH, true)
+
+
+func after_test() -> void:
+	ProjectSettings.set_setting(HenSettings.FLOW_WRAP_PATH, _wrap_before)
+
 
 func _node(
 	_graph: HenFlowGraphTypes.FlowGraph,

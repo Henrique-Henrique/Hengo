@@ -1100,8 +1100,6 @@ func _dispatch_click() -> bool:
 
 		return true
 
-	var origin: Vector2 = hit.origin
-
 	if hit.kind == &'menu' and card.node.action:
 		_select_card(card)
 		_open_card_menu(hit, card, card.node.action)
@@ -1126,7 +1124,7 @@ func _dispatch_click() -> bool:
 
 		# an edit with no popup (a bool toggle) never reaches _on_popup_closed, and
 		# the snapshot taken above would sit open until some later edit commits it
-		if not _editor.chip_pressed(hit.part, int(hit.index), rect, _chip_ring.bind(card, origin)):
+		if not _editor.chip_pressed(hit.part, rect):
 			var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 
 			_history.commit(global.SAVE_DATA if global else null, 'Edit Action')
@@ -1339,29 +1337,6 @@ func _world_of(_card: HenFlowNodeCard) -> Vector2:
 			return (item.rect as Rect2).position
 
 	return Vector2.INF
-
-
-# every text-editable chip of the card, in reading order: the tab order. the card
-# is re-emitted first because a committed value resizes the line it sits on
-func _chip_ring(_card: HenFlowNodeCard, _origin: Vector2) -> Array:
-	var ring: Array = []
-
-	if not is_instance_valid(_card):
-		return ring
-
-	_card.refresh_content()
-
-	for hit: Dictionary in _card.get_hits():
-		if hit.kind != &'chip' or not bool((hit.part as Dictionary).get('editable', false)):
-			continue
-
-		ring.append({
-			part = hit.part,
-			index = hit.index,
-			rect = screen_rect(Rect2(_origin + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
-		})
-
-	return ring
 
 
 func hit_under_mouse() -> Dictionary:

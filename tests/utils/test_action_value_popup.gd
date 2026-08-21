@@ -1,8 +1,8 @@
 @tool
 class_name TestHenActionValuePopup extends GdUnitTestSuite
 
-# the chip of a Variant slot opens the text field and nothing else, so the field
-# is the only way into a slot that wants a variable: it has to offer the way out
+# the one-line field behind Rename Action. it used to sit between a chip and the
+# slot row too, which is why it once carried a button out to the value sources
 
 const POPUP_SCENE = preload('res://addons/hengo/scenes/action_value_popup.tscn')
 
@@ -16,8 +16,17 @@ func _popup() -> HenActionValuePopup:
 	return popup
 
 
-# the field moved under a row when the button was added, and a stale path only
-# shows up as a crash while typing
+func _key(_code: Key) -> InputEventKey:
+	var event: InputEventKey = InputEventKey.new()
+
+	event.keycode = _code
+	event.pressed = true
+
+	return event
+
+
+# the field moved under a row when a button was added beside it, and a stale path
+# only shows up as a crash while typing
 func test_the_field_is_reachable() -> void:
 	var popup: HenActionValuePopup = _popup()
 
@@ -27,22 +36,23 @@ func test_the_field_is_reachable() -> void:
 	assert_str((popup.get_node('Row/Input') as LineEdit).text).is_equal('hello')
 
 
-func test_the_field_offers_a_way_to_a_variable() -> void:
+func test_enter_confirms_what_was_typed() -> void:
 	var popup: HenActionValuePopup = _popup()
-	var button: Button = popup.get_node_or_null('Row/BindBt')
+	var confirmed: Array = []
 
-	assert_object(button).is_not_null()
+	popup.confirmed.connect(func(_chip: Variant, _text: String) -> void: confirmed.append(_text))
+	popup.edit(null, 'dash')
+	popup._on_field_input(_key(KEY_ENTER))
 
-	var asked: Array = []
-
-	popup.bind_requested.connect(func(chip: Variant) -> void: asked.append(chip))
-	popup.edit({name = 'slot'}, '')
-	button.pressed.emit()
-
-	assert_int(asked.size()).is_equal(1)
-	assert_str(str((asked[0] as Dictionary).get('name', ''))).is_equal('slot')
+	assert_array(confirmed).contains_exactly(['dash'])
 
 
-# a Variant slot reads as text on the card, which is what sends it to the field
-func test_a_variant_slot_still_uses_the_text_editor() -> void:
-	assert_str(str(HenActionValueEditors.kind_for('Variant'))).is_equal(str(HenActionValueEditors.TEXT))
+func test_escape_cancels() -> void:
+	var popup: HenActionValuePopup = _popup()
+	var cancelled: Array = []
+
+	popup.cancelled.connect(func() -> void: cancelled.append(true))
+	popup.edit(null, 'dash')
+	popup._on_field_input(_key(KEY_ESCAPE))
+
+	assert_int(cancelled.size()).is_equal(1)
