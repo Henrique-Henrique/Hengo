@@ -226,3 +226,88 @@ func test_every_entry_is_readable() -> void:
 		assert_str(str(entry.title)).is_not_empty()
 		assert_str(str(entry.description)).is_not_empty()
 		assert_str(HenShortcuts.group_name(entry.group)).is_not_empty()
+
+
+const FIX_IF: String = 'res://addons/hengo/actions/flow/if_condition.gd'
+
+
+func _register_flow(_path: String) -> HenSaveMacro:
+	var instance: HenScriptMacroBase = (load(_path) as GDScript).new()
+	var macro: HenSaveMacro = _register(_path)
+
+	for flow_output: Dictionary in instance.get_flow_outputs():
+		macro.flow_outputs.append(HenSaveFlowParam.create(flow_output))
+
+	return macro
+
+
+# clicking a branch cell that already had a target panned the camera to it, so a
+# branch could be set once and never changed again. the transition card the
+# builder draws beside it is what takes the reader to the target
+func test_a_branch_cell_opens_the_editor_even_when_it_has_a_target() -> void:
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'Hit'
+
+	var action: HenSaveAction = HenSaveAction.create(_register_flow(FIX_IF))
+
+	action.phase = &'update'
+	save_data.add_state_action(state.id, action)
+	action.branches['true'] = {state_id = target.id, label = ''}
+
+	var viewer: HenFlowViewer = auto_free(
+		(load('res://addons/hengo/scenes/flow_viewer.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(viewer)
+	viewer.rebuild()
+
+	viewer._rebuild_hover_cache()
+
+	var card: HenFlowNodeCard = null
+
+	for entry: Variant in viewer._states.values():
+		for candidate: HenFlowNodeCard in entry.cards:
+			if candidate.node.action == action:
+				card = candidate
+
+	assert_object(card).is_not_null()
+
+	var origin: Vector2 = Vector2.INF
+
+	for item: Dictionary in viewer._hover_items:
+		if item.get('card') == card:
+			origin = (item.rect as Rect2).position
+
+	assert_bool(origin.is_finite()).is_true()
+
+	var cell: Dictionary = {}
+
+	for hit: Dictionary in card.get_hits():
+		if hit.kind == &'exec_out':
+			cell = hit
+			break
+
+	assert_bool(cell.is_empty()).is_false()
+
+	# the real path: the point under the cursor resolves to the cell, and the cell
+	# decides between the editor and the camera
+	var resolved: Dictionary = viewer.hit_at(origin + (cell.rect as Rect2).get_center())
+
+	assert_str(str(resolved.get('kind', ''))).is_equal('exec_out')
+	assert_bool(viewer._dispatch_hit(resolved)).is_true()
+	assert_bool(viewer._editor.is_editing).is_true()
+
+	await _drop_inspector()
+
+
+# with no UI base the popup singleton refuses to host, so edit_branch instantiates
+# an inspector that is never parented and the runner counts every node of it
+func _drop_inspector() -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if is_instance_valid(global.CURRENT_INSPECTOR):
+		global.CURRENT_INSPECTOR.free()
+		global.CURRENT_INSPECTOR = null
+
+	# make_flat queue_frees the scroll it unparents, which lands a frame later
+	await await_idle_frame()

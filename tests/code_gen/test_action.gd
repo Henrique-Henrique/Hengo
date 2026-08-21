@@ -2454,6 +2454,10 @@ func test_branch_to_an_unreachable_sub_state_is_refused() -> void:
 	var other: HenSaveState = save_data.add_state(false)
 	other.name = 'other top'
 
+	# the first sub-state is the machine's start, and entering it emits a
+	# change_sub_state of its own: the branch under test needs a name of its own
+	_sub_state(other, 'entry point')
+
 	var stranger: HenSaveState = _sub_state(other, 'stranger')
 
 	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'transition'), &'update')

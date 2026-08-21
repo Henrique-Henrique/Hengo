@@ -508,3 +508,53 @@ func test_the_chosen_output_is_stored() -> void:
 	var entry: Dictionary = action.input_actions[str(action.inputs[0].id)]
 
 	assert_str(str(entry.output)).is_equal('y')
+
+
+# a rename writes straight to the resource, and the sidebar rows and the state
+# graph read it by name: both went on showing the old one until something else
+# happened to refresh them
+func test_an_edit_is_announced_when_the_popup_closes() -> void:
+	var action: HenSaveAction = _action(FIX_MATH)
+	var inspector: HenInspector = _row_for(action, 'A')
+	var announced: Array = []
+	var bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
+	bus.request_structural_update.connect(func() -> void: announced.append(true))
+
+	inspector._on_value_changed('name', 'renamed', TYPE_STRING)
+
+	# the string editor emits per keystroke: announcing there rebuilds the sidebar
+	# while the name is still being typed
+	assert_array(announced).is_empty()
+
+	inspector.announce_changes()
+
+	assert_int(announced.size()).is_equal(1)
+
+
+func test_a_popup_that_changed_nothing_announces_nothing() -> void:
+	var inspector: HenInspector = _row_for(_action(FIX_MATH), 'A')
+	var announced: Array = []
+	var bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
+	bus.request_structural_update.connect(func() -> void: announced.append(true))
+
+	inspector.announce_changes()
+
+	assert_array(announced).is_empty()
+
+
+func test_an_edit_is_announced_only_once() -> void:
+	var action: HenSaveAction = _action(FIX_MATH)
+	var inspector: HenInspector = _row_for(action, 'A')
+	var announced: Array = []
+	var bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
+	bus.request_structural_update.connect(func() -> void: announced.append(true))
+
+	inspector._on_value_changed('name', 'a', TYPE_STRING)
+	inspector._on_value_changed('name', 'ab', TYPE_STRING)
+	inspector.announce_changes()
+	inspector.announce_changes()
+
+	assert_int(announced.size()).is_equal(1)

@@ -278,6 +278,12 @@ func add_state(_save: bool = true) -> HenSaveState:
 			return
 	
 	states.append(s)
+
+	# the flag is set after the append, because its setter sweeps the siblings by
+	# looking for the list holding this state and would find none before it
+	if states.size() == 1:
+		s.start = true
+
 	return s
 
 

@@ -57,6 +57,9 @@ var nested_producer: bool = false
 # as the row it was showing instead of the whole action behind it
 var _single_slot: Dictionary = {}
 var _single_branch: Dictionary = {}
+# an edit landed that nothing else announced, so the sidebar and the graph still
+# show what the resource was called before it
+var _dirty: bool = false
 # (slot: Dictionary, chip: Control), set by the cascade
 var on_action_chip: Callable = Callable()
 var active_action_key: String = ''
@@ -119,7 +122,7 @@ static func edit_resource(_res: Resource, _title: String = '', _actions: Array[D
 	var scene: PackedScene = load('res://addons/hengo/scenes/custom_inspector.tscn')
 	var inspector: HenInspector = scene.instantiate()
 
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
+	var popup: HenPopupContainer = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
 	inspector.hide_phase = _hide_phase
 
 	if _flat:
@@ -129,6 +132,7 @@ static func edit_resource(_res: Resource, _title: String = '', _actions: Array[D
 
 	global.CURRENT_INSPECTOR = inspector
 	inspector.grab_focus()
+	inspector.announce_on_close(popup)
 
 
 # one input of an action, with the same row the full inspector renders for it:
@@ -137,13 +141,14 @@ static func edit_slot(_action: HenSaveAction, _slot: Dictionary, _title: String,
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var inspector: HenInspector = (load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
 
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
+	var popup: HenPopupContainer = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
 
 	inspector.make_flat()
 	inspector.edit_one_slot(_action, _slot, _title)
 
 	global.CURRENT_INSPECTOR = inspector
 	inspector.grab_focus()
+	inspector.announce_on_close(popup)
 
 	# after the row's own grab_focus, and deferred past the popup's deferred move:
 	# the chip is a value being edited, so the caret belongs in the editor
@@ -156,13 +161,32 @@ static func edit_branch(_action: HenSaveAction, _key: String, _title: String, _p
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var inspector: HenInspector = (load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
 
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
+	var popup: HenPopupContainer = (Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(inspector, _popup_opts)
 
 	inspector.make_flat()
 	inspector.edit_one_branch(_action, _key, _title)
 
 	global.CURRENT_INSPECTOR = inspector
 	inspector.grab_focus()
+	inspector.announce_on_close(popup)
+
+
+# the sidebar rows and the state graph read a resource by its name, so renaming one
+# leaves both showing the old name until something says so. announcing per keystroke
+# would rebuild the whole sidebar while the name is still being typed
+func announce_on_close(_popup: HenPopupContainer) -> void:
+	if not is_instance_valid(_popup):
+		return
+
+	_popup.closed.connect(announce_changes, CONNECT_ONE_SHOT)
+
+
+func announce_changes() -> void:
+	if not _dirty:
+		return
+
+	_dirty = false
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
 
 func edit_one_branch(_action: HenSaveAction, _key: String, _title: String) -> void:
@@ -1644,10 +1668,15 @@ func _on_value_changed(prop_name: String, new_val: Variant, type: int) -> void:
 	# 	return
 
 	resource.set(prop_name, final_val)
-	
+
+	# the string editor emits on every keystroke, and a refresh rebuilds the whole
+	# sidebar: the edit is announced once, when the popup that held it closes
+	_dirty = true
+
 	if prop_name == 'type' and (resource is HenSaveVar or resource is HenSaveParam):
 		_update_props()
 		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+		_dirty = false
 
 
 func undo_redo(_undo: bool) -> void:

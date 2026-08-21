@@ -1027,8 +1027,10 @@ func _apply_drop(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool)
 
 
 func _dispatch_click() -> bool:
-	var hit: Dictionary = hit_under_mouse()
+	return _dispatch_hit(hit_under_mouse())
 
+
+func _dispatch_hit(hit: Dictionary) -> bool:
 	if hit.is_empty():
 		return false
 
@@ -1069,10 +1071,10 @@ func _dispatch_click() -> bool:
 	if card.node.kind == &'transition' and _focus_state(card.node.title):
 		return true
 
+	# always the editor, never the camera: a branch that already went somewhere could
+	# not be changed, because the click that would change it panned away instead. the
+	# transition card below is what takes the reader to the target
 	if hit.kind == &'exec_out' and card.node.action:
-		if _focus_branch(card, hit.pin):
-			return true
-
 		_editing_card = card
 		_editor_for(hit.node)
 		_editor.open_branch(
@@ -1212,19 +1214,6 @@ func _open_state(_state: HenSaveState) -> void:
 
 	if route:
 		(Engine.get_singleton(&'Router') as HenRouter).change_route(route)
-
-
-# a branch that goes somewhere reads as a link; one that falls through is a value
-func _focus_branch(_card: HenFlowNodeCard, _pin: HenFlowGraphTypes.FlowPin) -> bool:
-	var action: HenSaveAction = _card.node.action
-
-	if not action or not Engine.has_singleton(&'Global'):
-		return false
-
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var target: HenSaveState = HenGeneratorAction.branch_target(global.SAVE_DATA, action, str(_pin.id))
-
-	return _focus_frame(target)
 
 
 # a transition card only carries the target's name, and the flow view is one

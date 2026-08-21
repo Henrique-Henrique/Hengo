@@ -85,6 +85,11 @@ func add_sub_state(_save_data: HenSaveData) -> void:
 	if not states_list.has(s):
 		states_list.append(s)
 
+	# a sub machine has its own start, and the flag is set after the append: its
+	# setter sweeps the siblings by looking for the list holding this state
+	if states_list.size() == 1:
+		s.start = true
+
 
 func get_sub_states(_save_data: HenSaveData) -> Array:
 	if not _save_data.sub_states.has(id):
