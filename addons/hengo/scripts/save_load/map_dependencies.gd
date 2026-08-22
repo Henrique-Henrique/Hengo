@@ -7,9 +7,6 @@ class ProjectAST:
 	var identity: HenSaveDataIdentity
 	var macros: Array[HenSaveMacro]
 	var variables: Array[HenSaveVar]
-	var functions: Array[HenSaveFunc]
-	var signals: Array[HenSaveSignal]
-	var signals_callback: Array[HenSaveSignalCallback]
 	var states: Array[HenSaveState]
 
 
@@ -57,14 +54,6 @@ func _map_project_data(_id: StringName) -> void:
 				match type:
 					HenSideBar.SideBarItem.VARIABLES:
 						ast.variables.append(res)
-					HenSideBar.SideBarItem.FUNCTIONS:
-						ast.functions.append(res)
-					HenSideBar.SideBarItem.SIGNALS:
-						ast.signals.append(res)
-					HenSideBar.SideBarItem.SIGNALS_CALLBACK:
-						ast.signals_callback.append(res)
-					HenSideBar.SideBarItem.MACROS:
-						ast.macros.append(res)
 
 	ast_list.set(_id, ast)
 
@@ -147,24 +136,6 @@ func _has_dependency_changed(_deps: Array, _updated_ast: ProjectAST) -> bool:
 						if HenUtils.get_dependency_hash(v) == dep.hash:
 							changed = false
 						break
-			HenEnums.DependencyType.FUNC:
-				for f: HenSaveFunc in _updated_ast.functions:
-					if f.id == dep.id:
-						if HenUtils.get_dependency_hash(f) == dep.hash:
-							changed = false
-						break
-			HenEnums.DependencyType.SIGNAL:
-				for s: HenSaveSignal in _updated_ast.signals:
-					if s.id == dep.id:
-						if HenUtils.get_dependency_hash(s) == dep.hash:
-							changed = false
-						break
-			HenEnums.DependencyType.MACRO:
-				for m: HenSaveMacro in _updated_ast.macros:
-					if m.id == dep.id:
-						if HenUtils.get_dependency_hash(m) == dep.hash:
-							changed = false
-						break
 		
 		if changed:
 			return true
@@ -180,10 +151,6 @@ func update_project_data(_id: StringName) -> void:
 func update_project_data_from_save(_id: StringName, _save_data: HenSaveData) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 	ast.identity = _save_data.identity
-	ast.macros = _save_data.macros
 	ast.variables = _save_data.variables
-	ast.functions = _save_data.functions
-	ast.signals = _save_data.signals
-	ast.signals_callback = _save_data.signals_callback
 	ast.states = _save_data.states
 	ast_list.set(_id, ast)

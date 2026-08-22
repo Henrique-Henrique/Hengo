@@ -58,7 +58,7 @@ func _ready() -> void:
 
 	_update_zoom_label()
 
-	
+
 func _on_ui_size_changed() -> void:
 	(grid.material as ShaderMaterial).set_shader_parameter('screen_size', get_parent().size)
 
@@ -78,30 +78,47 @@ static func set_all_can_scroll(_tree: SceneTree, _value: bool) -> void:
 		(node as HenCam).can_scroll = _value
 
 
+static func reset_all_zoom(_tree: SceneTree) -> void:
+	if not _tree:
+		return
+
+	for node: Node in _tree.get_nodes_in_group(&'hen_cam'):
+		(node as HenCam).reset_zoom()
+
+
+static func update_all_settings(_tree: SceneTree) -> void:
+	if not _tree:
+		return
+
+	for node: Node in _tree.get_nodes_in_group(&'hen_cam'):
+		(node as HenCam).update_settings()
+
+
+static func set_all_input_enabled(_tree: SceneTree, _value: bool) -> void:
+	if not _tree:
+		return
+
+	for node: Node in _tree.get_nodes_in_group(&'hen_cam'):
+		var cam: HenCam = node as HenCam
+		cam.set_process_input(_value)
+
+		if not _value:
+			cam.set_physics_process(false)
+
+
 func is_cam_active() -> bool:
 	var parent: Control = get_parent() as Control
-	
+
 	if is_global_cam:
-		var global: HenGlobal = Engine.get_singleton(&'Global') as HenGlobal
-		if not global or global.CAM != self:
-			return false
-			
-		# cede control if a local cam is hovered
-		for node in get_tree().get_nodes_in_group(&'hen_cam'):
-			if node != self and node is HenCam:
-				var local_cam: HenCam = node as HenCam
-				if not local_cam.is_global_cam and local_cam.is_cam_active():
-					return false
-					
-		return true
-	
+		return false
+
 	if not is_inside_tree():
 		return false
-		
+
 	if parent and parent.is_visible_in_tree():
 		var rect: Rect2 = parent.get_global_rect()
 		return rect.has_point(parent.get_global_mouse_position())
-		
+
 	return false
 
 
@@ -118,7 +135,6 @@ func _input(event: InputEvent) -> void:
 
 	if is_cam_active():
 		if event is InputEventMouseMotion:
-			check_vc_action_menu()
 
 			var mask: int = (event as InputEventMouseMotion).button_mask
 
@@ -129,13 +145,11 @@ func _input(event: InputEvent) -> void:
 				transform.origin += (event as InputEventMouseMotion).relative
 				(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 				set_physics_process(false)
-				_check_virtual_cnodes()
-		
+
 		elif event is InputEventPanGesture:
 			transform.origin -= (event as InputEventPanGesture).delta * 40
 			(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 			set_physics_process(false)
-			_check_virtual_cnodes()
 
 		elif event is InputEventMagnifyGesture:
 			var zoom_amount = (event as InputEventMagnifyGesture).factor
@@ -190,15 +204,8 @@ func _zoom_out(amount: float = ZOOM_INCREMENT) -> void:
 	_update_zoom_label()
 
 
-func _update_zoom_label() -> void:
-	if not is_global_cam:
-		return
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if not global or not global.HENGO_ROOT:
-		return
-	var label: Label = global.HENGO_ROOT.get_node_or_null('%ZoomLabel') as Label
-	if label:
-		label.text = 'Zoom: %d%%' % int(round(target_zoom * 100))
+func _process(_delta: float) -> void:
+	pass
 
 
 func reset_zoom() -> void:
@@ -241,7 +248,6 @@ func _physics_process(_delta: float) -> void:
 		(grid.material as ShaderMaterial).set_shader_parameter('zoom_factor', transform.x.x)
 		(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
-		_check_virtual_cnodes()
 
 		if is_equal_approx(transform.origin.x, pos.x):
 			set_physics_process(false)
@@ -250,67 +256,8 @@ func _physics_process(_delta: float) -> void:
 
 # drains the batched-show queue under SHOW_BUDGET_USEC each frame; sorts
 # farthest-first so pop_back shows the closest-to-center vcnodes first
-func _process(_delta: float) -> void:
-	if not is_global_cam:
-		return
-	var global: HenGlobal = Engine.get_singleton(&'Global') as HenGlobal
-	if not global or global.pending_show_queue.is_empty():
-		return
-
-	var start: int = Time.get_ticks_usec()
-	var queue: Array = global.pending_show_queue
-	if queue.size() > 1:
-		var parent: Control = get_parent() as Control
-		var viewport_size: Vector2 = parent.size if parent else Vector2.ZERO
-		var center: Vector2 = (transform.origin / -transform.x.x) + viewport_size * 0.5 / transform.x.x
-		queue.sort_custom(func(_a: HenVirtualCNode, _b: HenVirtualCNode) -> bool:
-			var ca: Vector2 = _a.position + _a.size * 0.5
-			var cb: Vector2 = _b.position + _b.size * 0.5
-			return (ca - center).length_squared() > (cb - center).length_squared()
-		)
-
-	while not queue.is_empty():
-		var vc: HenVirtualCNode = queue.pop_back()
-		if not is_instance_valid(vc):
-			continue
-		vc.is_queued_for_show = false
-		# skip if it left the viewport after being queued
-		if not vc.is_showing:
-			continue
-		if is_instance_valid(vc.cnode_instance):
-			continue
-		vc.show()
-		if (Time.get_ticks_usec() - start) >= SHOW_BUDGET_USEC:
-			return
-
-
 # checks virtual cnode visibility; _force=true bypasses the pos/zoom throttle
 # (lerp settle, route change)
-func _check_virtual_cnodes(_pos: Vector2 = transform.origin, _zoom: float = transform.x.x, _force: bool = false) -> void:
-	if not is_global_cam:
-		return
-
-	if not _force:
-		var moved_px: float = (_pos - _last_check_pos).length() * _zoom
-		var zoom_delta: float = absf(_zoom - _last_check_zoom)
-		if moved_px < CHECK_MIN_DELTA_PX and zoom_delta < CHECK_MIN_DELTA_ZOOM and _frames_since_check < CHECK_MAX_FRAMES_SKIP:
-			_frames_since_check += 1
-			return
-
-	_last_check_pos = _pos
-	_last_check_zoom = _zoom
-	_frames_since_check = 0
-
-	var rect: Rect2 = Rect2(
-		_pos / -_zoom,
-		(get_parent() as Control).size / _zoom
-	)
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
-		v_cnode.check_visibility(rect)
-
-
 func get_rect() -> Rect2:
 	return Rect2(
 		transform.origin / -transform.x.x,
@@ -339,9 +286,9 @@ func go_to_center(_pos: Vector2) -> void:
 func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
 	var zoom_to_use: float = _target_zoom if _target_zoom > 0 else transform.x.x
 	zoom_to_use = clamp(zoom_to_use, MIN_ZOOM, MAX_ZOOM)
-	
+
 	pos = (_pos * (-zoom_to_use)) + (get_parent().size / 2)
-	
+
 	if _target_zoom > 0:
 		target_zoom = zoom_to_use
 		t_x = Vector2(target_zoom, 0)
@@ -351,21 +298,15 @@ func go_to_center_with_zoom(_pos: Vector2, _target_zoom: float = -1) -> void:
 	ignore_process = true
 	set_physics_process(true)
 
+# drains the batched-show queue under SHOW_BUDGET_USEC each frame; sorts
+# farthest-first so pop_back shows the closest-to-center vcnodes first
 
-func check_vc_action_menu() -> void:
+func _update_zoom_label() -> void:
 	if not is_global_cam:
 		return
-		
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	if router.current_route and is_instance_valid(router.current_route.get('ref')):
-		for vc: HenVirtualCNode in router.get_current_route_v_cnodes():
-			if not vc.is_showing_on_screen():
-				continue
-
-			var mouse_inside: bool = vc.check_mouse_inside()
-
-			if vc.showing_action_menu and mouse_inside:
-				continue
-
-			vc.showing_action_menu = mouse_inside
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	if not global or not global.HENGO_ROOT:
+		return
+	var label: Label = global.HENGO_ROOT.get_node_or_null('%ZoomLabel') as Label
+	if label:
+		label.text = 'Zoom: %d%%' % int(round(target_zoom * 100))

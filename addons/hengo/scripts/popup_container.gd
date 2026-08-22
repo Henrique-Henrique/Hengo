@@ -176,7 +176,7 @@ func _position_anchored(gp: PanelContainer, opts: Dictionary) -> void:
 		if has_anchor:
 			pos = _pos_relative_to(anchor, side, gp.size)
 		else:
-			var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CNODE_UI.get_viewport_rect()
+			var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_viewport_rect()
 			pos = Vector2(rect.position.x + (rect.size.x - gp.size.x) * 0.5, rect.position.y + (rect.size.y - gp.size.y) * 0.5)
 
 	gp.position = pos + offset

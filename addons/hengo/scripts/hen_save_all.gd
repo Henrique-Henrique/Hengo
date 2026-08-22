@@ -162,9 +162,6 @@ func _compile_task() -> void:
 						var temp_ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
 						temp_ast.identity = temp_save.identity
 						temp_ast.variables = temp_save.variables
-						temp_ast.functions = temp_save.functions
-						temp_ast.signals = temp_save.signals
-						temp_ast.macros = temp_save.macros
 						preloaded_saves[current_id] = temp_ast
 					
 			if not preloaded_saves.has(current_id):
@@ -251,23 +248,7 @@ func _compile_task() -> void:
 		if save_data.identity:
 			item.script_name = save_data.identity.name
 
-		# collect all routes once and reuse for both validation and deps
-		var routes: Array = _collect_routes(save_data)
-
-		# validate using check_errors (no UI side-effects)
-		var graph_errors: Array[String] = _validate_routes(save_data, routes)
-		if not graph_errors.is_empty():
-			item.status = 'failed'
-			item.message = 'Graph validation failed.'
-			item.errors = graph_errors
-			report.items.append(item)
-			report.failed_count += 1
-			aborted = true
-			abort_index = idx
-			break
-
-		# recalculate deps using the same routes
-		_recalculate_deps_from_routes(save_data, routes)
+		HenSaver.recalculate_dependencies(save_data)
 
 		code_gen.reset()
 		var code: String = code_gen.get_code(save_data)
@@ -367,58 +348,12 @@ func _on_finished() -> void:
 			toast.notify.call_deferred('Batch compilation failed. See report for details.', HenToast.MessageType.ERROR)
 
 
-# collects all routes from save data in a single pass
-func _collect_routes(save_data: HenSaveData) -> Array:
-	var routes: Array = [save_data.get_base_route()]
-
-	for state: HenSaveState in save_data.states:
-		routes.append(state.get_route(save_data))
-	for func_data: HenSaveFunc in save_data.functions:
-		routes.append(func_data.get_route(save_data))
-	for macro: HenSaveMacro in save_data.macros:
-		routes.append(macro.get_route(save_data))
-	for callback_data: HenSaveSignalCallback in save_data.signals_callback:
-		routes.append(callback_data.get_route(save_data))
-
-	return routes
-
-
-# validates all cnodes in the given routes using check_errors (no UI updates)
-func _validate_routes(save_data: HenSaveData, routes: Array) -> Array[String]:
-	var errors: Array[String] = []
-
-	# a script with states and no start flag would compile as change_state("")
-	if not save_data.states.is_empty() and not _has_start_state(save_data):
-		errors.append('No start state defined. Mark one state as the start state.')
-
-	for route in routes:
-		if not route:
-			continue
-		for vc: HenVirtualCNode in route.virtual_cnode_list:
-			var node_errors: Array = vc.check_errors(save_data)
-			for err in node_errors:
-				errors.append(str(err.get('description', 'Unknown graph error')))
-
-	return errors
-
-
 func _has_start_state(save_data: HenSaveData) -> bool:
 	for state: HenSaveState in save_data.states:
 		if state.start:
 			return true
 
 	return false
-
-
-# recalculates deps from pre-collected routes
-func _recalculate_deps_from_routes(save_data: HenSaveData, routes: Array) -> void:
-	save_data.identity.deps.clear()
-	save_data.identity.detailed_deps.clear()
-
-	for route in routes:
-		if not route:
-			continue
-		HenSaver._process_cnodes_for_deps(save_data, route.virtual_cnode_list)
 
 
 func _is_script_up_to_date(save_path: String, script_path: String) -> bool:

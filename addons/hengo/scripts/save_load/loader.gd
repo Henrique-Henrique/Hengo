@@ -2,40 +2,23 @@
 class_name HenLoader extends Node
 
 
-class BaseRouteRef extends RefCounted:
-	var virtual_cnode_list: Array = []
-
 
 func reset_to_load(_id: StringName, _headless: bool) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var router: HenRouter = Engine.get_singleton(&'Router')
 	
-	if router.current_route:
-		for v_cnode: HenVirtualCNode in router.get_current_route_v_cnodes():
-			v_cnode.hide()
-		router.current_route = null
 
 	if not _headless:
-		var compile_bt: Button = global.CAM.get_parent().get_node_or_null('%Compile')
+		var compile_bt: Button = global.HENGO_ROOT.get_node_or_null('%Compile')
 		compile_bt.disabled = false
 
 	# hide all virtuals
-	for cnode: HenCnode in global.cnode_pool:
-		for signal_data: Dictionary in cnode.get_signal_connection_list('on_move'):
-			cnode.disconnect('on_move', signal_data.callable)
 
-		cnode.visible = false
 
-	for connection: HenConnectionLine in global.connection_line_pool:
-		connection.visible = false
 
-	for flow_connection: HenFlowConnectionLine in global.flow_connection_line_pool:
-		flow_connection.visible = false
 
-	global.SELECTED_VIRTUAL_CNODE.clear()
 
 	# confirming queue free before check errors
-	if not _headless: await global.CAM.get_tree().process_frame
+	if not _headless: await get_tree().process_frame
 
 	global.history = UndoRedo.new()
  
@@ -84,7 +67,6 @@ func load_collection(_collection_id: StringName, _headless: bool = false) -> boo
 	for script_id: StringName in collection.script_ids:
 		var save_data: HenSaveData = load_res(script_id)
 		if save_data:
-			_strip_script_macros(save_data)
 			global.OPEN_SCRIPTS.append(save_data)
 
 	# refresh the dependency map from in-memory data so cross-script resolution
@@ -96,7 +78,7 @@ func load_collection(_collection_id: StringName, _headless: bool = false) -> boo
 	if global.OPEN_SCRIPTS.is_empty():
 		global.SAVE_DATA = null
 		reset_to_load(&'', _headless)
-		global.CAM.can_scroll = true
+		HenCam.set_all_can_scroll(get_tree(), true)
 		global.DASHBOARD.hide_dashboard()
 		if global.HENGO_ROOT:
 			global.HENGO_ROOT.refresh_script_state()
@@ -109,7 +91,7 @@ func load_collection(_collection_id: StringName, _headless: bool = false) -> boo
 	reset_to_load(active.identity.id, _headless)
 	_apply_active(active, _headless)
 
-	global.CAM.can_scroll = true
+	HenCam.set_all_can_scroll(get_tree(), true)
 	global.DASHBOARD.hide_dashboard()
 
 	var end: int = Time.get_ticks_usec()
@@ -150,40 +132,21 @@ func _resolve_active(_collection: HenSaveCollection) -> HenSaveData:
 # wires the active script into the ui (route, sidebar, class name)
 func _apply_active(_save_data: HenSaveData, _headless: bool) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	HenScriptMacroLoader.load_script_macros()
 	HenScriptMacroLoader.load_native_actions()
 
 	if not _headless:
 		show_class_name()
-		router.change_route(_initial_route(_save_data))
 
 	if global.HENGO_ROOT:
 		global.HENGO_ROOT.refresh_script_state()
 
 
-# opening a script lands on its start state, falling back to the base route
-func _initial_route(_save_data: HenSaveData) -> HenRouteData:
-	for state: HenSaveState in _save_data.states:
-		if state.start and not state.is_sub_state:
-			var route: HenRouteData = state.get_route(_save_data)
-			if route:
-				return route
-
-	return _save_data.get_base_route()
-
-
-# removes script-macros baked into the save data (re-added from the macros folder)
-func _strip_script_macros(_save_data: HenSaveData) -> void:
-	for i: int in range(_save_data.macros.size() - 1, -1, -1):
-		if _save_data.macros[i].is_script_macro:
-			_save_data.macros.remove_at(i)
 
 
 func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData = null) -> bool:
 	var start: int = Time.get_ticks_usec()
-	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	var save_data: HenSaveData
@@ -198,8 +161,6 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 		global.SAVE_DATA = save_data
 		global.OPEN_SCRIPTS = [save_data]
 
-		_strip_script_macros(save_data)
-
 		# load script macros
 		HenScriptMacroLoader.load_script_macros()
 		HenScriptMacroLoader.load_native_actions()
@@ -211,13 +172,12 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 	# showing current type
 	if not _headless:
 		show_class_name()
-		router.change_route(_initial_route(global.SAVE_DATA))
 
 	var end: int = Time.get_ticks_usec()
 
 	print('LOADED SCRIPT IN ', (end - start) / 1000., 'ms')
 
-	global.CAM.can_scroll = true
+	HenCam.set_all_can_scroll(get_tree(), true)
 	global.DASHBOARD.hide_dashboard()
 
 	if global.HENGO_ROOT:

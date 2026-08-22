@@ -25,10 +25,7 @@ func get_code(_save_data: HenSaveData, _build_preview: bool = false) -> String:
 	(Engine.get_singleton(&'CodeGeneration') as HenCodeGeneration).flow_errors.clear()
 
 	code += _get_start(_save_data)
-	code += HenGeneratorSignal.get_signals_code(_save_data)
 	code += HenGeneratorVariable.get_variables_code(_save_data)
-	code += HenGeneratorFunc.get_functions_code(_save_data)
-	code += HenGeneratorSignalCallback.get_signals_callback_code(_save_data)
 	code += HenGeneratorBase.get_base_script_code(_save_data, refs)
 
 	# a one-line lambda on the last line only parses when a newline closes it

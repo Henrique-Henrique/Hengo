@@ -6,7 +6,6 @@ signal inline_changed
 const PROP_CONTAINER: PackedScene = preload('res://addons/hengo/scenes/prop_container.tscn')
 const TITLE_FONT: Font = preload('res://addons/hengo/assets/fonts/bold.ttf')
 const DROPDOWN_HINT_TYPES: Array[String] = [
-	'state_transition',
 	'action',
 	'all_godot_classes',
 	'var_type',
@@ -312,22 +311,22 @@ func _create_prop_editor(prop: Dictionary, prop_index: int) -> void:
 	ThemeUtils.apply_font_size(label, 14)
 
 	vbox.add_theme_constant_override('separation', 10)
-	
+
 	var editor: Control = _instantiate_editor(prop_scene, prop)
 	if not editor:
 		return
 
 	configure_editor(editor, resource, prop)
-	
+
 	container.add_child(editor)
-	
+
 	var panel: PanelContainer = PanelContainer.new()
-	
+
 	if prop_index % 2 != 0:
 		panel.self_modulate = Color(1, 1, 1, 0.05)
 	else:
 		panel.self_modulate = Color(1, 1, 1, 0)
-	
+
 	panel.add_child(container)
 	vbox.add_child(panel)
 
@@ -1360,15 +1359,6 @@ func _branch_target_name(target: HenSaveState, script_id: StringName) -> String:
 
 
 # the state whose route is open — the action being edited belongs to it
-func _owner_state(save_data: HenSaveData) -> HenSaveState:
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	if not router or not router.current_route or router.current_route.type != HenRouter.ROUTE_TYPE.STATE:
-		return null
-
-	return HenGeneratorAction.find_state(save_data, router.current_route.id)
-
-
 func _on_branch_selected(item: Dictionary, key: String) -> void:
 	var action: HenSaveAction = resource as HenSaveAction
 
@@ -1656,10 +1646,10 @@ func _script_type_label(save_var: HenSaveVar) -> String:
 
 func _on_value_changed(prop_name: String, new_val: Variant, type: int) -> void:
 	var final_val: Variant = normalize_value(resource, prop_name, new_val, type)
-		
+
 	# var global: HenGlobal = Engine.get_singleton('Global')
 	# var history: UndoRedo = global.history
-	
+
 	# if history:
 	# 	history.create_action('Set ' + prop_name)
 	# 	history.add_do_property(resource, prop_name, final_val)
@@ -1792,7 +1782,7 @@ func _create_action_button(action: Dictionary) -> Button:
 	var bt := Button.new()
 	bt.text = str(action.get('name', 'Action'))
 	bt.tooltip_text = str(action.get('tooltip', ''))
-	
+
 	var icon_value: Variant = action.get('icon', null)
 	if icon_value is Texture2D:
 		bt.icon = icon_value
@@ -1824,3 +1814,8 @@ func _apply_button_color(bt: Button, color: Color) -> void:
 
 func _apply_header_panel_style() -> void:
 	header_panel.add_theme_stylebox_override('panel', StyleBoxEmpty.new())
+
+# the state whose route is open — the action being edited belongs to it
+func _owner_state(save_data: HenSaveData) -> HenSaveState:
+
+		return null

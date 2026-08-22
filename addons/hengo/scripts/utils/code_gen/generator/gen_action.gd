@@ -55,7 +55,7 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		body = _substitute_outputs(_save_data, body, action, instance)
 		body = _substitute_inputs(_save_data, body, action, instance)
 		body = _substitute_branches(_save_data, body, action, branches, _state)
-		body = HenVirtualCNodeCode.process_script_macro_body(body, false, action.id)
+		body = HenActionCode.process_script_macro_body(body, false, action.id)
 
 		# the nested body goes in LAST, after this action's own {{VCNODE_ID}} pass:
 		# its lines are already resolved and must not be run through it again
@@ -96,7 +96,7 @@ static func _substitute_loop_body(_save_data: HenSaveData, _state: HenSaveState,
 	if not has_statement:
 		nested.append('pass')
 
-	return HenVirtualCNodeCode._inject_placeholder(_body, 'loop_body', '\n'.join(nested))
+	return HenActionCode._inject_placeholder(_body, 'loop_body', '\n'.join(nested))
 
 
 # why an action cannot be emitted, empty when it is fine. every emission path
@@ -220,7 +220,7 @@ static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) 
 		if base.is_empty():
 			continue
 
-		base = HenVirtualCNodeCode.process_script_macro_body(base, false, action.id)
+		base = HenActionCode.process_script_macro_body(base, false, action.id)
 
 		# a blank line between blocks, or two actions run together on screen
 		if not lines.is_empty():
@@ -250,7 +250,7 @@ static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 			if scope.is_empty():
 				continue
 
-			scope = HenVirtualCNodeCode.process_script_macro_body(scope, false, action.id)
+			scope = HenActionCode.process_script_macro_body(scope, false, action.id)
 
 			for line: String in scope.strip_edges().split('\n'):
 				lines.append(line)
@@ -286,7 +286,7 @@ static func merge_script_overrides(_save_data: HenSaveData, _override_data: Dict
 						tokens = []
 					}
 
-				var code: String = HenVirtualCNodeCode.process_script_macro_body(body as String, false, action.id)
+				var code: String = HenActionCode.process_script_macro_body(body as String, false, action.id)
 
 				for line: String in code.strip_edges(false, true).split('\n'):
 					(_override_data[func_name].tokens as Array).append(line)
@@ -347,7 +347,7 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 			continue
 
 		var code: String = _substitute_inputs(_save_data, body as String, action, instance)
-		code = HenVirtualCNodeCode.process_script_macro_body(code, false, action.id)
+		code = HenActionCode.process_script_macro_body(code, false, action.id)
 
 		for line: String in code.strip_edges(false, true).split('\n'):
 			tokens.append(line)
@@ -406,13 +406,17 @@ static func get_phase_params(_save_data: HenSaveData, _state: HenSaveState, _pha
 	if str(_phase) == 'exit':
 		return []
 
-	var vc_name: String = str(_phase)
+	# the phase signature is fixed: the tick phases take delta and enter takes the
+	# data the transition carries, which the state declares itself
+	if str(_phase) in ['update', 'physics']:
+		return [ {name = 'delta'} ]
 
-	for vc: HenVirtualCNode in _state.get_route(_save_data).virtual_sub_type_vc_list:
-		if vc.name == vc_name:
-			return HenVirtualCNodeCode.get_output_token_list(_save_data, vc)
+	if str(_phase) != 'enter':
+		return []
 
-	return [ {name = 'delta'} ] if vc_name in ['update', 'physics'] else []
+	return _state.transition_data.map(func(param: HenSaveParam) -> Dictionary:
+		return {name = param.name, type = param.type, category = &'', data = {}}
+	)
 
 
 # body for a phase: the macro's get_flow_<phase>(). only update may fall back to
@@ -470,7 +474,7 @@ static func _substitute_outputs(_save_data: HenSaveData, _body: String, _action:
 
 		# bound: the token line becomes `store = rhs`; unbound: drop the whole line
 		if not lvalue.is_empty():
-			body = HenVirtualCNodeCode._inject_placeholder(body, 'out:' + id, lvalue + ' = ' + _output_rhs(_instance, id))
+			body = HenActionCode._inject_placeholder(body, 'out:' + id, lvalue + ' = ' + _output_rhs(_instance, id))
 		else:
 			body = _drop_placeholder_line(body, 'out:' + id)
 
@@ -526,7 +530,7 @@ static func _substitute_branches(_save_data: HenSaveData, _body: String, _action
 			if not trace.is_empty():
 				call = trace + '\n' + call
 
-		body = HenVirtualCNodeCode._inject_placeholder(body, key, call)
+		body = HenActionCode._inject_placeholder(body, key, call)
 
 	return body
 
@@ -915,7 +919,7 @@ static func _get_process_body(_instance: HenScriptMacroBase) -> String:
 
 		var object: Object = callable_body.get_object()
 		var source: String = object.get_script().source_code if object and object.get_script() else ''
-		var parsed: Dictionary = HenVirtualCNodeCode.parse_script_function(source, callable_body.get_method())
+		var parsed: Dictionary = HenActionCode.parse_script_function(source, callable_body.get_method())
 		return parsed.get('body', '')
 
 	return ''
@@ -952,9 +956,9 @@ static func _substitute_inputs(_save_data: HenSaveData, _body: String, _action: 
 					# raw input: a code fragment emitted verbatim, never quoted
 					literal = str(value)
 				else:
-					literal = HenVirtualCNodeCode.get_default_value_code(_save_data, effective_type(_save_data, _action, input), false, '', null, value)
+					literal = HenActionCode.get_default_value_code(_save_data, effective_type(_save_data, _action, input), false, '', null, value)
 
-		body = HenVirtualCNodeCode._inject_placeholder(body, key, literal)
+		body = HenActionCode._inject_placeholder(body, key, literal)
 
 	return body
 
@@ -978,7 +982,7 @@ static func _emit_inline_action(_save_data: HenSaveData, _ref: Variant) -> Strin
 
 	var rhs: String = _output_rhs(instance, output_id)
 	rhs = _substitute_inputs(_save_data, rhs, child, instance)
-	rhs = HenVirtualCNodeCode.process_script_macro_body(rhs, false, child.id)
+	rhs = HenActionCode.process_script_macro_body(rhs, false, child.id)
 
 	# _inject_placeholder trails a newline per input, which would break the expression
 	return rhs.strip_edges()

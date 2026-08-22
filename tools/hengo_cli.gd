@@ -363,7 +363,6 @@ func _fmt_default(_value: Variant) -> Variant:
 # a json may hold a single script (top-level) or many via a `scripts` array.
 func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var router: HenRouter = Engine.get_singleton(&'Router')
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 
 	var specs: Array = _json.get('scripts', [])
@@ -399,7 +398,6 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 	# pass 2b: fill the action lists
 	for b: Dictionary in built:
 		global.SAVE_DATA = b.save_data
-		router.current_route = b.base_route
 		map_deps.ast_list.set(b.identity.id, HenUtils.get_current_ast_list())
 		var err: String = HenHengoActions.build_actions(b.save_data, b.spec, all_scripts)
 		if not err.is_empty():
@@ -431,7 +429,6 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 		collection.add_script(StringName(str(b.id)))
 
 		global.SAVE_DATA = b.save_data
-		router.current_route = b.base_route
 		var code: String = code_gen.get_code(b.save_data)
 		var file: FileAccess = FileAccess.open(b.identity.script_path, FileAccess.WRITE)
 		if not file:
@@ -504,9 +501,8 @@ func _create_script_resource(_collection: HenSaveCollection, _spec: Dictionary) 
 	var save_data: HenSaveData = HenSaveData.new()
 	save_data.identity = identity
 	save_data.counter = 1
-	var base_route: HenRouteData = save_data.create_route(identity.id, 'Base', HenRouter.ROUTE_TYPE.BASE)
 
-	return {id = id, id_path = id_path, identity = identity, save_data = save_data, base_route = base_route, spec = _spec}
+	return {id = id, id_path = id_path, identity = identity, save_data = save_data, spec = _spec}
 
 
 # reloads the .res from disk bypassing the resource cache (a genuinely fresh
@@ -515,15 +511,12 @@ func _create_script_resource(_collection: HenSaveCollection, _spec: Dictionary) 
 # passes use the same context — the only variable is in-memory vs serialized graph.
 func _verify_roundtrip(_save_path: String, _expected_code: String) -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
 	var reloaded: HenSaveData = ResourceLoader.load(_save_path, '', ResourceLoader.CACHE_MODE_IGNORE_DEEP)
 	if not reloaded:
 		return {ok = false, detail = 'reload failed: ' + _save_path}
 
 	global.SAVE_DATA = reloaded
 	global.OPEN_SCRIPTS = [reloaded]
-	router.current_route = reloaded.get_base_route()
 
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 	map_deps.ast_list.set(reloaded.identity.id, HenUtils.get_current_ast_list())

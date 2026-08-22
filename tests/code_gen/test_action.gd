@@ -1531,10 +1531,6 @@ func _assert_whole_pool_compiles(_owner: String) -> void:
 	any_out.name = 'any_out'
 	any_out.type = 'Variant'
 
-	# a declared signal, so emit_signal has a real name to fire instead of ''
-	var sig: HenSaveSignal = save_data.add_signal(false)
-	sig.name = 'swept_signal'
-
 	var target: HenSaveState = save_data.add_state(false)
 	target.name = 'other state'
 
@@ -1552,7 +1548,7 @@ func _assert_whole_pool_compiles(_owner: String) -> void:
 		if str(macro.id) == 'emit_signal':
 			for signal_param: HenSaveParam in action.inputs:
 				if str(signal_param.id) == 'signal_name':
-					signal_param.default_value = sig.name
+					signal_param.default_value = 'swept_signal'
 
 		# every required slot gets a source, so the action is never skipped
 		for param: HenSaveParam in action.inputs:

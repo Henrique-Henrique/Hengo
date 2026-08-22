@@ -165,8 +165,8 @@ func _set_value(path: String, value: Variant) -> void:
 	emit_changed()
 	
 	var global: HenGlobal = Engine.get_singleton('Global')
-	if global and global.get("CAM") and global.CAM.has_method("update_settings"):
-		global.CAM.update_settings()
+	if global and is_instance_valid(global.get('HENGO_ROOT')):
+		HenCam.update_all_settings(global.HENGO_ROOT.get_tree())
 
 	# re-scale the ui live so the factor takes effect without a plugin reload
 	if path == FONT_SCALE_PATH and global and is_instance_valid(global.get('HENGO_ROOT')) and global.HENGO_ROOT.has_method('reapply_font_scale'):

@@ -29,15 +29,3 @@ func get_data() -> Dictionary:
 		inputs = input_data,
 	}
 
-
-func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	var arr: Array[Dictionary] = []
-
-	for param: HenSaveParam in inputs:
-		arr.append(param.get_data())
-
-	return arr
-
-
-func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	return []

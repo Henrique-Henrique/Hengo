@@ -1,3 +1,4 @@
+@tool
 class_name HenUtils extends Node
 
 # an action binding stores 'var:<id>' for a hengo variable and the bare name for a
@@ -206,6 +207,8 @@ const UI_COLORS = {
 }
 
 
+static var _script_dir_index: Dictionary = {}
+
 static func get_depth_color(depth: int) -> Color:
 	return DEPTH_COLORS[depth % DEPTH_COLORS.size()]
 
@@ -223,209 +226,6 @@ static func tint_button(_bt: Button, _color: Color, _tint_text: bool = true) -> 
 		_bt.add_theme_color_override(&'font_pressed_color', _color.darkened(.15))
 		_bt.add_theme_color_override(&'font_focus_color', _color)
 
-
-static func get_icon_for_subtype(_sub_type: int) -> Texture2D:
-	match _sub_type:
-		HenVirtualCNode.SubType.FUNC, \
-		HenVirtualCNode.SubType.USER_FUNC, \
-		HenVirtualCNode.SubType.FUNC_FROM, \
-		HenVirtualCNode.SubType.MACRO, \
-		HenVirtualCNode.SubType.SCRIPT_MACRO:
-			return ICON_FUNCTION
-
-		HenVirtualCNode.SubType.VIRTUAL, \
-		HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-			return ICON_LAYERS
-
-		HenVirtualCNode.SubType.FUNC_INPUT, \
-		HenVirtualCNode.SubType.MACRO_INPUT:
-			return ICON_INPUT
-
-		HenVirtualCNode.SubType.FUNC_OUTPUT, \
-		HenVirtualCNode.SubType.MACRO_OUTPUT:
-			return ICON_OUTPUT
-
-		HenVirtualCNode.SubType.VAR, \
-		HenVirtualCNode.SubType.LOCAL_VAR, \
-		HenVirtualCNode.SubType.SET_VAR, \
-		HenVirtualCNode.SubType.SET_LOCAL_VAR, \
-		HenVirtualCNode.SubType.VAR_FROM, \
-		HenVirtualCNode.SubType.SET_VAR_FROM, \
-		HenVirtualCNode.SubType.CONST, \
-		HenVirtualCNode.SubType.GET_FROM_PROP, \
-		HenVirtualCNode.SubType.IN_PROP:
-			return ICON_VARIABLE
-
-		HenVirtualCNode.SubType.LITERAL:
-			return ICON_LITERAL
-
-		HenVirtualCNode.SubType.GET_PROP, \
-		HenVirtualCNode.SubType.SET_PROP:
-			return ICON_PROPERTY
-
-		HenVirtualCNode.SubType.IF:
-			return ICON_IF
-
-		HenVirtualCNode.SubType.FOR, \
-		HenVirtualCNode.SubType.FOR_ARR, \
-		HenVirtualCNode.SubType.FOR_ITEM:
-			return ICON_LOOP
-
-		HenVirtualCNode.SubType.BREAK, \
-		HenVirtualCNode.SubType.CONTINUE, \
-		HenVirtualCNode.SubType.PASS, \
-		HenVirtualCNode.SubType.GO_TO_VOID, \
-		HenVirtualCNode.SubType.SELF_GO_TO_VOID:
-			return ICON_PLAY
-
-		HenVirtualCNode.SubType.STATE, \
-		HenVirtualCNode.SubType.STATE_START:
-			return ICON_STATE
-
-		HenVirtualCNode.SubType.SIGNAL_ENTER, \
-		HenVirtualCNode.SubType.SIGNAL_CONNECTION, \
-		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
-			return ICON_SIGNAL
-
-		HenVirtualCNode.SubType.DEBUG, \
-		HenVirtualCNode.SubType.DEBUG_VALUE, \
-		HenVirtualCNode.SubType.DEBUG_PUSH, \
-		HenVirtualCNode.SubType.DEBUG_FLOW_START, \
-		HenVirtualCNode.SubType.START_DEBUG_STATE, \
-		HenVirtualCNode.SubType.DEBUG_STATE:
-			return ICON_DEBUG
-
-		HenVirtualCNode.SubType.VOID:
-			return ICON_VOID
-		
-		HenVirtualCNode.SubType.INVALID:
-			return ICON_INVALID
-		
-		HenVirtualCNode.SubType.RAW_CODE:
-			return ICON_CODE
-
-		HenVirtualCNode.SubType.IMG:
-			return ICON_IMAGE
-
-		HenVirtualCNode.SubType.EXPRESSION:
-			return ICON_CALCULATOR
-
-		HenVirtualCNode.SubType.OPERATOR:
-			return ICON_CALCULATOR
-
-		HenVirtualCNode.SubType.NOT_CONNECTED:
-			return ICON_LINK_OFF
-
-		HenVirtualCNode.SubType.CAST:
-			return ICON_BOX
-
-		HenVirtualCNode.SubType.MAKE_TRANSITION, \
-		HenVirtualCNode.SubType.STATE_TRANSITION, \
-		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
-			return ICON_TRANSITION
-
-		HenVirtualCNode.SubType.INPUT_EVENT_CHECK, \
-		HenVirtualCNode.SubType.INPUT_ACTION_CHECK, \
-		HenVirtualCNode.SubType.INPUT_POLLING:
-			return ICON_GAMEPAD
-
-	return null
-
-
-static func get_color_for_subtype(_sub_type: int) -> Color:
-	match _sub_type:
-		HenVirtualCNode.SubType.FUNC, \
-		HenVirtualCNode.SubType.USER_FUNC, \
-		HenVirtualCNode.SubType.FUNC_FROM, \
-		HenVirtualCNode.SubType.MACRO, \
-		HenVirtualCNode.SubType.SCRIPT_MACRO:
-			return Color('#54a0ff')
-
-		HenVirtualCNode.SubType.VIRTUAL, \
-		HenVirtualCNode.SubType.OVERRIDE_VIRTUAL:
-			return Color('#ff9ff3')
-
-		HenVirtualCNode.SubType.FUNC_INPUT, \
-		HenVirtualCNode.SubType.MACRO_INPUT:
-			return Color('#ff9ff3')
-
-		HenVirtualCNode.SubType.FUNC_OUTPUT, \
-		HenVirtualCNode.SubType.MACRO_OUTPUT:
-			return Color('#ff9ff3')
-
-		HenVirtualCNode.SubType.VAR, \
-		HenVirtualCNode.SubType.LOCAL_VAR, \
-		HenVirtualCNode.SubType.SET_VAR, \
-		HenVirtualCNode.SubType.SET_LOCAL_VAR, \
-		HenVirtualCNode.SubType.VAR_FROM, \
-		HenVirtualCNode.SubType.SET_VAR_FROM, \
-		HenVirtualCNode.SubType.CONST, \
-		HenVirtualCNode.SubType.GET_FROM_PROP, \
-		HenVirtualCNode.SubType.IN_PROP:
-			return Color('#1dd1a1')
-
-		HenVirtualCNode.SubType.LITERAL:
-			return Color('#e1b12c')
-
-		HenVirtualCNode.SubType.GET_PROP, \
-		HenVirtualCNode.SubType.SET_PROP:
-			return Color('#00d2d3')
-
-		HenVirtualCNode.SubType.IF:
-			return Color('#ff6b6b')
-
-		HenVirtualCNode.SubType.FOR, \
-		HenVirtualCNode.SubType.FOR_ARR, \
-		HenVirtualCNode.SubType.FOR_ITEM:
-			return Color('#ff6b6b')
-
-		HenVirtualCNode.SubType.BREAK, \
-		HenVirtualCNode.SubType.CONTINUE, \
-		HenVirtualCNode.SubType.PASS, \
-		HenVirtualCNode.SubType.GO_TO_VOID, \
-		HenVirtualCNode.SubType.SELF_GO_TO_VOID:
-			return Color('#ff6b6b')
-
-		HenVirtualCNode.SubType.STATE, \
-		HenVirtualCNode.SubType.STATE_START:
-			return Color('#a29bfe')
-
-		HenVirtualCNode.SubType.SIGNAL_ENTER, \
-		HenVirtualCNode.SubType.SIGNAL_CONNECTION, \
-		HenVirtualCNode.SubType.SIGNAL_DISCONNECTION:
-			return Color('#ff6b6b')
-
-		HenVirtualCNode.SubType.DEBUG, \
-		HenVirtualCNode.SubType.DEBUG_VALUE, \
-		HenVirtualCNode.SubType.DEBUG_PUSH, \
-		HenVirtualCNode.SubType.DEBUG_FLOW_START, \
-		HenVirtualCNode.SubType.START_DEBUG_STATE, \
-		HenVirtualCNode.SubType.DEBUG_STATE:
-			return Color('#c8d6e5')
-
-		HenVirtualCNode.SubType.VOID:
-			return Color('#d1d9e0')
-		
-		HenVirtualCNode.SubType.RAW_CODE:
-			return Color('#feca57')
-
-		HenVirtualCNode.SubType.EXPRESSION:
-			return Color('#ff9f43')
-
-		HenVirtualCNode.SubType.OPERATOR:
-			return Color('#f39c12')
-
-		HenVirtualCNode.SubType.MAKE_TRANSITION, \
-		HenVirtualCNode.SubType.STATE_TRANSITION, \
-		HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
-			return Color('#6c5ce7')
-
-		HenVirtualCNode.SubType.INPUT_EVENT_CHECK, \
-		HenVirtualCNode.SubType.INPUT_ACTION_CHECK, \
-		HenVirtualCNode.SubType.INPUT_POLLING:
-			return Color('#ef5777')
-
-	return Color('#343434')
 
 static func move_array_item(_arr: Array, _ref, _factor: int) -> bool:
 	var target_idx: int = _arr.find(_ref) - _factor
@@ -631,7 +431,7 @@ static func get_bind_label(_save_data: HenSaveData, _bind_code: String) -> Strin
 
 
 static func reposition_control_inside(_control: Control) -> void:
-	var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).CNODE_UI.get_viewport_rect()
+	var rect: Rect2 = (Engine.get_singleton(&'Global') as HenGlobal).HENGO_ROOT.get_viewport_rect()
 
 	# x
 	if _control.position.x + _control.size.x > rect.position.x + rect.size.x:
@@ -808,22 +608,6 @@ static func get_dependency_type(res: Resource) -> HenEnums.DependencyType:
 	return HenEnums.DependencyType.VAR
 
 
-static func is_circular_dependent(_sub_type: HenVirtualCNode.SubType) -> bool:
-	match _sub_type:
-		HenVirtualCNode.SubType.FUNC_INPUT, \
-		HenVirtualCNode.SubType.FUNC_OUTPUT, \
-		HenVirtualCNode.SubType.MACRO_INPUT, \
-		HenVirtualCNode.SubType.MACRO_OUTPUT, \
-		HenVirtualCNode.SubType.SIGNAL_ENTER:
-			return true
-		
-	return false
-
-
-# index of script_id -> script directory, resolved across all collections
-static var _script_dir_index: Dictionary = {}
-
-
 # rebuilds the script_id -> directory index by scanning every collection folder
 static func rebuild_script_index() -> void:
 	var fresh: Dictionary = {}
@@ -853,6 +637,8 @@ static func get_script_dir(_id: StringName) -> String:
 
 
 # returns every known script id across all collections
+
+
 static func get_all_script_ids() -> Array[StringName]:
 	rebuild_script_index()
 
@@ -870,14 +656,6 @@ static func get_side_bar_item_path(_save_data_id: StringName, _type: HenSideBar.
 	match _type:
 		HenSideBar.SideBarItem.VARIABLES:
 			suffix = '/variables/'
-		HenSideBar.SideBarItem.FUNCTIONS:
-			suffix = '/functions/'
-		HenSideBar.SideBarItem.SIGNALS:
-			suffix = '/signals/'
-		HenSideBar.SideBarItem.SIGNALS_CALLBACK:
-			suffix = '/signals_callback/'
-		HenSideBar.SideBarItem.MACROS:
-			suffix = '/macros/'
 		HenSideBar.SideBarItem.STATES:
 			suffix = '/states/'
 
@@ -900,11 +678,8 @@ static func get_current_ast_list() -> HenMapDependencies.ProjectAST:
 	var ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
 
 	ast.identity = global.SAVE_DATA.identity
-	ast.macros = global.SAVE_DATA.macros + global.script_macros
+	ast.macros = global.script_macros
 	ast.variables = global.SAVE_DATA.variables
-	ast.functions = global.SAVE_DATA.functions
-	ast.signals = global.SAVE_DATA.signals
-	ast.signals_callback = global.SAVE_DATA.signals_callback
 	ast.states = global.SAVE_DATA.states
 
 	return ast
@@ -923,12 +698,6 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 				match _res_data.type:
 					HenSideBar.AddType.VAR:
 						list = ast.variables
-					HenSideBar.AddType.FUNC:
-						list = ast.functions
-					HenSideBar.AddType.SIGNAL_CALLBACK:
-						list = ast.signals_callback
-					HenSideBar.AddType.SIGNAL:
-						list = ast.signals
 					HenSideBar.AddType.MACRO:
 						list = ast.macros
 					HenSideBar.AddType.STATE:
@@ -937,15 +706,8 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 			match _res_data.type:
 				HenSideBar.AddType.VAR:
 					list = _save_data.variables
-				HenSideBar.AddType.FUNC:
-					list = _save_data.functions
-				HenSideBar.AddType.SIGNAL_CALLBACK:
-					list = _save_data.signals_callback
-				HenSideBar.AddType.SIGNAL:
-					list = _save_data.signals
 				HenSideBar.AddType.MACRO:
-					list = _save_data.macros.duplicate()
-					list.append_array((Engine.get_singleton(&'Global') as HenGlobal).script_macros)
+					list = (Engine.get_singleton(&'Global') as HenGlobal).script_macros.duplicate()
 				HenSideBar.AddType.STATE:
 					list = _save_data.states
 				HenSideBar.AddType.LOCAL_VAR:
@@ -957,9 +719,7 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 										return lv
 						return null
 
-					var found: HenSaveParam = check_list.call(_save_data.functions)
-					if not found: found = check_list.call(_save_data.macros)
-					if not found: found = check_list.call(_save_data.states)
+					var found: HenSaveParam = check_list.call(_save_data.states)
 					if not found:
 						for sub_list: Array in _save_data.sub_states.values():
 							found = check_list.call(sub_list)

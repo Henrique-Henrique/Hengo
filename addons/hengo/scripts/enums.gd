@@ -45,7 +45,6 @@ const SINGLETON_LIST: Array[StringName] = [
 	&'ThreadHelper',
 	&'MapDependencies',
 	&'Loader',
-	&'Router',
 	&'CodeGeneration',
 	&'Enums',
 	&'Global',

@@ -129,36 +129,9 @@ static func _compile_script(_id: StringName) -> void:
 
 
 static func recalculate_dependencies(save_data: HenSaveData) -> void:
+	# dependencies came from the cnodes a route held; actions declare theirs
+	# through bindings, which the map rebuilds from the save data itself
 	save_data.identity.deps.clear()
 	save_data.identity.detailed_deps.clear()
 	
-	_process_cnodes_for_deps(save_data, save_data.get_base_route().virtual_cnode_list)
-	
-	for state_data: HenSaveState in save_data.states:
-		_process_cnodes_for_deps(save_data, state_data.get_route(save_data).virtual_cnode_list)
-	
-	for func_data: HenSaveFunc in save_data.functions:
-		_process_cnodes_for_deps(save_data, func_data.get_route(save_data).virtual_cnode_list)
-		
-	for macro_data: HenSaveMacro in save_data.macros:
-		_process_cnodes_for_deps(save_data, macro_data.get_route(save_data).virtual_cnode_list)
-		
-	for sc_data: HenSaveSignalCallback in save_data.signals_callback:
-		_process_cnodes_for_deps(save_data, sc_data.get_route(save_data).virtual_cnode_list)
 
-
-static func _process_cnodes_for_deps(save_data: HenSaveData, cnode_list: Array) -> void:
-	for vc: HenVirtualCNode in cnode_list:
-		var res = vc.get_res(save_data)
-		if res:
-			var parent_id: String = HenUtils.get_res_parent_id(res)
-			save_data.add_dep(parent_id)
-			
-			var dep_hash: int = HenUtils.get_dependency_hash(res)
-				
-			if dep_hash != 0:
-				save_data.add_detailed_dep(parent_id, {
-					type = HenUtils.get_dependency_type(res),
-					id = res.id,
-					hash = dep_hash
-				})

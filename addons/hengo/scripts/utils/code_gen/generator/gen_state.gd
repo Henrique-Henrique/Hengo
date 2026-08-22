@@ -34,13 +34,14 @@ static func get_states_start_code(_save_data: HenSaveData) -> String:
 static func get_states_code(_save_data: HenSaveData) -> String:
 	return get_states_code_with_arr(_save_data, _save_data.states)
 
-
 static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array, _level: int = 0) -> String:
 	var code: String = ''
 	var idx: int = 0
 	# generate classes implementation
 	for state: HenSaveState in _state_arr:
-		var virtual_tokens: Dictionary = HenGeneratorBase.parse_virtual_cnode(state.get_route(_save_data).virtual_sub_type_vc_list, _save_data)
+		# the phases a state has come from its action list alone: the scaffolding
+		# vcnode that used to stand for each one carried no logic of its own
+		var virtual_tokens: Dictionary = {}
 
 		# inject linear action bodies into the state's lifecycle methods.
 		# exit gets super() for free (the != 'enter' rule), which the base needs
@@ -106,12 +107,10 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 
 			if start_sub_state:
 				var sub_state_data: String = ''
-				for virtual_vc: HenVirtualCNode in start_sub_state.get_route(_save_data).virtual_sub_type_vc_list:
-					if virtual_vc.get_vc_name(_save_data) == 'enter':
-						var flow_tokens: Array = HenVirtualCNodeCode.get_output_token_list(_save_data, virtual_vc)
-						sub_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
-							return HenVirtualCNodeCode.get_default_value_code(_save_data, x.type, false, x.get('category', ''), x.get('data', null))))
-						break
+				var flow_tokens: Array = HenGeneratorAction.get_phase_params(_save_data, start_sub_state, &'enter')
+
+				sub_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
+					return HenActionCode.get_default_value_code(_save_data, x.type, false, x.get('category', ''), x.get('data', null))))
 				
 				var change_sub_command = '_ref._STATE_CONTROLLER.current_state.change_sub_state("{name}"{data})'.format({
 					name = start_sub_state.name.to_snake_case(),
@@ -163,7 +162,7 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 					func_codes.append('\t'.repeat(_level + 2) + token)
 				elif token is Dictionary:
 					func_codes.append(
-						HenGeneratorByToken.get_code_by_token(_save_data, token, _level + 2)
+						''
 					)
 		
 			func_base += '\n'.join(func_codes)

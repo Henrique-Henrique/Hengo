@@ -36,18 +36,6 @@ func _on_create(_open: bool = false) -> void:
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
 
 
-func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
-	var save_data: HenSaveData = HenSaveData.new()
-	var _class: StringName = extend_bt.text if ClassDB.class_exists(extend_bt.text) else 'Node'
-
-	save_data.identity = _identity
-	save_data.counter = 1
-
-	save_data.create_route(save_data.identity.id, 'Base', HenRouter.ROUTE_TYPE.BASE)
-
-	return save_data
-
-
 func create_script(_name: String, _class: StringName) -> Dictionary:
 	var collection: HenSaveCollection = HenCollectionManager.ensure_active_collection()
 
@@ -83,3 +71,13 @@ func create_script(_name: String, _class: StringName) -> Dictionary:
 		id = id,
 		data = res
 	}
+
+func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
+	var save_data: HenSaveData = HenSaveData.new()
+	var _class: StringName = extend_bt.text if ClassDB.class_exists(extend_bt.text) else 'Node'
+
+	save_data.identity = _identity
+	save_data.counter = 1
+
+
+	return save_data

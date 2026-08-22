@@ -1091,10 +1091,6 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if hit.is_empty():
 		return false
 
-	if hit.kind == &'frame_header':
-		_open_state(hit.state)
-		return true
-
 	var card: HenFlowNodeCard = hit.card
 	var rect: Rect2 = screen_rect(Rect2((hit.origin as Vector2) + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
 
@@ -1390,17 +1386,6 @@ func selected_actions() -> Array[HenSaveAction]:
 
 
 # --- navigation ---
-
-func _open_state(_state: HenSaveState) -> void:
-	if not _state or not Engine.has_singleton(&'Global'):
-		return
-
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var route: HenRouteData = _state.get_route(global.SAVE_DATA) if global.SAVE_DATA else null
-
-	if route:
-		(Engine.get_singleton(&'Router') as HenRouter).change_route(route)
-
 
 # a transition card only carries the target's name, and the flow view is one
 # script at a time, so a name is unique here

@@ -2,22 +2,14 @@
 class_name HenGlobal extends Node
 
 # nodes referencs
-var CAM: HenCam
-var CNODE_CONTAINER: Control
-var COMMENT_CONTAINER: Control
 var SIDE_MENU_POPUP: PanelContainer
-var ERROR_BT: HenErrorBt
-var CONNECTION_GUIDE: HenConnectionGuide
 var HENGO_ROOT: HenHengoRoot
 var SIDE_BAR: HenSideBar
 var SIDE_PANEL: PanelContainer
 var TOOLTIP: HenTooltip
-var CODE_PREVIEWER: HenCodePreview
 var GENERATE_PREVIEW_CODE: bool = false
 var SCRIPT_REF_CACHE: Dictionary = {}
 var TABS: HenTabs
-var SELECTED_VIRTUAL_CNODE: Array[HenVirtualCNode]
-var CNODE_UI: Panel
 var DASHBOARD: HenDashboard
 var SAVE_DATA: HenSaveData
 # all scripts of the active collection kept in memory
@@ -28,12 +20,10 @@ var CODE_SEARCH: HenCodeSearch
 
 # CONFIG
 var SETTINGS: HenSettings = HenSettings.new()
-var AUTO_CAMERA: HenAutoCamera = HenAutoCamera.new()
 var IS_HEADLESS: bool = false
 
 # cnodes
 var can_make_connection: bool = false
-var connection_to_data: CNodeInOutConnectionData
 var can_make_flow_connection: bool = false
 var flow_connection_to_data: Dictionary = {}
 var flow_cnode_from: PanelContainer = null
@@ -85,11 +75,7 @@ var current_script_debug_symbols: Dictionary = {}
 
 
 # pool
-var cnode_pool: Array = []
 var state_pool: Array = []
-var connection_line_pool: Array = []
-var flow_connection_line_pool: Array = []
-var state_connection_line_pool: Array = []
 # skeleton placeholders shown at a vcnode's spot while it waits in
 # pending_show_queue; grabbed on enqueue, released when show() runs
 var placeholder_pool: Array = []
@@ -104,7 +90,6 @@ var can_instantiate_pool: bool = true
 
 # macro
 var USE_MACRO_USE_SELF: bool = false
-var MACRO_REF: HenVirtualCNode
 var USE_MACRO_REF: bool = false
 var MACRO_USE_SELF: bool = false
 var script_macros: Array[HenSaveMacro] = []

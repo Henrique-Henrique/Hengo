@@ -30,23 +30,6 @@ func test_foreign_state_does_not_clear_start() -> void:
 
 # the first state is flagged on creation, so a script reaches this state only by
 # having had the flag cleared
-func test_batch_validation_flags_missing_start_state() -> void:
-	save_data.add_state(false).start = false
-
-	var errors: Array[String] = HenSaveAll.new()._validate_routes(save_data, [])
-
-	assert_array(errors).contains(['No start state defined. Mark one state as the start state.'])
-
-
-func test_batch_validation_passes_with_start_state() -> void:
-	var state: HenSaveState = save_data.add_state(false)
-	state.start = true
-
-	assert_array(HenSaveAll.new()._validate_routes(save_data, [])).is_empty()
-	# a script without states never needs one
-	assert_array(HenSaveAll.new()._validate_routes(HenSaveData.new(), [])).is_empty()
-
-
 func test_generated_code_keeps_start_state() -> void:
 	var state: HenSaveState = save_data.add_state(false)
 	state.name = 'idle'
@@ -60,13 +43,6 @@ func test_generated_code_keeps_start_state() -> void:
 
 # a script whose first state is not the start compiles as change_state(""), so the
 # flag is set on creation instead of waiting for someone to remember it
-func test_the_first_state_is_the_start() -> void:
-	var first: HenSaveState = save_data.add_state(false)
-
-	assert_bool(first.start).is_true()
-	assert_array(HenSaveAll.new()._validate_routes(save_data, [])).is_empty()
-
-
 func test_a_later_state_does_not_steal_the_start() -> void:
 	var first: HenSaveState = save_data.add_state(false)
 	var second: HenSaveState = save_data.add_state(false)

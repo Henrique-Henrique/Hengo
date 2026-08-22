@@ -70,7 +70,6 @@ static func state_dict(_state: HenSaveState, _save_data: HenSaveData) -> Diction
 	var on_dict: Dictionary = {}
 	var on_meta: Dictionary = {}
 
-	_add_cnode_transitions(_state, _save_data, on_dict, on_meta)
 	add_branch_edges(_state, _save_data, on_dict, on_meta)
 
 	if not on_dict.is_empty():
@@ -103,49 +102,6 @@ static func _add_sub_states(_state: HenSaveState, _save_data: HenSaveData, _out:
 			_out.initial = sub.name
 
 		_out.states[sub.name] = state_dict(sub, _save_data)
-
-
-static func _add_cnode_transitions(_state: HenSaveState, _save_data: HenSaveData, _on: Dictionary, _meta: Dictionary) -> void:
-	var route: HenRouteData = _state.get_route(_save_data)
-
-	if not route or not route.virtual_cnode_list:
-		return
-
-	for vc: HenVirtualCNode in route.virtual_cnode_list:
-		var is_from: bool = vc.sub_type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM
-
-		if vc.sub_type != HenVirtualCNode.SubType.STATE_TRANSITION and not is_from:
-			continue
-
-		var target: HenSaveState = null
-
-		if vc.has_method('get_res'):
-			target = vc.get_res(_save_data) as HenSaveState
-
-		if not target and not is_from and vc.get('res_data') and vc.res_data.has('id'):
-			target = find_state_by_id(vc.res_data.id, _save_data)
-
-		if not target:
-			continue
-
-		var custom: String = str(vc.name_to_code) if vc.name_to_code else ''
-		var event: String = custom if not custom.is_empty() else 'go_to_' + target.name
-		var path: String = target.name
-
-		# cross-script: qualify the target with the owning script name so the edge
-		# resolves against the global graph (draws between machines)
-		if is_from and vc.get('res_data') and vc.res_data.has('save_data_id'):
-			var owner: String = script_name_for_id(vc.res_data.save_data_id)
-
-			if not owner.is_empty():
-				path = owner + '.' + target.name
-
-		_on[event] = path
-		_meta[event] = {
-			kind = &'cross_script' if is_from else &'transition',
-			icon = TRANSITION_ICON,
-			auto_label = custom.is_empty()
-		}
 
 
 # branching actions transition too, so their targets draw as edges. the branch

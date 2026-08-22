@@ -1,7 +1,7 @@
 @tool
 extends TabContainer
 
-const DEBUG_TAB_INDEX = 3
+const DEBUG_TAB_INDEX = 2
 
 const CONFIG = {
     0: {
@@ -15,11 +15,6 @@ const CONFIG = {
         button = '%PropsIconBt'
     },
     2: {
-        title = 'Code Preview',
-        icon = preload('res://addons/hengo/assets/icons/menu/text.svg'),
-        button = '%CodeIconBt'
-    },
-    3: {
         title = 'Debug',
         icon = preload('res://addons/hengo/assets/new_icons/bug.svg'),
         button = '%DebugIconBt'

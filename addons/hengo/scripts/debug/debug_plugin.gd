@@ -37,71 +37,6 @@ func _has_capture(prefix: String) -> bool:
 	return prefix == PREFIX
 
 
-func _capture(_message: String, _data: Array, _session_id: int) -> bool:
-	match _message:
-		'hengo:state':
-			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-			if signal_bus:
-				signal_bus.debug_state_changed.emit(StringName(_data[0]), String(_data[1]) if _data.size() > 1 else '')
-			return true
-		'hengo:flow':
-			var id: int = _data[0]
-			var port: StringName = _data[1]
-			
-			var vc: HenVirtualCNode = _get_vc_by_id(id)
-
-			if vc:
-				if vc.cnode_instance:
-					vc.cnode_instance.show_debug_execution()
-				
-				var line: HenFlowConnectionLine = _get_flow_line(vc, port)
-				if line:
-					line.show_debug()
-			
-			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-			if signal_bus:
-				signal_bus.debug_flow_transition.emit(id, port)
-			
-			return true
-		'hengo:state_flow':
-			var id: int = _data[0]
-			var port: StringName = _data[1]
-			var script_id: String = String(_data[2]) if _data.size() > 2 else ''
-
-			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-			if signal_bus:
-				signal_bus.debug_state_flow.emit(id, port, script_id)
-
-			return true
-		'hengo:action':
-			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-			if signal_bus:
-				signal_bus.debug_action_flow.emit(StringName(_data[0]), String(_data[1]) if _data.size() > 1 else '')
-			return true
-		'hengo:state_transition':
-			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-			if signal_bus:
-				signal_bus.debug_state_transition.emit(String(_data[0]), String(_data[1]), String(_data[2]))
-			return true
-		'hengo:value':
-			var id: int = _data[0]
-			var value = _data[1]
-			
-			var vc: HenVirtualCNode = _get_vc_by_id(id)
-
-			if vc and vc.cnode_instance:
-				vc.cnode_instance.show_debug_value(value)
-
-			return true
-		'hengo:nodes_list':
-			var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-			if signal_bus:
-				signal_bus.debug_nodes_listed.emit(String(_data[0]), _data[1])
-			return true
-
-	return false
-
-
 # asks every active session for the live nodes of EVERY open script
 func send_list_nodes() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -162,37 +97,6 @@ func _setup_session(_session_id: int) -> void:
 
 	session.started.connect(_on_started)
 	session.stopped.connect(_on_stopped)
-
-
-func _get_vc_by_id(_id: int) -> HenVirtualCNode:
-	var router: HenRouter = Engine.get_singleton("Router")
-	if not router.current_route: return null
-	
-	for vc: HenVirtualCNode in router.current_route.virtual_cnode_list:
-		if int(vc.id) == _id:
-			return vc
-	return null
-
-
-func _get_flow_line(vc: HenVirtualCNode, port: StringName) -> HenFlowConnectionLine:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var flow_outputs: Array = vc.get_flow_outputs(global.SAVE_DATA)
-	var target_idx: int = -1
-	
-	for i in range(flow_outputs.size()):
-		var flow: HenVCFlow = flow_outputs[i]
-		if flow.id == port:
-			target_idx = i
-			break
-	
-	if target_idx == -1: return null
-	
-	for line: HenFlowConnectionLine in global.flow_connection_line_pool:
-		if line.is_visible_in_tree():
-			var from_vc: HenVirtualCNode = line.from.get_ref()
-			if from_vc == vc and line.from_idx == target_idx:
-				return line
-	return null
 
 
 func _on_started() -> void:

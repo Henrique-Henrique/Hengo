@@ -79,18 +79,10 @@ func _enter_tree():
 		print('NATIVE LIST JSON -> ', FileAccess.get_open_error())
 
 	# setting globals
-	var cnode_ui = main_scene.get_node('%CNodeUI') as Panel
-
 	global.history = UndoRedo.new()
 	global.HENGO_ROOT = main_scene
-	global.CAM = main_scene.get_node('%Cam')
-	global.CNODE_CONTAINER = main_scene.get_node('%CnodeContainer')
-	global.COMMENT_CONTAINER = main_scene.get_node('%CommentContainer')
-	global.CONNECTION_GUIDE = cnode_ui.get_node('%ConnectionGuide')
 	global.TOOLTIP = main_scene.get_node('%Tooltip')
-	global.CODE_PREVIEWER = main_scene.get_node('%CodePreview')
 	global.SIDE_PANEL = main_scene.get_node('%SidePanel')
-	global.CNODE_UI = cnode_ui
 	global.DASHBOARD = main_scene.get_node('%DashBoard')
 
 	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup')
@@ -105,14 +97,8 @@ func _enter_tree():
 	add_autoload_singleton('HengoDebuggerInit', 'res://addons/hengo/scripts/debug/hengo_debugger_init.gd')
 	global.HENGO_EDITOR_PLUGIN = self
 
-	global.cnode_pool.clear()
 	global.state_pool.clear()
-	global.connection_line_pool.clear()
-	global.flow_connection_line_pool.clear()
-	global.state_connection_line_pool.clear()
 
-	# creating cnode pool
-	# HenCnode.instantiate_and_add_pool()
 	# syncs cam input to the initial (hidden) panel state
 	_on_hengo_visibility_changed()
 
@@ -121,7 +107,6 @@ func _exit_tree():
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	global.can_instantiate_pool = false
-	global.SELECTED_VIRTUAL_CNODE.clear()
 
 	remove_debugger_plugin(debug_plugin)
 
@@ -232,11 +217,7 @@ func _on_hengo_visibility_changed() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var vis: bool = main_scene.visible if main_scene else false
 
-	if global and global.CAM:
-		global.CAM.set_process_input(vis)
-
-		if not vis:
-			global.CAM.set_physics_process(false)
+	HenCam.set_all_input_enabled(main_scene.get_tree() if main_scene else null, vis)
 
 	# defers dashboard to first show so it lays out with a real size
 	if vis and not _did_first_show:

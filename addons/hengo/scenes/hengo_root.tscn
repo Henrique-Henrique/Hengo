@@ -2,26 +2,18 @@
 
 [ext_resource type="Script" uid="uid://isaus02qqnxg" path="res://addons/hengo/scripts/hengo_root.gd" id="2_velgh"]
 [ext_resource type="Script" uid="uid://dndakpv2e001o" path="res://addons/hengo/scripts/utils/thread_helper.gd" id="3_1gx8m"]
-[ext_resource type="Script" uid="uid://cupav3ek86tky" path="res://addons/hengo/scripts/cam.gd" id="3_84akk"]
 [ext_resource type="Script" uid="uid://txuf5gnky3em" path="res://addons/hengo/scripts/save_load/map_dependencies.gd" id="6_0js6d"]
-[ext_resource type="Texture2D" uid="uid://bphiia4jm8ubg" path="res://addons/hengo/assets/images/line.png" id="7_6jref"]
-[ext_resource type="Script" uid="uid://ckwbirfiedarl" path="res://addons/hengo/scripts/connection_guide.gd" id="7_gj1gq"]
 [ext_resource type="Script" uid="uid://bojhvy7et13dd" path="res://addons/hengo/scripts/save_load/loader.gd" id="7_rg66s"]
-[ext_resource type="Script" uid="uid://2jt18jo67ub8" path="res://addons/hengo/scripts/router.gd" id="8_nqb6j"]
 [ext_resource type="Shader" uid="uid://cq7sij4xolke1" path="res://addons/hengo/assets/shaders/grid.gdshader" id="9_5sxro"]
 [ext_resource type="Script" uid="uid://bwvlnkdrjks50" path="res://addons/hengo/scripts/code_generation.gd" id="9_dkwui"]
 [ext_resource type="Script" uid="uid://exlq4wcwactd" path="res://addons/hengo/scripts/enums.gd" id="10_q27l4"]
-[ext_resource type="Script" uid="uid://cw62vf7ag4m1h" path="res://addons/hengo/scripts/code_preview.gd" id="10_r5155"]
-[ext_resource type="PackedScene" uid="uid://b8u6g6i185o8y" path="res://addons/hengo/scenes/gd_editor.tscn" id="10_vu20g"]
 [ext_resource type="Script" uid="uid://btva62mk8a3sy" path="res://addons/hengo/scripts/compile.gd" id="11_35y2j"]
 [ext_resource type="Script" uid="uid://itdfd6vqm34v" path="res://addons/hengo/scripts/global.gd" id="11_3680e"]
 [ext_resource type="Theme" uid="uid://b8wwxpbbrp2rl" path="res://addons/hengo/references/theme/hengo.tres" id="12_5c7h0"]
 [ext_resource type="Script" uid="uid://gl7h3vk7bcts" path="res://addons/hengo/scripts/utils/api/api.gd" id="13_5c7h0"]
-[ext_resource type="Script" uid="uid://5onu8yqwja25" path="res://addons/hengo/scripts/utils/c_node_container_bg.gd" id="16_74kfo"]
 [ext_resource type="Texture2D" uid="uid://bkxx3iubq3qun" path="res://addons/hengo/assets/images/grid.png" id="17_lxtpw"]
 [ext_resource type="Texture2D" uid="uid://byhp341nd8v2j" path="res://addons/hengo/assets/new_icons/cog.svg" id="18_fdf88"]
 [ext_resource type="Script" uid="uid://boxasjxccdkk1" path="res://addons/hengo/scripts/utils/side_panel_tab_container.gd" id="18_hg3xi"]
-[ext_resource type="PackedScene" uid="uid://cxi2fc0kvcl6b" path="res://addons/hengo/scenes/utils/vc_action_buttons.tscn" id="20_w813u"]
 [ext_resource type="Texture2D" uid="uid://c6p6p77i7bfc4" path="res://addons/hengo/assets/icons/settings.svg" id="21_5c7h0"]
 [ext_resource type="Texture2D" uid="uid://fnc82jlho3ft" path="res://addons/hengo/assets/icons/menu/text.svg" id="22_33cyo"]
 [ext_resource type="PackedScene" uid="uid://c4qu2ti8efl61" path="res://addons/hengo/scenes/side_bar.tscn" id="22_x5h56"]
@@ -44,12 +36,10 @@
 [ext_resource type="Texture2D" uid="uid://cuxdwx2mic0yt" path="res://addons/hengo/assets/new_icons/focus.svg" id="55_focus"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/utils/tabs.gd" id="tabs_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/saving_pill.tscn" id="savpill_inst"]
-[ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/loading_overlay.tscn" id="loadovlay_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_nodes_panel.tscn" id="dbgpanel_inst"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/bug.svg" id="57_bug"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/command.svg" id="54_shortcuts"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/columns-3.svg" id="55_wrapon"]
-[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/unfold-vertical.svg" id="56_wrapoff"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_sidetabs"]
 
@@ -142,10 +132,6 @@ metadata/_custom_type_script = "uid://txuf5gnky3em"
 unique_name_in_owner = true
 script = ExtResource("7_rg66s")
 metadata/_custom_type_script = "uid://bojhvy7et13dd"
-
-[node name="Router" type="Node" parent="AutoLoads" unique_id=1440772332]
-unique_name_in_owner = true
-script = ExtResource("8_nqb6j")
 
 [node name="CodeGeneration" type="Node" parent="AutoLoads" unique_id=1979949874]
 unique_name_in_owner = true
@@ -335,6 +321,7 @@ size_flags_vertical = 4
 mouse_default_cursor_shape = 2
 theme_type_variation = &"SidebarTabButton"
 tooltip_text = "Code Preview"
+disabled = true
 toggle_mode = true
 button_group = SubResource("ButtonGroup_sidetabs")
 icon = ExtResource("22_33cyo")
@@ -401,26 +388,6 @@ layout_mode = 2
 visible = false
 metadata/_tab_index = 1
 metadata/_tab_name = "Props"
-
-[node name="CodePreview" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarTabContainer" unique_id=48314858 instance=ExtResource("10_vu20g")]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(750, 0)
-layout_mode = 2
-theme_override_colors/font_readonly_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxEmpty_lxtpw")
-theme_override_styles/read_only = SubResource("StyleBoxEmpty_1gx8m")
-placeholder_text = ""
-editable = false
-scroll_smooth = true
-caret_move_on_right_click = false
-caret_multiple = false
-gutters_draw_line_numbers = true
-code_completion_enabled = false
-script = ExtResource("10_r5155")
-metadata/_tab_index = 2
-metadata/_tab_name = "Code Preview"
 
 [node name="DebugNodesPanel" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/SideBarMargin/SidePanel/VBoxContainer/SidebarTabContainer" unique_id=2000000060 instance=ExtResource("dbgpanel_inst")]
 unique_name_in_owner = true
@@ -533,132 +500,6 @@ tabs_visible = false
 current_tab = 1
 tab_0/title = "Canvas"
 tab_1/title = "Flow"
-
-[node name="CNodeUI" type="Panel" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs" unique_id=1262400160]
-unique_name_in_owner = true
-clip_contents = true
-custom_minimum_size = Vector2(800, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_72kn2")
-metadata/_tab_index = 0
-metadata/_tab_name = "Flow"
-
-[node name="CNodeContainerBG" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI" unique_id=1077183945]
-unique_name_in_owner = true
-clip_contents = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("16_74kfo")
-
-[node name="Panel" type="Panel" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG" unique_id=717265577]
-process_mode = 4
-clip_children = 1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_onj4m")
-
-[node name="Grid" type="TextureRect" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Panel" unique_id=1070055922]
-process_mode = 4
-texture_filter = 1
-texture_repeat = 2
-material = SubResource("ShaderMaterial_r8ipe")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = ExtResource("17_lxtpw")
-
-[node name="Cam" type="Node2D" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG" unique_id=95183905 node_paths=PackedStringArray("grid")]
-unique_name_in_owner = true
-position = Vector2(0, -8)
-script = ExtResource("3_84akk")
-grid = NodePath("../Panel/Grid")
-
-[node name="RefPoint" type="Marker2D" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=2087226410]
-visible = false
-position = Vector2(289, 313)
-
-[node name="Lines" type="Node2D" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=469442060]
-
-[node name="ConnectionGuide" type="Line2D" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=1282222396]
-unique_name_in_owner = true
-visible = false
-z_index = 2
-width = 6.0
-gradient = SubResource("Gradient_rg8iy")
-texture = ExtResource("7_6jref")
-texture_mode = 1
-script = ExtResource("7_gj1gq")
-
-[node name="CommentContainer" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=252482894]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-metadata/_edit_use_anchors_ = true
-
-[node name="CnodeContainer" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=1663593833]
-unique_name_in_owner = true
-layout_mode = 3
-anchors_preset = 0
-offset_right = 1.0
-offset_bottom = 1.0
-metadata/_edit_use_anchors_ = true
-
-[node name="SelectionRect" type="ReferenceRect" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=805961561]
-process_mode = 4
-visible = false
-offset_left = 153.0
-offset_top = 148.0
-offset_right = 193.0
-offset_bottom = 188.0
-mouse_filter = 2
-border_color = Color(0.749928, 0.915784, 0.889306, 1)
-border_width = 3.0
-
-[node name="Panel" type="Panel" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam/SelectionRect" unique_id=1630308070]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_6ehx0")
-
-[node name="VCActionButtons" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI/CNodeContainerBG/Cam" unique_id=1698247101 instance=ExtResource("20_w813u")]
-unique_name_in_owner = true
-visible = false
-
-[node name="Control" type="Control" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI" unique_id=428273699]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 4.0
-mouse_filter = 2
-
-[node name="LoadingOverlay" parent="Content/UIBase/MainLayout/CenterRow/ContentArea/CanvasVBox/CanvasTabs/CNodeUI" unique_id=2147010001 instance=ExtResource("loadovlay_inst")]
-unique_name_in_owner = true
-layout_mode = 1
-z_index = 110
 
 [node name="StatusBar" type="PanelContainer" parent="Content/UIBase/MainLayout" unique_id=2000000010]
 layout_mode = 2

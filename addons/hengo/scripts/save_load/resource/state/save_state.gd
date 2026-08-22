@@ -22,6 +22,8 @@ class_name HenSaveState extends HenSaveResTypeWithRoute
 @export_multiline var description: String = ''
 
 
+# a state is its name and its action list now: the route and the scaffolding
+# vcnodes that used to stand for each phase are gone
 static func create(_is_sub_state: bool = false) -> HenSaveState:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var state: HenSaveState = HenSaveState.new()
@@ -30,45 +32,11 @@ static func create(_is_sub_state: bool = false) -> HenSaveState:
 	state.name = state.get_new_name()
 	state.is_sub_state = _is_sub_state
 
-	var route: HenRouteData = state.create_route(HenRouter.ROUTE_TYPE.STATE)
-
-	HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'enter',
-		sub_type = HenVirtualCNode.SubType.VIRTUAL,
-		route = route,
-		position = Vector2.ZERO,
-		can_delete = false,
-		res_data = state.get_res_data(HenSideBar.AddType.STATE)
-	})
-
-	HenVirtualCNode.instantiate_virtual_cnode({
-		name = 'update',
-		sub_type = HenVirtualCNode.SubType.VIRTUAL,
-		outputs = [ {
-			name = 'delta',
-			type = 'float'
-		}],
-		route = route,
-		position = Vector2(400, 0),
-		can_delete = false
-	})
-
 	return state
 
 
 func get_new_name() -> String:
 	return 'state_' + str(id)
-
-
-func get_vc_name(_type: HenVirtualCNode.SubType) -> String:
-	match _type:
-		HenVirtualCNode.SubType.VIRTUAL:
-			return 'enter'
-		HenVirtualCNode.SubType.STATE_TRANSITION:
-			return 'Transition -> ' + name
-	
-	
-	return name
 
 
 func add_sub_state(_save_data: HenSaveData) -> void:
@@ -98,28 +66,6 @@ func get_sub_states(_save_data: HenSaveData) -> Array:
 	return _save_data.sub_states.get(id)
 
 
-func get_inputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	var arr: Array[Dictionary] = []
-
-	if _type == HenVirtualCNode.SubType.STATE_TRANSITION:
-		for param: HenSaveParam in transition_data:
-			arr.append(param.get_data())
-	elif _type == HenVirtualCNode.SubType.STATE_TRANSITION_FROM:
-		var info: Dictionary = _get_resource_info()
-
-		arr.append({
-			id = 0,
-			name = info.name,
-			type = info.type,
-			is_ref = true
-		})
-
-		for param: HenSaveParam in transition_data:
-			arr.append(param.get_data())
-
-	return arr
-
-
 func _get_resource_info() -> Dictionary:
 	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 
@@ -134,55 +80,6 @@ func _get_resource_info() -> Dictionary:
 				break
 
 	return {name = name, type = &'Variant'}
-
-
-func get_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	var arr: Array[Dictionary] = []
-
-	if _type == HenVirtualCNode.SubType.VIRTUAL:
-		for param: HenSaveParam in transition_data:
-			if not param: continue
-			
-			arr.append(param.get_data())
-
-	return arr
-
-
-func get_flow_outputs(_type: HenVirtualCNode.SubType) -> Array[Dictionary]:
-	var arr: Array[Dictionary] = []
-
-	if _type == HenVirtualCNode.SubType.STATE:
-		for flow_output: HenSaveParam in flow_outputs:
-			arr.append({id = flow_output.id, name = flow_output.name})
-	else:
-		arr.append({id = 0})
-	return arr
-
-
-func get_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
-	var router: HenRouter = Engine.get_singleton(&'Router')
-
-	return {
-		name = name,
-		type = HenVirtualCNode.Type.STATE,
-		sub_type = HenVirtualCNode.SubType.STATE if not _from_another_script else HenVirtualCNode.SubType.STATE,
-		route = router.current_route,
-		res_data = get_res_data(HenSideBar.AddType.STATE, _save_data_id)
-	}
-
-
-func get_transition_cnode_data(_save_data_id: StringName, _from_another_script: bool = false) -> Dictionary:
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	
-	return {
-		name = name,
-		sub_type = HenVirtualCNode.SubType.STATE_TRANSITION if not _from_another_script else HenVirtualCNode.SubType.STATE_TRANSITION_FROM,
-		route = router.current_route,
-		res_data = get_res_data(HenSideBar.AddType.STATE, _save_data_id)
-	}
-
-
-# hide the default resource section properties
 
 
 func _validate_property(_property: Dictionary) -> void:

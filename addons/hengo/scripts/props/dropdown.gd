@@ -7,7 +7,6 @@ var options: Array = []
 @export var type: String = ''
 var custom_data
 var custom_value: String = ''
-var input_ref: HenVCInOutData
 
 signal value_changed
 signal on_set_res_data
@@ -17,34 +16,125 @@ func _ready() -> void:
 	button_down.connect(_on_pressed)
 
 
+# every mapped script as a type option, labeled with the class it extends
+static func get_hengo_script_types() -> Array:
+	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var arr: Array = []
+
+	if not map_dep:
+		return arr
+
+	for script_id: StringName in map_dep.ast_list:
+		var ast: HenMapDependencies.ProjectAST = map_dep.ast_list[script_id]
+
+		if not ast.identity:
+			continue
+
+		if global and global.SAVE_DATA and global.SAVE_DATA.identity and ast.identity.id == global.SAVE_DATA.identity.id:
+			continue
+
+		arr.append({
+			name = ast.identity.name + ' (' + str(ast.identity.type) + ')',
+			type = ast.identity.type,
+			script_id = ast.identity.id
+		})
+
+	return arr
+
+
+func _selected(_item: Dictionary) -> void:
+	text = _item.name
+
+	HenCam.set_all_can_scroll(get_tree(), true)
+
+	match type:
+		'var_type':
+			# a script option carries its base class plus the identity to remember;
+			# both cases travel together so type and script_id never disagree
+			if _item.has('script_id'):
+				on_set_res_data.emit(_item)
+			else:
+				on_set_res_data.emit({type = _item.name, script_id = &''})
+			return
+		'hengo_states':
+			text = (_item.name as String).to_snake_case()
+		'enum_list':
+			text = _item.name
+			custom_value = _item.code_name
+			emit_signal('value_changed', custom_value)
+			return
+		'all_props':
+			emit_signal('value_changed', text, text.to_snake_case())
+			return
+		'get_prop':
+			emit_signal('value_changed', text, _item.type)
+			return
+
+
+	value_changed.emit(text)
+
+func set_font_size(_size: int) -> void:
+	add_theme_font_size_override('font_size', _size)
+
+
+func set_default(_text: String) -> void:
+	match type:
+		'enum_list':
+			text = _text.split('.')[-1] as String
+			custom_value = _text
+		_:
+			text = _text
+
+
+func get_value() -> String:
+	match type:
+		'enum_list':
+			return custom_value
+		_:
+			return text
+
+
+func get_generated_code() -> String:
+	match type:
+		'enum_list':
+			return custom_value
+		'all_props', 'callable':
+			return text.to_snake_case()
+		'get_prop', 'set_prop':
+			return text.replacen(' -> ', '.')
+
+	return text
+
+
+func get_const_list(_arr: Array, _type: StringName, _name: String, _prop_type: StringName, _check_type: bool = true) -> Array:
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+	if enums.NATIVE_PROPS_LIST.has(_prop_type):
+		for prop: Dictionary in enums.NATIVE_PROPS_LIST.get(_prop_type):
+			var my_name: String = _name + ' -> ' + prop.name
+
+			if _check_type:
+				if _type == 'Variant' or prop.type == _type:
+					_arr.append({
+						name = my_name,
+						value = my_name.replacen(' -> ', '.')
+					})
+					continue
+			else:
+				_arr.append({
+						name = my_name,
+						value = my_name.replacen(' -> ', '.'),
+						type = prop.type
+					})
+
+			get_const_list(_arr, _type, my_name, prop.type, _check_type)
+
+	return _arr
+
 func _on_pressed() -> void:
-	var router: HenRouter = Engine.get_singleton(&'Router')
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	match type:
-		'state_transition':
-			var arr: Array = []
-			var state_id: StringName
-
-			for state_key: StringName in global.SAVE_DATA.routes.keys():
-				var route: HenRouteData = global.SAVE_DATA.routes.get(state_key)
-
-				if route == router.current_route:
-					state_id = state_key
-					break
-
-			if state_id:
-				for state: HenSaveState in global.SAVE_DATA.states:
-					if str(state.id) == state_id:
-						for flow: HenSaveParam in state.flow_outputs:
-							arr.append({
-								name = flow.name,
-								id = state.id,
-								type = HenSideBar.AddType.STATE,
-								flow_id = flow.id
-							})
-			
-			options = arr
 		'action':
 			var arr: Array = []
 
@@ -53,7 +143,7 @@ func _on_pressed() -> void:
 					arr.append({
 						name = dict.name.substr(dict.name.find('/') + 1, dict.name.length())
 					})
-			
+
 			options = arr
 		'all_godot_classes':
 			options = (HenEnums.VARIANT_TYPES + ClassDB.get_class_list() as Array).map(func(x: String): return {
@@ -77,32 +167,8 @@ func _on_pressed() -> void:
 
 			for enum_name in ClassDB.class_get_enum_constants(custom_data[0], custom_data[1]):
 				enum_reference[enum_name] = '.'.join(custom_data) + '.' + enum_name
-			
+
 			options = enum_reference.keys().map(func(x: String) -> Dictionary: return {name = x, code_name = enum_reference[x]}) if not enum_reference.is_empty() else []
-		'all_props':
-			var arr: Array = []
-
-			for var_data: HenSaveVar in global.SAVE_DATA.variables:
-				if HenUtils.is_type_relation_valid(input_ref.type, var_data.type):
-					arr.append({
-						name = var_data.name,
-						category = 'class_props',
-						ref = var_data
-					})
-			
-			for prop: Dictionary in ClassDB.class_get_property_list(global.SAVE_DATA.identity.type):
-				var _type: StringName = input_ref.type
-				var prop_type: StringName = type_string(prop.type)
-				
-				if (_type == 'Variant' and prop.type != TYPE_NIL) or HenUtils.is_type_relation_valid(_type, prop_type):
-					arr.append({
-						name = prop.name,
-						category = 'class_props',
-					})
-				
-				get_const_list(arr, _type, prop.name, prop_type)
-
-			options = arr
 		'signal':
 			options = ClassDB.class_get_signal_list(custom_data).map(func(x): return {
 				name = x.name
@@ -142,7 +208,7 @@ func _on_pressed() -> void:
 		'state_event_list':
 			pass
 
-			
+
 	var dropdown_menu: HenDropDownMenu = DROP_DOWN_MENU_SCENE.instantiate()
 	dropdown_menu.mount(options, _selected, type)
 	dropdown_menu.custom_minimum_size.x = size.x
@@ -152,134 +218,3 @@ func _on_pressed() -> void:
 		pos = global_position,
 		min_size = Vector2(max(size.x, 220), 280)
 	})
-
-
-# every mapped script as a type option, labeled with the class it extends
-static func get_hengo_script_types() -> Array:
-	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var arr: Array = []
-
-	if not map_dep:
-		return arr
-
-	for script_id: StringName in map_dep.ast_list:
-		var ast: HenMapDependencies.ProjectAST = map_dep.ast_list[script_id]
-
-		if not ast.identity:
-			continue
-
-		if global and global.SAVE_DATA and global.SAVE_DATA.identity and ast.identity.id == global.SAVE_DATA.identity.id:
-			continue
-
-		arr.append({
-			name = ast.identity.name + ' (' + str(ast.identity.type) + ')',
-			type = ast.identity.type,
-			script_id = ast.identity.id
-		})
-
-	return arr
-
-
-func _selected(_item: Dictionary) -> void:
-	text = _item.name
-
-	(Engine.get_singleton(&'Global') as HenGlobal).CAM.can_scroll = true
-
-	match type:
-		'var_type':
-			# a script option carries its base class plus the identity to remember;
-			# both cases travel together so type and script_id never disagree
-			if _item.has('script_id'):
-				on_set_res_data.emit(_item)
-			else:
-				on_set_res_data.emit({type = _item.name, script_id = &''})
-			return
-		'hengo_states':
-			text = (_item.name as String).to_snake_case()
-		'state_transition':
-			_item.erase('name')
-			on_set_res_data.emit(_item)
-			return
-		'enum_list':
-			text = _item.name
-			custom_value = _item.code_name
-			emit_signal('value_changed', custom_value)
-			return
-		'all_props':
-			emit_signal('value_changed', text, text.to_snake_case())
-			var input = get_parent().owner
-
-			input.remove_in_prop(true)
-
-			input_ref.category = 'class_props'
-
-			return
-		'get_prop':
-			emit_signal('value_changed', text, _item.type)
-
-			if _item.has('ref'):
-				input_ref.set_ref(_item.ref)
-			else:
-				input_ref.remove_ref()
-			return
-
-
-	value_changed.emit(text)
-
-func set_font_size(_size: int) -> void:
-	add_theme_font_size_override('font_size', _size)
-
-
-func set_default(_text: String) -> void:
-	match type:
-		'enum_list':
-			text = _text.split('.')[-1] as String
-			custom_value = _text
-		_:
-			text = _text
-
-
-func get_value() -> String:
-	match type:
-		'enum_list':
-			return custom_value
-		_:
-			return text
-
-
-func get_generated_code() -> String:
-	match type:
-		'enum_list':
-			return custom_value
-		'all_props', 'callable':
-			return text.to_snake_case()
-		'get_prop', 'set_prop':
-			return text.replacen(' -> ', '.')
-	
-	return text
-	
-
-func get_const_list(_arr: Array, _type: StringName, _name: String, _prop_type: StringName, _check_type: bool = true) -> Array:
-	var enums: HenEnums = Engine.get_singleton(&'Enums')
-	if enums.NATIVE_PROPS_LIST.has(_prop_type):
-		for prop: Dictionary in enums.NATIVE_PROPS_LIST.get(_prop_type):
-			var my_name: String = _name + ' -> ' + prop.name
-
-			if _check_type:
-				if _type == 'Variant' or prop.type == _type:
-					_arr.append({
-						name = my_name,
-						value = my_name.replacen(' -> ', '.')
-					})
-					continue
-			else:
-				_arr.append({
-						name = my_name,
-						value = my_name.replacen(' -> ', '.'),
-						type = prop.type
-					})
-			
-			get_const_list(_arr, _type, my_name, prop.type, _check_type)
-
-	return _arr

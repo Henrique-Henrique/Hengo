@@ -16,18 +16,11 @@ signal request_list_update
 signal request_structural_update
 
 # emitted whenever the active route changes
-signal route_changed(_route: HenRouteData)
 
 # set to true during batch compilation to suppress thread-unsafe UI signals
 var is_batch_loading: bool = false
 
-signal add_virtual_cnode_to_route(_id: String, _vc: HenVirtualCNode)
-signal remove_virtual_cnode_from_route(_id: String, _vc: HenVirtualCNode)
 
-signal connection_added(_connection: HenVCConnectionData)
-signal connection_removed(_connection: HenVCConnectionData)
-signal flow_connection_added(_connection: HenVCFlowConnectionData)
-signal flow_connection_removed(_connection: HenVCFlowConnectionData)
 
 signal debug_state_changed(_state_name: StringName, _script_id: String)
 signal debug_flow_transition(_vc_id: int, _port: StringName)

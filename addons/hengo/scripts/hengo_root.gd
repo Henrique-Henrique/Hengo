@@ -36,82 +36,6 @@ func reapply_font_scale() -> void:
 		signal_bus.request_structural_update.emit()
 
 
-func _ready() -> void:
-	if HenUtils.disable_scene(self):
-		return
-
-	set_process(true)
-
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	var enums: HenEnums = Engine.get_singleton(&'Enums')
-
-	var margin: int = 8
-	var side_bar_margin: MarginContainer = get_node('%SideBarMargin')
-
-	side_bar_margin.add_theme_constant_override('margin_left', margin)
-	side_bar_margin.add_theme_constant_override('margin_right', margin)
-	side_bar_margin.add_theme_constant_override('margin_top', margin)
-	side_bar_margin.add_theme_constant_override('margin_bottom', margin)
-
-	# initializing
-	router.current_route = null
-	# HenGlobal.history = UndoRedo.new()
-	enums.DROPDOWN_STATES = []
-	(Engine.get_singleton(&'Global') as HenGlobal).SELECTED_VIRTUAL_CNODE.clear()
-
-	var object_list = ClassDB.get_inheriters_from_class('Object')
-	object_list.sort()
-	enums.OBJECT_TYPES = object_list
-	enums.DROPDOWN_OBJECT_TYPES = Array(enums.OBJECT_TYPES).map(
-		func(x: String) -> Dictionary:
-			return {
-				name = x
-			}
-	)
-
-	var all_classes = ClassDB.get_class_list()
-	all_classes.sort()
-
-	all_classes = HenEnums.VARIANT_TYPES + all_classes
-	enums.ALL_CLASSES = all_classes.duplicate()
-	enums.DROPDOWN_ALL_CLASSES = Array(enums.ALL_CLASSES).map(
-		func(x: String) -> Dictionary:
-			return {
-				name = x
-			}
-	)
-	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
-	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
-	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
-	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
-	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
-	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
-	_setup_flow_view()
-
-	var toggle_tabs_bt: Button = get_node_or_null('%ToggleScriptTabsBt')
-	if toggle_tabs_bt:
-		toggle_tabs_bt.pressed.connect(_on_toggle_script_tabs)
-	var new_tab_bt: Button = get_node_or_null('%NewScriptTabBt')
-	if new_tab_bt:
-		new_tab_bt.pressed.connect(_on_new_script_tab)
-	_apply_script_tabs_collapse()
-
-	_apply_semantic_colors()
-
-	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	signal_bus.add_virtual_cnode_to_route.connect(_on_graph_changed_no_args)
-	signal_bus.remove_virtual_cnode_from_route.connect(_on_graph_changed_no_args)
-	signal_bus.request_list_update.connect(_on_graph_changed)
-	signal_bus.connection_added.connect(_on_graph_changed_no_args)
-	signal_bus.connection_removed.connect(_on_graph_changed_no_args)
-	signal_bus.flow_connection_added.connect(_on_graph_changed_no_args)
-	signal_bus.flow_connection_removed.connect(_on_graph_changed_no_args)
-	
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).closed.connect(schedule_check_errors)
-
-	refresh_script_state()
-
-
 # updates ui parts that depend on whether a script is currently loaded
 func refresh_script_state() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -127,9 +51,6 @@ func refresh_script_state() -> void:
 	var props_icon: Button = get_node_or_null('%PropsIconBt')
 	if props_icon:
 		props_icon.disabled = not has_script
-	var code_icon: Button = get_node_or_null('%CodeIconBt')
-	if code_icon:
-		code_icon.disabled = not has_script
 
 	var cl_label: Button = get_node_or_null('%ClassName')
 	if cl_label and not has_script:
@@ -213,16 +134,10 @@ func _sync_wrap_button(_bt: Button) -> void:
 
 
 func _on_reset_zoom() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if global and global.CAM:
-		global.CAM.reset_zoom()
+	HenCam.reset_all_zoom(get_tree())
 
 
 func _on_graph_changed() -> void:
-	schedule_check_errors()
-
-
-func _on_graph_changed_no_args(_a = null, _b = null) -> void:
 	schedule_check_errors()
 
 
@@ -232,21 +147,6 @@ var _dirty: bool = false
 const DEBOUNCE_DELAY: float = 0.13
 
 
-func _process(delta: float) -> void:
-	_time += delta
-	
-	if _dirty:
-		_debounce_time += delta
-		if _debounce_time >= DEBOUNCE_DELAY:
-			check_errors(false)
-			HenFormatter.format_current_route()
-			_dirty = false
-			_time = 0.0
-
- 
-func schedule_check_errors() -> void:
-	_dirty = true
-	_debounce_time = 0.0
 
 
 # tints toolbar/sidebar buttons with semantic colors
@@ -273,96 +173,20 @@ func _on_close() -> void:
 	global.HENGO_EDITOR_PLUGIN.hide_plugin()
 
 
-func _input(event: InputEvent) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-
-	if not global.HENGO_ROOT:
-		return
-
-	if not global.HENGO_ROOT.visible:
-		if event is InputEventKey:
-			var e: InputEventKey = event
-			if e.pressed and e.shift_pressed:
-				if e.keycode == KEY_SPACE:
-					get_tree().root.set_input_as_handled()
-					global.HENGO_EDITOR_PLUGIN.show_plugin()
-		return
-	
-	if event is InputEventKey:
-		var e: InputEventKey = event
-
-		if e.pressed:
-			if e.shift_pressed:
-				if e.keycode == KEY_F:
-					var all_nodes = global.SELECTED_VIRTUAL_CNODE
-					global.history.create_action('Delete Node')
-
-					for v_cnode: HenVirtualCNode in all_nodes:
-						if not v_cnode.cnode_instance:
-							continue
-
-						var v_cnode_return: HenVCNodeReturn = v_cnode.get_history_obj()
-
-						global.history.add_do_method(v_cnode_return.remove)
-						global.history.add_undo_reference(v_cnode_return)
-						global.history.add_undo_method(v_cnode_return.add)
-
-					global.history.commit_action()
-				elif e.keycode == KEY_SPACE:
-					get_tree().root.set_input_as_handled()
-					global.HENGO_EDITOR_PLUGIN.hide_plugin()
-				elif e.keycode == KEY_E:
-					if _sidebar_collapsed:
-						expand_sidebar()
-						var tabs: TabContainer = get_node_or_null('%SidebarTabContainer')
-						if tabs:
-							tabs.current_tab = HenDashboard.TAB_INDEX
-					else:
-						global.DASHBOARD.toggle_dashboard()
-				elif e.keycode == KEY_H:
-					var code_generation: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
-					print(
-						code_generation.get_code(global.SAVE_DATA)
-					)
-			elif e.keycode == KEY_F10:
-				for line: HenConnectionLine in global.connection_line_pool:
-					if line.visible:
-						line.visible = true
-			if e.ctrl_pressed:
-				# undo/redo disabled for now: as a bottom panel, _input grabs ctrl+z/ctrl+y
-				# editor-wide and blocks godot's own undo/redo
-				# if e.keycode == KEY_Z:
-				# 	get_tree().root.set_input_as_handled()
-				# 	if global.CURRENT_INSPECTOR:
-				# 		global.CURRENT_INSPECTOR.undo_redo(true)
-				# 	else:
-				# 		global.history.undo()
-				# elif e.keycode == KEY_Y:
-				# 	get_tree().root.set_input_as_handled()
-				# 	if global.CURRENT_INSPECTOR:
-				# 		global.CURRENT_INSPECTOR.undo_redo(false)
-				# 	else:
-				# 		global.history.redo()
-				if e.keycode == KEY_F:
-					get_tree().root.set_input_as_handled()
-					HenFormatter.format_current_route()
-					print('FORMATTED')
-
-
 # checks for errors in current script and dependents
 func check_errors(_compile: bool = false) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
 	var save_data: HenSaveData = global.SAVE_DATA
-	
+
 	if not save_data:
 		return false
-		
+
 	var all_errors: Array = []
-	
+
 	all_errors.append_array(_validate_script_errors(save_data))
-	
+
 	var deps: Array[StringName] = map_deps.check_dependencies(save_data.identity.id)
 	for dep_id in deps:
 		var dep_save_data: HenSaveData = loader.load_res(dep_id)
@@ -372,9 +196,9 @@ func check_errors(_compile: bool = false) -> bool:
 				err['description'] = '[{0}] {1}'.format([dep_save_data.identity.name, err.description])
 				err['script_id'] = dep_id
 			all_errors.append_array(dep_errors)
-	
+
 	call_deferred('_update_ui_state', all_errors)
-	
+
 	if _compile and not all_errors.is_empty():
 		call_deferred('_show_error_popup', all_errors)
 		return false
@@ -430,30 +254,6 @@ func _show_error_popup(all_errors: Array) -> void:
 	var error_popup = preload('res://addons/hengo/scenes/utils/error_list_popup.tscn').instantiate()
 	error_popup.errors = all_errors
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(error_popup)
-
-
-func _validate_script_errors(_save_data: HenSaveData) -> Array:
-	var errors: Array = []
-	
-	var routes: Array = [_save_data.get_base_route()]
-	for state in _save_data.states:
-		routes.append(state.get_route(_save_data))
-	for func_data in _save_data.functions:
-		routes.append(func_data.get_route(_save_data))
-	for macro in _save_data.macros:
-		routes.append(macro.get_route(_save_data))
-	for sc in _save_data.signals_callback:
-		routes.append(sc.get_route(_save_data))
-		
-	for route in routes:
-		if not route: continue
-		for vc: HenVirtualCNode in route.virtual_cnode_list:
-			var node_errors = vc.validate_errors(_save_data)
-			for err in node_errors:
-				err['route_id'] = route.id
-			errors.append_array(node_errors)
-			
-	return errors
 
 
 func _on_actions_bt_pressed() -> void:
@@ -553,3 +353,144 @@ func _on_new_script_tab() -> void:
 		side = SIDE_RIGHT,
 		min_size = Vector2(360, 0)
 	})
+
+func _ready() -> void:
+	if HenUtils.disable_scene(self):
+		return
+
+	set_process(true)
+
+	var enums: HenEnums = Engine.get_singleton(&'Enums')
+
+	var margin: int = 8
+	var side_bar_margin: MarginContainer = get_node('%SideBarMargin')
+
+	side_bar_margin.add_theme_constant_override('margin_left', margin)
+	side_bar_margin.add_theme_constant_override('margin_right', margin)
+	side_bar_margin.add_theme_constant_override('margin_top', margin)
+	side_bar_margin.add_theme_constant_override('margin_bottom', margin)
+
+	# initializing
+	# HenGlobal.history = UndoRedo.new()
+	enums.DROPDOWN_STATES = []
+
+	var object_list = ClassDB.get_inheriters_from_class('Object')
+	object_list.sort()
+	enums.OBJECT_TYPES = object_list
+	enums.DROPDOWN_OBJECT_TYPES = Array(enums.OBJECT_TYPES).map(
+		func(x: String) -> Dictionary:
+			return {
+				name = x
+			}
+	)
+
+	var all_classes = ClassDB.get_class_list()
+	all_classes.sort()
+
+	all_classes = HenEnums.VARIANT_TYPES + all_classes
+	enums.ALL_CLASSES = all_classes.duplicate()
+	enums.DROPDOWN_ALL_CLASSES = Array(enums.ALL_CLASSES).map(
+		func(x: String) -> Dictionary:
+			return {
+				name = x
+			}
+	)
+	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
+	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
+	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
+	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
+	(get_node('%CollapseToggleBt') as Button).pressed.connect(_on_collapse_sidebar)
+	(get_node('%ResetZoomBt') as Button).pressed.connect(_on_reset_zoom)
+	_setup_flow_view()
+
+	var toggle_tabs_bt: Button = get_node_or_null('%ToggleScriptTabsBt')
+	if toggle_tabs_bt:
+		toggle_tabs_bt.pressed.connect(_on_toggle_script_tabs)
+	var new_tab_bt: Button = get_node_or_null('%NewScriptTabBt')
+	if new_tab_bt:
+		new_tab_bt.pressed.connect(_on_new_script_tab)
+	_apply_script_tabs_collapse()
+
+	_apply_semantic_colors()
+
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+	signal_bus.request_list_update.connect(_on_graph_changed)
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).closed.connect(schedule_check_errors)
+
+	refresh_script_state()
+
+func _process(delta: float) -> void:
+	_time += delta
+
+	if _dirty:
+		_debounce_time += delta
+		if _debounce_time >= DEBOUNCE_DELAY:
+			check_errors(false)
+			_dirty = false
+			_time = 0.0
+
+
+func schedule_check_errors() -> void:
+	_dirty = true
+	_debounce_time = 0.0
+
+func _input(event: InputEvent) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global.HENGO_ROOT:
+		return
+
+	if not global.HENGO_ROOT.visible:
+		if event is InputEventKey:
+			var e: InputEventKey = event
+			if e.pressed and e.shift_pressed:
+				if e.keycode == KEY_SPACE:
+					get_tree().root.set_input_as_handled()
+					global.HENGO_EDITOR_PLUGIN.show_plugin()
+		return
+
+	if event is InputEventKey:
+		var e: InputEventKey = event
+
+		if e.pressed:
+			if e.shift_pressed:
+				if e.keycode == KEY_SPACE:
+					get_tree().root.set_input_as_handled()
+					global.HENGO_EDITOR_PLUGIN.hide_plugin()
+				elif e.keycode == KEY_E:
+					if _sidebar_collapsed:
+						expand_sidebar()
+						var tabs: TabContainer = get_node_or_null('%SidebarTabContainer')
+						if tabs:
+							tabs.current_tab = HenDashboard.TAB_INDEX
+					else:
+						global.DASHBOARD.toggle_dashboard()
+				elif e.keycode == KEY_H:
+					var code_generation: HenCodeGeneration = Engine.get_singleton('CodeGeneration')
+					print(
+						code_generation.get_code(global.SAVE_DATA)
+					)
+			if e.ctrl_pressed:
+				# undo/redo disabled for now: as a bottom panel, _input grabs ctrl+z/ctrl+y
+				# editor-wide and blocks godot's own undo/redo
+				# if e.keycode == KEY_Z:
+				# 	get_tree().root.set_input_as_handled()
+				# 	if global.CURRENT_INSPECTOR:
+				# 		global.CURRENT_INSPECTOR.undo_redo(true)
+				# 	else:
+				# 		global.history.undo()
+				# elif e.keycode == KEY_Y:
+				# 	get_tree().root.set_input_as_handled()
+				# 	if global.CURRENT_INSPECTOR:
+				# 		global.CURRENT_INSPECTOR.undo_redo(false)
+				# 	else:
+				# 		global.history.redo()
+				if e.keycode == KEY_F:
+					get_tree().root.set_input_as_handled()
+					print('FORMATTED')
+
+func _validate_script_errors(_save_data: HenSaveData) -> Array:
+	var errors: Array = []
+
+	return errors

@@ -3,10 +3,6 @@ class_name HenSideBar extends PanelContainer
 
 enum SideBarItem {
 	VARIABLES,
-	FUNCTIONS,
-	SIGNALS,
-	SIGNALS_CALLBACK,
-	MACROS,
 	STATES
 }
 
@@ -29,7 +25,6 @@ class DeleteResourceCommand:
 	var save_data: HenSaveData
 	var meta: HenSaveResType
 	var removed_route_ids: Array[StringName] = []
-	var removed_routes: Dictionary = {}
 	var removed_items: Array[Dictionary] = []
 	var removed_sub_states: Dictionary = {}
 	var removed_state_actions: Dictionary = {}
@@ -56,10 +51,6 @@ class DeleteResourceCommand:
 				removed_route_ids.append(meta.id)
 
 		for route_id: StringName in removed_route_ids:
-			if save_data.routes.has(route_id):
-				removed_routes[route_id] = save_data.routes[route_id]
-
-		for route_id: StringName in removed_route_ids:
 			if save_data.state_actions.has(route_id):
 				removed_state_actions[route_id] = save_data.state_actions[route_id]
 
@@ -82,9 +73,6 @@ class DeleteResourceCommand:
 		for item_info: Dictionary in items_desc:
 			side_bar._remove_item_from_array(item_info.array as Array, item_info.item)
 
-		for route_id in removed_routes.keys():
-			save_data.routes.erase(route_id)
-
 		for state_id in removed_sub_states.keys():
 			save_data.sub_states.erase(state_id)
 
@@ -100,9 +88,6 @@ class DeleteResourceCommand:
 	func add() -> void:
 		if not can_remove():
 			return
-
-		for route_id in removed_routes.keys():
-			save_data.routes[route_id] = removed_routes[route_id]
 
 		for state_id in removed_sub_states.keys():
 			save_data.sub_states[state_id] = (removed_sub_states[state_id] as Array).duplicate()
@@ -163,7 +148,7 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(250, 0)
 
 	global.SIDE_BAR = self
-	
+
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 	if signal_bus and not signal_bus.request_structural_update.is_connected(update):
 		signal_bus.request_structural_update.connect(update)
@@ -184,11 +169,7 @@ func update() -> void:
 
 	var categories: Array[Dictionary] = [
 		{name = 'States', type = AddType.STATE},
-		{name = 'Signals', type = AddType.SIGNAL},
-		{name = 'Variables', type = AddType.VAR},
-		{name = 'Functions', type = AddType.FUNC},
-		{name = 'Signals Callback', type = AddType.SIGNAL_CALLBACK},
-		{name = 'Macros', type = AddType.MACRO}
+		{name = 'Variables', type = AddType.VAR}
 	]
 
 	for i: int in range(categories.size()):
@@ -241,18 +222,6 @@ func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
 				)
 				row.set_type_badge(var_data.type)
 				_add_category_row(category, row)
-		AddType.FUNC:
-			for func_data: HenSaveFunc in global.SAVE_DATA.functions:
-				_add_category_row(category, _create_row(func_data.name, func_data, ICONS[_type], BG_COLOR[_type], false, 8))
-		AddType.SIGNAL_CALLBACK:
-			for db_data: HenSaveSignalCallback in global.SAVE_DATA.signals_callback:
-				_add_category_row(category, _create_row(db_data.name, db_data, ICONS[_type], BG_COLOR[_type], false, 8))
-		AddType.SIGNAL:
-			for signal_data: HenSaveSignal in global.SAVE_DATA.signals:
-				_add_category_row(category, _create_row(signal_data.name, signal_data, ICONS[_type], BG_COLOR[_type], false, 8))
-		AddType.MACRO:
-			for macro_data: HenSaveMacro in global.SAVE_DATA.macros:
-				_add_category_row(category, _create_row(macro_data.name, macro_data, ICONS[_type], BG_COLOR[_type], false, 8))
 
 
 func _add_sub_states_card(parent_container: Node, state: HenSaveState, type: AddType, tint: Color, depth: int) -> void:
@@ -299,20 +268,6 @@ func _build_nested_card_style(tint: Color, depth: int) -> StyleBoxFlat:
 	return style
 
 
-func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_color: Color = Color.WHITE, show_add: bool = false, indent: int = 0, add_label: String = 'New') -> HenSideBarRow:
-	var row: HenSideBarRow = SIDE_BAR_ROW_SCENE.instantiate()
-	row.setup(_name, _meta, _icon, _icon_color, show_add, indent, add_label)
-	row.row_pressed.connect(_on_row_pressed)
-	row.add_pressed.connect(_on_row_add_pressed)
-	row.set_selected(_is_meta_selected(_meta))
-
-	# pointing hand cursor for rows that navigate to a route
-	if _meta is HenSaveResTypeWithRoute or _meta is HenRouteData:
-		row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-
-	return row
-
-
 func _add_category_row(category: HenSideBarCategory, row: HenSideBarRow) -> void:
 	row.set_background_mode(_category_row_bg_toggle)
 	category.add_row(row)
@@ -344,14 +299,6 @@ func _on_add_requested(meta: int) -> void:
 			global.SAVE_DATA.add_state()
 		AddType.VAR:
 			global.SAVE_DATA.add_var()
-		AddType.FUNC:
-			global.SAVE_DATA.add_func()
-		AddType.SIGNAL:
-			global.SAVE_DATA.add_signal()
-		AddType.SIGNAL_CALLBACK:
-			global.SAVE_DATA.add_signals_callback()
-		AddType.MACRO:
-			global.SAVE_DATA.add_macro()
 
 	update()
 
@@ -362,15 +309,6 @@ func _on_row_add_pressed(meta: Variant) -> void:
 		(meta as HenSaveState).add_sub_state(global.SAVE_DATA)
 
 	update()
-
-
-func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
-	match mouse_button_index:
-		MOUSE_BUTTON_LEFT:
-			_change_route_from_meta(meta)
-		MOUSE_BUTTON_RIGHT:
-			if meta and not meta is HenRouteData:
-				HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta), _get_inspect_popup_opts())
 
 
 # anchors the inspector popup to the right edge of the sidebar
@@ -391,27 +329,6 @@ func _get_inspect_popup_opts() -> Dictionary:
 		blur = false,
 		min_size = Vector2(360, 0)
 	}
-
-
-func _change_route_from_meta(meta: Variant) -> void:
-	if meta is HenSaveResTypeWithRoute:
-		var global: HenGlobal = Engine.get_singleton(&'Global')
-		(Engine.get_singleton(&'Router') as HenRouter).change_route((meta as HenSaveResTypeWithRoute).get_route(global.SAVE_DATA))
-	elif meta is HenRouteData:
-		(Engine.get_singleton(&'Router') as HenRouter).change_route(meta as HenRouteData)
-
-
-func _is_meta_selected(meta: Variant) -> bool:
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	if not router or not router.current_route or not meta:
-		return false
-
-	if meta is HenRouteData:
-		return (meta as HenRouteData).id == router.current_route.id
-	if meta is HenSaveResTypeWithRoute:
-		return (meta as HenSaveResTypeWithRoute).id == router.current_route.id
-
-	return false
 
 
 func _get_inspect_title(meta: Variant) -> String:
@@ -538,21 +455,6 @@ func _save_resource_at_path(res: Resource, res_path: String) -> void:
 	ResourceSaver.save(res, res_path)
 
 
-func _after_resource_removed(removed_route_ids: Array[StringName]) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var save_data: HenSaveData = global.SAVE_DATA
-
-	var router: HenRouter = Engine.get_singleton(&'Router')
-	if router and router.current_route and removed_route_ids.has(router.current_route.id):
-		router.change_route(save_data.get_base_route())
-
-	update()
-	if global.HENGO_ROOT:
-		global.HENGO_ROOT.schedule_check_errors()
-	if global.DASHBOARD and global.DASHBOARD.visible:
-		global.DASHBOARD.refresh()
-
-
 func _after_resource_restored() -> void:
 	update()
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -569,14 +471,6 @@ func _get_target_array_for_meta(meta: HenSaveResType) -> Array:
 
 	if meta is HenSaveVar:
 		return save_data.variables
-	if meta is HenSaveFunc:
-		return save_data.functions
-	if meta is HenSaveSignal:
-		return save_data.signals
-	if meta is HenSaveSignalCallback:
-		return save_data.signals_callback
-	if meta is HenSaveMacro:
-		return save_data.macros
 	if meta is HenSaveState:
 		return save_data.states
 
@@ -618,15 +512,40 @@ func _get_file_entries_for_delete(meta: HenSaveResType, removed_items: Array[Dic
 func _get_side_bar_item_type(meta: HenSaveResType) -> int:
 	if meta is HenSaveVar:
 		return SideBarItem.VARIABLES
-	if meta is HenSaveFunc:
-		return SideBarItem.FUNCTIONS
-	if meta is HenSaveSignal:
-		return SideBarItem.SIGNALS
-	if meta is HenSaveSignalCallback:
-		return SideBarItem.SIGNALS_CALLBACK
-	if meta is HenSaveMacro:
-		return SideBarItem.MACROS
 	if meta is HenSaveState:
 		return SideBarItem.STATES
 
 	return -1
+
+func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_color: Color = Color.WHITE, show_add: bool = false, indent: int = 0, add_label: String = 'New') -> HenSideBarRow:
+	var row: HenSideBarRow = SIDE_BAR_ROW_SCENE.instantiate()
+	row.setup(_name, _meta, _icon, _icon_color, show_add, indent, add_label)
+	row.row_pressed.connect(_on_row_pressed)
+	row.add_pressed.connect(_on_row_add_pressed)
+	row.set_selected(_is_meta_selected(_meta))
+
+	row.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+	return row
+
+func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
+	match mouse_button_index:
+		MOUSE_BUTTON_LEFT:
+			pass
+		MOUSE_BUTTON_RIGHT:
+			HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta), _get_inspect_popup_opts())
+
+# nothing is selected by route any more: a row is picked, not navigated to
+func _is_meta_selected(_meta: Variant) -> bool:
+	return false
+
+func _after_resource_removed(removed_route_ids: Array[StringName]) -> void:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var save_data: HenSaveData = global.SAVE_DATA
+
+
+	update()
+	if global.HENGO_ROOT:
+		global.HENGO_ROOT.schedule_check_errors()
+	if global.DASHBOARD and global.DASHBOARD.visible:
+		global.DASHBOARD.refresh()

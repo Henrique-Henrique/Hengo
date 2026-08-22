@@ -6,7 +6,6 @@ class_name HenExpressionEditor extends PanelContainer
 @onready var code_edit: CodeEdit = get_node('%CodeEdit')
 @onready var save_bt: Button = get_node('%Save')
 
-var v_cnode: HenVirtualCNode
 var bt_ref: HenExpressionBt
 var word_list: Array
 var completion_list: Array
