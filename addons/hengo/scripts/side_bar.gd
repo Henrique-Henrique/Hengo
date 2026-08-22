@@ -150,8 +150,13 @@ func _ready() -> void:
 	global.SIDE_BAR = self
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-	if signal_bus and not signal_bus.request_structural_update.is_connected(update):
-		signal_bus.request_structural_update.connect(update)
+	if signal_bus:
+		for signal_name: StringName in [&'request_structural_update', &'request_list_update']:
+			if not signal_bus.get(signal_name).is_connected(update):
+				signal_bus.get(signal_name).connect(update)
+
+	# the script can already be loaded when the sidebar enters the tree
+	update()
 
 
 func _on_exit() -> void:

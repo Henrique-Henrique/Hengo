@@ -4,7 +4,7 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       checks: write
@@ -16,6 +16,6 @@ jobs:
       - name: Run Tests
         uses: MikeSchulze/gdunit4-action@v1
         with:
-          godot-version: '4.7'
-          version: 'v6.2.0'
-          paths: 'res://tests'
+          godot-version: "4.7"
+          version: "v6.2.1"
+          paths: "res://tests"

@@ -587,3 +587,62 @@ func test_the_flow_owns_copy_and_paste_while_it_is_visible() -> void:
 	assert_bool(viewer._handle_shortcut(_key(KEY_C, true))).is_true()
 	assert_bool(viewer._handle_shortcut(_key(KEY_V, true))).is_true()
 	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
+
+
+func _chain_names(_viewer: HenFlowViewer) -> Array:
+	var out: Array = []
+
+	for action: HenSaveAction in save_data.get_state_actions(state.id):
+		out.append(str(action.id))
+
+	return out
+
+
+func _select_first_two(_viewer: HenFlowViewer) -> Array[HenSaveAction]:
+	var cards: Array = _action_cards(_viewer)
+
+	_viewer._select_card(cards[0])
+	_viewer._toggle_card(cards[1])
+
+	return _viewer.selected_actions()
+
+
+# dragging one card of the selection has to carry every selected action, and the
+# batch must land in the order it had on screen
+func test_dropping_a_selection_below_a_target_keeps_the_order() -> void:
+	var viewer: HenFlowViewer = _viewer(4)
+	var chain: Array = save_data.get_state_actions(state.id)
+	var ids: Array = [str(chain[0].id), str(chain[1].id), str(chain[2].id), str(chain[3].id)]
+	var batch: Array[HenSaveAction] = _select_first_two(viewer)
+
+	assert_int(batch.size()).is_equal(2)
+
+	viewer._apply_drop_batch(batch, chain[3], false)
+
+	assert_array(_chain_names(viewer)).is_equal([ids[2], ids[3], ids[0], ids[1]])
+
+
+func test_dropping_a_selection_above_a_target_keeps_the_order() -> void:
+	var viewer: HenFlowViewer = _viewer(4)
+	var chain: Array = save_data.get_state_actions(state.id)
+	var ids: Array = [str(chain[0].id), str(chain[1].id), str(chain[2].id), str(chain[3].id)]
+	var batch: Array[HenSaveAction] = _select_first_two(viewer)
+
+	viewer._apply_drop_batch(batch, chain[3], true)
+
+	assert_array(_chain_names(viewer)).is_equal([ids[2], ids[0], ids[1], ids[3]])
+
+
+# the whole batch is a single ctrl+z, the same way a batch delete is
+func test_dropping_a_selection_is_one_undo() -> void:
+	var viewer: HenFlowViewer = _viewer(4)
+	var chain: Array = save_data.get_state_actions(state.id)
+	var before: Array = _chain_names(viewer)
+
+	viewer._apply_drop_batch(_select_first_two(viewer), chain[3], false)
+
+	assert_array(_chain_names(viewer)).is_not_equal(before)
+
+	viewer._history.undo(save_data)
+
+	assert_array(_chain_names(viewer)).is_equal(before)

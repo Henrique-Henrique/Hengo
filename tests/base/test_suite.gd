@@ -15,6 +15,10 @@ func before_test() -> void:
 
 
 func after_test() -> void:
+	# a test that repopulates a list leaves the old rows on the free queue, and
+	# they only leave the ObjectDB on the next frame
+	await get_tree().process_frame
+
 	for singleton_name: StringName in HenEnums.SINGLETON_LIST:
 		if Engine.has_singleton(singleton_name):
 			Engine.unregister_singleton(singleton_name)

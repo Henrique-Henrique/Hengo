@@ -35,7 +35,8 @@ func _on_press() -> void:
 
 	var prop_arr: Array = data.get('recursive_props', [])
 	if prop_arr.is_empty():
-		prop_arr = global.CODE_SEARCH.get_native_props_as_data(data)
+		_select()
+		return
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 

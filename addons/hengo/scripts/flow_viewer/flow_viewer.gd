@@ -1019,7 +1019,7 @@ func _update_drag(_mouse: Vector2) -> void:
 
 	var target: HenFlowNodeCard = _draggable_under_mouse()
 
-	if target == null or target == _press_card:
+	if target == null or target == _press_card or _is_dragged_along(target):
 		_set_drop(null, true)
 		return
 
@@ -1062,7 +1062,62 @@ func _finish_drag() -> void:
 	if not is_instance_valid(dragged) or not is_instance_valid(target):
 		return
 
+	var batch: Array[HenSaveAction] = _drag_batch(dragged)
+
+	if batch.size() > 1:
+		_apply_drop_batch(batch, target.node.action, before)
+		return
+
 	_apply_drop(dragged.node.action, target.node.action, before)
+
+
+# dragging a card of the selection carries the whole selection, dragging any
+# other card leaves it alone
+func _drag_batch(_card: HenFlowNodeCard) -> Array[HenSaveAction]:
+	if not _selected_actions.has(str(_card.node.action.id)):
+		return [_card.node.action] as Array[HenSaveAction]
+
+	return selected_actions()
+
+
+func _is_dragged_along(_card: HenFlowNodeCard) -> bool:
+	if not is_instance_valid(_press_card) or not _selected_actions.has(str(_press_card.node.action.id)):
+		return false
+
+	return _selected_actions.has(str(_card.node.action.id))
+
+
+# every action lands on the same anchor, so a drop below the target runs
+# backwards to keep the order the selection had on screen
+func _apply_drop_batch(_actions: Array[HenSaveAction], _target: HenSaveAction, _before: bool) -> bool:
+	var states: Array = _states_of_selection()
+	var to_id: StringName = _state_by_action.get(str(_target.id), &'')
+
+	if not to_id.is_empty() and not states.has(to_id):
+		states.append(to_id)
+
+	if states.is_empty():
+		return false
+
+	var ordered: Array = _actions.duplicate()
+
+	if not _before:
+		ordered.reverse()
+
+	_ensure_editor()
+
+	return _history.record(_save_data(), states, 'Move Action', func() -> bool:
+		var any: bool = false
+
+		for action: HenSaveAction in ordered:
+			if action == _target:
+				continue
+
+			if _apply_drop(action, _target, _before):
+				any = true
+
+		return any
+	)
 
 
 func _apply_drop(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool) -> bool:

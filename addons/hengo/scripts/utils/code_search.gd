@@ -73,6 +73,11 @@ func is_action_mode() -> bool:
 	return (config.get(&'on_pick', Callable()) as Callable).is_valid()
 
 
+# the type the picker is filtering by, empty when opened without a target input
+func get_connection_type() -> StringName:
+	return config.get(&'type', &'')
+
+
 # 253 macros filtered in memory: the api search is threaded because the native
 # class list is huge, and paying for a thread here would only add a frame
 func _search_actions(_text: String) -> void:
