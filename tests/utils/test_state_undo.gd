@@ -146,3 +146,19 @@ func test_a_rejected_move_records_no_entry() -> void:
 	HenStateOps.request_move(save_data, state, state, false)
 
 	assert_bool(viewer._undo()).is_false()
+
+
+# variables share the machine's stack now: the write-only UndoRedo that used to
+# take their edits is gone
+func test_adding_a_variable_is_undone_by_the_shortcut() -> void:
+	var viewer: HenFlowViewer = _viewer()
+	var created: HenSaveVar = HenStateOps.request_add_var(save_data, false)
+
+	assert_array(save_data.variables).contains([created])
+
+	assert_bool(viewer._undo()).is_true()
+	assert_array(save_data.variables).not_contains([created])
+
+	assert_bool(viewer._redo()).is_true()
+	assert_array(save_data.variables).contains([created])
+	assert_str(str(save_data.variables[-1].id)).is_equal(str(created.id))

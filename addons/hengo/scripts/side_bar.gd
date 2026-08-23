@@ -305,7 +305,8 @@ func _on_add_requested(meta: int) -> void:
 			HenStateOps.request_add_state(global.SAVE_DATA, null)
 			return
 		AddType.VAR:
-			global.SAVE_DATA.add_var()
+			HenStateOps.request_add_var(global.SAVE_DATA)
+			return
 
 	update()
 
@@ -392,19 +393,11 @@ func _request_delete_resource(meta: HenSaveResType) -> void:
 	if not cmd.can_remove():
 		return
 
-	# a state is part of the machine, so it goes on the stack ctrl+z drains in the
-	# flow view; a variable has no place there and keeps the old pair
-	if meta is HenSaveState and global.flow_history:
+	if global.flow_history:
 		global.flow_history.record_tree(global.SAVE_DATA, 'Delete ' + meta.name, func() -> bool:
 			cmd.remove()
 			return true
 		)
-	elif global.history:
-		global.history.create_action('Delete ' + meta.name)
-		global.history.add_do_method(cmd.remove)
-		global.history.add_undo_reference(cmd)
-		global.history.add_undo_method(cmd.add)
-		global.history.commit_action()
 	else:
 		cmd.remove()
 

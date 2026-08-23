@@ -134,9 +134,6 @@ func test_the_frame_reserves_room_for_the_button_strip() -> void:
 
 # the button is not just drawn: it reaches the op that flips the flag
 func test_the_start_button_makes_the_state_start() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.history = UndoRedo.new()
-
 	var second: HenSaveState = save_data.add_state(false)
 	var viewer: HenFlowViewer = _viewer()
 	var frame: HenFlowStateFrame = null
@@ -187,9 +184,6 @@ func _sidebar() -> HenSideBar:
 # deleting only refreshed the sidebar, so the graph kept drawing the frame of a
 # state that was already gone
 func test_deleting_a_state_rebuilds_the_graph() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.history = UndoRedo.new()
-
 	var doomed: HenSaveState = save_data.add_state(false)
 	doomed.name = 'Doomed'
 

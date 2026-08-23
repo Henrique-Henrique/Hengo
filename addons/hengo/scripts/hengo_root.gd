@@ -371,7 +371,6 @@ func _ready() -> void:
 	side_bar_margin.add_theme_constant_override('margin_bottom', margin)
 
 	# initializing
-	# HenGlobal.history = UndoRedo.new()
 	enums.DROPDOWN_STATES = []
 
 	var object_list = ClassDB.get_inheriters_from_class('Object')
@@ -472,20 +471,9 @@ func _input(event: InputEvent) -> void:
 						code_generation.get_code(global.SAVE_DATA)
 					)
 			if e.ctrl_pressed:
-				# undo/redo disabled for now: as a bottom panel, _input grabs ctrl+z/ctrl+y
-				# editor-wide and blocks godot's own undo/redo
-				# if e.keycode == KEY_Z:
-				# 	get_tree().root.set_input_as_handled()
-				# 	if global.CURRENT_INSPECTOR:
-				# 		global.CURRENT_INSPECTOR.undo_redo(true)
-				# 	else:
-				# 		global.history.undo()
-				# elif e.keycode == KEY_Y:
-				# 	get_tree().root.set_input_as_handled()
-				# 	if global.CURRENT_INSPECTOR:
-				# 		global.CURRENT_INSPECTOR.undo_redo(false)
-				# 	else:
-				# 		global.history.redo()
+				# ctrl+z/ctrl+y are not handled here: as a bottom panel, _input grabs
+				# them editor-wide and blocks godot's own undo. the flow view binds
+				# them through HenShortcuts instead, above the unhandled layer
 				if e.keycode == KEY_F:
 					get_tree().root.set_input_as_handled()
 					print('FORMATTED')

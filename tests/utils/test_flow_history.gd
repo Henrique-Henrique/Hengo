@@ -319,7 +319,7 @@ func test_a_duplicated_producer_and_body_get_new_ids_too() -> void:
 	assert_str(str(copy.body_actions[0].id)).is_not_equal(str(inner.id))
 
 
-# the phase change used to write a method pair into global.history as well
+# the phase change used to write a method pair into a second stack as well
 func test_changing_the_phase_is_undone_by_the_flow_stack() -> void:
 	var actions: Array = _add()
 	var action: HenSaveAction = actions[0]

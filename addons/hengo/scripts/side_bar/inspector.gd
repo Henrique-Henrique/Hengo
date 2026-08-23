@@ -1727,16 +1727,6 @@ func _script_type_label(save_var: HenSaveVar) -> String:
 func _on_value_changed(prop_name: String, new_val: Variant, type: int) -> void:
 	var final_val: Variant = normalize_value(resource, prop_name, new_val, type)
 
-	# var global: HenGlobal = Engine.get_singleton('Global')
-	# var history: UndoRedo = global.history
-
-	# if history:
-	# 	history.create_action('Set ' + prop_name)
-	# 	history.add_do_property(resource, prop_name, final_val)
-	# 	history.add_undo_property(resource, prop_name, resource.get(prop_name))
-	# 	history.commit_action()
-	# 	return
-
 	resource.set(prop_name, final_val)
 
 	# the string editor emits on every keystroke, and a refresh rebuilds the whole
@@ -1747,17 +1737,6 @@ func _on_value_changed(prop_name: String, new_val: Variant, type: int) -> void:
 		_update_props()
 		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 		_dirty = false
-
-
-func undo_redo(_undo: bool) -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	if not global or not global.history:
-		return
-
-	if _undo:
-		global.history.undo()
-	else:
-		global.history.redo()
 
 
 func get_prop_scene(target_resource: Resource, prop: Dictionary) -> PackedScene:

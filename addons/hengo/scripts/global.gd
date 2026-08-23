@@ -36,9 +36,7 @@ var mouse_on_cnode_ui: bool = false
 var can_make_state_connection: bool = false
 var state_connection_to_date: Dictionary = {}
 
-# history
-var history: UndoRedo
-# the stack ctrl+z actually drains: every view that edits a script records here
+# the stack ctrl+z drains: every view that edits a script records into it
 var flow_history: HenFlowHistory = HenFlowHistory.new()
 
 # cam

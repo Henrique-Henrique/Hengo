@@ -79,7 +79,6 @@ func _enter_tree():
 		print('NATIVE LIST JSON -> ', FileAccess.get_open_error())
 
 	# setting globals
-	global.history = UndoRedo.new()
 	global.HENGO_ROOT = main_scene
 	global.TOOLTIP = main_scene.get_node('%Tooltip')
 	global.SIDE_PANEL = main_scene.get_node('%SidePanel')

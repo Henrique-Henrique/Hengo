@@ -713,8 +713,8 @@ func move_action(_action: HenSaveAction, _phase: StringName, _index: int) -> voi
 	if new_order == old_order and str(old_phase) == str(_phase):
 		return
 
-	# the flow history snapshots the whole list at the popup boundary, so a method
-	# pair on global.history would record the same edit into a second stack
+	# the history snapshots the whole list at the popup boundary, so the reorder
+	# only has to happen once here
 	var data: HenSaveData = _save_data
 	var state_id: StringName = _state_id
 

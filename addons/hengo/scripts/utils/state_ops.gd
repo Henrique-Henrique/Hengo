@@ -87,8 +87,7 @@ static func request_move(_save_data: HenSaveData, _state: HenSaveState, _parent:
 	)
 
 
-# the stack ctrl+z drains is the flow view's, never the UndoRedo on Global: that
-# one is filled by several places and drained by none
+# every edit to the machine goes on the one stack ctrl+z drains
 static func _record(_save_data: HenSaveData, _label: String, _mutation: Callable) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
@@ -144,6 +143,30 @@ static func _do_add(_save_data: HenSaveData, _state: HenSaveState, _parent: HenS
 		persist(_save_data, _state, _parent == null)
 
 
+# same shape as request_add_state: the variable is built once so a redo cannot
+# hand out a second id for the same binding
+static func request_add_var(_save_data: HenSaveData, _save: bool = true) -> HenSaveVar:
+	if not _save_data:
+		return null
+
+	var variable: HenSaveVar = HenSaveVar.create()
+
+	if not variable:
+		return null
+
+	_record(_save_data, 'New variable', func() -> bool:
+		if not _save_data.variables.has(variable):
+			_save_data.variables.append(variable)
+
+		if _save:
+			HenUtils.save_side_bar_item(variable, _save_data.identity.id, HenSideBar.SideBarItem.VARIABLES)
+
+		return true
+	)
+
+	return variable
+
+
 # the setter demotes the sibling that held the flag, so the undo goes through the
 # same snapshot the move uses instead of writing the property back
 static func request_set_start(_save_data: HenSaveData, _state: HenSaveState, _save: bool = true) -> void:
@@ -181,7 +204,12 @@ static func tree_snapshot(_save_data: HenSaveData) -> Dictionary:
 	for state: HenSaveState in all_states(_save_data):
 		flags.append({state = state, start = state.start, is_sub_state = state.is_sub_state})
 
-	return {states = _save_data.states.duplicate(), sub_states = subs, flags = flags}
+	return {
+		states = _save_data.states.duplicate(),
+		sub_states = subs,
+		flags = flags,
+		variables = _save_data.variables.duplicate()
+	}
 
 
 # the lists and the flags of every state, put back as one: the `start` setter
@@ -189,6 +217,9 @@ static func tree_snapshot(_save_data: HenSaveData) -> Dictionary:
 # the same flags. writes the state files too, or a restored state would be left
 # with nothing on disk for save.res to point at
 static func apply_tree(_save_data: HenSaveData, _snap: Dictionary, _save: bool = true) -> void:
+	if _snap.has('variables'):
+		_save_data.variables.assign(_snap.variables)
+
 	_save_data.states.assign(_snap.states)
 	_save_data.sub_states.clear()
 
@@ -214,6 +245,10 @@ static func apply_tree(_save_data: HenSaveData, _snap: Dictionary, _save: bool =
 		if _save_data.states.has(state) or _is_nested(_save_data, state):
 			persist(_save_data, state, not state.is_sub_state)
 
+	# a restored variable needs its file back too, or save.res points at the trash
+	for variable: HenSaveVar in _save_data.variables:
+		HenUtils.save_side_bar_item(variable, _save_data.identity.id, HenSideBar.SideBarItem.VARIABLES)
+
 
 static func _is_nested(_save_data: HenSaveData, _state: HenSaveState) -> bool:
 	for key: Variant in _save_data.sub_states:
@@ -237,6 +272,9 @@ static func tree_digest(_snap: Dictionary) -> String:
 
 	for entry: Dictionary in _snap.flags:
 		parts.append([str((entry.state as HenSaveState).id), entry.start, entry.is_sub_state])
+
+	for variable: HenSaveVar in _snap.get('variables', []):
+		parts.append(['var', str(variable.id)])
 
 	return var_to_str(parts)
 

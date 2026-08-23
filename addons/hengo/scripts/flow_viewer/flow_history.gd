@@ -2,10 +2,10 @@
 class_name HenFlowHistory
 extends RefCounted
 
-# undo stack of the flow view, kept apart from global.history on purpose. the save
-# data mutates its resources in place, so a method pair would hold a reference to
-# the very object that changed: each entry carries a copy of a state's action list
-# from before and after the edit, and undo puts a fresh copy back
+# the one undo stack of the plugin. the save data mutates its resources in place,
+# so a method pair would hold a reference to the very object that changed: each
+# entry carries a copy of what the edit touched from before and after it, and undo
+# puts a fresh copy back
 
 const LIMIT: int = 60
 

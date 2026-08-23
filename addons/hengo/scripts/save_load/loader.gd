@@ -20,7 +20,6 @@ func reset_to_load(_id: StringName, _headless: bool) -> void:
 	# confirming queue free before check errors
 	if not _headless: await get_tree().process_frame
 
-	global.history = UndoRedo.new()
  
 
 func load_res(_res_id: StringName) -> HenSaveData:

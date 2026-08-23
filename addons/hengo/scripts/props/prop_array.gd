@@ -182,36 +182,21 @@ func _on_add_pressed() -> void:
 		var script: Script = load('res://addons/hengo/scripts/save_load/resource/save_param.gd')
 		new_item = script.create()
 	
-	var history: UndoRedo = global.history
-	history.create_action('Add ' + array_type_string)
-	
+	# the flow history snapshots the whole action at the popup boundary, so the
+	# undo half of a method pair here would only fill a second stack
 	var new_arr: Array = array_val.duplicate()
 	new_arr.append(new_item)
-	
-	history.add_do_property(resource, prop_name, new_arr)
-	history.add_undo_property(resource, prop_name, array_val)
-	
-	history.add_do_method(_active_refresh.bind(new_arr))
-	history.add_undo_method(_active_refresh.bind(array_val))
-	
-	history.commit_action()
+
+	resource.set(prop_name, new_arr)
+	_active_refresh(new_arr)
 
 
 func _on_remove_pressed(index: int) -> void:
-	var global: HenGlobal = Engine.get_singleton('Global')
-	var history: UndoRedo = global.history
-	
 	var new_arr: Array = array_val.duplicate()
 	new_arr.remove_at(index)
-	
-	history.create_action('Remove Array Item')
-	history.add_do_property(resource, prop_name, new_arr)
-	history.add_undo_property(resource, prop_name, array_val)
-	
-	history.add_do_method(_active_refresh.bind(new_arr))
-	history.add_undo_method(_active_refresh.bind(array_val))
-	
-	history.commit_action()
+
+	resource.set(prop_name, new_arr)
+	_active_refresh(new_arr)
 
 
 func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, type: int) -> void:
@@ -220,22 +205,10 @@ func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, typ
 	if inspector:
 		final_val = inspector.normalize_value(item, p_name, new_val, type)
 	
-	var global: HenGlobal = Engine.get_singleton('Global')
-	var history: UndoRedo = global.history
-	
-	history.create_action('Set ' + p_name)
-	history.add_do_property(item, p_name, final_val)
-	history.add_undo_property(item, p_name, item.get(p_name))
-	
+	item.set(p_name, final_val)
+
 	if p_name == 'type' and item is HenSaveParam:
-		history.add_do_method((Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit)
-		history.add_undo_method((Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit)
-		history.add_do_method(_refresh_list)
-		history.add_undo_method(_refresh_list)
-	
-	history.commit_action()
-	
-	if p_name == 'type' and item is HenSaveParam:
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 		_refresh_list()
 
 
