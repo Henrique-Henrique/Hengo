@@ -21,6 +21,27 @@ const RUN_SHADOW: Color = Color(0.39, 1.0, 0.57, 0.26)
 const RUN_BORDER_WIDTH: int = 5
 const RUN_SHADOW_SIZE: int = 12
 
+# the header buttons, laid out like the ones a node card carries
+const BT_SIZE: float = 22.0
+const BT_GAP: float = 3.0
+const BT_ICON: float = 14.0
+const BT_COLOR: Color = Color('#c3ccdb')
+const BT_OFF_ALPHA: float = 0.3
+const BT_HOVER_ALPHA: float = 0.22
+const BT_CORNER: int = 4
+const MENU_DOT: float = 3.0
+const MENU_DOT_GAP: float = 6.0
+const DELETE_COLOR: Color = Color('#c16460')
+const START_COLOR: Color = Color('#63ff92')
+const START_BG: Color = Color('#26482f')
+const BADGE_SIZE: int = 11
+const BADGE_PAD_H: float = 6.0
+
+const ICON_MOVE: Texture2D = preload('res://addons/hengo/assets/new_icons/move.svg')
+const ICON_ADD_SUB: Texture2D = preload('res://addons/hengo/assets/new_icons/circle-plus.svg')
+const ICON_TRASH: Texture2D = preload('res://addons/hengo/assets/new_icons/trash-2.svg')
+const ICON_START: Texture2D = preload('res://addons/hengo/assets/new_icons/flag.svg')
+
 const CORNER: int = 8
 const HEADER_CORNER: int = 6
 const BORDER_WIDTH: int = 3
@@ -43,12 +64,16 @@ var _content: Vector2 = Vector2.ZERO
 var _header_h: float = 0.0
 var _final_size: Vector2 = Vector2.ZERO
 var _running: bool = false
+var _is_start: bool = false
+var _hover_kind: StringName = &''
+var _hits: Array[Dictionary] = []
 
 
-func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color) -> void:
+func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color, _start: bool = false) -> void:
 	_host = _host_control
 	state_name = _name
 	_accent = _accent_color
+	_is_start = _start
 
 	_painter.bind(_host)
 
@@ -87,14 +112,48 @@ func frame_size() -> Vector2:
 	return _final_size
 
 
+# the button strip answers the mouse the same way a card's own parts do
+func get_hits() -> Array[Dictionary]:
+	return _hits
+
+
+func set_hover(_kind: StringName) -> bool:
+	if _hover_kind == _kind:
+		return false
+
+	_hover_kind = _kind
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
+
+
 func _header_width() -> float:
-	return _painter.measure(state_name.to_upper(), NAME_SIZE).x \
-		+ GAP + _painter.measure(_meta, META_SIZE).x
+	return _text_end() - HEADER_PAD_H + _strip_width()
+
+
+# where the name, the node count and the start badge stop, in frame space
+func _text_end() -> float:
+	var end: float = HEADER_PAD_H \
+		+ _painter.measure(state_name.to_upper(), NAME_SIZE).x + GAP \
+		+ _painter.measure(_meta, META_SIZE).x + GAP
+
+	return end + (_badge_width() + GAP if _is_start else 0.0)
+
+
+func _strip_width() -> float:
+	return BT_SIZE * 5.0 + BT_GAP * 4.0
+
+
+func _badge_width() -> float:
+	return _painter.measure('START', BADGE_SIZE).x + BADGE_PAD_H * 2.0
 
 
 func apply_size(_size: Vector2) -> void:
 	_final_size = _size
 	_painter.clear()
+	_hits.clear()
 
 	_painter.add_style(_body(), Rect2(Vector2.ZERO, _size))
 	_emit_header(_size)
@@ -115,6 +174,94 @@ func _emit_header(_size: Vector2) -> void:
 	x += _painter.measure(upper, NAME_SIZE).x + GAP
 
 	_painter.add_text(_meta, META_SIZE, Vector2(x, centre - _painter.line_height(META_SIZE) * 0.5), META_COLOR)
+	x += _painter.measure(_meta, META_SIZE).x + GAP
+
+	if _is_start:
+		_emit_badge(Vector2(x, centre))
+
+	_emit_buttons(_size, centre)
+
+
+# the same badge the sidebar puts on a start row, so the two views read alike
+func _emit_badge(_at: Vector2) -> void:
+	var text_h: float = _painter.line_height(BADGE_SIZE)
+	var rect := Rect2(Vector2(_at.x, _at.y - text_h * 0.5), Vector2(_badge_width(), text_h))
+
+	_painter.add_style(_chip(START_BG, BT_CORNER), rect)
+	_painter.add_text('START', BADGE_SIZE, rect.position + Vector2(BADGE_PAD_H, 0.0), START_COLOR)
+
+
+# right aligned: start, new sub-state, move, delete, then the menu the sidebar
+# popup opens from
+func _emit_buttons(_size: Vector2, _centre: float) -> void:
+	var y: float = _centre - BT_SIZE * 0.5
+	var x: float = _size.x - HEADER_PAD_H - BT_SIZE
+
+	_emit_menu(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)))
+	x -= BT_SIZE + BT_GAP
+
+	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_TRASH, DELETE_COLOR, &'state_delete')
+	x -= BT_SIZE + BT_GAP
+
+	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_MOVE, BT_COLOR, &'state_move')
+	x -= BT_SIZE + BT_GAP
+
+	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_ADD_SUB, BT_COLOR, &'state_add_sub')
+	x -= BT_SIZE + BT_GAP
+
+	# a state that already runs first has nothing to set, so the button only shows
+	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_START, START_COLOR, &'state_start', not _is_start)
+
+
+func _emit_button(_rect: Rect2, _icon: Texture2D, _color: Color, _kind: StringName, _enabled: bool = true) -> void:
+	if _enabled:
+		_emit_hover(_rect, _kind)
+
+	_painter.add_texture(
+		_icon,
+		Rect2(_rect.position + Vector2.ONE * (BT_SIZE - BT_ICON) * 0.5, Vector2(BT_ICON, BT_ICON)),
+		_color if _enabled else Color(_color, BT_OFF_ALPHA)
+	)
+
+	if _enabled:
+		_hit(_rect, _kind)
+
+
+func _emit_menu(_rect: Rect2) -> void:
+	_emit_hover(_rect, &'state_menu')
+
+	var top: float = _rect.position.y + BT_SIZE * 0.5 - MENU_DOT_GAP - MENU_DOT * 0.5
+
+	for i: int in range(3):
+		_painter.add_style(
+			_chip(BT_COLOR, 1),
+			Rect2(Vector2(_rect.position.x + (BT_SIZE - MENU_DOT) * 0.5, top + i * MENU_DOT_GAP), Vector2(MENU_DOT, MENU_DOT))
+		)
+
+	_hit(_rect, &'state_menu')
+
+
+# behind the glyph and not over it: a wash on top mutes the red and the green the
+# two coloured buttons are read by
+func _emit_hover(_rect: Rect2, _kind: StringName) -> void:
+	if _hover_kind != _kind:
+		return
+
+	_painter.add_style(_chip(Color(BT_COLOR, BT_HOVER_ALPHA), BT_CORNER), _rect)
+
+
+func _hit(_rect: Rect2, _kind: StringName) -> void:
+	_hits.append({rect = _rect, kind = _kind})
+
+
+func _chip(_color: Color, _corner: int) -> StyleBoxFlat:
+	return _cached('chip|%d|%d' % [_color.to_rgba32(), _corner], func() -> StyleBoxFlat:
+		var style: StyleBoxFlat = StyleBoxFlat.new()
+		style.bg_color = _color
+		style.set_corner_radius_all(_corner)
+
+		return style
+	)
 
 
 # the state the debugger says is running right now

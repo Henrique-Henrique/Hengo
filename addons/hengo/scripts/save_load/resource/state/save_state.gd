@@ -39,11 +39,11 @@ func get_new_name() -> String:
 	return 'state_' + str(id)
 
 
-func add_sub_state(_save_data: HenSaveData) -> void:
+func add_sub_state(_save_data: HenSaveData) -> HenSaveState:
 	var s: HenSaveState = HenSaveState.create(true)
 
 	if not s:
-		return
+		return null
 
 	if not _save_data.sub_states.has(id):
 		_save_data.sub_states.set(id, [])
@@ -57,6 +57,8 @@ func add_sub_state(_save_data: HenSaveData) -> void:
 	# setter sweeps the siblings by looking for the list holding this state
 	if states_list.size() == 1:
 		s.start = true
+
+	return s
 
 
 func get_sub_states(_save_data: HenSaveData) -> Array:

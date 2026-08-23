@@ -1178,6 +1178,15 @@ func _create_branch_row(action: HenSaveAction, key: String, title: String) -> vo
 	name_edit.focus_exited.connect(func() -> void: _on_branch_label_changed(key, name_edit.text))
 	row.add_child(name_edit)
 
+	# the state a transition needs may not exist yet, and going to the sidebar for
+	# it loses the row that asked
+	var new_bt := Button.new()
+	new_bt.icon = load('res://addons/hengo/assets/new_icons/circle-plus.svg')
+	new_bt.tooltip_text = 'Create a state and transition to it'
+	new_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	new_bt.pressed.connect(_open_branch_create_menu.bind(key, new_bt))
+	row.add_child(new_bt)
+
 	container.add_child(row)
 
 	# a target on another script needs the instance whose machine will be driven
@@ -1234,6 +1243,77 @@ func _create_branch_instance_row(action: HenSaveAction, key: String, script_id: 
 	row.add_child(check)
 
 	return row
+
+
+# a new target is either a state of the script or a sibling of the state this
+# action runs in, which only exist as two choices while the owner is nested
+func _open_branch_create_menu(key: String, anchor: Control) -> void:
+	var save_data: HenSaveData = HenActionsPanel.owner_of(resource as HenSaveAction)
+
+	if not save_data:
+		return
+
+	var owner_state: HenSaveState = _owner_state(save_data)
+	var parent: HenSaveState = HenStateOps.parent_of(save_data, owner_state) if owner_state else null
+
+	if not parent:
+		_create_branch_target(key, null)
+		return
+
+	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		pos = anchor.global_position,
+		min_size = Vector2(240, 140)
+	})
+
+	menu.mount(
+		[
+			{name = 'New state', kind = 'root'},
+			{name = 'New sub-state in ' + parent.name, kind = 'sibling'}
+		],
+		_on_branch_create_selected.bind(key, parent),
+		'item_type'
+	)
+
+
+# the menu closes the popup it lives in, so the creation runs after that close
+func _on_branch_create_selected(item: Dictionary, key: String, parent: HenSaveState) -> void:
+	var target: HenSaveState = parent if str(item.get('kind', '')) == 'sibling' else null
+
+	_create_branch_target.bind(key, target).call_deferred()
+
+
+# creates the state, points the branch at it and opens it so it can be named
+func _create_branch_target(key: String, parent: HenSaveState, save: bool = true) -> void:
+	var save_data: HenSaveData = HenActionsPanel.owner_of(resource as HenSaveAction)
+
+	if not save_data:
+		return
+
+	var state: HenSaveState = HenStateOps.request_add_state(save_data, parent, save)
+
+	if not state:
+		return
+
+	_on_branch_selected({kind = 'state', state_id = state.id}, key)
+	_open_state_inspector(state)
+
+
+# the same popup the sidebar opens on a state row, stacked over this one
+func _open_state_inspector(state: HenSaveState) -> void:
+	var side_bar: HenSideBar = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR
+
+	if not side_bar:
+		return
+
+	HenInspector.edit_resource(
+		state,
+		side_bar.get_inspect_title(state),
+		side_bar.get_inspect_actions(state),
+		side_bar.get_inspect_popup_opts()
+	)
 
 
 func _open_branch_picker(key: String, anchor: Control) -> void:
@@ -1815,7 +1895,9 @@ func _apply_button_color(bt: Button, color: Color) -> void:
 func _apply_header_panel_style() -> void:
 	header_panel.add_theme_stylebox_override('panel', StyleBoxEmpty.new())
 
-# the state whose route is open — the action being edited belongs to it
+# the state whose chain holds the action being edited
 func _owner_state(save_data: HenSaveData) -> HenSaveState:
-
-		return null
+	return HenGeneratorAction.find_state(
+		save_data,
+		HenActionsPanel.state_id_of(save_data, resource as HenSaveAction)
+	) if save_data else null

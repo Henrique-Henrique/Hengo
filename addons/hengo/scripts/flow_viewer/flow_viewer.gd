@@ -22,6 +22,18 @@ const DOUBLE_CLICK_MS: int = 400
 # HengoDebugger throttles a trace to one per 120ms per action, on purpose: an
 # update action fires every frame. a shorter fade would strobe instead of glow
 const RUN_TIME_MS: int = 200
+# the header buttons of a state frame, the only part of the band that reacts
+const FRAME_BUTTONS: Array[StringName] = [&'state_start', &'state_add_sub', &'state_move', &'state_delete', &'state_menu']
+const STATE_POPUP_SIZE: Vector2 = Vector2(360, 400)
+# a button hint is glanced at, not read like a doc, so it waits far less
+const BUTTON_DWELL: float = 0.3
+const FRAME_BUTTON_HINTS: Dictionary = {
+	state_start = 'Make this the state the machine starts on',
+	state_add_sub = 'New sub-state inside this one',
+	state_move = 'Move this state into another state',
+	state_delete = 'Delete this state',
+	state_menu = 'State settings'
+}
 
 var parser: HenStateViewerDataParser = HenStateViewerDataParser.new()
 var measurer: HenStateViewerUIMeasurer = HenStateViewerUIMeasurer.new()
@@ -43,9 +55,10 @@ var _hovered_edge: HenStateViewerGraphTypes.DirectedGraphEdge = null
 # contains a point is the innermost one, which is what a hit means
 var _hover_items: Array[Dictionary] = []
 var _hovered_card: HenFlowNodeCard = null
+var _hovered_frame: HenFlowStateFrame = null
 var _hover_kind: StringName = &''
 var _last_hover_pos: Vector2 = Vector2.INF
-var _tooltip_action: String = ''
+var _tooltip_key: String = ''
 var _editor: HenStateViewerCardEditor = null
 var _editing_card: HenFlowNodeCard = null
 var _click_press_pos: Vector2 = Vector2.ZERO
@@ -73,6 +86,8 @@ var _cards_by_action: Dictionary = {}
 # action id -> the state that owns it, which is the unit the history snapshots
 var _state_by_action: Dictionary = {}
 var _running_state: String = ''
+# swapped in _ready for the one on Global, so the sidebar and the state ops record
+# into the same stack. the local one covers the paths that return before that
 var _history: HenFlowHistory = HenFlowHistory.new()
 var _history_script: String = ''
 
@@ -105,6 +120,11 @@ func _ready() -> void:
 
 	if general_popup and not general_popup.closed.is_connected(_on_popup_closed):
 		general_popup.closed.connect(_on_popup_closed)
+
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if global and global.flow_history:
+		_history = global.flow_history
 
 	rebuild()
 
@@ -167,6 +187,10 @@ func _release_hover() -> void:
 	if is_instance_valid(_hovered_card):
 		_hovered_card.set_hover(&'', null)
 		_hovered_card = null
+
+	if is_instance_valid(_hovered_frame):
+		_hovered_frame.set_hover(&'')
+		_hovered_frame = null
 
 	_close_tooltip()
 
@@ -283,6 +307,7 @@ func _update_hover(_pos: Vector2) -> void:
 	_hover_kind = StringName(str(hit.get('kind', &'')))
 
 	_apply_card_hover(hit)
+	_apply_frame_hover(hit)
 	_update_tooltip(hit)
 
 	# a card is a solid object and a route is a two pixel line, so whatever the
@@ -302,6 +327,20 @@ func _apply_card_hover(_hit: Dictionary) -> void:
 		card.set_hover(StringName(str(_hit.kind)), _hit.get('pin', null))
 
 
+# only the header buttons light up: the band itself is not a target
+func _apply_frame_hover(_hit: Dictionary) -> void:
+	var kind: StringName = StringName(str(_hit.get('kind', &'')))
+	var frame: HenFlowStateFrame = _hit.get('frame', null) if kind in FRAME_BUTTONS else null
+
+	if is_instance_valid(_hovered_frame) and _hovered_frame != frame:
+		_hovered_frame.set_hover(&'')
+
+	_hovered_frame = frame
+
+	if frame:
+		frame.set_hover(kind)
+
+
 # hovering a route is a question about two states, so the rest steps back
 func _update_focus(_hovered: HenStateViewerGraphTypes.DirectedGraphEdge) -> void:
 	if _hovered == _hovered_edge:
@@ -317,6 +356,14 @@ func _update_focus(_hovered: HenStateViewerGraphTypes.DirectedGraphEdge) -> void
 
 # the doc is only built while a card is actually hovered, never while one draws
 func _update_tooltip(_hit: Dictionary) -> void:
+	var kind: String = str(_hit.get('kind', ''))
+
+	# the frame buttons are drawn and not controls, so the hint they would carry as
+	# tooltip_text is served from here instead
+	if FRAME_BUTTON_HINTS.has(kind):
+		_show_tooltip(kind, str(FRAME_BUTTON_HINTS[kind]), BUTTON_DWELL)
+		return
+
 	var card: HenFlowNodeCard = _hit.get('card', null)
 	var action: HenSaveAction = card.node.action if card else null
 
@@ -324,14 +371,10 @@ func _update_tooltip(_hit: Dictionary) -> void:
 		_close_tooltip()
 		return
 
-	if _tooltip_action == str(action.id):
-		return
-
-	_tooltip_action = str(action.id)
-
 	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 
 	if not global or not global.TOOLTIP:
+		_tooltip_key = str(action.id)
 		return
 
 	var doc: String = HenActionDoc.bbcode(HenActionsPanel.find_macro(action.macro_id))
@@ -341,15 +384,31 @@ func _update_tooltip(_hit: Dictionary) -> void:
 	if not values.is_empty():
 		content += ('\n\n' if not doc.is_empty() else '') + '[color=#5f6a7a]Current: ' + values + '[/color]'
 
-	if not content.is_empty():
-		global.TOOLTIP.go_to(get_global_mouse_position(), content, Vector2.ZERO, DOC_DWELL)
+	_show_tooltip(str(action.id), content, DOC_DWELL)
+
+
+# the key is what the hint is about, so crossing back onto the same target does
+# not restart the dwell
+func _show_tooltip(_key: String, _content: String, _dwell: float) -> void:
+	if _tooltip_key == _key:
+		return
+
+	_tooltip_key = _key
+
+	if _content.is_empty():
+		return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if global and global.TOOLTIP:
+		global.TOOLTIP.go_to(get_global_mouse_position(), _content, Vector2.ZERO, _dwell)
 
 
 func _close_tooltip() -> void:
-	if _tooltip_action.is_empty():
+	if _tooltip_key.is_empty():
 		return
 
-	_tooltip_action = ''
+	_tooltip_key = ''
 
 	if not Engine.has_singleton(&'Global'):
 		return
@@ -508,7 +567,7 @@ func _spawn_frame(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var frame: HenFlowStateFrame = HenFlowStateFrame.new()
 
 	nodes_container.add_child(frame)
-	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state))
+	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start)
 	frame.set_content_size(entry.size)
 
 	_frames[_node] = frame
@@ -698,6 +757,13 @@ func hit_at(_pos: Vector2) -> Dictionary:
 			continue
 
 		if item.kind == &'frame':
+			var frame: HenFlowStateFrame = item.frame
+			var header_local: Vector2 = _pos - (item.rect as Rect2).position
+
+			for hit: Dictionary in frame.get_hits():
+				if (hit.rect as Rect2).has_point(header_local):
+					return _enrich(item, hit)
+
 			return _enrich(item, {kind = &'frame_header', rect = Rect2(Vector2.ZERO, (item.rect as Rect2).size)})
 
 		var card: HenFlowNodeCard = item.card
@@ -1146,8 +1212,17 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if hit.is_empty():
 		return false
 
-	var card: HenFlowNodeCard = hit.card
 	var rect: Rect2 = screen_rect(Rect2((hit.origin as Vector2) + (hit.rect as Rect2).position, (hit.rect as Rect2).size))
+
+	# a frame hit carries no card, so it is answered before anything reads one
+	if FRAME_BUTTONS.has(hit.kind):
+		return _dispatch_state_button(StringName(str(hit.kind)), hit.state, rect)
+
+	var card: HenFlowNodeCard = hit.get('card', null)
+
+	# the band around the buttons behaves like the canvas behind it
+	if not card:
+		return false
 
 	# before the action guard below: an add tail has no action of its own
 	if hit.kind == &'add_tail':
@@ -1263,6 +1338,45 @@ func _dispatch_context_click() -> bool:
 	_open_card_menu(hit, card, action)
 
 	return true
+
+
+# the state chrome mirrors the sidebar: the same menu, the same confirm and the
+# same undo entry, reached from the graph instead of from the list
+func _dispatch_state_button(_kind: StringName, _state: HenSaveState, _rect: Rect2) -> bool:
+	var side_bar: HenSideBar = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR
+
+	match _kind:
+		&'state_start':
+			HenStateOps.request_set_start(HenStateOps.owner_of(_state), _state)
+		&'state_add_sub':
+			HenStateOps.request_add_state(HenStateOps.owner_of(_state), _state)
+		&'state_move':
+			HenStateOps.open_move_menu(_state)
+		&'state_delete':
+			if side_bar:
+				side_bar.confirm_delete_resource(_state)
+		&'state_menu':
+			if side_bar:
+				HenInspector.edit_resource(
+					_state,
+					side_bar.get_inspect_title(_state),
+					side_bar.get_inspect_actions(_state),
+					_state_popup_opts(_rect)
+				)
+
+	return true
+
+
+# the inspector body is a scroll with no minimum of its own, so a height that is
+# only asked of the content opens the panel closed
+func _state_popup_opts(_rect: Rect2) -> Dictionary:
+	return {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		anchor_rect = _rect,
+		side = SIDE_BOTTOM,
+		blur = false,
+		min_size = STATE_POPUP_SIZE
+	}
 
 
 # a producer is not in the state's action list, so replace and delete would look

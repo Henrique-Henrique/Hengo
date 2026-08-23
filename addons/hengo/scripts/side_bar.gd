@@ -301,7 +301,9 @@ func _on_add_requested(meta: int) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	match meta:
 		AddType.STATE:
-			global.SAVE_DATA.add_state()
+			# the op owns the undo entry and the redraw of every view
+			HenStateOps.request_add_state(global.SAVE_DATA, null)
+			return
 		AddType.VAR:
 			global.SAVE_DATA.add_var()
 
@@ -310,14 +312,16 @@ func _on_add_requested(meta: int) -> void:
 
 func _on_row_add_pressed(meta: Variant) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+
 	if meta is HenSaveState:
-		(meta as HenSaveState).add_sub_state(global.SAVE_DATA)
+		HenStateOps.request_add_state(global.SAVE_DATA, meta as HenSaveState)
+		return
 
 	update()
 
 
 # anchors the inspector popup to the right edge of the sidebar
-func _get_inspect_popup_opts() -> Dictionary:
+func get_inspect_popup_opts() -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var sidebar: Control = null
 	if global and global.HENGO_ROOT:
@@ -336,7 +340,7 @@ func _get_inspect_popup_opts() -> Dictionary:
 	}
 
 
-func _get_inspect_title(meta: Variant) -> String:
+func get_inspect_title(meta: Variant) -> String:
 	if meta is HenSaveResType:
 		return '%s (%s)' % [meta.name, meta.get_class()]
 	if meta is Resource:
@@ -344,21 +348,28 @@ func _get_inspect_title(meta: Variant) -> String:
 	return 'Inspector'
 
 
-func _get_inspect_actions(meta: Variant) -> Array[Dictionary]:
+func get_inspect_actions(meta: Variant) -> Array[Dictionary]:
 	if not meta is HenSaveResType:
 		return []
 
-	return [
+	var actions: Array[Dictionary] = []
+
+	if meta is HenSaveState:
+		actions.append(HenStateOps.move_action(meta as HenSaveState))
+
+	actions.append(
 		{
 			name = 'Delete',
-			callable = _confirm_delete_resource.bind(meta),
+			callable = confirm_delete_resource.bind(meta),
 			color = Color('#c16460'),
 			icon = 'res://addons/hengo/assets/new_icons/trash-2.svg'
 		}
-	]
+	)
+
+	return actions
 
 
-func _confirm_delete_resource(meta: HenSaveResType) -> void:
+func confirm_delete_resource(meta: HenSaveResType) -> void:
 	if not meta:
 		return
 
@@ -381,7 +392,14 @@ func _request_delete_resource(meta: HenSaveResType) -> void:
 	if not cmd.can_remove():
 		return
 
-	if global.history:
+	# a state is part of the machine, so it goes on the stack ctrl+z drains in the
+	# flow view; a variable has no place there and keeps the old pair
+	if meta is HenSaveState and global.flow_history:
+		global.flow_history.record_tree(global.SAVE_DATA, 'Delete ' + meta.name, func() -> bool:
+			cmd.remove()
+			return true
+		)
+	elif global.history:
 		global.history.create_action('Delete ' + meta.name)
 		global.history.add_do_method(cmd.remove)
 		global.history.add_undo_reference(cmd)
@@ -461,7 +479,7 @@ func _save_resource_at_path(res: Resource, res_path: String) -> void:
 
 
 func _after_resource_restored() -> void:
-	update()
+	_announce_change()
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if global.HENGO_ROOT:
 		global.HENGO_ROOT.schedule_check_errors()
@@ -538,7 +556,7 @@ func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
 		MOUSE_BUTTON_LEFT:
 			pass
 		MOUSE_BUTTON_RIGHT:
-			HenInspector.edit_resource(meta, _get_inspect_title(meta), _get_inspect_actions(meta), _get_inspect_popup_opts())
+			HenInspector.edit_resource(meta, get_inspect_title(meta), get_inspect_actions(meta), get_inspect_popup_opts())
 
 # nothing is selected by route any more: a row is picked, not navigated to
 func _is_meta_selected(_meta: Variant) -> bool:
@@ -548,9 +566,19 @@ func _after_resource_removed(removed_route_ids: Array[StringName]) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var save_data: HenSaveData = global.SAVE_DATA
 
-
-	update()
+	_announce_change()
 	if global.HENGO_ROOT:
 		global.HENGO_ROOT.schedule_check_errors()
 	if global.DASHBOARD and global.DASHBOARD.visible:
 		global.DASHBOARD.refresh()
+
+
+# the sidebar is not the only view of a state: the flow graph draws the same data
+# and only rebuilds on the signal
+func _announce_change() -> void:
+	update()
+
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
+	if signal_bus:
+		signal_bus.request_structural_update.emit()

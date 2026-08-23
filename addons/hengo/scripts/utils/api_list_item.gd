@@ -48,7 +48,6 @@ func _on_press() -> void:
 
 func _select() -> void:
 	if not data.is_empty():
-		print(JSON.stringify(data))
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 		signal_bus.request_code_search_select.emit(data)
 

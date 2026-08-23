@@ -479,12 +479,20 @@ static func owner_of(_action: HenSaveAction) -> HenSaveData:
 
 
 static func _holds_action(_save_data: HenSaveData, _target: HenSaveAction) -> bool:
+	return not state_id_of(_save_data, _target).is_empty()
+
+
+# the state whose chain holds this action, however deep inside it the action sits
+static func state_id_of(_save_data: HenSaveData, _target: HenSaveAction) -> StringName:
+	if not _save_data or not _target:
+		return &''
+
 	for state_id: Variant in _save_data.state_actions:
 		for action: HenSaveAction in _save_data.state_actions[state_id]:
 			if _contains_action(action, _target):
-				return true
+				return StringName(str(state_id))
 
-	return false
+	return &''
 
 
 # an action may be nested in a loop body or feeding an input, so the search walks both

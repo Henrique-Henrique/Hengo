@@ -38,6 +38,8 @@ var state_connection_to_date: Dictionary = {}
 
 # history
 var history: UndoRedo
+# the stack ctrl+z actually drains: every view that edits a script records here
+var flow_history: HenFlowHistory = HenFlowHistory.new()
 
 # cam
 enum UI_STATE {
