@@ -38,11 +38,15 @@ class FlowNode extends RefCounted:
 	var accent: String
 	# null on a state_entry, a transition and an add tail
 	var action: HenSaveAction
+	# on a body add tail, the loop action a new step is nested into
+	var body_parent: HenSaveAction
 	# the phase chain this node belongs to
 	var phase: StringName = &''
 	var pins: Array[FlowPin] = []
 	# a loop macro's nested chain, laid out inside this node
 	var body: Array[FlowNode] = []
+	# height the branch row takes at the bottom, so the body is not laid over it
+	var flow_row_h: float = 0.0
 	var position: Vector2
 	var size: Vector2
 

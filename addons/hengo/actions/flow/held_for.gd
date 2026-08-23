@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Takes the Held branch once the condition has stayed true for the whole time asked, such as holding a button to charge a shot. Any frame the condition fails puts the count back to zero.'
+	return 'Takes Held once the condition has stayed true for the whole time asked. With Seconds = 2, holding the button for two seconds charges the shot, and letting go before that puts the count back to zero. Actions nested inside it run once the condition has held long enough.'
 
 
 func get_display_name() -> String:
@@ -16,6 +16,15 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'timer-reset'
+
+
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
 
 
 func get_inputs() -> Array[Dictionary]:
@@ -59,8 +68,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Held', id = &'held', doc = 'Where to go once the condition has held long enough. It keeps firing while the condition stays true.'},
-		{name = 'Waiting', id = &'waiting', doc = 'Where to go while the time is not complete.'}
+		{name = 'Held', id = &'held', optional = true, doc = 'Where to go once the condition has held long enough. It keeps firing while the condition stays true.'},
+		{name = 'Waiting', id = &'waiting', optional = true, doc = 'Where to go while the time is not complete.'}
 	]
 
 
@@ -78,6 +87,6 @@ func _body() -> String:
 		+ 'else:\n' \
 		+ '\theld_{{VCNODE_ID}} = 0.0\n' \
 		+ 'if held_{{VCNODE_ID}} > 0.0 and held_{{VCNODE_ID}} >= {{seconds}}:\n' \
-		+ '\t{{held}}\n' \
+		+ fire_body(&'held') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{waiting}}'

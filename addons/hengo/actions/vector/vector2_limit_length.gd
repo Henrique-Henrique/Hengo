@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Shortens a 2D vector so it is no longer than a maximum and stores it. Use it to cap a speed so diagonal motion is not faster than straight.'
+	return 'Shortens a vector when it is longer than Max, and leaves it alone when it is not. Capping a velocity is what stops diagonal movement from being faster than walking straight.'
 
 
 func get_display_name() -> String:

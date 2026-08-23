@@ -12,7 +12,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Produces a sine wave from the game clock that swings between minus Amplitude and plus Amplitude. Useful for bobbing, floating or pulsing without tracking time by hand.'
+	return 'Gives a number that swings smoothly up and down forever, driven by the game clock. With Amplitude = 10 it travels between -10 and 10, and Frequency = 2 makes it do that twice a second. Add it to a position for a coin that bobs or a light that pulses.'
 
 
 func get_display_name() -> String:
@@ -33,14 +33,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Frequency',
 			type = 'float',
 			id = &'frequency',
-			doc = 'How many full cycles happen each second.',
+			doc = 'How many full up-and-down trips happen each second.',
 			default_value = 1.0
 		},
 		{
 			name = 'Amplitude',
 			type = 'float',
 			id = &'amplitude',
-			doc = 'How far the wave reaches from the center.',
+			doc = 'How far it reaches from the middle, in each direction.',
 			default_value = 1.0
 		}
 	]

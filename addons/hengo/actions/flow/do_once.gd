@@ -12,7 +12,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs its First branch only the first time it is reached, then runs Rest on every following run. The guard resets each time the state is entered.'
+	return 'Does something on the first frame it runs and never again, so a hit sound plays once instead of every frame. Every frame after that takes After That. It resets each time the state is entered. Actions nested inside it run on that first frame.'
 
 
 func get_display_name() -> String:
@@ -21,6 +21,15 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'flag'
+
+
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
 
 
 # one guard per action, so two do-once blocks in the same state never share it
@@ -45,8 +54,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'First', id = &'first', doc = 'Where to go the first time only.'},
-		{name = 'Rest', id = &'rest', doc = 'Where to go on every following run.'}
+		{name = 'First Time', id = &'first', optional = true, doc = 'Where to go on the first frame only.'},
+		{name = 'After That', id = &'rest', optional = true, doc = 'Where to go on every frame after the first.'}
 	]
 
 
@@ -59,4 +68,8 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return 'if not did_{{VCNODE_ID}}:\n\tdid_{{VCNODE_ID}} = true\n\t{{first}}\nelse:\n\t{{rest}}'
+	return 'if not did_{{VCNODE_ID}}:\n' \
+		+ '\tdid_{{VCNODE_ID}} = true\n' \
+		+ fire_body(&'first') + '\n' \
+		+ 'else:\n' \
+		+ '\t{{rest}}'

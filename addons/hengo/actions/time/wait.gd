@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Waits a number of seconds while staying in this state, then takes the Finished branch. The timer resets each time this state is entered.'
+	return 'Waits a number of seconds while staying in this state, then takes the Finished branch on every frame from there on. With Seconds = 3 a game over screen sits still and then moves on. For N Seconds is the one that also gives a branch for the waiting frames.'
 
 
 func get_display_name() -> String:

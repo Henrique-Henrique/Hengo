@@ -1,5 +1,5 @@
 @tool
-class_name HenActionTweenMove extends HenScriptMacroBase
+class_name HenActionTweenMove extends HenActionTweenBase
 
 
 # animates position toward To over Duration seconds. create_tween is
@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Smoothly moves the node to a target position over time. Runs once when the state starts.'
+	return 'Smoothly moves the node to a target position over time. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -60,4 +60,4 @@ func get_flow_enter() -> String:
 
 
 func _body() -> String:
-	return '_ref.create_tween().tween_property(_ref, "position", {{to}}, {{duration}})'
+	return start_tween('tween_property(_ref, "position", {{to}}, {{duration}})')

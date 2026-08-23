@@ -1,5 +1,5 @@
 @tool
-class_name HenActionPlayMusic extends HenScriptMacroBase
+class_name HenActionPlayMusic extends HenActionTweenBase
 
 
 func get_id() -> StringName:
@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Swaps the track of a music player, fading the old one out and the new one back in. Runs once when the state starts.'
+	return 'Swaps the track of a music player, fading the old one out and the new one back in. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -68,4 +68,5 @@ func _body() -> String:
 		+ 'swap_{{VCNODE_ID}}.tween_property(music_{{VCNODE_ID}}, "volume_db", -80.0, {{fade}} * 0.5)\n' \
 		+ 'swap_{{VCNODE_ID}}.tween_callback(func(): music_{{VCNODE_ID}}.stream = track_{{VCNODE_ID}})\n' \
 		+ 'swap_{{VCNODE_ID}}.tween_callback(func(): music_{{VCNODE_ID}}.play())\n' \
-		+ 'swap_{{VCNODE_ID}}.tween_property(music_{{VCNODE_ID}}, "volume_db", volume_{{VCNODE_ID}}, {{fade}} * 0.5)'
+		+ 'swap_{{VCNODE_ID}}.tween_property(music_{{VCNODE_ID}}, "volume_db", volume_{{VCNODE_ID}}, {{fade}} * 0.5)\n' \
+		+ finish_hook('swap_{{VCNODE_ID}}')

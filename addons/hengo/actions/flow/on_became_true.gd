@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fires its branch only on the frame the condition turns true, and stays quiet while it keeps being true. A condition already true when the state is entered counts as turning true, so it fires once per entry.'
+	return 'Fires only on the frame the condition turns true, and stays quiet while it keeps being true. Holding a button takes Became True on the frame it goes down and Other Frames while it stays down. A condition already true on entry counts as turning true. Actions nested inside it run on that one frame.'
 
 
 func get_display_name() -> String:
@@ -16,6 +16,15 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'toggle-right'
+
+
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
 
 
 func get_inputs() -> Array[Dictionary]:
@@ -52,8 +61,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Became True', id = &'became_true', doc = 'Where to go on the one frame the condition turns true.'},
-		{name = 'Not Yet', id = &'not_yet', doc = 'Where to go on every other frame, the ones where it stays true included.'}
+		{name = 'Became True', id = &'became_true', optional = true, doc = 'Where to go on the one frame the condition turns true.'},
+		{name = 'Other Frames', id = &'not_yet', optional = true, doc = 'Where to go on every other frame, the ones where it stays true included.'}
 	]
 
 
@@ -71,6 +80,6 @@ func _body() -> String:
 		+ 'var fired_{{VCNODE_ID}}: bool = now_{{VCNODE_ID}} and not was_true_{{VCNODE_ID}}\n' \
 		+ 'was_true_{{VCNODE_ID}} = now_{{VCNODE_ID}}\n' \
 		+ 'if fired_{{VCNODE_ID}}:\n' \
-		+ '\t{{became_true}}\n' \
+		+ fire_body(&'became_true') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{not_yet}}'

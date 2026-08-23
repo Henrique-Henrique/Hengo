@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Folds a value so it bounces between 0 and a length, rising then falling over and over. Feed it time to drive a back-and-forth motion.'
+	return 'Makes a number climb up to Length and then walk back down to 0, over and over. Feeding it the elapsed time with Length = 1 gives a value that goes 0 to 1 and back, the way a platform slides side to side.'
 
 
 func get_display_name() -> String:
@@ -28,14 +28,14 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Value',
 			type = 'float',
 			id = &'value',
-			doc = 'The number to fold, often accumulated time.',
+			doc = 'A number that keeps growing, usually the elapsed time.',
 			default_value = 0.0
 		},
 		{
 			name = 'Length',
 			type = 'float',
 			id = &'length',
-			doc = 'The value it bounces up to before falling back.',
+			doc = 'How high it climbs before turning back down.',
 			default_value = 1.0
 		}
 	]

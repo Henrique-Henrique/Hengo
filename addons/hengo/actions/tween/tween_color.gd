@@ -1,5 +1,5 @@
 @tool
-class_name HenActionTweenColor extends HenScriptMacroBase
+class_name HenActionTweenColor extends HenActionTweenBase
 
 
 func get_id() -> StringName:
@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Smoothly blends the color of a node toward a target color over time. Runs once when the state starts.'
+	return 'Smoothly blends the color of a node toward a target color over time. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -28,7 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
-			doc = 'The node to tint, such as a sprite, a Control or a 3d mesh.',
+			doc = 'The node to tint. A 2D script tints it, a 3D one blends the color of its material.',
 			bind_only = true,
 			default_value = null
 		},
@@ -61,9 +61,15 @@ func get_flow_enter() -> String:
 
 # SpriteBase3D and Label3D also inherit GeometryInstance3D
 func _body() -> String:
+	if targets(&'Node3D') and not (targets(&'SpriteBase3D') or targets(&'Label3D')):
+		return 'var node_{{VCNODE_ID}} = {{target}}\n' \
+			+ 'var mat_{{VCNODE_ID}} := (node_{{VCNODE_ID}} as GeometryInstance3D).material_override as StandardMaterial3D\n' \
+			+ 'var fade_{{VCNODE_ID}} = _ref.create_tween()\n' \
+			+ 'if mat_{{VCNODE_ID}}:\n' \
+			+ '\tfade_{{VCNODE_ID}}.tween_property(mat_{{VCNODE_ID}}, "albedo_color", {{to}}, {{duration}})\n' \
+			+ finish_hook('fade_{{VCNODE_ID}}')
+
 	return 'var node_{{VCNODE_ID}} = {{target}}\n' \
-		+ 'var mat_{{VCNODE_ID}}: Material = (node_{{VCNODE_ID}} as GeometryInstance3D).material_override if node_{{VCNODE_ID}} is GeometryInstance3D else null\n' \
-		+ 'if mat_{{VCNODE_ID}} is StandardMaterial3D and not (node_{{VCNODE_ID}} is SpriteBase3D or node_{{VCNODE_ID}} is Label3D):\n' \
-		+ '\t_ref.create_tween().tween_property(mat_{{VCNODE_ID}}, "albedo_color", {{to}}, {{duration}})\n' \
-		+ 'else:\n' \
-		+ '\t_ref.create_tween().tween_property(node_{{VCNODE_ID}}, "modulate", {{to}}, {{duration}})'
+		+ 'var fade_{{VCNODE_ID}} = _ref.create_tween()\n' \
+		+ 'fade_{{VCNODE_ID}}.tween_property(node_{{VCNODE_ID}}, "modulate", {{to}}, {{duration}})\n' \
+		+ finish_hook('fade_{{VCNODE_ID}}')

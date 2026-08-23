@@ -1,5 +1,5 @@
 @tool
-class_name HenActionTweenRotate3D extends HenScriptMacroBase
+class_name HenActionTweenRotate3D extends HenActionTweenBase
 
 
 func get_id() -> StringName:
@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Smoothly rotates the node to a target angle over time. Runs once when the state starts.'
+	return 'Smoothly rotates the node to a target angle over time. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -57,4 +57,4 @@ func get_flow_enter() -> String:
 
 # rotation_degrees keeps the 2d unit convention, deg_to_rad has no Vector3 form
 func _body() -> String:
-	return '_ref.create_tween().tween_property(_ref, "rotation_degrees", {{to}}, {{duration}})'
+	return start_tween('tween_property(_ref, "rotation_degrees", {{to}}, {{duration}})')

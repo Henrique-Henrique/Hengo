@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fires its branch once on the frame a value passes a limit in the chosen direction, and stays quiet until the value comes back and passes it again. A value already past the limit when the state is entered counts as a crossing, so it fires once per entry.'
+	return 'Fires once on the frame a value passes a limit, then stays quiet until the value comes back and passes it again. With Limit = 20 going down, health dropping from 25 to 15 takes Crossed on that one frame and Other Frames while it stays at 15. A value already past the limit on entry counts as a crossing. Actions nested inside it run on the frame it crosses.'
 
 
 func get_display_name() -> String:
@@ -16,6 +16,15 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'gauge'
+
+
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
 
 
 func get_inputs() -> Array[Dictionary]:
@@ -68,8 +77,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Crossed', id = &'crossed', doc = 'Where to go on the one frame the value passes the limit.'},
-		{name = 'Not Yet', id = &'not_yet', doc = 'Where to go on every other frame, the ones where it stays past the limit included.'}
+		{name = 'Crossed', id = &'crossed', optional = true, doc = 'Where to go on the one frame the value passes the limit.'},
+		{name = 'Other Frames', id = &'not_yet', optional = true, doc = 'Where to go on every other frame, the ones where it stays past the limit included.'}
 	]
 
 
@@ -90,7 +99,7 @@ func _body() -> String:
 		+ 'var fired_{{VCNODE_ID}}: bool = past_{{VCNODE_ID}} and not was_past_{{VCNODE_ID}}\n' \
 		+ 'was_past_{{VCNODE_ID}} = past_{{VCNODE_ID}}\n' \
 		+ 'if fired_{{VCNODE_ID}}:\n' \
-		+ '\t{{crossed}}\n' \
+		+ fire_body(&'crossed') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{not_yet}}'
 

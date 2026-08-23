@@ -103,9 +103,7 @@ func _body() -> String:
 			+ '\t{{none}}'
 
 	if targets(&'Node3D'):
-		return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
-			+ 'if _ref is CollisionObject3D:\n' \
-			+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject3D).get_rid())\n' \
+		return _self_skip(&'CollisionObject3D') \
 			+ 'var shape_{{VCNODE_ID}} = SphereShape3D.new()\n' \
 			+ 'shape_{{VCNODE_ID}}.radius = {{radius}}\n' \
 			+ 'var query_{{VCNODE_ID}} = PhysicsShapeQueryParameters3D.new()\n' \
@@ -119,9 +117,7 @@ func _body() -> String:
 			+ '\tlist_{{VCNODE_ID}}.append(item_{{VCNODE_ID}}.collider)\n' \
 			+ '{{out:result}}' + tail
 
-	return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
-		+ 'if _ref is CollisionObject2D:\n' \
-		+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject2D).get_rid())\n' \
+	return _self_skip(&'CollisionObject2D') \
 		+ 'var shape_{{VCNODE_ID}} = CircleShape2D.new()\n' \
 		+ 'shape_{{VCNODE_ID}}.radius = {{radius}}\n' \
 		+ 'var query_{{VCNODE_ID}} = PhysicsShapeQueryParameters2D.new()\n' \
@@ -134,3 +130,12 @@ func _body() -> String:
 		+ 'for item_{{VCNODE_ID}} in found_{{VCNODE_ID}}:\n' \
 		+ '\tlist_{{VCNODE_ID}}.append(item_{{VCNODE_ID}}.collider)\n' \
 		+ '{{out:result}}' + tail
+
+
+# the owner excludes itself from the query only when the script is a collision
+# object, which the class it extends already answers: no `is` reaches the game
+func _self_skip(_class: StringName) -> String:
+	if not targets(_class):
+		return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n'
+
+	return 'var skip_{{VCNODE_ID}}: Array[RID] = [(_ref as ' + str(_class) + ').get_rid()]\n'

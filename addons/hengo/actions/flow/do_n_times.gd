@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs its Within branch on the first runs, up to Times of them, and runs Done on every run after that. The count resets each time the state is entered.'
+	return 'Does something on the first frames only and then stops. With Times = 3, the first three frames take First Times and every frame after that takes After That. The count restarts each time the state is entered. Actions nested inside it run on the First Times frames.'
 
 
 func get_display_name() -> String:
@@ -18,13 +18,22 @@ func get_icon() -> String:
 	return 'flag-triangle-right'
 
 
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
+
+
 func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Times',
 			type = 'int',
 			id = &'times',
-			doc = 'How many runs go through the Within branch.',
+			doc = 'How many frames go through the First Times branch.',
 			default_value = 3
 		}
 	]
@@ -52,8 +61,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Within', id = &'within', doc = 'Where to go while the run count is still below Times.'},
-		{name = 'Done', id = &'done', doc = 'Where to go on every run after the first Times runs.'}
+		{name = 'First Times', id = &'within', optional = true, doc = 'Where to go on the first Times frames.'},
+		{name = 'After That', id = &'done', optional = true, doc = 'Where to go on every frame once those are used up.'}
 	]
 
 
@@ -68,6 +77,6 @@ func get_flow_physics() -> String:
 func _body() -> String:
 	return 'if did_{{VCNODE_ID}} < {{times}}:\n' \
 		+ '\tdid_{{VCNODE_ID}} += 1\n' \
-		+ '\t{{within}}\n' \
+		+ fire_body(&'within') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{done}}'

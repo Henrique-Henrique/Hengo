@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Combines two 3D vectors into a single number, such as the distance or angle between them.'
+	return 'Turns two 3D vectors into one number, such as how far apart two points are or the angle between them.'
 
 
 func get_display_name() -> String:
@@ -27,7 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
-			doc = 'How to combine the two vectors.',
+			doc = 'distance_to is how far apart they are, dot tells how much they point the same way, and angle_to gives the angle between them.',
 			raw = true,
 			options = ['distance_to', 'distance_squared_to', 'dot', 'angle_to'],
 			default_value = 'distance_to'

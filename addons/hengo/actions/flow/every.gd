@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs the actions inside it once every so many seconds while this state runs. The timer resets each time the state is entered.'
+	return 'Runs the actions inside it once every so many seconds while this state runs. With Seconds = 2, an enemy spawns every two seconds. The timer restarts each time the state is entered. Every N Seconds is the same clock with branches instead of nested actions.'
 
 
 func get_display_name() -> String:

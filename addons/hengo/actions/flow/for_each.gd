@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs its nested actions once for every element in a collection, all in the same frame.'
+	return 'Runs the actions inside it once for every item of a list, all in the same frame. A list of ten enemies runs the inside ten times, with Item holding one enemy each pass.'
 
 
 func get_display_name() -> String:

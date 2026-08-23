@@ -1,5 +1,5 @@
 @tool
-class_name HenActionCameraShake extends HenScriptMacroBase
+class_name HenActionCameraShake extends HenActionTweenBase
 
 
 func get_id() -> StringName:
@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. It runs once when the state starts.'
+	return 'Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. It runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -61,13 +61,17 @@ func get_flow_enter() -> String:
 
 # Camera3D has no offset property, only h_offset and v_offset
 func _body() -> String:
+	if targets(&'Node3D'):
+		return 'var cam_{{VCNODE_ID}} = {{camera}}\n' \
+			+ 'var shake_{{VCNODE_ID}} = _ref.create_tween()\n' \
+			+ 'var jitter_h_{{VCNODE_ID}} = func(v: float) -> void: cam_{{VCNODE_ID}}.h_offset = randf_range(-v, v)\n' \
+			+ 'var jitter_v_{{VCNODE_ID}} = func(v: float) -> void: cam_{{VCNODE_ID}}.v_offset = randf_range(-v, v)\n' \
+			+ 'shake_{{VCNODE_ID}}.tween_method(jitter_h_{{VCNODE_ID}}, {{strength}}, 0.0, {{duration}})\n' \
+			+ 'shake_{{VCNODE_ID}}.parallel().tween_method(jitter_v_{{VCNODE_ID}}, {{strength}}, 0.0, {{duration}})\n' \
+			+ finish_hook('shake_{{VCNODE_ID}}')
+
 	return 'var cam_{{VCNODE_ID}} = {{camera}}\n' \
 		+ 'var shake_{{VCNODE_ID}} = _ref.create_tween()\n' \
-		+ 'if cam_{{VCNODE_ID}} is Camera2D:\n' \
-		+ '\tvar jitter_{{VCNODE_ID}} = func(v: float) -> void: cam_{{VCNODE_ID}}.offset = Vector2(randf_range(-v, v), randf_range(-v, v))\n' \
-		+ '\tshake_{{VCNODE_ID}}.tween_method(jitter_{{VCNODE_ID}}, {{strength}}, 0.0, {{duration}})\n' \
-		+ 'else:\n' \
-		+ '\tvar jitter_h_{{VCNODE_ID}} = func(v: float) -> void: cam_{{VCNODE_ID}}.h_offset = randf_range(-v, v)\n' \
-		+ '\tvar jitter_v_{{VCNODE_ID}} = func(v: float) -> void: cam_{{VCNODE_ID}}.v_offset = randf_range(-v, v)\n' \
-		+ '\tshake_{{VCNODE_ID}}.tween_method(jitter_h_{{VCNODE_ID}}, {{strength}}, 0.0, {{duration}})\n' \
-		+ '\tshake_{{VCNODE_ID}}.parallel().tween_method(jitter_v_{{VCNODE_ID}}, {{strength}}, 0.0, {{duration}})'
+		+ 'var jitter_{{VCNODE_ID}} = func(v: float) -> void: cam_{{VCNODE_ID}}.offset = Vector2(randf_range(-v, v), randf_range(-v, v))\n' \
+		+ 'shake_{{VCNODE_ID}}.tween_method(jitter_{{VCNODE_ID}}, {{strength}}, 0.0, {{duration}})\n' \
+		+ finish_hook('shake_{{VCNODE_ID}}')

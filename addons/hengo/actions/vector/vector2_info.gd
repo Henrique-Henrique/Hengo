@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Reads a single number from a vector, such as its length or angle.'
+	return 'Reads one number out of a vector: how long it is, or which way it points. Feeding a velocity to length gives the current speed.'
 
 
 func get_display_name() -> String:
@@ -27,7 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
-			doc = 'Which value to read from the vector.',
+			doc = 'length is how long it is, angle is the direction in degrees, and length_squared skips the square root, good enough to compare two distances.',
 			raw = true,
 			options = ['length', 'length_squared', 'angle'],
 			default_value = 'length'

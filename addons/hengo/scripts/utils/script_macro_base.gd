@@ -13,6 +13,8 @@ var bound_inputs: Dictionary = {}
 # flow output id -> true when that branch has somewhere to go. only meaningful for
 # a branch declared optional: the others are required before the action is emitted
 var connected_flows: Dictionary = {}
+# how many actions the one being generated nests, 0 when its body is empty
+var body_action_count: int = 0
 
 
 # literal an input holds on the action being generated
@@ -34,6 +36,29 @@ func is_flow_connected(_id: StringName) -> bool:
 
 func any_flow_connected() -> bool:
 	return not connected_flows.is_empty()
+
+
+# what a gating action runs on the frame it fires: the actions nested in it, when
+# it holds any, and then its branch. the placeholder is left out of an empty body
+# so the emitted code carries no stray pass
+func fire_body(_branch_id: StringName, _indent: String = '\t') -> String:
+	var lines: PackedStringArray = []
+
+	if body_action_count > 0:
+		lines.append(_indent + '{{loop_body}}')
+
+	lines.append(_indent + '{{' + str(_branch_id) + '}}')
+
+	return '\n'.join(lines)
+
+
+# a gating action with an empty body and no branch target would emit an if/else
+# of two passes. the reason surfaces on the action instead of running silently
+func gate_validation_error() -> String:
+	if body_action_count > 0 or not connected_flows.is_empty():
+		return ''
+
+	return 'add an action inside it or set a branch target'
 
 
 # native classes this macro supports; a script whose base inherits from any of

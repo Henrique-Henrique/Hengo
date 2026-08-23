@@ -70,9 +70,7 @@ func get_flow_physics() -> String:
 func _body() -> String:
 	if targets(&'Node3D'):
 		return 'var target_{{VCNODE_ID}} = {{target}}\n' \
-			+ 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
-			+ 'if _ref is CollisionObject3D:\n' \
-			+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject3D).get_rid())\n' \
+			+ _self_skip(&'CollisionObject3D') \
 			+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters3D.create(_ref.global_position, target_{{VCNODE_ID}}.global_position)\n' \
 			+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 			+ 'var hit_{{VCNODE_ID}} = _ref.get_world_3d().direct_space_state.intersect_ray(query_{{VCNODE_ID}})\n' \
@@ -82,9 +80,7 @@ func _body() -> String:
 			+ '\t{{blocked}}'
 
 	return 'var target_{{VCNODE_ID}} = {{target}}\n' \
-		+ 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
-		+ 'if _ref is CollisionObject2D:\n' \
-		+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject2D).get_rid())\n' \
+		+ _self_skip(&'CollisionObject2D') \
 		+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters2D.create(_ref.global_position, target_{{VCNODE_ID}}.global_position)\n' \
 		+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 		+ 'var hit_{{VCNODE_ID}} = _ref.get_world_2d().direct_space_state.intersect_ray(query_{{VCNODE_ID}})\n' \
@@ -92,3 +88,12 @@ func _body() -> String:
 		+ '\t{{clear}}\n' \
 		+ 'else:\n' \
 		+ '\t{{blocked}}'
+
+
+# the owner excludes itself from the query only when the script is a collision
+# object, which the class it extends already answers: no `is` reaches the game
+func _self_skip(_class: StringName) -> String:
+	if not targets(_class):
+		return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n'
+
+	return 'var skip_{{VCNODE_ID}}: Array[RID] = [(_ref as ' + str(_class) + ').get_rid()]\n'

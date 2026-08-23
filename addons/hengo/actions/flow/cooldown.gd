@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Lets its branch fire at most once every so many seconds, ignoring the runs in between. Use it to stop an action from spamming while a condition stays true.'
+	return 'Lets something happen at most once every so many seconds, however many frames run through it. With Seconds = 1, holding the fire button gives one shot per second and the frames in between take Cooling. It fires right away on the first frame and only then blocks, unlike Every N Seconds, which waits first. Actions nested inside it run on the frame it fires.'
 
 
 func get_display_name() -> String:
@@ -22,13 +22,22 @@ func get_icon() -> String:
 	return 'timer'
 
 
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
+
+
 func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Seconds',
 			type = 'float',
 			id = &'seconds',
-			doc = 'How long the branch stays blocked after it fires, in seconds.',
+			doc = 'How long it stays blocked after firing, in seconds.',
 			default_value = 1.0
 		}
 	]
@@ -56,8 +65,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Ready', id = &'ready', doc = 'Where to go when the wait is up. It starts the wait again.'},
-		{name = 'Cooling', id = &'cooling', doc = 'Where to go while still waiting.'}
+		{name = 'Ready', id = &'ready', optional = true, doc = 'Where to go when the wait is up. It starts the wait again.'},
+		{name = 'Cooling', id = &'cooling', optional = true, doc = 'Where to go while still waiting.'}
 	]
 
 
@@ -73,6 +82,6 @@ func _body() -> String:
 	return 'cooldown_{{VCNODE_ID}} = maxf(cooldown_{{VCNODE_ID}} - delta, 0.0)\n' \
 		+ 'if cooldown_{{VCNODE_ID}} <= 0.0:\n' \
 		+ '\tcooldown_{{VCNODE_ID}} = {{seconds}}\n' \
-		+ '\t{{ready}}\n' \
+		+ fire_body(&'ready') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{cooling}}'

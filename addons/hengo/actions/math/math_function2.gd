@@ -27,7 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
-			doc = 'The math function to apply.',
+			doc = 'min keeps the smaller of the two, max the bigger, pow raises A to the power of B, snapped rounds A to steps of B, and fmod gives the remainder of A divided by B.',
 			raw = true,
 			options = ['min', 'max', 'pow', 'snapped', 'fmod'],
 			default_value = 'min'

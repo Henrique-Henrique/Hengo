@@ -41,8 +41,13 @@ func get_outputs() -> Array[Dictionary]:
 	]
 
 
+# the class the script extends decides which projection is emitted: a 3d point
+# goes through the active camera, a 2d one through the canvas transform
 func get_output_result() -> String:
-	return '(_ref.get_viewport().get_canvas_transform() * {{node}}.global_position if not {{node}} is Node3D else (_ref.get_viewport().get_camera_3d().unproject_position({{node}}.global_position) if _ref.get_viewport().get_camera_3d() != null else Vector2.ZERO))'
+	if targets(&'Node3D'):
+		return '(_ref.get_viewport().get_camera_3d().unproject_position({{node}}.global_position) if _ref.get_viewport().get_camera_3d() != null else Vector2.ZERO)'
+
+	return '(_ref.get_viewport().get_canvas_transform() * {{node}}.global_position)'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

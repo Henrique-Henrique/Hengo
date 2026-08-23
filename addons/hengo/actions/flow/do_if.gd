@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs its nested actions only when the condition is true, staying in the same state.'
+	return 'Runs the actions inside it only when the condition is true, staying in the same state. It is the plain if: nothing here jumps to another state.'
 
 
 func get_display_name() -> String:

@@ -391,6 +391,7 @@ static func _prime_instance(_save_data: HenSaveData, _instance: HenScriptMacroBa
 	for key: Variant in _action.input_actions:
 		_instance.bound_inputs[str(key)] = true
 
+	_instance.body_action_count = _action.body_actions.size()
 	_instance.connected_flows = {}
 
 	for out: Dictionary in _instance.get_flow_outputs():

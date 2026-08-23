@@ -101,9 +101,7 @@ func get_flow_physics() -> String:
 
 # get_rid() lives on CollisionObject2D, so a plain Node2D owner has nothing to skip
 func _body() -> String:
-	return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n' \
-		+ 'if {{ignore_self}} and _ref is CollisionObject2D:\n' \
-		+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject2D).get_rid())\n' \
+	return _self_skip() \
 		+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters2D.create({{from}}, {{to}})\n' \
 		+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 		+ 'var hit_{{VCNODE_ID}} = _ref.get_world_2d().direct_space_state.intersect_ray(query_{{VCNODE_ID}})\n' \
@@ -114,3 +112,23 @@ func _body() -> String:
 		+ '\t{{hit}}\n' \
 		+ 'else:\n' \
 		+ '\t{{miss}}'
+
+
+# the script class already answers whether the owner is a collision object, so
+# only the user's own toggle is left for runtime
+func _self_skip() -> String:
+	var empty: String = 'var skip_{{VCNODE_ID}}: Array[RID] = []\n'
+
+	if not targets(&'CollisionObject2D'):
+		return empty
+
+	# a toggle nobody bound is known here, so the branch never reaches the game
+	if not is_bound(&'ignore_self'):
+		if not bool(value_of(&'ignore_self', true)):
+			return empty
+
+		return 'var skip_{{VCNODE_ID}}: Array[RID] = [(_ref as CollisionObject2D).get_rid()]\n'
+
+	return empty \
+		+ 'if {{ignore_self}}:\n' \
+		+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject2D).get_rid())\n'

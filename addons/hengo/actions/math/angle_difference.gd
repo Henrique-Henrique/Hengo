@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Returns the shortest signed angle from one angle to another, wrapping around a full turn. Feed it to a smooth turn so the shorter way is always taken.'
+	return 'Measures how far one angle is from another, always taking the short way around. From 350 to 10 degrees it answers 20 instead of -340, which is what stops a turning node from spinning the long way. A negative answer means turning the other way.'
 
 
 func get_display_name() -> String:
@@ -43,7 +43,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result', doc = 'The shortest signed angle from one to the other, in degrees.'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'How far to turn, in degrees, negative when the short way is the other way.'}
 	]
 
 

@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Counts every run and takes the Reached branch on the run number Times, then starts counting again from zero. The count survives leaving and coming back to this state, so it fits things like the third hit killing an enemy.'
+	return 'Counts every time it runs and takes Reached on the run number Times, then counts from zero again. With Times = 3 on enter, the first two hits take Counting and the third one kills the enemy. The count survives leaving and coming back to this state. Actions nested inside it run on the run that reaches Times.'
 
 
 func get_display_name() -> String:
@@ -18,13 +18,22 @@ func get_icon() -> String:
 	return 'target'
 
 
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
+
+
 func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Times',
 			type = 'int',
 			id = &'times',
-			doc = 'How many runs it takes to reach the target.',
+			doc = 'How many times it has to run before Reached fires.',
 			default_value = 3
 		}
 	]
@@ -49,8 +58,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Reached', id = &'reached', doc = 'Where to go on the run that hits Times. The count goes back to zero right after.'},
-		{name = 'Counting', id = &'counting', doc = 'Where to go while the count is still below Times.'}
+		{name = 'Reached', id = &'reached', optional = true, doc = 'Where to go on the run that hits Times. The count goes back to zero right after.'},
+		{name = 'Counting', id = &'counting', optional = true, doc = 'Where to go while the count is still below Times.'}
 	]
 
 
@@ -70,6 +79,6 @@ func _body() -> String:
 	return 'count_{{VCNODE_ID}} += 1\n' \
 		+ 'if count_{{VCNODE_ID}} >= {{times}}:\n' \
 		+ '\tcount_{{VCNODE_ID}} = 0\n' \
-		+ '\t{{reached}}\n' \
+		+ fire_body(&'reached') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{counting}}'

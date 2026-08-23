@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs its nested actions a fixed number of times, all in the same frame.'
+	return 'Runs the actions inside it a fixed number of times, all in the same frame. With Times = 10, ten bullets go out on the same frame and Index counts from 0 to 9.'
 
 
 func get_display_name() -> String:

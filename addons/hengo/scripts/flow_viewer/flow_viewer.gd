@@ -1228,7 +1228,7 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if hit.kind == &'add_tail':
 		_editing_card = card
 		_editor_for(hit.node)
-		_editor.open_add(card.node.phase, null, -1, rect)
+		_editor.open_add(card.node.phase, card.node.body_parent, -1, rect)
 		return true
 
 	# a phase cell of the entry is where its chain is started, the same way a branch

@@ -311,6 +311,7 @@ func compute_size() -> Vector2:
 	)
 
 	node.size = _base_size
+	node.flow_row_h = _flow_h
 
 	# the formatter orders a fan by the exec anchors, and it runs before apply_size
 	_emit_enter(_base_size)
@@ -808,10 +809,13 @@ func _emit_enter(_size: Vector2) -> void:
 # the loop's chain lives in the space the formatter added at the bottom
 func _emit_body_frame(_size: Vector2) -> void:
 	var top: float = _header_h + _rows_h
+	# an action that also branches keeps its row at the bottom, so the body stops
+	# above it instead of being drawn over the branch cells
+	var bottom: float = _size.y - _flow_h - BODY_PAD * 0.5
 
 	_painter.add_style(
 		_flat(BODY_BG, CORNER),
-		Rect2(Vector2(BODY_PAD * 0.5, top), Vector2(_size.x - BODY_PAD, _size.y - top - BODY_PAD * 0.5))
+		Rect2(Vector2(BODY_PAD * 0.5, top), Vector2(_size.x - BODY_PAD, bottom - top))
 	)
 
 	# the body port is not drawn as a slot, only anchored: over the first nested

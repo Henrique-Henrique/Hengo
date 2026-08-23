@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Blends between two values by a weight, where 0 gives From and 1 gives To.'
+	return 'Blends between two values by a weight, where 0 gives From, 1 gives To and 0.5 gives the value right in the middle.'
 
 
 func get_display_name() -> String:

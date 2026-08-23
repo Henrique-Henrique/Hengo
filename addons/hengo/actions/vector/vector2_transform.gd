@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Applies a function to a vector and returns a new vector, such as normalized or abs.'
+	return 'Reshapes a vector and stores the new one, most often to normalize it: keep the direction but set the length to 1, so it stops carrying a speed.'
 
 
 func get_display_name() -> String:
@@ -27,7 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
-			doc = 'The function to apply to the vector.',
+			doc = 'normalized keeps the direction and sets the length to 1, abs drops the minus signs, floor, ceil and round snap to whole numbers, and orthogonal turns it a quarter turn.',
 			raw = true,
 			options = ['normalized', 'abs', 'sign', 'floor', 'ceil', 'round', 'orthogonal'],
 			default_value = 'normalized'

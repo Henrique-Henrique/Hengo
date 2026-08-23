@@ -13,6 +13,12 @@ const FIX_TRANSITION: String = 'res://addons/hengo/actions/flow/transition.gd'
 const FIX_MATH: String = 'res://addons/hengo/actions/math/math_operator.gd'
 const FIX_VEC_XY: String = 'res://addons/hengo/actions/vector/get_vector2_xy.gd'
 const FIX_MOVE: String = 'res://addons/hengo/actions/physics2d/move_and_collide.gd'
+# a gating action: it holds a body and branches, both optional
+const FIX_DO_N_TIMES: String = 'res://addons/hengo/actions/flow/do_n_times.gd'
+# an animated action: its Finished branch runs from the tween signal
+const FIX_TWEEN: String = 'res://addons/hengo/actions/tween/tween_move.gd'
+# dispatches on the class the script extends, never on the node at runtime
+const FIX_FLASH: String = 'res://addons/hengo/actions/render/flash.gd'
 
 var state: HenSaveState
 
@@ -3335,3 +3341,140 @@ func test_a_labelled_action_shows_its_own_name() -> void:
 	action.label = '   '
 
 	assert_str(HenActionsPanel.display_name(action)).is_not_equal('   ')
+
+
+# --- a body and a branch on the same action --------------------------------
+
+
+# the nested actions run on the branch that fires, and the branch still follows
+func test_a_gating_action_runs_its_body_before_its_branch() -> void:
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'done'
+
+	var action: HenSaveAction = _add_action(_register(FIX_DO_N_TIMES), &'update')
+
+	action.branches['done'] = {state_id = target.id, label = ''}
+	action.body_actions.append(HenSaveAction.create(_register(FIX_PHASES)))
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('test_update("hi")')
+	assert_str(code).contains('_ref._STATE_CONTROLLER.change_state("done")')
+
+
+# the body alone is reason enough to emit: both branches are optional
+func test_a_gating_action_with_only_a_body_is_not_skipped() -> void:
+	var action: HenSaveAction = _add_action(_register(FIX_DO_N_TIMES), &'update')
+
+	action.body_actions.append(HenSaveAction.create(_register(FIX_PHASES)))
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('test_update("hi")')
+	assert_str(code).not_contains('unresolved')
+
+
+# nothing nested and nothing wired: an if/else of two passes, reported instead
+func test_a_gating_action_with_nothing_wired_is_reported() -> void:
+	_add_action(_register(FIX_DO_N_TIMES), &'update')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('add an action inside it or set a branch target')
+
+
+# --- an animated action reporting its end ----------------------------------
+
+
+# no branch wired: the plain one-liner it always was, with nothing declared, so
+# the action still fits inside a loop body
+func test_an_animated_action_stays_a_one_liner_without_its_branch() -> void:
+	_add_action(_register(FIX_TWEEN), &'enter')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('_ref.create_tween().tween_property(_ref, "position"')
+	assert_str(code).not_contains('finished.connect')
+
+
+# wired: the tween drives the transition from its own signal, and exit kills it
+# so an animation left behind never transitions on its way out
+func test_an_animated_action_branches_from_the_tween_signal() -> void:
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'done'
+
+	var action: HenSaveAction = _add_action(_register(FIX_TWEEN), &'enter')
+
+	action.branches['finished'] = {state_id = target.id, label = ''}
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('finished.connect(func() -> void:')
+	assert_str(code).contains('_ref._STATE_CONTROLLER.change_state("done")')
+	assert_str(code).contains('.kill()')
+
+
+# --- a state entering its own start sub-state ------------------------------
+
+
+# through the controller this reads current_state, the TOP level state, so a
+# sub-state holding sub-states of its own handed the name to its ancestor and
+# change_sub_state found nothing and returned in silence
+func test_a_nested_state_enters_its_own_start_sub_state() -> void:
+	var moving: HenSaveState = _sub_state(state, 'moving')
+	var blink: HenSaveState = _sub_state(moving, 'blink')
+
+	blink.start = true
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('change_sub_state("blink")')
+	assert_str(code).not_contains('_ref._STATE_CONTROLLER.current_state.change_sub_state("blink")')
+
+	var script: GDScript = GDScript.new()
+
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# --- dispatching on the script class, not on the running node ---------------
+
+
+# a 2d script only ever tints through modulate, so the mesh half of the action is
+# never compiled and no `is` reaches the game
+func test_an_action_compiles_only_the_side_its_script_needs() -> void:
+	var node_var: HenSaveVar = save_data.add_var(false)
+
+	node_var.name = 'sprite_ref'
+	node_var.type = 'Node'
+
+	var action: HenSaveAction = _add_action(_register(FIX_FLASH), &'enter')
+
+	action.input_bindings['target'] = 'sprite_ref'
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('"modulate"')
+	assert_str(code).not_contains(' is CanvasItem')
+	assert_str(code).not_contains('albedo_color')
+
+
+# the same action on a 3d script compiles the material half instead
+func test_the_same_action_compiles_the_other_side_on_a_3d_script() -> void:
+	save_data.identity.type = 'Node3D'
+
+	var node_var: HenSaveVar = save_data.add_var(false)
+
+	node_var.name = 'mesh_ref'
+	node_var.type = 'Node'
+
+	var action: HenSaveAction = _add_action(_register(FIX_FLASH), &'enter')
+
+	action.input_bindings['target'] = 'mesh_ref'
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('albedo_color')
+	assert_str(code).not_contains(' is CanvasItem')
+	assert_str(code).not_contains(' is GeometryInstance3D')

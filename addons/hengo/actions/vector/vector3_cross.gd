@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Returns the cross product of two 3D vectors, a vector perpendicular to both. Useful to find a side direction.'
+	return 'Takes two 3D directions and gives the one standing at a right angle to both. Feeding the facing direction and the up direction gives the side direction, which is how strafing left and right is worked out.'
 
 
 func get_display_name() -> String:
@@ -42,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector3', id = &'result', doc = 'The perpendicular vector.'}
+		{name = 'Result', type = 'Vector3', id = &'result', doc = 'The direction at a right angle to both, such as the side of a body.'}
 	]
 
 

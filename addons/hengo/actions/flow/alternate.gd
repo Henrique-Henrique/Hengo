@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Switches between its two branches on every run, First then Second and back again. The side it stopped on survives leaving and coming back to this state, so a left and right footstep keeps taking turns.'
+	return 'Takes turns between its two branches, First then Second then First again, one per run. On enter it is what makes a footstep state play the left sound and then the right one. The side it stopped on survives leaving and coming back to this state.'
 
 
 func get_display_name() -> String:

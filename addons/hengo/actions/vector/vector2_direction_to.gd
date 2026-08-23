@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Returns the unit direction pointing from one point to another in 2D. Useful to aim or to steer toward a target.'
+	return 'Gives the direction that points from one place to another, always exactly one unit long so it carries no speed of its own. Multiply it with Scale Vector2 to turn it into a velocity, such as sending a bullet toward the player.'
 
 
 func get_display_name() -> String:
@@ -42,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The unit direction from one point to the other.'}
+		{name = 'Result', type = 'Vector2', id = &'result', doc = 'The direction from From to To, one unit long.'}
 	]
 
 

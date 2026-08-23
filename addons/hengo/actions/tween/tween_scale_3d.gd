@@ -1,5 +1,5 @@
 @tool
-class_name HenActionTweenScale3D extends HenScriptMacroBase
+class_name HenActionTweenScale3D extends HenActionTweenBase
 
 
 func get_id() -> StringName:
@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Smoothly scales the node to a target size over time. Runs once when the state starts.'
+	return 'Smoothly scales the node to a target size over time. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -56,4 +56,4 @@ func get_flow_enter() -> String:
 
 
 func _body() -> String:
-	return '_ref.create_tween().tween_property(_ref, "scale", {{to}}, {{duration}})'
+	return start_tween('tween_property(_ref, "scale", {{to}}, {{duration}})')

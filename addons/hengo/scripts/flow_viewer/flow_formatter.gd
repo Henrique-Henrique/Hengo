@@ -449,7 +449,11 @@ static func _place_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
 			continue
 
 		var owned: Array[HenFlowGraphTypes.FlowNode] = body_closure(_graph, node)
-		var origin: Vector2 = node.position + Vector2(BODY_PAD, node.size.y - _body_height(owned))
+		# above the branch row: an action with a body AND branches keeps that row at
+		# the bottom of the card, and the body would land on top of it
+		var origin: Vector2 = node.position + Vector2(
+			BODY_PAD, node.size.y - node.flow_row_h - _body_height(owned)
+		)
 
 		for child: HenFlowGraphTypes.FlowNode in owned:
 			child.position += origin

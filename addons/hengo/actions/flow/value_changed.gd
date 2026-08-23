@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fires its branch on the frame a value stops being what it was, and reports the value it held before. The first run after the state is entered only records the value, so it never fires on entry.'
+	return 'Fires on the frame a value stops being what it was, and reports the value it held before. Swapping the weapon from sword to bow takes Changed on that frame, with Previous holding the sword. The first frame after entering only records the value, so it never fires on entry. Actions nested inside it run on the frame it changes.'
 
 
 func get_display_name() -> String:
@@ -16,6 +16,15 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'arrow-right-left'
+
+
+func get_has_body() -> bool:
+	return true
+
+
+# nothing nested and no branch wired means an if/else of two passes
+func get_validation_error() -> String:
+	return gate_validation_error()
 
 
 func get_inputs() -> Array[Dictionary]:
@@ -64,8 +73,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Changed', id = &'changed', doc = 'Where to go on the one frame the value is different.'},
-		{name = 'Same', id = &'same', doc = 'Where to go while the value stays the same.'}
+		{name = 'Changed', id = &'changed', optional = true, doc = 'Where to go on the one frame the value is different.'},
+		{name = 'Same', id = &'same', optional = true, doc = 'Where to go while the value stays the same.'}
 	]
 
 
@@ -86,6 +95,6 @@ func _body() -> String:
 		+ 'seen_{{VCNODE_ID}} = true\n' \
 		+ 'if changed_{{VCNODE_ID}}:\n' \
 		+ '\t{{out:previous}}\n' \
-		+ '\t{{changed}}\n' \
+		+ fire_body(&'changed') + '\n' \
 		+ 'else:\n' \
 		+ '\t{{same}}'

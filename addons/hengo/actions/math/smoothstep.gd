@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Returns an eased 0 to 1 ramp of a value between two edges, flat outside them and an S-curve in between. Smoother than Map Range for fades and reveals.'
+	return 'Turns a number into a 0 to 1 amount that starts slow, speeds up in the middle and eases out at the end. With From = 0 and To = 100, a value of 50 gives 0.5, anything below 0 gives 0 and anything above 100 gives 1. Use it instead of Map Range when a fade should not start and stop abruptly.'
 
 
 func get_display_name() -> String:
@@ -28,21 +28,21 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'From',
 			type = 'float',
 			id = &'from',
-			doc = 'The edge where the ramp starts leaving 0.',
+			doc = 'The value that gives 0. Anything below it also gives 0.',
 			default_value = 0.0
 		},
 		{
 			name = 'To',
 			type = 'float',
 			id = &'to',
-			doc = 'The edge where the ramp reaches 1.',
+			doc = 'The value that gives 1. Anything above it also gives 1.',
 			default_value = 1.0
 		},
 		{
 			name = 'Value',
 			type = 'float',
 			id = &'value',
-			doc = 'The number to ramp.',
+			doc = 'The number to turn into an amount, such as a distance or a timer.',
 			default_value = 0.0
 		}
 	]
@@ -50,7 +50,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Result', type = 'float', id = &'result', doc = 'The eased value, between 0 and 1.'}
+		{name = 'Result', type = 'float', id = &'result', doc = 'The eased amount, always between 0 and 1.'}
 	]
 
 

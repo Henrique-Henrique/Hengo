@@ -55,6 +55,36 @@ static func _add_tail(_graph: HenFlowGraphTypes.FlowGraph, _bucket: Array, _phas
 	_graph.connect_pins(&'exec', _head_of(_graph, _bucket.back().id), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
 
 
+# a body carries its own end the way a phase chain does: without it an empty body
+# has nowhere to drop the first step and the card draws as if it had no body
+static func _body_tail(
+	_graph: HenFlowGraphTypes.FlowGraph,
+	_action: HenSaveAction,
+	_owner: HenFlowGraphTypes.FlowNode,
+	_chain: Array[HenFlowGraphTypes.FlowNode],
+	_phase: StringName
+) -> HenFlowGraphTypes.FlowNode:
+	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
+
+	node.id = StringName('addb' + str(_action.id))
+	node.kind = &'add'
+	node.title = 'Add action'
+	node.accent = HenActionVisuals.FALLBACK_COLOR
+	node.phase = _phase
+	node.body_parent = _action
+
+	node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
+
+	_graph.add_node(node)
+
+	if _chain.is_empty():
+		_graph.connect_pins(&'exec', _owner, HenFlowGraphTypes.BODY_PIN, node, HenFlowGraphTypes.ENTER_PIN)
+	else:
+		_graph.connect_pins(&'exec', _chain.back(), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
+
+	return node
+
+
 # walks one action list in order, wiring each action's `then` into the next
 # returns the nodes that ended up carrying the sequence, in order: an action that
 # left its place to a store is not one of them, the store is
@@ -150,7 +180,12 @@ static func _action_node(
 
 		# the body is the nodes that carry its sequence, which is not the same list
 		# as its actions: a stored action hands that place to its store
-		node.body.assign(_chain(_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase))
+		var chain: Array[HenFlowGraphTypes.FlowNode] = _chain(
+			_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase
+		)
+
+		chain.append(_body_tail(_graph, _action, node, chain, _phase))
+		node.body.assign(chain)
 
 	return node
 

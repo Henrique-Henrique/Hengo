@@ -1,5 +1,5 @@
 @tool
-class_name HenActionFadeAudio extends HenScriptMacroBase
+class_name HenActionFadeAudio extends HenActionTweenBase
 
 
 # fades a bound audio player toward To Volume over Duration seconds. -80 dB is
@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fades an audio player toward a target volume over time. -80 is silence and 0 is full. Runs once when the state starts.'
+	return 'Fades an audio player toward a target volume over time. -80 is silence and 0 is full. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -64,4 +64,4 @@ func get_flow_enter() -> String:
 
 
 func _body() -> String:
-	return '_ref.create_tween().tween_property({{player}}, "volume_db", {{to}}, {{duration}})'
+	return start_tween('tween_property({{player}}, "volume_db", {{to}}, {{duration}})')

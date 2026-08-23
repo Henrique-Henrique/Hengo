@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Rescales a value from one range to another and clamps it to the target range. Feeding a raw reading with an Out range of 0 to 1 turns it into a blend or bar fill.'
+	return 'Takes a number that lives in one range and gives the matching number in another range. Health from 0 to 100 with an Out range of 0 to 1 becomes the fill of a health bar, so 30 health gives 0.3. A value outside the In range is held at the closest end.'
 
 
 func get_display_name() -> String:

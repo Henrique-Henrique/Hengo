@@ -27,7 +27,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Function',
 			type = 'String',
 			id = &'func_name',
-			doc = 'The math function to apply.',
+			doc = 'abs drops the minus sign, sign answers -1, 0 or 1, round, floor and ceil turn a decimal into a whole number, and sqrt gives the square root.',
 			raw = true,
 			options = ['abs', 'sign', 'round', 'floor', 'ceil', 'sqrt'],
 			default_value = 'abs'

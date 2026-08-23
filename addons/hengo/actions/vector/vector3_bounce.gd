@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Reflects a 3D vector off a surface and stores the result, such as the velocity a ball keeps after hitting a wall. Normal must be a unit vector.'
+	return 'Turns a velocity into the one it keeps after bouncing off a surface, the way a ball comes off a wall. Cast Ray and Move And Collide already report the Normal it needs on a hit.'
 
 
 func get_display_name() -> String:
@@ -35,7 +35,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Normal',
 			type = 'Vector3',
 			id = &'normal',
-			doc = 'The unit direction the surface faces.',
+			doc = 'The direction the surface faces, straight out of it. A collision reports it as the normal.',
 			default_value = Vector3(0, 1, 0)
 		}
 	]

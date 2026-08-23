@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Runs the actions inside it on a random interval, drawing a new wait between Min and Max after each run. Good for spawns and idle noises that should not sound metronomic.'
+	return 'Runs the actions inside it on a random interval, drawing a new wait between Min and Max after each run. With Min = 1 and Max = 4, an idle grunt plays somewhere between one and four seconds apart instead of on a metronome.'
 
 
 func get_display_name() -> String:

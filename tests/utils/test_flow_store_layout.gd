@@ -9,7 +9,10 @@ const FIX_DISTANCE: String = 'res://addons/hengo/actions/node2d/get_distance.gd'
 const FIX_RAY: String = 'res://addons/hengo/actions/physics2d/cast_ray.gd'
 const FIX_PRINT: String = 'res://addons/hengo/actions/debug/print_value.gd'
 
+# a loop that also branches: the body and the branch row share the same card
+const FIX_GATE: String = 'res://addons/hengo/actions/flow/do_n_times.gd'
 const CARD: Vector2 = Vector2(190.0, 74.0)
+const FLOW_ROW: float = 22.0
 
 var state: HenSaveState
 
@@ -172,6 +175,60 @@ func test_a_loop_body_with_a_store_does_not_stack_cards() -> void:
 	assert_array(_tight_links(graph)).is_empty()
 
 
+# an action with a body AND branches keeps its branch row at the bottom of the
+# card, so the nested chain has to stop above it instead of covering the cells
+func test_a_body_stops_above_the_branch_row() -> void:
+	var gate: HenSaveAction = _add(_register(FIX_GATE))
+
+	gate.body_actions.append(HenSaveAction.create(_register(FIX_PRINT)))
+
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		node.size = HenFlowNodeCard.ADD_TAIL_SIZE if node.kind == &'add' else CARD
+
+		if node.action == gate:
+			node.flow_row_h = FLOW_ROW
+
+	HenFlowFormatter.format(graph)
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if node.action != gate:
+			continue
+
+		var limit: float = node.position.y + node.size.y - FLOW_ROW
+
+		for child: HenFlowGraphTypes.FlowNode in node.body:
+			assert_bool(child.position.y + child.size.y <= limit).is_true()
+
+		return
+
+	fail('the loop node is missing from the graph')
+
+
+# an empty body still ends with its tail: without it there is nowhere to drop the
+# first nested step and the card draws as if it had no body at all
+func test_an_empty_body_keeps_its_tail() -> void:
+	var loop: HenSaveAction = _add(_register(FIX_LOOP))
+
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if node.action != loop:
+			continue
+
+		assert_int(node.body.size()).is_equal(1)
+
+		var tail: HenFlowGraphTypes.FlowNode = node.body[0]
+
+		assert_str(str(tail.kind)).is_equal('add')
+		assert_bool(tail.body_parent == loop).is_true()
+
+		return
+
+	fail('the loop node is missing from the graph')
+
+
 # the body block has to hold the nodes that carry its sequence, or the loop is
 # measured around an empty box and the body spills over it
 func test_a_loop_body_lists_the_store_that_carries_it() -> void:
@@ -189,8 +246,10 @@ func test_a_loop_body_lists_the_store_that_carries_it() -> void:
 		if node.action != loop:
 			continue
 
-		assert_int(node.body.size()).is_equal(1)
+		# the store plus the tail every body ends with
+		assert_int(node.body.size()).is_equal(2)
 		assert_str(str((node.body[0] as HenFlowGraphTypes.FlowNode).kind)).is_equal('store')
+		assert_str(str((node.body[1] as HenFlowGraphTypes.FlowNode).kind)).is_equal('add')
 
 		return
 

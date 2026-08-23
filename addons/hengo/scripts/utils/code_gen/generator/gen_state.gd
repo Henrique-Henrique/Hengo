@@ -112,7 +112,11 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 				sub_state_data = (', ' if not flow_tokens.is_empty() else '') + ', '.join(flow_tokens.map(func(x: Dictionary) -> String:
 					return HenActionCode.get_default_value_code(_save_data, x.type, false, x.get('category', ''), x.get('data', null))))
 				
-				var change_sub_command = '_ref._STATE_CONTROLLER.current_state.change_sub_state("{name}"{data})'.format({
+				# the state enters its own start sub-state: through the controller this
+				# reads current_state, which is the TOP level one, so a sub-state with
+				# sub-states of its own would hand the name to its ancestor and the
+				# call would silently find nothing
+				var change_sub_command = 'change_sub_state("{name}"{data})'.format({
 					name = start_sub_state.name.to_snake_case(),
 					data = sub_state_data
 				})

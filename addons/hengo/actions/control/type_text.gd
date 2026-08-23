@@ -1,5 +1,5 @@
 @tool
-class_name HenActionTypeText extends HenScriptMacroBase
+class_name HenActionTypeText extends HenActionTweenBase
 
 
 func get_id() -> StringName:
@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Reveals the text of a label one character at a time, the typewriter effect used in dialogue. Runs once when the state starts.'
+	return 'Reveals the text of a label one character at a time, the typewriter effect used in dialogue. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
 
 
 func get_display_name() -> String:
@@ -63,4 +63,4 @@ func _body() -> String:
 	return 'var text_{{VCNODE_ID}}: String = str({{text}})\n' \
 		+ '{{label}}.text = text_{{VCNODE_ID}}\n' \
 		+ '{{label}}.visible_ratio = 0.0\n' \
-		+ '_ref.create_tween().tween_property({{label}}, "visible_ratio", 1.0, text_{{VCNODE_ID}}.length() / maxf({{speed}}, 0.001))'
+		+ start_tween('tween_property({{label}}, "visible_ratio", 1.0, text_{{VCNODE_ID}}.length() / maxf({{speed}}, 0.001))')
