@@ -139,6 +139,10 @@ static func _chain(
 			_graph, _save_data, action, &'producer' if pulled else &'action', _phase
 		)
 
+		# a pulled producer left the sequence to its store, but it is still the step
+		# the list holds, so it stays a drag handle
+		node.step = true
+
 		if not pulled:
 			_graph.connect_pins(&'exec', previous, previous_pin, node, HenFlowGraphTypes.ENTER_PIN)
 
@@ -148,6 +152,8 @@ static func _chain(
 
 		if stored:
 			var store: HenFlowGraphTypes.FlowNode = _store_node(_graph, _save_data, action, macro, node)
+
+			store.step = true
 
 			_graph.connect_pins(&'exec', previous, previous_pin, store, HenFlowGraphTypes.ENTER_PIN)
 

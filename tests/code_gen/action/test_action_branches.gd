@@ -76,6 +76,17 @@ func test_branch_without_any_target_emits_marker() -> void:
 	assert_str(code).contains('no branch target set')
 
 
+# steps are somewhere to go on a required branch too, not only on an optional one
+func test_branch_with_only_steps_is_not_skipped() -> void:
+	var action: HenSaveAction = _if_action(&'update')
+	action.branch_actions['true'] = [HenSaveAction.create(_register(FIX_PHASES))] as Array[HenSaveAction]
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).not_contains('no branch target set')
+	assert_str(code).contains('if _ref.is_dead:\n\t\t\ttest_update("hi")\n\t\telse:\n\t\t\tpass')
+
+
 # the row preview shows where each configured branch goes
 func test_branch_shows_in_row_preview() -> void:
 	var dead: HenSaveState = save_data.add_state(false)

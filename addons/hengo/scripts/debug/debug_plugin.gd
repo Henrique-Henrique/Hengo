@@ -37,6 +37,32 @@ func _has_capture(prefix: String) -> bool:
 	return prefix == PREFIX
 
 
+# the game capture group strips 'hengo:' from the message, the editor side does not
+func _capture(message: String, data: Array, _session_id: int) -> bool:
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
+	match message.trim_prefix(PREFIX + ':'):
+		'nodes_list':
+			if signal_bus and data.size() > 1:
+				signal_bus.debug_nodes_listed.emit(String(data[0]), data[1] as Array)
+		'state':
+			if signal_bus and not data.is_empty():
+				signal_bus.debug_state_changed.emit(StringName(data[0]), String(data[1]) if data.size() > 1 else '')
+		'action':
+			if signal_bus and not data.is_empty():
+				signal_bus.debug_action_flow.emit(StringName(data[0]), String(data[1]) if data.size() > 1 else '')
+		'state_transition':
+			if signal_bus and data.size() > 2:
+				signal_bus.debug_state_transition.emit(String(data[0]), String(data[1]), String(data[2]))
+		# cnode-era traces without a listener, swallowed so an old build does not warn
+		'flow', 'state_flow', 'value':
+			pass
+		_:
+			return false
+
+	return true
+
+
 # asks every active session for the live nodes of EVERY open script
 func send_list_nodes() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')

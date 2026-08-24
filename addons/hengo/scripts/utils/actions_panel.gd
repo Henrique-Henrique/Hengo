@@ -508,26 +508,26 @@ static func state_id_of(_save_data: HenSaveData, _target: HenSaveAction) -> Stri
 
 	for state_id: Variant in _save_data.state_actions:
 		for action: HenSaveAction in _save_data.state_actions[state_id]:
-			if _contains_action(action, _target):
+			if contains_action(action, _target):
 				return StringName(str(state_id))
 
 	return &''
 
 
 # an action may be nested in a loop body or feeding an input, so the search walks both
-static func _contains_action(_root: HenSaveAction, _target: HenSaveAction) -> bool:
+static func contains_action(_root: HenSaveAction, _target: HenSaveAction) -> bool:
 	if _root == _target:
 		return true
 
 	for list: Array in HenGeneratorAction.nested_lists(_root):
 		for child: HenSaveAction in list:
-			if _contains_action(child, _target):
+			if contains_action(child, _target):
 				return true
 
 	for key: Variant in _root.input_actions:
 		var child: HenSaveAction = inline_child(_root.input_actions[key])
 
-		if child and _contains_action(child, _target):
+		if child and contains_action(child, _target):
 			return true
 
 	return false

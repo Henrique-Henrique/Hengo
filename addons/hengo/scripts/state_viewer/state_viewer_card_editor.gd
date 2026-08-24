@@ -720,6 +720,50 @@ func _list_of(_action: HenSaveAction) -> Array:
 	return []
 
 
+# the drop target can sit in the state chain, in a loop body or in a branch, and
+# the step lands in the very list that holds it
+func drop_step(_action: HenSaveAction, _target: HenSaveAction, _before: bool, _from: StringName, _to: StringName) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	# contains_action is true for the action itself, so a drop on its own card stops here
+	if not global or not global.SAVE_DATA or HenActionsPanel.contains_action(_action, _target):
+		return false
+
+	var data: HenSaveData = global.SAVE_DATA
+
+	target(data, _to)
+
+	var parent: HenSaveAction = _parent_of(_target)
+
+	if not parent:
+		var index: int = HenActionsPanel.drop_index(data.get_state_actions(_to), _target, _action, _before)
+
+		return false if index < 0 else move_step(_action, _target, index, _from, _to)
+
+	# the live array, taken before the removal empties the list it came from
+	var list: Array = _list_of(_target)
+
+	var done: bool = _record([_from, _to], 'Move Action', func() -> bool:
+		data.remove_action_anywhere(_from, _action)
+
+		var at: int = list.find(_target)
+
+		if at < 0:
+			return false
+
+		if HenActionsPanel.can_use_phase(_action, parent.phase):
+			_action.phase = parent.phase
+
+		list.insert(at + (0 if _before else 1), _action)
+
+		return true
+	)
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
+	return done
+
+
 # rewrites the whole list so array order stays enter -> update -> exit
 # the only move there is: same state or across two, so the phase rule and the
 # reorder are written once
@@ -732,7 +776,9 @@ func move_step(_action: HenSaveAction, _target: HenSaveAction, _index: int, _fro
 	var data: HenSaveData = global.SAVE_DATA
 
 	return _record([_from, _to], 'Move Action', func() -> bool:
-		if _from == _to:
+		# a nested step has no place in the chain, so reordering it there would leave
+		# the copy inside its loop or branch behind
+		if _from == _to and data.get_state_actions(_from).has(_action):
 			target(data, _to)
 			move_action(_action, _target.phase, _index)
 

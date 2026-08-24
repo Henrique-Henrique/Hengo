@@ -3,6 +3,7 @@ class_name TestHenFlowHistory extends HenTestSuite
 
 
 const FIX_MATH: String = 'res://addons/hengo/actions/math/math_operator.gd'
+const FIX_LOOP: String = 'res://addons/hengo/actions/flow/repeat.gd'
 
 var state: HenSaveState
 var history: HenFlowHistory
@@ -440,6 +441,92 @@ func test_a_drop_is_undone_in_one_step() -> void:
 
 	assert_bool(viewer._undo()).is_true()
 	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str((actions[0] as HenSaveAction).id))
+
+
+func _loop_macro() -> HenSaveMacro:
+	var instance: HenScriptMacroBase = (load(FIX_LOOP) as GDScript).new()
+	var macro: HenSaveMacro = HenSaveMacro.new()
+
+	macro.id = instance.get_id()
+	macro.name = 'repeat'
+	macro.is_script_macro = true
+	macro.script_path = FIX_LOOP
+	macro.has_body = instance.get_has_body()
+
+	for input: Dictionary in instance.get_inputs():
+		macro.inputs.append(HenSaveParam.create(input))
+
+	(Engine.get_singleton(&'Global') as HenGlobal).action_macros.append(macro)
+
+	return macro
+
+
+func _loop() -> HenSaveAction:
+	var loop: HenSaveAction = HenSaveAction.create(_loop_macro())
+
+	loop.phase = &'update'
+	save_data.add_state_action(state.id, loop)
+
+	return loop
+
+
+# the body is its own list, and the drop index used to be read off the state chain
+func test_dropping_a_step_into_a_loop_body() -> void:
+	var actions: Array = _add(1)
+	var loop: HenSaveAction = _loop()
+	var inner: HenSaveAction = HenSaveAction.create(_macro())
+
+	loop.body_actions.append(inner)
+
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(actions[0], inner, false)).is_true()
+	assert_int(loop.body_actions.size()).is_equal(2)
+	assert_str(str(loop.body_actions[1].id)).is_equal(str((actions[0] as HenSaveAction).id))
+	assert_bool(save_data.get_state_actions(state.id).has(actions[0])).is_false()
+
+
+func test_dropping_a_step_out_of_a_loop_body() -> void:
+	var actions: Array = _add(1)
+	var loop: HenSaveAction = _loop()
+	var inner: HenSaveAction = HenSaveAction.create(_macro())
+
+	loop.body_actions.append(inner)
+
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(inner, actions[0], true)).is_true()
+	assert_array(loop.body_actions).is_empty()
+	assert_str(str(save_data.get_state_actions(state.id)[0].id)).is_equal(str(inner.id))
+
+
+func test_a_loop_refuses_to_land_inside_its_own_body() -> void:
+	_add(1)
+
+	var loop: HenSaveAction = _loop()
+	var inner: HenSaveAction = HenSaveAction.create(_macro())
+
+	loop.body_actions.append(inner)
+
+	var viewer: HenFlowViewer = _viewer()
+
+	assert_bool(viewer._apply_drop(loop, inner, true)).is_false()
+	assert_int(loop.body_actions.size()).is_equal(1)
+
+
+func test_a_nested_drop_is_undone_in_one_step() -> void:
+	var actions: Array = _add(1)
+	var loop: HenSaveAction = _loop()
+	var inner: HenSaveAction = HenSaveAction.create(_macro())
+
+	loop.body_actions.append(inner)
+
+	var viewer: HenFlowViewer = _viewer()
+
+	viewer._apply_drop(actions[0], inner, false)
+
+	assert_bool(viewer._undo()).is_true()
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(2)
 
 
 func _second_state() -> HenSaveState:

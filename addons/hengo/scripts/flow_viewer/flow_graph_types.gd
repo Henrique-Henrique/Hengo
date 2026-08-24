@@ -38,6 +38,8 @@ class FlowNode extends RefCounted:
 	var accent: String
 	# null on a state_entry, a transition and an add tail
 	var action: HenSaveAction
+	# stands for a step of an action list, which an inline producer never does
+	var step: bool = false
 	# on a body add tail, the loop action a new step is nested into
 	var body_parent: HenSaveAction
 	# on a branch add tail, which branch of body_parent the step lands on

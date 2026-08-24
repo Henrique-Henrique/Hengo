@@ -175,6 +175,43 @@ func test_a_loop_body_with_a_store_does_not_stack_cards() -> void:
 	assert_array(_tight_links(graph)).is_empty()
 
 
+# a stored producer draws as two boxes, and neither one used to be a drag handle
+func test_a_stored_producer_keeps_a_drag_handle() -> void:
+	var macro: HenSaveMacro = _register(FIX_DISTANCE)
+	var action: HenSaveAction = _add(macro)
+
+	_store_into(action, macro)
+
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+	var kinds: Array[String] = []
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if node.action == action and node.step:
+			kinds.append(str(node.kind))
+
+	assert_array(kinds).contains(['store', 'producer'])
+
+
+# a producer feeding an input is not a step, and dragging it would pull it out of
+# the action it belongs to
+func test_an_inline_producer_is_not_a_drag_handle() -> void:
+	var print_macro: HenSaveMacro = _register(FIX_PRINT)
+	var macro: HenSaveMacro = _register(FIX_DISTANCE)
+	var host: HenSaveAction = _add(print_macro)
+	var inline: HenSaveAction = HenSaveAction.create(macro)
+
+	host.input_actions[str(print_macro.inputs[0].id)] = {
+		action = inline,
+		output = str(macro.outputs[0].id)
+	}
+
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if node.action == inline:
+			assert_bool(node.step).is_false()
+
+
 # an action with a body AND branches keeps its branch row at the bottom of the
 # card, so the nested chain has to stop above it instead of covering the cells
 func test_a_body_stops_above_the_branch_row() -> void:

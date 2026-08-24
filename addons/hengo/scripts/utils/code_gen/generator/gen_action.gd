@@ -143,8 +143,8 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 	# a pure producer whose only content is its outputs contributes nothing when
 	# none is stored: the phase method would be left empty and fail to parse
-	if not _has_branch_target(_save_data, _action, branches):
-		if _produces_nothing(_save_data, _action, _instance, phase) and not _runs_branch_steps(_action, branches):
+	if not _branch_is_wired(_save_data, _action, branches):
+		if _produces_nothing(_save_data, _action, _instance, phase):
 			return 'no output stored'
 
 		if branches.is_empty() or _branches_are_optional(branches):
@@ -158,7 +158,7 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 	# a branching action with nowhere to go would emit `if x: pass else: pass`.
 	# an action whose branches are all optional still does its work without them
-	if not _has_branch_target(_save_data, _action, branches) and not _branches_are_optional(branches):
+	if not _branch_is_wired(_save_data, _action, branches) and not _branches_are_optional(branches):
 		return 'no branch target set'
 
 	# a cross-script branch drives another node's machine — without the instance
@@ -822,6 +822,12 @@ static func _branches_are_optional(_branches: Array) -> bool:
 	return true
 
 
+# a branch is wired when it transitions or runs steps, and only the transition
+# is refused on exit
+static func _branch_is_wired(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:
+	return _has_transition(_save_data, _action, _branches) or _runs_branch_steps(_action, _branches)
+
+
 # a branch that runs steps is in use even with nowhere to transition to
 static func _runs_branch_steps(_action: HenSaveAction, _branches: Array) -> bool:
 	for out: Dictionary in _branches:
@@ -832,10 +838,6 @@ static func _runs_branch_steps(_action: HenSaveAction, _branches: Array) -> bool
 
 
 static func _has_transition(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:
-	return _has_branch_target(_save_data, _action, _branches)
-
-
-static func _has_branch_target(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:
 	for out: Dictionary in _branches:
 		if branch_target(_save_data, _action, str(out.get('id', ''))):
 			return true

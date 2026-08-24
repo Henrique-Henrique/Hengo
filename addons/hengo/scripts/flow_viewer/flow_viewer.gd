@@ -798,6 +798,14 @@ func _enrich(_item: Dictionary, _hit: Dictionary) -> Dictionary:
 # --- editing ---
 
 func _gui_input(event: InputEvent) -> void:
+	# the press holds the mouse focus, so motion is what carries the drag even after
+	# it leaves the viewer rect
+	if event is InputEventMouseMotion:
+		if _press_card != null:
+			_update_drag(nodes_container.get_local_mouse_position())
+
+		return
+
 	if not event is InputEventMouseButton:
 		return
 
@@ -1058,8 +1066,8 @@ func _notify_structural() -> void:
 
 # returns whether the click landed on something, so the caller can tell a miss
 # from a hit and only count the miss toward the double click
-# only a top level action reorders: a producer belongs to an input and a body
-# action to its loop, and neither is a step of the state's chain
+# the store card and the producer it saves are the same step, so either one drags
+# it; an inline producer belongs to an input and is not a step at all
 func _draggable_under_mouse() -> HenFlowNodeCard:
 	var hit: Dictionary = hit_under_mouse()
 
@@ -1068,13 +1076,18 @@ func _draggable_under_mouse() -> HenFlowNodeCard:
 
 	var card: HenFlowNodeCard = hit.card
 
-	return card if card.node.kind == &'action' and card.node.action else null
+	return card if card.node.step and card.node.action else null
 
 
 func _update_drag(_mouse: Vector2) -> void:
 	if not is_instance_valid(_press_card) or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		if not _dragging:
+		# a release the viewer never saw would leave the drag armed, and then the next
+		# plain click would land a drop
+		if _dragging:
+			_finish_drag()
+		else:
 			_press_card = null
+
 		return
 
 	if not _dragging:
@@ -1085,7 +1098,9 @@ func _update_drag(_mouse: Vector2) -> void:
 
 	var target: HenFlowNodeCard = _draggable_under_mouse()
 
-	if target == null or target == _press_card or _is_dragged_along(target):
+	# by action and not by card: a stored step draws as a producer plus its store
+	if target == null or target.node.action == _press_card.node.action \
+			or _is_dragged_along(target) or _is_inside_drag(target):
 		_set_drop(null, true)
 		return
 
@@ -1134,7 +1149,7 @@ func _finish_drag() -> void:
 		_apply_drop_batch(batch, target.node.action, before)
 		return
 
-	_apply_drop(dragged.node.action, target.node.action, before)
+	_apply_drop(batch[0], target.node.action, before)
 
 
 # dragging a card of the selection carries the whole selection, dragging any
@@ -1143,7 +1158,26 @@ func _drag_batch(_card: HenFlowNodeCard) -> Array[HenSaveAction]:
 	if not _selected_actions.has(str(_card.node.action.id)):
 		return [_card.node.action] as Array[HenSaveAction]
 
-	return selected_actions()
+	return _roots_only(selected_actions())
+
+
+# a step nested in another step of the batch already travels inside it, and moving
+# it on its own would pull it out of the parent it was selected with
+func _roots_only(_actions: Array[HenSaveAction]) -> Array[HenSaveAction]:
+	var out: Array[HenSaveAction] = []
+
+	for action: HenSaveAction in _actions:
+		var nested: bool = false
+
+		for other: HenSaveAction in _actions:
+			if other != action and HenActionsPanel.contains_action(other, action):
+				nested = true
+				break
+
+		if not nested:
+			out.append(action)
+
+	return out
 
 
 func _is_dragged_along(_card: HenFlowNodeCard) -> bool:
@@ -1151,6 +1185,15 @@ func _is_dragged_along(_card: HenFlowNodeCard) -> bool:
 		return false
 
 	return _selected_actions.has(str(_card.node.action.id))
+
+
+# a loop dropped into its own body would take the target with it
+func _is_inside_drag(_card: HenFlowNodeCard) -> bool:
+	for action: HenSaveAction in _drag_batch(_press_card):
+		if HenActionsPanel.contains_action(action, _card.node.action):
+			return true
+
+	return false
 
 
 # every action lands on the same anchor, so a drop below the target runs
@@ -1187,21 +1230,15 @@ func _apply_drop_batch(_actions: Array[HenSaveAction], _target: HenSaveAction, _
 
 
 func _apply_drop(_dragged: HenSaveAction, _target: HenSaveAction, _before: bool) -> bool:
-	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 	var from_id: StringName = _state_by_action.get(str(_dragged.id), &'')
 	var to_id: StringName = _state_by_action.get(str(_target.id), &'')
 
-	if not global or from_id.is_empty() or to_id.is_empty():
-		return false
-
-	var index: int = HenActionsPanel.drop_index(global.SAVE_DATA.get_state_actions(to_id), _target, _dragged, _before)
-
-	if index < 0:
+	if from_id.is_empty() or to_id.is_empty():
 		return false
 
 	_ensure_editor()
 
-	return _editor.move_step(_dragged, _target, index, from_id, to_id)
+	return _editor.drop_step(_dragged, _target, _before, from_id, to_id)
 
 
 func _dispatch_click(_ctrl: bool = false, _shift: bool = false) -> bool:
