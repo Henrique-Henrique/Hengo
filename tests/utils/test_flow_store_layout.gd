@@ -206,6 +206,88 @@ func test_a_body_stops_above_the_branch_row() -> void:
 	fail('the loop node is missing from the graph')
 
 
+# a loop inside a loop: the inner tail belongs to the inner body, so it is moved
+# by the inner loop only. moved once per ancestor it lands outside the card, and
+# the nested loop draws with no way to add its first step
+func test_a_loop_inside_a_loop_keeps_its_tail_inside() -> void:
+	var macro: HenSaveMacro = _register(FIX_LOOP)
+	var outer: HenSaveAction = _add(macro)
+	var inner: HenSaveAction = HenSaveAction.create(macro)
+
+	outer.body_actions.append(inner)
+
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		node.size = HenFlowNodeCard.ADD_TAIL_SIZE if node.kind == &'add' else CARD
+
+	HenFlowFormatter.format(graph)
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if node.action != inner:
+			continue
+
+		assert_int(node.body.size()).is_equal(1)
+
+		var tail: HenFlowGraphTypes.FlowNode = node.body[0]
+
+		assert_bool(Rect2(node.position, node.size).encloses(Rect2(tail.position, tail.size))).is_true()
+
+		return
+
+	fail('the nested loop is missing from the graph')
+
+
+# the shape the branch steps made possible: a gate with a chain on each branch and
+# the run carrying on below it. the sides used to clear only the head of that run,
+# which was enough while a branch was a single transition card sitting high
+func test_branch_chains_clear_the_run_below_them() -> void:
+	var gate: HenSaveAction = _add(_register(FIX_GATE))
+	var print_macro: HenSaveMacro = _register(FIX_PRINT)
+
+	gate.branch_actions['within'] = [
+		HenSaveAction.create(print_macro), HenSaveAction.create(print_macro)
+	] as Array[HenSaveAction]
+	gate.branch_actions['done'] = [HenSaveAction.create(print_macro)] as Array[HenSaveAction]
+
+	# the run goes on after the gate, and its own branches make it wide
+	var next: HenSaveAction = _add(_register(FIX_GATE))
+
+	next.branch_actions['within'] = [HenSaveAction.create(print_macro)] as Array[HenSaveAction]
+
+	var graph: HenFlowGraphTypes.FlowGraph = _laid_out()
+
+	assert_array(_overlaps(graph)).is_empty()
+
+
+# a branch that runs steps draws them hanging off its pin, ending in a tail that
+# knows which branch a new step lands on
+func test_a_branch_chain_ends_in_its_own_tail() -> void:
+	var gate: HenSaveAction = _add(_register(FIX_GATE))
+	var step: HenSaveAction = HenSaveAction.create(_register(FIX_PRINT))
+
+	gate.branch_actions['done'] = [step] as Array[HenSaveAction]
+
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+	var tail: HenFlowGraphTypes.FlowNode = null
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if node.kind == &'add' and node.body_parent == gate:
+			tail = node
+
+	assert_object(tail).is_not_null()
+	assert_str(str(tail.body_branch)).is_equal('done')
+
+	for node: HenFlowGraphTypes.FlowNode in graph.nodes:
+		node.size = HenFlowNodeCard.ADD_TAIL_SIZE if node.kind == &'add' else CARD
+
+	HenFlowFormatter.format(graph)
+
+	# the formatter owns every position: a node it never placed sits on the origin
+	assert_bool(tail.position != Vector2.ZERO).is_true()
+	assert_array(_overlaps(graph)).is_empty()
+
+
 # an empty body still ends with its tail: without it there is nowhere to drop the
 # first nested step and the card draws as if it had no body at all
 func test_an_empty_body_keeps_its_tail() -> void:

@@ -164,6 +164,9 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 		HenScriptMacroLoader.load_script_macros()
 		HenScriptMacroLoader.load_native_actions()
 
+		# after the pool: the macro is what names the branch an older body moves to
+		HenSaveAction.migrate_branch_bodies(save_data)
+
 		reset_to_load(_id, _headless)
 	else:
 		return false

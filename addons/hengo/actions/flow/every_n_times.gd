@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Does something once every so many frames instead of every frame. With Times = 5, the first four frames take Other Times and the fifth takes Nth Time, then it starts over. The count restarts each time the state is entered. Actions nested inside it run on the Nth Time frame.'
+	return 'Does something once every so many frames instead of every frame. With Times = 5, the first four frames take Other Times and the fifth takes Nth Time, then it starts over. The count restarts each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -18,8 +18,9 @@ func get_icon() -> String:
 	return 'repeat-1'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'nth'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -78,6 +79,6 @@ func _body() -> String:
 	return 'cycle_{{VCNODE_ID}} += 1\n' \
 		+ 'if cycle_{{VCNODE_ID}} >= {{times}}:\n' \
 		+ '\tcycle_{{VCNODE_ID}} = 0\n' \
-		+ fire_body(&'nth') + '\n' \
+		+ '\t{{nth}}\n' \
 		+ 'else:\n' \
 		+ '\t{{between}}'

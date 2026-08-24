@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fires only on the frame the condition turns true, and stays quiet while it keeps being true. Holding a button takes Became True on the frame it goes down and Other Frames while it stays down. A condition already true on entry counts as turning true. Actions nested inside it run on that one frame.'
+	return 'Fires only on the frame the condition turns true, and stays quiet while it keeps being true. Holding a button takes Became True on the frame it goes down and Other Frames while it stays down. A condition already true on entry counts as turning true. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -18,8 +18,9 @@ func get_icon() -> String:
 	return 'toggle-right'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'became_true'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -80,6 +81,6 @@ func _body() -> String:
 		+ 'var fired_{{VCNODE_ID}}: bool = now_{{VCNODE_ID}} and not was_true_{{VCNODE_ID}}\n' \
 		+ 'was_true_{{VCNODE_ID}} = now_{{VCNODE_ID}}\n' \
 		+ 'if fired_{{VCNODE_ID}}:\n' \
-		+ fire_body(&'became_true') + '\n' \
+		+ '\t{{became_true}}\n' \
 		+ 'else:\n' \
 		+ '\t{{not_yet}}'

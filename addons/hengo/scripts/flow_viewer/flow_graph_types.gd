@@ -40,6 +40,8 @@ class FlowNode extends RefCounted:
 	var action: HenSaveAction
 	# on a body add tail, the loop action a new step is nested into
 	var body_parent: HenSaveAction
+	# on a branch add tail, which branch of body_parent the step lands on
+	var body_branch: StringName = &''
 	# the phase chain this node belongs to
 	var phase: StringName = &''
 	var pins: Array[FlowPin] = []

@@ -89,13 +89,14 @@ func test_tween_rotate_converts_degrees() -> void:
 	assert_int(script.reload()).is_equal(OK)
 
 
-# a fire-and-forget tween has nowhere to run per frame, so it only offers enter
-func test_tween_is_enter_only() -> void:
+# per frame it starts itself again, so the phases are offered beside enter
+func test_tween_offers_the_per_frame_phases() -> void:
 	HenScriptMacroLoader.load_native_actions()
 
 	var macro: HenSaveMacro = HenActionsPanel.find_macro(&'tween_move')
 
-	assert_array(HenSaveAction.supported_phases(macro)).is_equal([&'enter'])
+	# per frame it repeats itself, so the phases are offered; enter stays the default
+	assert_array(HenSaveAction.supported_phases(macro)).is_equal([&'enter', &'update', &'physics'])
 	assert_str(str(HenSaveAction.default_phase(macro))).is_equal('enter')
 
 
@@ -228,3 +229,66 @@ func test_an_animated_action_branches_from_the_tween_signal() -> void:
 	assert_str(code).contains('finished.connect(func() -> void:')
 	assert_str(code).contains('_ref._STATE_CONTROLLER.change_state("done")')
 	assert_str(code).contains('.kill()')
+
+
+# an animated action on enter is the one line it always was: nothing declared,
+# nothing torn down, so it stays the cheapest thing it can be
+func test_an_animated_action_on_enter_declares_nothing() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'tween_move'), &'enter')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('_ref.create_tween().tween_property(_ref, "position"')
+	assert_str(code).not_contains('is_running()')
+	assert_str(code).not_contains('.kill()')
+
+
+# per frame it keeps the tween in a slot and only starts again once the last one
+# ended: without the guard every frame would stack another animation
+func test_an_animated_action_per_frame_keeps_its_tween() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'tween_move'), &'update')
+
+	var code: String = HenTest.get_all_code()
+	var slot: String = 'tween_' + str(action.id)
+
+	assert_str(code).contains('var ' + slot + ': Tween = null')
+	assert_str(code).contains('if ' + slot + ' == null or not ' + slot + '.is_running():')
+	assert_str(code).contains(slot + ' = _ref.create_tween()')
+	# the state gives it back instead of leaving it running for good
+	assert_str(code).contains(slot + '.kill()')
+
+	var script := GDScript.new()
+
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# the Finished branch does not have to leave the state: steps on it run from the
+# tween signal, which is what makes a one-off follow-up need no state of its own
+func test_an_animated_action_runs_steps_on_finished() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var tween: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'tween_move'), &'enter')
+	var step: HenSaveAction = _nested(&'print_value')
+
+	step.inputs = [HenSaveParam.create({name = 'Value', type = 'Variant', id = &'value', default_value = 'done'})]
+	tween.branch_actions['finished'] = [step] as Array[HenSaveAction]
+
+	var code: String = HenTest.get_all_code()
+
+	# steps alone arm the signal: without them the action stays the plain one-liner
+	assert_str(code).contains('finished.connect(func() -> void:')
+	assert_str(code).contains('print("done")')
+	# _ready always starts the machine, so only the state body is checked
+	assert_str(code.substr(code.find('class StateTest'))).not_contains('change_state')
+
+	var script := GDScript.new()
+
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)

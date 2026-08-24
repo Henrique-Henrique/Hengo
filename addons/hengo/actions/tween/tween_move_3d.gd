@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Smoothly moves the node to a target position over time. Runs once when the state starts. Wire Finished and the flow moves on by itself when it ends, with no timer of your own.'
+	return 'Smoothly moves the node to a target position over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.'
 
 
 func get_display_name() -> String:
@@ -20,10 +20,6 @@ func get_icon() -> String:
 
 func get_target_classes() -> Array[StringName]:
 	return [&'Node3D']
-
-
-func get_default_phase() -> StringName:
-	return &'enter'
 
 
 func get_inputs() -> Array[Dictionary]:
@@ -45,14 +41,18 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
-func get_flow_inputs() -> Array[Dictionary]:
-	return [
-		{name = 'Enter', id = &'enter'}
-	]
 
 
 func get_flow_enter() -> String:
 	return _body()
+
+
+func get_flow_update() -> String:
+	return guard_per_frame(_body())
+
+
+func get_flow_physics() -> String:
+	return guard_per_frame(_body())
 
 
 func _body() -> String:

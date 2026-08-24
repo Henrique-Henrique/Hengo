@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Takes Held once the condition has stayed true for the whole time asked. With Seconds = 2, holding the button for two seconds charges the shot, and letting go before that puts the count back to zero. Actions nested inside it run once the condition has held long enough.'
+	return 'Takes Held once the condition has stayed true for the whole time asked. With Seconds = 2, holding the button for two seconds charges the shot, and letting go before that puts the count back to zero. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -18,8 +18,9 @@ func get_icon() -> String:
 	return 'timer-reset'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'held'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -87,6 +88,6 @@ func _body() -> String:
 		+ 'else:\n' \
 		+ '\theld_{{VCNODE_ID}} = 0.0\n' \
 		+ 'if held_{{VCNODE_ID}} > 0.0 and held_{{VCNODE_ID}} >= {{seconds}}:\n' \
-		+ fire_body(&'held') + '\n' \
+		+ '\t{{held}}\n' \
 		+ 'else:\n' \
 		+ '\t{{waiting}}'

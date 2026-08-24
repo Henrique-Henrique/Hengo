@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fires on the frame a value stops being what it was, and reports the value it held before. Swapping the weapon from sword to bow takes Changed on that frame, with Previous holding the sword. The first frame after entering only records the value, so it never fires on entry. Actions nested inside it run on the frame it changes.'
+	return 'Fires on the frame a value stops being what it was, and reports the value it held before. Swapping the weapon from sword to bow takes Changed on that frame, with Previous holding the sword. The first frame after entering only records the value, so it never fires on entry. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -18,8 +18,9 @@ func get_icon() -> String:
 	return 'arrow-right-left'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'changed'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -95,6 +96,6 @@ func _body() -> String:
 		+ 'seen_{{VCNODE_ID}} = true\n' \
 		+ 'if changed_{{VCNODE_ID}}:\n' \
 		+ '\t{{out:previous}}\n' \
-		+ fire_body(&'changed') + '\n' \
+		+ '\t{{changed}}\n' \
 		+ 'else:\n' \
 		+ '\t{{same}}'

@@ -300,8 +300,9 @@ static func _action_digest(_action: HenSaveAction) -> Array:
 
 	var body: Array = []
 
-	for nested: HenSaveAction in _action.body_actions:
-		body.append(_action_digest(nested))
+	for list: Array in HenGeneratorAction.nested_lists(_action):
+		for nested: HenSaveAction in list:
+			body.append(_action_digest(nested))
 
 	return [
 		str(_action.id),

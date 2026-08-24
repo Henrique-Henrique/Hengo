@@ -170,7 +170,14 @@ func open_producer(_slot: Dictionary, _rect: Rect2) -> void:
 
 # adding was only reachable through the sidebar tab that the cards replaced, so
 # the search opens here with no action to replace and an index to land on
-func open_add(_phase: StringName, _parent: HenSaveAction, _at: int, _rect: Rect2, _replacing: HenSaveAction = null) -> void:
+func open_add(
+	_phase: StringName,
+	_parent: HenSaveAction,
+	_at: int,
+	_rect: Rect2,
+	_replacing: HenSaveAction = null,
+	_branch_key: StringName = &''
+) -> void:
 	if _state_id.is_empty() or _reject():
 		return
 
@@ -179,6 +186,7 @@ func open_add(_phase: StringName, _parent: HenSaveAction, _at: int, _rect: Rect2
 	var at: int = _at
 	var phase: StringName = _phase
 	var replacing: HenSaveAction = _replacing
+	var branch_key: StringName = _branch_key
 
 	is_editing = true
 
@@ -188,7 +196,7 @@ func open_add(_phase: StringName, _parent: HenSaveAction, _at: int, _rect: Rect2
 		type = &'',
 		phase = phase,
 		on_pick = func(_macro: HenSaveMacro, _output: StringName) -> void:
-			_insert_new(_macro, state_id, parent, phase, at, replacing)
+			_insert_new(_macro, state_id, parent, phase, at, replacing, branch_key)
 	})
 
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(
@@ -205,7 +213,8 @@ func _insert_new(
 	_parent: HenSaveAction,
 	_phase: StringName,
 	_at: int,
-	_replacing: HenSaveAction = null
+	_replacing: HenSaveAction = null,
+	_branch_key: StringName = &''
 ) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
@@ -218,7 +227,7 @@ func _insert_new(
 		if _replacing:
 			data.remove_action_anywhere(_state_id, _replacing)
 
-		_do_insert(_macro, data, _state_id, _parent, _phase, _at)
+		_do_insert(_macro, data, _state_id, _parent, _phase, _at, _branch_key)
 
 		return true
 	)
@@ -226,14 +235,24 @@ func _insert_new(
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
 
-func _do_insert(_macro: HenSaveMacro, _data: HenSaveData, _state_id: StringName, _parent: HenSaveAction, _phase: StringName, _at: int) -> void:
+func _do_insert(
+	_macro: HenSaveMacro,
+	_data: HenSaveData,
+	_state_id: StringName,
+	_parent: HenSaveAction,
+	_phase: StringName,
+	_at: int,
+	_branch_key: StringName = &''
+) -> void:
 	var action: HenSaveAction = HenSaveAction.create(_macro)
 
 	# the macro decides: a phase it has no body for would emit nothing at all
 	action.phase = _phase if HenSaveAction.supported_phases(_macro).has(_phase) else HenSaveAction.default_phase(_macro)
 
 	if _parent:
-		_parent.body_actions.insert(clampi(_at if _at >= 0 else _parent.body_actions.size(), 0, _parent.body_actions.size()), action)
+		var list: Array = _target_list(_parent, _branch_key)
+
+		list.insert(clampi(_at if _at >= 0 else list.size(), 0, list.size()), action)
 		return
 
 	var list: Array = _data.get_state_actions(_state_id).duplicate()
@@ -241,6 +260,21 @@ func _do_insert(_macro: HenSaveMacro, _data: HenSaveData, _state_id: StringName,
 
 	list.append(action)
 	_data.set_state_actions(_state_id, HenActionsPanel.reorder(list, action, action.phase, _at if _at >= 0 else bucket.size()))
+
+
+# the list a new step lands in: the loop body, or the branch when one is named.
+# a branch list is created on demand, so an untouched branch stores nothing
+func _target_list(_parent: HenSaveAction, _branch_key: StringName) -> Array:
+	if _branch_key.is_empty():
+		return _parent.body_actions
+
+	var key: String = str(_branch_key)
+
+	if not _parent.branch_actions.has(key):
+		var fresh: Array[HenSaveAction] = []
+		_parent.branch_actions[key] = fresh
+
+	return _parent.branch_actions[key]
 
 
 # pasted steps land in run order after the anchor, each one keeping its own phase
@@ -283,7 +317,7 @@ func index_around(_action: HenSaveAction, _below: bool) -> int:
 		return -1
 
 	var parent: HenSaveAction = _parent_of(_action)
-	var list: Array = parent.body_actions if parent else _save_data.get_state_actions(_state_id)
+	var list: Array = _list_of(_action)
 	var index: int = list.find(_action)
 
 	if index < 0:
@@ -516,17 +550,18 @@ func move_in_chain(_action: HenSaveAction, _delta: int) -> bool:
 	return true
 
 
-# a loop body is its own list, and its order is not grouped by phase
+# a nested list is its own chain, and its order is not grouped by phase
 func _swap_in_body(_parent: HenSaveAction, _action: HenSaveAction, _delta: int) -> bool:
-	var index: int = _parent.body_actions.find(_action)
+	var list: Array = _list_of(_action)
+	var index: int = list.find(_action)
 	var target: int = index + _delta
 
-	if index < 0 or target < 0 or target >= _parent.body_actions.size():
+	if index < 0 or target < 0 or target >= list.size():
 		return false
 
 	_record([_state_id], 'Move Action', func() -> bool:
-		_parent.body_actions.remove_at(index)
-		_parent.body_actions.insert(target, _action)
+		list.remove_at(index)
+		list.insert(target, _action)
 		return true
 	)
 
@@ -579,7 +614,8 @@ func duplicate_action(_action: HenSaveAction) -> void:
 		var copy: HenSaveAction = HenActionsPanel.duplicate_action(_action)
 
 		if parent:
-			parent.body_actions.insert(parent.body_actions.find(_action) + 1, copy)
+			var list: Array = _list_of(_action)
+			list.insert(list.find(_action) + 1, copy)
 		else:
 			data.insert_state_action(state_id, copy, data.get_state_actions(state_id).find(_action) + 1)
 
@@ -656,16 +692,32 @@ func _parent_of(_action: HenSaveAction) -> HenSaveAction:
 
 
 func _find_parent(_root: HenSaveAction, _target: HenSaveAction) -> HenSaveAction:
-	for child: HenSaveAction in _root.body_actions:
-		if child == _target:
-			return _root
+	for list: Array in HenGeneratorAction.nested_lists(_root):
+		for child: HenSaveAction in list:
+			if child == _target:
+				return _root
 
-		var deeper: HenSaveAction = _find_parent(child, _target)
+			var deeper: HenSaveAction = _find_parent(child, _target)
 
-		if deeper:
-			return deeper
+			if deeper:
+				return deeper
 
 	return null
+
+
+# the array holding this action: a loop body, one branch of it, or the state
+# chain. moving and duplicating write into it, and it is not always body_actions
+func _list_of(_action: HenSaveAction) -> Array:
+	var parent: HenSaveAction = _parent_of(_action)
+
+	if not parent:
+		return _save_data.get_state_actions(_state_id) if _save_data else []
+
+	for list: Array in HenGeneratorAction.nested_lists(parent):
+		if list.has(_action):
+			return list
+
+	return []
 
 
 # rewrites the whole list so array order stays enter -> update -> exit

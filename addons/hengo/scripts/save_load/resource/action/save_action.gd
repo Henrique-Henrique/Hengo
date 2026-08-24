@@ -26,6 +26,9 @@ const PHASE_ORDER: Array[StringName] = [&'enter', &'update', &'physics', &'exit'
 @export var output_bindings: Dictionary
 # nested action list a loop macro runs per iteration; empty for every other macro
 @export var body_actions: Array[HenSaveAction]
+# flow output id -> Array[HenSaveAction] the branch runs while staying in this
+# state. a branch can run steps, transition, or both: the steps go first
+@export var branch_actions: Dictionary
 # skipped by codegen while set, so a step can be muted without losing its values
 @export var disabled: bool = false
 # optional name the user gave this instance; empty falls back to the macro name
@@ -45,6 +48,43 @@ static func create(_macro: HenSaveMacro) -> HenSaveAction:
 		action.inputs.append(HenSaveParam.create(param.get_data()))
 
 	return action
+
+
+# a branching action used to keep its steps in body_actions, before every branch
+# could hold its own. the macro names the branch they belong to, so the move never
+# guesses from declaration order. idempotent: an already moved list is empty
+static func migrate_branch_bodies(_save_data: HenSaveData) -> void:
+	if not _save_data:
+		return
+
+	for state: HenSaveState in _save_data.states:
+		_migrate_list(_save_data.get_state_actions(state.id))
+
+	for sub_list: Variant in _save_data.sub_states.values():
+		for state: HenSaveState in sub_list:
+			_migrate_list(_save_data.get_state_actions(state.id))
+
+
+static func _migrate_list(_actions: Array) -> void:
+	for action: HenSaveAction in _actions:
+		for list: Array in HenGeneratorAction.nested_lists(action):
+			_migrate_list(list)
+
+		if action.body_actions.is_empty():
+			continue
+
+		var branch: StringName = HenActionsPanel.body_branch_of(action.macro_id)
+
+		if branch.is_empty():
+			continue
+
+		var moved: Array[HenSaveAction] = []
+
+		moved.assign(action.body_actions)
+		moved.append_array(HenGeneratorAction.branch_steps(action, str(branch)))
+
+		action.branch_actions[str(branch)] = moved
+		action.body_actions.clear()
 
 
 func get_new_name() -> String:

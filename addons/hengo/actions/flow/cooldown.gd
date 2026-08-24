@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Lets something happen at most once every so many seconds, however many frames run through it. With Seconds = 1, holding the fire button gives one shot per second and the frames in between take Cooling. It fires right away on the first frame and only then blocks, unlike Every N Seconds, which waits first. Actions nested inside it run on the frame it fires.'
+	return 'Lets something happen at most once every so many seconds, however many frames run through it. With Seconds = 1, holding the fire button gives one shot per second and the frames in between take Cooling. It fires right away on the first frame and only then blocks, unlike Every N Seconds, which waits first. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -22,8 +22,9 @@ func get_icon() -> String:
 	return 'timer'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'ready'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -82,6 +83,6 @@ func _body() -> String:
 	return 'cooldown_{{VCNODE_ID}} = maxf(cooldown_{{VCNODE_ID}} - delta, 0.0)\n' \
 		+ 'if cooldown_{{VCNODE_ID}} <= 0.0:\n' \
 		+ '\tcooldown_{{VCNODE_ID}} = {{seconds}}\n' \
-		+ fire_body(&'ready') + '\n' \
+		+ '\t{{ready}}\n' \
 		+ 'else:\n' \
 		+ '\t{{cooling}}'

@@ -1187,6 +1187,15 @@ func _create_branch_row(action: HenSaveAction, key: String, title: String) -> vo
 	new_bt.pressed.connect(_open_branch_create_menu.bind(key, new_bt))
 	row.add_child(new_bt)
 
+	# a branch does not have to leave the state: it can run steps of its own and
+	# carry on, which is what saves a state per one-off bit of behaviour
+	var step_bt := Button.new()
+	step_bt.icon = load('res://addons/hengo/assets/new_icons/list-plus.svg')
+	step_bt.tooltip_text = 'Run an action on this branch, staying in this state'
+	step_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	step_bt.pressed.connect(_add_branch_step.bind(key, step_bt))
+	row.add_child(step_bt)
+
 	container.add_child(row)
 
 	# a target on another script needs the instance whose machine will be driven
@@ -1247,6 +1256,25 @@ func _create_branch_instance_row(action: HenSaveAction, key: String, script_id: 
 
 # a new target is either a state of the script or a sibling of the state this
 # action runs in, which only exist as two choices while the owner is nested
+# the same action search the chain uses, landing at the end of the branch list
+func _add_branch_step(key: String, anchor: Control) -> void:
+	var action: HenSaveAction = resource as HenSaveAction
+	var save_data: HenSaveData = HenActionsPanel.owner_of(action)
+
+	if not action or not save_data:
+		return
+
+	var state_id: StringName = HenActionsPanel.state_id_of(save_data, action)
+
+	if state_id.is_empty():
+		return
+
+	var editor: HenStateViewerCardEditor = HenStateViewerCardEditor.new()
+
+	editor.target(save_data, state_id)
+	editor.open_add(action.phase, action, -1, anchor.get_global_rect(), null, StringName(key))
+
+
 func _open_branch_create_menu(key: String, anchor: Control) -> void:
 	var save_data: HenSaveData = HenActionsPanel.owner_of(resource as HenSaveAction)
 

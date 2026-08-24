@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Fires once on the frame a value passes a limit, then stays quiet until the value comes back and passes it again. With Limit = 20 going down, health dropping from 25 to 15 takes Crossed on that one frame and Other Frames while it stays at 15. A value already past the limit on entry counts as a crossing. Actions nested inside it run on the frame it crosses.'
+	return 'Fires once on the frame a value passes a limit, then stays quiet until the value comes back and passes it again. With Limit = 20 going down, health dropping from 25 to 15 takes Crossed on that one frame and Other Frames while it stays at 15. A value already past the limit on entry counts as a crossing. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -18,8 +18,9 @@ func get_icon() -> String:
 	return 'gauge'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'crossed'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -99,7 +100,7 @@ func _body() -> String:
 		+ 'var fired_{{VCNODE_ID}}: bool = past_{{VCNODE_ID}} and not was_past_{{VCNODE_ID}}\n' \
 		+ 'was_past_{{VCNODE_ID}} = past_{{VCNODE_ID}}\n' \
 		+ 'if fired_{{VCNODE_ID}}:\n' \
-		+ fire_body(&'crossed') + '\n' \
+		+ '\t{{crossed}}\n' \
 		+ 'else:\n' \
 		+ '\t{{not_yet}}'
 

@@ -55,6 +55,35 @@ static func _add_tail(_graph: HenFlowGraphTypes.FlowGraph, _bucket: Array, _phas
 	_graph.connect_pins(&'exec', _head_of(_graph, _bucket.back().id), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
 
 
+# the end of a branch chain, the same affordance a body gets. it is wired after
+# the last step, so a branch that only transitions never grows one
+static func _branch_tail(
+	_graph: HenFlowGraphTypes.FlowGraph,
+	_action: HenSaveAction,
+	_branch: StringName,
+	_owner: HenFlowGraphTypes.FlowNode,
+	_chain: Array[HenFlowGraphTypes.FlowNode]
+) -> void:
+	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
+
+	node.id = StringName('addr' + str(_action.id) + ':' + str(_branch))
+	node.kind = &'add'
+	node.title = 'Add action'
+	node.accent = HenActionVisuals.FALLBACK_COLOR
+	node.phase = _owner.phase
+	node.body_parent = _action
+	node.body_branch = _branch
+
+	node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
+
+	_graph.add_node(node)
+
+	if _chain.is_empty():
+		_graph.connect_pins(&'exec', _owner, _branch, node, HenFlowGraphTypes.ENTER_PIN)
+	else:
+		_graph.connect_pins(&'exec', _chain.back(), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
+
+
 # a body carries its own end the way a phase chain does: without it an empty body
 # has nowhere to drop the first step and the card draws as if it had no body
 static func _body_tail(
@@ -326,6 +355,15 @@ static func _add_branch_pins(
 	for flow: HenSaveFlowParam in _macro.flow_outputs:
 		_node.add_pin(HenFlowGraphTypes.FlowPin.new(flow.id, &'exec_out', flow.name))
 
+		# a branch runs its own steps without leaving the state, so they hang off the
+		# branch pin the way a transition card does
+		var steps: Array = HenGeneratorAction.branch_steps(_action, str(flow.id))
+		var chain: Array[HenFlowGraphTypes.FlowNode] = []
+
+		if not steps.is_empty():
+			chain = _chain(_graph, _save_data, steps, _node, flow.id, _node.phase)
+			_branch_tail(_graph, _action, flow.id, _node, chain)
+
 		var target: HenSaveState = HenGeneratorAction.branch_target(_save_data, _action, str(flow.id))
 
 		if not target:
@@ -343,7 +381,13 @@ static func _add_branch_pins(
 		transition.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
 
 		_graph.add_node(transition)
-		_graph.connect_pins(&'exec', _node, flow.id, transition, HenFlowGraphTypes.ENTER_PIN)
+
+		# with steps on the branch the transition is what the chain ends on, so it
+		# reads in the order it runs
+		if chain.is_empty():
+			_graph.connect_pins(&'exec', _node, flow.id, transition, HenFlowGraphTypes.ENTER_PIN)
+		else:
+			_graph.connect_pins(&'exec', chain.back(), HenFlowGraphTypes.THEN_PIN, transition, HenFlowGraphTypes.ENTER_PIN)
 
 
 # the node that carries an action in the sequence: its store when it has one,

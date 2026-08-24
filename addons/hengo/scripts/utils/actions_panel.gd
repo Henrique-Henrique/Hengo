@@ -102,6 +102,24 @@ static func _is_stale(_global: HenGlobal) -> bool:
 
 
 # every action row resolves its macro, several times over, so this cannot scan
+# the branch an older save's body_actions belong to, empty when the macro never
+# had one. read from the macro script, so the mapping lives with the action
+static func body_branch_of(_macro_id: StringName) -> StringName:
+	var macro: HenSaveMacro = find_macro(_macro_id)
+
+	if not macro or not macro.is_script_macro or not FileAccess.file_exists(macro.script_path):
+		return &''
+
+	var script: GDScript = ResourceLoader.load(macro.script_path, '', ResourceLoader.CACHE_MODE_REUSE) as GDScript
+
+	if not script:
+		return &''
+
+	var instance: HenScriptMacroBase = script.new() as HenScriptMacroBase
+
+	return instance.get_body_branch() if instance else &''
+
+
 static func find_macro(_macro_id: StringName) -> HenSaveMacro:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
@@ -269,8 +287,9 @@ static func _reid_action(_action: HenSaveAction) -> void:
 		if nested:
 			_reid_action(nested)
 
-	for nested: HenSaveAction in _action.body_actions:
-		_reid_action(nested)
+	for list: Array in HenGeneratorAction.nested_lists(_action):
+		for nested: HenSaveAction in list:
+			_reid_action(nested)
 
 
 static func _editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:
@@ -500,9 +519,10 @@ static func _contains_action(_root: HenSaveAction, _target: HenSaveAction) -> bo
 	if _root == _target:
 		return true
 
-	for child: HenSaveAction in _root.body_actions:
-		if _contains_action(child, _target):
-			return true
+	for list: Array in HenGeneratorAction.nested_lists(_root):
+		for child: HenSaveAction in list:
+			if _contains_action(child, _target):
+				return true
 
 	for key: Variant in _root.input_actions:
 		var child: HenSaveAction = inline_child(_root.input_actions[key])

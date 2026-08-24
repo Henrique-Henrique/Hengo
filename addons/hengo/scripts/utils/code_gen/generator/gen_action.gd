@@ -38,7 +38,7 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 			tokens.append(_unresolved_token(action, 'could not instance macro'))
 			continue
 
-		_prime_instance(_save_data, instance, action)
+		_prime_instance(_save_data, instance, action, _phase if not _phase.is_empty() else StringName(str(action.phase)))
 
 		var reason: String = skip_reason(_save_data, _state, action, instance, _phase, _loop_depth)
 
@@ -54,7 +54,7 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		# next sweep resolves. then branch transitions, then {{VCNODE_ID}} / _ref
 		body = _substitute_outputs(_save_data, body, action, instance)
 		body = _substitute_inputs(_save_data, body, action, instance)
-		body = _substitute_branches(_save_data, body, action, branches, _state)
+		body = _substitute_branches(_save_data, body, action, branches, _state, _phase, _loop_depth)
 		body = HenActionCode.process_script_macro_body(body, false, action.id)
 
 		# the nested body goes in LAST, after this action's own {{VCNODE_ID}} pass:
@@ -114,12 +114,6 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 	if _instance.get_needs_loop() and _loop_depth == 0:
 		return str(_instance.get_display_name()).to_lower() + ' can only be used inside a loop'
 
-	# an action that keeps state (a wait counter, a signal connection, an _input
-	# override) can't run inside a loop: its declarations live at the state/script
-	# level and would not be collected, and a per-iteration hook makes no sense
-	if _loop_depth > 0 and _declares_hook(_instance):
-		return str(_instance.get_display_name()).to_lower() + ' can only be used at the top level, not inside a loop'
-
 	# a nested action runs at the loop's phase, not its own stored one
 	var phase: StringName = _phase if not _phase.is_empty() else _action.phase
 
@@ -150,16 +144,16 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 	# a pure producer whose only content is its outputs contributes nothing when
 	# none is stored: the phase method would be left empty and fail to parse
 	if not _has_branch_target(_save_data, _action, branches):
-		if _produces_nothing(_save_data, _action, _instance, phase):
+		if _produces_nothing(_save_data, _action, _instance, phase) and not _runs_branch_steps(_action, branches):
 			return 'no output stored'
 
 		if branches.is_empty() or _branches_are_optional(branches):
 			return ''
 
 	# change_state calls exit() before swapping current_state, so a transition
-	# emitted from exit re-enters it forever. an unwired optional branch emits no
-	# transition at all, so the action is still welcome there
-	if str(phase) == 'exit' and _has_branch_target(_save_data, _action, branches):
+	# emitted from exit re-enters it forever. steps are not a transition, so a
+	# branch that only runs them is still welcome there
+	if str(phase) == 'exit' and _has_transition(_save_data, _action, branches):
 		return 'a branching action cannot run on exit'
 
 	# a branching action with nowhere to go would emit `if x: pass else: pass`.
@@ -201,20 +195,51 @@ static func _first_unreachable_branch(_save_data: HenSaveData, _state: HenSaveSt
 	return ''
 
 
+# every action of a state that actually gets emitted, in run order, the ones
+# nested in a loop body included: a nested action declares at the same levels as
+# a top level one, and {{VCNODE_ID}} keys the names by action id so nesting never
+# makes two of them collide.
+# a nested action is filtered at the phase its loop runs on, never its own stored
+# one, the way the emit path treats it. a skipped action takes its whole body with
+# it: declaring for a step that never runs would arm a listener nobody drives
+static func emitted_actions(_save_data: HenSaveData, _state: HenSaveState) -> Array:
+	var out: Array = []
+
+	_collect_emitted(_save_data, _state, _save_data.get_state_actions(_state.id), &'', 0, out)
+
+	return out
+
+
+static func _collect_emitted(
+	_save_data: HenSaveData,
+	_state: HenSaveState,
+	_actions: Array,
+	_phase: StringName,
+	_depth: int,
+	_out: Array
+) -> void:
+	for action: HenSaveAction in _actions:
+		var phase: StringName = _phase if not _phase.is_empty() else StringName(str(action.phase))
+		var instance: HenScriptMacroBase = _instance_for(_save_data, action, phase)
+
+		if not instance or not skip_reason(_save_data, _state, action, instance, phase, _depth).is_empty():
+			continue
+
+		_out.append({action = action, instance = instance})
+
+		for list: Array in nested_lists(action):
+			_collect_emitted(_save_data, _state, list, phase, _depth + 1, _out)
+
+
 # class-level declarations the actions of a state need, from each macro's
 # get_script_base(). emitted inside the state class, so an action can keep a
 # counter across frames; {{VCNODE_ID}} makes the names unique per action
 static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) -> Array:
 	var lines: Array = []
 
-	for action: HenSaveAction in _save_data.get_state_actions(_state.id):
-		var instance: HenScriptMacroBase = _instance_for(_save_data, action)
-
-		# the phase path already reported it; emitting only its base would leave a
-		# listener armed for an action that does not run
-		if not instance or not skip_reason(_save_data, _state, action, instance).is_empty():
-			continue
-
+	for entry: Dictionary in emitted_actions(_save_data, _state):
+		var action: HenSaveAction = entry.action
+		var instance: HenScriptMacroBase = entry.instance
 		var base: String = instance.get_script_base()
 
 		if base.is_empty():
@@ -239,13 +264,9 @@ static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 	var lines: Array = []
 
 	for state: HenSaveState in _all_states(_save_data):
-		for action: HenSaveAction in _save_data.get_state_actions(state.id):
-			var instance: HenScriptMacroBase = _live_instance(_save_data, state, action)
-
-			if not instance:
-				continue
-
-			var scope: String = instance.get_script_scope()
+		for entry: Dictionary in emitted_actions(_save_data, state):
+			var action: HenSaveAction = entry.action
+			var scope: String = (entry.instance as HenScriptMacroBase).get_script_scope()
 
 			if scope.is_empty():
 				continue
@@ -263,13 +284,10 @@ static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 # first line indented
 static func merge_script_overrides(_save_data: HenSaveData, _override_data: Dictionary) -> void:
 	for state: HenSaveState in _all_states(_save_data):
-		for action: HenSaveAction in _save_data.get_state_actions(state.id):
-			var instance: HenScriptMacroBase = _live_instance(_save_data, state, action)
+		for entry: Dictionary in emitted_actions(_save_data, state):
+			var action: HenSaveAction = entry.action
 
-			if not instance:
-				continue
-
-			for override: Dictionary in instance.get_function_overrides():
+			for override: Dictionary in (entry.instance as HenScriptMacroBase).get_function_overrides():
 				var func_name: String = str(override.get('name', ''))
 
 				if func_name.is_empty():
@@ -290,17 +308,6 @@ static func merge_script_overrides(_save_data: HenSaveData, _override_data: Dict
 
 				for line: String in code.strip_edges(false, true).split('\n'):
 					(_override_data[func_name].tokens as Array).append(line)
-
-
-# instance of an action that actually gets emitted; null when it is skipped, so a
-# skipped action never leaves an override or a declaration behind
-static func _live_instance(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction) -> HenScriptMacroBase:
-	var instance: HenScriptMacroBase = _instance_for(_save_data, _action)
-
-	if not instance or not skip_reason(_save_data, _state, _action, instance).is_empty():
-		return null
-
-	return instance
 
 
 # every state of the script, sub-states included
@@ -332,13 +339,11 @@ static func get_state_teardown_tokens(_save_data: HenSaveData, _state: HenSaveSt
 static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _method: StringName) -> Array:
 	var tokens: Array = []
 
-	for action: HenSaveAction in _save_data.get_state_actions(_state.id):
-		var instance: HenScriptMacroBase = _instance_for(_save_data, action)
+	for entry: Dictionary in emitted_actions(_save_data, _state):
+		var action: HenSaveAction = entry.action
+		var instance: HenScriptMacroBase = entry.instance
 
-		if not instance or not instance.has_method(_method):
-			continue
-
-		if not skip_reason(_save_data, _state, action, instance).is_empty():
+		if not instance.has_method(_method):
 			continue
 
 		var body: Variant = instance.call(_method)
@@ -356,7 +361,7 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 
 
 # macro instance behind an action, or null when it can't be resolved
-static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction) -> HenScriptMacroBase:
+static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction, _phase: StringName = &'') -> HenScriptMacroBase:
 	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
 
 	if not macro or not FileAccess.file_exists(macro.script_path):
@@ -365,15 +370,21 @@ static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction) -> He
 	var instance: HenScriptMacroBase = _load_instance(macro)
 
 	if instance:
-		_prime_instance(_save_data, instance, _action)
+		_prime_instance(_save_data, instance, _action, _phase)
 
 	return instance
 
 
 # context the body getters read: the class the script extends, the literals the
 # action holds and which slots are bound. a fresh instance per call, never shared
-static func _prime_instance(_save_data: HenSaveData, _instance: HenScriptMacroBase, _action: HenSaveAction) -> void:
+static func _prime_instance(
+	_save_data: HenSaveData,
+	_instance: HenScriptMacroBase,
+	_action: HenSaveAction,
+	_phase: StringName = &''
+) -> void:
 	_instance.target_class = _save_data.identity.type if _save_data.identity else &''
+	_instance.action_phase = _phase if not _phase.is_empty() else StringName(str(_action.phase))
 	_instance.input_values = {}
 	_instance.bound_inputs = {}
 
@@ -391,13 +402,18 @@ static func _prime_instance(_save_data: HenSaveData, _instance: HenScriptMacroBa
 	for key: Variant in _action.input_actions:
 		_instance.bound_inputs[str(key)] = true
 
-	_instance.body_action_count = _action.body_actions.size()
+	_instance.nested_action_count = 0
+
+	for list: Array in nested_lists(_action):
+		_instance.nested_action_count += list.size()
 	_instance.connected_flows = {}
 
 	for out: Dictionary in _instance.get_flow_outputs():
 		var id: String = str(out.get('id', ''))
 
-		if branch_target(_save_data, _action, id) or not branch_script_id(_save_data, _action, id).is_empty():
+		# steps count as somewhere to go: a branch that only runs them still has to
+		# be emitted, and an action that reports its end still has to report it
+		if not branch_steps(_action, id).is_empty() 			or branch_target(_save_data, _action, id) 			or not branch_script_id(_save_data, _action, id).is_empty():
 			_instance.connected_flows[id] = true
 
 
@@ -437,8 +453,9 @@ static func _get_phase_body(_instance: HenScriptMacroBase, _phase: StringName) -
 
 
 # true when the action contributes anything beyond its phase body — a script-scope
-# or class-level declaration, a virtual override, or an enter/exit hook. those are
-# gathered from the flat state list only, so nesting one would drop its declarations
+# or class-level declaration, a virtual override, or an enter/exit hook. a nested
+# action is reached through emitted_actions, but an INLINE producer is not: it
+# hangs off input_actions, so its declarations still would not be collected
 static func _declares_hook(_instance: HenScriptMacroBase) -> bool:
 	if not _instance.get_script_base().is_empty() \
 		or not _instance.get_script_scope().is_empty() \
@@ -518,7 +535,15 @@ static func _drop_placeholder_line(_body: String, _token: String) -> String:
 
 
 # each flow output is a branch: it emits its transition call, or `pass` when unset
-static func _substitute_branches(_save_data: HenSaveData, _body: String, _action: HenSaveAction, _branches: Array, _state: HenSaveState) -> String:
+static func _substitute_branches(
+	_save_data: HenSaveData,
+	_body: String,
+	_action: HenSaveAction,
+	_branches: Array,
+	_state: HenSaveState,
+	_phase: StringName = &'',
+	_loop_depth: int = 0
+) -> String:
 	var body: String = _body
 
 	for out: Dictionary in _branches:
@@ -531,9 +556,41 @@ static func _substitute_branches(_save_data: HenSaveData, _body: String, _action
 			if not trace.is_empty():
 				call = trace + '\n' + call
 
+		# the steps the branch runs come first: a transition ends the state, so
+		# anything after it would only run on the way out
+		var steps: Array = _emit_actions(
+			_save_data, _state, branch_steps(_action, key), _phase, _loop_depth, false
+		)
+
+		if not steps.is_empty():
+			var lines: String = '\n'.join(steps).strip_edges(false, true)
+
+			if not lines.is_empty():
+				call = lines if call == 'pass' else lines + '\n' + call
+
 		body = HenActionCode._inject_placeholder(body, key, call)
 
 	return body
+
+
+# the steps stored on one branch, empty when it only transitions
+static func branch_steps(_action: HenSaveAction, _key: String) -> Array:
+	var stored: Variant = _action.branch_actions.get(_key)
+
+	return stored if stored is Array else []
+
+
+# every nested list an action owns: its loop body and each of its branches
+static func nested_lists(_action: HenSaveAction) -> Array:
+	var lists: Array = [_action.body_actions]
+
+	for key: Variant in _action.branch_actions:
+		var stored: Variant = _action.branch_actions[key]
+
+		if stored is Array and not (stored as Array).is_empty():
+			lists.append(stored)
+
+	return lists
 
 
 # debug: flashes the state-viewer edge for this branch when the transition runs.
@@ -763,6 +820,19 @@ static func _branches_are_optional(_branches: Array) -> bool:
 			return false
 
 	return true
+
+
+# a branch that runs steps is in use even with nowhere to transition to
+static func _runs_branch_steps(_action: HenSaveAction, _branches: Array) -> bool:
+	for out: Dictionary in _branches:
+		if not branch_steps(_action, str(out.get('id', ''))).is_empty():
+			return true
+
+	return false
+
+
+static func _has_transition(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:
+	return _has_branch_target(_save_data, _action, _branches)
 
 
 static func _has_branch_target(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:

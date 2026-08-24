@@ -12,6 +12,8 @@ const FIRST_LEVEL_Y_GAP: float = 64.0
 const INPUT_X_GAP: float = 32.0
 const INPUT_Y_GAP: float = 12.0
 const MIDDLE_X_GAP: float = 90.0
+# the run carries on below every branch of the fan, not beside them
+const MIDDLE_Y_GAP: float = 50.0
 # breathing room around a loop's nested chain, drawn as a frame inside the node
 const BODY_PAD: float = 16.0
 
@@ -415,7 +417,7 @@ static func _layout_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
 			continue
 
 		var inner: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
-		var owned: Array[HenFlowGraphTypes.FlowNode] = body_closure(_graph, node)
+		var owned: Array[HenFlowGraphTypes.FlowNode] = _direct_members(_graph, node)
 
 		inner.entry = node.body[0]
 		inner.nodes.assign(owned)
@@ -444,11 +446,14 @@ static func _layout_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
 # the body was laid out in its own space, so it follows the owner once the outer
 # pass settled
 static func _place_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
-	for node: HenFlowGraphTypes.FlowNode in _graph.nodes:
-		if node.body.is_empty():
-			continue
+	# shallowest first: a member is placed against an owner that already settled,
+	# and its own body follows in a later round
+	var owners: Array = _bodies_deepest_first(_graph)
 
-		var owned: Array[HenFlowGraphTypes.FlowNode] = body_closure(_graph, node)
+	owners.reverse()
+
+	for node: HenFlowGraphTypes.FlowNode in owners:
+		var owned: Array[HenFlowGraphTypes.FlowNode] = _direct_members(_graph, node)
 		# above the branch row: an action with a body AND branches keeps that row at
 		# the bottom of the card, and the body would land on top of it
 		var origin: Vector2 = node.position + Vector2(
@@ -457,6 +462,22 @@ static func _place_bodies(_graph: HenFlowGraphTypes.FlowGraph) -> void:
 
 		for child: HenFlowGraphTypes.FlowNode in owned:
 			child.position += origin
+
+
+# what a body places itself: its own closure minus everything a nested body owns.
+# a loop inside a loop keeps its members in ITS space, so they are moved once, by
+# the loop holding them, instead of once per ancestor
+static func _direct_members(_graph: HenFlowGraphTypes.FlowGraph, _node: HenFlowGraphTypes.FlowNode) -> Array[HenFlowGraphTypes.FlowNode]:
+	var owned: Array[HenFlowGraphTypes.FlowNode] = body_closure(_graph, _node)
+
+	for member: HenFlowGraphTypes.FlowNode in _node.body:
+		if member.body.is_empty():
+			continue
+
+		for nested: HenFlowGraphTypes.FlowNode in body_closure(_graph, member):
+			owned.erase(nested)
+
+	return owned
 
 
 # the chain of a body plus the satellites it owns: the producers feeding it and
@@ -478,7 +499,10 @@ static func body_closure(_graph: HenFlowGraphTypes.FlowGraph, _node: HenFlowGrap
 		for edge: HenFlowGraphTypes.FlowEdge in _graph.edges:
 			if edge.kind == &'data' and edge.to_node == current:
 				pending.append(edge.from_node)
-			elif edge.kind == &'exec' and edge.from_node == current and edge.to_node.kind == &'transition':
+			elif edge.kind == &'exec' and edge.from_node == current:
+				# every exec port of a member: the transition card it leaves through
+				# and the steps a branch of it runs, which would strand at the origin.
+				# nothing leaves a body this way, so the walk stays inside it
 				pending.append(edge.to_node)
 
 		for nested: HenFlowGraphTypes.FlowNode in current.body:
@@ -542,15 +566,6 @@ static func _anchor_x(_node: HenFlowGraphTypes.FlowNode, _pin: HenFlowGraphTypes
 		return _node.position.x + _node.size.x * 0.5
 
 	return _node.position.x + _pin.rect.get_center().x
-
-
-# the head card and the producers stacked beside it, without the chain below it
-static func _head_bounding(_head: HenFlowGraphTypes.FlowNode, _data: FormatData) -> Rect2:
-	var owned: Array[HenFlowGraphTypes.FlowNode] = [_head]
-
-	_collect_inputs(_data, _head, owned)
-
-	return _bounding_of(owned)
 
 
 static func _start_format(_node: HenFlowGraphTypes.FlowNode, _data: FormatData) -> Rect2:
@@ -622,26 +637,12 @@ static func _place_fan(
 
 	var min_pos: Vector2 = _node.position
 	var max_pos: Vector2 = _node.position + _node.size
-	var limit_left: float = centre - MIDDLE_X_GAP
-	var limit_right: float = centre + MIDDLE_X_GAP
-
-	if middle != null:
-		var child: Rect2 = _place_single(_node, middle, _data, _format, _base_y)
-
-		if child.size != Vector2.ZERO:
-			min_pos = min_pos.min(child.position)
-			max_pos = max_pos.max(child.position + child.size)
-
-			# the sides only clear the head of the middle chain: the branch cards
-			# sit high, and the deeper steps are below them anyway
-			var head: Rect2 = _head_bounding(middle.target, _data)
-
-			limit_left = minf(limit_left, head.position.x - MIDDLE_X_GAP)
-			limit_right = maxf(limit_right, head.position.x + head.size.x + MIDDLE_X_GAP)
+	# the deepest a branch of the fan reaches: the run passes under all of them
+	var side_bottom: float = _base_y
 
 	left.reverse()
 
-	var limit: float = limit_left
+	var limit: float = centre - MIDDLE_X_GAP
 	var idx: int = -left.size()
 
 	for item: Dictionary in left:
@@ -650,11 +651,12 @@ static func _place_fan(
 			idx += 1
 			continue
 		limit = minf(limit, box.position.x - MIDDLE_X_GAP)
+		side_bottom = maxf(side_bottom, box.position.y + box.size.y)
 		min_pos = min_pos.min(box.position)
 		max_pos = max_pos.max(box.position + box.size)
 		idx += 1
 
-	limit = limit_right
+	limit = centre + MIDDLE_X_GAP
 	idx = -right.size()
 
 	for item: Dictionary in right:
@@ -663,9 +665,21 @@ static func _place_fan(
 			idx += 1
 			continue
 		limit = maxf(limit, box.position.x + box.size.x + MIDDLE_X_GAP)
+		side_bottom = maxf(side_bottom, box.position.y + box.size.y)
 		min_pos = min_pos.min(box.position)
 		max_pos = max_pos.max(box.position + box.size)
 		idx += 1
+
+	# last, and under the whole fan: the run reads as what happens after the
+	# branches, and nothing to the side can reach it
+	if middle != null:
+		var child: Rect2 = _place_single(
+			_node, middle, _data, _format, maxf(side_bottom, _data.y_limit) + MIDDLE_Y_GAP - Y_GAP
+		)
+
+		if child.size != Vector2.ZERO:
+			min_pos = min_pos.min(child.position)
+			max_pos = max_pos.max(child.position + child.size)
 
 	return Rect2(min_pos, max_pos - min_pos)
 

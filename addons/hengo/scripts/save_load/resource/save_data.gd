@@ -164,7 +164,11 @@ func _remove_action_inside(_action: HenSaveAction, _target: HenSaveAction) -> bo
 		if nested and _remove_action_inside(nested, _target):
 			return true
 
-	return _remove_action_from(_action.body_actions, _target)
+	for list: Array in HenGeneratorAction.nested_lists(_action):
+		if _remove_action_from(list, _target):
+			return true
+
+	return false
 
 
 # inserts at a flat index; a negative or out of range index appends

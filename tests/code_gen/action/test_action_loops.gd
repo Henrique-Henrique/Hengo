@@ -166,10 +166,10 @@ func test_body_actions_round_trip() -> void:
 	assert_str(str(loaded.body_actions[0].macro_id)).is_equal('print_value')
 
 
-# a stateful action (wait, signal, mouse look) can't live inside a loop: its
-# declarations are collected from the flat state list only, so nesting it would
-# reference undeclared vars. refused loudly instead of emitting broken code
-func test_stateful_action_in_a_loop_is_refused() -> void:
+# a stateful action (wait, signal, mouse look) nested in a loop: its declarations
+# are collected THROUGH the bodies, so the counter lives at state level and the
+# reset runs in enter(), the same as it does at the top
+func test_stateful_action_in_a_loop_declares_at_state_level() -> void:
 	HenScriptMacroLoader.load_native_actions()
 
 	var coll: HenSaveVar = save_data.add_var(false)
@@ -179,13 +179,53 @@ func test_stateful_action_in_a_loop_is_refused() -> void:
 	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'for_each'), &'update')
 	loop.input_bindings['collection'] = HenUtils.bind_code_for_var(coll)
 
+	var done: HenSaveState = save_data.add_state(false)
+	done.name = 'done'
+
 	var wait: HenSaveAction = _nested(&'wait')
 	wait.inputs = [HenSaveParam.create({name = 'Seconds', type = 'float', id = &'seconds', default_value = 1.0})]
+	wait.branches['finished'] = {state_id = done.id, label = ''}
 	loop.body_actions.append(wait)
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('can only be used at the top level, not inside a loop')
+	assert_str(code).not_contains('can only be used at the top level')
+	assert_str(code).not_contains('unresolved')
+	assert_str(code).contains('var wait_' + str(wait.id))
+	assert_str(code).contains('wait_' + str(wait.id) + ' = 0.0')
+	assert_str(code).contains('wait_' + str(wait.id) + ' += delta')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# a skipped loop takes its whole body with it: declaring for a step that never
+# runs would leave a counter, or a signal connection, with nothing driving it
+func test_a_skipped_loop_declares_nothing_for_its_body() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var coll: HenSaveVar = save_data.add_var(false)
+	coll.name = 'gone'
+	coll.type = 'Array'
+
+	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'for_each'), &'update')
+	loop.input_bindings['collection'] = HenUtils.bind_code_for_var(coll)
+
+	var done: HenSaveState = save_data.add_state(false)
+	done.name = 'done'
+
+	var wait: HenSaveAction = _nested(&'wait')
+	wait.inputs = [HenSaveParam.create({name = 'Seconds', type = 'float', id = &'seconds', default_value = 1.0})]
+	wait.branches['finished'] = {state_id = done.id, label = ''}
+	loop.body_actions.append(wait)
+
+	save_data.variables.erase(coll)
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('unresolved: input "Collection"')
 	assert_str(code).not_contains('wait_' + str(wait.id))
 
 	var script := GDScript.new()
@@ -194,35 +234,81 @@ func test_stateful_action_in_a_loop_is_refused() -> void:
 	assert_int(script.reload()).is_equal(OK)
 
 
-# --- a body and a branch on the same action ---------------------------------
+# a loop inside a loop, both keeping state: two counters, two resets, no collision
+func test_a_gate_nested_in_a_loop_keeps_its_own_counter() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var outer: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'do_n_times'), &'update')
+	outer.inputs = [HenSaveParam.create({name = 'Times', type = 'int', id = &'times', default_value = 3})]
+
+	var inner: HenSaveAction = _nested(&'do_once')
+	outer.branch_actions['within'] = [inner] as Array[HenSaveAction]
+
+	var step: HenSaveAction = _nested(&'print_value')
+	step.inputs = [HenSaveParam.create({name = 'Value', type = 'Variant', id = &'value', default_value = 'hi'})]
+	inner.branch_actions['first'] = [step] as Array[HenSaveAction]
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('var did_' + str(outer.id))
+	assert_str(code).contains('var did_' + str(inner.id))
+	assert_str(code).contains('did_' + str(outer.id) + ' = 0')
+	assert_str(code).contains('did_' + str(inner.id) + ' = false')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
 
 
-# the nested actions run on the branch that fires, and the branch still follows
-func test_a_gating_action_runs_its_body_before_its_branch() -> void:
+# --- steps a branch runs without leaving the state --------------------------
+
+
+# a branch runs its own steps and still transitions: the steps go first, since a
+# transition ends the state and nothing after it would run
+func test_a_branch_runs_its_steps_before_transitioning() -> void:
 	var target: HenSaveState = save_data.add_state(false)
 	target.name = 'done'
 
 	var action: HenSaveAction = _add_action(_register(FIX_DO_N_TIMES), &'update')
+	var step: HenSaveAction = HenSaveAction.create(_register(FIX_PHASES))
 
-	action.branches['done'] = {state_id = target.id, label = ''}
-	action.body_actions.append(HenSaveAction.create(_register(FIX_PHASES)))
+	action.branches['within'] = {state_id = target.id, label = ''}
+	action.branch_actions['within'] = [step] as Array[HenSaveAction]
 
 	var code: String = HenTest.get_all_code()
+	var at_step: int = code.find('test_update("hi")')
+	var at_change: int = code.find('_ref._STATE_CONTROLLER.change_state("done")')
 
-	assert_str(code).contains('test_update("hi")')
-	assert_str(code).contains('_ref._STATE_CONTROLLER.change_state("done")')
+	assert_int(at_step).is_greater(0)
+	assert_int(at_step).is_less(at_change)
 
 
-# the body alone is reason enough to emit: both branches are optional
-func test_a_gating_action_with_only_a_body_is_not_skipped() -> void:
+# steps alone are reason enough to emit: the branch never has to leave the state
+func test_a_branch_with_only_steps_is_not_skipped() -> void:
 	var action: HenSaveAction = _add_action(_register(FIX_DO_N_TIMES), &'update')
 
-	action.body_actions.append(HenSaveAction.create(_register(FIX_PHASES)))
+	action.branch_actions['done'] = [HenSaveAction.create(_register(FIX_PHASES))] as Array[HenSaveAction]
 
 	var code: String = HenTest.get_all_code()
 
 	assert_str(code).contains('test_update("hi")')
 	assert_str(code).not_contains('unresolved')
+
+
+# the two sides run their own steps and neither changes state
+func test_both_branches_can_run_steps() -> void:
+	var action: HenSaveAction = _add_action(_register(FIX_DO_N_TIMES), &'update')
+
+	action.branch_actions['within'] = [HenSaveAction.create(_register(FIX_PHASES))] as Array[HenSaveAction]
+	action.branch_actions['done'] = [HenSaveAction.create(_register(FIX_PHASES))] as Array[HenSaveAction]
+
+	var code: String = HenTest.get_all_code()
+
+	assert_int(code.count('test_update("hi")')).is_equal(2)
+	assert_str(code).not_contains('unresolved')
+	# _ready always starts the machine, so only the state body is checked
+	assert_str(code.substr(code.find('class StateTest'))).not_contains('change_state')
 
 
 # nothing nested and nothing wired: an if/else of two passes, reported instead
@@ -232,3 +318,25 @@ func test_a_gating_action_with_nothing_wired_is_reported() -> void:
 	var code: String = HenTest.get_all_code()
 
 	assert_str(code).contains('add an action inside it or set a branch target')
+
+
+# steps used to live in body_actions before every branch could hold its own. the
+# macro names the branch they move to, so the migration never guesses from order
+func test_an_older_body_moves_to_the_branch_the_macro_names() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var gate: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'for_seconds'), &'update')
+	var step: HenSaveAction = _nested(&'print_value')
+
+	gate.body_actions.append(step)
+
+	HenSaveAction.migrate_branch_bodies(save_data)
+
+	assert_bool(gate.body_actions.is_empty()).is_true()
+	assert_int((gate.branch_actions.get('during', []) as Array).size()).is_equal(1)
+	assert_str(str((gate.branch_actions['during'][0] as HenSaveAction).macro_id)).is_equal('print_value')
+
+	# running it again moves nothing: the body is already empty
+	HenSaveAction.migrate_branch_bodies(save_data)
+
+	assert_int((gate.branch_actions.get('during', []) as Array).size()).is_equal(1)

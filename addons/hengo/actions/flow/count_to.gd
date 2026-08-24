@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Counts every time it runs and takes Reached on the run number Times, then counts from zero again. With Times = 3 on enter, the first two hits take Counting and the third one kills the enemy. The count survives leaving and coming back to this state. Actions nested inside it run on the run that reaches Times.'
+	return 'Counts every time it runs and takes Reached on the run number Times, then counts from zero again. With Times = 3 on enter, the first two hits take Counting and the third one kills the enemy. The count survives leaving and coming back to this state. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -18,8 +18,9 @@ func get_icon() -> String:
 	return 'target'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'reached'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -79,6 +80,6 @@ func _body() -> String:
 	return 'count_{{VCNODE_ID}} += 1\n' \
 		+ 'if count_{{VCNODE_ID}} >= {{times}}:\n' \
 		+ '\tcount_{{VCNODE_ID}} = 0\n' \
-		+ fire_body(&'reached') + '\n' \
+		+ '\t{{reached}}\n' \
 		+ 'else:\n' \
 		+ '\t{{counting}}'

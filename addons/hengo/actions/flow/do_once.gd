@@ -12,7 +12,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Does something on the first frame it runs and never again, so a hit sound plays once instead of every frame. Every frame after that takes After That. It resets each time the state is entered. Actions nested inside it run on that first frame.'
+	return 'Does something on the first frame it runs and never again, so a hit sound plays once instead of every frame. Every frame after that takes After That. It resets each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -23,8 +23,9 @@ func get_icon() -> String:
 	return 'flag'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'first'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -70,6 +71,6 @@ func get_flow_physics() -> String:
 func _body() -> String:
 	return 'if not did_{{VCNODE_ID}}:\n' \
 		+ '\tdid_{{VCNODE_ID}} = true\n' \
-		+ fire_body(&'first') + '\n' \
+		+ '\t{{first}}\n' \
 		+ 'else:\n' \
 		+ '\t{{rest}}'

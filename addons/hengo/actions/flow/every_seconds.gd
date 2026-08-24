@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Waits so many seconds, takes Time Up for one frame and starts counting again, over and over. With Seconds = 3, an enemy shoots every three seconds and the frames in between take Waiting. Cooldown is the one that fires right away and blocks afterwards. Actions nested inside it run on the frame the time is up.'
+	return 'Waits so many seconds, takes Time Up for one frame and starts counting again, over and over. With Seconds = 3, an enemy shoots every three seconds and the frames in between take Waiting. Cooldown is the one that fires right away and blocks afterwards. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -22,8 +22,9 @@ func get_icon() -> String:
 	return 'timer-reset'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'time_up'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -82,6 +83,6 @@ func _body() -> String:
 	return 'interval_{{VCNODE_ID}} += delta\n' \
 		+ 'if interval_{{VCNODE_ID}} >= {{seconds}}:\n' \
 		+ '\tinterval_{{VCNODE_ID}} = 0.0\n' \
-		+ fire_body(&'time_up') + '\n' \
+		+ '\t{{time_up}}\n' \
 		+ 'else:\n' \
 		+ '\t{{waiting}}'

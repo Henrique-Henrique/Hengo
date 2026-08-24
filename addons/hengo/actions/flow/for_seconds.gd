@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Does something for the first seconds only and then stops. With Seconds = 2, the first two seconds take During and every frame after that takes After That, which is how a dash or an invincibility window ends itself. The timer restarts each time the state is entered. Actions nested inside it run while the time is not up.'
+	return 'Does something for the first seconds only and then stops. With Seconds = 2, the first two seconds take During and every frame after that takes After That, which is how a dash or an invincibility window ends itself. The timer restarts each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.'
 
 
 func get_display_name() -> String:
@@ -22,8 +22,9 @@ func get_icon() -> String:
 	return 'hourglass'
 
 
-func get_has_body() -> bool:
-	return true
+# the branch the steps of an older save belong to
+func get_body_branch() -> StringName:
+	return &'during'
 
 
 # nothing nested and no branch wired means an if/else of two passes
@@ -81,6 +82,6 @@ func get_flow_physics() -> String:
 func _body() -> String:
 	return 'window_{{VCNODE_ID}} += delta\n' \
 		+ 'if window_{{VCNODE_ID}} < {{seconds}}:\n' \
-		+ fire_body(&'during') + '\n' \
+		+ '\t{{during}}\n' \
 		+ 'else:\n' \
 		+ '\t{{after}}'
