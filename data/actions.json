@@ -11753,51 +11753,6 @@
 		},
 		{
 			"branches": [],
-			"category": "render",
-			"color": "#f368e0",
-			"default_phase": "enter",
-			"description": "Paints a 3D mesh of the scene with a color, creating the material it needs when the mesh has none. Change Color only paints the node the script sits on.",
-			"has_body": false,
-			"icon": "paint-bucket",
-			"id": "set_mesh_color",
-			"inputs": [
-				{
-					"default": null,
-					"doc": "The mesh to paint, such as a MeshInstance3D. Leave it empty to paint this node.",
-					"id": "target",
-					"lvalue": false,
-					"name": "Target",
-					"optional": true,
-					"options": [],
-					"picker": "",
-					"type": "GeometryInstance3D",
-					"type_from": ""
-				},
-				{
-					"default": "(1.0, 1.0, 1.0, 1.0)",
-					"doc": "The color to apply.",
-					"id": "color",
-					"lvalue": false,
-					"name": "Color",
-					"optional": false,
-					"options": [],
-					"picker": "",
-					"type": "Color",
-					"type_from": ""
-				}
-			],
-			"name": "Set Mesh Color",
-			"outputs": [],
-			"phases": [
-				"enter",
-				"update",
-				"physics",
-				"exit"
-			],
-			"target_classes": []
-		},
-		{
-			"branches": [],
 			"category": "input",
 			"color": "#38bdf8",
 			"default_phase": "enter",
@@ -16974,7 +16929,7 @@
 		},
 		{
 			"color": "#f368e0",
-			"count": 6,
+			"count": 5,
 			"icon": "palette",
 			"id": "render",
 			"name": "Render"
