@@ -92,6 +92,8 @@ var _running_state: String = ''
 # into the same stack. the local one covers the paths that return before that
 var _history: HenFlowHistory = HenFlowHistory.new()
 var _history_script: String = ''
+# the script the cam is currently framing, so its view can be kept on the way out
+var _cam_script: String = ''
 
 
 func _ready() -> void:
@@ -209,6 +211,27 @@ func _cam() -> HenCam:
 		_cam_node = get_node_or_null('%Cam') as HenCam
 
 	return _cam_node
+
+
+# one cam frames one script at a time, so the outgoing view is kept until its tab
+# comes back
+func _store_cam_view(_global: HenGlobal) -> void:
+	if not _global or _cam_script.is_empty():
+		return
+
+	var cam: HenCam = _cam()
+
+	if cam:
+		_global.CAM_VIEWS[_cam_script] = cam.capture_view()
+
+
+func _restore_cam_view(_global: HenGlobal, _script_id: String) -> void:
+	var cam: HenCam = _cam()
+
+	if not _global or not cam:
+		return
+
+	cam.apply_view(_global.CAM_VIEWS.get(_script_id, {}))
 
 
 func _process(_delta: float) -> void:
@@ -445,6 +468,8 @@ func rebuild() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	if not global or not global.SAVE_DATA:
+		_store_cam_view(global)
+		_cam_script = ''
 		_clear()
 		return
 
@@ -456,6 +481,11 @@ func rebuild() -> void:
 	if script_id != _history_script:
 		_history_script = script_id
 		_history.clear()
+
+	if script_id != _cam_script:
+		_store_cam_view(global)
+		_cam_script = script_id
+		_restore_cam_view(global, script_id)
 
 	_clear()
 	_build_states(save_data)

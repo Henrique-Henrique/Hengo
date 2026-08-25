@@ -216,6 +216,36 @@ func reset_zoom() -> void:
 	_update_zoom_label()
 
 
+# a pan writes transform.origin straight and leaves pos behind, while a running
+# lerp has pos as the destination transform.origin is still travelling to
+func capture_view() -> Dictionary:
+	return {
+		origin = pos if is_physics_processing() else transform.origin,
+		zoom = target_zoom
+	}
+
+
+func apply_view(_view: Dictionary) -> void:
+	var zoom: float = clampf(_view.get('zoom', 1.0), MIN_ZOOM, MAX_ZOOM)
+	var origin: Vector2 = _view.get('origin', Vector2.ZERO)
+
+	target_zoom = zoom
+	t_x = Vector2(zoom, 0)
+	t_y = Vector2(0, zoom)
+	pos = origin
+	transform = Transform2D(t_x, t_y, origin)
+
+	ignore_process = false
+	set_physics_process(false)
+
+	if grid and grid.material:
+		var mat: ShaderMaterial = grid.material as ShaderMaterial
+		mat.set_shader_parameter('zoom_factor', zoom)
+		mat.set_shader_parameter('offset', origin)
+
+	_update_zoom_label()
+
+
 func _set_transform(_pos: Vector2) -> void:
 	ref_point.global_position = _pos
 

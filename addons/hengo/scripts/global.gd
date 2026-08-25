@@ -16,6 +16,8 @@ var SAVE_DATA: HenSaveData
 var OPEN_SCRIPTS: Array[HenSaveData] = []
 var ACTIVE_COLLECTION: HenSaveCollection
 var CURRENT_INSPECTOR: HenInspector
+# script id -> { origin: Vector2, zoom: float } of the flow canvas
+var CAM_VIEWS: Dictionary = {}
 var CODE_SEARCH: HenCodeSearch
 
 # CONFIG
