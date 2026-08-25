@@ -940,6 +940,12 @@ func _shortcut_input(event: InputEvent) -> void:
 	if general_popup and general_popup.has_open_popups():
 		return
 
+	# _shortcut_input runs for the whole editor, above godot's own undo binding
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+	if not global or not global.HENGO_ROOT or not global.HENGO_ROOT.has_input_focus():
+		return
+
 	# a bare letter is a shortcut only while nothing is being typed into
 	var focus: Control = get_viewport().gui_get_focus_owner()
 

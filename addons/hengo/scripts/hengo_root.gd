@@ -470,6 +470,20 @@ func schedule_check_errors() -> void:
 	_dirty = true
 	_debounce_time = 0.0
 
+
+# a dock keeps receiving editor-wide keys even while another editor panel is in use
+func has_input_focus() -> bool:
+	if not is_visible_in_tree():
+		return false
+
+	if get_global_rect().has_point(get_global_mouse_position()):
+		return true
+
+	var focus: Control = get_viewport().gui_get_focus_owner()
+
+	return focus != null and is_ancestor_of(focus)
+
+
 func _input(event: InputEvent) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
@@ -493,7 +507,13 @@ func _input(event: InputEvent) -> void:
 				if e.keycode == KEY_SPACE:
 					get_tree().root.set_input_as_handled()
 					global.HENGO_EDITOR_PLUGIN.hide_plugin()
-				elif e.keycode == KEY_E:
+					return
+
+			if not has_input_focus():
+				return
+
+			if e.shift_pressed:
+				if e.keycode == KEY_E:
 					if _sidebar_collapsed:
 						expand_sidebar()
 						var tabs: TabContainer = get_node_or_null('%SidebarTabContainer')
@@ -507,9 +527,7 @@ func _input(event: InputEvent) -> void:
 						code_generation.get_code(global.SAVE_DATA)
 					)
 			if e.ctrl_pressed:
-				# ctrl+z/ctrl+y are not handled here: as a bottom panel, _input grabs
-				# them editor-wide and blocks godot's own undo. the flow view binds
-				# them through HenShortcuts instead, above the unhandled layer
+				# ctrl+z/ctrl+y belong to the flow view, through HenShortcuts
 				if e.keycode == KEY_F:
 					get_tree().root.set_input_as_handled()
 					print('FORMATTED')
