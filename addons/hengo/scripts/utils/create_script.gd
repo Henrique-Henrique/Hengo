@@ -54,6 +54,11 @@ func create_script(_name: String, _class: StringName) -> Dictionary:
 	res.take_over_path(id_path.path_join(HenEnums.SAVE_FILE))
 
 	var result_identity: int = ResourceSaver.save(identity)
+
+	# the base state is its own file that save.res points at, and the folder only
+	# resolves by id once identity.res is on disk
+	HenUtils.save_side_bar_item(res.get_base_state(), identity.id, HenSideBar.SideBarItem.STATES)
+
 	var result: int = ResourceSaver.save(res)
 
 	if result != OK or result_identity != OK:
@@ -78,6 +83,6 @@ func get_save_content(_identity: HenSaveDataIdentity) -> HenSaveData:
 
 	save_data.identity = _identity
 	save_data.counter = 1
-
+	save_data.ensure_base_state()
 
 	return save_data

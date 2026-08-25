@@ -134,9 +134,10 @@ static func _do_add(_save_data: HenSaveData, _state: HenSaveState, _parent: HenS
 
 	_state.is_sub_state = _parent != null
 
-	# the flag is set after the append: its setter sweeps the siblings by looking
-	# for the list holding this state and would find none before it
+	# the flags are set after the append: the start setter sweeps the siblings by
+	# looking for the list holding this state and would find none before it
 	if list.size() == 1:
+		_state.is_base = not _parent
 		_state.start = true
 
 	if _save:
@@ -295,6 +296,10 @@ static func can_move(_save_data: HenSaveData, _state: HenSaveState, _parent: Hen
 
 	if _parent and descendants(_save_data, _state).has(_parent):
 		_notify('A state cannot be moved into one of its own sub-states.', HenToast.MessageType.ERROR)
+		return false
+
+	if _parent and _state.is_base:
+		_notify('The base state cannot be moved into another state.', HenToast.MessageType.ERROR)
 		return false
 
 	# the script machine would be left with no state to start on

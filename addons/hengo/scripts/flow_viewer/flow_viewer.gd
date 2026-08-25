@@ -110,6 +110,7 @@ func _ready() -> void:
 				signal_bus.get(signal_name).connect(_on_changed)
 
 		for pair: Array in [
+			[&'request_focus_state', focus_state],
 			[&'debug_state_changed', _on_debug_state_changed],
 			[&'debug_action_flow', _on_debug_action_flow],
 			[&'debug_state_transition', _on_debug_state_transition],
@@ -587,7 +588,7 @@ func _spawn_frame(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var frame: HenFlowStateFrame = HenFlowStateFrame.new()
 
 	nodes_container.add_child(frame)
-	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start)
+	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base)
 	frame.set_content_size(entry.size)
 
 	_frames[_node] = frame
@@ -1313,6 +1314,11 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if FRAME_BUTTONS.has(hit.kind):
 		return _dispatch_state_button(StringName(str(hit.kind)), hit.state, rect)
 
+	# the header band is the state itself, so picking it takes the view there, the
+	# same way a transition card does
+	if hit.kind == &'frame_header':
+		return focus_state(hit.state)
+
 	var card: HenFlowNodeCard = hit.get('card', null)
 
 	# the band around the buttons behaves like the canvas behind it
@@ -1346,7 +1352,7 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 		return true
 
 	# a transition card names where the flow goes, so it takes the reader there
-	if card.node.kind == &'transition' and _focus_state(card.node.title):
+	if card.node.kind == &'transition' and _focus_state_by_name(card.node.title):
 		return true
 
 	# always the editor, never the camera: a branch that already went somewhere could
@@ -1662,10 +1668,10 @@ func selected_actions() -> Array[HenSaveAction]:
 
 # a transition card only carries the target's name, and the flow view is one
 # script at a time, so a name is unique here
-func _focus_state(_name: String) -> bool:
+func _focus_state_by_name(_name: String) -> bool:
 	for entry: Variant in _states.values():
 		if (entry.state as HenSaveState).name == _name:
-			return _focus_frame(entry.state)
+			return focus_state(entry.state)
 
 	return false
 
@@ -1689,7 +1695,7 @@ func focus_action(_action_id: String, _keep: bool = true) -> bool:
 	return true
 
 
-func _focus_frame(_state: HenSaveState) -> bool:
+func focus_state(_state: HenSaveState) -> bool:
 	if not _state:
 		return false
 

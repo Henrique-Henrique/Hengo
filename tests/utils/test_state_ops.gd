@@ -165,3 +165,48 @@ func test_the_first_state_added_is_the_start() -> void:
 	var created: HenSaveState = HenStateOps.request_add_state(save_data, null, false)
 
 	assert_bool(created.start).is_true()
+	assert_bool(created.is_base).is_true()
+
+
+func test_a_sub_state_is_never_the_base() -> void:
+	var host: HenSaveState = save_data.add_state(false)
+	var created: HenSaveState = HenStateOps.request_add_state(save_data, host, false)
+
+	assert_bool(created.start).is_true()
+	assert_bool(created.is_base).is_false()
+
+
+func test_the_base_state_cannot_be_nested() -> void:
+	var base: HenSaveState = save_data.add_state(false)
+	var host: HenSaveState = save_data.add_state(false)
+
+	assert_bool(base.is_base).is_true()
+	assert_bool(HenStateOps.can_move(save_data, base, host)).is_false()
+
+
+# a script created from the panel already answers change_state on ready
+func test_a_fresh_script_gets_a_base_state() -> void:
+	var fresh: HenSaveData = HenSaveData.new()
+
+	fresh.identity = HenSaveDataIdentity.create(&'fresh', &'Node', 'Fresh')
+	fresh.counter = 1
+
+	var base: HenSaveState = fresh.ensure_base_state()
+
+	assert_str(base.name).is_equal(HenSaveState.BASE_NAME)
+	assert_bool(base.start).is_true()
+	assert_array(fresh.states).contains([base])
+
+
+# a script written before the base existed keeps the state it starts on
+func test_the_backfill_marks_the_state_that_starts() -> void:
+	save_data.add_state(false)
+
+	var second: HenSaveState = save_data.add_state(false)
+
+	for state: HenSaveState in save_data.states:
+		state.is_base = false
+
+	second.start = true
+
+	assert_object(save_data.ensure_base_state()).is_same(second)

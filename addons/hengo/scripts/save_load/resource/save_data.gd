@@ -84,12 +84,52 @@ func add_state(_save: bool = true) -> HenSaveState:
 	
 	states.append(s)
 
-	# the flag is set after the append, because its setter sweeps the siblings by
-	# looking for the list holding this state and would find none before it
+	# the flags are set after the append, because the start setter sweeps the
+	# siblings by looking for the list holding this state and would find none before
 	if states.size() == 1:
+		s.is_base = true
 		s.start = true
 
 	return s
+
+
+func new_counter_id() -> StringName:
+	counter += 1
+	return StringName(str(counter))
+
+
+func get_base_state() -> HenSaveState:
+	for state: HenSaveState in states:
+		if state.is_base:
+			return state
+
+	return null
+
+
+# every script keeps one top level state that cannot be deleted, so the machine
+# always has somewhere to start
+func ensure_base_state() -> HenSaveState:
+	var base: HenSaveState = get_base_state()
+
+	if base:
+		return base
+
+	for state: HenSaveState in states:
+		if state.start:
+			base = state
+			break
+
+	if not base and not states.is_empty():
+		base = states[0]
+
+	if not base:
+		base = HenSaveState.create(false, self)
+		base.name = HenSaveState.BASE_NAME
+		states.append(base)
+		base.start = true
+
+	base.is_base = true
+	return base
 
 
 

@@ -58,6 +58,9 @@ class DeleteResourceCommand:
 
 
 	func can_remove() -> bool:
+		if meta is HenSaveState and (meta as HenSaveState).is_base:
+			return false
+
 		return not removed_items.is_empty()
 
 
@@ -356,6 +359,10 @@ func get_inspect_actions(meta: Variant) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
 
 	if meta is HenSaveState:
+		# the base state stays put and stays alive, so it gets no entry at all
+		if (meta as HenSaveState).is_base:
+			return actions
+
 		actions.append(HenStateOps.move_action(meta as HenSaveState))
 
 	actions.append(
@@ -372,6 +379,14 @@ func get_inspect_actions(meta: Variant) -> Array[Dictionary]:
 
 func confirm_delete_resource(meta: HenSaveResType) -> void:
 	if not meta:
+		return
+
+	if meta is HenSaveState and (meta as HenSaveState).is_base:
+		var toast: HenToast = Engine.get_singleton(&'ToastContainer')
+
+		if toast and toast.is_inside_tree():
+			toast.notify('The base state cannot be deleted.', HenToast.MessageType.ERROR)
+
 		return
 
 	var message: String = "Are you sure you want to delete '%s'?" % meta.name
@@ -547,9 +562,20 @@ func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_c
 func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
 	match mouse_button_index:
 		MOUSE_BUTTON_LEFT:
-			pass
+			_focus_state_in_graph(meta)
 		MOUSE_BUTTON_RIGHT:
 			HenInspector.edit_resource(meta, get_inspect_title(meta), get_inspect_actions(meta), get_inspect_popup_opts())
+
+
+# the row names a state the graph already draws, so picking it takes the view there
+func _focus_state_in_graph(_meta: Variant) -> void:
+	if not _meta is HenSaveState:
+		return
+
+	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
+
+	if signal_bus:
+		signal_bus.request_focus_state.emit(_meta as HenSaveState)
 
 # nothing is selected by route any more: a row is picked, not navigated to
 func _is_meta_selected(_meta: Variant) -> bool:

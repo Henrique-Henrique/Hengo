@@ -15,6 +15,9 @@ signal request_list_update
 
 signal request_structural_update
 
+# a state was picked outside the graph, which is asked to centre the view on it
+signal request_focus_state(_state: HenSaveState)
+
 # emitted whenever the active route changes
 
 # set to true during batch compilation to suppress thread-unsafe UI signals

@@ -67,16 +67,18 @@ var _header_h: float = 0.0
 var _final_size: Vector2 = Vector2.ZERO
 var _running: bool = false
 var _is_start: bool = false
+var _is_base: bool = false
 var _errors: int = 0
 var _hover_kind: StringName = &''
 var _hits: Array[Dictionary] = []
 
 
-func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color, _start: bool = false) -> void:
+func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color, _start: bool = false, _base: bool = false) -> void:
 	_host = _host_control
 	state_name = _name
 	_accent = _accent_color
 	_is_start = _start
+	_is_base = _base
 
 	_painter.bind(_host)
 
@@ -242,10 +244,11 @@ func _emit_buttons(_size: Vector2, _centre: float) -> void:
 	_emit_menu(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)))
 	x -= BT_SIZE + BT_GAP
 
-	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_TRASH, DELETE_COLOR, &'state_delete')
+	# the script always keeps its base state, so it neither goes nor moves away
+	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_TRASH, DELETE_COLOR, &'state_delete', not _is_base)
 	x -= BT_SIZE + BT_GAP
 
-	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_MOVE, BT_COLOR, &'state_move')
+	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_MOVE, BT_COLOR, &'state_move', not _is_base)
 	x -= BT_SIZE + BT_GAP
 
 	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_ADD_SUB, BT_COLOR, &'state_add_sub')

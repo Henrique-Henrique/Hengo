@@ -22,7 +22,7 @@ func reset_to_load(_id: StringName, _headless: bool) -> void:
 
  
 
-func load_res(_res_id: StringName) -> HenSaveData:
+func load_res(_res_id: StringName, _migrate_base: bool = false) -> HenSaveData:
 	var save_data: HenSaveData
 	var path: String = HenUtils.get_script_dir(_res_id).path_join(HenEnums.SAVE_FILE)
 
@@ -33,12 +33,30 @@ func load_res(_res_id: StringName) -> HenSaveData:
 		if signal_bus:
 			signal_bus.is_batch_loading = true
 		save_data = ResourceLoader.load(path)
+		_ensure_base_state(save_data, _migrate_base)
 		if signal_bus:
 			signal_bus.is_batch_loading = prev_batch
 	else:
 		print('error loading save: ', path)
 
 	return save_data
+
+
+# scripts written before the base state existed get theirs on the way in. writing
+# it back is left to the paths that open a script, because the dependency scan
+# reaches this from the codegen worker thread
+func _ensure_base_state(_save_data: HenSaveData, _migrate: bool) -> void:
+	if not _save_data or not _save_data.identity or _save_data.get_base_state():
+		return
+
+	var base: HenSaveState = _save_data.ensure_base_state()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not _migrate or not base or (global and global.IS_HEADLESS):
+		return
+
+	HenUtils.save_side_bar_item(base, _save_data.identity.id, HenSideBar.SideBarItem.STATES)
+	ResourceSaver.save(_save_data)
 
 
 func load_collection_res(_collection_id: StringName) -> HenSaveCollection:
@@ -64,7 +82,7 @@ func load_collection(_collection_id: StringName, _headless: bool = false) -> boo
 	global.OPEN_SCRIPTS.clear()
 
 	for script_id: StringName in collection.script_ids:
-		var save_data: HenSaveData = load_res(script_id)
+		var save_data: HenSaveData = load_res(script_id, true)
 		if save_data:
 			global.OPEN_SCRIPTS.append(save_data)
 
@@ -153,7 +171,7 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 	if _override_data:
 		save_data = _override_data
 	else:
-		save_data = load_res(_id)
+		save_data = load_res(_id, true)
 
 	# loading hengo script data
 	if save_data:

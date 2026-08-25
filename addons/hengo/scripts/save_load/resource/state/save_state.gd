@@ -1,9 +1,12 @@
 @tool
 class_name HenSaveState extends HenSaveResTypeWithRoute
 
+const BASE_NAME: String = 'base'
+
 @export var flow_outputs: Array[HenSaveFlowParam]
 @export var transition_data: Array[HenSaveParam]
 @export var is_sub_state: bool
+@export var is_base: bool = false
 @export var start: bool = false:
 	set(value):
 		if start == value: return
@@ -24,11 +27,13 @@ class_name HenSaveState extends HenSaveResTypeWithRoute
 
 # a state is its name and its action list now: the route and the scaffolding
 # vcnodes that used to stand for each phase are gone
-static func create(_is_sub_state: bool = false) -> HenSaveState:
+static func create(_is_sub_state: bool = false, _owner: HenSaveData = null) -> HenSaveState:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var state: HenSaveState = HenSaveState.new()
 
-	state.id = global.get_new_node_counter()
+	# the global counter belongs to the active script, which is not the one being
+	# built when a script is created while another is open
+	state.id = _owner.new_counter_id() if _owner else global.get_new_node_counter()
 	state.name = state.get_new_name()
 	state.is_sub_state = _is_sub_state
 
@@ -86,7 +91,7 @@ func _get_resource_info() -> Dictionary:
 
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
-	if _property.name in [&'is_sub_state']:
+	if _property.name in [&'is_sub_state', &'is_base']:
 		_property.usage = PROPERTY_USAGE_STORAGE
 
 
