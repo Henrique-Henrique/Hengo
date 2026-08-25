@@ -87,6 +87,50 @@ static func _migrate_list(_actions: Array) -> void:
 		action.body_actions.clear()
 
 
+# an action clones the macro inputs when it is created, so one that predates a new
+# input never draws its slot. matched by id, placed where the macro declares it
+static func sync_macro_inputs(_save_data: HenSaveData) -> void:
+	if not _save_data:
+		return
+
+	for state: HenSaveState in _save_data.states:
+		_sync_list(_save_data.get_state_actions(state.id))
+
+	for sub_list: Variant in _save_data.sub_states.values():
+		for state: HenSaveState in sub_list:
+			_sync_list(_save_data.get_state_actions(state.id))
+
+
+static func _sync_list(_actions: Array) -> void:
+	for action: HenSaveAction in _actions:
+		for list: Array in HenGeneratorAction.nested_lists(action):
+			_sync_list(list)
+
+		for nested: Variant in action.input_actions.values():
+			var child: HenSaveAction = HenGeneratorAction._inline_child(nested)
+
+			if child:
+				_sync_list([child])
+
+		var macro: HenSaveMacro = HenActionsPanel.find_macro(action.macro_id)
+
+		if not macro:
+			continue
+
+		var held: Dictionary = {}
+
+		for param: HenSaveParam in action.inputs:
+			held[str(param.id)] = true
+
+		for index: int in macro.inputs.size():
+			var declared: HenSaveParam = macro.inputs[index]
+
+			if held.has(str(declared.id)):
+				continue
+
+			action.inputs.insert(mini(index, action.inputs.size()), HenSaveParam.create(declared.get_data()))
+
+
 func get_new_name() -> String:
 	return 'action_' + str(id)
 

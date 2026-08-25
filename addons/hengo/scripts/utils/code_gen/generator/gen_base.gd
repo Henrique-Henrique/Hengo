@@ -8,7 +8,7 @@ const _EVENTS = {events}
 func _init() -> void:
 	_STATE_CONTROLLER.set_states({
 {states_dict}
-	})
+	}){reenterable}
 
 
 func _ready() -> void:
@@ -96,6 +96,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 		_process = '\n'.join(process_code),
 		_physics_process = '\n'.join(physics_process_code),
 		custom_virtuals = (custom_virtual_code + '\n') if not custom_virtual_code.is_empty() else '',
+		reenterable = HenGeneratorState.get_reenterable_code(_save_data),
 		states_dict = HenGeneratorState.get_states_start_code(_save_data),
 		states = HenGeneratorState.get_states_code(_save_data)
 	})

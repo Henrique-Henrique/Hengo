@@ -28,6 +28,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node that does the facing. Leave it empty to check this node.'),
 		{
 			name = 'Target',
 			type = 'Variant',
@@ -77,7 +78,7 @@ func get_flow_physics() -> String:
 func _body() -> String:
 	return 'var target_{{VCNODE_ID}} = {{target}}\n' \
 		+ 'var point_{{VCNODE_ID}} = target_{{VCNODE_ID}}.global_position if target_{{VCNODE_ID}} is Node2D else target_{{VCNODE_ID}}\n' \
-		+ 'if absf(_ref.get_angle_to(point_{{VCNODE_ID}})) <= deg_to_rad({{angle}}):\n' \
+		+ 'if absf({{ref}}.get_angle_to(point_{{VCNODE_ID}})) <= deg_to_rad({{angle}}):\n' \
 		+ '\t{{facing}}\n' \
 		+ 'else:\n' \
 		+ '\t{{away}}'

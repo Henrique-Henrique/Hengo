@@ -27,6 +27,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to resize. Leave it empty to resize this node.'),
 		{
 			name = 'Scale',
 			type = 'Vector3',
@@ -58,4 +59,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.scale = {{scale}}'
+	return '{{ref}}.scale = {{scale}}'

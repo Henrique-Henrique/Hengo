@@ -30,6 +30,12 @@ func get_default_phase() -> StringName:
 	return &'update'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The node to read the facing of. Leave it empty to read this node.')
+	]
+
+
 func get_outputs() -> Array[Dictionary]:
 	return [
 		{name = 'Forward', type = 'Vector2', id = &'forward', doc = 'Where to store the facing direction, as a unit vector.'}
@@ -38,7 +44,7 @@ func get_outputs() -> Array[Dictionary]:
 
 # a Node2D with no rotation faces right, which is where its sprite is drawn facing
 func get_output_forward() -> String:
-	return 'Vector2.RIGHT.rotated(_ref.global_rotation)'
+	return 'Vector2.RIGHT.rotated({{ref}}.global_rotation)'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

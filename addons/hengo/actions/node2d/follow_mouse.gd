@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to move. Leave it empty to move this node.'),
 		{
 			name = 'Speed',
 			type = 'float',
@@ -54,5 +55,5 @@ func get_flow_inputs() -> Array[Dictionary]:
 func get_flow_update() -> String:
 	return 'var mouse_{{VCNODE_ID}}: Vector2 = _ref.get_global_mouse_position()\n' \
 		+ 'if {{rotate}}:\n' \
-		+ '\t_ref.look_at(mouse_{{VCNODE_ID}})\n' \
-		+ '_ref.position = _ref.position.move_toward(mouse_{{VCNODE_ID}}, {{speed}} * delta)'
+		+ '\t{{ref}}.look_at(mouse_{{VCNODE_ID}})\n' \
+		+ '{{ref}}.position = {{ref}}.position.move_toward(mouse_{{VCNODE_ID}}, {{speed}} * delta)'

@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node whose method is called.',
+			doc = 'The node to call the method on. Leave it empty to call it on this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

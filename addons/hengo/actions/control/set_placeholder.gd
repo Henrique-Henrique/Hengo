@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'LineEdit',
 			id = &'target',
-			doc = 'The text field to set the hint on.',
+			doc = 'The text field to change. Leave it empty to change this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

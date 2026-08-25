@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node to locate on the screen, a 2D or a 3D one.',
+			doc = 'The node to project onto the screen. Leave it empty to project this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

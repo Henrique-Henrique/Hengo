@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to move. Leave it empty to move this node.'),
 		{
 			name = 'Speed',
 			type = 'float',
@@ -68,4 +69,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.velocity = Vector2.RIGHT.rotated(_ref.rotation) * {{speed}}'
+	return '{{ref}}.velocity = Vector2.RIGHT.rotated({{ref}}.rotation) * {{speed}}'

@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to spin. Leave it empty to spin this node.'),
 		{
 			name = 'Axis',
 			type = 'Vector3',
@@ -55,16 +56,16 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 
 func get_flow_enter() -> String:
-	return '_ref.rotate({{axis}}.normalized(), deg_to_rad({{speed}}))'
+	return '{{ref}}.rotate({{axis}}.normalized(), deg_to_rad({{speed}}))'
 
 
 func get_flow_update() -> String:
-	return '_ref.rotate({{axis}}.normalized(), deg_to_rad({{speed}}) * delta)'
+	return '{{ref}}.rotate({{axis}}.normalized(), deg_to_rad({{speed}}) * delta)'
 
 
 func get_flow_physics() -> String:
-	return '_ref.rotate({{axis}}.normalized(), deg_to_rad({{speed}}) * delta)'
+	return '{{ref}}.rotate({{axis}}.normalized(), deg_to_rad({{speed}}) * delta)'
 
 
 func get_flow_exit() -> String:
-	return '_ref.rotate({{axis}}.normalized(), deg_to_rad({{speed}}))'
+	return '{{ref}}.rotate({{axis}}.normalized(), deg_to_rad({{speed}}))'

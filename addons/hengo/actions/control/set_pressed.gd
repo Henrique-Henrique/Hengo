@@ -31,10 +31,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'BaseButton',
 			id = &'target',
-			doc = 'The toggle button to set.',
+			doc = 'The button to press or release. Leave it empty to change this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

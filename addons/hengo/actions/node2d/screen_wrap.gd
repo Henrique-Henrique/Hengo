@@ -30,6 +30,12 @@ func get_default_phase() -> StringName:
 	return &'physics'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The node to wrap around the screen. Leave it empty to wrap this node.')
+	]
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Update', id = &'update'},
@@ -47,7 +53,7 @@ func get_flow_physics() -> String:
 
 func _body() -> String:
 	return 'var rect_{{VCNODE_ID}} = _ref.get_viewport_rect()\n' \
-		+ 'var pos_{{VCNODE_ID}} = _ref.global_position\n' \
+		+ 'var pos_{{VCNODE_ID}} = {{ref}}.global_position\n' \
 		+ 'pos_{{VCNODE_ID}}.x = wrapf(pos_{{VCNODE_ID}}.x, rect_{{VCNODE_ID}}.position.x, rect_{{VCNODE_ID}}.end.x)\n' \
 		+ 'pos_{{VCNODE_ID}}.y = wrapf(pos_{{VCNODE_ID}}.y, rect_{{VCNODE_ID}}.position.y, rect_{{VCNODE_ID}}.end.y)\n' \
-		+ '_ref.global_position = pos_{{VCNODE_ID}}'
+		+ '{{ref}}.global_position = pos_{{VCNODE_ID}}'

@@ -31,6 +31,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to spin. Leave it empty to spin this node.'),
 		{
 			name = 'Speed',
 			type = 'float',
@@ -68,4 +69,4 @@ func get_flow_exit() -> String:
 
 # angular_velocity is in radians, and every angle in the catalog is degrees
 func _body() -> String:
-	return '_ref.angular_velocity = deg_to_rad({{speed}})'
+	return '{{ref}}.angular_velocity = deg_to_rad({{speed}})'

@@ -31,6 +31,20 @@ static func get_states_start_code(_save_data: HenSaveData) -> String:
 	return code
 
 
+# the flag rides the instance, so the states dict stays a plain literal
+static func get_reenterable_code(_save_data: HenSaveData) -> String:
+	var names: Array[String] = []
+
+	for state: HenSaveState in _save_data.states:
+		if state.can_reenter:
+			names.append('"' + state.name.to_snake_case() + '"')
+
+	if names.is_empty():
+		return ''
+
+	return '\n\t_STATE_CONTROLLER.set_reenterable([{names}])'.format({names = ', '.join(names)})
+
+
 static func get_states_code(_save_data: HenSaveData) -> String:
 	return get_states_code_with_arr(_save_data, _save_data.states)
 
@@ -95,9 +109,10 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 			for sub_state: HenSaveState in sub_states:
 				if sub_state.start:
 					start_sub_state = sub_state
-				sub_state_tokens.append('add_sub_state("{name_key}", {name}.new(_p))'.format(({
+				sub_state_tokens.append('add_sub_state("{name_key}", {name}.new(_p){reenter})'.format(({
 					name_key = sub_state.name.to_snake_case(),
-					name = sub_state.name.to_pascal_case()
+					name = sub_state.name.to_pascal_case(),
+					reenter = ', true' if sub_state.can_reenter else ''
 				})))
 			
 			virtual_tokens.set('_init', {

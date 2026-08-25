@@ -24,6 +24,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to resize. Leave it empty to resize this node.'),
 		{
 			name = 'To',
 			type = 'Vector3',
@@ -56,4 +57,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return start_tween('tween_property(_ref, "scale", {{to}}, {{duration}})')
+	return start_tween('tween_property({{ref}}, "scale", {{to}}, {{duration}})')

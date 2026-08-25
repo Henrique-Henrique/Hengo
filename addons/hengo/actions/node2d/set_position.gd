@@ -27,6 +27,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to place. Leave it empty to place this node.'),
 		{
 			name = 'Position',
 			type = 'Vector2',
@@ -58,4 +59,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.position = {{position}}'
+	return '{{ref}}.position = {{position}}'

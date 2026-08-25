@@ -22,6 +22,7 @@ const BASE_NAME: String = 'base'
 
 		if signal_bus and not batch_loading:
 			signal_bus.request_structural_update.emit()
+@export var can_reenter: bool = false
 @export_multiline var description: String = ''
 
 

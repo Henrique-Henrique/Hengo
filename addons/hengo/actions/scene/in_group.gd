@@ -20,6 +20,7 @@ func get_icon() -> String:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to check. Leave it empty to check this node.'),
 		{
 			name = 'Group',
 			type = 'StringName',
@@ -38,7 +39,7 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_result() -> String:
-	return '_ref.is_in_group({{group}})'
+	return '{{ref}}.is_in_group({{group}})'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

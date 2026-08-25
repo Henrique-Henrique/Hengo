@@ -32,6 +32,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to spin. Leave it empty to spin this node.'),
 		{
 			name = 'Torque',
 			type = 'Vector3',
@@ -63,4 +64,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return '_ref.apply_torque_impulse({{torque}})'
+	return '{{ref}}.apply_torque_impulse({{torque}})'

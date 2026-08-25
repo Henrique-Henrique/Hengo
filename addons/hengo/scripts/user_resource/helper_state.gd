@@ -3,6 +3,7 @@ class_name HengoState
 var _ref
 var _transitions: Dictionary
 var _d_counter: float
+var _can_reenter: bool = false
 
 var _script_id: String = ''
 
@@ -33,10 +34,11 @@ var _sub_name: String = ''
 var previous_sub_state_name: String = ''
 
 
-func add_sub_state(_name: String, _state: HengoState) -> void:
+func add_sub_state(_name: String, _state: HengoState, _reenter: bool = false) -> void:
 	sub_states[_name] = _state
 	_state._parent_ref = weakref(self)
 	_state._sub_name = _name
+	_state._can_reenter = _reenter
 
 
 # returns to whoever was running before this state took over. a sub-state hands
@@ -56,7 +58,11 @@ func go_back() -> void:
 func change_sub_state(_name: String, ..._args) -> void:
 	if not sub_states.has(_name):
 		return
-		
+
+	# a state only runs again from the outside when it opts in
+	if current_sub_state and sub_states.get(_name) == current_sub_state and not current_sub_state._can_reenter:
+		return
+
 	if current_sub_state:
 		previous_sub_state_name = current_sub_state._sub_name
 		current_sub_state.exit()

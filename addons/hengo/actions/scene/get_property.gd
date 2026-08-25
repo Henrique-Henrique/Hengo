@@ -24,8 +24,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node to read the value from.',
+			doc = 'The node to read from. Leave it empty to read this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

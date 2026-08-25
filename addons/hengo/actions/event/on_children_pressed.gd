@@ -31,10 +31,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Container',
-			type = 'Node',
+			type = 'Container',
 			id = &'container',
-			doc = 'The node whose child buttons to watch, such as a hand or a menu.',
+			doc = 'The node whose buttons are watched. Leave it empty to watch the children of this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

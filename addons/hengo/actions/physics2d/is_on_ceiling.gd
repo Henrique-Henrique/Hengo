@@ -29,6 +29,11 @@ func get_default_phase() -> StringName:
 	return &'physics'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The body to check. Leave it empty to check this node.'),
+	]
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -57,4 +62,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return 'if _ref.is_on_ceiling():\n\t{{true}}\nelse:\n\t{{false}}'
+	return 'if {{ref}}.is_on_ceiling():\n\t{{true}}\nelse:\n\t{{false}}'

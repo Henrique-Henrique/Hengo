@@ -28,6 +28,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node that looks. Leave it empty to look from this node.'),
 		{
 			name = 'Target',
 			type = 'Node',
@@ -71,7 +72,7 @@ func _body() -> String:
 	if targets(&'Node3D'):
 		return 'var target_{{VCNODE_ID}} = {{target}}\n' \
 			+ _self_skip(&'CollisionObject3D') \
-			+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters3D.create(_ref.global_position, target_{{VCNODE_ID}}.global_position)\n' \
+			+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters3D.create({{ref}}.global_position, target_{{VCNODE_ID}}.global_position)\n' \
 			+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 			+ 'var hit_{{VCNODE_ID}} = _ref.get_world_3d().direct_space_state.intersect_ray(query_{{VCNODE_ID}})\n' \
 			+ 'if hit_{{VCNODE_ID}}.is_empty() or hit_{{VCNODE_ID}}.collider == target_{{VCNODE_ID}}:\n' \
@@ -81,7 +82,7 @@ func _body() -> String:
 
 	return 'var target_{{VCNODE_ID}} = {{target}}\n' \
 		+ _self_skip(&'CollisionObject2D') \
-		+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters2D.create(_ref.global_position, target_{{VCNODE_ID}}.global_position)\n' \
+		+ 'var query_{{VCNODE_ID}} = PhysicsRayQueryParameters2D.create({{ref}}.global_position, target_{{VCNODE_ID}}.global_position)\n' \
 		+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 		+ 'var hit_{{VCNODE_ID}} = _ref.get_world_2d().direct_space_state.intersect_ray(query_{{VCNODE_ID}})\n' \
 		+ 'if hit_{{VCNODE_ID}}.is_empty() or hit_{{VCNODE_ID}}.collider == target_{{VCNODE_ID}}:\n' \
@@ -96,4 +97,4 @@ func _self_skip(_class: StringName) -> String:
 	if not targets(_class):
 		return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n'
 
-	return 'var skip_{{VCNODE_ID}}: Array[RID] = [(_ref as ' + str(_class) + ').get_rid()]\n'
+	return 'var skip_{{VCNODE_ID}}: Array[RID] = [({{ref}} as ' + str(_class) + ').get_rid()]\n'

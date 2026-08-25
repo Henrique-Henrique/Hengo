@@ -24,6 +24,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to destroy. Leave it empty to destroy this node.'),
 		{
 			name = 'Seconds',
 			type = 'float',
@@ -45,4 +46,4 @@ func get_flow_enter() -> String:
 
 
 func _body() -> String:
-	return '_ref.get_tree().create_timer({{seconds}}).timeout.connect(_ref.queue_free)'
+	return '_ref.get_tree().create_timer({{seconds}}).timeout.connect({{ref}}.queue_free)'

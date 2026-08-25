@@ -107,6 +107,7 @@ func load_collection(_collection_id: StringName, _headless: bool = false) -> boo
 	global.SAVE_DATA = active
 	reset_to_load(active.identity.id, _headless)
 	_apply_active(active, _headless)
+	_migrate_open_scripts()
 
 	HenCam.set_all_can_scroll(get_tree(), true)
 	global.DASHBOARD.hide_dashboard()
@@ -146,6 +147,14 @@ func _resolve_active(_collection: HenSaveCollection) -> HenSaveData:
 	return global.OPEN_SCRIPTS[0]
 
 
+# runs after the macro pool: the macro is what names the branch an older body moves
+# to, and what tells an older action clone which input it is missing
+func _migrate_open_scripts() -> void:
+	for save_data: HenSaveData in (Engine.get_singleton(&'Global') as HenGlobal).OPEN_SCRIPTS:
+		HenSaveAction.migrate_branch_bodies(save_data)
+		HenSaveAction.sync_macro_inputs(save_data)
+
+
 # wires the active script into the ui (route, sidebar, class name)
 func _apply_active(_save_data: HenSaveData, _headless: bool) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -182,8 +191,7 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 		HenScriptMacroLoader.load_script_macros()
 		HenScriptMacroLoader.load_native_actions()
 
-		# after the pool: the macro is what names the branch an older body moves to
-		HenSaveAction.migrate_branch_bodies(save_data)
+		_migrate_open_scripts()
 
 		reset_to_load(_id, _headless)
 	else:

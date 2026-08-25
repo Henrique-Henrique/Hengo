@@ -33,6 +33,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to move. Leave it empty to move this node.'),
 		{
 			name = 'Direction',
 			type = 'Vector2',
@@ -67,6 +68,6 @@ func get_flow_physics() -> String:
 
 func _body() -> String:
 	return 'var dir_{{VCNODE_ID}}: Vector2 = {{direction}}\n' \
-		+ 'var world_{{VCNODE_ID}}: Vector3 = (_ref.transform.basis * Vector3(dir_{{VCNODE_ID}}.x, 0, dir_{{VCNODE_ID}}.y)).normalized()\n' \
-		+ '_ref.velocity.x = world_{{VCNODE_ID}}.x * {{speed}}\n' \
-		+ '_ref.velocity.z = world_{{VCNODE_ID}}.z * {{speed}}'
+		+ 'var world_{{VCNODE_ID}}: Vector3 = ({{ref}}.transform.basis * Vector3(dir_{{VCNODE_ID}}.x, 0, dir_{{VCNODE_ID}}.y)).normalized()\n' \
+		+ '{{ref}}.velocity.x = world_{{VCNODE_ID}}.x * {{speed}}\n' \
+		+ '{{ref}}.velocity.z = world_{{VCNODE_ID}}.z * {{speed}}'

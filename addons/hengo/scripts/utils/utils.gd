@@ -740,6 +740,15 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 	return null
 
 
+# a node slot that falls back to the node the script sits on when nobody binds it,
+# which is what an action reads through {{ref}}
+static func is_node_ref_slot(_type: StringName, _bind_only: bool, _optional: bool) -> bool:
+	if not _bind_only or not _optional or not ClassDB.class_exists(_type):
+		return false
+
+	return ClassDB.is_parent_class(_type, &'Node')
+
+
 static func is_abstract_class_needing_connection(_type: StringName, _identity_type: StringName) -> bool:
 	if not ClassDB.class_exists(_type) or not _identity_type:
 		return false

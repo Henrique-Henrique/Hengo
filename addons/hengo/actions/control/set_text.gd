@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'Control',
 			id = &'target',
-				doc = 'The Control node to write text to.',
+				doc = 'The node to write text to, such as a Label or Button. Leave it empty to write to this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

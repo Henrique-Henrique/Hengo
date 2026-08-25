@@ -27,6 +27,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to turn. Leave it empty to turn this node.'),
 		{
 			name = 'Target',
 			type = 'Vector2',
@@ -58,4 +59,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.look_at({{target}})'
+	return '{{ref}}.look_at({{target}})'

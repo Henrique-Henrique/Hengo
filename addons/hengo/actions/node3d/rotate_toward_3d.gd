@@ -37,6 +37,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to turn. Leave it empty to turn this node.'),
 		{
 			name = 'Target',
 			type = 'Vector3',
@@ -100,9 +101,9 @@ func get_flow_physics() -> String:
 # direction to face
 func _turn() -> String:
 	return 'var to_{{VCNODE_ID}} = {{target}}\n' \
-		+ 'if not _ref.global_position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
-		+ '\tvar aim_{{VCNODE_ID}} = _ref.global_transform.looking_at(to_{{VCNODE_ID}}, {{up}}).basis.get_rotation_quaternion()\n' \
-		+ '\tvar spin_{{VCNODE_ID}} = _ref.global_basis.get_rotation_quaternion()\n' \
+		+ 'if not {{ref}}.global_position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
+		+ '\tvar aim_{{VCNODE_ID}} = {{ref}}.global_transform.looking_at(to_{{VCNODE_ID}}, {{up}}).basis.get_rotation_quaternion()\n' \
+		+ '\tvar spin_{{VCNODE_ID}} = {{ref}}.global_basis.get_rotation_quaternion()\n' \
 		+ '\tvar gap_{{VCNODE_ID}} = spin_{{VCNODE_ID}}.angle_to(aim_{{VCNODE_ID}})\n' \
 		+ '\tif gap_{{VCNODE_ID}} > 0.0:\n' \
 		+ '\t\t_ref.global_basis = Basis(spin_{{VCNODE_ID}}.slerp(aim_{{VCNODE_ID}}, clampf(deg_to_rad({{speed}}) * delta / gap_{{VCNODE_ID}}, 0.0, 1.0)))'
@@ -113,7 +114,7 @@ func _body() -> String:
 		return _turn()
 
 	return _turn() + '\n' \
-		+ 'if (-_ref.global_basis.z).angle_to(to_{{VCNODE_ID}} - _ref.global_position) <= ' + str(AIM_TOLERANCE) + ':\n' \
+		+ 'if (-{{ref}}.global_basis.z).angle_to(to_{{VCNODE_ID}} - {{ref}}.global_position) <= ' + str(AIM_TOLERANCE) + ':\n' \
 		+ '\t{{aimed}}\n' \
 		+ 'else:\n' \
 		+ '\t{{turning}}'

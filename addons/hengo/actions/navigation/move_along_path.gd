@@ -28,6 +28,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to move along the path. Leave it empty to move this node.'),
 		{
 			name = 'Agent',
 			type = 'Node',
@@ -64,10 +65,10 @@ func get_flow_physics() -> String:
 # 3d keeps velocity.y so the gravity written by another action is not wiped each frame
 func _body() -> String:
 	if targets(&'CharacterBody3D'):
-		return 'var to_{{VCNODE_ID}} = {{agent}}.get_next_path_position() - _ref.global_position\n' \
+		return 'var to_{{VCNODE_ID}} = {{agent}}.get_next_path_position() - {{ref}}.global_position\n' \
 			+ 'var dir_{{VCNODE_ID}} = Vector3(to_{{VCNODE_ID}}.x, 0.0, to_{{VCNODE_ID}}.z).normalized()\n' \
-			+ '_ref.velocity = Vector3(dir_{{VCNODE_ID}}.x * {{speed}}, _ref.velocity.y, dir_{{VCNODE_ID}}.z * {{speed}})\n' \
-			+ '_ref.move_and_slide()'
+			+ '{{ref}}.velocity = Vector3(dir_{{VCNODE_ID}}.x * {{speed}}, {{ref}}.velocity.y, dir_{{VCNODE_ID}}.z * {{speed}})\n' \
+			+ '{{ref}}.move_and_slide()'
 
-	return '_ref.velocity = _ref.global_position.direction_to({{agent}}.get_next_path_position()) * {{speed}}\n' \
-		+ '_ref.move_and_slide()'
+	return '{{ref}}.velocity = {{ref}}.global_position.direction_to({{agent}}.get_next_path_position()) * {{speed}}\n' \
+		+ '{{ref}}.move_and_slide()'

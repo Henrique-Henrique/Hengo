@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'Control',
 			id = &'target',
-			doc = 'The Control node to set the tooltip on.',
+			doc = 'The node to give the tooltip to. Leave it empty to change this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

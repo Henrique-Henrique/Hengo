@@ -33,6 +33,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to move. Leave it empty to move this node.'),
 		{
 			name = 'Motion',
 			type = 'Vector2',
@@ -87,7 +88,7 @@ func get_flow_physics() -> String:
 
 # the outputs land inside the hit branch, so an unbound one just drops its line
 func _body() -> String:
-	return 'var col_{{VCNODE_ID}} = _ref.move_and_collide({{motion}})\n' \
+	return 'var col_{{VCNODE_ID}} = {{ref}}.move_and_collide({{motion}})\n' \
 		+ 'if col_{{VCNODE_ID}}:\n' \
 		+ '\t{{out:collider}}\n' \
 		+ '\t{{out:point}}\n' \

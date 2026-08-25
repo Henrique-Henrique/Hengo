@@ -24,6 +24,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to turn. Leave it empty to turn this node.'),
 		{
 			name = 'To Degrees',
 			type = 'Vector3',
@@ -57,4 +58,4 @@ func get_flow_physics() -> String:
 
 # rotation_degrees keeps the 2d unit convention, deg_to_rad has no Vector3 form
 func _body() -> String:
-	return start_tween('tween_property(_ref, "rotation_degrees", {{to}}, {{duration}})')
+	return start_tween('tween_property({{ref}}, "rotation_degrees", {{to}}, {{duration}})')

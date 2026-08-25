@@ -2,9 +2,6 @@
 class_name HenActionGetNode extends HenScriptMacroBase
 
 
-# writes a node of the scene into Store, so the other actions can act on it.
-
-
 func get_id() -> StringName:
 	return &'get_node'
 
@@ -27,11 +24,12 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the path starts from. Leave it empty to start from this node.', 'From'),
 		{
 			name = 'Path',
 			type = 'String',
 			id = &'path',
-			doc = 'The path to the node, relative to this node.',
+			doc = 'The path to the node, relative to From.',
 			default_value = 'Sprite2D'
 		}
 	]
@@ -48,7 +46,7 @@ func get_output_result() -> String:
 	if any_flow_connected():
 		return 'node_{{VCNODE_ID}}'
 
-	return '_ref.get_node_or_null({{path}})'
+	return '{{ref}}.get_node_or_null({{path}})'
 
 
 func get_flow_inputs() -> Array[Dictionary]:
@@ -87,7 +85,7 @@ func _body() -> String:
 	if not any_flow_connected():
 		return '{{out:result}}'
 
-	return 'var node_{{VCNODE_ID}} = _ref.get_node_or_null({{path}})\n' \
+	return 'var node_{{VCNODE_ID}} = {{ref}}.get_node_or_null({{path}})\n' \
 		+ '{{out:result}}\n' \
 		+ 'if node_{{VCNODE_ID}} != null:\n' \
 		+ '\t{{found}}\n' \

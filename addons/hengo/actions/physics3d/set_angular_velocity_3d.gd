@@ -31,6 +31,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to spin. Leave it empty to spin this node.'),
 		{
 			name = 'Velocity',
 			type = 'Vector3',
@@ -68,4 +69,4 @@ func get_flow_exit() -> String:
 
 # angular_velocity is in radians, and deg_to_rad has no Vector3 form
 func _body() -> String:
-	return '_ref.angular_velocity = {{velocity}} * (PI / 180.0)'
+	return '{{ref}}.angular_velocity = {{velocity}} * (PI / 180.0)'

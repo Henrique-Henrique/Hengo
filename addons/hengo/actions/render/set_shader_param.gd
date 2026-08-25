@@ -32,8 +32,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
-			doc = 'The node whose ShaderMaterial is written to.',
+			doc = 'The node whose shader is changed. Leave it empty to change this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'Control',
 			id = &'target',
-			doc = 'The Control node to give focus to.',
+			doc = 'The node to give keyboard focus to. Leave it empty to focus this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

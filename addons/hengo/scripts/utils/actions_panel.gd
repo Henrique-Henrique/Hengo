@@ -171,7 +171,10 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 		var needs_bind: bool = declared.lvalue or declared.bind_only
 
 		if part.kind == &'literal' and needs_bind:
-			part.value = '(none)' if declared.optional else 'not set'
+			if HenUtils.is_node_ref_slot(declared.type, declared.bind_only, declared.optional):
+				part.value = 'Self'
+			else:
+				part.value = '(none)' if declared.optional else 'not set'
 
 		part.label = param.name if show_names else ''
 		part.options = declared.options if not declared.options.is_empty() else param.options

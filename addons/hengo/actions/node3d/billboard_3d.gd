@@ -30,6 +30,11 @@ func get_default_phase() -> StringName:
 	return &'update'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The node to keep facing the camera. Leave it empty to turn this node.'),
+	]
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Update', id = &'update'},
@@ -49,5 +54,5 @@ func get_flow_physics() -> String:
 # direction to face
 func _body() -> String:
 	return 'var cam_{{VCNODE_ID}} = _ref.get_viewport().get_camera_3d()\n' \
-		+ 'if is_instance_valid(cam_{{VCNODE_ID}}) and not _ref.global_position.is_equal_approx(cam_{{VCNODE_ID}}.global_position):\n' \
-		+ '\t_ref.look_at(cam_{{VCNODE_ID}}.global_position, Vector3.UP)'
+		+ 'if is_instance_valid(cam_{{VCNODE_ID}}) and not {{ref}}.global_position.is_equal_approx(cam_{{VCNODE_ID}}.global_position):\n' \
+		+ '\t{{ref}}.look_at(cam_{{VCNODE_ID}}.global_position, Vector3.UP)'

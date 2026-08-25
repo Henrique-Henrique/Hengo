@@ -20,6 +20,7 @@ func get_icon() -> String:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the path starts from. Leave it empty to start from this node.', 'From'),
 		{
 			name = 'Path',
 			type = 'String',
@@ -37,7 +38,7 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_result() -> String:
-	return '_ref.has_node({{path}})'
+	return '{{ref}}.has_node({{path}})'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

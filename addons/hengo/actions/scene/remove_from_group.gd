@@ -24,6 +24,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to remove. Leave it empty to remove this node.'),
 		{
 			name = 'Group',
 			type = 'StringName',
@@ -56,4 +57,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.remove_from_group({{group}})'
+	return '{{ref}}.remove_from_group({{group}})'

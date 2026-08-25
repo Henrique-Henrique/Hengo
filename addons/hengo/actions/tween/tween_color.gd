@@ -24,8 +24,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
-			doc = 'The node to tint. A 2D script tints it, a 3D one blends the color of its material.',
+			doc = 'The node to fade to a color. Leave it empty to fade this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

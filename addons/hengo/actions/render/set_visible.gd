@@ -31,6 +31,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to show or hide. Leave it empty to change this node.'),
 		{
 			name = 'Visible',
 			type = 'bool',
@@ -62,4 +63,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.visible = {{visible}}'
+	return '{{ref}}.visible = {{visible}}'

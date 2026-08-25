@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
-			doc = 'The node to flash. A 2D script tints it, a 3D one paints its material.',
+			doc = 'The node to flash. A 2D script tints it, a 3D one paints its material. Leave it empty to flash this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

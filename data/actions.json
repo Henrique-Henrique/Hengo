@@ -11,6 +11,18 @@
 			"id": "add_to_group",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to add. Leave it empty to add this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "'enemies'",
 					"doc": "The group name to tag the node with.",
 					"id": "group",
@@ -94,7 +106,7 @@
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Switches between its two branches on every run, First then Second and back again. The side it stopped on survives leaving and coming back to this state, so a left and right footstep keeps taking turns.",
+			"description": "Takes turns between its two branches, First then Second then First again, one per run. On enter it is what makes a footstep state play the left sound and then the right one. The side it stopped on survives leaving and coming back to this state.",
 			"has_body": false,
 			"icon": "arrow-right-left",
 			"id": "alternate",
@@ -113,7 +125,7 @@
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
-			"description": "Returns the shortest signed angle from one angle to another, wrapping around a full turn. Feed it to a smooth turn so the shorter way is always taken.",
+			"description": "Measures how far one angle is from another, always taking the short way around. From 350 to 10 degrees it answers 20 instead of -340, which is what stops a turning node from spinning the long way. A negative answer means turning the other way.",
 			"has_body": false,
 			"icon": "rotate-cw",
 			"id": "angle_difference",
@@ -146,7 +158,7 @@
 			"name": "Angle Difference",
 			"outputs": [
 				{
-					"doc": "The shortest signed angle from one to the other, in degrees.",
+					"doc": "How far to turn, in degrees, negative when the short way is the other way.",
 					"id": "result",
 					"name": "Result",
 					"type": "float"
@@ -202,6 +214,18 @@
 			"id": "apply_force",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to push. Leave it empty to push this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The push to apply each frame, in pixels times mass per second squared.",
 					"id": "force",
@@ -246,6 +270,18 @@
 			"icon": "wind",
 			"id": "apply_force_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to push. Leave it empty to push this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The push to apply each frame, in units times mass per second squared.",
@@ -292,6 +328,18 @@
 			"id": "apply_gravity",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to pull down. Leave it empty to pull this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "980.0",
 					"doc": "How strong the downward pull is, in pixels per second squared.",
 					"id": "gravity",
@@ -325,6 +373,18 @@
 			"id": "apply_gravity_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to pull down. Leave it empty to pull this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "24.0",
 					"doc": "How strong the downward pull is, in units per second squared.",
 					"id": "gravity",
@@ -357,6 +417,18 @@
 			"icon": "zap",
 			"id": "apply_impulse",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to kick. Leave it empty to kick this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0)",
 					"doc": "The push to apply, in pixels times mass per second.",
@@ -404,6 +476,18 @@
 			"id": "apply_impulse_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to kick. Leave it empty to kick this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The push to apply, in units times mass per second.",
 					"id": "impulse",
@@ -450,6 +534,18 @@
 			"id": "apply_torque_impulse",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to spin. Leave it empty to spin this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "0.0",
 					"doc": "The spin to apply. Positive turns one way, negative the other.",
 					"id": "torque",
@@ -483,6 +579,18 @@
 			"icon": "rotate-cw",
 			"id": "apply_torque_impulse_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to spin. Leave it empty to spin this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The spin to apply around each axis.",
@@ -1442,7 +1550,20 @@
 			"has_body": false,
 			"icon": "camera",
 			"id": "billboard_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to keep facing the camera. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Face Camera",
 			"outputs": [],
 			"phases": [
@@ -1476,6 +1597,18 @@
 			"icon": "radar",
 			"id": "bodies_in_radius",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the circle is centered on. Leave it empty to center it on this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "100.0",
 					"doc": "How far around the node to look, in pixels in 2D and in meters in 3D.",
@@ -1658,11 +1791,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node whose method is called.",
+					"doc": "The node to call the method on. Leave it empty to call it on this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -1903,11 +2036,18 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "camera",
 			"color": "#0ea5e9",
 			"default_phase": "enter",
-			"description": "Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. It runs once when the state starts.",
+			"description": "Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "vibrate",
 			"id": "camera_shake",
@@ -1952,7 +2092,9 @@
 			"name": "Shake Camera",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -2037,6 +2179,18 @@
 			"inputs": [
 				{
 					"default": null,
+					"doc": "The node that looks. Leave it empty to look from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
 					"doc": "The node to look at, such as the player. Point it at the body itself, since a parent above the collider never matches.",
 					"id": "target",
 					"lvalue": false,
@@ -2083,6 +2237,18 @@
 			"icon": "crosshair",
 			"id": "cast_ray",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the ray starts from. Leave it empty to start from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0)",
 					"doc": "The global point the line starts at, usually the position of this node.",
@@ -2173,6 +2339,18 @@
 			"icon": "crosshair",
 			"id": "cast_ray_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the ray starts from. Leave it empty to start from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The global point the line starts at, usually the position of this node.",
@@ -2294,6 +2472,18 @@
 			"icon": "palette",
 			"id": "change_color",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to paint. Leave it empty to paint this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(1.0, 1.0, 1.0, 1.0)",
 					"doc": "The color to apply.",
@@ -2750,11 +2940,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node whose children are removed, such as the container holding a list.",
+					"doc": "The node whose children are removed. Leave it empty to clear this node.",
 					"id": "parent",
 					"lvalue": false,
 					"name": "Parent",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -2993,26 +3183,26 @@
 					"doc": "Where to go when the wait is up. It starts the wait again.",
 					"id": "ready",
 					"name": "Ready",
-					"optional": false
+					"optional": true
 				},
 				{
 					"doc": "Where to go while still waiting.",
 					"id": "cooling",
 					"name": "Cooling",
-					"optional": false
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Lets its branch fire at most once every so many seconds, ignoring the runs in between. Use it to stop an action from spamming while a condition stays true.",
+			"description": "Lets something happen at most once every so many seconds, however many frames run through it. With Seconds = 1, holding the fire button gives one shot per second and the frames in between take Cooling. It fires right away on the first frame and only then blocks, unlike Every N Seconds, which waits first. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "timer",
 			"id": "cooldown",
 			"inputs": [
 				{
 					"default": "1.0",
-					"doc": "How long the branch stays blocked after it fires, in seconds.",
+					"doc": "How long it stays blocked after firing, in seconds.",
 					"id": "seconds",
 					"lvalue": false,
 					"name": "Seconds",
@@ -3037,26 +3227,26 @@
 					"doc": "Where to go on the run that hits Times. The count goes back to zero right after.",
 					"id": "reached",
 					"name": "Reached",
-					"optional": false
+					"optional": true
 				},
 				{
 					"doc": "Where to go while the count is still below Times.",
 					"id": "counting",
 					"name": "Counting",
-					"optional": false
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Counts every run and takes the Reached branch on the run number Times, then starts counting again from zero. The count survives leaving and coming back to this state, so it fits things like the third hit killing an enemy.",
+			"description": "Counts every time it runs and takes Reached on the run number Times, then counts from zero again. With Times = 3 on enter, the first two hits take Counting and the third one kills the enemy. The count survives leaving and coming back to this state. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "target",
 			"id": "count_to",
 			"inputs": [
 				{
 					"default": "3",
-					"doc": "How many runs it takes to reach the target.",
+					"doc": "How many times it has to run before Reached fires.",
 					"id": "times",
 					"lvalue": false,
 					"name": "Times",
@@ -3082,19 +3272,19 @@
 					"doc": "Where to go on the one frame the value passes the limit.",
 					"id": "crossed",
 					"name": "Crossed",
-					"optional": false
+					"optional": true
 				},
 				{
 					"doc": "Where to go on every other frame, the ones where it stays past the limit included.",
 					"id": "not_yet",
-					"name": "Not Yet",
-					"optional": false
+					"name": "Other Frames",
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Fires its branch once on the frame a value passes a limit in the chosen direction, and stays quiet until the value comes back and passes it again. A value already past the limit when the state is entered counts as a crossing, so it fires once per entry.",
+			"description": "Fires once on the frame a value passes a limit, then stays quiet until the value comes back and passes it again. With Limit = 20 going down, health dropping from 25 to 15 takes Crossed on that one frame and Other Frames while it stays at 15. A value already past the limit on entry counts as a crossing. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "gauge",
 			"id": "crossed_value",
@@ -3177,6 +3367,18 @@
 			"id": "destroy_after",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to destroy. Leave it empty to destroy this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "2.0",
 					"doc": "How long the node stays alive before it is removed.",
 					"id": "seconds",
@@ -3240,11 +3442,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to remove, such as the coin that was just picked up.",
+					"doc": "The node to destroy. Leave it empty to destroy this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -3703,7 +3905,7 @@
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs its nested actions only when the condition is true, staying in the same state.",
+			"description": "Runs the actions inside it only when the condition is true, staying in the same state. It is the plain if: nothing here jumps to another state.",
 			"has_body": true,
 			"icon": "git-branch",
 			"id": "do_if",
@@ -3733,29 +3935,29 @@
 		{
 			"branches": [
 				{
-					"doc": "Where to go while the run count is still below Times.",
+					"doc": "Where to go on the first Times frames.",
 					"id": "within",
-					"name": "Within",
-					"optional": false
+					"name": "First Times",
+					"optional": true
 				},
 				{
-					"doc": "Where to go on every run after the first Times runs.",
+					"doc": "Where to go on every frame once those are used up.",
 					"id": "done",
-					"name": "Done",
-					"optional": false
+					"name": "After That",
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs its Within branch on the first runs, up to Times of them, and runs Done on every run after that. The count resets each time the state is entered.",
+			"description": "Does something on the first frames only and then stops. With Times = 3, the first three frames take First Times and every frame after that takes After That. The count restarts each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "flag-triangle-right",
 			"id": "do_n_times",
 			"inputs": [
 				{
 					"default": "3",
-					"doc": "How many runs go through the Within branch.",
+					"doc": "How many frames go through the First Times branch.",
 					"id": "times",
 					"lvalue": false,
 					"name": "Times",
@@ -3777,22 +3979,22 @@
 		{
 			"branches": [
 				{
-					"doc": "Where to go the first time only.",
+					"doc": "Where to go on the first frame only.",
 					"id": "first",
-					"name": "First",
-					"optional": false
+					"name": "First Time",
+					"optional": true
 				},
 				{
-					"doc": "Where to go on every following run.",
+					"doc": "Where to go on every frame after the first.",
 					"id": "rest",
-					"name": "Rest",
-					"optional": false
+					"name": "After That",
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs its First branch only the first time it is reached, then runs Rest on every following run. The guard resets each time the state is entered.",
+			"description": "Does something on the first frame it runs and never again, so a hit sound plays once instead of every frame. Every frame after that takes After That. It resets each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "flag",
 			"id": "do_once",
@@ -3817,11 +4019,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to copy.",
+					"doc": "The node to copy. Leave it empty to copy this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -3856,11 +4058,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The particle node to fire, such as a GPUParticles2D or a CPUParticles3D.",
+					"doc": "The particles node to fire. Leave it empty to fire this node.",
 					"id": "particles",
 					"lvalue": false,
 					"name": "Particles",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -3915,7 +4117,7 @@
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs the actions inside it once every so many seconds while this state runs. The timer resets each time the state is entered.",
+			"description": "Runs the actions inside it once every so many seconds while this state runs. With Seconds = 2, an enemy spawns every two seconds. The timer restarts each time the state is entered. Every N Seconds is the same clock with branches instead of nested actions.",
 			"has_body": true,
 			"icon": "timer",
 			"id": "every",
@@ -3944,29 +4146,29 @@
 		{
 			"branches": [
 				{
-					"doc": "Where to go on the last run of each cycle, once every Times runs.",
+					"doc": "Where to go on every Times-th frame, so once per cycle.",
 					"id": "nth",
-					"name": "Nth",
-					"optional": false
+					"name": "Nth Time",
+					"optional": true
 				},
 				{
-					"doc": "Where to go on the other runs of the cycle.",
+					"doc": "Where to go on the frames in between.",
 					"id": "between",
-					"name": "Between",
-					"optional": false
+					"name": "Other Times",
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Takes the Nth branch once every so many runs, and the Between branch on the runs in the middle. The cycle resets each time the state is entered.",
+			"description": "Does something once every so many frames instead of every frame. With Times = 5, the first four frames take Other Times and the fifth takes Nth Time, then it starts over. The count restarts each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "repeat-1",
 			"id": "every_n_times",
 			"inputs": [
 				{
 					"default": "5",
-					"doc": "How many runs make one cycle. The last run of each cycle takes the Nth branch.",
+					"doc": "How many frames one cycle lasts. 5 means the fifth frame is the one that fires.",
 					"id": "times",
 					"lvalue": false,
 					"name": "Times",
@@ -3990,7 +4192,7 @@
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs the actions inside it on a random interval, drawing a new wait between Min and Max after each run. Good for spawns and idle noises that should not sound metronomic.",
+			"description": "Runs the actions inside it on a random interval, drawing a new wait between Min and Max after each run. With Min = 1 and Max = 4, an idle grunt plays somewhere between one and four seconds apart instead of on a metronome.",
 			"has_body": true,
 			"icon": "dice-5",
 			"id": "every_random",
@@ -4021,6 +4223,50 @@
 				}
 			],
 			"name": "Every Random",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
+			"branches": [
+				{
+					"doc": "Where to go on the frame the timer reaches Seconds. The timer goes back to zero right after.",
+					"id": "time_up",
+					"name": "Time Up",
+					"optional": true
+				},
+				{
+					"doc": "Where to go on the frames while the timer is still running.",
+					"id": "waiting",
+					"name": "Waiting",
+					"optional": true
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Waits so many seconds, takes Time Up for one frame and starts counting again, over and over. With Seconds = 3, an enemy shoots every three seconds and the frames in between take Waiting. Cooldown is the one that fires right away and blocks afterwards. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
+			"has_body": false,
+			"icon": "timer-reset",
+			"id": "every_seconds",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "How long each round of the timer lasts, in seconds.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "Every N Seconds",
 			"outputs": [],
 			"phases": [
 				"update",
@@ -4069,11 +4315,18 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "audio",
 			"color": "#ec4899",
 			"default_phase": "enter",
-			"description": "Fades an audio player toward a target volume over time. -80 is silence and 0 is full. Runs once when the state starts.",
+			"description": "Fades an audio player toward a target volume over time. -80 is silence and 0 is full. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "volume-2",
 			"id": "fade_audio",
@@ -4118,7 +4371,9 @@
 			"name": "Fade Sound",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -4369,22 +4624,29 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "render",
 			"color": "#f368e0",
 			"default_phase": "enter",
-			"description": "Briefly tints a node toward a color and back, the flash a character shows when it takes damage. Runs once when the state starts.",
+			"description": "Briefly tints a node toward a color and back, the flash a character shows when it takes damage. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "sparkles",
 			"id": "flash",
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to flash.",
+					"doc": "The node to flash. A 2D script tints it, a 3D one paints its material. Leave it empty to flash this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -4418,7 +4680,9 @@
 			"name": "Flash",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -4434,14 +4698,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The sprite to flip.",
+					"doc": "The node to flip. Leave it empty to flip this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Node2D",
 					"type_from": ""
 				},
 				{
@@ -4476,6 +4740,18 @@
 			"icon": "mouse-pointer-2",
 			"id": "follow_mouse",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "200.0",
 					"doc": "How fast to move toward the mouse, in pixels per second.",
@@ -4515,7 +4791,7 @@
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs its nested actions once for every element in a collection, all in the same frame.",
+			"description": "Runs the actions inside it once for every item of a list, all in the same frame. A list of ten enemies runs the inside ten times, with Item holding one enemy each pass. A timer nested inside it ticks once per item, not once per frame.",
 			"has_body": true,
 			"icon": "repeat",
 			"id": "for_each",
@@ -4556,6 +4832,50 @@
 			"target_classes": []
 		},
 		{
+			"branches": [
+				{
+					"doc": "Where to go while the time is not up yet.",
+					"id": "during",
+					"name": "During",
+					"optional": true
+				},
+				{
+					"doc": "Where to go on every frame once the time is up.",
+					"id": "after",
+					"name": "After That",
+					"optional": true
+				}
+			],
+			"category": "flow",
+			"color": "#f97316",
+			"default_phase": "update",
+			"description": "Does something for the first seconds only and then stops. With Seconds = 2, the first two seconds take During and every frame after that takes After That, which is how a dash or an invincibility window ends itself. The timer restarts each time the state is entered. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
+			"has_body": false,
+			"icon": "hourglass",
+			"id": "for_seconds",
+			"inputs": [
+				{
+					"default": "1.0",
+					"doc": "How long the During branch lasts, in seconds.",
+					"id": "seconds",
+					"lvalue": false,
+					"name": "Seconds",
+					"optional": false,
+					"options": [],
+					"picker": "",
+					"type": "float",
+					"type_from": ""
+				}
+			],
+			"name": "For N Seconds",
+			"outputs": [],
+			"phases": [
+				"update",
+				"physics"
+			],
+			"target_classes": []
+		},
+		{
 			"branches": [],
 			"category": "node2d",
 			"color": "#0abde3",
@@ -4565,6 +4885,18 @@
 			"icon": "compass",
 			"id": "get_angle_to",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the angle is measured from. Leave it empty to measure from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": null,
 					"doc": "The node to measure the angle to, such as another Node2D.",
@@ -4659,6 +4991,18 @@
 			"inputs": [
 				{
 					"default": null,
+					"doc": "The node the distance is measured from. Leave it empty to measure from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
 					"doc": "The node to measure the distance to, such as another Node2D.",
 					"id": "target",
 					"lvalue": false,
@@ -4698,6 +5042,18 @@
 			"icon": "ruler",
 			"id": "get_distance_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the distance is measured from. Leave it empty to measure from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": null,
 					"doc": "The node to measure the distance to, such as another Node3D.",
@@ -4765,7 +5121,20 @@
 			"has_body": false,
 			"icon": "navigation",
 			"id": "get_forward",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to read the facing of. Leave it empty to read this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Get Facing Direction",
 			"outputs": [
 				{
@@ -4794,7 +5163,20 @@
 			"has_body": false,
 			"icon": "navigation",
 			"id": "get_forward_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to read the facing of. Leave it empty to read this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Get Facing Direction",
 			"outputs": [
 				{
@@ -4826,11 +5208,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node whose position to read.",
+					"doc": "The node to read the position of. Leave it empty to read this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -5036,6 +5418,18 @@
 			"id": "get_nearest",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to measure from. Leave it empty to measure from this node, which is also the one left out of the search.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "'enemies'",
 					"doc": "The group to search for the closest node.",
 					"id": "group",
@@ -5092,8 +5486,20 @@
 			"id": "get_node",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node the path starts from. Leave it empty to start from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "From",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "'Sprite2D'",
-					"doc": "The path to the node, relative to this node.",
+					"doc": "The path to the node, relative to From.",
 					"id": "path",
 					"lvalue": false,
 					"name": "Path",
@@ -5131,11 +5537,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to read the value from.",
+					"doc": "The node to read from. Leave it empty to read this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -5210,14 +5616,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Control node to read text from.",
+					"doc": "The node to read the text from. Leave it empty to read this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				}
 			],
@@ -5342,7 +5748,20 @@
 			"has_body": false,
 			"icon": "gauge",
 			"id": "get_velocity",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to read. Leave it empty to read this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Get Velocity",
 			"outputs": [
 				{
@@ -5370,7 +5789,20 @@
 			"has_body": false,
 			"icon": "gauge",
 			"id": "get_velocity_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to read. Leave it empty to read this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Get Velocity",
 			"outputs": [
 				{
@@ -5420,14 +5852,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Control node to give focus to.",
+					"doc": "The node to give keyboard focus to. Leave it empty to focus this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				}
 			],
@@ -5463,6 +5895,18 @@
 			"icon": "git-branch",
 			"id": "has_node",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the path starts from. Leave it empty to start from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "From",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "''",
 					"doc": "The node path to check, relative to this node.",
@@ -5535,19 +5979,19 @@
 					"doc": "Where to go once the condition has held long enough. It keeps firing while the condition stays true.",
 					"id": "held",
 					"name": "Held",
-					"optional": false
+					"optional": true
 				},
 				{
 					"doc": "Where to go while the time is not complete.",
 					"id": "waiting",
 					"name": "Waiting",
-					"optional": false
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Takes the Held branch once the condition has stayed true for the whole time asked, such as holding a button to charge a shot. Any frame the condition fails puts the count back to zero.",
+			"description": "Takes Held once the condition has stayed true for the whole time asked. With Seconds = 2, holding the button for two seconds charges the shot, and letting go before that puts the count back to zero. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "timer-reset",
 			"id": "held_for",
@@ -5679,6 +6123,18 @@
 			"icon": "users",
 			"id": "in_group",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "'enemies'",
 					"doc": "The name of the group to look for.",
@@ -5884,6 +6340,18 @@
 			"inputs": [
 				{
 					"default": null,
+					"doc": "The node that does the facing. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
+					"default": null,
 					"doc": "The point to face. A node works too, its global position is read.",
 					"id": "target",
 					"lvalue": false,
@@ -5941,6 +6409,18 @@
 			"icon": "users",
 			"id": "is_in_group",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "'enemies'",
 					"doc": "The group name to check for.",
@@ -6054,7 +6534,20 @@
 			"has_body": false,
 			"icon": "chevrons-right",
 			"id": "is_on_ceiling",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Ceiling",
 			"outputs": [],
 			"phases": [
@@ -6088,7 +6581,20 @@
 			"has_body": false,
 			"icon": "chevrons-right",
 			"id": "is_on_ceiling_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Ceiling",
 			"outputs": [],
 			"phases": [
@@ -6122,7 +6628,20 @@
 			"has_body": false,
 			"icon": "chevrons-right",
 			"id": "is_on_floor",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Floor",
 			"outputs": [],
 			"phases": [
@@ -6156,7 +6675,20 @@
 			"has_body": false,
 			"icon": "chevrons-right",
 			"id": "is_on_floor_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Floor",
 			"outputs": [],
 			"phases": [
@@ -6190,7 +6722,20 @@
 			"has_body": false,
 			"icon": "eye",
 			"id": "is_on_screen",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Screen",
 			"outputs": [],
 			"phases": [
@@ -6224,7 +6769,20 @@
 			"has_body": false,
 			"icon": "chevrons-right",
 			"id": "is_on_wall",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Wall",
 			"outputs": [],
 			"phases": [
@@ -6258,7 +6816,20 @@
 			"has_body": false,
 			"icon": "chevrons-right",
 			"id": "is_on_wall_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to check. Leave it empty to check this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Is On Wall",
 			"outputs": [],
 			"phases": [
@@ -6422,6 +6993,18 @@
 			"id": "jump_2d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to jump. Leave it empty to jump this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "400.0",
 					"doc": "How hard the jump is, in pixels per second.",
 					"id": "force",
@@ -6455,6 +7038,18 @@
 			"icon": "move-up",
 			"id": "jump_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to jump. Leave it empty to jump this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "8.0",
 					"doc": "How hard the jump is, in units per second.",
@@ -6490,6 +7085,18 @@
 			"id": "keep_on_screen",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to keep on screen. Leave it empty to keep this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "0.0",
 					"doc": "How far inside each edge the node stops, in pixels.",
 					"id": "margin",
@@ -6517,7 +7124,7 @@
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
-			"description": "Blends between two values by a weight, where 0 gives From and 1 gives To.",
+			"description": "Blends between two values by a weight, where 0 gives From, 1 gives To and 0.5 gives the value right in the middle.",
 			"has_body": false,
 			"icon": "spline",
 			"id": "lerp",
@@ -6706,6 +7313,18 @@
 			"id": "look_at_2d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The point in global space to face.",
 					"id": "target",
@@ -6739,6 +7358,18 @@
 			"icon": "crosshair",
 			"id": "look_at_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The point in global space to face.",
@@ -6954,7 +7585,7 @@
 			"inputs": [
 				{
 					"default": "'abs'",
-					"doc": "The math function to apply.",
+					"doc": "abs drops the minus sign, sign answers -1, 0 or 1, round, floor and ceil turn a decimal into a whole number, and sqrt gives the square root.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -7012,7 +7643,7 @@
 			"inputs": [
 				{
 					"default": "'min'",
-					"doc": "The math function to apply.",
+					"doc": "min keeps the smaller of the two, max the bigger, pow raises A to the power of B, snapped rounds A to steps of B, and fmod gives the remainder of A divided by B.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -7331,84 +7962,6 @@
 			"target_classes": []
 		},
 		{
-			"branches": [
-				{
-					"doc": "",
-					"id": "flow_out",
-					"name": "Out",
-					"optional": false
-				}
-			],
-			"category": "",
-			"color": "#7c93ff",
-			"default_phase": "update",
-			"description": "",
-			"has_body": false,
-			"icon": "square-function",
-			"id": "mouse_orbit_camera_3d_v2",
-			"inputs": [
-				{
-					"default": null,
-					"doc": "",
-					"id": "target",
-					"lvalue": false,
-					"name": "Target",
-					"optional": false,
-					"options": [],
-					"picker": "",
-					"type": "Node3D",
-					"type_from": ""
-				},
-				{
-					"default": null,
-					"doc": "",
-					"id": "distance",
-					"lvalue": false,
-					"name": "Distance",
-					"optional": false,
-					"options": [],
-					"picker": "",
-					"type": "float",
-					"type_from": ""
-				},
-				{
-					"default": null,
-					"doc": "",
-					"id": "sensitivity",
-					"lvalue": false,
-					"name": "Sensitivity",
-					"optional": false,
-					"options": [],
-					"picker": "",
-					"type": "float",
-					"type_from": ""
-				},
-				{
-					"default": null,
-					"doc": "",
-					"id": "click_to_orbit",
-					"lvalue": false,
-					"name": "Click to Orbit",
-					"optional": false,
-					"options": [],
-					"picker": "",
-					"type": "bool",
-					"type_from": ""
-				}
-			],
-			"name": "Orbit Mouse 2",
-			"outputs": [
-				{
-					"doc": "",
-					"id": "cam_pos",
-					"name": "Camera Position",
-					"type": "Vector3"
-				}
-			],
-			"phases": [],
-			"target_classes": []
-		},
-		{
 			"branches": [],
 			"category": "navigation",
 			"color": "#4ade80",
@@ -7418,6 +7971,18 @@
 			"icon": "route",
 			"id": "move_along_path",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to move along the path. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": null,
 					"doc": "The NavigationAgent2D or NavigationAgent3D node that plans the route.",
@@ -7477,6 +8042,18 @@
 			"icon": "crosshair",
 			"id": "move_and_collide",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0)",
 					"doc": "How far to move this step, in pixels.",
@@ -7543,6 +8120,18 @@
 			"id": "move_and_collide_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "How far to move this step, in world units.",
 					"id": "motion",
@@ -7606,7 +8195,20 @@
 			"has_body": false,
 			"icon": "footprints",
 			"id": "move_and_slide",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Move And Slide",
 			"outputs": [],
 			"phases": [
@@ -7641,7 +8243,20 @@
 			"has_body": false,
 			"icon": "footprints",
 			"id": "move_and_slide_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Move And Slide",
 			"outputs": [],
 			"phases": [
@@ -7663,6 +8278,18 @@
 			"icon": "move-right",
 			"id": "move_forward",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "200.0",
 					"doc": "How fast to move along the facing, in pixels per second.",
@@ -7698,6 +8325,18 @@
 			"icon": "navigation",
 			"id": "move_relative",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0)",
 					"doc": "Movement direction relative to the body, with x sideways and y forward.",
@@ -7743,6 +8382,18 @@
 			"icon": "move",
 			"id": "move_sprite",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(120.0, 0.0)",
 					"doc": "The direction and speed to move, in pixels.",
@@ -7803,6 +8454,18 @@
 			"id": "move_towards",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The point in global space to move toward.",
 					"id": "target",
@@ -7860,6 +8523,18 @@
 			"id": "move_towards_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The point in global space to move toward.",
 					"id": "target",
@@ -7904,6 +8579,18 @@
 			"icon": "search",
 			"id": "node_exists",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node the path starts from. Leave it empty to start from this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "From",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "''",
 					"doc": "The path to look for, counted from this node.",
@@ -8154,19 +8841,19 @@
 					"doc": "Where to go on the one frame the condition turns true.",
 					"id": "became_true",
 					"name": "Became True",
-					"optional": false
+					"optional": true
 				},
 				{
 					"doc": "Where to go on every other frame, the ones where it stays true included.",
 					"id": "not_yet",
-					"name": "Not Yet",
-					"optional": false
+					"name": "Other Frames",
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Fires its branch only on the frame the condition turns true, and stays quiet while it keeps being true. A condition already true when the state is entered counts as turning true, so it fires once per entry.",
+			"description": "Fires only on the frame the condition turns true, and stays quiet while it keeps being true. Holding a button takes Became True on the frame it goes down and Other Frames while it stays down. A condition already true on entry counts as turning true. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "toggle-right",
 			"id": "on_became_true",
@@ -8349,14 +9036,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node whose child buttons to watch, such as a hand or a menu.",
+					"doc": "The node whose buttons are watched. Leave it empty to watch the children of this node.",
 					"id": "container",
 					"lvalue": false,
 					"name": "Container",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Container",
 					"type_from": ""
 				},
 				{
@@ -8968,14 +9655,14 @@
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
-			"description": "Folds a value so it bounces between 0 and a length, rising then falling over and over. Feed it time to drive a back-and-forth motion.",
+			"description": "Makes a number climb up to Length and then walk back down to 0, over and over. Feeding it the elapsed time with Length = 1 gives a value that goes 0 to 1 and back, the way a platform slides side to side.",
 			"has_body": false,
 			"icon": "arrow-left-right",
 			"id": "ping_pong",
 			"inputs": [
 				{
 					"default": "0.0",
-					"doc": "The number to fold, often accumulated time.",
+					"doc": "A number that keeps growing, usually the elapsed time.",
 					"id": "value",
 					"lvalue": false,
 					"name": "Value",
@@ -8987,7 +9674,7 @@
 				},
 				{
 					"default": "1.0",
-					"doc": "The value it bounces up to before falling back.",
+					"doc": "How high it climbs before turning back down.",
 					"id": "length",
 					"lvalue": false,
 					"name": "Length",
@@ -9059,11 +9746,18 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "audio",
 			"color": "#ec4899",
 			"default_phase": "enter",
-			"description": "Swaps the track of a music player, fading the old one out and the new one back in. Runs once when the state starts.",
+			"description": "Swaps the track of a music player, fading the old one out and the new one back in. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "music",
 			"id": "play_music",
@@ -9108,7 +9802,9 @@
 			"name": "Play Music",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -9330,7 +10026,20 @@
 			"has_body": false,
 			"icon": "trash-2",
 			"id": "queue_free",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to destroy. Leave it empty to destroy this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Destroy Self",
 			"outputs": [],
 			"phases": [
@@ -9764,7 +10473,7 @@
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
-			"description": "Rescales a value from one range to another and clamps it to the target range. Feeding a raw reading with an Out range of 0 to 1 turns it into a blend or bar fill.",
+			"description": "Takes a number that lives in one range and gives the matching number in another range. Health from 0 to 100 with an Out range of 0 to 1 becomes the fill of a health bar, so 30 health gives 0.3. A value outside the In range is held at the closest end.",
 			"has_body": false,
 			"icon": "ruler",
 			"id": "remap",
@@ -9857,6 +10566,18 @@
 			"id": "remove_from_group",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to remove. Leave it empty to remove this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "'enemies'",
 					"doc": "The group name to drop from the node.",
 					"id": "group",
@@ -9890,11 +10611,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to move.",
+					"doc": "The node to move. Leave it empty to move this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -9927,7 +10648,7 @@
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Runs its nested actions a fixed number of times, all in the same frame.",
+			"description": "Runs the actions inside it a fixed number of times, all in the same frame. With Times = 10, ten bullets go out on the same frame and Index counts from 0 to 9. A timer nested inside it ticks once per pass, so ten passes in one frame move it ten steps.",
 			"has_body": true,
 			"icon": "repeat-2",
 			"id": "repeat",
@@ -10012,6 +10733,18 @@
 			"id": "rotate_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to spin. Leave it empty to spin this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 1.0, 0.0)",
 					"doc": "The axis to rotate around, such as 0, 1, 0 for the up axis.",
 					"id": "axis",
@@ -10059,6 +10792,18 @@
 			"id": "rotate_sprite",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to spin. Leave it empty to spin this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "90.0",
 					"doc": "How fast to rotate, in degrees per second.",
 					"id": "speed",
@@ -10105,6 +10850,18 @@
 			"icon": "crosshair",
 			"id": "rotate_toward",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0)",
 					"doc": "The point in global space to face.",
@@ -10163,6 +10920,18 @@
 			"icon": "crosshair",
 			"id": "rotate_toward_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The point in global space to face.",
@@ -10266,11 +11035,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to locate on the screen, a 2D or a 3D one.",
+					"doc": "The node to project onto the screen. Leave it empty to project this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -10303,7 +11072,20 @@
 			"has_body": false,
 			"icon": "refresh-cw",
 			"id": "screen_wrap",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to wrap around the screen. Leave it empty to wrap this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Wrap Around Screen",
 			"outputs": [],
 			"phases": [
@@ -10324,6 +11106,18 @@
 			"icon": "rotate-cw",
 			"id": "set_angular_velocity",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to spin. Leave it empty to spin this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "0.0",
 					"doc": "The spin to set, in degrees per second. Zero stops the spin.",
@@ -10359,6 +11153,18 @@
 			"icon": "rotate-3d",
 			"id": "set_angular_velocity_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to spin. Leave it empty to spin this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The spin to set, in degrees per second around each axis. Zero stops the spin.",
@@ -10484,11 +11290,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The body or area to change.",
+					"doc": "The body to change. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -10556,11 +11362,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The CollisionShape2D or CollisionShape3D to switch.",
+					"doc": "The collision shape to turn on or off. Leave it empty to change this node.",
 					"id": "shape",
 					"lvalue": false,
 					"name": "Shape",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -10601,14 +11407,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Range node to write to.",
+					"doc": "The slider or bar to change. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Range",
 					"type_from": ""
 				},
 				{
@@ -10645,14 +11451,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Control node to enable or disable.",
+					"doc": "The button to enable or disable. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "BaseButton",
 					"type_from": ""
 				},
 				{
@@ -10720,6 +11526,18 @@
 			"id": "set_global_position",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to place. Leave it empty to place this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The new position, in global space.",
 					"id": "position",
@@ -10755,6 +11573,18 @@
 			"id": "set_global_position_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to place. Leave it empty to place this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The new position, in global space.",
 					"id": "position",
@@ -10789,6 +11619,18 @@
 			"icon": "arrow-down-to-line",
 			"id": "set_gravity_scale",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to change. Leave it empty to change this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "1.0",
 					"doc": "How much gravity to apply, as a multiplier of the world gravity.",
@@ -10826,6 +11668,18 @@
 			"id": "set_linear_velocity",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to change. Leave it empty to change this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The velocity to set, in pixels per second. Zero stops the body.",
 					"id": "velocity",
@@ -10860,6 +11714,18 @@
 			"icon": "gauge",
 			"id": "set_linear_velocity_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to change. Leave it empty to change this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The velocity to set, in units per second. Zero stops the body.",
@@ -10897,14 +11763,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The mesh to paint, such as a MeshInstance3D.",
+					"doc": "The mesh to paint, such as a MeshInstance3D. Leave it empty to paint this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "GeometryInstance3D",
 					"type_from": ""
 				},
 				{
@@ -11099,14 +11965,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The text field to set the hint on.",
+					"doc": "The text field to change. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "LineEdit",
 					"type_from": ""
 				},
 				{
@@ -11142,6 +12008,18 @@
 			"id": "set_position",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to place. Leave it empty to place this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The new position, in parent space.",
 					"id": "position",
@@ -11175,6 +12053,18 @@
 			"icon": "locate-fixed",
 			"id": "set_position_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to place. Leave it empty to place this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The new position, in parent space.",
@@ -11212,14 +12102,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The toggle button to set.",
+					"doc": "The button to press or release. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "BaseButton",
 					"type_from": ""
 				},
 				{
@@ -11256,11 +12146,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to write the value into.",
+					"doc": "The node to write to. Leave it empty to write to this node.",
 					"id": "node",
 					"lvalue": false,
 					"name": "Node",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -11356,6 +12246,18 @@
 			"id": "set_rotation",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "0.0",
 					"doc": "The angle to point at, in degrees. Zero is upright.",
 					"id": "angle",
@@ -11390,6 +12292,18 @@
 			"icon": "rotate-3d",
 			"id": "set_rotation_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The angle to point at on each axis, in degrees. Zero is upright.",
@@ -11426,6 +12340,18 @@
 			"id": "set_scale",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to resize. Leave it empty to resize this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(1.0, 1.0)",
 					"doc": "The new scale, where 1 by 1 is the normal size.",
 					"id": "scale",
@@ -11459,6 +12385,18 @@
 			"icon": "scale-3d",
 			"id": "set_scale_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to resize. Leave it empty to resize this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(1.0, 1.0, 1.0)",
 					"doc": "The new scale, where 1, 1, 1 is the normal size.",
@@ -11495,11 +12433,11 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node whose ShaderMaterial is written to.",
+					"doc": "The node whose shader is changed. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -11552,14 +12490,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Control node to write text to.",
+					"doc": "The node to write text to, such as a Label or Button. Leave it empty to write to this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				},
 				{
@@ -11596,14 +12534,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Control node to write text to.",
+					"doc": "The node to write text to, such as a Label or Button. Leave it empty to write to this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				},
 				{
@@ -11688,14 +12626,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node whose image is replaced.",
+					"doc": "The node to change the image of. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				},
 				{
@@ -11764,14 +12702,14 @@
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Control node to set the tooltip on.",
+					"doc": "The node to give the tooltip to. Leave it empty to change this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				},
 				{
@@ -11851,6 +12789,18 @@
 			"id": "set_velocity",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to change. Leave it empty to change this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0)",
 					"doc": "The velocity to apply, in pixels per second.",
 					"id": "velocity",
@@ -11886,6 +12836,18 @@
 			"id": "set_velocity_3d",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The body to change. Leave it empty to change this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The velocity to apply, in units per second.",
 					"id": "velocity",
@@ -11920,6 +12882,18 @@
 			"icon": "eye",
 			"id": "set_visible",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to show or hide. Leave it empty to change this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "true",
 					"doc": "On to show the node, off to hide it.",
@@ -12033,6 +13007,18 @@
 			"id": "set_z_index",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to reorder. Leave it empty to reorder this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "0",
 					"doc": "The draw order. Higher draws in front.",
 					"id": "z",
@@ -12061,14 +13047,14 @@
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
-			"description": "Returns an eased 0 to 1 ramp of a value between two edges, flat outside them and an S-curve in between. Smoother than Map Range for fades and reveals.",
+			"description": "Turns a number into a 0 to 1 amount that starts slow, speeds up in the middle and eases out at the end. With From = 0 and To = 100, a value of 50 gives 0.5, anything below 0 gives 0 and anything above 100 gives 1. Use it instead of Map Range when a fade should not start and stop abruptly.",
 			"has_body": false,
 			"icon": "spline",
 			"id": "smoothstep",
 			"inputs": [
 				{
 					"default": "0.0",
-					"doc": "The edge where the ramp starts leaving 0.",
+					"doc": "The value that gives 0. Anything below it also gives 0.",
 					"id": "from",
 					"lvalue": false,
 					"name": "From",
@@ -12080,7 +13066,7 @@
 				},
 				{
 					"default": "1.0",
-					"doc": "The edge where the ramp reaches 1.",
+					"doc": "The value that gives 1. Anything above it also gives 1.",
 					"id": "to",
 					"lvalue": false,
 					"name": "To",
@@ -12092,7 +13078,7 @@
 				},
 				{
 					"default": "0.0",
-					"doc": "The number to ramp.",
+					"doc": "The number to turn into an amount, such as a distance or a timer.",
 					"id": "value",
 					"lvalue": false,
 					"name": "Value",
@@ -12106,7 +13092,7 @@
 			"name": "Smooth Step",
 			"outputs": [
 				{
-					"doc": "The eased value, between 0 and 1.",
+					"doc": "The eased amount, always between 0 and 1.",
 					"id": "result",
 					"name": "Result",
 					"type": "float"
@@ -12129,6 +13115,18 @@
 			"icon": "grid-3x3",
 			"id": "snap_to_grid",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to snap. Leave it empty to snap this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "32.0",
 					"doc": "How wide one grid cell is, in pixels for a 2D node and in units for a 3D one.",
@@ -12531,6 +13529,18 @@
 			"id": "steer",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to steer. Leave it empty to steer this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "0.0",
 					"doc": "Steering input from -1 to 1, where negative turns one way and positive the other.",
 					"id": "amount",
@@ -12638,7 +13648,20 @@
 			"has_body": false,
 			"icon": "gauge",
 			"id": "stop_body",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to stop. Leave it empty to stop this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Freeze Body",
 			"outputs": [],
 			"phases": [
@@ -12660,7 +13683,20 @@
 			"has_body": false,
 			"icon": "gauge",
 			"id": "stop_body_3d",
-			"inputs": [],
+			"inputs": [
+				{
+					"default": null,
+					"doc": "The body to stop. Leave it empty to stop this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				}
+			],
 			"name": "Freeze Body",
 			"outputs": [],
 			"phases": [
@@ -13410,6 +14446,18 @@
 			"id": "translate",
 			"inputs": [
 				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
+				{
 					"default": "(100.0, 0.0)",
 					"doc": "The amount to move, in pixels.",
 					"id": "offset",
@@ -13443,6 +14491,18 @@
 			"icon": "move-3d",
 			"id": "translate_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(1.0, 0.0, 0.0)",
 					"doc": "The amount to move, in world units.",
@@ -13513,22 +14573,29 @@
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly blends the color of a node toward a target color over time. Runs once when the state starts.",
+			"description": "Smoothly blends the color of a node toward a target color over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "palette",
 			"id": "tween_color",
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node to tint, such as a sprite, a Control or a 3d mesh.",
+					"doc": "The node to fade to a color. Leave it empty to fade this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -13562,20 +14629,41 @@
 			"name": "Tween Color",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly fades the node toward a target transparency over time. Runs once when the state starts.",
+			"description": "Smoothly fades the node toward a target transparency over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "eye",
 			"id": "tween_fade",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to fade. Leave it empty to fade this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "1.0",
 					"doc": "Target transparency, where 1 is fully visible and 0 is invisible.",
@@ -13604,22 +14692,43 @@
 			"name": "Tween Fade",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"CanvasItem"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly moves the node to a target position over time. Runs once when the state starts.",
+			"description": "Smoothly moves the node to a target position over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "move",
 			"id": "tween_move",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0)",
 					"doc": "The position to move to.",
@@ -13648,22 +14757,43 @@
 			"name": "Tween Move",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"Node2D"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly moves the node to a target position over time. Runs once when the state starts.",
+			"description": "Smoothly moves the node to a target position over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "move",
 			"id": "tween_move_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to move. Leave it empty to move this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The position to move to.",
@@ -13692,29 +14822,38 @@
 			"name": "Tween Move",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"Node3D"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly animates any property of a node toward a value over time. Runs once when the state starts.",
+			"description": "Smoothly animates any property of a node toward a value over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "spline",
 			"id": "tween_property",
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The node that owns the property.",
+					"doc": "The node whose property is animated. Leave it empty to animate this node.",
 					"id": "target",
 					"lvalue": false,
 					"name": "Target",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
 					"type": "Node",
@@ -13760,20 +14899,41 @@
 			"name": "Tween Property",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly rotates the node to a target angle over time. Runs once when the state starts.",
+			"description": "Smoothly rotates the node to a target angle over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "rotate-cw",
 			"id": "tween_rotate",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "0.0",
 					"doc": "The target angle, in degrees.",
@@ -13802,22 +14962,43 @@
 			"name": "Tween Rotate",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"Node2D"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly rotates the node to a target angle over time. Runs once when the state starts.",
+			"description": "Smoothly rotates the node to a target angle over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "rotate-cw",
 			"id": "tween_rotate_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to turn. Leave it empty to turn this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(0.0, 0.0, 0.0)",
 					"doc": "The target angle on each axis, in degrees.",
@@ -13846,22 +15027,43 @@
 			"name": "Tween Rotate",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"Node3D"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly scales the node to a target size over time. Runs once when the state starts.",
+			"description": "Smoothly scales the node to a target size over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "scaling",
 			"id": "tween_scale",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to resize. Leave it empty to resize this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(1.0, 1.0)",
 					"doc": "The target scale, where 1, 1 is the normal size.",
@@ -13890,22 +15092,43 @@
 			"name": "Tween Scale",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"Node2D"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "tween",
 			"color": "#fb7185",
 			"default_phase": "enter",
-			"description": "Smoothly scales the node to a target size over time. Runs once when the state starts.",
+			"description": "Smoothly scales the node to a target size over time. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "scaling",
 			"id": "tween_scale_3d",
 			"inputs": [
+				{
+					"default": null,
+					"doc": "The node to resize. Leave it empty to resize this node.",
+					"id": "ref",
+					"lvalue": false,
+					"name": "Node",
+					"optional": true,
+					"options": [],
+					"picker": "",
+					"type": "Node",
+					"type_from": ""
+				},
 				{
 					"default": "(1.0, 1.0, 1.0)",
 					"doc": "The target scale, where 1, 1, 1 is the normal size.",
@@ -13934,32 +15157,41 @@
 			"name": "Tween Scale",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": [
 				"Node3D"
 			]
 		},
 		{
-			"branches": [],
+			"branches": [
+				{
+					"doc": "Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.",
+					"id": "finished",
+					"name": "Finished",
+					"optional": true
+				}
+			],
 			"category": "control",
 			"color": "#60a5fa",
 			"default_phase": "enter",
-			"description": "Reveals the text of a label one character at a time, the typewriter effect used in dialogue. Runs once when the state starts.",
+			"description": "Reveals the text of a label one character at a time, the typewriter effect used in dialogue. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.",
 			"has_body": false,
 			"icon": "text-cursor",
 			"id": "type_text",
 			"inputs": [
 				{
 					"default": null,
-					"doc": "The Label or RichTextLabel that shows the text.",
+					"doc": "The Label or RichTextLabel that shows the text. Leave it empty to type into this node.",
 					"id": "label",
 					"lvalue": false,
 					"name": "Label",
-					"optional": false,
+					"optional": true,
 					"options": [],
 					"picker": "",
-					"type": "Node",
+					"type": "Control",
 					"type_from": ""
 				},
 				{
@@ -13990,7 +15222,9 @@
 			"name": "Type Text",
 			"outputs": [],
 			"phases": [
-				"enter"
+				"enter",
+				"update",
+				"physics"
 			],
 			"target_classes": []
 		},
@@ -14000,19 +15234,19 @@
 					"doc": "Where to go on the one frame the value is different.",
 					"id": "changed",
 					"name": "Changed",
-					"optional": false
+					"optional": true
 				},
 				{
 					"doc": "Where to go while the value stays the same.",
 					"id": "same",
 					"name": "Same",
-					"optional": false
+					"optional": true
 				}
 			],
 			"category": "flow",
 			"color": "#f97316",
 			"default_phase": "update",
-			"description": "Fires its branch on the frame a value stops being what it was, and reports the value it held before. The first run after the state is entered only records the value, so it never fires on entry.",
+			"description": "Fires on the frame a value stops being what it was, and reports the value it held before. Swapping the weapon from sword to bow takes Changed on that frame, with Previous holding the sword. The first frame after entering only records the value, so it never fires on entry. Either branch can run actions of its own, so a small bit of behaviour needs no state of its own.",
 			"has_body": false,
 			"icon": "arrow-right-left",
 			"id": "value_changed",
@@ -14050,7 +15284,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Reflects a 2D vector off a surface and stores the result, such as the velocity a ball keeps after hitting a wall. Normal must be a unit vector.",
+			"description": "Turns a velocity into the one it keeps after bouncing off a surface, the way a ball comes off a wall. Cast Ray and Move And Collide already report the Normal it needs on a hit.",
 			"has_body": false,
 			"icon": "move-diagonal-2",
 			"id": "vector2_bounce",
@@ -14069,7 +15303,7 @@
 				},
 				{
 					"default": "(0.0, 1.0)",
-					"doc": "The unit direction the surface faces.",
+					"doc": "The direction the surface faces, straight out of it. A collision reports it as the normal.",
 					"id": "normal",
 					"lvalue": false,
 					"name": "Normal",
@@ -14101,14 +15335,14 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Combines two vectors into a single number, such as the distance or angle between them.",
+			"description": "Turns two vectors into one number, such as how far apart two points are or the angle between them.",
 			"has_body": false,
 			"icon": "git-merge",
 			"id": "vector2_combine",
 			"inputs": [
 				{
 					"default": "'distance_to'",
-					"doc": "How to combine the two vectors.",
+					"doc": "distance_to is how far apart they are, dot tells how much they point the same way, and the angle ones give the angle between them.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -14171,7 +15405,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Returns the unit direction pointing from one point to another in 2D. Useful to aim or to steer toward a target.",
+			"description": "Gives the direction that points from one place to another, always exactly one unit long so it carries no speed of its own. Multiply it with Scale Vector2 to turn it into a velocity, such as sending a bullet toward the player.",
 			"has_body": false,
 			"icon": "navigation",
 			"id": "vector2_direction_to",
@@ -14204,7 +15438,7 @@
 			"name": "Vector2 Direction To",
 			"outputs": [
 				{
-					"doc": "The unit direction from one point to the other.",
+					"doc": "The direction from From to To, one unit long.",
 					"id": "result",
 					"name": "Result",
 					"type": "Vector2"
@@ -14222,14 +15456,14 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Reads a single number from a vector, such as its length or angle.",
+			"description": "Reads one number out of a vector: how long it is, or which way it points. Feeding a velocity to length gives the current speed.",
 			"has_body": false,
 			"icon": "ruler",
 			"id": "vector2_info",
 			"inputs": [
 				{
 					"default": "'length'",
-					"doc": "Which value to read from the vector.",
+					"doc": "length is how long it is, angle is the direction in degrees, and length_squared skips the square root, good enough to compare two distances.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -14340,7 +15574,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Shortens a 2D vector so it is no longer than a maximum and stores it. Use it to cap a speed so diagonal motion is not faster than straight.",
+			"description": "Shortens a vector when it is longer than Max, and leaves it alone when it is not. Capping a velocity is what stops diagonal movement from being faster than walking straight.",
 			"has_body": false,
 			"icon": "scaling",
 			"id": "vector2_limit_length",
@@ -14615,14 +15849,14 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Applies a function to a vector and returns a new vector, such as normalized or abs.",
+			"description": "Reshapes a vector and stores the new one, most often to normalize it: keep the direction but set the length to 1, so it stops carrying a speed.",
 			"has_body": false,
 			"icon": "move-3d",
 			"id": "vector2_transform",
 			"inputs": [
 				{
 					"default": "'normalized'",
-					"doc": "The function to apply to the vector.",
+					"doc": "normalized keeps the direction and sets the length to 1, abs drops the minus signs, floor, ceil and round snap to whole numbers, and orthogonal turns it a quarter turn.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -14674,7 +15908,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Reflects a 3D vector off a surface and stores the result, such as the velocity a ball keeps after hitting a wall. Normal must be a unit vector.",
+			"description": "Turns a velocity into the one it keeps after bouncing off a surface, the way a ball comes off a wall. Cast Ray and Move And Collide already report the Normal it needs on a hit.",
 			"has_body": false,
 			"icon": "move-diagonal-2",
 			"id": "vector3_bounce",
@@ -14693,7 +15927,7 @@
 				},
 				{
 					"default": "(0.0, 1.0, 0.0)",
-					"doc": "The unit direction the surface faces.",
+					"doc": "The direction the surface faces, straight out of it. A collision reports it as the normal.",
 					"id": "normal",
 					"lvalue": false,
 					"name": "Normal",
@@ -14725,14 +15959,14 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Combines two 3D vectors into a single number, such as the distance or angle between them.",
+			"description": "Turns two 3D vectors into one number, such as how far apart two points are or the angle between them.",
 			"has_body": false,
 			"icon": "git-merge",
 			"id": "vector3_combine",
 			"inputs": [
 				{
 					"default": "'distance_to'",
-					"doc": "How to combine the two vectors.",
+					"doc": "distance_to is how far apart they are, dot tells how much they point the same way, and angle_to gives the angle between them.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -14793,7 +16027,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Returns the cross product of two 3D vectors, a vector perpendicular to both. Useful to find a side direction.",
+			"description": "Takes two 3D directions and gives the one standing at a right angle to both. Feeding the facing direction and the up direction gives the side direction, which is how strafing left and right is worked out.",
 			"has_body": false,
 			"icon": "axis-3d",
 			"id": "vector3_cross",
@@ -14826,7 +16060,7 @@
 			"name": "Vector3 Cross",
 			"outputs": [
 				{
-					"doc": "The perpendicular vector.",
+					"doc": "The direction at a right angle to both, such as the side of a body.",
 					"id": "result",
 					"name": "Result",
 					"type": "Vector3"
@@ -14844,7 +16078,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Returns the unit direction pointing from one point to another in 3D. Useful to aim or to steer toward a target.",
+			"description": "Gives the direction that points from one place to another in 3D, always exactly one unit long so it carries no speed of its own. Multiply it with Scale Vector3 to turn it into a velocity.",
 			"has_body": false,
 			"icon": "navigation",
 			"id": "vector3_direction_to",
@@ -14877,7 +16111,7 @@
 			"name": "Vector3 Direction To",
 			"outputs": [
 				{
-					"doc": "The unit direction from one point to the other.",
+					"doc": "The direction from From to To, one unit long.",
 					"id": "result",
 					"name": "Result",
 					"type": "Vector3"
@@ -14935,14 +16169,14 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Reads a single number from a 3D vector, such as its length.",
+			"description": "Reads one number out of a 3D vector, most often its length. Feeding a velocity to length gives the current speed.",
 			"has_body": false,
 			"icon": "ruler",
 			"id": "vector3_info",
 			"inputs": [
 				{
 					"default": "'length'",
-					"doc": "Which value to read from the vector.",
+					"doc": "length is how long it is, and length_squared skips the square root, good enough to compare two distances.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -15052,7 +16286,7 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Shortens a 3D vector so it is no longer than a maximum and stores it. Use it to cap a speed so diagonal motion is not faster than straight.",
+			"description": "Shortens a 3D vector when it is longer than Max, and leaves it alone when it is not. Capping a velocity is what stops diagonal movement from being faster than walking straight.",
 			"has_body": false,
 			"icon": "scaling",
 			"id": "vector3_limit_length",
@@ -15327,14 +16561,14 @@
 			"category": "vector",
 			"color": "#a855f7",
 			"default_phase": "update",
-			"description": "Applies a function to a 3D vector and returns a new vector, such as normalized or abs.",
+			"description": "Reshapes a 3D vector and stores the new one, most often to normalize it: keep the direction but set the length to 1, so it stops carrying a speed.",
 			"has_body": false,
 			"icon": "move-3d",
 			"id": "vector3_transform",
 			"inputs": [
 				{
 					"default": "'normalized'",
-					"doc": "The function to apply to the vector.",
+					"doc": "normalized keeps the direction and sets the length to 1, abs drops the minus signs, and floor, ceil and round snap to whole numbers.",
 					"id": "func_name",
 					"lvalue": false,
 					"name": "Function",
@@ -15448,7 +16682,7 @@
 			"category": "time",
 			"color": "#94a3b8",
 			"default_phase": "update",
-			"description": "Waits a number of seconds while staying in this state, then takes the Finished branch. The timer resets each time this state is entered.",
+			"description": "Waits a number of seconds while staying in this state, then takes the Finished branch on every frame from there on. With Seconds = 3 a game over screen sits still and then moves on. For N Seconds is the one that also gives a branch for the waiting frames.",
 			"has_body": false,
 			"icon": "hourglass",
 			"id": "wait",
@@ -15479,14 +16713,14 @@
 			"category": "math",
 			"color": "#8b5cf6",
 			"default_phase": "update",
-			"description": "Produces a sine wave from the game clock that swings between minus Amplitude and plus Amplitude. Useful for bobbing, floating or pulsing without tracking time by hand.",
+			"description": "Gives a number that swings smoothly up and down forever, driven by the game clock. With Amplitude = 10 it travels between -10 and 10, and Frequency = 2 makes it do that twice a second. Add it to a position for a coin that bobs or a light that pulses.",
 			"has_body": false,
 			"icon": "spline",
 			"id": "wave",
 			"inputs": [
 				{
 					"default": "1.0",
-					"doc": "How many full cycles happen each second.",
+					"doc": "How many full up-and-down trips happen each second.",
 					"id": "frequency",
 					"lvalue": false,
 					"name": "Frequency",
@@ -15498,7 +16732,7 @@
 				},
 				{
 					"default": "1.0",
-					"doc": "How far the wave reaches from the center.",
+					"doc": "How far it reaches from the middle, in each direction.",
 					"id": "amplitude",
 					"lvalue": false,
 					"name": "Amplitude",
@@ -15593,7 +16827,7 @@
 	"categories": [
 		{
 			"color": "#f97316",
-			"count": 22,
+			"count": 24,
 			"icon": "git-branch",
 			"id": "flow",
 			"name": "Flow"
@@ -15779,13 +17013,6 @@
 			"icon": "terminal",
 			"id": "debug",
 			"name": "Debug"
-		},
-		{
-			"color": "#7c93ff",
-			"count": 1,
-			"icon": "square-function",
-			"id": "",
-			"name": "General"
 		}
 	],
 	"version": "4.7-stable (official)"

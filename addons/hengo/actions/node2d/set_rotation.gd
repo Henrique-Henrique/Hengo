@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to turn. Leave it empty to turn this node.'),
 		{
 			name = 'Angle',
 			type = 'float',
@@ -64,4 +65,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.rotation_degrees = {{angle}}'
+	return '{{ref}}.rotation_degrees = {{angle}}'

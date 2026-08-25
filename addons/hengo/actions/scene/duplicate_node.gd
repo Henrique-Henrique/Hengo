@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node to copy.',
+			doc = 'The node to copy. Leave it empty to copy this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

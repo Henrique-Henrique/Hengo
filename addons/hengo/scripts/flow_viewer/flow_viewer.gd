@@ -588,7 +588,7 @@ func _spawn_frame(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var frame: HenFlowStateFrame = HenFlowStateFrame.new()
 
 	nodes_container.add_child(frame)
-	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base)
+	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base, state.can_reenter)
 	frame.set_content_size(entry.size)
 
 	_frames[_node] = frame

@@ -32,6 +32,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to push. Leave it empty to push this node.'),
 		{
 			name = 'Force',
 			type = 'Vector2',
@@ -65,4 +66,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return '_ref.apply_force({{force}}, {{offset}})'
+	return '{{ref}}.apply_force({{force}}, {{offset}})'

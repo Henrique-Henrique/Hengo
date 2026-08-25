@@ -28,6 +28,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the ray starts from. Leave it empty to start from this node.'),
 		{
 			name = 'From',
 			type = 'Vector3',
@@ -127,8 +128,8 @@ func _self_skip() -> String:
 		if not bool(value_of(&'ignore_self', true)):
 			return empty
 
-		return 'var skip_{{VCNODE_ID}}: Array[RID] = [(_ref as CollisionObject3D).get_rid()]\n'
+		return 'var skip_{{VCNODE_ID}}: Array[RID] = [({{ref}} as CollisionObject3D).get_rid()]\n'
 
 	return empty \
 		+ 'if {{ignore_self}}:\n' \
-		+ '\tskip_{{VCNODE_ID}}.append((_ref as CollisionObject3D).get_rid())\n'
+		+ '\tskip_{{VCNODE_ID}}.append(({{ref}} as CollisionObject3D).get_rid())\n'

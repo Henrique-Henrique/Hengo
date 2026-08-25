@@ -27,6 +27,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the angle is measured from. Leave it empty to measure from this node.'),
 		{
 			name = 'Target',
 			type = 'Node2D',
@@ -45,7 +46,7 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_angle() -> String:
-	return 'rad_to_deg(_ref.get_angle_to({{target}}.global_position))'
+	return 'rad_to_deg({{ref}}.get_angle_to({{target}}.global_position))'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

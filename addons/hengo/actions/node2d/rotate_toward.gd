@@ -36,6 +36,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to turn. Leave it empty to turn this node.'),
 		{
 			name = 'Target',
 			type = 'Vector2',
@@ -89,11 +90,11 @@ func get_flow_physics() -> String:
 # lerping the angle by hand gets wrong at the -180/180 seam
 func _body() -> String:
 	if not any_flow_connected():
-		return '_ref.rotation = rotate_toward(_ref.rotation, _ref.global_position.angle_to_point({{target}}), deg_to_rad({{speed}}) * delta)'
+		return '{{ref}}.rotation = rotate_toward({{ref}}.rotation, {{ref}}.global_position.angle_to_point({{target}}), deg_to_rad({{speed}}) * delta)'
 
-	return 'var aim_{{VCNODE_ID}} = _ref.global_position.angle_to_point({{target}})\n' \
-		+ '_ref.rotation = rotate_toward(_ref.rotation, aim_{{VCNODE_ID}}, deg_to_rad({{speed}}) * delta)\n' \
-		+ 'if absf(angle_difference(_ref.rotation, aim_{{VCNODE_ID}})) <= ' + str(AIM_TOLERANCE) + ':\n' \
+	return 'var aim_{{VCNODE_ID}} = {{ref}}.global_position.angle_to_point({{target}})\n' \
+		+ '{{ref}}.rotation = rotate_toward({{ref}}.rotation, aim_{{VCNODE_ID}}, deg_to_rad({{speed}}) * delta)\n' \
+		+ 'if absf(angle_difference({{ref}}.rotation, aim_{{VCNODE_ID}})) <= ' + str(AIM_TOLERANCE) + ':\n' \
 		+ '\t{{aimed}}\n' \
 		+ 'else:\n' \
 		+ '\t{{turning}}'

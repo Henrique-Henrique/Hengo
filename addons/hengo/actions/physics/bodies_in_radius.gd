@@ -28,6 +28,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the circle is centered on. Leave it empty to center it on this node.'),
 		{
 			name = 'Radius',
 			type = 'float',
@@ -108,7 +109,7 @@ func _body() -> String:
 			+ 'shape_{{VCNODE_ID}}.radius = {{radius}}\n' \
 			+ 'var query_{{VCNODE_ID}} = PhysicsShapeQueryParameters3D.new()\n' \
 			+ 'query_{{VCNODE_ID}}.shape = shape_{{VCNODE_ID}}\n' \
-			+ 'query_{{VCNODE_ID}}.transform = Transform3D(Basis.IDENTITY, _ref.global_position)\n' \
+			+ 'query_{{VCNODE_ID}}.transform = Transform3D(Basis.IDENTITY, {{ref}}.global_position)\n' \
 			+ 'query_{{VCNODE_ID}}.collision_mask = {{mask}}\n' \
 			+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 			+ 'var found_{{VCNODE_ID}} = _ref.get_world_3d().direct_space_state.intersect_shape(query_{{VCNODE_ID}}, 32)\n' \
@@ -122,7 +123,7 @@ func _body() -> String:
 		+ 'shape_{{VCNODE_ID}}.radius = {{radius}}\n' \
 		+ 'var query_{{VCNODE_ID}} = PhysicsShapeQueryParameters2D.new()\n' \
 		+ 'query_{{VCNODE_ID}}.shape = shape_{{VCNODE_ID}}\n' \
-		+ 'query_{{VCNODE_ID}}.transform = Transform2D(0.0, _ref.global_position)\n' \
+		+ 'query_{{VCNODE_ID}}.transform = Transform2D(0.0, {{ref}}.global_position)\n' \
 		+ 'query_{{VCNODE_ID}}.collision_mask = {{mask}}\n' \
 		+ 'query_{{VCNODE_ID}}.exclude = skip_{{VCNODE_ID}}\n' \
 		+ 'var found_{{VCNODE_ID}} = _ref.get_world_2d().direct_space_state.intersect_shape(query_{{VCNODE_ID}}, 32)\n' \
@@ -138,4 +139,4 @@ func _self_skip(_class: StringName) -> String:
 	if not targets(_class):
 		return 'var skip_{{VCNODE_ID}}: Array[RID] = []\n'
 
-	return 'var skip_{{VCNODE_ID}}: Array[RID] = [(_ref as ' + str(_class) + ').get_rid()]\n'
+	return 'var skip_{{VCNODE_ID}}: Array[RID] = [({{ref}} as ' + str(_class) + ').get_rid()]\n'

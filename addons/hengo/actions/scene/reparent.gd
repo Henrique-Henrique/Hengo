@@ -32,8 +32,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node to move.',
+			doc = 'The node to move. Leave it empty to move this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

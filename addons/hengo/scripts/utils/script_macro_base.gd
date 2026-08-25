@@ -61,7 +61,23 @@ func targets(_class: StringName) -> bool:
 	return ClassDB.is_parent_class(target_class, _class) if ClassDB.class_exists(target_class) else false
 
 
+# first input of every action that acts on a node: unbound it emits `_ref`, the
+# node the script sits on, so the slot reads as Self until another node is bound
+func node_ref_input(_doc: String, _name: String = 'Node', _id: StringName = &'ref') -> Dictionary:
+	return {
+		name = _name,
+		type = 'Node',
+		id = _id,
+		doc = _doc,
+		bind_only = true,
+		optional = true,
+		default_value = null
+	}
+
+
 # returns an array of dictionary with { name: string, type: string, id: stringname }
+# an action that acts on a node opens with node_ref_input() and reads it as
+# {{ref}}, never as a bare _ref.
 # optional keys: default_value, type_from (follow another input's bound type),
 # raw (emit the value verbatim), options (fixed set shown as a picker — pair it
 # with raw and make default_value the first option, or the ui and the emitted code

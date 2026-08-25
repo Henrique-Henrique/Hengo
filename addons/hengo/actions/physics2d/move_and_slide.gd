@@ -30,6 +30,11 @@ func get_default_phase() -> StringName:
 	return &'physics'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The body to move. Leave it empty to move this node.'),
+	]
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -75,10 +80,10 @@ func get_flow_exit() -> String:
 # get_slide_collision_count reports what the last move_and_slide call ran into
 func _body() -> String:
 	if not any_flow_connected():
-		return '_ref.move_and_slide()'
+		return '{{ref}}.move_and_slide()'
 
-	return '_ref.move_and_slide()\n' \
-		+ 'if _ref.get_slide_collision_count() > 0:\n' \
+	return '{{ref}}.move_and_slide()\n' \
+		+ 'if {{ref}}.get_slide_collision_count() > 0:\n' \
 		+ '\t{{hit}}\n' \
 		+ 'else:\n' \
 		+ '\t{{clear}}'

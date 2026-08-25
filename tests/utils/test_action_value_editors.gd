@@ -265,7 +265,7 @@ func test_an_input_pin_is_clickable() -> void:
 	var viewer: HenFlowViewer = _card_with(action)
 	var hits: Array = _hits_of(viewer, action, &'pin')
 
-	assert_int(hits.size()).is_equal(1)
+	assert_int(hits.size()).is_equal(action.inputs.size())
 	# the drawn dot is 13px and unreachable once the cam zooms out
 	assert_float((hits[0].rect as Rect2).size.x).is_greater(HenFlowNodeCard.SLOT_DOT)
 
@@ -299,11 +299,11 @@ func test_a_pin_fed_by_a_producer_has_no_picker() -> void:
 	var action: HenSaveAction = _action(FIX_VECTOR2)
 	var producer: HenSaveAction = _action(FIX_VECTOR2)
 
-	action.input_actions[str(action.inputs[0].id)] = {action = producer, output = &'result'}
+	action.input_actions[str(action.inputs[-1].id)] = {action = producer, output = &'result'}
 
 	var viewer: HenFlowViewer = _card_with(action)
 
-	assert_int(_hits_of(viewer, action, &'pin').size()).is_equal(0)
+	assert_int(_hits_of(viewer, action, &'pin').size()).is_equal(action.inputs.size() - 1)
 
 
 func _macro_named(_name: String) -> HenSaveMacro:
@@ -356,7 +356,7 @@ func test_a_variant_output_is_offered_for_any_type() -> void:
 func test_setting_a_producer_drops_the_other_sources() -> void:
 	var action: HenSaveAction = _action(FIX_VECTOR2)
 	var part: Dictionary = _part_named(action, 'Position')
-	var key: String = str(action.inputs[0].id)
+	var key: String = str((part.slot as Dictionary).bind_key)
 
 	action.input_bindings[key] = 'some_var'
 	action.input_expressions[key] = HenSaveActionExpression.new()
@@ -384,10 +384,10 @@ func test_a_committed_value_reaches_the_card() -> void:
 	assert_object(card).is_not_null()
 
 	viewer._editing_card = card
-	action.inputs[0].default_value = Vector2(42.0, 7.0)
+	action.inputs[-1].default_value = Vector2(42.0, 7.0)
 	viewer._refresh_edited_card()
 
-	var pin: HenFlowGraphTypes.FlowPin = (card as HenFlowNodeCard).node.pins_of(&'data_in')[0]
+	var pin: HenFlowGraphTypes.FlowPin = (card as HenFlowNodeCard).node.pins_of(&'data_in')[-1]
 
 	assert_str(str(pin.part.get('value', ''))).contains('42')
 
@@ -403,7 +403,7 @@ func test_the_edited_card_holds_its_screen_position() -> void:
 	action.phase = &'update'
 	# the wide one owns the left edge of the box, so normalising after the relayout
 	# cannot cancel the movement of the card below it
-	first.inputs[0].default_value = Vector2(111111111111.111, 222222222222.222)
+	first.inputs[-1].default_value = Vector2(111111111111.111, 222222222222.222)
 	save_data.add_state_action(state.id, first)
 	save_data.add_state_action(state.id, action)
 
@@ -418,7 +418,7 @@ func test_the_edited_card_holds_its_screen_position() -> void:
 
 	viewer._editing_card = card
 	# the header floors the card width, so a narrow value would not relayout
-	action.inputs[0].default_value = Vector2(111111111.111, 222222222.222)
+	action.inputs[-1].default_value = Vector2(111111111.111, 222222222.222)
 	viewer._refresh_edited_card()
 
 	var moved: Variant = viewer._cards_by_action.get(str(action.id))
@@ -505,7 +505,7 @@ func test_the_chosen_output_is_stored() -> void:
 
 	HenActionsPanel.set_producer(part.slot, _macro_named('get_vector2_xy'), &'y')
 
-	var entry: Dictionary = action.input_actions[str(action.inputs[0].id)]
+	var entry: Dictionary = action.input_actions[str((part.slot as Dictionary).bind_key)]
 
 	assert_str(str(entry.output)).is_equal('y')
 

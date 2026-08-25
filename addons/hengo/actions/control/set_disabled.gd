@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'BaseButton',
 			id = &'target',
-				doc = 'The Control node to enable or disable.',
+				doc = 'The button to enable or disable. Leave it empty to change this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

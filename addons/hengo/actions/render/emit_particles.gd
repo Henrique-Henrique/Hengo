@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Particles',
 			type = 'Node',
 			id = &'particles',
-			doc = 'The particle node to fire, such as a GPUParticles2D or a CPUParticles3D.',
+			doc = 'The particles node to fire. Leave it empty to fire this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

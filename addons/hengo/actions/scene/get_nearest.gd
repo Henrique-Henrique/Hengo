@@ -32,6 +32,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to measure from. Leave it empty to measure from this node, which is also the one left out of the search.'),
 		{
 			name = 'Group',
 			type = 'StringName',
@@ -101,9 +102,9 @@ func _body() -> String:
 	var body: String = 'var best_{{VCNODE_ID}} = null\n' \
 		+ 'var best_dist_{{VCNODE_ID}} = INF\n' \
 		+ 'for node_{{VCNODE_ID}} in _ref.get_tree().get_nodes_in_group({{group}}):\n' \
-		+ '\tif node_{{VCNODE_ID}} == _ref:\n' \
+		+ '\tif node_{{VCNODE_ID}} == {{ref}}:\n' \
 		+ '\t\tcontinue\n' \
-		+ '\tvar d_{{VCNODE_ID}} = _ref.global_position.distance_to(node_{{VCNODE_ID}}.global_position)\n' \
+		+ '\tvar d_{{VCNODE_ID}} = {{ref}}.global_position.distance_to(node_{{VCNODE_ID}}.global_position)\n' \
 		+ '\tif d_{{VCNODE_ID}} < best_dist_{{VCNODE_ID}}:\n' \
 		+ '\t\tbest_dist_{{VCNODE_ID}} = d_{{VCNODE_ID}}\n' \
 		+ '\t\tbest_{{VCNODE_ID}} = node_{{VCNODE_ID}}\n' \

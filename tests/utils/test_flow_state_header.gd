@@ -221,6 +221,17 @@ func test_the_start_button_makes_the_state_start() -> void:
 	assert_bool(state.start).is_false()
 
 
+# blocking re-entry is the default, so the states that opt out say so in the graph
+func test_a_reenterable_state_wears_a_badge() -> void:
+	var viewer: HenFlowViewer = _viewer()
+	var before: float = _frame_of(viewer, state)._text_end()
+
+	state.can_reenter = true
+	viewer.rebuild()
+
+	assert_float(_frame_of(viewer, state)._text_end()).is_greater(before)
+
+
 func test_the_header_offers_a_new_sub_state_button() -> void:
 	var viewer: HenFlowViewer = _viewer()
 	var frame: HenFlowStateFrame = _frame(viewer)

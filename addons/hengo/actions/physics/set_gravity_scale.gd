@@ -24,6 +24,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to change. Leave it empty to change this node.'),
 		{
 			name = 'Scale',
 			type = 'float',
@@ -60,4 +61,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.gravity_scale = {{scale}}'
+	return '{{ref}}.gravity_scale = {{scale}}'

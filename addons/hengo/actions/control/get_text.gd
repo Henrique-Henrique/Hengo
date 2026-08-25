@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'Control',
 			id = &'target',
-			doc = 'The Control node to read text from.',
+			doc = 'The node to read the text from. Leave it empty to read this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

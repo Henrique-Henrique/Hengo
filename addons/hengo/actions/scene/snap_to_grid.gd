@@ -24,6 +24,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to snap. Leave it empty to snap this node.'),
 		{
 			name = 'Cell Size',
 			type = 'float',
@@ -61,6 +62,6 @@ func get_flow_exit() -> String:
 
 func _body() -> String:
 	if targets(&'Node3D'):
-		return '_ref.position = _ref.position.snapped(Vector3.ONE * {{cell}})'
+		return '{{ref}}.position = {{ref}}.position.snapped(Vector3.ONE * {{cell}})'
 
-	return '_ref.position = _ref.position.snapped(Vector2.ONE * {{cell}})'
+	return '{{ref}}.position = {{ref}}.position.snapped(Vector2.ONE * {{cell}})'

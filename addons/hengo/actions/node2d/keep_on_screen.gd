@@ -28,6 +28,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to keep on screen. Leave it empty to keep this node.'),
 		{
 			name = 'Margin',
 			type = 'float',
@@ -56,7 +57,7 @@ func get_flow_physics() -> String:
 # global_position hands back a copy, so a component is written back whole
 func _body() -> String:
 	return 'var rect_{{VCNODE_ID}} = _ref.get_viewport_rect().grow(-{{margin}})\n' \
-		+ 'var pos_{{VCNODE_ID}} = _ref.global_position\n' \
+		+ 'var pos_{{VCNODE_ID}} = {{ref}}.global_position\n' \
 		+ 'pos_{{VCNODE_ID}}.x = clampf(pos_{{VCNODE_ID}}.x, rect_{{VCNODE_ID}}.position.x, rect_{{VCNODE_ID}}.end.x)\n' \
 		+ 'pos_{{VCNODE_ID}}.y = clampf(pos_{{VCNODE_ID}}.y, rect_{{VCNODE_ID}}.position.y, rect_{{VCNODE_ID}}.end.y)\n' \
-		+ '_ref.global_position = pos_{{VCNODE_ID}}'
+		+ '{{ref}}.global_position = pos_{{VCNODE_ID}}'

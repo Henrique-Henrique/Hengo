@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to move. Leave it empty to move this node.'),
 		{
 			name = 'Velocity',
 			type = 'Vector2',
@@ -54,12 +55,12 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 
 func get_flow_enter() -> String:
-	return '_ref.position += {{velocity}} * {{speed}}'
+	return '{{ref}}.position += {{velocity}} * {{speed}}'
 
 
 func get_flow_update() -> String:
-	return '_ref.position += {{velocity}} * {{speed}} * delta'
+	return '{{ref}}.position += {{velocity}} * {{speed}} * delta'
 
 
 func get_flow_exit() -> String:
-	return '_ref.position += {{velocity}} * {{speed}}'
+	return '{{ref}}.position += {{velocity}} * {{speed}}'

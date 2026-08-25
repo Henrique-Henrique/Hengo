@@ -473,7 +473,7 @@ static func _prime_instance(
 	_action: HenSaveAction,
 	_phase: StringName = &''
 ) -> void:
-	_instance.target_class = _save_data.identity.type if _save_data.identity else &''
+	_instance.target_class = _dispatch_class(_save_data, _instance, _action)
 	_instance.action_phase = _phase if not _phase.is_empty() else StringName(str(_action.phase))
 	_instance.input_values = {}
 	_instance.bound_inputs = {}
@@ -505,6 +505,30 @@ static func _prime_instance(
 		# be emitted, and an action that reports its end still has to report it
 		if not branch_steps(_action, id).is_empty() 			or branch_target(_save_data, _action, id) 			or not branch_script_id(_save_data, _action, id).is_empty():
 			_instance.connected_flows[id] = true
+
+
+# the class the bodies dispatch on: what the ref slot is bound to when it says
+# more than Node, else the class the script extends
+static func _dispatch_class(_save_data: HenSaveData, _instance: HenScriptMacroBase, _action: HenSaveAction) -> StringName:
+	var identity: StringName = _save_data.identity.type if _save_data.identity else &''
+
+	for input: Dictionary in _instance.get_inputs():
+		if not HenUtils.is_node_ref_slot(
+			StringName(str(input.get('type', ''))),
+			bool(input.get('bind_only', false)),
+			bool(input.get('optional', false))
+		):
+			continue
+
+		var bind: String = str(_action.input_bindings.get(str(input.get('id', '')), ''))
+		var bound: StringName = StringName(HenUtils.get_bound_source_type(_save_data, bind))
+
+		if bound != &'Node' and ClassDB.class_exists(bound):
+			return bound
+
+		return identity
+
+	return identity
 
 
 # params for a synthesized lifecycle method: enter mirrors the state's enter vc
@@ -1009,6 +1033,10 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 		if bind.is_empty():
 			# an optional target is simply left out of the emitted code
 			if bool(input.get('optional', false)):
+				# a node slot falls back to this node, which has to be able to stand in for it
+				if _self_cannot_stand_in(_save_data, input):
+					return name
+
 				continue
 
 			return name
@@ -1017,6 +1045,19 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 			return name
 
 	return ''
+
+
+# true when an unbound node slot has nothing to fall back to: the slot asks for a
+# class the node running the script could never be
+static func _self_cannot_stand_in(_save_data: HenSaveData, _input: Dictionary) -> bool:
+	var type: StringName = StringName(str(_input.get('type', '')))
+
+	if not HenUtils.is_node_ref_slot(type, bool(_input.get('bind_only', false)), true):
+		return false
+
+	var identity: StringName = _save_data.identity.type if _save_data.identity else &''
+
+	return not identity.is_empty() and not HenUtils.can_hold_instance_of(identity, type)
 
 
 # name of the first branch that targets another script without an instance source

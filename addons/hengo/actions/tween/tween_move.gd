@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to move. Leave it empty to move this node.'),
 		{
 			name = 'To',
 			type = 'Vector2',
@@ -60,4 +61,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return start_tween('tween_property(_ref, "position", {{to}}, {{duration}})')
+	return start_tween('tween_property({{ref}}, "position", {{to}}, {{duration}})')

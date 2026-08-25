@@ -36,11 +36,21 @@ func set_states(_states: Dictionary) -> void:
 	states = _states
 
 
+func set_reenterable(_names: Array) -> void:
+	for state_name: String in _names:
+		if states.has(state_name):
+			(states[state_name] as HengoState)._can_reenter = true
+
+
 func change_state(_state: String, ..._args) -> void:
 	if not states.has(_state):
 		print('State not found: ', _state)
 		return
-		
+
+	# a state only runs again from the outside when it opts in
+	if current_state and _current_state_name == _state and not current_state._can_reenter:
+		return
+
 	if current_state:
 		previous_state_name = _current_state_name
 		current_state.exit()

@@ -24,8 +24,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Shape',
 			type = 'Node',
 			id = &'shape',
-			doc = 'The CollisionShape2D or CollisionShape3D to switch.',
+			doc = 'The collision shape to turn on or off. Leave it empty to change this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

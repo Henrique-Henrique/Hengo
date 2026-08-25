@@ -24,8 +24,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node to write the value into.',
+			doc = 'The node to write to. Leave it empty to write to this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

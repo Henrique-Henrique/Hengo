@@ -33,6 +33,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to jump. Leave it empty to jump this node.'),
 		{
 			name = 'Force',
 			type = 'float',
@@ -64,4 +65,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return 'if _ref.is_on_floor():\n\t_ref.velocity.y = {{force}}'
+	return 'if {{ref}}.is_on_floor():\n\t_ref.velocity.y = {{force}}'

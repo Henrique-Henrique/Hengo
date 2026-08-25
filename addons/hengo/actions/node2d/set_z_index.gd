@@ -31,6 +31,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to reorder. Leave it empty to reorder this node.'),
 		{
 			name = 'Order',
 			type = 'int',
@@ -62,4 +63,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.z_index = {{z}}'
+	return '{{ref}}.z_index = {{z}}'

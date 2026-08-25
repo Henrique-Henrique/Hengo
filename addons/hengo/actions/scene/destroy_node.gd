@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Node',
 			type = 'Node',
 			id = &'node',
-			doc = 'The node to remove, such as the coin that was just picked up.',
+			doc = 'The node to destroy. Leave it empty to destroy this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

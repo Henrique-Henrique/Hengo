@@ -34,6 +34,9 @@ const MENU_DOT_GAP: float = 6.0
 const DELETE_COLOR: Color = Color('#c16460')
 const START_COLOR: Color = Color('#63ff92')
 const START_BG: Color = Color('#26482f')
+const REENTER_COLOR: Color = Color('#7fb4ff')
+const REENTER_BG: Color = Color('#1e2c45')
+const REENTER_TEXT: String = 'REENTER'
 const BADGE_SIZE: int = 11
 const BADGE_PAD_H: float = 6.0
 const ERROR_COLOR: Color = HenActionVisuals.ERROR_COLOR
@@ -68,17 +71,19 @@ var _final_size: Vector2 = Vector2.ZERO
 var _running: bool = false
 var _is_start: bool = false
 var _is_base: bool = false
+var _can_reenter: bool = false
 var _errors: int = 0
 var _hover_kind: StringName = &''
 var _hits: Array[Dictionary] = []
 
 
-func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color, _start: bool = false, _base: bool = false) -> void:
+func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color, _start: bool = false, _base: bool = false, _reenter: bool = false) -> void:
 	_host = _host_control
 	state_name = _name
 	_accent = _accent_color
 	_is_start = _start
 	_is_base = _base
+	_can_reenter = _reenter
 
 	_painter.bind(_host)
 
@@ -158,15 +163,18 @@ func _text_end() -> float:
 		+ _painter.measure(state_name.to_upper(), NAME_SIZE).x + GAP \
 		+ _painter.measure(_meta, META_SIZE).x + GAP
 
-	return end + (_badge_width() + GAP if _is_start else 0.0)
+	end += (_badge_width('START') + GAP) if _is_start else 0.0
+	end += (_badge_width(REENTER_TEXT) + GAP) if _can_reenter else 0.0
+
+	return end
 
 
 func _strip_width() -> float:
 	return BT_SIZE * 5.0 + BT_GAP * 4.0
 
 
-func _badge_width() -> float:
-	return _painter.measure('START', BADGE_SIZE).x + BADGE_PAD_H * 2.0
+func _badge_width(_text: String) -> float:
+	return _painter.measure(_text, BADGE_SIZE).x + BADGE_PAD_H * 2.0
 
 
 func _error_badge_text() -> String:
@@ -204,8 +212,12 @@ func _emit_header(_size: Vector2) -> void:
 	x += _painter.measure(_meta, META_SIZE).x + GAP
 
 	if _is_start:
-		_emit_badge(Vector2(x, centre))
-		x += _badge_width() + GAP
+		_emit_badge(Vector2(x, centre), 'START', START_BG, START_COLOR)
+		x += _badge_width('START') + GAP
+
+	if _can_reenter:
+		_emit_badge(Vector2(x, centre), REENTER_TEXT, REENTER_BG, REENTER_COLOR)
+		x += _badge_width(REENTER_TEXT) + GAP
 
 	# the count arrives after the layout measured the header, so it takes the free
 	# space before the buttons and is dropped when there is none
@@ -219,12 +231,12 @@ func _emit_header(_size: Vector2) -> void:
 
 
 # the same badge the sidebar puts on a start row, so the two views read alike
-func _emit_badge(_at: Vector2) -> void:
+func _emit_badge(_at: Vector2, _text: String, _bg: Color, _color: Color) -> void:
 	var text_h: float = _painter.line_height(BADGE_SIZE)
-	var rect := Rect2(Vector2(_at.x, _at.y - text_h * 0.5), Vector2(_badge_width(), text_h))
+	var rect := Rect2(Vector2(_at.x, _at.y - text_h * 0.5), Vector2(_badge_width(_text), text_h))
 
-	_painter.add_style(_chip(START_BG, BT_CORNER), rect)
-	_painter.add_text('START', BADGE_SIZE, rect.position + Vector2(BADGE_PAD_H, 0.0), START_COLOR)
+	_painter.add_style(_chip(_bg, BT_CORNER), rect)
+	_painter.add_text(_text, BADGE_SIZE, rect.position + Vector2(BADGE_PAD_H, 0.0), _color)
 
 
 func _emit_error_badge(_at: Vector2) -> void:

@@ -27,6 +27,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the distance is measured from. Leave it empty to measure from this node.'),
 		{
 			name = 'Target',
 			type = 'Node2D',
@@ -45,7 +46,7 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_distance() -> String:
-	return '_ref.global_position.distance_to({{target}}.global_position)'
+	return '{{ref}}.global_position.distance_to({{target}}.global_position)'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

@@ -30,10 +30,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'Node2D',
 			id = &'target',
-			doc = 'The sprite to flip.',
+			doc = 'The node to flip. Leave it empty to flip this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

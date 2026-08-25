@@ -24,8 +24,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Target',
 			type = 'Node',
 			id = &'target',
-			doc = 'The node that owns the property.',
+			doc = 'The node whose property is animated. Leave it empty to animate this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

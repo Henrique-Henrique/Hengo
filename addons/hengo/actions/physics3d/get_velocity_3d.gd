@@ -30,6 +30,11 @@ func get_default_phase() -> StringName:
 	return &'physics'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The body to read. Leave it empty to read this node.'),
+	]
+
 func get_outputs() -> Array[Dictionary]:
 	return [
 		{name = 'Velocity', type = 'Vector3', id = &'velocity', doc = 'Where to store the current velocity, in units per second.'}
@@ -37,7 +42,7 @@ func get_outputs() -> Array[Dictionary]:
 
 
 func get_output_velocity() -> String:
-	return '_ref.velocity'
+	return '{{ref}}.velocity'
 
 
 func get_flow_inputs() -> Array[Dictionary]:

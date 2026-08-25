@@ -24,6 +24,7 @@ func get_icon() -> String:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node the path starts from. Leave it empty to start from this node.', 'From'),
 		{
 			name = 'Path',
 			type = 'String',
@@ -62,4 +63,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return 'if _ref.has_node({{path}}):\n\t{{true}}\nelse:\n\t{{false}}'
+	return 'if {{ref}}.has_node({{path}}):\n\t{{true}}\nelse:\n\t{{false}}'

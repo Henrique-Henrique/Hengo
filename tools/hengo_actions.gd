@@ -12,7 +12,7 @@ class_name HenHengoActions extends RefCounted
 # collection and debug ride along when the json holds a single script
 const SCRIPT_KEYS: PackedStringArray = ['name', 'extends', 'vars', 'states', 'collection', 'debug']
 const VAR_KEYS: PackedStringArray = ['name', 'type', 'value', 'export']
-const STATE_KEYS: PackedStringArray = ['name', 'start', 'description', 'actions', 'sub_states']
+const STATE_KEYS: PackedStringArray = ['name', 'start', 'can_reenter', 'description', 'actions', 'sub_states']
 const ACTION_KEYS: PackedStringArray = ['id', 'phase', 'inputs', 'branches', 'outputs', 'body']
 
 
@@ -75,6 +75,7 @@ static func _declare_state(_save_data: HenSaveData, _spec: Dictionary) -> String
 	var state: HenSaveState = _save_data.add_state(false)
 	state.name = name
 	state.description = str(_spec.get('description', ''))
+	state.can_reenter = bool(_spec.get('can_reenter', false))
 
 	if bool(_spec.get('start', false)):
 		state.start = true
@@ -106,6 +107,7 @@ static func _declare_sub_state(_save_data: HenSaveData, _parent: HenSaveState, _
 	var state: HenSaveState = siblings[siblings.size() - 1]
 	state.name = name
 	state.description = str(_spec.get('description', ''))
+	state.can_reenter = bool(_spec.get('can_reenter', false))
 
 	if bool(_spec.get('start', false)):
 		state.start = true

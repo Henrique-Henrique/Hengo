@@ -32,6 +32,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to pull down. Leave it empty to pull this node.'),
 		{
 			name = 'Gravity',
 			type = 'float',
@@ -58,4 +59,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return '_ref.velocity.y -= {{gravity}} * delta'
+	return '{{ref}}.velocity.y -= {{gravity}} * delta'

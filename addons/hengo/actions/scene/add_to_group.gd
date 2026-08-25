@@ -27,6 +27,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to add. Leave it empty to add this node.'),
 		{
 			name = 'Group',
 			type = 'StringName',
@@ -59,4 +60,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.add_to_group({{group}})'
+	return '{{ref}}.add_to_group({{group}})'

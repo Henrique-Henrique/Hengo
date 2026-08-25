@@ -26,6 +26,11 @@ func get_default_phase() -> StringName:
 	return &'enter'
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The node to destroy. Leave it empty to destroy this node.'),
+	]
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -42,4 +47,4 @@ func get_flow_update() -> String:
 
 
 func _body() -> String:
-	return '_ref.queue_free()'
+	return '{{ref}}.queue_free()'

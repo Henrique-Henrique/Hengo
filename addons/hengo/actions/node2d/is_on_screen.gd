@@ -22,6 +22,12 @@ func get_target_classes() -> Array[StringName]:
 	return [&'Node2D']
 
 
+func get_inputs() -> Array[Dictionary]:
+	return [
+		node_ref_input('The node to check. Leave it empty to check this node.')
+	]
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -51,7 +57,7 @@ func get_flow_physics() -> String:
 
 # get_global_transform_with_canvas() gives the screen point, so a camera counts
 func _body() -> String:
-	return 'if _ref.get_viewport_rect().has_point(_ref.get_global_transform_with_canvas().origin):\n' \
+	return 'if _ref.get_viewport_rect().has_point({{ref}}.get_global_transform_with_canvas().origin):\n' \
 		+ '\t{{true}}\n' \
 		+ 'else:\n' \
 		+ '\t{{false}}'

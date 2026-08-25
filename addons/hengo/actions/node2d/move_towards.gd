@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to move. Leave it empty to move this node.'),
 		{
 			name = 'Target',
 			type = 'Vector2',
@@ -75,11 +76,11 @@ func get_flow_update() -> String:
 # move_toward returns the target itself once the step covers what is left
 func _body() -> String:
 	if not any_flow_connected():
-		return '_ref.position = _ref.position.move_toward({{target}}, {{speed}} * delta)'
+		return '{{ref}}.position = {{ref}}.position.move_toward({{target}}, {{speed}} * delta)'
 
 	return 'var to_{{VCNODE_ID}} = {{target}}\n' \
-		+ '_ref.position = _ref.position.move_toward(to_{{VCNODE_ID}}, {{speed}} * delta)\n' \
-		+ 'if _ref.position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
+		+ '{{ref}}.position = {{ref}}.position.move_toward(to_{{VCNODE_ID}}, {{speed}} * delta)\n' \
+		+ 'if {{ref}}.position.is_equal_approx(to_{{VCNODE_ID}}):\n' \
 		+ '\t{{arrived}}\n' \
 		+ 'else:\n' \
 		+ '\t{{moving}}'

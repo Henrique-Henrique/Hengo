@@ -23,6 +23,7 @@ func get_icon() -> String:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to check. Leave it empty to check this node.'),
 		{
 			name = 'Group',
 			type = 'StringName',
@@ -62,4 +63,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return 'if _ref.is_in_group({{group}}):\n\t{{true}}\nelse:\n\t{{false}}'
+	return 'if {{ref}}.is_in_group({{group}}):\n\t{{true}}\nelse:\n\t{{false}}'

@@ -22,10 +22,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Label',
-			type = 'Node',
+			type = 'Control',
 			id = &'label',
-			doc = 'The Label or RichTextLabel that shows the text.',
+			doc = 'The Label or RichTextLabel that shows the text. Leave it empty to type into this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to change. Leave it empty to change this node.'),
 		{
 			name = 'Velocity',
 			type = 'Vector2',
@@ -68,4 +69,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.velocity = {{velocity}}'
+	return '{{ref}}.velocity = {{velocity}}'

@@ -28,6 +28,7 @@ func get_target_classes() -> Array[StringName]:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The node to steer. Leave it empty to steer this node.'),
 		{
 			name = 'Amount',
 			type = 'float',
@@ -65,4 +66,4 @@ func get_flow_physics() -> String:
 
 
 func _body() -> String:
-	return '_ref.rotation += deg_to_rad({{degrees}}) * {{amount}} * delta'
+	return '{{ref}}.rotation += deg_to_rad({{degrees}}) * {{amount}} * delta'

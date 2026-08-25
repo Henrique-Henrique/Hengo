@@ -26,10 +26,11 @@ func get_inputs() -> Array[Dictionary]:
 	return [
 		{
 			name = 'Target',
-			type = 'Node',
+			type = 'GeometryInstance3D',
 			id = &'target',
-			doc = 'The mesh to paint, such as a MeshInstance3D.',
+			doc = 'The mesh to paint, such as a MeshInstance3D. Leave it empty to paint this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		},
 		{

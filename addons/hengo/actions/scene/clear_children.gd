@@ -28,8 +28,9 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Parent',
 			type = 'Node',
 			id = &'parent',
-			doc = 'The node whose children are removed, such as the container holding a list.',
+			doc = 'The node whose children are removed. Leave it empty to clear this node.',
 			bind_only = true,
+			optional = true,
 			default_value = null
 		}
 	]

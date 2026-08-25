@@ -32,7 +32,9 @@ func get_default_phase() -> StringName:
 
 
 func get_inputs() -> Array[Dictionary]:
-	return []
+	return [
+		node_ref_input('The body to stop. Leave it empty to stop this node.'),
+	]
 
 
 func get_flow_inputs() -> Array[Dictionary]:
@@ -61,4 +63,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.linear_velocity = Vector2.ZERO\n_ref.angular_velocity = 0.0'
+	return '{{ref}}.linear_velocity = Vector2.ZERO\n_ref.angular_velocity = 0.0'

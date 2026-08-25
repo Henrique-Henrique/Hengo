@@ -32,6 +32,7 @@ func get_default_phase() -> StringName:
 
 func get_inputs() -> Array[Dictionary]:
 	return [
+		node_ref_input('The body to change. Leave it empty to change this node.'),
 		{
 			name = 'Velocity',
 			type = 'Vector2',
@@ -68,4 +69,4 @@ func get_flow_exit() -> String:
 
 
 func _body() -> String:
-	return '_ref.linear_velocity = {{velocity}}'
+	return '{{ref}}.linear_velocity = {{velocity}}'
