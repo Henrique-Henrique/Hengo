@@ -30,6 +30,10 @@ const RUN_COLOR: Color = HenActionVisuals.RUN_COLOR
 const RUN_SHADOW: Color = Color(0.39, 1.0, 0.57, 0.30)
 const RUN_BORDER_WIDTH: int = 2
 const RUN_SHADOW_SIZE: int = 10
+const ERROR_COLOR: Color = HenActionVisuals.ERROR_COLOR
+const ERROR_SHADOW: Color = Color(0.94, 0.27, 0.27, 0.28)
+const ERROR_BORDER_WIDTH: int = 2
+const ERROR_SHADOW_SIZE: int = 10
 # neutral on purpose: the palette owns every hue, so selection reads by being the
 # only white outline on screen
 const SELECT_COLOR: Color = Color('#eaf0ff')
@@ -99,6 +103,7 @@ var _hover_ref: Variant = null
 var _chip_seq: int = 0
 var _running: bool = false
 var _selected: bool = false
+var _errored: bool = false
 # -1 none, 0 above this card, 1 below it
 var _drop_edge: int = -1
 
@@ -106,6 +111,7 @@ var _drop_edge: int = -1
 func setup(_host_control: Control, _node: HenFlowGraphTypes.FlowNode) -> void:
 	_host = _host_control
 	node = _node
+	_errored = not _node.error.is_empty()
 
 	_painter.bind(_host)
 
@@ -168,6 +174,21 @@ func set_running(_on: bool) -> bool:
 
 func is_running() -> bool:
 	return _running
+
+
+# the node keeps the reason, the card only has to know whether there is one
+func sync_error() -> bool:
+	var has: bool = node != null and not node.error.is_empty()
+
+	if _errored == has:
+		return false
+
+	_errored = has
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
 
 
 func set_selected(_on: bool) -> bool:
@@ -407,6 +428,7 @@ func apply_size(_size: Vector2) -> void:
 	if _detail != Detail.FULL:
 		_build_compact_label(_size)
 		_hit(rect, &'node', {})
+		_emit_error(rect)
 		_emit_selected(rect)
 		queue_redraw()
 		return
@@ -424,6 +446,7 @@ func apply_size(_size: Vector2) -> void:
 	_hit(rect, &'node', {})
 	_emit_hover()
 	_emit_running(rect)
+	_emit_error(rect)
 	_emit_selected(rect)
 
 	if node.action and node.action.disabled:
@@ -513,6 +536,31 @@ func _emit_running(_rect: Rect2) -> void:
 	_painter.add_style(_run_style(), _rect)
 
 
+# after the run outline: a step that is running and broken is still broken
+func _emit_error(_rect: Rect2) -> void:
+	if not _errored:
+		return
+
+	_painter.add_style(_error_style(), _rect)
+
+
+func _error_style() -> StyleBoxFlat:
+	if _style_cache.has('errored'):
+		return _style_cache['errored']
+
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color.TRANSPARENT
+	style.set_corner_radius_all(CORNER)
+	style.border_color = ERROR_COLOR
+	style.set_border_width_all(ERROR_BORDER_WIDTH)
+	style.shadow_color = ERROR_SHADOW
+	style.shadow_size = ERROR_SHADOW_SIZE
+
+	_style_cache['errored'] = style
+
+	return style
+
+
 func _run_style() -> StyleBoxFlat:
 	if _style_cache.has('running'):
 		return _style_cache['running']
@@ -599,12 +647,20 @@ func _emit_header(_size: Vector2) -> void:
 func _emit_icon(_rect: Rect2) -> void:
 	var glyph: float = _rect.size.x * (ICON_GLYPH / ICON)
 
-	_painter.add_style(_flat(accent(), int(_rect.size.x * (float(ICON_CORNER) / ICON))), _rect)
+	_painter.add_style(_flat(_badge_color(), int(_rect.size.x * (float(ICON_CORNER) / ICON))), _rect)
 	_painter.add_texture(
-		HenActionVisuals.icon_texture(node.icon),
+		HenActionVisuals.icon_texture(_badge_icon()),
 		Rect2(_rect.position + Vector2.ONE * (_rect.size.x - glyph) * 0.5, Vector2(glyph, glyph)),
 		Color.WHITE
 	)
+
+
+func _badge_color() -> Color:
+	return ERROR_COLOR if _errored else accent()
+
+
+func _badge_icon() -> String:
+	return HenActionVisuals.ERROR_ICON if _errored else node.icon
 
 
 # far out the slots are noise: only the badge and the name still say anything, and
@@ -614,7 +670,7 @@ func _build_compact_label(_size: Vector2) -> void:
 		_compact_label = CompactLabel.new()
 		add_child(_compact_label)
 
-	_compact_label.build(_painter, node.title, HenActionVisuals.icon_texture(node.icon), accent(), _title_color())
+	_compact_label.build(_painter, node.title, HenActionVisuals.icon_texture(_badge_icon()), _badge_color(), _title_color())
 	_compact_label.position = _size * 0.5
 	_compact_label.scale = Vector2(_title_scale, _title_scale)
 	_compact_label.visible = true

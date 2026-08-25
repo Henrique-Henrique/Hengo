@@ -250,6 +250,21 @@ func _compile_task() -> void:
 
 		HenSaver.recalculate_dependencies(save_data)
 
+		# an action the codegen drops would reach the file as a comment and nothing else
+		var broken: Array[Dictionary] = HenGeneratorAction.collect_errors(save_data)
+
+		if not broken.is_empty():
+			item.status = 'failed'
+			item.message = 'Broken action(s): ' + str(broken.size()) + '.'
+			# the whole entry, so the report row can take the canvas to the action
+			item.errors = broken
+
+			report.items.append(item)
+			report.failed_count += 1
+			aborted = true
+			abort_index = idx
+			break
+
 		code_gen.reset()
 		var code: String = code_gen.get_code(save_data)
 		var flow_error_count: int = code_gen.flow_errors.size()
@@ -325,17 +340,13 @@ func _on_finished() -> void:
 	_is_compiling = false
 	batch_finished.emit()
 
+	# nothing pops up: the toast tells how it went and the Actions button holds the
+	# report until it is asked for
+	HenCompileAllReportPopup.last_report = _report
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if global and global.HENGO_ROOT:
-		var ui_base: Control = global.HENGO_ROOT.get_node_or_null('%UIBase')
-		if ui_base:
-			# remove any existing result panels before showing the new one
-			for child in ui_base.get_children():
-				if child is HenCompileResultPanel:
-					child.queue_free()
-			var panel := HenCompileResultPanel.new()
-			panel.report = _report
-			ui_base.add_child(panel)
+		global.HENGO_ROOT.schedule_check_errors()
 
 	if Engine.is_editor_hint():
 		EditorInterface.get_resource_filesystem().scan()

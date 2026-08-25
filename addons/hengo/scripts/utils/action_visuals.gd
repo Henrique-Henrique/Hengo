@@ -73,6 +73,10 @@ const CAPSULE_TITLE_SIZE: int = 16
 # debug: same green and window the cnode border uses
 const RUN_COLOR: Color = Color('#63ff92')
 
+# an action the codegen drops, in the red the toolbar and the status bar already use
+const ERROR_COLOR: Color = Color('#ef4444')
+const ERROR_ICON: String = 'shield-alert'
+
 
 # icon name from assets/new_icons, falling back when the macro declares none
 static func icon_texture(icon_name: String) -> Texture2D:

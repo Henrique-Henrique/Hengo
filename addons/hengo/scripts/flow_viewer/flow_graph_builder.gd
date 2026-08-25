@@ -32,7 +32,7 @@ static func build(_save_data: HenSaveData, _state: HenSaveState) -> HenFlowGraph
 		if bucket.is_empty():
 			continue
 
-		_chain(graph, _save_data, bucket, entry, phase, phase)
+		_chain(graph, _save_data, bucket, entry, phase, phase, 0)
 		_add_tail(graph, bucket, phase)
 
 	return graph
@@ -123,7 +123,8 @@ static func _chain(
 	_actions: Array,
 	_from: HenFlowGraphTypes.FlowNode,
 	_from_pin: StringName,
-	_phase: StringName
+	_phase: StringName,
+	_depth: int
 ) -> Array[HenFlowGraphTypes.FlowNode]:
 	var links: Array[HenFlowGraphTypes.FlowNode] = []
 	var previous: HenFlowGraphTypes.FlowNode = _from
@@ -136,7 +137,7 @@ static func _chain(
 		# that also runs the flow keeps its place and the store follows it
 		var pulled: bool = stored and is_pure_producer(macro)
 		var node: HenFlowGraphTypes.FlowNode = _action_node(
-			_graph, _save_data, action, &'producer' if pulled else &'action', _phase
+			_graph, _save_data, action, &'producer' if pulled else &'action', _phase, _depth
 		)
 
 		# a pulled producer left the sequence to its store, but it is still the step
@@ -154,6 +155,7 @@ static func _chain(
 			var store: HenFlowGraphTypes.FlowNode = _store_node(_graph, _save_data, action, macro, node)
 
 			store.step = true
+			store.depth = _depth
 
 			_graph.connect_pins(&'exec', previous, previous_pin, store, HenFlowGraphTypes.ENTER_PIN)
 
@@ -181,7 +183,8 @@ static func _action_node(
 	_save_data: HenSaveData,
 	_action: HenSaveAction,
 	_kind: StringName,
-	_phase: StringName
+	_phase: StringName,
+	_depth: int
 ) -> HenFlowGraphTypes.FlowNode:
 	var macro: HenSaveMacro = HenActionsPanel.find_macro(_action.macro_id)
 	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
@@ -193,12 +196,13 @@ static func _action_node(
 	node.icon = macro.icon if macro else ''
 	node.accent = HenActionVisuals.accent_of(macro).to_html(false)
 	node.phase = _phase
+	node.depth = _depth
 
 	_graph.add_node(node)
 
 	node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
 
-	_add_input_pins(_graph, _save_data, _action, node)
+	_add_input_pins(_graph, _save_data, _action, node, _depth)
 
 	if macro:
 		for output: HenSaveParam in macro.outputs:
@@ -208,7 +212,7 @@ static func _action_node(
 	if _kind != &'producer':
 		node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.THEN_PIN, &'exec_out'))
 
-	_add_branch_pins(_graph, _save_data, _action, macro, node)
+	_add_branch_pins(_graph, _save_data, _action, macro, node, _depth)
 
 	if macro and macro.has_body:
 		node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.BODY_PIN, &'exec_out', 'Body'))
@@ -216,7 +220,7 @@ static func _action_node(
 		# the body is the nodes that carry its sequence, which is not the same list
 		# as its actions: a stored action hands that place to its store
 		var chain: Array[HenFlowGraphTypes.FlowNode] = _chain(
-			_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase
+			_graph, _save_data, _action.body_actions, node, HenFlowGraphTypes.BODY_PIN, _phase, _depth + 1
 		)
 
 		chain.append(_body_tail(_graph, _action, node, chain, _phase))
@@ -231,7 +235,8 @@ static func _add_input_pins(
 	_graph: HenFlowGraphTypes.FlowGraph,
 	_save_data: HenSaveData,
 	_action: HenSaveAction,
-	_node: HenFlowGraphTypes.FlowNode
+	_node: HenFlowGraphTypes.FlowNode,
+	_depth: int
 ) -> void:
 	# value_parts lists the declared inputs first, in order, then outputs and branches
 	var parts: Array = HenActionsPanel.value_parts(_action, _save_data)
@@ -254,7 +259,9 @@ static func _add_input_pins(
 		if not child:
 			continue
 
-		var producer: HenFlowGraphTypes.FlowNode = _action_node(_graph, _save_data, child, &'producer', _node.phase)
+		var producer: HenFlowGraphTypes.FlowNode = _action_node(
+			_graph, _save_data, child, &'producer', _node.phase, _depth
+		)
 
 		_graph.connect_pins(&'data', producer, _producer_output(ref, producer), _node, param.id)
 
@@ -273,6 +280,21 @@ static func refresh_parts(_save_data: HenSaveData, _node: HenFlowGraphTypes.Flow
 			continue
 
 		pins[i].part = parts[i]
+
+
+# the rebuild never asks this: a macro instance per action costs too much there
+static func refresh_error(_save_data: HenSaveData, _state: HenSaveState, _node: HenFlowGraphTypes.FlowNode) -> bool:
+	if not _node or not _node.action or not _node.step:
+		return false
+
+	var reason: String = HenGeneratorAction.action_error(_save_data, _state, _node.action, _node.phase, _node.depth)
+
+	if reason == _node.error:
+		return false
+
+	_node.error = reason
+
+	return true
 
 
 # the stored {action, output} names the port; older data stored the action alone
@@ -353,7 +375,8 @@ static func _add_branch_pins(
 	_save_data: HenSaveData,
 	_action: HenSaveAction,
 	_macro: HenSaveMacro,
-	_node: HenFlowGraphTypes.FlowNode
+	_node: HenFlowGraphTypes.FlowNode,
+	_depth: int
 ) -> void:
 	if not _macro:
 		return
@@ -367,7 +390,7 @@ static func _add_branch_pins(
 		var chain: Array[HenFlowGraphTypes.FlowNode] = []
 
 		if not steps.is_empty():
-			chain = _chain(_graph, _save_data, steps, _node, flow.id, _node.phase)
+			chain = _chain(_graph, _save_data, steps, _node, flow.id, _node.phase, _depth)
 			_branch_tail(_graph, _action, flow.id, _node, chain)
 
 		var target: HenSaveState = HenGeneratorAction.branch_target(_save_data, _action, str(flow.id))

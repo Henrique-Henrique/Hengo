@@ -46,6 +46,10 @@ class FlowNode extends RefCounted:
 	var body_branch: StringName = &''
 	# the phase chain this node belongs to
 	var phase: StringName = &''
+	# why the codegen would drop this action, empty when it is fine
+	var error: String = ''
+	# the loop depth the emit path runs this action at, which the error check needs
+	var depth: int = 0
 	var pins: Array[FlowPin] = []
 	# a loop macro's nested chain, laid out inside this node
 	var body: Array[FlowNode] = []

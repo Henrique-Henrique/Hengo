@@ -195,6 +195,96 @@ static func _first_unreachable_branch(_save_data: HenSaveData, _state: HenSaveSt
 	return ''
 
 
+# why the codegen would drop this action, empty when it is fine. the phase and the
+# depth are the ones the emit path uses, never the action's stored phase
+static func action_error(
+	_save_data: HenSaveData,
+	_state: HenSaveState,
+	_action: HenSaveAction,
+	_phase: StringName = &'',
+	_loop_depth: int = 0
+) -> String:
+	if not _save_data or not _state or not _action or _action.disabled:
+		return ''
+
+	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
+
+	if not macro or not FileAccess.file_exists(macro.script_path):
+		return 'macro not found'
+
+	var instance: HenScriptMacroBase = _load_instance(macro)
+
+	if not instance:
+		return 'could not instance macro'
+
+	var phase: StringName = _phase if not _phase.is_empty() else StringName(str(_action.phase))
+
+	_prime_instance(_save_data, instance, _action, phase)
+
+	return skip_reason(_save_data, _state, _action, instance, phase, _loop_depth)
+
+
+# every action of a script the codegen cannot emit. the graph and the error list
+# read this, so a red card never disagrees with the generated file
+static func collect_errors(_save_data: HenSaveData) -> Array[Dictionary]:
+	var errors: Array[Dictionary] = []
+
+	if not _save_data:
+		return errors
+
+	for state: HenSaveState in _all_states(_save_data):
+		_collect_errors(_save_data, state, _save_data.get_state_actions(state.id), &'', 0, errors)
+
+	return errors
+
+
+# a skipped action takes its body with it, the way the emit path does: a step that
+# never runs cannot be broken
+static func _collect_errors(
+	_save_data: HenSaveData,
+	_state: HenSaveState,
+	_actions: Array,
+	_phase: StringName,
+	_depth: int,
+	_out: Array[Dictionary]
+) -> void:
+	for action: HenSaveAction in _actions:
+		if action.disabled:
+			continue
+
+		var phase: StringName = _phase if not _phase.is_empty() else StringName(str(action.phase))
+		var reason: String = action_error(_save_data, _state, action, phase, _depth)
+
+		if not reason.is_empty():
+			_out.append(_error_entry(_save_data, _state, action, reason))
+			continue
+
+		# a branch runs at the same depth the action does, only a body nests
+		_collect_errors(_save_data, _state, action.body_actions, phase, _depth + 1, _out)
+
+		for key: Variant in action.branch_actions:
+			_collect_errors(_save_data, _state, branch_steps(action, str(key)), phase, _depth, _out)
+
+
+static func _error_entry(
+	_save_data: HenSaveData,
+	_state: HenSaveState,
+	_action: HenSaveAction,
+	_reason: String
+) -> Dictionary:
+	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
+	var label: String = str(_action.label).strip_edges()
+	var title: String = label if not label.is_empty() else (macro.name if macro else str(_action.name))
+
+	return {
+		script_id = StringName(str(_save_data.identity.id)) if _save_data.identity else &'',
+		state_id = StringName(str(_state.id)),
+		action_id = StringName(str(_action.id)),
+		reason = _reason,
+		description = _state.name + ' / ' + title + ': ' + _reason
+	}
+
+
 # every action of a state that actually gets emitted, in run order, the ones
 # nested in a loop body included: a nested action declares at the same levels as
 # a top level one, and {{VCNODE_ID}} keys the names by action id so nesting never

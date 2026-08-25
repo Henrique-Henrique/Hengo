@@ -68,6 +68,8 @@ var _context_press_pos: Vector2 = Vector2.ZERO
 var _selected_actions: Array[String] = []
 # where a shift click measures the range from
 var _selection_anchor: String = ''
+# an action the graph is asked to centre on before it holds the card
+var _pending_focus: String = ''
 # the card the press landed on, and the drop it is currently pointing at
 var _press_card: HenFlowNodeCard = null
 var _dragging: bool = false
@@ -384,6 +386,12 @@ func _update_tooltip(_hit: Dictionary) -> void:
 	if not values.is_empty():
 		content += ('\n\n' if not doc.is_empty() else '') + '[color=#5f6a7a]Current: ' + values + '[/color]'
 
+	# first: the reason this step is dropped is what the hover is being asked for
+	if not card.node.error.is_empty():
+		var reason: String = '[color=#ef4444]This step is skipped: ' + card.node.error + '[/color]'
+
+		content = reason + ('\n\n' + content if not content.is_empty() else '')
+
 	_show_tooltip(str(action.id), content, DOC_DWELL)
 
 
@@ -451,6 +459,18 @@ func rebuild() -> void:
 	_clear()
 	_build_states(save_data)
 	_build_outer(save_data)
+
+	# the cards come back blank, and the sweep that marks the broken ones is the
+	# root's: a manual refresh has nothing else to schedule it
+	if global.HENGO_ROOT:
+		global.HENGO_ROOT.schedule_check_errors()
+
+	if not _pending_focus.is_empty():
+		var wanted: String = _pending_focus
+
+		_pending_focus = ''
+
+		focus_action(wanted, false)
 
 
 func _clear() -> void:
@@ -627,6 +647,44 @@ func _apply_running_state() -> void:
 			and state.name.strip_edges().to_snake_case() == _running_state
 
 		(entry.frame as HenFlowStateFrame).set_running(running)
+
+
+# the root already collected the reasons, so the red cards and the toolbar count
+# cannot disagree. a card whose action is not in the list is cleared
+func apply_errors(_errors: Array) -> void:
+	var reasons: Dictionary = {}
+
+	for error: Dictionary in _errors:
+		reasons[str(error.get('action_id', ''))] = str(error.get('reason', ''))
+
+	for entry: Variant in _states.values():
+		for card: HenFlowNodeCard in entry.cards:
+			var node: HenFlowGraphTypes.FlowNode = card.node
+
+			if not node.action or not node.step:
+				continue
+
+			node.error = str(reasons.get(str(node.action.id), ''))
+			card.sync_error()
+
+	var count: Dictionary = _errors_per_state(_errors)
+
+	for key: Variant in _states:
+		var entry: Variant = _states[key]
+
+		if entry.has('frame'):
+			(entry.frame as HenFlowStateFrame).set_error_count(int(count.get(str(key), 0)))
+
+
+func _errors_per_state(_errors: Array) -> Dictionary:
+	var count: Dictionary = {}
+
+	for error: Dictionary in _errors:
+		var key: String = str(error.get('state_id', ''))
+
+		count[key] = int(count.get(key, 0)) + 1
+
+	return count
 
 
 func _on_debug_action_flow(_action_id: StringName, _script_id: String) -> void:
@@ -1573,6 +1631,15 @@ func _action_by_id(_id: String) -> HenSaveAction:
 	return card.node.action if card else null
 
 
+func _state_of_card(_card: HenFlowNodeCard) -> HenSaveState:
+	if not is_instance_valid(_card) or not _card.node.action:
+		return null
+
+	var entry: Variant = _states.get(str(_state_by_action.get(str(_card.node.action.id), '')))
+
+	return entry.state if entry else null
+
+
 # the first of the selection, for the operations that still take one
 func selected_action() -> HenSaveAction:
 	return _action_by_id(_selected_actions[0]) if not _selected_actions.is_empty() else null
@@ -1601,6 +1668,25 @@ func _focus_state(_name: String) -> bool:
 			return _focus_frame(entry.state)
 
 	return false
+
+
+# centers on one step and selects it, which is how the error list lands on a card.
+# switching scripts rebuilds the graph, so a request that arrives first waits
+func focus_action(_action_id: String, _keep: bool = true) -> bool:
+	var card: Variant = _cards_by_action.get(_action_id)
+	var cam: HenCam = _cam()
+	var origin: Vector2 = _world_of(card) if card else Vector2.INF
+
+	if not card or not cam or origin == Vector2.INF:
+		if _keep:
+			_pending_focus = _action_id
+
+		return false
+
+	cam.go_to_center(origin + (card as HenFlowNodeCard).node.size * 0.5)
+	_select_card(card)
+
+	return true
 
 
 func _focus_frame(_state: HenSaveState) -> bool:
@@ -1662,6 +1748,12 @@ func _refresh_edited_card() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
 
 	HenFlowGraphBuilder.refresh_parts(global.SAVE_DATA if global else null, _editing_card.node)
+	HenFlowGraphBuilder.refresh_error(
+		global.SAVE_DATA if global else null,
+		_state_of_card(_editing_card),
+		_editing_card.node
+	)
+	_editing_card.sync_error()
 
 	if _editing_card.refresh_content():
 		_rebuild_anchored(_editing_card)

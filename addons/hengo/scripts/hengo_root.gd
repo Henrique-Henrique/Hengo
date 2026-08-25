@@ -173,37 +173,74 @@ func _on_close() -> void:
 	global.HENGO_EDITOR_PLUGIN.hide_plugin()
 
 
-# checks for errors in current script and dependents
-func check_errors(_compile: bool = false) -> bool:
+# the scripts the Actions button speaks about: the whole open collection, plus
+# whoever depends on it and is not on screen
+func scanned_scripts() -> Array[HenSaveData]:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 	var loader: HenLoader = Engine.get_singleton(&'Loader')
-	var save_data: HenSaveData = global.SAVE_DATA
+	var out: Array[HenSaveData] = []
+	var seen: Dictionary = {}
+
+	if not global:
+		return out
+
+	for save_data: HenSaveData in global.OPEN_SCRIPTS:
+		if not save_data or not save_data.identity or seen.has(str(save_data.identity.id)):
+			continue
+
+		seen[str(save_data.identity.id)] = true
+		out.append(save_data)
+
+	for save_data: HenSaveData in out.duplicate():
+		for dep_id: StringName in map_deps.check_dependencies(save_data.identity.id):
+			if seen.has(str(dep_id)):
+				continue
+
+			seen[str(dep_id)] = true
+
+			var dependent: HenSaveData = loader.load_res(dep_id)
+
+			if dependent:
+				out.append(dependent)
+
+	return out
+
+
+# checks for errors across the collection, which is the scope the report shows
+func check_errors(_compile: bool = false) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+	var save_data: HenSaveData = global.SAVE_DATA if global else null
 
 	if not save_data:
 		return false
 
 	var all_errors: Array = []
 
-	all_errors.append_array(_validate_script_errors(save_data))
-
-	var deps: Array[StringName] = map_deps.check_dependencies(save_data.identity.id)
-	for dep_id in deps:
-		var dep_save_data: HenSaveData = loader.load_res(dep_id)
-		if dep_save_data:
-			var dep_errors = _validate_script_errors(dep_save_data)
-			for err in dep_errors:
-				err['description'] = '[{0}] {1}'.format([dep_save_data.identity.name, err.description])
-				err['script_id'] = dep_id
-			all_errors.append_array(dep_errors)
+	for script: HenSaveData in scanned_scripts():
+		all_errors.append_array(_validate_script_errors(script))
 
 	call_deferred('_update_ui_state', all_errors)
+	call_deferred('_paint_graph_errors', save_data.identity.id if save_data.identity else &'', all_errors)
 
-	if _compile and not all_errors.is_empty():
-		call_deferred('_show_error_popup', all_errors)
-		return false
+	# a compile stops on any error, and the toast is what says so
+	return all_errors.is_empty() or not _compile
 
-	return true
+
+# the graph only draws the active script, so a dependent's errors stay in the list
+func _paint_graph_errors(_script_id: StringName, all_errors: Array) -> void:
+	var flow: HenFlowViewer = get_node_or_null('%FlowViewer')
+
+	if not flow:
+		return
+
+	var mine: Array = []
+
+	for err: Dictionary in all_errors:
+		if StringName(str(err.get('script_id', ''))) == _script_id:
+			mine.append(err)
+
+	flow.apply_errors(mine)
 
 
 func _update_ui_state(all_errors: Array) -> void:
@@ -250,15 +287,14 @@ func _update_ui_state(all_errors: Array) -> void:
 			err_icon.modulate = fail_color
 
 
-func _show_error_popup(all_errors: Array) -> void:
-	var error_popup = preload('res://addons/hengo/scenes/utils/error_list_popup.tscn').instantiate()
-	error_popup.errors = all_errors
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(error_popup)
-
-
+# the compile report is also the error list: one screen for the state of the project
 func _on_actions_bt_pressed() -> void:
-	# force check and show
-	check_errors(true)
+	check_errors(false)
+
+	var popup: HenCompileAllReportPopup = preload('res://addons/hengo/scenes/utils/compile_all_report_popup.tscn').instantiate()
+
+	popup.report = HenCompileAllReportPopup.live_report()
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup)
 
 
 var _saved_split_offset: int = 0
@@ -479,6 +515,4 @@ func _input(event: InputEvent) -> void:
 					print('FORMATTED')
 
 func _validate_script_errors(_save_data: HenSaveData) -> Array:
-	var errors: Array = []
-
-	return errors
+	return HenGeneratorAction.collect_errors(_save_data)

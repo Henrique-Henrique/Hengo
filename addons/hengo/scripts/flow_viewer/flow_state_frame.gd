@@ -36,6 +36,8 @@ const START_COLOR: Color = Color('#63ff92')
 const START_BG: Color = Color('#26482f')
 const BADGE_SIZE: int = 11
 const BADGE_PAD_H: float = 6.0
+const ERROR_COLOR: Color = HenActionVisuals.ERROR_COLOR
+const ERROR_BG: Color = Color('#3d1c1c')
 
 const ICON_MOVE: Texture2D = preload('res://addons/hengo/assets/new_icons/move.svg')
 const ICON_ADD_SUB: Texture2D = preload('res://addons/hengo/assets/new_icons/circle-plus.svg')
@@ -65,6 +67,7 @@ var _header_h: float = 0.0
 var _final_size: Vector2 = Vector2.ZERO
 var _running: bool = false
 var _is_start: bool = false
+var _errors: int = 0
 var _hover_kind: StringName = &''
 var _hits: Array[Dictionary] = []
 
@@ -86,6 +89,20 @@ func setup(_host_control: Control, _name: String, _description: String, _nodes: 
 # the bounding of the graph inside, handed over before the outer layout measures
 func set_content_size(_size: Vector2) -> void:
 	_content = _size
+
+
+# how many steps the codegen drops inside this state, which the header wears so a
+# broken action is findable without opening every frame
+func set_error_count(_count: int) -> bool:
+	if _errors == _count:
+		return false
+
+	_errors = _count
+
+	if _final_size != Vector2.ZERO:
+		apply_size(_final_size)
+
+	return true
 
 
 func compute_size() -> Vector2:
@@ -150,6 +167,14 @@ func _badge_width() -> float:
 	return _painter.measure('START', BADGE_SIZE).x + BADGE_PAD_H * 2.0
 
 
+func _error_badge_text() -> String:
+	return '%d ERROR%s' % [_errors, '' if _errors == 1 else 'S']
+
+
+func _error_badge_width() -> float:
+	return _painter.measure(_error_badge_text(), BADGE_SIZE).x + BADGE_PAD_H * 2.0
+
+
 func apply_size(_size: Vector2) -> void:
 	_final_size = _size
 	_painter.clear()
@@ -178,6 +203,15 @@ func _emit_header(_size: Vector2) -> void:
 
 	if _is_start:
 		_emit_badge(Vector2(x, centre))
+		x += _badge_width() + GAP
+
+	# the count arrives after the layout measured the header, so it takes the free
+	# space before the buttons and is dropped when there is none
+	if _errors > 0:
+		var at: float = _size.x - HEADER_PAD_H - _strip_width() - GAP - _error_badge_width()
+
+		if at > x:
+			_emit_error_badge(Vector2(at, centre))
 
 	_emit_buttons(_size, centre)
 
@@ -189,6 +223,14 @@ func _emit_badge(_at: Vector2) -> void:
 
 	_painter.add_style(_chip(START_BG, BT_CORNER), rect)
 	_painter.add_text('START', BADGE_SIZE, rect.position + Vector2(BADGE_PAD_H, 0.0), START_COLOR)
+
+
+func _emit_error_badge(_at: Vector2) -> void:
+	var text_h: float = _painter.line_height(BADGE_SIZE)
+	var rect := Rect2(Vector2(_at.x, _at.y - text_h * 0.5), Vector2(_error_badge_width(), text_h))
+
+	_painter.add_style(_chip(ERROR_BG, BT_CORNER), rect)
+	_painter.add_text(_error_badge_text(), BADGE_SIZE, rect.position + Vector2(BADGE_PAD_H, 0.0), ERROR_COLOR)
 
 
 # right aligned: start, new sub-state, move, delete, then the menu the sidebar
