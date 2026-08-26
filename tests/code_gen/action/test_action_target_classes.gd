@@ -181,4 +181,3 @@ func test_the_same_action_compiles_the_other_side_on_a_3d_script() -> void:
 
 	assert_str(code).contains('albedo_color')
 	assert_str(code).not_contains(' is CanvasItem')
-	assert_str(code).not_contains(' is GeometryInstance3D')

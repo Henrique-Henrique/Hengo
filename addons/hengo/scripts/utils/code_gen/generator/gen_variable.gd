@@ -9,14 +9,19 @@ static func get_variables_code(_save_data: HenSaveData) -> String:
 	return var_code + ' \n' if var_code else ''
 
 
+static func _is_node_type(_type: StringName) -> bool:
+	return ClassDB.class_exists(_type) and ClassDB.is_parent_class(_type, &'Node')
+
+
 static func get_var_code_base(_type: StringName, _export: bool, _custom_name: String = '', _preview_id: String = '', _default_value: Variant = null, _holds_instance: bool = false) -> String:
 	var var_code: String = ''
 	var type_value: String = 'null'
+	var starts_empty: bool = _holds_instance or _is_node_type(_type)
 	# a variable holding another node starts empty; instancing its base would only
 	# create a stray node, so the type is declared instead (an export needs one)
-	var type_hint: String = ': ' + _type if _holds_instance and _export else ''
+	var type_hint: String = ': ' + _type if starts_empty and _export else ''
 
-	if _holds_instance:
+	if starts_empty:
 		type_value = 'null'
 	elif _default_value != null:
 		type_value = var_to_str(_default_value)

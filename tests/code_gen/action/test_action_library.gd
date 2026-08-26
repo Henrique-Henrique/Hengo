@@ -105,6 +105,28 @@ func test_a_cancelled_flash_is_run_out_with_its_branch_muted() -> void:
 	assert_str(code).contains('.kill()')
 
 
+# casting to a class the node is not yields null, not an error
+func test_flash_guards_the_material_path_before_the_cast() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	save_data.identity.type = 'Node3D'
+
+	var once: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'flash'), &'enter')
+	var every: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'flash'), &'update')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('if node_' + str(once.id) + ' is GeometryInstance3D:')
+	assert_str(code).contains('if node_' + str(every.id) + ' is GeometryInstance3D:')
+	# the kept slot stays outside the check, so the finish hook reads a declared name
+	assert_str(code).contains('\n\t\tif flash_' + str(once.id) + ':')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
 # fade drives the sub-property of modulate, not a whole Color
 func test_tween_fade_targets_modulate_alpha() -> void:
 	HenScriptMacroLoader.load_native_actions()

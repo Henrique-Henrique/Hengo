@@ -243,8 +243,6 @@ func test_signal_action_fires_at_runtime() -> void:
 	save_data.identity.type = 'Node2D'
 	state.start = true
 
-	# Variant on purpose: a var typed Node2D makes gen_variable emit Node2D.new()
-	# as its default, which leaks an orphan node and is a separate known debt
 	var body_var: HenSaveVar = save_data.add_var(false)
 	body_var.name = 'ultimo corpo'
 	body_var.type = 'Variant'
