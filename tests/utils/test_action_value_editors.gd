@@ -558,3 +558,24 @@ func test_an_edit_is_announced_only_once() -> void:
 	inspector.announce_changes()
 
 	assert_int(announced.size()).is_equal(1)
+
+
+# browsing groups by category, so a 2d/3d pair reads apart by its header. the
+# search flattens that away and the two rows carry the same name
+func test_a_search_row_says_which_category_it_came_from() -> void:
+	var search: HenActionsSearch = auto_free(
+		(load('res://addons/hengo/scenes/actions_search.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(search)
+	HenScriptMacroLoader.load_native_actions()
+	HenActionPool.invalidate()
+	search._populate('set position')
+
+	var badges: Array = []
+
+	for row: Node in search.results.get_children():
+		if row is HenSideBarRow:
+			badges.append((row as HenSideBarRow).type_label.text)
+
+	assert_array(badges).contains(['Node 2D', 'Node 3D'])

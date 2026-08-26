@@ -1024,8 +1024,15 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 		var key: String = str(input.get('id', ''))
 		var name: String = str(input.get('name', key))
 
-		# neither an expression nor an inline action is an assignable/bindable source
-		if _action.input_expressions.has(key) or _action.input_actions.has(key):
+		# a producer wired into the slot is a real source, it just cannot be the left
+		# side of an assignment, and an expression is neither
+		if _action.input_actions.has(key):
+			if is_lvalue:
+				return name
+
+			continue
+
+		if _action.input_expressions.has(key):
 			return name
 
 		var bind: String = HenUtils.bind_expression(_save_data, _action.input_bindings.get(key, ''))
@@ -1034,7 +1041,7 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 			# an optional target is simply left out of the emitted code
 			if bool(input.get('optional', false)):
 				# a node slot falls back to this node, which has to be able to stand in for it
-				if _self_cannot_stand_in(_save_data, input):
+				if _self_cannot_stand_in(_save_data, _instance, input):
 					return name
 
 				continue
@@ -1048,8 +1055,9 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 
 
 # true when an unbound node slot has nothing to fall back to: the slot asks for a
-# class the node running the script could never be
-static func _self_cannot_stand_in(_save_data: HenSaveData, _input: Dictionary) -> bool:
+# class the node running the script could never be, or the action itself was
+# written for classes this script is none of
+static func _self_cannot_stand_in(_save_data: HenSaveData, _instance: HenScriptMacroBase, _input: Dictionary) -> bool:
 	var type: StringName = StringName(str(_input.get('type', '')))
 
 	if not HenUtils.is_node_ref_slot(type, bool(_input.get('bind_only', false)), true):
@@ -1057,7 +1065,10 @@ static func _self_cannot_stand_in(_save_data: HenSaveData, _input: Dictionary) -
 
 	var identity: StringName = _save_data.identity.type if _save_data.identity else &''
 
-	return not identity.is_empty() and not HenUtils.can_hold_instance_of(identity, type)
+	if identity.is_empty():
+		return false
+
+	return not HenUtils.can_hold_instance_of(identity, type) 		or not HenUtils.class_serves(identity, _instance.get_target_classes())
 
 
 # name of the first branch that targets another script without an instance source

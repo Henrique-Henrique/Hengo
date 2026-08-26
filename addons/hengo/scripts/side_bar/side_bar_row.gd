@@ -53,13 +53,13 @@ func setup(_title: String, _meta: Variant, _icon: Texture2D = null, _icon_color:
 	add_button.add_theme_stylebox_override('disabled', add_style)
 
 
-func set_type_badge(type_name: String) -> void:
+func set_type_badge(type_name: String, _color_override: Color = Color(0, 0, 0, 0)) -> void:
 	_bind_refs()
 	if type_name.is_empty():
 		type_badge.visible = false
 		return
 
-	var color: Color = HenUtils.get_type_parent_color(type_name, 1.0, Color('#72788a'))
+	var color: Color = _color_override if _color_override.a > 0.0 else HenUtils.get_type_parent_color(type_name, 1.0, Color('#72788a'))
 
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(color.r, color.g, color.b, 0.22)

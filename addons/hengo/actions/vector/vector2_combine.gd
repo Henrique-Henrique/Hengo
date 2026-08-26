@@ -68,6 +68,7 @@ func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
 		{name = 'Update', id = &'update'},
+		{name = 'Physics', id = &'physics'},
 		{name = 'Exit', id = &'exit'}
 	]
 
@@ -77,6 +78,10 @@ func get_flow_enter() -> String:
 
 
 func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_physics() -> String:
 	return _body()
 
 

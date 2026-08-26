@@ -241,7 +241,7 @@ func test_if_branch_goes_to_another_script_state() -> void:
 func test_transition_phases() -> void:
 	var macro: HenSaveMacro = _register(FIX_TRANSITION)
 
-	assert_array(HenSaveAction.supported_phases(macro)).is_equal([&'enter', &'update'])
+	assert_array(HenSaveAction.supported_phases(macro)).is_equal([&'enter', &'update', &'physics'])
 	assert_str(str(HenSaveAction.default_phase(macro))).is_equal('update')
 
 

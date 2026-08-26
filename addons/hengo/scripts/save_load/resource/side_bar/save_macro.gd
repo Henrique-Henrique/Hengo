@@ -23,7 +23,6 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 @export var has_body: bool
 
 
-# a macro is offered to a script when its base inherits from one of the targets
 static func create() -> HenSaveMacro:
 	var macro: HenSaveMacro = HenSaveMacro.new()
 
@@ -34,14 +33,20 @@ static func create() -> HenSaveMacro:
 
 
 func serves_class(_class: StringName) -> bool:
-	if target_classes.is_empty() or not ClassDB.class_exists(_class):
-		return true
+	return takes_any_node() or HenUtils.class_serves(_class, target_classes)
 
-	for target: StringName in target_classes:
-		if ClassDB.class_exists(target) and ClassDB.is_parent_class(_class, target):
-			return true
 
-	return false
+# an action whose first input is a self-defaulting node slot reaches any node, so
+# the class of the script stops deciding whether it is offered. leaving that slot
+# empty on a script the action was not written for is what reports the missing
+# reference
+func takes_any_node() -> bool:
+	if inputs.is_empty():
+		return false
+
+	var first: HenSaveParam = inputs[0]
+
+	return HenUtils.is_node_ref_slot(first.type, first.bind_only, first.optional)
 
 
 func get_new_name() -> String:

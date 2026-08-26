@@ -83,7 +83,7 @@ func _populate(_query: String) -> void:
 		if not macro.name.to_lower().contains(query):
 			continue
 
-		results.add_child(_build_row(macro))
+		results.add_child(_build_row(macro, true))
 
 
 func _populate_grouped() -> void:
@@ -111,12 +111,17 @@ func _populate_grouped() -> void:
 			category.add_row(_build_row(macro))
 
 
-# same icon/color the row gets once added, so the search reads as the same list
-func _build_row(_macro: HenSaveMacro) -> HenSideBarRow:
+# same icon/color the row gets once added, so the search reads as the same list.
+# a flat list has no category header, and two actions of a 2d/3d pair share a name
+func _build_row(_macro: HenSaveMacro, _with_category: bool = false) -> HenSideBarRow:
 	var row: HenSideBarRow = SIDE_BAR_ROW_SCENE.instantiate()
 	var color: Color = Color(_macro.color) if not _macro.color.is_empty() else ACTION_COLOR
 
 	row.setup(_macro.name, _macro, HenActionVisuals.icon_texture(_macro.icon), color, false, 4)
+
+	if _with_category:
+		var data: Dictionary = HenActionCategories.get_data(_macro.category)
+		row.set_type_badge(str(data.name), Color(str(data.color)))
 	# native tooltip: the search popup lives on the editor base control, above the
 	# custom HenTooltip, so only the native one renders on top of it
 	row.tooltip_text = HenActionDoc.plain(_macro)

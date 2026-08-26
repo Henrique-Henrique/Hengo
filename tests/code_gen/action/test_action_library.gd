@@ -292,3 +292,24 @@ func test_an_animated_action_runs_steps_on_finished() -> void:
 	script.source_code = code
 
 	assert_int(script.reload()).is_equal(OK)
+
+
+# --- library wide -----------------------------------------------------------
+
+
+# update and physics are the two per-frame ticks: an action offered on one runs
+# the same on the other, and picking the wrong one used to hide it from the picker
+func test_every_per_frame_action_runs_on_both_ticks() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var missing: Array[String] = []
+
+	for macro: HenSaveMacro in (Engine.get_singleton(&'Global') as HenGlobal).action_macros:
+		var phases: Array = HenSaveAction.supported_phases(macro)
+
+		if phases.has(&'update') and not phases.has(&'physics'):
+			missing.append(str(macro.id))
+
+	assert_array(missing).override_failure_message(
+		'these declare Update with no Physics body: ' + ', '.join(missing)
+	).is_empty()

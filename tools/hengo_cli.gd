@@ -7,10 +7,13 @@ extends SceneTree
 # referenced by its macro id, never redeclared.
 # usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name]
 #        godot --headless -s tools/hengo_cli.gd -- --list-actions [--class=Node2D]
+#        godot --headless -s tools/hengo_cli.gd -- --export-actions [out.json]
 
 
 const HENGO_ROOT_SCENE: String = 'res://addons/hengo/scenes/hengo_root.tscn'
-const USAGE: String = 'usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name] | --list-actions [--class=Node2D]'
+const USAGE: String = 'usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name] | --list-actions [--class=Node2D] | --export-actions [out.json]'
+# the catalog is not committed here, it is built straight into the docs site checkout
+const FRONT_ACTIONS_PATH: String = '../HengoFront/src/data/actions.json'
 # codegen marks an action it could not emit with this prefix
 const UNRESOLVED_MARKER: String = '# hengo: action '
 
@@ -34,8 +37,9 @@ func _initialize() -> void:
 		return
 
 	if user_args[0] == '--export-actions':
-		var out_path: String = user_args[1] if user_args.size() > 1 else 'res://data/actions.json'
-		var export_err: String = _export_actions(out_path)
+		var explicit_path: bool = user_args.size() > 1
+		var out_path: String = user_args[1] if explicit_path else _default_actions_path()
+		var export_err: String = _export_actions(out_path, explicit_path)
 		root_scene.free()
 
 		if export_err.is_empty():
@@ -147,8 +151,12 @@ func _input_data(_param: HenSaveParam) -> Dictionary:
 	}
 
 
+func _default_actions_path() -> String:
+	return ProjectSettings.globalize_path('res://').path_join(FRONT_ACTIONS_PATH).simplify_path()
+
+
 # writes the full actions catalog (categories + actions) as json for the docs site
-func _export_actions(_out_path: String) -> String:
+func _export_actions(_out_path: String, _create_dirs: bool) -> String:
 	var actions: Array = []
 	var present: Dictionary = {}
 
@@ -182,7 +190,13 @@ func _export_actions(_out_path: String) -> String:
 
 	var doc: Dictionary = {version = Engine.get_version_info().string, categories = categories, actions = actions}
 
-	DirAccess.make_dir_recursive_absolute(_out_path.get_base_dir())
+	var out_dir: String = _out_path.get_base_dir()
+
+	if _create_dirs:
+		DirAccess.make_dir_recursive_absolute(out_dir)
+	elif not DirAccess.dir_exists_absolute(out_dir):
+		return 'docs site not found at ' + out_dir + ', pass an output path'
+
 	var file: FileAccess = FileAccess.open(_out_path, FileAccess.WRITE)
 
 	if not file:
@@ -190,7 +204,7 @@ func _export_actions(_out_path: String) -> String:
 
 	file.store_string(JSON.stringify(doc, '\t'))
 	file.close()
-	print('exported ', actions.size(), ' actions to ', _out_path)
+	print('exported ', actions.size(), ' actions to ', ProjectSettings.globalize_path(_out_path))
 
 	return ''
 

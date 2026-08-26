@@ -11,6 +11,8 @@ const FIX_FLASH: String = 'res://addons/hengo/actions/render/flash.gd'
 
 
 const FIX_COLOR: String = 'res://addons/hengo/actions/render/change_color.gd'
+# gated and with no node slot of its own, so its targets still decide who sees it
+const FIX_PICK: String = 'res://addons/hengo/actions/input/pick_under_mouse_2d.gd'
 
 
 # the same action emits the 2d path when the script extends a Node2D
@@ -99,13 +101,10 @@ func test_target_class_dispatches_to_line_2d() -> void:
 
 # a macro is offered to whoever inherits from its targets, and to no one else
 func test_macro_is_offered_only_to_declared_classes() -> void:
-	var color: HenSaveMacro = _register(FIX_COLOR)
+	var picker: HenSaveMacro = _register(FIX_PICK)
 
-	assert_bool(color.serves_class(&'Sprite2D')).is_true()
-	assert_bool(color.serves_class(&'MeshInstance3D')).is_true()
-	# change_color absorbed set_modulate, so it targets CanvasItem too (Control included)
-	assert_bool(color.serves_class(&'Button')).is_true()
-	assert_bool(color.serves_class(&'Timer')).is_false()
+	assert_bool(picker.serves_class(&'Sprite2D')).is_true()
+	assert_bool(picker.serves_class(&'Timer')).is_false()
 
 	var only_control: HenSaveMacro = HenSaveMacro.new()
 	only_control.target_classes = [&'Control']
@@ -118,6 +117,16 @@ func test_macro_is_offered_only_to_declared_classes() -> void:
 
 	assert_bool(universal.serves_class(&'Sprite2D')).is_true()
 	assert_bool(only_control.serves_class(&'MyCustomBase')).is_true()
+
+
+# an action that acts on a node reaches any node, so the class of the script stops
+# hiding it: the reference is what says which node it works on
+func test_an_action_that_takes_a_node_is_offered_to_every_class() -> void:
+	var color: HenSaveMacro = _register(FIX_COLOR)
+
+	assert_bool(color.takes_any_node()).is_true()
+	assert_bool(color.serves_class(&'Timer')).is_true()
+	assert_bool(_register(FIX_PICK).takes_any_node()).is_false()
 
 
 # the recipe is mtime-cached, so the targets must survive the real loader path

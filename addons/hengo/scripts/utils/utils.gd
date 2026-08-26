@@ -740,6 +740,19 @@ static func get_res(_res_data: Dictionary, _save_data: HenSaveData) -> Resource:
 	return null
 
 
+# true when a script extending _class is served by a list of target classes. an
+# empty list serves everyone, and an unknown class never hides the pool
+static func class_serves(_class: StringName, _targets: Array) -> bool:
+	if _targets.is_empty() or not ClassDB.class_exists(_class):
+		return true
+
+	for target: Variant in _targets:
+		if ClassDB.class_exists(StringName(str(target))) and ClassDB.is_parent_class(_class, StringName(str(target))):
+			return true
+
+	return false
+
+
 # a node slot that falls back to the node the script sits on when nobody binds it,
 # which is what an action reads through {{ref}}
 static func is_node_ref_slot(_type: StringName, _bind_only: bool, _optional: bool) -> bool:

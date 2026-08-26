@@ -150,3 +150,29 @@ func test_syncing_twice_adds_nothing() -> void:
 	HenSaveAction.sync_macro_inputs(save_data)
 
 	assert_int(action.inputs.size()).is_equal(2)
+
+
+# --- offered off class -------------------------------------------------------
+
+
+# a script the action was not written for still gets the action, and the empty
+# reference is what is reported instead of a body that would fail at runtime
+func test_an_unbound_ref_off_class_is_reported() -> void:
+	save_data.identity.type = 'Node'
+	_add_action(_register(FIX_COLOR), &'update')
+
+	assert_str(HenTest.get_all_code()).contains('must be bound to a variable or property')
+
+
+func test_a_bound_ref_off_class_emits() -> void:
+	save_data.identity.type = 'Node'
+	_node_var('hit_mesh', 'MeshInstance3D')
+
+	var action: HenSaveAction = _add_action(_register(FIX_COLOR), &'update')
+
+	action.input_bindings['ref'] = 'hit_mesh'
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('albedo_color = Color(')
+	assert_str(code).not_contains('must be bound')

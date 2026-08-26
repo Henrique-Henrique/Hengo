@@ -177,9 +177,11 @@ func test_unknown_input_and_branch_are_reported() -> void:
 		.contains('branch "too" is not a flow output (valid: to)')
 
 
+# every per-frame action runs on both ticks, so what is left out is the phase an
+# action has no body for at all
 func test_unsupported_phase_is_reported() -> void:
-	assert_str(_build_one('set_value', 'physics')) \
-		.contains('phase "physics" is not supported')
+	assert_str(_build_one('destroy_after', 'update')) \
+		.contains('phase "update" is not supported')
 
 
 func test_broken_references_are_reported() -> void:
@@ -206,5 +208,14 @@ func test_unknown_schema_key_is_reported() -> void:
 func test_action_not_serving_the_class_is_reported() -> void:
 	save_data.identity.type = 'Node'
 
-	assert_str(_build_one('move_and_slide', 'physics')) \
+	assert_str(_build_one('pick_under_mouse_2d', 'update')) \
 		.contains('does not serve Node')
+
+
+# one that acts on a node is accepted whatever the script extends: the reference
+# is what says which node, and codegen is what asks for it
+func test_an_action_that_takes_a_node_serves_any_class() -> void:
+	save_data.identity.type = 'Node'
+
+	assert_str(_build_one('move_and_slide', 'physics')).is_empty()
+	assert_str(HenTest.get_all_code()).contains('must be bound to a variable or property')

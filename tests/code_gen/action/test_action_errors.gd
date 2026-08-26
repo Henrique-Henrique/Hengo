@@ -66,6 +66,46 @@ func test_a_skipped_parent_hides_its_body() -> void:
 	assert_str(str(errors[0].action_id)).is_equal(str(loop.id))
 
 
+# a node slot takes a producer the same way it takes a binding
+func test_an_inline_producer_feeds_a_bind_only_slot() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var child: HenSaveAction = HenSaveAction.create(HenActionsPanel.find_macro(&'get_node'))
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'change_color'), &'update')
+
+	for param: HenSaveParam in child.inputs:
+		if str(param.id) == 'path':
+			param.default_value = 'cube'
+
+	action.input_actions['ref'] = {action = child, output = &'result'}
+
+	var code: String = HenTest.get_all_code()
+
+	assert_array(HenGeneratorAction.collect_errors(save_data)).is_empty()
+	assert_str(code).not_contains('# hengo:')
+	assert_str(code).contains("get_node_or_null('cube')")
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# the same producer cannot be the left side of an assignment
+func test_an_inline_producer_is_refused_as_an_assignment_target() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var child: HenSaveAction = HenSaveAction.create(HenActionsPanel.find_macro(&'get_node'))
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'set_value'), &'update')
+
+	action.input_actions['target'] = {action = child, output = &'result'}
+
+	var errors: Array = HenGeneratorAction.collect_errors(save_data)
+
+	assert_int(errors.size()).is_equal(1)
+	assert_str(str(errors[0].reason)).contains('Target')
+
+
 func test_a_muted_action_reports_nothing() -> void:
 	HenScriptMacroLoader.load_native_actions()
 

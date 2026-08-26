@@ -48,11 +48,20 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
-		{name = 'Update', id = &'update'}
+		{name = 'Update', id = &'update'},
+		{name = 'Physics', id = &'physics'}
 	]
 
 
 func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_physics() -> String:
+	return _body()
+
+
+func _body() -> String:
 	return 'var mouse_{{VCNODE_ID}}: Vector2 = _ref.get_global_mouse_position()\n' \
 		+ 'if {{rotate}}:\n' \
 		+ '\t{{ref}}.look_at(mouse_{{VCNODE_ID}})\n' \

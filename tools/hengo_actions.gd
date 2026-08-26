@@ -201,7 +201,7 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 	if not input_err.is_empty():
 		return input_err
 
-	var branch_err: String = _apply_branches(_save_data, action, macro, _spec.get('branches', {}), _all_scripts)
+	var branch_err: String = _apply_branches(_save_data, _state, action, macro, _spec.get('branches', {}), _all_scripts)
 
 	if not branch_err.is_empty():
 		return branch_err
@@ -439,14 +439,30 @@ static func _build_expression(_save_data: HenSaveData, _source: Dictionary) -> V
 	return expr
 
 
-static func _apply_branches(_save_data: HenSaveData, _action: HenSaveAction, _macro: HenSaveMacro, _branches: Dictionary, _all_scripts: Dictionary) -> String:
+# a branch may run steps, transition, or both; "actions" holds the steps and the
+# transition keys stay the ones _build_branch reads
+static func _apply_branches(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _macro: HenSaveMacro, _branches: Dictionary, _all_scripts: Dictionary) -> String:
 	for raw_key: Variant in _branches:
 		var key: String = str(raw_key)
 
 		if not _macro_flow_output(_macro, key):
 			return 'branch "' + key + '" is not a flow output (valid: ' + _flow_output_ids(_macro) + ')'
 
-		var branch: Variant = _build_branch(_save_data, _branches[raw_key], _all_scripts)
+		var spec: Variant = _branches[raw_key]
+
+		if spec is Dictionary and (spec as Dictionary).has('actions'):
+			var dict: Dictionary = spec as Dictionary
+			var steps: Variant = _build_branch_steps(_save_data, _state, dict.actions, _all_scripts)
+
+			if steps is String:
+				return 'branch "' + key + '": ' + str(steps)
+
+			_action.branch_actions[key] = steps
+
+			if not (dict.has('state') or dict.has('script')):
+				continue
+
+		var branch: Variant = _build_branch(_save_data, spec, _all_scripts)
 
 		if not branch is Dictionary:
 			return 'branch "' + key + '": ' + str(branch)
@@ -454,6 +470,30 @@ static func _apply_branches(_save_data: HenSaveData, _action: HenSaveAction, _ma
 		_action.branches[key] = branch
 
 	return ''
+
+
+# steps of a branch run at the phase of the action that owns it, so they are built
+# nested and their own phase is ignored
+static func _build_branch_steps(_save_data: HenSaveData, _state: HenSaveState, _steps: Variant, _all_scripts: Dictionary) -> Variant:
+	if not _steps is Array:
+		return '"actions" needs an array of steps'
+
+	var list: Array[HenSaveAction] = []
+	var index: int = 0
+
+	for step_spec: Variant in _steps as Array:
+		if not step_spec is Dictionary:
+			return 'step #' + str(index) + ': needs an action object'
+
+		var built: Variant = _make_action(_save_data, _state, step_spec as Dictionary, _all_scripts, true)
+
+		if built is String:
+			return 'step #' + str(index) + ': ' + str(built)
+
+		list.append(built)
+		index += 1
+
+	return list
 
 
 # a plain string targets a state of this script; a dict may target another one
