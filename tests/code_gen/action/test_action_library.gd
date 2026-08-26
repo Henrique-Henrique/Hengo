@@ -464,3 +464,19 @@ func test_every_per_frame_action_runs_on_both_ticks() -> void:
 	assert_array(missing).override_failure_message(
 		'these declare Update with no Physics body: ' + ', '.join(missing)
 	).is_empty()
+
+
+# the branch runs from the tween signal, where a return leaves the lambda instead
+func test_a_tween_finished_branch_does_not_end_the_phase() -> void:
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'done'
+
+	var action: HenSaveAction = _add_action(_register(FIX_TWEEN), &'enter')
+
+	action.branches['finished'] = {state_id = target.id, label = ''}
+
+	var code: String = HenTest.get_all_code()
+	var call_at: int = code.find('change_state("done")')
+
+	assert_int(call_at).is_greater(-1)
+	assert_str(code.substr(call_at, 40)).not_contains('return')

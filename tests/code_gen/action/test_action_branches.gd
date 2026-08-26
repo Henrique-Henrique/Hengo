@@ -24,7 +24,7 @@ func test_branch_to_sibling_state() -> void:
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('if _ref.is_dead:\n\t\t\t_ref._STATE_CONTROLLER.change_state("dead")\n\t\telse:\n\t\t\tpass')
+	assert_str(code).contains('if _ref.is_dead:\n\t\t\t_ref._STATE_CONTROLLER.change_state("dead")\n\t\t\treturn\n\t\telse:\n\t\t\tpass')
 
 
 # a child of the owning state goes through the parent, not the controller
@@ -243,6 +243,34 @@ func test_transition_phases() -> void:
 
 	assert_array(HenSaveAction.supported_phases(macro)).is_equal([&'enter', &'update', &'physics'])
 	assert_str(str(HenSaveAction.default_phase(macro))).is_equal('update')
+
+
+# --- a transition ends the phase --------------------------------------------
+
+
+# the state is gone once it transitions, so the steps stored after it must not run
+func test_a_local_transition_ends_the_phase() -> void:
+	var dead: HenSaveState = save_data.add_state(false)
+	dead.name = 'dead'
+
+	var action: HenSaveAction = _if_action(&'update')
+	action.branches['true'] = {state_id = dead.id, label = ''}
+
+	var code: String = HenTest.get_all_code()
+	var call_at: int = code.find('change_state("dead")')
+
+	assert_int(call_at).is_greater(-1)
+	assert_int(code.find('return', call_at)).is_equal(call_at + 'change_state("dead")'.length() + 4)
+
+
+# it drives the machine of another node, so this one carries on where it was
+func test_a_cross_script_transition_does_not_end_the_phase() -> void:
+	var other: Dictionary = _other_script('hurt')
+
+	var action: HenSaveAction = _add_action(_register(FIX_TRANSITION), &'update')
+	action.branches['to'] = _cross_branch('to', other, {instance_path = '%Player'})
+
+	assert_str(HenTest.get_all_code()).not_contains('\n\t\t\treturn')
 
 
 # --- instance source --------------------------------------------------------

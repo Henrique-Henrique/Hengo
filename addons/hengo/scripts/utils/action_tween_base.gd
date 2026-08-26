@@ -39,6 +39,8 @@ func get_flow_outputs() -> Array[Dictionary]:
 			name = 'Finished',
 			id = FINISH_SLOT,
 			optional = true,
+			# the branch runs from the tween signal, where a return would only leave the lambda
+			from_signal = true,
 			doc = 'Where to go when the animation ends. Leaving the state first cancels it, so it never fires late.'
 		}
 	]

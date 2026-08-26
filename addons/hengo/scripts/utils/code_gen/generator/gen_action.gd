@@ -674,6 +674,9 @@ static func _substitute_branches(
 			if not trace.is_empty():
 				call = trace + '\n' + call
 
+			if _transition_ends_phase(_save_data, _action, key, out, _phase):
+				call += '\nreturn'
+
 		# the steps the branch runs come first: a transition ends the state, so
 		# anything after it would only run on the way out
 		var steps: Array = _emit_actions(
@@ -689,6 +692,22 @@ static func _substitute_branches(
 		body = HenActionCode._inject_placeholder(body, key, call)
 
 	return body
+
+
+# a cross-script transition drives another machine, so this state keeps running
+static func _transition_ends_phase(
+	_save_data: HenSaveData,
+	_action: HenSaveAction,
+	_key: String,
+	_out: Dictionary,
+	_phase: StringName
+) -> bool:
+	var phase: StringName = _phase if not _phase.is_empty() else StringName(str(_action.phase))
+
+	if phase == &'exit' or bool(_out.get('from_signal', false)):
+		return false
+
+	return branch_instance_ref(_save_data, _action, _key).is_empty()
 
 
 # the steps stored on one branch, empty when it only transitions
