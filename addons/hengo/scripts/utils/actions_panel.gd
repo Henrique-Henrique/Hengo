@@ -184,7 +184,6 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 
 		parts.append(part)
 
-	parts.append_array(output_parts(_action, macro, _owner))
 	parts.append_array(branch_parts(_action, macro, _owner))
 
 	return parts
@@ -328,34 +327,6 @@ static func capsule_data(_ref: Variant, _owner: HenSaveData = null) -> Dictionar
 		color = macro.color if macro else '',
 		parts = parts
 	}
-
-
-# where each stored output lands, so a producer's reason to exist reads on the
-# row; an unbound output is left out
-static func output_parts(_action: HenSaveAction, _macro: HenSaveMacro, _owner: HenSaveData = null) -> Array[Dictionary]:
-	var parts: Array[Dictionary] = []
-
-	if not _macro or _macro.outputs.is_empty():
-		return parts
-
-	var show_names: bool = _macro.outputs.size() > 1
-
-	for output: HenSaveParam in _macro.outputs:
-		var bind: String = str(_action.output_bindings.get(str(output.id), ''))
-
-		if bind.is_empty():
-			continue
-
-		parts.append({
-			kind = _bind_kind(bind, _owner),
-			label = output.name if show_names else '',
-			value = '-> ' + _bind_label(bind, _owner),
-			output_id = str(output.id),
-			output_name = output.name,
-			slot = {action = _action}
-		})
-
-	return parts
 
 
 # where each configured branch goes; unset branches are left out of the row

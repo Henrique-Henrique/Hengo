@@ -63,7 +63,7 @@ static func _branch_tail(
 	_branch: StringName,
 	_owner: HenFlowGraphTypes.FlowNode,
 	_chain: Array[HenFlowGraphTypes.FlowNode]
-) -> void:
+) -> HenFlowGraphTypes.FlowNode:
 	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
 
 	node.id = StringName('addr' + str(_action.id) + ':' + str(_branch))
@@ -82,6 +82,8 @@ static func _branch_tail(
 		_graph.connect_pins(&'exec', _owner, _branch, node, HenFlowGraphTypes.ENTER_PIN)
 	else:
 		_graph.connect_pins(&'exec', _chain.back(), HenFlowGraphTypes.THEN_PIN, node, HenFlowGraphTypes.ENTER_PIN)
+
+	return node
 
 
 # a body carries its own end the way a phase chain does: without it an empty body
@@ -131,37 +133,17 @@ static func _chain(
 	var previous_pin: StringName = _from_pin
 
 	for action: HenSaveAction in _actions:
-		var macro: HenSaveMacro = HenActionsPanel.find_macro(action.macro_id)
-		var stored: bool = wants_store(action, macro)
-		# an action that only produces a value leaves the sequence to its store; one
-		# that also runs the flow keeps its place and the store follows it
-		var pulled: bool = stored and is_pure_producer(macro)
 		var node: HenFlowGraphTypes.FlowNode = _action_node(
-			_graph, _save_data, action, &'producer' if pulled else &'action', _phase, _depth
+			_graph, _save_data, action, &'action', _phase, _depth
 		)
 
-		# a pulled producer left the sequence to its store, but it is still the step
-		# the list holds, so it stays a drag handle
 		node.step = true
 
-		if not pulled:
-			_graph.connect_pins(&'exec', previous, previous_pin, node, HenFlowGraphTypes.ENTER_PIN)
+		_graph.connect_pins(&'exec', previous, previous_pin, node, HenFlowGraphTypes.ENTER_PIN)
 
-			previous = node
-			previous_pin = HenFlowGraphTypes.THEN_PIN
-			links.append(node)
-
-		if stored:
-			var store: HenFlowGraphTypes.FlowNode = _store_node(_graph, _save_data, action, macro, node)
-
-			store.step = true
-			store.depth = _depth
-
-			_graph.connect_pins(&'exec', previous, previous_pin, store, HenFlowGraphTypes.ENTER_PIN)
-
-			previous = store
-			previous_pin = HenFlowGraphTypes.THEN_PIN
-			links.append(store)
+		previous = node
+		previous_pin = HenFlowGraphTypes.THEN_PIN
+		links.append(node)
 
 	return links
 
@@ -248,6 +230,10 @@ static func _add_input_pins(
 
 		_node.add_pin(pin)
 
+		if _action.input_wires.has(key):
+			_connect_wire(_graph, _action.input_wires[key], _node, param.id)
+			continue
+
 		if not _action.input_actions.has(key):
 			if i < parts.size():
 				pin.part = parts[i]
@@ -266,6 +252,68 @@ static func _add_input_pins(
 		_graph.connect_pins(&'data', producer, _producer_output(ref, producer), _node, param.id)
 
 
+# a wire is an edge of its own kind, so the router leaves it undrawn and the card
+# is free to show it as a chip and reveal the route only on demand
+static func _connect_wire(
+	_graph: HenFlowGraphTypes.FlowGraph,
+	_wire: Variant,
+	_node: HenFlowGraphTypes.FlowNode,
+	_pin: StringName
+) -> void:
+	if not _wire is Dictionary:
+		return
+
+	var spec: Dictionary = _wire as Dictionary
+	var producer: HenFlowGraphTypes.FlowNode = _node_of_action(_graph, StringName(str(spec.get('action_id', ''))))
+
+	if not producer:
+		return
+
+	var output: StringName = StringName(str(spec.get('output', '')))
+	var source: HenFlowGraphTypes.FlowPin = producer.pin(output)
+	var reader: HenFlowGraphTypes.FlowPin = _node.pin(_pin)
+
+	if source:
+		source.wires += 1
+
+	if reader:
+		reader.wired = true
+
+	# a reference draws where an inline producer would: the value has to be followed
+	# by eye from the slot that uses it, which a mark on the slot never gives
+	var proxy: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
+
+	proxy.id = StringName('w' + str(_node.id) + '_' + str(_pin))
+	proxy.kind = &'wire_ref'
+	# no action on purpose: it is a mirror of a step, so the menu, the two adds and
+	# the inspector all belong to the card it points at. the wire edge is the link
+	proxy.action = null
+	# the value names it and the icon says which step made it, the way a transition
+	# names the state and not the action that leaves for it
+	proxy.title = source.label if source else str(output)
+	proxy.icon = producer.icon
+	proxy.accent = producer.accent
+	proxy.phase = _node.phase
+	proxy.depth = _node.depth
+	proxy.wire_owner = _node.action
+	proxy.wire_input = _pin
+	proxy.wire_source = producer.action
+	proxy.add_pin(HenFlowGraphTypes.FlowPin.new(output, &'data_out', source.label if source else str(output)))
+
+	_graph.add_node(proxy)
+	_graph.connect_pins(&'data', proxy, output, _node, _pin)
+	_graph.connect_pins(&'wire', producer, output, proxy, output)
+
+
+# a wire only ever points at a step that already ran, so its node is always built
+static func _node_of_action(_graph: HenFlowGraphTypes.FlowGraph, _id: StringName) -> HenFlowGraphTypes.FlowNode:
+	for node: HenFlowGraphTypes.FlowNode in _graph.nodes:
+		if node.action and StringName(str(node.action.id)) == _id:
+			return node
+
+	return null
+
+
 # the chip text is baked into the pin when the graph is built, so an edit that
 # leaves the graph alone still has to re-derive the parts before anything re-measures
 static func refresh_parts(_save_data: HenSaveData, _node: HenFlowGraphTypes.FlowNode) -> void:
@@ -276,7 +324,9 @@ static func refresh_parts(_save_data: HenSaveData, _node: HenFlowGraphTypes.Flow
 	var pins: Array[HenFlowGraphTypes.FlowPin] = _node.pins_of(&'data_in')
 
 	for i: int in range(mini(_node.action.inputs.size(), mini(parts.size(), pins.size()))):
-		if _node.action.input_actions.has(str(_node.action.inputs[i].id)):
+		var key: String = str(_node.action.inputs[i].id)
+
+		if _node.action.input_actions.has(key) or _node.action.input_wires.has(key):
 			continue
 
 		pins[i].part = parts[i]
@@ -308,64 +358,6 @@ static func _producer_output(_ref: Variant, _producer: HenFlowGraphTypes.FlowNod
 	var outputs: Array[HenFlowGraphTypes.FlowPin] = _producer.pins_of(&'data_out')
 
 	return outputs[0].id if not outputs.is_empty() else &''
-
-
-# an action gets a store as soon as one of its results has somewhere to land
-static func wants_store(_action: HenSaveAction, _macro: HenSaveMacro) -> bool:
-	if not _macro or _macro.outputs.is_empty():
-		return false
-
-	for output: HenSaveParam in _macro.outputs:
-		if not str(_action.output_bindings.get(str(output.id), '')).is_empty():
-			return true
-
-	return false
-
-
-# an action whose whole job is to produce a value reads as a step of the sequence,
-# which it is not: the store takes that place and pulls the action in as a source,
-# the same shape an inline producer already has. one that branches or owns a body
-# does run the sequence, so it stays where it is
-static func is_pure_producer(_macro: HenSaveMacro) -> bool:
-	return _macro != null and not _macro.has_body and _macro.flow_outputs.is_empty()
-
-
-# where the results of an action land: one node per action, with a port per stored
-# output, standing in the chain in place of the action that feeds it
-static func _store_node(
-	_graph: HenFlowGraphTypes.FlowGraph,
-	_save_data: HenSaveData,
-	_action: HenSaveAction,
-	_macro: HenSaveMacro,
-	_node: HenFlowGraphTypes.FlowNode
-) -> HenFlowGraphTypes.FlowNode:
-	var store: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
-
-	store.id = StringName('st' + str(_action.id))
-	store.kind = &'store'
-	store.action = _action
-	store.title = 'Store In'
-	store.icon = 'save'
-	store.accent = str(HenActionCategories.get_data('variable').color)
-	store.phase = _node.phase
-
-	store.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
-
-	for part: Dictionary in HenActionsPanel.output_parts(_action, _macro, _save_data):
-		var id: StringName = StringName(str(part.get('output_id', '')))
-		var pin: HenFlowGraphTypes.FlowPin = HenFlowGraphTypes.FlowPin.new(id, &'data_in', str(part.get('output_name', '')))
-
-		pin.part = part
-		store.add_pin(pin)
-
-	store.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.THEN_PIN, &'exec_out'))
-
-	_graph.add_node(store)
-
-	for pin: HenFlowGraphTypes.FlowPin in store.pins_of(&'data_in'):
-		_graph.connect_pins(&'data', _node, pin.id, store, pin.id)
-
-	return store
 
 
 # a branch with a target leaves the state, so it gets its own node; one without a
@@ -411,8 +403,8 @@ static func _add_branch_pins(
 
 		_graph.add_node(transition)
 
-		# with steps on the branch the transition is what the chain ends on, so it
-		# reads in the order it runs
+		# a branch goes to a state or it runs steps, never both, so a transition only
+		# ever hangs off the branch port itself
 		if chain.is_empty():
 			_graph.connect_pins(&'exec', _node, flow.id, transition, HenFlowGraphTypes.ENTER_PIN)
 		else:

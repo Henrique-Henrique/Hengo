@@ -40,7 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Index', type = 'int', id = &'index', doc = 'The current pass number, starting at 0.'}
+		{name = 'Index', type = 'int', id = &'index', branch = &'body', doc = 'The current pass number, starting at 0.'}
 	]
 
 

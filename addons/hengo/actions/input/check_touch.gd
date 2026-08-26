@@ -40,7 +40,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Position', type = 'Vector2', id = &'position', doc = 'Where to store the screen point of the touch.'}
+		{name = 'Position', type = 'Vector2', id = &'position', branch = &'true', doc = 'Where to store the screen point of the touch.'}
 	]
 
 

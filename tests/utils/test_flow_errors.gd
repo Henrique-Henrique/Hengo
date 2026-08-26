@@ -82,24 +82,6 @@ func test_a_sound_step_takes_no_error() -> void:
 	assert_str(node.error).is_empty()
 
 
-# the store stands in the chain for its action, so it goes red with it
-func test_the_store_takes_the_same_error() -> void:
-	var macro: HenSaveMacro = _register(FIX_DISTANCE)
-	var action: HenSaveAction = _add(macro)
-
-	action.output_bindings[str(macro.outputs[0].id)] = HenUtils.bind_code_for_var(save_data.add_var(false))
-
-	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
-	var producer: HenFlowGraphTypes.FlowNode = _node_for(graph, action, &'producer')
-	var store: HenFlowGraphTypes.FlowNode = _node_for(graph, action, &'store')
-
-	HenFlowGraphBuilder.refresh_error(save_data, state, producer)
-	HenFlowGraphBuilder.refresh_error(save_data, state, store)
-
-	assert_str(producer.error).contains('Target')
-	assert_str(store.error).is_equal(producer.error)
-
-
 # a fault inside an inline producer is reported on the action that pulls it in
 func test_an_inline_producer_is_not_asked() -> void:
 	var speed: HenSaveVar = save_data.add_var(false)

@@ -19,6 +19,10 @@ class FlowPin extends RefCounted:
 	var label: String
 	# the value_parts entry a data_in draws as a chip; empty when a wire feeds it
 	var part: Dictionary = {}
+	# how many steps read this data_out through a wire, which is what the badge counts
+	var wires: int = 0
+	# true on a data_in a wire feeds, which is what makes it a drop target
+	var wired: bool = false
 	# filled by the renderer, read by the wire router
 	var rect: Rect2
 
@@ -44,6 +48,11 @@ class FlowNode extends RefCounted:
 	var body_parent: HenSaveAction
 	# on a branch add tail, which branch of body_parent the step lands on
 	var body_branch: StringName = &''
+	# on a wire_ref, the step and the slot the wire feeds, which unwiring clears
+	var wire_owner: HenSaveAction
+	var wire_input: StringName = &''
+	# on a wire_ref, the step the value comes from, which clicking it goes to
+	var wire_source: HenSaveAction
 	# the phase chain this node belongs to
 	var phase: StringName = &''
 	# why the codegen would drop this action, empty when it is fine

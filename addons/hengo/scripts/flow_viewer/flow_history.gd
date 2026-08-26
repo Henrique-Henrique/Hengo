@@ -310,11 +310,13 @@ static func _action_digest(_action: HenSaveAction) -> Array:
 		str(_action.phase),
 		inputs,
 		var_to_str(_action.input_bindings),
-		var_to_str(_action.output_bindings),
+		var_to_str(_action.input_wires),
 		var_to_str(_action.branches),
 		expressions,
 		inline,
-		body
+		body,
+		_action.disabled,
+		_action.label
 	]
 
 

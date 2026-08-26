@@ -73,6 +73,15 @@ var _pending_focus: String = ''
 # the card the press landed on, and the drop it is currently pointing at
 var _press_card: HenFlowNodeCard = null
 var _dragging: bool = false
+# the output a wire is being pulled from, and the rubber band that follows the
+# cursor until it lands
+var _wire_card: HenFlowNodeCard = null
+var _wire_pin: HenFlowGraphTypes.FlowPin = null
+var _wire_start: Vector2 = Vector2.ZERO
+var _wire_line: Line2D = null
+# while the badge is hovered: one line per reader, and the reference cards lit
+var _wire_focus_lines: Array[Line2D] = []
+var _wire_focus_cards: Array[HenFlowNodeCard] = []
 var _drop_card: HenFlowNodeCard = null
 var _drop_before: bool = true
 var _click_last_time: int = 0
@@ -334,6 +343,7 @@ func _update_hover(_pos: Vector2) -> void:
 
 	_apply_card_hover(hit)
 	_apply_frame_hover(hit)
+	_apply_wire_focus(hit)
 	_update_tooltip(hit)
 
 	# a card is a solid object and a route is a two pixel line, so whatever the
@@ -815,9 +825,11 @@ func _rebuild_hover_cache() -> void:
 		})
 
 		for card: HenFlowNodeCard in entry.cards:
+			var reach: Rect2 = card.hover_rect()
+
 			_hover_items.append({
 				kind = &'card',
-				rect = Rect2(frame.position + card.position, card.node.size),
+				rect = Rect2(frame.position + card.position + reach.position, reach.size),
 				frame = frame,
 				node = node,
 				state = entry.state,
@@ -893,6 +905,9 @@ func _gui_input(event: InputEvent) -> void:
 		if _press_card != null:
 			_update_drag(nodes_container.get_local_mouse_position())
 
+		if _wire_card:
+			_update_wire_drag(nodes_container.get_local_mouse_position())
+
 		return
 
 	if not event is InputEventMouseButton:
@@ -915,7 +930,17 @@ func _gui_input(event: InputEvent) -> void:
 
 	if button.pressed:
 		_click_press_pos = button.position
+
+		# the dot is a small, specific target, so it takes the whole gesture and the
+		# rest of the card goes on moving the step
+		if _arm_wire_drag():
+			return
+
 		_press_card = _draggable_under_mouse()
+		return
+
+	if _wire_card:
+		_finish_wire_drag()
 		return
 
 	if _dragging:
@@ -1163,6 +1188,213 @@ func _notify_structural() -> void:
 # from a hit and only count the miss toward the double click
 # the store card and the producer it saves are the same step, so either one drags
 # it; an inline producer belongs to an input and is not a step at all
+# the badge counts the readers, so hovering it has to say which ones: every reader
+# lights up and gets a line back to the value it reads
+func _apply_wire_focus(_hit: Dictionary) -> void:
+	if str(_hit.get('kind', '')) != 'wire_out':
+		_clear_wire_focus()
+		return
+
+	if not _wire_focus_lines.is_empty():
+		return
+
+	var card: HenFlowNodeCard = _hit.get('card', null)
+	var pin: Variant = _hit.get('pin')
+	var frame: HenFlowStateFrame = _hit.get('frame', null)
+	var entry: Variant = _states.get(String((_hit.state as HenSaveState).id)) if _hit.get('state') else null
+
+	if not card or not pin or not frame or not entry:
+		return
+
+	var from: Vector2 = frame.position + card.position + ((pin as HenFlowGraphTypes.FlowPin).rect as Rect2).get_center()
+	var lit: Dictionary = {card: true}
+
+	for edge: HenFlowGraphTypes.FlowEdge in (entry.graph as HenFlowGraphTypes.FlowGraph).edges_of(&'wire'):
+		if edge.from_node != card.node or edge.from_pin != (pin as HenFlowGraphTypes.FlowPin).id:
+			continue
+
+		var reader: HenFlowNodeCard = _card_of_node(entry.cards, edge.to_node)
+
+		if not reader:
+			continue
+
+		var line: Line2D = Line2D.new()
+
+		line.width = 2.0
+		line.default_color = Color(card.accent(), 0.85)
+		line.z_index = 1
+		line.points = PackedVector2Array([
+			from,
+			frame.position + reader.position + Vector2(reader.node.size.x, reader.node.size.y * 0.5)
+		])
+
+		nodes_container.add_child(line)
+		_wire_focus_lines.append(line)
+
+		lit[reader] = true
+
+		# the reference is attached to the step that reads it, so dimming one and not
+		# the other would cut the pair in half
+		var consumer: HenFlowNodeCard = _card_of_node(entry.cards, _consumer_of(entry.graph, edge.to_node))
+
+		if consumer:
+			lit[consumer] = true
+
+	if lit.size() < 2:
+		return
+
+	# the same reading a hovered transition gives: what takes part stays lit and the
+	# rest of the state steps back
+	for other: HenFlowNodeCard in entry.cards:
+		if lit.has(other):
+			continue
+
+		other.modulate.a = FRAME_DIM
+		_wire_focus_cards.append(other)
+
+
+# the step a reference feeds, which is the other half of the pair
+func _consumer_of(_graph: HenFlowGraphTypes.FlowGraph, _reference: HenFlowGraphTypes.FlowNode) -> HenFlowGraphTypes.FlowNode:
+	for edge: HenFlowGraphTypes.FlowEdge in _graph.edges_of(&'data'):
+		if edge.from_node == _reference:
+			return edge.to_node
+
+	return null
+
+
+func _card_of_node(_cards: Array, _node: HenFlowGraphTypes.FlowNode) -> HenFlowNodeCard:
+	for card: HenFlowNodeCard in _cards:
+		if card.node == _node:
+			return card
+
+	return null
+
+
+func _clear_wire_focus() -> void:
+	for line: Line2D in _wire_focus_lines:
+		if is_instance_valid(line):
+			line.queue_free()
+
+	for card: HenFlowNodeCard in _wire_focus_cards:
+		if is_instance_valid(card):
+			card.modulate.a = 1.0
+
+	_wire_focus_lines.clear()
+	_wire_focus_cards.clear()
+
+
+# true when the press landed on an output, which is what starts a wire
+func _arm_wire_drag() -> bool:
+	var hit: Dictionary = hit_under_mouse()
+
+	if hit.is_empty() or not hit.has('card') or str(hit.get('kind', '')) != 'output':
+		return false
+
+	var card: HenFlowNodeCard = hit.card
+
+	if not card.node.action or not card.node.step:
+		return false
+
+	_wire_card = card
+	_wire_pin = hit.get('pin')
+	_wire_start = (hit.origin as Vector2) + (_wire_pin.rect as Rect2).get_center()
+	_wire_line = Line2D.new()
+	_wire_line.width = 2.0
+	_wire_line.default_color = card.accent()
+	_wire_line.z_index = 1
+	nodes_container.add_child(_wire_line)
+	HenFlowNodeCard.wire_dropping = true
+
+	return true
+
+
+func _update_wire_drag(_mouse: Vector2) -> void:
+	if not is_instance_valid(_wire_card) or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		_clear_wire_drag()
+		return
+
+	if is_instance_valid(_wire_line):
+		_wire_line.points = PackedVector2Array([_wire_start, _mouse])
+
+
+# an input under the cursor takes the value; anywhere else the gesture is dropped
+func _finish_wire_drag() -> void:
+	var hit: Dictionary = hit_under_mouse()
+	var source: HenFlowNodeCard = _wire_card
+	var pin: HenFlowGraphTypes.FlowPin = _wire_pin
+
+	_clear_wire_drag()
+
+	if not is_instance_valid(source) or not pin or hit.is_empty() or not hit.has('card'):
+		return
+
+	var target: HenFlowNodeCard = hit.card
+	var into: Variant = hit.get('pin')
+
+	var kind: String = str(hit.get('kind', ''))
+
+	if not target.node.action or not into or (kind != 'pin' and kind != 'wired_in'):
+		return
+
+	_connect_wire(source.node.action, pin.id, target.node.action, (into as HenFlowGraphTypes.FlowPin).id)
+
+
+func _clear_wire_drag() -> void:
+	HenFlowNodeCard.wire_dropping = false
+
+	if is_instance_valid(_wire_line):
+		_wire_line.queue_free()
+
+	_wire_line = null
+	_wire_card = null
+	_wire_pin = null
+
+
+# the slot goes back to whatever the macro defaults it to, which is what an empty
+# source means everywhere else
+func _disconnect_wire(_consumer: HenSaveAction, _input: StringName) -> void:
+	var state_id: StringName = _state_by_action.get(str(_consumer.id), &'')
+
+	if state_id.is_empty():
+		return
+
+	var key: String = str(_input)
+
+	_history.record(_save_data(), [state_id], 'Unwire Value', func() -> bool:
+		_consumer.input_wires.erase(key)
+
+		return true
+	)
+
+	_request_rebuild()
+
+
+# the slot takes one source at a time, so wiring it drops whatever fed it before
+func _connect_wire(
+	_producer: HenSaveAction,
+	_output: StringName,
+	_consumer: HenSaveAction,
+	_input: StringName
+) -> void:
+	var state_id: StringName = _state_by_action.get(str(_consumer.id), &'')
+
+	if state_id.is_empty():
+		return
+
+	var key: String = str(_input)
+
+	_history.record(_save_data(), [state_id], 'Wire Value', func() -> bool:
+		_consumer.input_bindings.erase(key)
+		_consumer.input_expressions.erase(key)
+		_consumer.input_actions.erase(key)
+		_consumer.input_wires[key] = {action_id = StringName(str(_producer.id)), output = _output}
+
+		return true
+	)
+
+	_request_rebuild()
+
+
 func _draggable_under_mouse() -> HenFlowNodeCard:
 	var hit: Dictionary = hit_under_mouse()
 
@@ -1361,6 +1593,15 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if not card:
 		return false
 
+	# before the action guard below too: a reference stands for a value made
+	# elsewhere, so it carries no action of its own
+	if hit.kind == &'unwire' and card.node.wire_owner:
+		_disconnect_wire(card.node.wire_owner, card.node.wire_input)
+		return true
+
+	if card.node.kind == &'wire_ref' and card.node.wire_source:
+		return focus_action(str(card.node.wire_source.id))
+
 	# before the action guard below: an add tail has no action of its own
 	if hit.kind == &'add_tail':
 		_editing_card = card
@@ -1411,17 +1652,6 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if not action:
 		return true
 
-	# every port of a store node names one output of the action feeding it
-	if card.node.kind == &'store' and (hit.kind == &'pin' or hit.kind == &'chip'):
-		_editing_card = card
-		_editor_for(hit.node)
-		# binding an output adds or drops the store node itself, so the picture has
-		# to be rebuilt once the popup is done with it
-		_rebuild_pending = true
-		_editor.open_output(action, StringName(str((hit.part as Dictionary).get('output_id', ''))), rect)
-
-		return true
-
 	if hit.kind == &'menu' and card.node.action:
 		_select_card(card)
 		_open_card_menu(hit, card, card.node.action)
@@ -1431,13 +1661,6 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 		_editing_card = card
 		_editor_for(hit.node)
 		_editor.open_producer((hit.part as Dictionary).get('slot', {}), rect)
-		return true
-
-	if hit.kind == &'output':
-		_editing_card = card
-		_editor_for(hit.node)
-		_rebuild_pending = true
-		_editor.open_output(card.node.action, (hit.pin as HenFlowGraphTypes.FlowPin).id, rect)
 		return true
 
 	if hit.kind == &'chip':

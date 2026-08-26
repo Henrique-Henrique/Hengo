@@ -528,6 +528,10 @@ static func _index(_graph: HenFlowGraphTypes.FlowGraph) -> FormatData:
 			data.exec_to[_key(edge.from_node.id, edge.from_pin)] = edge.to_node
 			continue
 
+		# a wire reads a step that is laid out on its own, so it pulls nothing here
+		if edge.kind != &'data':
+			continue
+
 		data.data_from[_key(edge.to_node.id, edge.to_pin)] = edge.from_node
 
 		if not data.consumers.has(edge.from_node.id):

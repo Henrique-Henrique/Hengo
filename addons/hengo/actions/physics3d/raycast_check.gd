@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks what a RayCast node is touching right now and branches on the result. It works with RayCast3D and RayCast2D.'
+	return 'Checks what a RayCast node is touching right now and branches on the result. It works with RayCast3D and RayCast2D. It reports what is there on every run, so When It Changes is the one that fires only on the frame the contact starts.'
 
 
 func get_display_name() -> String:
@@ -37,9 +37,9 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Collider', type = 'Object', id = &'collider', doc = 'The node the ray hit.'},
-		{name = 'Point', type = 'Vector3', id = &'point', doc = 'The world position where the ray hit.'},
-		{name = 'Normal', type = 'Vector3', id = &'normal', doc = 'The direction the hit surface faces.'}
+		{name = 'Collider', type = 'Object', id = &'collider', branch = &'hit', doc = 'The node the ray hit.'},
+		{name = 'Point', type = 'Vector3', id = &'point', branch = &'hit', doc = 'The world position where the ray hit.'},
+		{name = 'Normal', type = 'Vector3', id = &'normal', branch = &'hit', doc = 'The direction the hit surface faces.'}
 	]
 
 

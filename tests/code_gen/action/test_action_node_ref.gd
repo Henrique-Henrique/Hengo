@@ -92,21 +92,25 @@ func test_a_bound_ref_compiles() -> void:
 
 
 func test_get_node_starts_from_the_owner_by_default() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
 	var action: HenSaveAction = _add_action(_register(FIX_GET_NODE), &'enter')
 
-	action.output_bindings['result'] = HenUtils.bind_code_for_var(_node_var('found', 'Node'))
+	_sink(action, &'result', _node_var('found', 'Node'))
 
 	assert_str(HenTest.get_all_code()).contains('_ref.get_node_or_null(')
 
 
 # reaching a child of the node a raycast returned is the whole point of the slot
 func test_get_node_starts_from_the_bound_node() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
 	_node_var('hit_body', 'Node')
 
 	var action: HenSaveAction = _add_action(_register(FIX_GET_NODE), &'enter')
 
 	action.input_bindings['ref'] = 'hit_body'
-	action.output_bindings['result'] = HenUtils.bind_code_for_var(_node_var('found', 'Node'))
+	_sink(action, &'result', _node_var('found', 'Node'))
 
 	assert_str(HenTest.get_all_code()).contains('_ref.hit_body.get_node_or_null(')
 

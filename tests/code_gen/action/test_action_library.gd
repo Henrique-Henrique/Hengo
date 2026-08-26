@@ -19,14 +19,15 @@ func test_random_actions_emit_their_range() -> void:
 	my_var.type = 'int'
 
 	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'random_int'), &'update')
-	action.output_bindings['result'] = HenUtils.bind_code_for_var(my_var)
 
 	for param: HenSaveParam in action.inputs:
 		match str(param.id):
 			'min': param.default_value = 1
 			'max': param.default_value = 6
 
-	assert_str(HenTest.get_all_code()).contains('_ref.roll = randi_range(1, 6)')
+	_sink(action, &'result', my_var)
+
+	assert_str(HenTest.get_all_code()).contains('_ref.roll = (randi_range(1, 6))')
 
 
 # an unset in-place target must read as missing in the row, not as an empty literal
@@ -219,12 +220,12 @@ func test_get_nearest_scans_the_group_into_a_variable() -> void:
 	enemy.type = 'Node2D'
 
 	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'get_nearest'), &'update')
-	action.output_bindings['nearest'] = HenUtils.bind_code_for_var(enemy)
+	_sink(action, &'nearest', enemy)
 
 	var code: String = HenTest.get_all_code()
 
 	assert_str(code).contains("_ref.get_tree().get_nodes_in_group('enemies')")
-	assert_str(code).contains('_ref.closest = best_' + str(action.id))
+	assert_str(code).contains('_ref.closest = (best_' + str(action.id) + ')')
 
 	var script := GDScript.new()
 	script.source_code = code
@@ -249,8 +250,12 @@ func test_get_nearest_runs_inside_a_for_each() -> void:
 
 	var near: HenSaveAction = _nested(&'get_nearest')
 	near.inputs = [HenSaveParam.create({name = 'Group', type = 'StringName', id = &'group', default_value = 'enemies'})]
-	near.output_bindings['nearest'] = HenUtils.bind_code_for_var(enemy)
+	var reader: HenSaveAction = HenSaveAction.create(HenActionsPanel.find_macro(&'set_value'))
+
+	reader.input_bindings['target'] = HenUtils.bind_code_for_var(enemy)
+	reader.input_wires['value'] = {action_id = StringName(str(near.id)), output = &'nearest'}
 	loop.body_actions.append(near)
+	loop.body_actions.append(reader)
 
 	var code: String = HenTest.get_all_code()
 

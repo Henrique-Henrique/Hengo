@@ -369,8 +369,6 @@ func _render_action_params() -> void:
 			indent = 0
 		})
 
-	if not nested_producer:
-		_create_output_section(action, outputs)
 
 
 # upgrades bindings saved by name to the id form, so opening an action once makes
@@ -824,25 +822,14 @@ func _on_bind_selected(item: Dictionary, slot: Dictionary) -> void:
 				(expr_store as Dictionary).erase(expr_key)
 			_erase_action(slot)
 			_update_props()
-			_notify_store_change(slot)
 		'bind':
 			bind_store[bind_key] = item.code
 			if expr_store != null:
 				(expr_store as Dictionary).erase(expr_key)
 			_erase_action(slot)
 			_update_props()
-			_notify_store_change(slot)
 		'native_arg':
 			_prompt_source_arg(slot, str(item.source_key))
-
-
-# where an output lands decides whether the flow view draws a store node for it,
-# so that edit moves the graph and not just the row
-func _notify_store_change(slot: Dictionary) -> void:
-	if not (resource is HenSaveAction) or slot.get('bind_store') != (resource as HenSaveAction).output_bindings:
-		return
-
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 
 
 # a slot holds one source at a time
@@ -914,40 +901,6 @@ func _on_producer_picked(macro: HenSaveMacro, slot: Dictionary) -> void:
 	inline_changed.emit()
 	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 	_update_props()
-
-
-# a header plus one lvalue slot per declared output, where the produced value is
-# stored. an output is optional: leaving it unbound drops its line in codegen
-func _create_output_section(action: HenSaveAction, outputs: Array[HenSaveParam]) -> void:
-	if outputs.is_empty():
-		return
-
-	var header := Label.new()
-	header.text = 'Outputs'
-	header.add_theme_font_override('font', TITLE_FONT)
-	ThemeUtils.apply_font_size(header, 13)
-	header.add_theme_color_override('font_color', Color('#8fa0b8'))
-	vbox.add_child(header)
-
-	for output: HenSaveParam in outputs:
-		# a synthetic write-only slot, so the shared value slot renders the lvalue
-		# picker (variable/property, no literal editor, no expression)
-		var slot_param: HenSaveParam = HenSaveParam.create({
-			name = output.name,
-			type = str(output.type),
-			id = str(output.id),
-			lvalue = true,
-			optional = true
-		})
-
-		_create_value_slot({
-			param = slot_param,
-			bind_store = action.output_bindings,
-			bind_key = str(output.id),
-			macro_params = {},
-			quick_var = true,
-			indent = 0
-		})
 
 
 # creates and binds a variable named after the output, no prompt

@@ -55,9 +55,9 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Collider', type = 'Object', id = &'collider', doc = 'The node the line touched.'},
-		{name = 'Point', type = 'Vector2', id = &'point', doc = 'The global position where the line touched it.'},
-		{name = 'Normal', type = 'Vector2', id = &'normal', doc = 'The direction the touched surface faces.'}
+		{name = 'Collider', type = 'Object', id = &'collider', branch = &'hit', doc = 'The node the line touched.'},
+		{name = 'Point', type = 'Vector2', id = &'point', branch = &'hit', doc = 'The global position where the line touched it.'},
+		{name = 'Normal', type = 'Vector2', id = &'normal', branch = &'hit', doc = 'The direction the touched surface faces.'}
 	]
 
 

@@ -208,7 +208,7 @@ func test_option_input_emits_verbatim() -> void:
 	my_var.type = 'float'
 
 	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'math_operator'), &'update')
-	action.output_bindings['result'] = HenUtils.bind_code_for_var(my_var)
+	_sink(action, &'result', my_var)
 
 	for param: HenSaveParam in action.inputs:
 		match str(param.id):
@@ -218,7 +218,7 @@ func test_option_input_emits_verbatim() -> void:
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('_ref.score = 3.0 * 2.0')
+	assert_str(code).contains('_ref.score = (3.0 * 2.0)')
 	assert_str(code).not_contains("'*'")
 
 	var script := GDScript.new()
@@ -409,12 +409,6 @@ func test_write_target_refuses_call_shaped_bindings() -> void:
 
 	assert_str(set_code).contains('must be bound to a variable or property')
 	assert_str(set_code).not_contains('randf() = ')
-
-	# an output's store is assignable too: a call there drops the line, never `randf() = ...`
-	var rng: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'random_int'), &'update')
-	rng.output_bindings['result'] = 'randf()'
-
-	assert_str(HenTest.get_all_code()).not_contains('randf() = randi_range')
 
 
 # the picker must not offer what codegen refuses: a Store slot gets variables and

@@ -46,6 +46,16 @@ func any_flow_connected() -> bool:
 
 # a gating action with an empty body and no branch target would emit an if/else
 # of two passes. the reason surfaces on the action instead of running silently
+# the branch an output is only produced inside, empty when it lands at the level of
+# the action itself and is reachable on every path through it
+func output_branch(_id: StringName) -> StringName:
+	for output: Dictionary in get_outputs():
+		if StringName(str(output.get('id', ''))) == _id:
+			return StringName(str(output.get('branch', '')))
+
+	return &''
+
+
 func gate_validation_error() -> String:
 	if nested_action_count > 0 or not connected_flows.is_empty():
 		return ''

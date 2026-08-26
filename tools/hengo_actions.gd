@@ -13,7 +13,11 @@ class_name HenHengoActions extends RefCounted
 const SCRIPT_KEYS: PackedStringArray = ['name', 'extends', 'vars', 'states', 'collection', 'debug']
 const VAR_KEYS: PackedStringArray = ['name', 'type', 'value', 'export']
 const STATE_KEYS: PackedStringArray = ['name', 'start', 'can_reenter', 'description', 'actions', 'sub_states']
-const ACTION_KEYS: PackedStringArray = ['id', 'phase', 'inputs', 'branches', 'outputs', 'body']
+const ACTION_KEYS: PackedStringArray = ['id', 'phase', 'inputs', 'branches', 'body', 'ref']
+
+# ref given in the json -> the action built for it, so a wire can point at a step
+# declared earlier. cleared per script, since a wire never crosses one
+static var _refs: Dictionary = {}
 
 
 static func declare(_save_data: HenSaveData, _spec: Dictionary) -> String:
@@ -117,6 +121,8 @@ static func _declare_sub_state(_save_data: HenSaveData, _parent: HenSaveState, _
 
 # fills the action list of every state; declare() must have run for all scripts
 static func build_actions(_save_data: HenSaveData, _spec: Dictionary, _all_scripts: Dictionary = {}) -> String:
+	_refs.clear()
+
 	for st: Dictionary in _spec.get('states', []):
 		var err: String = _build_state_actions(_save_data, st, _all_scripts)
 		if not err.is_empty():
@@ -189,17 +195,18 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 		if not phase_err.is_empty():
 			return phase_err
 
-	# outputs first: a producer's inputs follow the type of the output variable
-	# (type_from), so the literal coercion in _apply_inputs needs the binding set
-	var output_err: String = _apply_outputs(_save_data, action, macro, _spec.get('outputs', {}))
-
-	if not output_err.is_empty():
-		return output_err
-
 	var input_err: String = _apply_inputs(_save_data, _state, action, macro, _spec.get('inputs', {}), _all_scripts)
 
 	if not input_err.is_empty():
 		return input_err
+
+	if _spec.has('ref'):
+		var ref: String = str(_spec.ref)
+
+		if _refs.has(ref):
+			return 'duplicated ref "' + ref + '"'
+
+		_refs[ref] = action
 
 	var branch_err: String = _apply_branches(_save_data, _state, action, macro, _spec.get('branches', {}), _all_scripts)
 
@@ -232,31 +239,6 @@ static func _apply_body(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 		_action.body_actions.append(built)
 		index += 1
-
-	return ''
-
-
-# an output stores the produced value into a variable/property; the source wrapper
-# is the same {bind|path|prop} used for inputs, minus native/expression (a store
-# has to be assignable)
-static func _apply_outputs(_save_data: HenSaveData, _action: HenSaveAction, _macro: HenSaveMacro, _outputs: Dictionary) -> String:
-	for raw_key: Variant in _outputs:
-		var key: String = str(raw_key)
-
-		if not _macro_output(_macro, key):
-			return 'output "' + key + '" is not declared (valid: ' + _output_ids(_macro) + ')'
-
-		var value: Variant = _outputs[raw_key]
-
-		if not value is Dictionary:
-			return 'output "' + key + '" needs a {bind|path|prop} source, not a literal'
-
-		var bind: Dictionary = _bind_code(_save_data, value as Dictionary)
-
-		if bind.has('error'):
-			return 'output "' + key + '": ' + str(bind.error)
-
-		_action.output_bindings[key] = bind.code
 
 	return ''
 
@@ -310,6 +292,9 @@ static func _apply_inputs(_save_data: HenSaveData, _state: HenSaveState, _action
 
 
 static func _apply_input_source(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _key: String, _source: Dictionary, _declared: HenSaveParam, _all_scripts: Dictionary) -> String:
+	if _source.has('wire'):
+		return _apply_wire(_action, _key, _source.wire, _declared)
+
 	if _source.has('action'):
 		return _apply_inline_action(_save_data, _state, _action, _key, _source, _declared, _all_scripts)
 
@@ -328,6 +313,32 @@ static func _apply_input_source(_save_data: HenSaveData, _state: HenSaveState, _
 		return 'input "' + _key + '": ' + str(bind.error)
 
 	_action.input_bindings[_key] = bind.code
+
+	return ''
+
+
+# source shape: { wire: { from: 'ref', output: 'x' } }
+static func _apply_wire(_action: HenSaveAction, _key: String, _wire: Variant, _declared: HenSaveParam) -> String:
+	if _declared.lvalue:
+		return 'input "' + _key + '": a wire cannot be the left side of an assignment'
+
+	if not _wire is Dictionary:
+		return 'input "' + _key + '": "wire" must be { from, output }'
+
+	var spec: Dictionary = _wire as Dictionary
+	var from: String = str(spec.get('from', ''))
+
+	if not _refs.has(from):
+		return 'input "' + _key + '": unknown ref "' + from + '", a wire only reaches a step declared before it'
+
+	var producer: HenSaveAction = _refs[from]
+	var macro: HenSaveMacro = find_macro(producer.macro_id)
+	var output: String = str(spec.get('output', ''))
+
+	if not _macro_output(macro, output):
+		return 'input "' + _key + '": output "' + output + '" is not declared on "' + from + '" (valid: ' + _output_ids(macro) + ')'
+
+	_action.input_wires[_key] = {action_id = StringName(str(producer.id)), output = StringName(output)}
 
 	return ''
 
@@ -456,10 +467,12 @@ static func _apply_branches(_save_data: HenSaveData, _state: HenSaveState, _acti
 			if steps is String:
 				return 'branch "' + key + '": ' + str(steps)
 
+			if dict.has('state') or dict.has('script'):
+				return 'branch "' + key + '": a branch goes to a state or it runs steps, never both. end the steps with a "transition" action instead'
+
 			_action.branch_actions[key] = steps
 
-			if not (dict.has('state') or dict.has('script')):
-				continue
+			continue
 
 		var branch: Variant = _build_branch(_save_data, spec, _all_scripts)
 

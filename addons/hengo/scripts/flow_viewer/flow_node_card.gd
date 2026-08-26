@@ -71,8 +71,10 @@ const FLOW_PAD_H: float = 12.0
 const FLOW_PAD_V: float = 7.0
 const SEPARATOR_WIDTH: float = 2.0
 const CHIP_CORNER: int = 4
-const HOVER_ROUNDED: Array[StringName] = [&'chip', &'menu', &'add_above', &'add_below']
+const HOVER_ROUNDED: Array[StringName] = [&'chip', &'menu', &'add_above', &'add_below', &'unwire', &'wire_out']
 const CHIP_PAD_H: float = 6.0
+# the badge hangs outside the card, so the stub is what ties it back to the dot
+const BADGE_STUB: float = 10.0
 const SWATCH_CORNER: int = 3
 const SWATCH_GAP: float = 5.0
 const SWATCH_BORDER: Color = Color(0, 0, 0, 0.45)
@@ -82,6 +84,8 @@ const BODY_PAD: float = HenFlowFormatter.BODY_PAD
 
 static var _style_cache: Dictionary = {}
 static var _icon_cache: Dictionary = {}
+# a wire is being pulled somewhere on the canvas, so a slot it could land on says so
+static var wire_dropping: bool = false
 
 var node: HenFlowGraphTypes.FlowNode
 
@@ -118,6 +122,18 @@ func setup(_host_control: Control, _node: HenFlowGraphTypes.FlowNode) -> void:
 
 func get_hits() -> Array[Dictionary]:
 	return _hits
+
+
+# a badge hangs past the plate, and the hover cache gates on this rect before it
+# ever looks at the hits inside, so anything drawn outside has to be counted here
+func hover_rect() -> Rect2:
+	var rect: Rect2 = Rect2(Vector2.ZERO, node.size)
+
+	for hit: Dictionary in _hits:
+		if hit.kind == &'wire_out':
+			rect = rect.merge(hit.rect)
+
+	return rect
 
 
 # the rect never changes with the level, so dropping the slots costs no layout
@@ -279,6 +295,12 @@ func compute_size() -> Vector2:
 
 	var inputs: Array[HenFlowGraphTypes.FlowPin] = node.pins_of(&'data_in')
 	var outputs: Array[HenFlowGraphTypes.FlowPin] = node.pins_of(&'data_out')
+
+	# a reference stands for a value made elsewhere, so it reads as icon and name the
+	# way a transition does, and its slot never takes a row
+	if node.kind == &'wire_ref':
+		inputs.clear()
+		outputs.clear()
 	var row_h: float = maxf(_painter.line_height(LABEL_SIZE), SLOT_DOT)
 	var left_w: float = 0.0
 	var right_w: float = 0.0
@@ -343,6 +365,9 @@ func compute_size() -> Vector2:
 
 func _header_width() -> float:
 	var menu: float = (MENU_SIZE * 3.0 + HEADER_BT_GAP * 2.0 + ICON_GAP) if node.action else 0.0
+
+	if node.kind == &'wire_ref':
+		menu = MENU_SIZE + ICON_GAP
 
 	return PAD * 2.0 + ICON + ICON_GAP + _painter.measure(node.title, TITLE_SIZE, true).x + menu
 
@@ -587,8 +612,10 @@ func _emit_hover() -> void:
 		if hit.kind != _hover_kind or hit.get('pin', null) != _hover_ref:
 			continue
 
+		var drop: bool = wire_dropping and (_hover_kind == &'pin' or _hover_kind == &'wired_in')
+
 		_painter.add_style(
-			_flat(Color(accent(), HOVER_ALPHA), CHIP_CORNER if _hover_kind in HOVER_ROUNDED else 0),
+			_flat(Color(DROP_COLOR if drop else accent(), HOVER_ALPHA), CHIP_CORNER if _hover_kind in HOVER_ROUNDED else 0),
 			hit.rect
 		)
 		return
@@ -614,6 +641,15 @@ func _emit_header(_size: Vector2) -> void:
 	# before the header, whose rect contains it: get_hits returns the first match
 	var button: Vector2 = Vector2(MENU_SIZE, _header_h - HEADER_PAD_V)
 	var menu: Rect2 = Rect2(Vector2(_size.x - PAD - button.x, centre - button.y * 0.5), button)
+
+	if node.kind == &'wire_ref':
+		_painter.add_texture(
+			HenActionVisuals.icon_texture('link-2-off'),
+			Rect2(menu.position + (menu.size - Vector2(ICON_GLYPH, ICON_GLYPH)) * 0.5, Vector2(ICON_GLYPH, ICON_GLYPH)),
+			_label_color()
+		)
+
+		_hit(menu, &'unwire', {})
 
 	if node.action:
 		var dots: float = centre - MENU_DOT_GAP - MENU_DOT * 0.5
@@ -737,15 +773,16 @@ func _emit_input(_entry: Dictionary, _centre: float) -> void:
 # the dot is 13px and unclickable once the cam zooms out, so the target is the dot
 # and its name, up to the chip. after the chip, which wins wherever the two meet
 func _emit_pin_hit(_pin: HenFlowGraphTypes.FlowPin, _entry: Dictionary, _centre: float) -> void:
-	# a pin already fed by a producer has a wire, and its source is that card
-	if _pin.part.is_empty():
+	# a pin fed by an inline producer is addressed on that card, a wired one keeps a
+	# target of its own so a new value can be dropped on it
+	if _pin.part.is_empty() and not _pin.wired:
 		return
 
 	var width: float = PAD + SLOT_DOT + SLOT_GAP + _entry.label_w + SLOT_GAP * 0.5
 
 	_hit(
 		Rect2(Vector2(0.0, _centre - _entry.height * 0.5), Vector2(width, _entry.height)),
-		&'pin',
+		&'wired_in' if _pin.wired else &'pin',
 		{pin = _pin, part = _pin.part}
 	)
 
@@ -763,6 +800,9 @@ func _emit_output(_entry: Dictionary, _centre: float, _width: float) -> void:
 		_label_color()
 	)
 
+	if pin.wires > 0:
+		_emit_wire_badge(pin, _centre, _width, _pin_color(pin))
+
 	# the dot and its name pick where the result lands, the way an input pin picks
 	# where its value comes from
 	var hit_w: float = PAD + SLOT_DOT + SLOT_GAP + _entry.output_w
@@ -772,6 +812,30 @@ func _emit_output(_entry: Dictionary, _centre: float, _width: float) -> void:
 		&'output',
 		{pin = pin}
 	)
+
+
+# hangs off the card instead of taking a column inside it: the readers are somewhere
+# else in the flow, and a badge in the row would read as part of this step
+func _emit_wire_badge(_pin: HenFlowGraphTypes.FlowPin, _centre: float, _width: float, _color: Color) -> void:
+	var text: String = '+' + str(_pin.wires)
+	var label_h: float = _painter.line_height(LABEL_SIZE)
+	var box_h: float = label_h + 4.0
+	var box_w: float = _painter.measure(text, LABEL_SIZE).x + CHIP_PAD_H * 2.0
+	var stub_x: float = _width - PAD * 0.5
+	var box_x: float = stub_x + BADGE_STUB
+
+	_painter.add_style(
+		_flat(Color(_color, 0.9), 1),
+		Rect2(Vector2(stub_x, _centre - 1.0), Vector2(BADGE_STUB, 2.0))
+	)
+	_painter.add_style(
+		_flat(Color(_color, 0.22), CHIP_CORNER, Color(_color, 0.55)),
+		Rect2(Vector2(box_x, _centre - box_h * 0.5), Vector2(box_w, box_h))
+	)
+	_painter.add_text(
+		text, LABEL_SIZE, Vector2(box_x + CHIP_PAD_H, _centre - label_h * 0.5), _color
+	)
+	_hit(Rect2(Vector2(box_x, _centre - box_h * 0.5), Vector2(box_w, box_h)), &'wire_out', {pin = _pin})
 
 
 # a branch is a cell along the bottom, split by a rule, the way the cnode does it.
@@ -817,6 +881,14 @@ func _emit_anchors(_size: Vector2) -> void:
 
 	if then and then.kind == &'exec_out':
 		then.rect = Rect2(Vector2(_size.x * 0.5 - 1.0, _size.y - 2.0), Vector2(2, 2))
+
+	# with no row to sit in, the slot of a reference anchors on the edge the line leaves
+	if node.kind == &'wire_ref':
+		for pin: HenFlowGraphTypes.FlowPin in node.pins_of(&'data_out'):
+			pin.rect = Rect2(
+				Vector2(_size.x - PAD - SLOT_DOT, _size.y * 0.5 - SLOT_DOT * 0.5),
+				Vector2(SLOT_DOT, SLOT_DOT)
+			)
 
 	var y: float = _header_h + PAD
 

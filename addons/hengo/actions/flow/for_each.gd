@@ -41,8 +41,8 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Item', type = 'Variant', id = &'item', doc = 'The current element, for the nested actions to read.'},
-		{name = 'Index', type = 'int', id = &'index', doc = 'The position of the current element, starting at 0.'}
+		{name = 'Item', type = 'Variant', id = &'item', branch = &'body', doc = 'The current element, for the nested actions to read.'},
+		{name = 'Index', type = 'int', id = &'index', branch = &'body', doc = 'The position of the current element, starting at 0.'}
 	]
 
 

@@ -51,7 +51,11 @@ func test_debug_trace_indents_inside_loop_body() -> void:
 
 	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'for_each'), &'update')
 	loop.input_bindings['collection'] = HenUtils.bind_code_for_var(coll)
-	loop.output_bindings['item'] = HenUtils.bind_code_for_var(item)
+	var reader: HenSaveAction = HenSaveAction.create(HenActionsPanel.find_macro(&'set_value'))
+
+	reader.input_bindings['target'] = HenUtils.bind_code_for_var(item)
+	reader.input_wires['value'] = {action_id = StringName(str(loop.id)), output = &'item'}
+	loop.body_actions.append(reader)
 
 	var print_a: HenSaveAction = _nested(&'print_value')
 	print_a.inputs = [HenSaveParam.create({name = 'Value', type = 'Variant', id = &'value'})]

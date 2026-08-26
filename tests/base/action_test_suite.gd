@@ -140,3 +140,17 @@ func _nested(_macro_id: StringName) -> HenSaveAction:
 	action.macro_id = _macro_id
 	action.id = (Engine.get_singleton(&'Global') as HenGlobal).get_new_node_counter()
 	return action
+
+
+# storing a result is a Set Value fed by a wire now, so a test that only needs the
+# producer to have a reader asks for one of these
+func _sink(_producer: HenSaveAction, _output: StringName, _target: HenSaveVar, _phase: StringName = &'') -> HenSaveAction:
+	var sink: HenSaveAction = HenSaveAction.create(HenActionsPanel.find_macro(&'set_value'))
+
+	sink.phase = _phase if not str(_phase).is_empty() else _producer.phase
+	sink.input_bindings['target'] = HenUtils.bind_code_for_var(_target)
+	sink.input_wires['value'] = {action_id = StringName(str(_producer.id)), output = _output}
+
+	save_data.add_state_action(state.id, sink)
+
+	return sink

@@ -15,15 +15,15 @@ const PHASE_ORDER: Array[StringName] = [&'enter', &'update', &'physics', &'exit'
 @export var input_expressions: Dictionary
 # input id -> { action: HenSaveAction, output: StringName }
 @export var input_actions: Dictionary
+# input id -> { action_id: StringName, output: StringName }. unlike an inline action
+# this reads a value another step already produced instead of running one of its own
+@export var input_wires: Dictionary
 # lifecycle phase this action runs in: enter (once) | update (per-frame) |
 # physics (fixed tick) | exit
 @export var phase: StringName = &'update'
 # flow output id -> { state_id: StringName, label: String }; a branch with no
 # entry emits `pass`. the target is stored by id so renames can't break it
 @export var branches: Dictionary
-# output id -> bind_code of the variable/property the produced value is written to;
-# an output with no entry is simply not emitted. same shape as input_bindings
-@export var output_bindings: Dictionary
 # nested action list a loop macro runs per iteration; empty for every other macro
 @export var body_actions: Array[HenSaveAction]
 # flow output id -> Array[HenSaveAction] the branch runs while staying in this

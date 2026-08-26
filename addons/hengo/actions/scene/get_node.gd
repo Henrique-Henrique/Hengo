@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Looks up a node by its path and stores it so later actions can use it. Stores null when nothing is found at that path.'
+	return 'Looks up a node by its path and stores it so later actions can use it. Stores null when nothing is found at that path. It answers what sits at the path right now, so When It Changes is the one that fires only on the frame that answer becomes something else.'
 
 
 func get_display_name() -> String:

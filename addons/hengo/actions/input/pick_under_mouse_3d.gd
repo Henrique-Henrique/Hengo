@@ -28,8 +28,8 @@ func get_default_phase() -> StringName:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Collider', type = 'Object', id = &'collider', doc = 'Where to store the collider found under the mouse.'},
-		{name = 'Point', type = 'Vector3', id = &'point', doc = 'Where to store the world position the ray touched.'}
+		{name = 'Collider', type = 'Object', id = &'collider', branch = &'hit', doc = 'Where to store the collider found under the mouse.'},
+		{name = 'Point', type = 'Vector3', id = &'point', branch = &'hit', doc = 'Where to store the world position the ray touched.'}
 	]
 
 

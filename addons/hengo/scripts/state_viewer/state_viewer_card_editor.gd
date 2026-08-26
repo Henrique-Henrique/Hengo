@@ -100,48 +100,6 @@ func open_slot(_action: HenSaveAction, _slot: Dictionary, _rect: Rect2) -> void:
 	)
 
 
-# the same write-only slot the inspector builds for an output: a destination, with
-# no literal editor and no expression
-func open_output(_action: HenSaveAction, _output_id: StringName, _rect: Rect2) -> void:
-	if _reject() or not _action:
-		return
-
-	var macro: HenSaveMacro = HenActionsPanel.find_macro(_action.macro_id)
-
-	if not macro:
-		return
-
-	for output: HenSaveParam in macro.outputs:
-		if output.id != _output_id:
-			continue
-
-		is_editing = true
-
-		var slot_param: HenSaveParam = HenSaveParam.create({
-			name = output.name,
-			type = str(output.type),
-			id = str(output.id),
-			lvalue = true,
-			optional = true
-		})
-
-		HenInspector.edit_slot(
-			_action,
-			{
-				param = slot_param,
-				bind_store = _action.output_bindings,
-				bind_key = str(output.id),
-				macro_params = {},
-				quick_var = true,
-				indent = 0
-			},
-			output.name,
-			_anchored_opts(_rect, Vector2(300, 0))
-		)
-
-		return
-
-
 # the pin is where a value comes from, so it offers the actions that produce one
 # of its type. the same picker the inspector's producer button opens
 func open_producer(_slot: Dictionary, _rect: Rect2) -> void:

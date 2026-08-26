@@ -62,11 +62,18 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		if instance.get_has_body():
 			body = _substitute_loop_body(_save_data, _state, body, action, _phase, _loop_depth)
 
+		var emitted: String = body.strip_edges(false, true)
+
+		# a producer read only through a wire emits its value at the reader, so its own
+		# body is empty and must not leave a blank line behind
+		if emitted.is_empty():
+			continue
+
 		# lights the action's row when execution reaches it, gone in release builds
 		if debug:
 			tokens.append(_action_trace(_save_data, action))
 
-		for line: String in body.strip_edges(false, true).split('\n'):
+		for line: String in emitted.split('\n'):
 			tokens.append(line)
 
 	return tokens
@@ -139,12 +146,22 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 	if not broken_inline.is_empty():
 		return broken_inline
 
+	var broken_wire: String = _first_broken_wire(_save_data, _action)
+
+	if not broken_wire.is_empty():
+		return broken_wire
+
+	var out_of_scope: String = _first_out_of_scope_wire(_save_data, _state, _action)
+
+	if not out_of_scope.is_empty():
+		return out_of_scope
+
 	var branches: Array = _instance.get_flow_outputs()
 
 	# a pure producer whose only content is its outputs contributes nothing when
 	# none is stored: the phase method would be left empty and fail to parse
 	if not _branch_is_wired(_save_data, _action, branches):
-		if _produces_nothing(_save_data, _action, _instance, phase):
+		if _produces_nothing(_save_data, _action, _instance, phase) and not is_wire_source(_save_data, _action):
 			return 'no output stored'
 
 		if branches.is_empty() or _branches_are_optional(branches):
@@ -496,6 +513,9 @@ static func _prime_instance(
 	for key: Variant in _action.input_actions:
 		_instance.bound_inputs[str(key)] = true
 
+	for key: Variant in _action.input_wires:
+		_instance.bound_inputs[str(key)] = true
+
 	_instance.nested_action_count = 0
 
 	for list: Array in nested_lists(_action):
@@ -606,25 +626,30 @@ static func _substitute_outputs(_save_data: HenSaveData, _body: String, _action:
 
 	for output: Dictionary in _instance.get_outputs():
 		var id: String = str(output.get('id', ''))
-		var lvalue: String = _output_lvalue(_save_data, _action, id)
+		var temp: String = wire_temp_name(_save_data, _action, _instance, id)
 
-		# bound: the token line becomes `store = rhs`; unbound: drop the whole line
-		if not lvalue.is_empty():
-			body = HenActionCode._inject_placeholder(body, 'out:' + id, lvalue + ' = ' + _output_rhs(_instance, id))
-		else:
+		# the macro already put the token where the value is reachable, so parking it
+		# right here is what puts the local in the scope the readers run in
+		if temp.is_empty():
 			body = _drop_placeholder_line(body, 'out:' + id)
+		else:
+			body = HenActionCode._inject_placeholder(
+				body, 'out:' + id, 'var ' + temp + ' = ' + _output_rhs(_instance, id)
+			)
 
 	return body
 
 
-# assignable target an output writes to, empty when nothing usable is bound. the
-# picker only offers a variable or a property, both of which bind_expression turns
-# into an lvalue (_ref.<var> / _ref.<prop>); a call-shaped source (randf()) is
-# refused here too, since `randf() = x` does not compile
-static func _output_lvalue(_save_data: HenSaveData, _action: HenSaveAction, _id: String) -> String:
-	var lvalue: String = HenUtils.bind_expression(_save_data, str(_action.output_bindings.get(_id, '')))
+# a value already parked in a local is read as many times as needed for free, one
+# that is recomputed at every read has to be parked once two steps read it
+static func wire_temp_name(_save_data: HenSaveData, _action: HenSaveAction, _instance: HenScriptMacroBase, _output: String) -> String:
+	if wire_reader_count(_save_data, StringName(str(_action.id)), _output) < 2:
+		return ''
 
-	return '' if lvalue.contains('(') else lvalue
+	if _output_rhs(_instance, _output).replace('{{VCNODE_ID}}', 'x').strip_edges().is_valid_identifier():
+		return ''
+
+	return 'wire_{{VCNODE_ID}}_' + _output
 
 
 # the right side of an output assignment, from the macro's get_output_<id>()
@@ -1004,6 +1029,23 @@ static func _first_broken_binding(_save_data: HenSaveData, _action: HenSaveActio
 
 
 # a fault deep in the subtree takes the top action down, instead of emitting half of it
+# a wire to a step that no longer exists would emit a silent null
+static func _first_broken_wire(_save_data: HenSaveData, _action: HenSaveAction) -> String:
+	for key: Variant in _action.input_wires:
+		var producer: HenSaveAction = wire_producer(_save_data, _action.input_wires[key])
+
+		if not producer:
+			return 'input "' + str(key) + '" reads a step that no longer exists'
+
+		var instance: HenScriptMacroBase = _instance_for(_save_data, producer)
+		var output: String = str((_action.input_wires[key] as Dictionary).get('output', ''))
+
+		if not instance or not instance.has_method('get_output_' + output):
+			return 'input "' + str(key) + '" reads an output that step does not have'
+
+	return ''
+
+
 static func _first_broken_inline(_save_data: HenSaveData, _action: HenSaveAction) -> String:
 	for key: Variant in _action.input_actions:
 		var child: HenSaveAction = _inline_child(_action.input_actions[key])
@@ -1049,7 +1091,7 @@ static func _first_unbound_required(_save_data: HenSaveData, _action: HenSaveAct
 
 		# a producer wired into the slot is a real source, it just cannot be the left
 		# side of an assignment, and an expression is neither
-		if _action.input_actions.has(key):
+		if _action.input_actions.has(key) or _action.input_wires.has(key):
 			if is_lvalue:
 				return name
 
@@ -1173,8 +1215,10 @@ static func _substitute_inputs(_save_data: HenSaveData, _body: String, _action: 
 		var key: String = str(input_id)
 		var literal: String
 
-		# priority: inline action > expression > binding > literal
-		if _action.input_actions.has(key):
+		# priority: wire > inline action > expression > binding > literal
+		if _action.input_wires.has(key):
+			literal = '(' + _emit_wire(_save_data, _action.input_wires[key]) + ')'
+		elif _action.input_actions.has(key):
 			literal = '(' + _emit_inline_action(_save_data, _action.input_actions[key]) + ')'
 		elif _action.input_expressions.has(key):
 			literal = '(' + _resolve_expression(_save_data, _action.input_expressions[key]) + ')'
@@ -1199,6 +1243,187 @@ static func _substitute_inputs(_save_data: HenSaveData, _body: String, _action: 
 		body = HenActionCode._inject_placeholder(body, key, literal)
 
 	return body
+
+
+# the producer's id feeds {{VCNODE_ID}}, so the local this reads is the one that step
+# declared and not a fresh one
+static func _emit_wire(_save_data: HenSaveData, _wire: Variant) -> String:
+	var producer: HenSaveAction = wire_producer(_save_data, _wire)
+
+	if not producer:
+		return 'null'
+
+	var instance: HenScriptMacroBase = _instance_for(_save_data, producer)
+
+	if not instance:
+		return 'null'
+
+	var output: String = str((_wire as Dictionary).get('output', ''))
+	var temp: String = wire_temp_name(_save_data, producer, instance, output)
+	var rhs: String = temp
+
+	# the parked local has no placeholders of its own beyond the producer's id
+	if temp.is_empty():
+		rhs = _substitute_inputs(_save_data, _output_rhs(instance, output), producer, instance)
+
+	rhs = HenActionCode.process_script_macro_body(rhs, false, producer.id)
+
+	return rhs.strip_edges()
+
+
+# a wire may only read a value that already ran on the path reaching it: same phase,
+# earlier in the order, and inside the scope that value lives in
+static func _first_out_of_scope_wire(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction) -> String:
+	if _action.input_wires.is_empty():
+		return ''
+
+	var index: Dictionary = _index_state_actions(_save_data, _state)
+	var reader: Dictionary = index.get(StringName(str(_action.id)), {})
+
+	if reader.is_empty():
+		return ''
+
+	for key: Variant in _action.input_wires:
+		var wire: Dictionary = _action.input_wires[key] as Dictionary
+		var producer: HenSaveAction = wire_producer(_save_data, wire)
+		var written: Dictionary = index.get(StringName(str(producer.id)), {}) if producer else {}
+		var where: String = 'input "' + str(key) + '" reads '
+
+		if written.is_empty():
+			return where + 'a step of another state'
+
+		if StringName(str(written.phase)) != StringName(str(reader.phase)):
+			return where + 'a step that runs on ' + str(written.phase) + ', not on ' + str(reader.phase)
+
+		if int(reader.order) < int(written.order):
+			return where + 'a step that only runs after it'
+
+		var instance: HenScriptMacroBase = _instance_for(_save_data, producer)
+		var branch: String = str(instance.output_branch(StringName(str(wire.get('output', ''))))) if instance else ''
+		var chain: Array = written.chain as Array
+		var scope: String = str(chain[chain.size() - 1])
+
+		if branch == str(HenFlowGraphTypes.BODY_PIN):
+			scope = str(producer.id) + ':body'
+		elif not branch.is_empty():
+			scope = str(producer.id) + ':branch:' + branch
+
+		if (reader.chain as Array).has(scope):
+			continue
+
+		if branch == str(HenFlowGraphTypes.BODY_PIN):
+			return where + 'a value that only exists inside the loop it belongs to'
+
+		if not branch.is_empty():
+			return where + 'a value that only exists inside the ' + branch + ' branch'
+
+		return where + 'a value that does not exist on this path'
+
+	return ''
+
+
+# every step of a state keyed by id, with the order it is emitted in, the phase it
+# ends up running at and the containers it sits inside
+static func _index_state_actions(_save_data: HenSaveData, _state: HenSaveState) -> Dictionary:
+	var index: Dictionary = {}
+
+	_index_action_list(_save_data.get_state_actions(_state.id), '', [], &'', index, [0])
+
+	return index
+
+
+static func _index_action_list(_actions: Array, _container: String, _parents: Array, _phase: StringName, _index: Dictionary, _order: Array) -> void:
+	var chain: Array = _parents.duplicate()
+
+	chain.append(_container)
+
+	for action: HenSaveAction in _actions:
+		var phase: StringName = _phase if not str(_phase).is_empty() else StringName(str(action.phase))
+
+		_index[StringName(str(action.id))] = {order = _order[0], phase = phase, chain = chain}
+		_order[0] += 1
+
+		_index_action_list(action.body_actions, str(action.id) + ':body', chain, phase, _index, _order)
+
+		for key: Variant in action.branch_actions:
+			_index_action_list(
+				branch_steps(action, str(key)), str(action.id) + ':branch:' + str(key), chain, phase, _index, _order
+			)
+
+
+# a step whose only content is its outputs still earns its place when a wire reads
+# it, so the reverse lookup runs before calling it dead
+static func is_wire_source(_save_data: HenSaveData, _action: HenSaveAction) -> bool:
+	return wire_reader_count(_save_data, StringName(str(_action.id)), '') > 0
+
+
+# how many steps read one output of a step; an empty output counts them all
+static func wire_reader_count(_save_data: HenSaveData, _id: StringName, _output: String) -> int:
+	var total: int = 0
+
+	for state_id: Variant in _save_data.state_actions:
+		total += _count_wire_readers(_save_data.state_actions[state_id], _id, _output)
+
+	return total
+
+
+static func _count_wire_readers(_actions: Array, _id: StringName, _output: String) -> int:
+	var total: int = 0
+
+	for action: HenSaveAction in _actions:
+		for key: Variant in action.input_wires:
+			var wire: Variant = action.input_wires[key]
+
+			if not wire is Dictionary:
+				continue
+
+			var spec: Dictionary = wire as Dictionary
+
+			if StringName(str(spec.get('action_id', ''))) != _id:
+				continue
+
+			if _output.is_empty() or str(spec.get('output', '')) == _output:
+				total += 1
+
+		for list: Array in nested_lists(action):
+			total += _count_wire_readers(list, _id, _output)
+
+	return total
+
+
+static func wire_producer(_save_data: HenSaveData, _wire: Variant) -> HenSaveAction:
+	if not _wire is Dictionary:
+		return null
+
+	return find_action(_save_data, StringName(str((_wire as Dictionary).get('action_id', ''))))
+
+
+# any step of the script by id, loop bodies and branch steps included
+static func find_action(_save_data: HenSaveData, _id: StringName) -> HenSaveAction:
+	if str(_id).is_empty():
+		return null
+
+	for state_id: Variant in _save_data.state_actions:
+		var found: HenSaveAction = _find_action_in(_save_data.state_actions[state_id], _id)
+
+		if found:
+			return found
+
+	return null
+
+
+static func _find_action_in(_actions: Array, _id: StringName) -> HenSaveAction:
+	for action: HenSaveAction in _actions:
+		if StringName(str(action.id)) == _id:
+			return action
+
+		for list: Array in nested_lists(action):
+			var found: HenSaveAction = _find_action_in(list, _id)
+
+			if found:
+				return found
+
+	return null
 
 
 # the child's own id feeds {{VCNODE_ID}}, so a nested producer never collides
@@ -1293,7 +1518,7 @@ static func effective_type(_save_data: HenSaveData, _action: HenSaveAction, _inp
 	if type_from.is_empty():
 		return declared
 
-	var bind: String = str(_action.input_bindings.get(type_from, _action.output_bindings.get(type_from, '')))
+	var bind: String = str(_action.input_bindings.get(type_from, ''))
 	if bind.is_empty():
 		return declared
 

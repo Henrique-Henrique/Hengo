@@ -42,7 +42,7 @@ func get_inputs() -> Array[Dictionary]:
 
 func get_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Previous', type = 'Variant', id = &'previous', doc = 'The value held until this change.'}
+		{name = 'Previous', type = 'Variant', id = &'previous', branch = &'changed', doc = 'The value held until this change.'}
 	]
 
 
