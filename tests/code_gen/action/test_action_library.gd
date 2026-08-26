@@ -48,7 +48,6 @@ func test_preview_calls_out_an_unset_target() -> void:
 # --- tween ------------------------------------------------------------------
 
 
-# fire-and-forget: one create_tween() call animating the owner's own property
 func test_tween_move_emits_a_property_tween() -> void:
 	HenScriptMacroLoader.load_native_actions()
 
@@ -56,12 +55,54 @@ func test_tween_move_emits_a_property_tween() -> void:
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('_ref.create_tween().tween_property(_ref, "position",')
+	assert_str(code).contains('= _ref.create_tween()')
+	assert_str(code).contains('.tween_property(_ref, "position",')
 
 	var script := GDScript.new()
 	script.source_code = code
 
 	assert_int(script.reload()).is_equal(OK)
+
+
+# a one-way animation stops where it was cancelled, which is a fine place to stop
+func test_a_cancelled_one_way_tween_is_not_run_out() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'tween_move'), &'enter')
+
+	assert_str(HenTest.get_all_code()).not_contains('custom_step')
+
+
+# a swap left mid fade keeps the old track at a level nobody asked for, a fade and
+# a typewriter leave the same kind of half state, so all of them are run out
+func test_the_animated_actions_that_run_out_on_cancel() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	for id: String in ['flash', 'camera_shake', 'play_music', 'type_text', 'fade_audio']:
+		assert_bool(_tween_macro(id).finishes_on_cancel()).override_failure_message(id).is_true()
+
+	for id: String in ['tween_move', 'tween_scale', 'tween_color', 'tween_property']:
+		assert_bool(_tween_macro(id).finishes_on_cancel()).override_failure_message(id).is_false()
+
+
+func _tween_macro(_id: String) -> HenActionTweenBase:
+	var macro: HenSaveMacro = HenActionsPanel.find_macro(StringName(_id))
+
+	return (load(macro.script_path) as GDScript).new() as HenActionTweenBase
+
+
+# a round trip effect ends on the resting value, so cancelling it runs it out
+# instead of parking the node on the flash color
+func test_a_cancelled_flash_is_run_out_with_its_branch_muted() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	_add_action(HenActionsPanel.find_macro(&'flash'), &'enter')
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('finished.get_connections()')
+	assert_str(code).contains('.custom_step(')
+	assert_str(code).contains('.kill()')
 
 
 # fade drives the sub-property of modulate, not a whole Color
@@ -203,15 +244,103 @@ func test_get_nearest_runs_inside_a_for_each() -> void:
 # --- an animated action reporting its end -----------------------------------
 
 
-# no branch wired: the plain one-liner it always was, with nothing declared, so
-# the action still fits inside a loop body
-func test_an_animated_action_stays_a_one_liner_without_its_branch() -> void:
+# no branch wired: there is no end to report, so no signal is hooked
+func test_an_animated_action_hooks_nothing_without_its_branch() -> void:
 	_add_action(_register(FIX_TWEEN), &'enter')
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('_ref.create_tween().tween_property(_ref, "position"')
+	assert_str(code).contains('.tween_property(_ref, "position"')
 	assert_str(code).not_contains('finished.connect')
+
+
+# a loop starts one animation per iteration, so a single slot would only ever hold
+# the last of them and the teardown would leave the others running
+func test_an_animated_action_in_a_loop_keeps_every_tween() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'repeat'), &'enter')
+
+	loop.body_actions.append(_nested(&'tween_move'))
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('Array[Tween] = []')
+	assert_str(code).contains('.append(')
+	assert_str(code).contains('.clear()')
+	assert_str(code).not_contains('# hengo:')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# finished fires from inside the tween's own step, and Tween refuses custom_step()
+# from there, so the slot is released before the branch can leave the state
+func test_a_finished_animation_releases_its_slot_before_the_branch() -> void:
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'done'
+
+	var action: HenSaveAction = _add_action(_register(FIX_TWEEN), &'enter')
+
+	action.branches['finished'] = {state_id = target.id, label = ''}
+
+	var code: String = HenTest.get_all_code()
+	var connect_at: int = code.find('finished.connect(func() -> void:')
+	var release_at: int = code.find(' = null', connect_at)
+	var branch_at: int = code.find('change_state("done")', connect_at)
+
+	assert_int(connect_at).is_greater(-1)
+	assert_int(release_at).is_greater(connect_at)
+	assert_int(branch_at).is_greater(release_at)
+
+
+func test_a_finished_animation_in_a_loop_drops_itself_from_the_list() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'done'
+
+	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'repeat'), &'enter')
+	var mover: HenSaveAction = _nested(&'tween_move')
+
+	mover.branches['finished'] = {state_id = target.id, label = ''}
+	loop.body_actions.append(mover)
+
+	assert_str(HenTest.get_all_code()).contains('.erase(')
+
+
+# a branch runs at the depth its action does; counting it as a loop would declare
+# the list while the body still assigns the single slot
+func test_an_animated_action_in_a_branch_keeps_one_tween() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var gate: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'compare'), &'enter')
+
+	gate.branch_actions['true'] = [_nested(&'tween_move')] as Array[HenSaveAction]
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains(': Tween = null')
+	assert_str(code).not_contains('Array[Tween]')
+
+	var script := GDScript.new()
+	script.source_code = code
+
+	assert_int(script.reload()).is_equal(OK)
+
+
+# the per-frame guard asks whether the last animation ended, and one animation per
+# item on every frame has no answer to that
+func test_an_animated_action_per_frame_in_a_loop_is_refused() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var loop: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'repeat'), &'update')
+
+	loop.body_actions.append(_nested(&'tween_move'))
+
+	assert_str(HenTest.get_all_code()).contains('has to run on enter, not every frame')
 
 
 # wired: the tween drives the transition from its own signal, and exit kills it
@@ -231,18 +360,18 @@ func test_an_animated_action_branches_from_the_tween_signal() -> void:
 	assert_str(code).contains('.kill()')
 
 
-# an animated action on enter is the one line it always was: nothing declared,
-# nothing torn down, so it stays the cheapest thing it can be
-func test_an_animated_action_on_enter_declares_nothing() -> void:
+# on enter the slot is kept and torn down like anywhere else, but the restart
+# guard belongs to a per-frame phase and must not show up here
+func test_an_animated_action_on_enter_keeps_its_tween_without_the_guard() -> void:
 	HenScriptMacroLoader.load_native_actions()
 
 	_add_action(HenActionsPanel.find_macro(&'tween_move'), &'enter')
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('_ref.create_tween().tween_property(_ref, "position"')
+	assert_str(code).contains('= _ref.create_tween()')
+	assert_str(code).contains('.kill()')
 	assert_str(code).not_contains('is_running()')
-	assert_str(code).not_contains('.kill()')
 
 
 # per frame it keeps the tween in a slot and only starts again once the last one

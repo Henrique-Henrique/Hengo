@@ -439,8 +439,7 @@ static func _build_expression(_save_data: HenSaveData, _source: Dictionary) -> V
 	return expr
 
 
-# a branch may run steps, transition, or both; "actions" holds the steps and the
-# transition keys stay the ones _build_branch reads
+# "actions" holds the steps a branch runs before its transition
 static func _apply_branches(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _macro: HenSaveMacro, _branches: Dictionary, _all_scripts: Dictionary) -> String:
 	for raw_key: Variant in _branches:
 		var key: String = str(raw_key)

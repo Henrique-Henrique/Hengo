@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.'
+	return 'Shakes a camera for a moment and settles it back, the punch a screen gets on a hit or an explosion. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs. Leaving the state before it ends settles the camera back to center, so it never stays off to one side.'
 
 
 func get_display_name() -> String:
@@ -16,6 +16,10 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'vibrate'
+
+
+func finishes_on_cancel() -> bool:
+	return true
 
 
 func get_inputs() -> Array[Dictionary]:

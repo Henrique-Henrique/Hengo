@@ -18,6 +18,9 @@ var nested_action_count: int = 0
 # the phase the body is being emitted at: a nested action runs at the phase of the
 # loop holding it, not the one it was stored with
 var action_phase: StringName = &'update'
+# how many loop bodies wrap the action being generated, zero at the top level of a
+# phase. anything above zero runs many times in one frame
+var loop_depth: int = 0
 
 
 # literal an input holds on the action being generated

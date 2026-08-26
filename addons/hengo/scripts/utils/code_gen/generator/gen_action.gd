@@ -38,7 +38,7 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 			tokens.append(_unresolved_token(action, 'could not instance macro'))
 			continue
 
-		_prime_instance(_save_data, instance, action, _phase if not _phase.is_empty() else StringName(str(action.phase)))
+		_prime_instance(_save_data, instance, action, _phase if not _phase.is_empty() else StringName(str(action.phase)), _loop_depth)
 
 		var reason: String = skip_reason(_save_data, _state, action, instance, _phase, _loop_depth)
 
@@ -219,7 +219,7 @@ static func action_error(
 
 	var phase: StringName = _phase if not _phase.is_empty() else StringName(str(_action.phase))
 
-	_prime_instance(_save_data, instance, _action, phase)
+	_prime_instance(_save_data, instance, _action, phase, _loop_depth)
 
 	return skip_reason(_save_data, _state, _action, instance, phase, _loop_depth)
 
@@ -310,15 +310,17 @@ static func _collect_emitted(
 ) -> void:
 	for action: HenSaveAction in _actions:
 		var phase: StringName = _phase if not _phase.is_empty() else StringName(str(action.phase))
-		var instance: HenScriptMacroBase = _instance_for(_save_data, action, phase)
+		var instance: HenScriptMacroBase = _instance_for(_save_data, action, phase, _depth)
 
 		if not instance or not skip_reason(_save_data, _state, action, instance, phase, _depth).is_empty():
 			continue
 
 		_out.append({action = action, instance = instance})
 
-		for list: Array in nested_lists(action):
-			_collect_emitted(_save_data, _state, list, phase, _depth + 1, _out)
+		_collect_emitted(_save_data, _state, action.body_actions, phase, _depth + 1, _out)
+
+		for key: Variant in action.branch_actions:
+			_collect_emitted(_save_data, _state, branch_steps(action, str(key)), phase, _depth, _out)
 
 
 # class-level declarations the actions of a state need, from each macro's
@@ -451,7 +453,7 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 
 
 # macro instance behind an action, or null when it can't be resolved
-static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction, _phase: StringName = &'') -> HenScriptMacroBase:
+static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction, _phase: StringName = &'', _loop_depth: int = 0) -> HenScriptMacroBase:
 	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
 
 	if not macro or not FileAccess.file_exists(macro.script_path):
@@ -460,7 +462,7 @@ static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction, _phas
 	var instance: HenScriptMacroBase = _load_instance(macro)
 
 	if instance:
-		_prime_instance(_save_data, instance, _action, _phase)
+		_prime_instance(_save_data, instance, _action, _phase, _loop_depth)
 
 	return instance
 
@@ -471,10 +473,12 @@ static func _prime_instance(
 	_save_data: HenSaveData,
 	_instance: HenScriptMacroBase,
 	_action: HenSaveAction,
-	_phase: StringName = &''
+	_phase: StringName = &'',
+	_loop_depth: int = 0
 ) -> void:
 	_instance.target_class = _dispatch_class(_save_data, _instance, _action)
 	_instance.action_phase = _phase if not _phase.is_empty() else StringName(str(_action.phase))
+	_instance.loop_depth = _loop_depth
 	_instance.input_values = {}
 	_instance.bound_inputs = {}
 

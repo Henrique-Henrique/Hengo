@@ -8,13 +8,17 @@ class_name HenActionTweenBase extends HenScriptMacroBase
 # lives outside actions/ on purpose — the loader scans that folder and would take
 # this abstract base for a macro.
 #
-# on enter it stays the one line it always was, with nothing declared. on a
-# per-frame phase the tween is kept in a slot and only started again once the last
-# one finished, so the effect repeats while the state runs instead of stacking a
-# new animation every frame
+# without the kept slot a second run stacks a new animation over the live one and
+# reads the resting value off a property already mid animation. on a per-frame
+# phase the body also waits for the last one to finish, so the effect repeats
+# while the state runs instead of starting one every frame.
+# inside a loop body one animation is started per iteration, so the slot is a list
+# there and the teardown walks it
 
 
 const FINISH_SLOT: StringName = &'finished'
+# longer than any animation, so one step lands on the last value of the tween
+const CANCEL_STEP: float = 9999.0
 
 
 func get_flow_inputs() -> Array[Dictionary]:
@@ -40,18 +44,29 @@ func get_flow_outputs() -> Array[Dictionary]:
 	]
 
 
-# the slot is what the branch reads on finish and what a per-frame phase checks
-# before starting again. an enter body that reports nothing declares nothing
+# the per-frame guard asks whether the last animation ended, and inside a loop that
+# question has no answer: the body runs once per item on every single frame
+func get_validation_error() -> String:
+	if in_loop() and per_frame():
+		return 'an animation inside a loop has to run on enter, not every frame'
+
+	return ''
+
+
 func get_script_base() -> String:
-	return 'var tween_{{VCNODE_ID}}: Tween = null' if keeps_tween() else ''
+	if in_loop():
+		return 'var tweens_{{VCNODE_ID}}: Array[Tween] = []'
+
+	return 'var tween_{{VCNODE_ID}}: Tween = null'
 
 
 func get_flow_teardown() -> String:
-	if not keeps_tween():
-		return ''
+	if not in_loop():
+		return cancel_lines('tween_{{VCNODE_ID}}', '')
 
-	return 'if tween_{{VCNODE_ID}} and tween_{{VCNODE_ID}}.is_valid():\n' \
-		+ '\ttween_{{VCNODE_ID}}.kill()'
+	return 'for t_{{VCNODE_ID}}: Tween in tweens_{{VCNODE_ID}}:\n' \
+		+ cancel_lines('t_{{VCNODE_ID}}', '\t') + '\n' \
+		+ 'tweens_{{VCNODE_ID}}.clear()'
 
 
 func reports_finish() -> bool:
@@ -62,41 +77,77 @@ func per_frame() -> bool:
 	return action_phase == &'update' or action_phase == &'physics'
 
 
-func keeps_tween() -> bool:
-	return reports_finish() or per_frame()
+func in_loop() -> bool:
+	return loop_depth > 0
+
+
+# true when the last value of the tween is the only sane place to stop
+func finishes_on_cancel() -> bool:
+	return false
+
+
+# running the animation out fires finished, so the handlers go before the step
+func cancel_lines(_name: String, _indent: String) -> String:
+	var out: String = _indent + 'if ' + _name + ' and ' + _name + '.is_valid():\n'
+
+	if finishes_on_cancel():
+		out += _indent + '\tfor con_{{VCNODE_ID}}: Dictionary in ' + _name + '.finished.get_connections():\n' \
+			+ _indent + '\t\t' + _name + '.finished.disconnect(con_{{VCNODE_ID}}.callable)\n' \
+			+ _indent + '\t' + _name + '.custom_step(' + str(CANCEL_STEP) + ')\n'
+
+	return out + _indent + '\t' + _name + '.kill()'
+
+
+# where a created tween is put so the teardown can reach it
+func keep_line(_local: String) -> String:
+	if in_loop():
+		return 'tweens_{{VCNODE_ID}}.append(' + _local + ')'
+
+	return 'tween_{{VCNODE_ID}} = ' + _local
+
+
+# an animation that ended is no longer held: the branch below may leave the state,
+# and the teardown cannot step a tween from inside that tween's own step
+func release_line(_local: String) -> String:
+	if in_loop():
+		return 'tweens_{{VCNODE_ID}}.erase(' + _local + ')'
+
+	return 'tween_{{VCNODE_ID}} = null'
+
+
+func connect_line(_local: String) -> String:
+	return _local + '.finished.connect(func() -> void:\n' \
+		+ '\t' + release_line(_local) + '\n' \
+		+ '\t{{finished}}\n' \
+		+ '\t)'
 
 
 # the one-tween case: _chain is what is called on the tween itself, such as
-# tween_property(...). with nothing to keep it stays the plain one-liner
+# tween_property(...)
 func start_tween(_chain: String) -> String:
-	if not keeps_tween():
-		return '_ref.create_tween().' + _chain
+	var local: String = 't_{{VCNODE_ID}}' if in_loop() else 'tween_{{VCNODE_ID}}'
+	var out: String = ('var ' if in_loop() else '') + local + ' = _ref.create_tween()\n' \
+		+ local + '.' + _chain
 
-	return 'tween_{{VCNODE_ID}} = _ref.create_tween()\n' \
-		+ 'tween_{{VCNODE_ID}}.' + _chain \
-		+ ('\n' + finish_hook('tween_{{VCNODE_ID}}') if reports_finish() else '')
+	if in_loop():
+		out += '\n' + keep_line(local)
+
+	if reports_finish():
+		out += '\n' + connect_line(local)
+
+	return out
 
 
 # the many-tweens case: an action that already built its own tween hands the name
 # over. the guard covers a path that built none
 func finish_hook(_local: String) -> String:
-	if not keeps_tween():
-		return ''
+	var lines: String = 'if ' + _local + ':\n' \
+		+ '\t' + keep_line(_local)
 
-	var own: bool = _local == 'tween_{{VCNODE_ID}}'
-	var lines: String = 'if ' + _local + ':\n'
+	if reports_finish():
+		lines += '\n\t' + connect_line(_local).replace('\n', '\n\t')
 
-	if not own:
-		lines += '\ttween_{{VCNODE_ID}} = ' + _local + '\n'
-
-	if not reports_finish():
-		# nothing to report: the slot only has to survive the frame that filled it
-		return '' if own else lines.trim_suffix('\n')
-
-	return lines \
-		+ '\ttween_{{VCNODE_ID}}.finished.connect(func() -> void:\n' \
-		+ '\t\t{{finished}}\n' \
-		+ '\t\t)'
+	return lines
 
 
 # a per-frame phase must not stack a new animation every frame, so the body only

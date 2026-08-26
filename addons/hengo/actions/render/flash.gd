@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Briefly tints a node toward a color and back, the flash a character shows when it takes damage. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.'
+	return 'Briefly tints a node toward a color and back, the flash a character shows when it takes damage. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs. Leaving the state before it ends puts the color back, so the node never stays on the flash color.'
 
 
 func get_display_name() -> String:
@@ -20,6 +20,10 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'sparkles'
+
+
+func finishes_on_cancel() -> bool:
+	return true
 
 
 func get_inputs() -> Array[Dictionary]:

@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Swaps the track of a music player, fading the old one out and the new one back in. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs.'
+	return 'Swaps the track of a music player, fading the old one out and the new one back in. Wire Finished and the flow moves on by itself when it ends, with no timer of your own. On enter it plays once; on update or physics it starts again as soon as the last one ended, so it keeps repeating while the state runs. Leaving the state before it ends finishes the swap, so the new track never stays silent with the old one loaded.'
 
 
 func get_display_name() -> String:
@@ -16,6 +16,10 @@ func get_display_name() -> String:
 
 func get_icon() -> String:
 	return 'music'
+
+
+func finishes_on_cancel() -> bool:
+	return true
 
 
 func get_inputs() -> Array[Dictionary]:
