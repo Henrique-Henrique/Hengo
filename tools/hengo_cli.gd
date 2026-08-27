@@ -7,11 +7,12 @@ extends SceneTree
 # referenced by its macro id, never redeclared.
 # usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name]
 #        godot --headless -s tools/hengo_cli.gd -- --list-actions [--class=Node2D]
-#        godot --headless -s tools/hengo_cli.gd -- --export-actions [out.json]
+#        godot --headless -s tools/hengo_cli.gd -- --export-actions [out.json] [--with-code]
+#        godot --headless -s tools/hengo_cli.gd -- --preview <action_id>
 
 
 const HENGO_ROOT_SCENE: String = 'res://addons/hengo/scenes/hengo_root.tscn'
-const USAGE: String = 'usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name] | --list-actions [--class=Node2D] | --export-actions [out.json]'
+const USAGE: String = 'usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name] | --list-actions [--class=Node2D] | --export-actions [out.json] [--with-code] | --preview <action_id>'
 # the catalog is not committed here, it is built straight into the docs site checkout
 const FRONT_ACTIONS_PATH: String = '../HengoFront/src/data/actions.json'
 # codegen marks an action it could not emit with this prefix
@@ -36,10 +37,22 @@ func _initialize() -> void:
 		quit(0)
 		return
 
+	if user_args[0] == '--preview':
+		var preview_err: String = _preview(user_args[1] if user_args.size() > 1 else '')
+		root_scene.free()
+
+		if preview_err.is_empty():
+			quit(0)
+		else:
+			_fail(preview_err)
+
+		return
+
 	if user_args[0] == '--export-actions':
-		var explicit_path: bool = user_args.size() > 1
-		var out_path: String = user_args[1] if explicit_path else _default_actions_path()
-		var export_err: String = _export_actions(out_path, explicit_path)
+		var given_path: String = _positional(user_args)
+		var explicit_path: bool = not given_path.is_empty()
+		var out_path: String = given_path if explicit_path else _default_actions_path()
+		var export_err: String = _export_actions(out_path, explicit_path, user_args.has('--with-code'))
 		root_scene.free()
 
 		if export_err.is_empty():
@@ -155,8 +168,30 @@ func _default_actions_path() -> String:
 	return ProjectSettings.globalize_path('res://').path_join(FRONT_ACTIONS_PATH).simplify_path()
 
 
+# prints everything about one action, the emitted code included
+func _preview(_id: String) -> String:
+	if _id.is_empty():
+		return USAGE
+
+	for macro: HenSaveMacro in HenHengoActions.pool():
+		if str(macro.id) == _id:
+			print(HenActionEmits.text(macro))
+			return ''
+
+	return 'unknown action "' + _id + '". run --list-actions to see the ids'
+
+
+# first argument that is not a flag, so --with-code can be passed without a path
+func _positional(_args: PackedStringArray) -> String:
+	for index: int in range(1, _args.size()):
+		if not _args[index].begins_with('--'):
+			return _args[index]
+
+	return ''
+
+
 # writes the full actions catalog (categories + actions) as json for the docs site
-func _export_actions(_out_path: String, _create_dirs: bool) -> String:
+func _export_actions(_out_path: String, _create_dirs: bool, _with_code: bool) -> String:
 	var actions: Array = []
 	var present: Dictionary = {}
 
@@ -177,6 +212,12 @@ func _export_actions(_out_path: String, _create_dirs: bool) -> String:
 			has_body = macro.has_body,
 			target_classes = macro.target_classes.map(func(c: StringName) -> String: return str(c)),
 		})
+
+		if _with_code:
+			var entry: Dictionary = actions[-1]
+
+			entry['emits'] = HenActionEmits.of(macro)
+			entry['usage'] = HenActionEmits.usage(macro)
 
 	actions.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a.id < b.id)
 
@@ -348,6 +389,8 @@ func _export_input(_param: HenSaveParam) -> Dictionary:
 		type = str(_param.type),
 		default = _fmt_default(_param.default_value),
 		doc = _param.doc,
+		raw = _param.raw,
+		bind_only = _param.bind_only,
 		lvalue = _param.lvalue,
 		optional = _param.optional,
 		type_from = str(_param.type_from),

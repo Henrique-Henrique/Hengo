@@ -177,6 +177,15 @@ func test_unknown_input_and_branch_are_reported() -> void:
 		.contains('branch "too" is not a flow output (valid: to)')
 
 
+# a raw value is pasted into the script as it stands, so one outside the declared
+# set would only fail at godot parse time
+func test_a_raw_input_refuses_a_value_outside_its_options() -> void:
+	assert_str(_build_one('set_mouse_mode', 'enter', {mode = 'captured'})) \
+		.contains('input "mode": "captured" is not one of')
+
+	assert_str(_build_one('set_mouse_mode', 'enter', {mode = 'MOUSE_MODE_CAPTURED'})).is_empty()
+
+
 # every per-frame action runs on both ticks, so what is left out is the phase an
 # action has no body for at all
 func test_unsupported_phase_is_reported() -> void:

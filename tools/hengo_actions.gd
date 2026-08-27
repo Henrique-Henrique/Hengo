@@ -593,6 +593,11 @@ static func _set_literal(_save_data: HenSaveData, _action: HenSaveAction, _key: 
 	for param: HenSaveParam in _action.inputs:
 		if str(param.id) == _key:
 			if _declared.raw:
+				# a raw value is pasted into the script as it stands, so one outside the
+				# declared set only fails at godot parse time
+				if not _declared.options.is_empty() and not _declared.options.has(str(_value)):
+					return 'input "' + _key + '": "' + str(_value) + '" is not one of ' + ', '.join(_declared.options)
+
 				param.default_value = _value
 				return ''
 
