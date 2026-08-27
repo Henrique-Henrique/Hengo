@@ -14,7 +14,8 @@ const BIND_PATH_PREFIX: String = 'path:'
 # a code must be atomic or parenthesized: it substitutes mid-expression.
 # a source with `key` takes an argument and is stored as "key:argument", its code
 # coming from code_format; label_format defaults to "name (argument)"
-# arg_picker names the menu that fills the argument instead of a text field
+# arg_picker names the menu that fills the argument instead of a text field, and
+# arg_example is an argument the code is known to compile with
 const NATIVE_SOURCES: Array[Dictionary] = [
 	{
 		name = 'Self (this node)',
@@ -50,6 +51,17 @@ const NATIVE_SOURCES: Array[Dictionary] = [
 		key = 'action_pressed',
 		arg_prompt = 'Input Action',
 		code_format = 'Input.is_action_pressed("{arg}")',
+		type = 'bool',
+		needs_class = &'',
+		global = true
+	},
+	# the key is an engine constant, so it is the one argument that is not quoted
+	{
+		name = 'Key pressed',
+		key = 'key_pressed',
+		arg_prompt = 'Key, such as KEY_SHIFT',
+		arg_example = 'KEY_SHIFT',
+		code_format = 'Input.is_key_pressed({arg})',
 		type = 'bool',
 		needs_class = &'',
 		global = true

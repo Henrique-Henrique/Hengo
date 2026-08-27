@@ -1,8 +1,8 @@
 extends HenActionTestSuite
 
 # covers the emitted-code report behind --preview and --export-actions --with-code,
-# and sweeps the shipped pool for the two mistakes it can now catch: an output with
-# no rhs and a body token that names no slot.
+# and sweeps the shipped pool for what it can now catch: an output with no rhs, a
+# body token that names no slot and an action that emits nothing.
 
 
 func _pool() -> Array:
@@ -77,7 +77,30 @@ func test_usage_json_lists_the_branches() -> void:
 
 
 func test_text_prints_the_options_of_a_picker_input() -> void:
-	assert_str(HenActionEmits.text(_find(&'double_tap'))).contains('options: KEY_SPACE')
+	assert_str(HenActionEmits.text(_find(&'check_key'))).contains('options: KEY_SPACE')
+
+
+# a picker the bodies dispatch on emits another shape, and showing only the default
+# one is what made the wheel read as if polling worked
+func test_a_picker_that_changes_the_code_reports_its_own_shape() -> void:
+	var wheel: Dictionary = {}
+
+	for shape: Dictionary in HenActionEmits.of(_find(&'mouse_button'))[0].option_shapes:
+		if (shape['values'] as Array).has('MOUSE_BUTTON_WHEEL_UP'):
+			wheel = shape
+
+	assert_dict(wheel).is_not_empty()
+	assert_str(str(wheel.input)).is_equal('button')
+	assert_str(str(wheel.code['update'])).not_contains('is_mouse_button_pressed')
+
+	# the two directions are one shape: only the constant pasted into it differs
+	assert_array(wheel['values']).contains(['MOUSE_BUTTON_WHEEL_UP', 'MOUSE_BUTTON_WHEEL_DOWN'])
+
+
+# the key is a token the body never dispatches on, so 56 options are still one shape
+func test_a_picker_the_bodies_never_read_adds_no_shape() -> void:
+	for shape: Dictionary in HenActionEmits.of(_find(&'check_key'))[0].get('option_shapes', []):
+		assert_str(str(shape.input)).is_not_equal('key')
 
 
 # --- pool sweeps ------------------------------------------------------------

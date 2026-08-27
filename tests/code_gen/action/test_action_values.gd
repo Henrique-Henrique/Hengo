@@ -334,7 +334,8 @@ func test_native_sources_compile() -> void:
 
 	for i: int in HenUtils.NATIVE_SOURCES.size():
 		var source: Dictionary = HenUtils.NATIVE_SOURCES[i]
-		var expression: String = HenUtils.native_source_code(source, 'ui_accept')
+		# not every argument is an input action: a key one is an engine constant
+		var expression: String = HenUtils.native_source_code(source, str(source.get('arg_example', 'ui_accept')))
 
 		if not bool(source.global):
 			# a source needing a class Node2D lacks is read off the untyped _ref, so its

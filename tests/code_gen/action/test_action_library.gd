@@ -485,3 +485,81 @@ func test_a_tween_finished_branch_does_not_end_the_phase() -> void:
 
 	assert_int(call_at).is_greater(-1)
 	assert_str(code.substr(call_at, 40)).not_contains('return')
+
+
+# --- input gap batch --------------------------------------------------------
+
+
+# is_mouse_button_pressed never reports a wheel, so picking one has to leave the
+# polling path even though When still says Held
+func test_a_wheel_leaves_the_polling_path() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'swap'
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'mouse_button'), &'update')
+
+	action.branches['true'] = {state_id = target.id, label = ''}
+
+	for param: HenSaveParam in action.inputs:
+		if str(param.id) == 'button':
+			param.default_value = 'MOUSE_BUTTON_WHEEL_UP'
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).not_contains('is_mouse_button_pressed')
+	assert_str(code).contains('event.button_index == MOUSE_BUTTON_WHEEL_UP')
+
+
+func test_a_wheel_refuses_the_moments_it_cannot_report() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'mouse_button'), &'update')
+
+	for param: HenSaveParam in action.inputs:
+		if str(param.id) == 'button':
+			param.default_value = 'MOUSE_BUTTON_WHEEL_DOWN'
+		elif str(param.id) == 'when':
+			param.default_value = 'Released'
+
+	assert_str(HenTest.get_all_code()).contains('no Released and no Double Click')
+
+
+# the press is recorded on the node, so a state that never ran the action still
+# gathered the press it will act on
+func test_a_buffered_press_is_recorded_outside_the_state() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'jump'
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'buffer_press'), &'physics')
+
+	action.branches['buffered'] = {state_id = target.id, label = ''}
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('func _input(')
+	assert_str(code).contains('event.is_action_pressed(&"ui_accept")')
+	# a reset on enter would wipe a press made right before the state was reached
+	assert_str(code).not_contains('press_at_' + str(action.id) + ' = -99.0\n\t\tpress_at')
+
+
+# nobody wired a branch, so the charge is only a value and the if/else would be
+# two passes
+func test_hold_charge_drops_the_branches_nobody_wired() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var my_var: HenSaveVar = save_data.add_var(false)
+	my_var.name = 'charge'
+	my_var.type = 'float'
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'hold_charge'), &'update')
+
+	_sink(action, &'result', my_var)
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('_ref.charge = (charge_' + str(action.id) + ')')
+	assert_str(code).not_contains('>= 1.0')

@@ -13,7 +13,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks a mouse button and branches on its state. Reads the button directly, so nothing has to be set up in the input map.'
+	return 'Checks a mouse button and branches on its state. Reads the button directly, so nothing has to be set up in the input map. Picking a wheel direction is how scrolling is read, such as swapping weapons.'
 
 
 func get_display_name() -> String:
@@ -32,19 +32,34 @@ func get_inputs() -> Array[Dictionary]:
 			id = &'button',
 			doc = 'Which mouse button to watch.',
 			raw = true,
-			options = ['MOUSE_BUTTON_LEFT', 'MOUSE_BUTTON_RIGHT', 'MOUSE_BUTTON_MIDDLE'],
+			options = [
+				'MOUSE_BUTTON_LEFT',
+				'MOUSE_BUTTON_RIGHT',
+				'MOUSE_BUTTON_MIDDLE',
+				'MOUSE_BUTTON_WHEEL_UP',
+				'MOUSE_BUTTON_WHEEL_DOWN'
+			],
 			default_value = 'MOUSE_BUTTON_LEFT'
 		},
 		{
 			name = 'When',
 			type = 'String',
 			id = &'when',
-			doc = 'Whether to react continuously while the button is down or only at the moment it changes.',
+			doc = 'Whether to react continuously while the button is down or only at the moment it changes. A wheel is always a moment, so it ignores Held.',
 			raw = true,
 			options = ['Held', 'Clicked', 'Released', 'Double Click'],
 			default_value = 'Held'
 		}
 	]
+
+
+# a wheel turn arrives as a press that is never released, so those two moments
+# would wait forever
+func get_validation_error() -> String:
+	if _is_wheel() and str(value_of(&'when', 'Held')) in ['Released', 'Double Click']:
+		return 'the mouse wheel only reports a turn, so it has no Released and no Double Click'
+
+	return ''
 
 
 func get_flow_inputs() -> Array[Dictionary]:
@@ -112,12 +127,20 @@ func get_flow_physics() -> String:
 
 
 func _is_held() -> bool:
-	return str(value_of(&'when', 'Held')) == 'Held'
+	return str(value_of(&'when', 'Held')) == 'Held' and not _is_wheel()
+
+
+# is_mouse_button_pressed never reports a wheel, which only exists as an event
+func _is_wheel() -> bool:
+	return str(value_of(&'button', 'MOUSE_BUTTON_LEFT')).begins_with('MOUSE_BUTTON_WHEEL')
 
 
 # a double click arrives as a second press flagged as such, so a plain click has
 # to rule it out or both would fire
 func _moment_test() -> String:
+	if _is_wheel():
+		return 'event.pressed'
+
 	match str(value_of(&'when', 'Held')):
 		'Released':
 			return 'not event.pressed'
