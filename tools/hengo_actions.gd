@@ -116,6 +116,12 @@ static func _declare_sub_state(_save_data: HenSaveData, _parent: HenSaveState, _
 	if bool(_spec.get('start', false)):
 		state.start = true
 
+	for sub: Dictionary in _spec.get('sub_states', []):
+		var err: String = _declare_sub_state(_save_data, state, sub)
+
+		if not err.is_empty():
+			return err
+
 	return ''
 
 
@@ -124,14 +130,25 @@ static func build_actions(_save_data: HenSaveData, _spec: Dictionary, _all_scrip
 	_refs.clear()
 
 	for st: Dictionary in _spec.get('states', []):
-		var err: String = _build_state_actions(_save_data, st, _all_scripts)
+		var err: String = _build_state_tree(_save_data, st, _all_scripts)
+
 		if not err.is_empty():
 			return err
 
-		for sub: Dictionary in st.get('sub_states', []):
-			var sub_err: String = _build_state_actions(_save_data, sub, _all_scripts)
-			if not sub_err.is_empty():
-				return sub_err
+	return ''
+
+
+static func _build_state_tree(_save_data: HenSaveData, _spec: Dictionary, _all_scripts: Dictionary) -> String:
+	var err: String = _build_state_actions(_save_data, _spec, _all_scripts)
+
+	if not err.is_empty():
+		return err
+
+	for sub: Dictionary in _spec.get('sub_states', []):
+		var sub_err: String = _build_state_tree(_save_data, sub, _all_scripts)
+
+		if not sub_err.is_empty():
+			return sub_err
 
 	return ''
 
