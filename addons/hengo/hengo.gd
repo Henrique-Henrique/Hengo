@@ -101,17 +101,6 @@ func _enter_tree():
 	# syncs cam input to the initial (hidden) panel state
 	_on_hengo_visibility_changed()
 
-	_attach_docs_driver()
-
-
-func _attach_docs_driver() -> void:
-	var path: String = OS.get_environment('HENGO_DOCS_DRIVER')
-
-	if path.is_empty() or not ResourceLoader.exists(path):
-		return
-
-	add_child((load(path) as GDScript).new())
-
 
 func _exit_tree():
 	var global: HenGlobal = Engine.get_singleton(&'Global')
