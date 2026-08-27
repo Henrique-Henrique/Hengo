@@ -109,10 +109,8 @@ static func _compile_script(_id: StringName) -> void:
 	var code: String = code_gen.get_code(save_data)
 	
 	# Determine where to write the compiled script
-	var script_path: String
-	if save_data.identity and not save_data.identity.script_path.is_empty():
-		script_path = save_data.identity.script_path
-	else:
+	var script_path: String = HenUtils.script_path_of(save_data.identity)
+	if script_path.is_empty():
 		script_path = HenEnums.HENGO_SCRIPTS_PATH + str(_id) + ".gd"
 
 	var script_dir: String = script_path.get_base_dir()

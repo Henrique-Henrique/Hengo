@@ -21,6 +21,7 @@ func _on_item_click(_index: int, _pos: Vector2, _mouse_index: int) -> void:
     _pick(_index)
 
 
+# a callback that opens a popup has to defer it, the hide below closes the topmost
 func _pick(_index: int) -> void:
     if not select_callable is Callable or _index < 0 or _index >= search_list.size():
         return

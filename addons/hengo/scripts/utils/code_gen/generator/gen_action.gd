@@ -1385,6 +1385,14 @@ static func _count_wire_readers(_actions: Array, _id: StringName, _output: Strin
 			if _output.is_empty() or str(spec.get('output', '')) == _output:
 				total += 1
 
+		# an inline producer is not a step, so the tree walk never reaches it and a wire
+		# inside one would read as a single reader and never get parked
+		for nested: Variant in action.input_actions.values():
+			var child: HenSaveAction = _inline_child(nested)
+
+			if child:
+				total += _count_wire_readers([child], _id, _output)
+
 		for list: Array in nested_lists(action):
 			total += _count_wire_readers(list, _id, _output)
 

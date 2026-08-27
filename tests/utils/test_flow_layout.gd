@@ -96,6 +96,69 @@ func test_a_branch_subtree_lands_on_its_cell_side() -> void:
 	assert_bool(_cx(walk) > _cx(check)).is_true()
 
 
+# a run card wider than the corridor used to land on the branch beside it
+func test_the_run_column_does_not_touch_a_branch_beside_it() -> void:
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
+	var entry: HenFlowGraphTypes.FlowNode = _node(graph, 'entry', &'state_entry', Vector2(150, 70))
+	var check: HenFlowGraphTypes.FlowNode = _action(graph, 'check', Vector2(200, 100))
+	var jump: HenFlowGraphTypes.FlowNode = _action(graph, 'jump', Vector2(150, 100))
+	var tail: HenFlowGraphTypes.FlowNode = _node(graph, 'tail', &'add', Vector2(132, 30))
+	var wide: HenFlowGraphTypes.FlowNode = _action(graph, 'wide', Vector2(420, 90))
+
+	graph.entry = entry
+	_cell(entry, &'update', 'update', 75.0)
+	_cell(check, &'true', 'True', 50.0)
+
+	_chain(graph, entry, &'update', check)
+	_chain(graph, check, &'true', jump)
+	_chain(graph, jump, HenFlowGraphTypes.THEN_PIN, tail)
+	_chain(graph, check, HenFlowGraphTypes.THEN_PIN, wide)
+
+	HenFlowFormatter.format(graph)
+
+	for side: HenFlowGraphTypes.FlowNode in [jump, tail]:
+		assert_bool(
+			Rect2(side.position, side.size).intersects(Rect2(wide.position, wide.size))
+		).is_false()
+
+	assert_float(wide.position.x).is_greater(tail.position.x + tail.size.x)
+
+
+# the run sits below the branch row, and not below the run that branch carries
+func test_the_run_does_not_wait_under_a_tall_branch() -> void:
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
+	var entry: HenFlowGraphTypes.FlowNode = _node(graph, 'entry', &'state_entry', Vector2(150, 70))
+	var check: HenFlowGraphTypes.FlowNode = _action(graph, 'check', Vector2(200, 100))
+	var next: HenFlowGraphTypes.FlowNode = _action(graph, 'next', Vector2(150, 70))
+	var walk: HenFlowGraphTypes.FlowNode = _action(graph, 'walk', Vector2(150, 70))
+	var deep: HenFlowGraphTypes.FlowNode = _action(graph, 'deep', Vector2(150, 70))
+
+	graph.entry = entry
+	_cell(entry, &'update', 'update', 75.0)
+	_cell(check, &'true', 'True', 50.0)
+	_cell(check, &'false', 'False', 150.0)
+
+	_chain(graph, entry, &'update', check)
+	_chain(graph, check, HenFlowGraphTypes.THEN_PIN, next)
+	_chain(graph, check, &'false', walk)
+	_chain(graph, walk, HenFlowGraphTypes.THEN_PIN, deep)
+
+	var tall: HenFlowGraphTypes.FlowNode = deep
+
+	for i: int in range(4):
+		var step: HenFlowGraphTypes.FlowNode = _action(graph, 'tall%d' % i, Vector2(150, 200))
+
+		_chain(graph, tall, HenFlowGraphTypes.THEN_PIN, step)
+		tall = step
+
+	HenFlowFormatter.format(graph)
+
+	assert_float(next.position.y).is_greater(walk.position.y + walk.size.y)
+	assert_float(next.position.y - (walk.position.y + walk.size.y)) 		.is_less_equal(HenFlowFormatter.MIDDLE_Y_GAP + 0.5)
+	assert_bool(next.position.y < tall.position.y).is_true()
+	assert_bool(_cx(walk) > _cx(next) + next.size.x * 0.5).is_true()
+
+
 func test_a_lone_branch_target_sits_under_its_cell() -> void:
 	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
 	var entry: HenFlowGraphTypes.FlowNode = _node(graph, 'entry', &'state_entry', Vector2(150, 70))

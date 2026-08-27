@@ -88,10 +88,10 @@ settings/auto_move_on_add=true
 settings/auto_move_on_connection=true
 settings/auto_move_on_remove=false
 settings/development_mode=true
-settings/debug_compilation=true
+settings/debug_compilation=false
 settings/dock_location=0
 settings/font_scale=1.0
-settings/flow_wrap=false
+settings/flow_wrap=true
 
 [input]
 

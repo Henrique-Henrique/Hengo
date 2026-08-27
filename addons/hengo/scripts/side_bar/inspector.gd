@@ -22,6 +22,8 @@ const DROPDOWN_HINT_TYPES: Array[String] = [
 ]
 # a slot the action writes to and that is still unset
 const WARNING_COLOR: Color = Color('#f0a24a')
+# first row of the node menu: falls back to the plain text field
+const TYPED_PATH_ENTRY: String = 'Type a path...'
 const PROPS: Dictionary = {
 	TYPE_BOOL: preload('res://addons/hengo/scenes/props/boolean.tscn'),
 	TYPE_INT: preload('res://addons/hengo/scenes/props/int.tscn'),
@@ -924,12 +926,38 @@ func _prompt_new_var(slot: Dictionary) -> void:
 # asks for the argument of a source that takes one (a node path, an input action)
 # and binds the slot to "<key>:<argument>"
 func _prompt_source_arg(slot: Dictionary, source_key: String) -> void:
-	var source: Dictionary = {}
+	var source: Dictionary = _native_source(source_key)
 
+	if source.is_empty():
+		return
+
+	# the menu that picked this source hides the topmost popup right after this
+	# callback, so opening now would close what just opened
+	if StringName(str(source.get('arg_picker', &''))) == &'node_path':
+		_open_node_path_menu.call_deferred(slot, source_key)
+		return
+
+	_open_source_arg_prompt.call_deferred(slot, source_key)
+
+
+func _native_source(source_key: String) -> Dictionary:
 	for entry: Dictionary in HenUtils.NATIVE_SOURCES:
 		if str(entry.get('key', '')) == source_key:
-			source = entry
-			break
+			return entry
+
+	return {}
+
+
+# reopening an already bound slot starts from what is there
+func _current_source_arg(slot: Dictionary, source_key: String) -> String:
+	var current: String = str((slot.bind_store as Dictionary).get(slot.bind_key, ''))
+	var prefix: String = source_key + ':'
+
+	return current.substr(prefix.length()) if current.begins_with(prefix) else ''
+
+
+func _open_source_arg_prompt(slot: Dictionary, source_key: String) -> void:
+	var source: Dictionary = _native_source(source_key)
 
 	if source.is_empty():
 		return
@@ -940,12 +968,39 @@ func _prompt_source_arg(slot: Dictionary, source_key: String) -> void:
 		layout = HenGeneralPopup.Layout.CENTER
 	})
 
-	# reopening an already bound slot starts from what is there
-	var current: String = str((slot.bind_store as Dictionary).get(slot.bind_key, ''))
-	var prefix: String = source_key + ':'
-	var initial: String = current.substr(prefix.length()) if current.begins_with(prefix) else ''
+	prompt.setup(str(source.arg_prompt), _current_source_arg(slot, source_key), '', _on_source_arg_named.bind(slot, source_key), false)
 
-	prompt.setup(str(source.arg_prompt), initial, '', _on_source_arg_named.bind(slot, source_key), false)
+
+# the nodes the scenes holding this script can reach, with the text field kept as
+# the first row for a node that only exists at runtime
+func _open_node_path_menu(slot: Dictionary, source_key: String) -> void:
+	var save_data: HenSaveData = HenActionsPanel.owner_of(slot.get('action') as HenSaveAction)
+	var entries: Array[Dictionary] = HenNodePaths.entries(save_data, StringName(_effective_slot_type(slot, slot.param)))
+
+	if entries.is_empty():
+		_open_source_arg_prompt(slot, source_key)
+		return
+
+	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
+	var list: Array = [{name = TYPED_PATH_ENTRY, path = ''}]
+
+	for entry: Dictionary in entries:
+		list.append({name = str(entry.label), path = str(entry.path)})
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.CENTER,
+		min_size = Vector2(360, 320)
+	})
+
+	menu.mount(list, func(item: Dictionary) -> void:
+		var path: String = str(item.get('path', ''))
+
+		if path.is_empty():
+			_open_source_arg_prompt.call_deferred(slot, source_key)
+			return
+
+		_on_source_arg_named(path, '', slot, source_key)
+	, 'item_type')
 
 
 func _on_source_arg_named(_arg: String, _type: String, slot: Dictionary, source_key: String) -> void:

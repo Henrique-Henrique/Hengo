@@ -12,8 +12,8 @@ const FIRST_LEVEL_Y_GAP: float = 64.0
 const INPUT_X_GAP: float = 32.0
 const INPUT_Y_GAP: float = 12.0
 const MIDDLE_X_GAP: float = 90.0
-# the run carries on below every branch of the fan, not beside them
-const MIDDLE_Y_GAP: float = 50.0
+# the run carries on below the branch row of the fan, not beside it
+const MIDDLE_Y_GAP: float = 25.0
 # breathing room around a loop's nested chain, drawn as a frame inside the node
 const BODY_PAD: float = 16.0
 
@@ -639,10 +639,11 @@ static func _place_fan(
 		else:
 			right.append(item)
 
-	var min_pos: Vector2 = _node.position
-	var max_pos: Vector2 = _node.position + _node.size
-	# the deepest a branch of the fan reaches: the run passes under all of them
+	# the branch cards themselves, not what hangs off them: a long run on a side
+	# would sink the middle by its whole height
 	var side_bottom: float = _base_y
+	var placed_left: Array[HenFlowGraphTypes.FlowNode] = []
+	var placed_right: Array[HenFlowGraphTypes.FlowNode] = []
 
 	left.reverse()
 
@@ -651,41 +652,126 @@ static func _place_fan(
 
 	for item: Dictionary in left:
 		var box: Rect2 = _place_side(_node, item.target, _data, _format, _base_y, idx, limit, true)
+		idx += 1
 		if box.size == Vector2.ZERO:
-			idx += 1
 			continue
 		limit = minf(limit, box.position.x - MIDDLE_X_GAP)
-		side_bottom = maxf(side_bottom, box.position.y + box.size.y)
-		min_pos = min_pos.min(box.position)
-		max_pos = max_pos.max(box.position + box.size)
-		idx += 1
+		side_bottom = maxf(side_bottom, _card_bottom(item.target))
+		placed_left.append(item.target)
 
 	limit = centre + MIDDLE_X_GAP
 	idx = -right.size()
 
 	for item: Dictionary in right:
 		var box: Rect2 = _place_side(_node, item.target, _data, _format, _base_y, idx, limit, false)
+		idx += 1
 		if box.size == Vector2.ZERO:
-			idx += 1
 			continue
 		limit = maxf(limit, box.position.x + box.size.x + MIDDLE_X_GAP)
-		side_bottom = maxf(side_bottom, box.position.y + box.size.y)
-		min_pos = min_pos.min(box.position)
-		max_pos = max_pos.max(box.position + box.size)
-		idx += 1
+		side_bottom = maxf(side_bottom, _card_bottom(item.target))
+		placed_right.append(item.target)
 
-	# last, and under the whole fan: the run reads as what happens after the
-	# branches, and nothing to the side can reach it
-	if middle != null:
-		var child: Rect2 = _place_single(
-			_node, middle, _data, _format, maxf(side_bottom, _data.y_limit) + MIDDLE_Y_GAP - Y_GAP
-		)
+	# last, and under the branch row: the run reads as what happens after the
+	# branches without waiting for the runs they carry
+	var middle_node: Variant = null
 
-		if child.size != Vector2.ZERO:
-			min_pos = min_pos.min(child.position)
-			max_pos = max_pos.max(child.position + child.size)
+	if middle != null and _place_single(
+		_node, middle, _data, _format, side_bottom + MIDDLE_Y_GAP - Y_GAP
+	).size != Vector2.ZERO:
+		middle_node = middle.target
+
+		var column: Array[HenFlowGraphTypes.FlowNode] = _tree_nodes(middle_node, _data)
+
+		_clear_column(placed_left, column, _data, true, centre - MIDDLE_X_GAP)
+		_clear_column(placed_right, column, _data, false, centre + MIDDLE_X_GAP)
+
+	if middle_node != null:
+		placed_right.append(middle_node)
+
+	var min_pos: Vector2 = _node.position
+	var max_pos: Vector2 = _node.position + _node.size
+
+	# measured after the pushes, so a side that moved carries its own subtree
+	for group: Array in [placed_left, placed_right]:
+		for target: HenFlowGraphTypes.FlowNode in group:
+			var box: Rect2 = _tree_bounding(target, _data)
+
+			min_pos = min_pos.min(box.position)
+			max_pos = max_pos.max(box.position + box.size)
 
 	return Rect2(min_pos, max_pos - min_pos)
+
+
+static func _card_bottom(_node: HenFlowGraphTypes.FlowNode) -> float:
+	return _node.position.y + _node.size.y
+
+
+# the run shares the fan's rows now, so a side is pushed off the part of the run
+# that actually sits beside it, and the sides further out follow
+static func _clear_column(
+	_placed: Array[HenFlowGraphTypes.FlowNode],
+	_column: Array[HenFlowGraphTypes.FlowNode],
+	_data: FormatData,
+	_is_left: bool,
+	_start: float
+) -> void:
+	var limit: float = _start
+
+	for target: HenFlowGraphTypes.FlowNode in _placed:
+		var box: Rect2 = _tree_bounding(target, _data)
+		var wall: float = _column_wall(_column, box, _is_left)
+		var edge: float = minf(limit, wall) if _is_left else maxf(limit, wall)
+
+		if _is_left and box.position.x + box.size.x > edge:
+			_move_tree(target, Vector2(edge - box.position.x - box.size.x, 0.0), _data)
+			box = _tree_bounding(target, _data)
+		elif not _is_left and box.position.x < edge:
+			_move_tree(target, Vector2(edge - box.position.x, 0.0), _data)
+			box = _tree_bounding(target, _data)
+
+		limit = minf(limit, box.position.x - MIDDLE_X_GAP) if _is_left 			else maxf(limit, box.position.x + box.size.x + MIDDLE_X_GAP)
+
+
+# INF when nothing of the run shares the rows the box occupies, which leaves the
+# caller on its own limit
+static func _column_wall(
+	_column: Array[HenFlowGraphTypes.FlowNode],
+	_box: Rect2,
+	_is_left: bool
+) -> float:
+	var wall: float = INF if _is_left else -INF
+
+	for node: HenFlowGraphTypes.FlowNode in _column:
+		if node.position.y + node.size.y <= _box.position.y:
+			continue
+
+		if node.position.y >= _box.position.y + _box.size.y:
+			continue
+
+		if _is_left:
+			wall = minf(wall, node.position.x - MIDDLE_X_GAP)
+		else:
+			wall = maxf(wall, node.position.x + node.size.x + MIDDLE_X_GAP)
+
+	return wall
+
+
+static func _tree_nodes(
+	_node: HenFlowGraphTypes.FlowNode,
+	_data: FormatData
+) -> Array[HenFlowGraphTypes.FlowNode]:
+	var out: Array[HenFlowGraphTypes.FlowNode] = [_node]
+
+	for pin: HenFlowGraphTypes.FlowPin in _node.pins_of(&'data_in'):
+		var from: Variant = _data.data_from.get(_key(_node.id, pin.id))
+
+		if from and _data.format_of((from as HenFlowGraphTypes.FlowNode).id).input_owner == _node.id:
+			out.append_array(_tree_nodes(from, _data))
+
+	for child: HenFlowGraphTypes.FlowNode in _data.format_of(_node.id).tree_children:
+		out.append_array(_tree_nodes(child, _data))
+
+	return out
 
 
 static func _place_side(

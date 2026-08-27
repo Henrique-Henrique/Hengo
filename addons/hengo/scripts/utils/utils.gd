@@ -14,6 +14,7 @@ const BIND_PATH_PREFIX: String = 'path:'
 # a code must be atomic or parenthesized: it substitutes mid-expression.
 # a source with `key` takes an argument and is stored as "key:argument", its code
 # coming from code_format; label_format defaults to "name (argument)"
+# arg_picker names the menu that fills the argument instead of a text field
 const NATIVE_SOURCES: Array[Dictionary] = [
 	{
 		name = 'Self (this node)',
@@ -27,6 +28,7 @@ const NATIVE_SOURCES: Array[Dictionary] = [
 		name = 'Node path',
 		key = 'path',
 		arg_prompt = 'Node Path',
+		arg_picker = &'node_path',
 		code_format = 'get_node("{arg}")',
 		label_format = '{arg}',
 		type = 'Node',
@@ -368,6 +370,16 @@ static func get_native_source(_save_data: HenSaveData, _bind_code: String) -> Di
 
 static func bind_code_for_var(_var: HenSaveVar) -> String:
 	return BIND_VAR_PREFIX + str(_var.id)
+
+
+static func script_path_of(_identity: HenSaveDataIdentity) -> String:
+	if not _identity:
+		return ''
+
+	if not _identity.script_path.is_empty():
+		return _identity.script_path
+
+	return HenEnums.HENGO_SCRIPTS_PATH + str(_identity.id) + '.gd'
 
 
 # variable a bind code points at: by id, or by name for bindings stored before ids
