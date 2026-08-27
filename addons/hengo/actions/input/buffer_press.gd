@@ -41,6 +41,7 @@ func get_inputs() -> Array[Dictionary]:
 			type = 'StringName',
 			id = &'action',
 			doc = 'The input action to remember, as named in the input map.',
+			picker = 'input_action',
 			default_value = 'ui_accept'
 		},
 		{

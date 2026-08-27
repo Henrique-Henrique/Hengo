@@ -262,3 +262,27 @@ func test_new_actions_take_their_folder_category() -> void:
 	assert_str(by_id['set_text'].category).is_equal('control')
 	assert_str(by_id['set_control_value'].category).is_equal('control')
 	assert_str(by_id['get_nearest'].category).is_equal('scene')
+
+
+# --- pickers ----------------------------------------------------------------
+
+
+# an input naming something the project already declares has to offer the list:
+# typing an input action or a group by hand is how a silent typo gets in
+func test_named_slots_offer_their_picker() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var expected: Dictionary = {action = 'input_action', group = 'group'}
+	var missing: Array[String] = []
+
+	for macro: HenSaveMacro in (Engine.get_singleton(&'Global') as HenGlobal).action_macros:
+		for param: HenSaveParam in macro.inputs:
+			var wanted: String = str(expected.get(str(param.id), ''))
+
+			if wanted.is_empty() or str(param.type) != 'StringName':
+				continue
+
+			if str(param.picker) != wanted:
+				missing.append('%s.%s wants the %s picker, has "%s"' % [macro.id, param.id, wanted, param.picker])
+
+	assert_array(missing).override_failure_message('\n'.join(missing)).is_empty()
