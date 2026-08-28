@@ -7,6 +7,7 @@ class_name TestHenCardEditor extends HenTestSuite
 
 const FIX_PHASES: String = 'res://tests/fixtures/action_phases.gd'
 const FIX_LOOP: String = 'res://addons/hengo/actions/flow/repeat.gd'
+const FIX_IF: String = 'res://addons/hengo/actions/flow/if_condition.gd'
 
 var state: HenSaveState
 var editor: HenStateViewerCardEditor
@@ -37,6 +38,9 @@ func _register(_path: String) -> HenSaveMacro:
 	# offers update
 	for flow_input: Dictionary in instance.get_flow_inputs():
 		macro.flow_inputs.append(HenSaveFlowParam.create(flow_input))
+
+	for flow_output: Dictionary in instance.get_flow_outputs():
+		macro.flow_outputs.append(HenSaveFlowParam.create(flow_output))
 
 	(Engine.get_singleton(&'Global') as HenGlobal).action_macros.append(macro)
 
@@ -105,3 +109,133 @@ func test_a_phase_the_macro_cannot_run_falls_back_to_its_default() -> void:
 	var actions: Array = save_data.get_state_actions(state.id)
 
 	assert_str(str((actions[0] as HenSaveAction).phase)).is_equal('update')
+
+
+# a step of a branch is drawn hanging off that branch pin, so the chain the graph
+# shows is what tells a wrong list apart from a right one
+func _branch_chain(_host: HenSaveAction, _key: StringName) -> Array[HenSaveAction]:
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(save_data, state)
+	var node: HenFlowGraphTypes.FlowNode = null
+	var out: Array[HenSaveAction] = []
+
+	for candidate: HenFlowGraphTypes.FlowNode in graph.nodes:
+		if candidate.action == _host:
+			node = candidate
+
+	var pin: StringName = _key
+
+	while node:
+		var next: HenFlowGraphTypes.FlowNode = null
+
+		for edge: HenFlowGraphTypes.FlowEdge in graph.edges_of(&'exec'):
+			if edge.from_node == node and edge.from_pin == pin:
+				next = edge.to_node
+
+		if not next or not next.action:
+			break
+
+		out.append(next.action)
+
+		node = next
+		pin = HenFlowGraphTypes.THEN_PIN
+
+	return out
+
+
+func _branching_host() -> HenSaveAction:
+	var host: HenSaveAction = HenSaveAction.create(_register(FIX_IF))
+
+	host.phase = &'update'
+	save_data.add_state_action(state.id, host)
+
+	return host
+
+
+func _fill_branch(_host: HenSaveAction, _key: String, _macro: HenSaveMacro, _count: int) -> Array[HenSaveAction]:
+	var steps: Array[HenSaveAction] = []
+
+	for i: int in range(_count):
+		steps.append(HenSaveAction.create(_macro))
+
+	var stored: Array[HenSaveAction] = steps.duplicate()
+
+	_host.branch_actions[_key] = stored
+
+	return steps
+
+
+func test_a_step_of_a_branch_reports_that_branch() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+	var host: HenSaveAction = _branching_host()
+	var steps: Array[HenSaveAction] = _fill_branch(host, 'false', macro, 2)
+
+	assert_str(str(editor._branch_key_of(steps[1]))).is_equal('false')
+	assert_object(editor._parent_of(steps[1])).is_same(host)
+
+
+func test_a_step_of_a_body_reports_no_branch() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+	var loop: HenSaveAction = _add(_register(FIX_LOOP), &'update')
+	var step: HenSaveAction = HenSaveAction.create(macro)
+
+	loop.body_actions.append(step)
+
+	assert_str(str(editor._branch_key_of(step))).is_equal('')
+
+
+# replacing the middle step of a branch used to drop the branch and send the new
+# step to the body, where nothing draws it and nothing emits it
+func test_replacing_a_branch_step_stays_in_that_branch() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+	var host: HenSaveAction = _branching_host()
+	var steps: Array[HenSaveAction] = _fill_branch(host, 'false', macro, 3)
+	var slot: Dictionary = editor._slot_around(steps[1], false)
+
+	save_data.remove_action_anywhere(state.id, steps[1])
+	editor._do_insert(macro, save_data, StringName(str(state.id)), slot.parent, &'update', slot.at, slot.branch)
+
+	var branch: Array = host.branch_actions['false']
+
+	assert_int(branch.size()).is_equal(3)
+	assert_object(branch[0]).is_same(steps[0])
+	assert_object(branch[2]).is_same(steps[2])
+	assert_int(host.body_actions.size()).is_equal(0)
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+	var chain: Array[HenSaveAction] = _branch_chain(host, &'false')
+
+	assert_int(chain.size()).is_equal(3)
+	assert_object(chain[1]).is_same(branch[1])
+
+
+func test_adding_below_a_branch_step_stays_in_that_branch() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+	var host: HenSaveAction = _branching_host()
+	var steps: Array[HenSaveAction] = _fill_branch(host, 'false', macro, 2)
+	var slot: Dictionary = editor._slot_around(steps[0], true)
+
+	editor._do_insert(macro, save_data, StringName(str(state.id)), slot.parent, &'update', slot.at, slot.branch)
+
+	var branch: Array = host.branch_actions['false']
+
+	assert_int(branch.size()).is_equal(3)
+	assert_object(branch[0]).is_same(steps[0])
+	assert_object(branch[2]).is_same(steps[1])
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+
+func test_pasting_next_to_a_branch_step_stays_in_that_branch() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+	var host: HenSaveAction = _branching_host()
+	var steps: Array[HenSaveAction] = _fill_branch(host, 'false', macro, 1)
+	var copy: HenSaveAction = HenSaveAction.create(macro)
+
+	assert_bool(editor.paste_around([copy], steps[0])).is_true()
+
+	assert_int((host.branch_actions['false'] as Array).size()).is_equal(2)
+	assert_int(save_data.get_state_actions(state.id).size()).is_equal(1)
+
+	var chain: Array[HenSaveAction] = _branch_chain(host, &'false')
+
+	assert_int(chain.size()).is_equal(2)
+	assert_object(chain[1]).is_same(copy)

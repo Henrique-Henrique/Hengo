@@ -82,7 +82,7 @@ settings/auto_zoom=true
 settings/auto_zoom_level_v2=1.4
 settings/max_zoom=5.0
 settings/min_zoom=0.1
-settings/auto_move=true
+settings/auto_move=false
 settings/auto_layout=true
 settings/auto_move_on_add=true
 settings/auto_move_on_connection=true
@@ -91,7 +91,7 @@ settings/development_mode=true
 settings/debug_compilation=false
 settings/dock_location=0
 settings/font_scale=0.85
-settings/flow_wrap=true
+settings/flow_wrap=false
 
 [input]
 

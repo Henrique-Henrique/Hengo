@@ -1,13 +1,9 @@
 @tool
-class_name HenActionSpawnScene extends HenScriptMacroBase
-
-
-# loads a scene file and adds a copy of it next to the owner, at Position.
-# leave Store unbound when the new node does not need to be kept around.
+class_name HenActionSpawnScene3D extends HenScriptMacroBase
 
 
 func get_id() -> StringName:
-	return &'spawn_scene'
+	return &'spawn_scene_3d'
 
 
 func get_description() -> String:
@@ -22,9 +18,8 @@ func get_icon() -> String:
 	return 'copy-plus'
 
 
-# the position it writes is a Vector2, so a 3D owner would get the 3D file instead
 func get_target_classes() -> Array[StringName]:
-	return [&'CanvasItem']
+	return [&'Node3D']
 
 
 func get_default_phase() -> StringName:
@@ -39,14 +34,14 @@ func get_inputs() -> Array[Dictionary]:
 			id = &'path',
 			picker = 'scene_path',
 			doc = 'The path to the scene file to spawn.',
-			default_value = 'res://scenes/bullet.tscn'
+			default_value = 'res://scenes/hit.tscn'
 		},
 		{
 			name = 'Position',
-			type = 'Vector2',
+			type = 'Vector3',
 			id = &'position',
-			doc = 'Where to place the new copy.',
-			default_value = Vector2.ZERO
+			doc = 'Where to place the new copy, in world space.',
+			default_value = Vector3.ZERO
 		}
 	]
 
@@ -81,7 +76,11 @@ func get_flow_physics() -> String:
 	return _body()
 
 
-# added to the parent so the copy is a sibling, not a child that moves along.
-# deferred because spawning in enter runs during _ready, where add_child is refused
+# placed before it is added, or a copy that emits on its first frame does it at the
+# origin: top_level is what makes the placement read as world space
 func _body() -> String:
-	return 'var spawned_{{VCNODE_ID}} = load({{path}}).instantiate()\nspawned_{{VCNODE_ID}}.position = {{position}}\n_ref.get_parent().add_child.call_deferred(spawned_{{VCNODE_ID}})\n{{out:spawned}}'
+	return 'var spawned_{{VCNODE_ID}} = load({{path}}).instantiate()\n' \
+		+ 'spawned_{{VCNODE_ID}}.top_level = true\n' \
+		+ 'spawned_{{VCNODE_ID}}.position = {{position}}\n' \
+		+ '_ref.get_parent().add_child.call_deferred(spawned_{{VCNODE_ID}})\n' \
+		+ '{{out:spawned}}'

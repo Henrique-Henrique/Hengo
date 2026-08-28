@@ -1114,7 +1114,7 @@ func _paste_actions() -> bool:
 
 	_editor_for_state(state_id)
 
-	return _editor.paste_actions(HenActionClipboard.take(), anchor.phase, _editor.index_around(anchor, true))
+	return _editor.paste_around(HenActionClipboard.take(), anchor)
 
 
 func _duplicate_selected() -> bool:
@@ -1620,12 +1620,7 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if (hit.kind == &'add_above' or hit.kind == &'add_below') and card.node.action:
 		_editing_card = card
 		_editor_for(hit.node)
-		_editor.open_add(
-			card.node.action.phase,
-			null,
-			_editor.index_around(card.node.action, hit.kind == &'add_below'),
-			rect
-		)
+		_editor.add_around(card.node.action, rect, hit.kind == &'add_below')
 		return true
 
 	# a transition card names where the flow goes, so it takes the reader there

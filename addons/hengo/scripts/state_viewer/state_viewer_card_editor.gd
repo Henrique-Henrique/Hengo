@@ -235,9 +235,23 @@ func _target_list(_parent: HenSaveAction, _branch_key: StringName) -> Array:
 	return _parent.branch_actions[key]
 
 
+# the anchor decides which list a paste lands in, and a nested anchor never means
+# the state chain
+func paste_around(_actions: Array, _anchor: HenSaveAction) -> bool:
+	var slot: Dictionary = _slot_around(_anchor, true)
+
+	return paste_actions(_actions, _anchor.phase, slot.at, slot.parent, slot.branch)
+
+
 # pasted steps land in run order after the anchor, each one keeping its own phase
 # when the macro has a body for the target chain
-func paste_actions(_actions: Array, _phase: StringName, _at: int) -> bool:
+func paste_actions(
+	_actions: Array,
+	_phase: StringName,
+	_at: int,
+	_parent: HenSaveAction = null,
+	_branch_key: StringName = &''
+) -> bool:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	if _actions.is_empty() or not global or not global.SAVE_DATA or _state_id.is_empty():
@@ -252,6 +266,13 @@ func paste_actions(_actions: Array, _phase: StringName, _at: int) -> bool:
 		for action: HenSaveAction in _actions:
 			if HenActionsPanel.can_use_phase(action, _phase):
 				action.phase = _phase
+
+			if _parent:
+				var nested: Array = _target_list(_parent, _branch_key)
+
+				nested.insert(clampi(index if index >= 0 else nested.size(), 0, nested.size()), action)
+				index += 1
+				continue
 
 			var list: Array = data.get_state_actions(state_id).duplicate()
 			var bucket: Array = HenActionsPanel.group_by_phase(list).get(str(action.phase), [])
@@ -425,8 +446,8 @@ func open_action_menu(_action: HenSaveAction, _rect: Rect2, _inline: bool) -> vo
 	var entries: Array[Dictionary] = []
 
 	if not _inline:
-		entries.append({name = 'Add above', callable = func() -> void: _add_around(_action, _rect, false)})
-		entries.append({name = 'Add below', callable = func() -> void: _add_around(_action, _rect, true)})
+		entries.append({name = 'Add above', callable = func() -> void: add_around(_action, _rect, false)})
+		entries.append({name = 'Add below', callable = func() -> void: add_around(_action, _rect, true)})
 		entries.append({name = 'Phase', callable = func() -> void: _open_phase_menu(_action, _rect)})
 
 	entries.append_array(_action_menu(_action, _rect))
@@ -603,16 +624,32 @@ func _replace_action(_action: HenSaveAction, _rect: Rect2) -> void:
 	# closing refreshes inline, so the rebuild must not fire a second time
 	is_editing = false
 
+	var slot: Dictionary = _slot_around(_action, false)
+
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
-	open_add(_action.phase, _parent_of(_action), index_around(_action, false), _rect, _action)
+	open_add(_action.phase, slot.parent, slot.at, _rect, _action, slot.branch)
 
 
 # the menu closes on click, so the search it opens has to outlive that close
-func _add_around(_action: HenSaveAction, _rect: Rect2, _below: bool) -> void:
+func add_around(_action: HenSaveAction, _rect: Rect2, _below: bool) -> void:
 	is_editing = false
 
-	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).hide_popup()
-	open_add(_action.phase, _parent_of(_action), index_around(_action, _below), _rect)
+	var popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup
+	var slot: Dictionary = _slot_around(_action, _below)
+
+	if popup.has_open_popups():
+		popup.hide_popup()
+
+	open_add(_action.phase, slot.parent, slot.at, _rect, null, slot.branch)
+
+
+# { parent: HenSaveAction, branch: StringName, at: int }
+func _slot_around(_action: HenSaveAction, _below: bool) -> Dictionary:
+	return {
+		parent = _parent_of(_action),
+		branch = _branch_key_of(_action),
+		at = index_around(_action, _below)
+	}
 
 
 func delete_action(_action: HenSaveAction) -> void:
@@ -661,6 +698,23 @@ func _find_parent(_root: HenSaveAction, _target: HenSaveAction) -> HenSaveAction
 				return deeper
 
 	return null
+
+
+# the branch of the parent this action is a step of, empty for a loop body and
+# for a top level step
+func _branch_key_of(_action: HenSaveAction) -> StringName:
+	var parent: HenSaveAction = _parent_of(_action)
+
+	if not parent:
+		return &''
+
+	for key: Variant in parent.branch_actions:
+		var stored: Variant = parent.branch_actions[key]
+
+		if stored is Array and (stored as Array).has(_action):
+			return StringName(str(key))
+
+	return &''
 
 
 # the array holding this action: a loop body, one branch of it, or the state

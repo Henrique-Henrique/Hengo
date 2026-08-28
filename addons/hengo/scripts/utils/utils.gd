@@ -67,6 +67,16 @@ const NATIVE_SOURCES: Array[Dictionary] = [
 		global = true
 	},
 	{
+		name = 'Mouse button pressed',
+		key = 'mouse_pressed',
+		arg_prompt = 'Button, such as MOUSE_BUTTON_LEFT',
+		arg_example = 'MOUSE_BUTTON_LEFT',
+		code_format = 'Input.is_mouse_button_pressed({arg})',
+		type = 'bool',
+		needs_class = &'',
+		global = true
+	},
+	{
 		name = 'Mouse Position',
 		code = 'get_global_mouse_position()',
 		type = 'Vector2',
