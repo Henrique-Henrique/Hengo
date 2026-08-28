@@ -563,3 +563,83 @@ func test_hold_charge_drops_the_branches_nobody_wired() -> void:
 
 	assert_str(code).contains('_ref.charge = (charge_' + str(action.id) + ')')
 	assert_str(code).not_contains('>= 1.0')
+
+
+# --- a question is also a value ---------------------------------------------
+
+
+const FIX_FLOOR: String = 'res://addons/hengo/actions/physics2d/is_on_floor.gd'
+const FIX_HOLD: String = 'res://addons/hengo/actions/flow/hold_charge.gd'
+const FIX_COMBINE: String = 'res://addons/hengo/actions/logic/combine_checks.gd'
+
+
+func _child(_path: String) -> HenSaveAction:
+	return HenSaveAction.create(_register(_path))
+
+
+# as a step with a branch wired it is the same if it always was
+func test_a_predicate_as_a_step_still_branches() -> void:
+	save_data.identity.type = 'CharacterBody2D'
+
+	var target: HenSaveState = save_data.add_state(false)
+	target.name = 'jump'
+
+	var action: HenSaveAction = _add_action(_register(FIX_FLOOR), &'physics')
+
+	action.branches['true'] = {state_id = target.id, label = ''}
+
+	assert_str(HenTest.get_all_code()).contains('if _ref.is_on_floor():')
+
+
+# the inline copy is only asked for the answer, so the if it would draw is gone
+func test_the_same_predicate_inline_is_only_the_expression() -> void:
+	save_data.identity.type = 'CharacterBody2D'
+	HenScriptMacroLoader.load_native_actions()
+
+	var my_var: HenSaveVar = save_data.add_var(false)
+	my_var.name = 'grounded'
+	my_var.type = 'bool'
+
+	var setter: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'set_value'), &'physics')
+
+	setter.input_bindings['target'] = HenUtils.bind_code_for_var(my_var)
+	setter.input_actions['value'] = {action = _child(FIX_FLOOR), output = &'result'}
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('_ref.grounded = (_ref.is_on_floor())')
+	assert_str(code).not_contains('if _ref.is_on_floor():')
+
+
+# two questions in one condition, which used to cost two levels of nesting and
+# froze the charge instead of clearing it
+func test_two_predicates_combine_into_one_condition() -> void:
+	save_data.identity.type = 'CharacterBody2D'
+	HenScriptMacroLoader.load_native_actions()
+
+	var hold: HenSaveAction = _add_action(_register(FIX_HOLD), &'physics')
+	var combine: HenSaveAction = _child(FIX_COMBINE)
+
+	combine.input_actions['a'] = {action = _child(FIX_FLOOR), output = &'result'}
+	combine.input_expressions['b'] = _expression('Input.is_key_pressed(KEY_X)', [], {}, {})
+	hold.input_actions['condition'] = {action = combine, output = &'result'}
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('_ref.is_on_floor()')
+	assert_str(code).contains('Input.is_key_pressed(KEY_X)')
+	assert_str(code).not_contains('if _ref.is_on_floor():')
+
+
+# the twin retired once Compare answered both ways, and a saved script that used it
+# has to keep working without anyone opening it to fix the rows by hand
+func test_a_retired_macro_is_migrated_to_the_one_that_replaced_it() -> void:
+	HenScriptMacroLoader.load_native_actions()
+
+	var action: HenSaveAction = _add_action(HenActionsPanel.find_macro(&'compare'), &'update')
+
+	action.macro_id = &'check'
+
+	HenSaveAction.migrate_retired_macros(save_data)
+
+	assert_str(str(action.macro_id)).is_equal('compare')

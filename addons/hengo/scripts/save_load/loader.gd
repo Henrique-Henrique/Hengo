@@ -151,6 +151,7 @@ func _resolve_active(_collection: HenSaveCollection) -> HenSaveData:
 # to, and what tells an older action clone which input it is missing
 func _migrate_open_scripts() -> void:
 	for save_data: HenSaveData in (Engine.get_singleton(&'Global') as HenGlobal).OPEN_SCRIPTS:
+		HenSaveAction.migrate_retired_macros(save_data)
 		HenSaveAction.migrate_branch_bodies(save_data)
 		HenSaveAction.sync_macro_inputs(save_data)
 

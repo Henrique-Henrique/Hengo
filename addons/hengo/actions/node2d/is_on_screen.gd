@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether the node is inside the visible screen and branches on the answer. A bullet or an enemy that left the view takes the False side.'
+	return 'Answers whether the node is inside the visible screen, so a bullet or an enemy that left the view can be cleared. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -28,6 +28,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the node is inside the view.'}
+	]
+
+
+func get_output_result() -> String:
+	return '_ref.get_viewport_rect().has_point({{ref}}.get_global_transform_with_canvas().origin)'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -38,8 +48,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go while the node is on screen.'},
-		{name = 'False', id = &'false', doc = 'Where to go once the node is off screen.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go while the node is on screen.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go once the node is off screen.'}
 	]
 
 
@@ -56,8 +66,14 @@ func get_flow_physics() -> String:
 
 
 # get_global_transform_with_canvas() gives the screen point, so a camera counts
+# with no branch wired it is only the answer, which is what lets it be read from
+# inside another action's field
 func _body() -> String:
-	return 'if _ref.get_viewport_rect().has_point({{ref}}.get_global_transform_with_canvas().origin):\n' \
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if _ref.get_viewport_rect().has_point({{ref}}.get_global_transform_with_canvas().origin):\n' \
 		+ '\t{{true}}\n' \
 		+ 'else:\n' \
 		+ '\t{{false}}'

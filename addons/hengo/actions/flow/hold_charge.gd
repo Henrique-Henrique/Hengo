@@ -28,7 +28,7 @@ func get_inputs() -> Array[Dictionary]:
 			name = 'Condition',
 			type = 'bool',
 			id = &'condition',
-			doc = 'The test that has to stay true, such as a Check action placed right here.',
+			doc = 'The test that has to stay true, such as a Compare action placed right here.',
 			default_value = true
 		},
 		{

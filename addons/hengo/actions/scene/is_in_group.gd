@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether the node belongs to a named group and branches on the answer.'
+	return 'Answers whether a node belongs to a group. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -35,6 +35,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the node is in the group.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{ref}}.is_in_group({{group}})'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -45,8 +55,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go when the node is in the group.'},
-		{name = 'False', id = &'false', doc = 'Where to go when the node is not in the group.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go when the node is in the group.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go when the node is not in the group.'}
 	]
 
 
@@ -62,5 +72,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if {{ref}}.is_in_group({{group}}):\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{ref}}.is_in_group({{group}}):\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

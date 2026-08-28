@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether an object still points at a live instance and branches on the result. Helps catch a freed node before using it.'
+	return 'Answers whether an object is still alive, which is false once it was freed. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -35,6 +35,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the object is still alive.'}
+	]
+
+
+func get_output_result() -> String:
+	return 'is_instance_valid({{object}})'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -45,8 +55,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go when the object is still valid.'},
-		{name = 'False', id = &'false', doc = 'Where to go when the object has been freed.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go when the object is still valid.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go when the object has been freed.'}
 	]
 
 
@@ -62,5 +72,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if is_instance_valid({{object}}):\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if is_instance_valid({{object}}):\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

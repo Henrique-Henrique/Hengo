@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Branches on whether the cursor is locked to the window for looking around. It is what keeps a pause screen from turning the camera and firing the gun while the menu is open.'
+	return 'Answers whether the cursor is locked to the window for looking around, which is what keeps a pause screen from turning the camera. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -22,6 +22,16 @@ func get_default_phase() -> StringName:
 	return &'physics'
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the cursor is locked to the window.'}
+	]
+
+
+func get_output_result() -> String:
+	return 'Input.mouse_mode == Input.MOUSE_MODE_CAPTURED'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -32,8 +42,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Captured', id = &'captured', doc = 'Where to go while the cursor is locked, which is when the game is being played.'},
-		{name = 'Free', id = &'free', doc = 'Where to go while the cursor is loose on screen.'}
+		{name = 'Captured', id = &'captured', optional = true, doc = 'Where to go while the cursor is locked, which is when the game is being played.'},
+		{name = 'Free', id = &'free', optional = true, doc = 'Where to go while the cursor is loose on screen.'}
 	]
 
 
@@ -49,8 +59,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read from
+# inside another action's field
 func _body() -> String:
-	return 'if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:\n' \
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:\n' \
 		+ '\t{{captured}}\n' \
 		+ 'else:\n' \
 		+ '\t{{free}}'

@@ -87,6 +87,39 @@ static func _migrate_list(_actions: Array) -> void:
 		action.body_actions.clear()
 
 
+# a question that only branched used to need a twin action to be read as a value,
+# and the twin retired once the question started answering both ways. same inputs
+# and same output id, so the id is all that moves
+const RETIRED_MACROS: Dictionary = {check = &'compare'}
+
+
+static func migrate_retired_macros(_save_data: HenSaveData) -> void:
+	if not _save_data:
+		return
+
+	for state: HenSaveState in _save_data.states:
+		_migrate_ids(_save_data.get_state_actions(state.id))
+
+	for sub_list: Variant in _save_data.sub_states.values():
+		for state: HenSaveState in sub_list:
+			_migrate_ids(_save_data.get_state_actions(state.id))
+
+
+static func _migrate_ids(_actions: Array) -> void:
+	for action: HenSaveAction in _actions:
+		for list: Array in HenGeneratorAction.nested_lists(action):
+			_migrate_ids(list)
+
+		for nested: Variant in action.input_actions.values():
+			var child: HenSaveAction = HenGeneratorAction._inline_child(nested)
+
+			if child:
+				_migrate_ids([child])
+
+		if RETIRED_MACROS.has(str(action.macro_id)):
+			action.macro_id = RETIRED_MACROS[str(action.macro_id)]
+
+
 # an action clones the macro inputs when it is created, so one that predates a new
 # input never draws its slot. matched by id, placed where the macro declares it
 static func sync_macro_inputs(_save_data: HenSaveData) -> void:

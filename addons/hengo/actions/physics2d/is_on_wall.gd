@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether the body is pressed against a wall and branches on the result. It uses the wall contact from the last Move And Slide.'
+	return 'Answers whether the body is pressed against a wall, from the contact of the last Move And Slide. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -34,6 +34,16 @@ func get_inputs() -> Array[Dictionary]:
 		node_ref_input('The body to check. Leave it empty to check this node.'),
 	]
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the body is against a wall.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{ref}}.is_on_wall()'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -44,8 +54,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go when the body touches a wall.'},
-		{name = 'False', id = &'false', doc = 'Where to go when the body touches no wall.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go when the body touches a wall.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go when the body touches no wall.'}
 	]
 
 
@@ -61,5 +71,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if {{ref}}.is_on_wall():\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{ref}}.is_on_wall():\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

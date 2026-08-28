@@ -269,7 +269,7 @@ const EXPR_HINTS: Array[Dictionary] = [
 	{pattern = '\\+\\s*str\\(|str\\(\\w+\\)\\s*\\+', hint = 'Fill Text'},
 	{pattern = '\\bif\\b.+\\belse\\b', hint = 'Pick Value, fed by a Check'},
 	{pattern = '\\s(and|or)\\s', hint = 'Combine Checks'},
-	{pattern = '^\\s*[a-zA-Z_]\\w*\\s*(==|!=|>=|<=|>|<)\\s*[^=]+$', hint = 'Check'},
+	{pattern = '^\\s*[a-zA-Z_]\\w*\\s*(==|!=|>=|<=|>|<)\\s*[^=]+$', hint = 'Compare'},
 	{pattern = '^\\s*[a-zA-Z_]\\w*\\.global_position\\s*$', hint = 'Get Position'},
 	{pattern = '^\\s*[a-zA-Z_]\\w*\\.[a-zA-Z_][\\w.]*\\s*$', hint = 'Get Property'},
 	{pattern = '\\.get\\(', hint = 'Dictionary Get, which takes a default'},

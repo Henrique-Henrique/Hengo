@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Compares two values with the chosen operator and branches on the result.'
+	return 'Answers how two values compare, using the operator picked in the middle. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -51,18 +51,29 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store the answer of the comparison.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{a}} {{op}} {{b}}'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
 		{name = 'Update', id = &'update'},
-		{name = 'Physics', id = &'physics'}
+		{name = 'Physics', id = &'physics'},
+		{name = 'Exit', id = &'exit'}
 	]
 
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go when the comparison is true.'},
-		{name = 'False', id = &'false', doc = 'Where to go when the comparison is false.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go when the comparison is true.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go when the comparison is false.'}
 	]
 
 
@@ -78,5 +89,18 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+func get_flow_exit() -> String:
+	return _body()
+
+
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if {{a}} {{op}} {{b}}:\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{a}} {{op}} {{b}}:\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

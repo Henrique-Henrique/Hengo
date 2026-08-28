@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether an AnimationPlayer is still running and branches on the result. Useful for holding a state until an animation finishes.'
+	return 'Answers whether an AnimationPlayer is still running, which is how a state waits for an animation to finish. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -35,6 +35,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the animation is still running.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{player}}.is_playing()'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -45,8 +55,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go while the animation is still playing.'},
-		{name = 'False', id = &'false', doc = 'Where to go once the animation has stopped.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go while the animation is still playing.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go once the animation has stopped.'}
 	]
 
 
@@ -62,5 +72,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if {{player}}.is_playing():\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{player}}.is_playing():\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

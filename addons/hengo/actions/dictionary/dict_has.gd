@@ -10,7 +10,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether a dictionary holds a given key and branches on the result.'
+	return 'Answers whether a dictionary holds a given key. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -41,6 +41,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the key is in the dictionary.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{dict}}.has({{key}})'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -51,8 +61,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go when the key is found.'},
-		{name = 'False', id = &'false', doc = 'Where to go when the key is missing.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go when the key is found.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go when the key is missing.'}
 	]
 
 
@@ -68,5 +78,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if {{dict}}.has({{key}}):\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{dict}}.has({{key}}):\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

@@ -7,7 +7,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Checks whether the navigation agent already arrived at the target it was given, and branches on the answer.'
+	return 'Answers whether the navigation agent already arrived at the target it was given. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -35,6 +35,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the agent already arrived.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{agent}}.is_navigation_finished()'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -45,8 +55,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'Yes', id = &'yes', doc = 'Where to go once the agent arrived at the target.'},
-		{name = 'No', id = &'no', doc = 'Where to go while the agent is still on its way.'}
+		{name = 'Yes', id = &'yes', optional = true, doc = 'Where to go once the agent arrived at the target.'},
+		{name = 'No', id = &'no', optional = true, doc = 'Where to go while the agent is still on its way.'}
 	]
 
 
@@ -62,5 +72,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if {{agent}}.is_navigation_finished():\n\t{{yes}}\nelse:\n\t{{no}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if {{agent}}.is_navigation_finished():\n' \
+		+ '\t{{yes}}\n' \
+		+ 'else:\n' \
+		+ '\t{{no}}'

@@ -92,3 +92,54 @@ func test_the_reference_is_not_a_second_copy_of_the_step() -> void:
 	assert_int(steps).is_equal(1)
 	assert_int(graph.nodes_of(&'wire_ref').size()).is_equal(2)
 	assert_int(ray.input_wires.size()).is_equal(0)
+
+
+# --- inline producer --------------------------------------------------------
+
+
+const FIX_NODE: String = 'res://addons/hengo/actions/scene/get_node.gd'
+
+
+func _inline(_owner: HenSaveAction, _input: StringName, _macro: HenSaveMacro, _output: StringName) -> HenSaveAction:
+	var child: HenSaveAction = HenSaveAction.create(_macro)
+
+	_owner.input_actions[str(_input)] = {action = child, output = _output}
+
+	return child
+
+
+# the inline copy is only ever asked for its value, so the branches it would draw
+# as a step point nowhere and read as dead pins on the card
+func test_an_inline_producer_draws_no_branch() -> void:
+	var node_macro: HenSaveMacro = _register(FIX_NODE)
+	var setter: HenSaveAction = _add(_register(FIX_SET), &'physics')
+
+	_inline(setter, &'value', node_macro, &'result')
+
+	var producer: HenFlowGraphTypes.FlowNode = null
+
+	for node: HenFlowGraphTypes.FlowNode in _build().nodes:
+		if node.kind == &'producer':
+			producer = node
+
+	assert_object(producer).is_not_null()
+	assert_array(producer.pins_of(&'exec_out')).is_empty()
+	assert_array(producer.pins_of(&'data_out')).is_not_empty()
+
+
+# the same action as a step keeps every branch it declares
+func test_the_same_action_as_a_step_keeps_its_branches() -> void:
+	_add(_register(FIX_NODE), &'physics')
+
+	var step: HenFlowGraphTypes.FlowNode = null
+
+	for node: HenFlowGraphTypes.FlowNode in _build().nodes:
+		if node.kind == &'action':
+			step = node
+
+	var branches: Array[String] = []
+
+	for pin: HenFlowGraphTypes.FlowPin in step.pins_of(&'exec_out'):
+		branches.append(str(pin.id))
+
+	assert_array(branches).contains(['found', 'missing'])

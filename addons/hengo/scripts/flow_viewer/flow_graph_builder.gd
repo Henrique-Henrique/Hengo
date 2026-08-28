@@ -190,11 +190,11 @@ static func _action_node(
 		for output: HenSaveParam in macro.outputs:
 			node.add_pin(HenFlowGraphTypes.FlowPin.new(output.id, &'data_out', output.name))
 
-	# a producer is pulled in by a wire, so it never carries the sequence
+	# a producer is pulled in by a wire, so it carries neither the sequence nor the
+	# branches: the inline copy is only ever asked for its value
 	if _kind != &'producer':
 		node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.THEN_PIN, &'exec_out'))
-
-	_add_branch_pins(_graph, _save_data, _action, macro, node, _depth)
+		_add_branch_pins(_graph, _save_data, _action, macro, node, _depth)
 
 	if macro and macro.has_body:
 		node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.BODY_PIN, &'exec_out', 'Body'))

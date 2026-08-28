@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Randomly branches to True or False based on a percentage. A chance of 50 goes True about half the time.'
+	return 'Answers a random roll against the chance given, so Chance = 25 comes up true about one time in four. It can branch on the answer or hand it to a field that takes a yes or no.'
 
 
 func get_display_name() -> String:
@@ -34,6 +34,16 @@ func get_inputs() -> Array[Dictionary]:
 	]
 
 
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Yes', type = 'bool', id = &'result', doc = 'Where to store whether the roll came up inside the chance.'}
+	]
+
+
+func get_output_result() -> String:
+	return 'randf() * 100.0 < {{chance}}'
+
+
 func get_flow_inputs() -> Array[Dictionary]:
 	return [
 		{name = 'Enter', id = &'enter'},
@@ -44,8 +54,8 @@ func get_flow_inputs() -> Array[Dictionary]:
 
 func get_flow_outputs() -> Array[Dictionary]:
 	return [
-		{name = 'True', id = &'true', doc = 'Where to go when the roll succeeds.'},
-		{name = 'False', id = &'false', doc = 'Where to go when it fails.'}
+		{name = 'True', id = &'true', optional = true, doc = 'Where to go when the roll succeeds.'},
+		{name = 'False', id = &'false', optional = true, doc = 'Where to go when it fails.'}
 	]
 
 
@@ -61,5 +71,14 @@ func get_flow_physics() -> String:
 	return _body()
 
 
+# with no branch wired it is only the answer, which is what lets it be read
+# from inside another action's field
 func _body() -> String:
-	return 'if randf() * 100.0 < {{chance}}:\n\t{{true}}\nelse:\n\t{{false}}'
+	if not any_flow_connected():
+		return '{{out:result}}'
+
+	return '{{out:result}}\n' \
+		+ 'if randf() * 100.0 < {{chance}}:\n' \
+		+ '\t{{true}}\n' \
+		+ 'else:\n' \
+		+ '\t{{false}}'

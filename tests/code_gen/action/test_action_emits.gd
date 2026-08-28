@@ -106,6 +106,53 @@ func test_a_picker_the_bodies_never_read_adds_no_shape() -> void:
 # --- pool sweeps ------------------------------------------------------------
 
 
+# these answer as a value somewhere else: four through an engine bind, and the last
+# one would only hand back the bool it was given
+const ANSWERED_ELSEWHERE: Array[String] = [
+	'any_input', 'check_key', 'input_action', 'mouse_button',
+	'if_condition'
+]
+
+
+# a one-expression question with no state of its own has to answer as a value too,
+# or it can only ever be asked by nesting a branch around whoever needed it
+func test_every_plain_question_also_produces_a_value() -> void:
+	var branch_only: Array = []
+
+	for macro: HenSaveMacro in _pool():
+		if macro.flow_outputs.size() != 2 or not macro.outputs.is_empty():
+			continue
+
+		if ANSWERED_ELSEWHERE.has(str(macro.id)):
+			continue
+
+		for variant: Dictionary in HenActionEmits.of(macro):
+			if not (variant.declares as Dictionary).is_empty():
+				continue
+
+			for phase: String in (variant.code as Dictionary):
+				if _is_plain_question(str(variant.code[phase])):
+					branch_only.append(str(macro.id))
+					break
+
+			break
+
+	assert_array(branch_only).override_failure_message(
+		'questions that only branch, they need a bool output and optional branches: ' + str(branch_only)
+	).is_empty()
+
+
+# `if <expression>:` over two branch tokens and nothing else. a stray carriage
+# return would hide a whole action from the sweep, so it never reaches the compare
+func _is_plain_question(_body: String) -> bool:
+	var lines: PackedStringArray = _body.replace('\r', '').split('\n')
+
+	if lines.size() != 4 or not lines[0].begins_with('if ') or not lines[0].ends_with(':'):
+		return false
+
+	return lines[2] == 'else:' and lines[1].begins_with('\t{{') and lines[3].begins_with('\t{{')
+
+
 # _output_rhs falls back to 'null' when the method is missing, so a typo in
 # get_output_<id> ships an action that quietly stores nothing
 func test_every_output_has_a_right_side() -> void:
