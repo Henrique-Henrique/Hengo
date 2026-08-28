@@ -509,6 +509,17 @@ theme_type_variation = &"StatusBarPanel"
 layout_mode = 2
 theme_override_constants/separation = 8
 
+[node name="BrandLabel" type="Label" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000120]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(1, 1, 1, 0.45)
+theme_override_fonts/font = ExtResource("23_tlngq")
+theme_override_font_sizes/font_size = 13
+text = "Hengo Script"
+
+[node name="VSeparatorBrand" type="VSeparator" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000121]
+layout_mode = 2
+
 [node name="ScriptInfo" type="HBoxContainer" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000035]
 layout_mode = 2
 theme_override_constants/separation = 4

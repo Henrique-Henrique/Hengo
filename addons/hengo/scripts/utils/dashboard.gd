@@ -4,8 +4,10 @@ class_name HenDashboard extends PanelContainer
 const ITEM_SCENE = preload('res://addons/hengo/scenes/utils/dashboard_item.tscn')
 const RENAME_POPUP_SCENE = preload('res://addons/hengo/scenes/utils/rename_script_popup.tscn')
 const TAB_INDEX: int = 0
+const DOCS_URL: String = 'https://hengoscript.com/docs/'
 
 @onready var new_script_bt: Button = %NewScript
+@onready var docs_bt: Button = %DocumentationBt
 @onready var search_edit: LineEdit = %Search
 @onready var script_list_node: VBoxContainer = %ScriptList
 
@@ -19,6 +21,7 @@ func _ready() -> void:
 
 	search_edit.text_changed.connect(_on_search_change)
 	new_script_bt.pressed.connect(_on_create_script)
+	docs_bt.pressed.connect(func(): OS.shell_open(DOCS_URL))
 
 	_apply_semantic_colors()
 
@@ -28,15 +31,11 @@ func _ready() -> void:
 		tabs.tab_changed.connect(_on_sidebar_tab_changed)
 
 
-# tints dashboard action buttons by purpose
 func _apply_semantic_colors() -> void:
 	var c: Dictionary = HenUtils.UI_COLORS
-	var root: Node = $MarginContainer/VBoxContainer
 
 	HenUtils.tint_button(new_script_bt, c.create)
-	HenUtils.tint_button(root.get_node('QuickActionsRow/DocumentationBt'), c.code)
-	HenUtils.tint_button(root.get_node('UsefulLinksRow/HowToUseBt'), c.info_yellow)
-	HenUtils.tint_button(root.get_node('UsefulLinksRow/WebsiteBt'), c.web)
+	HenUtils.tint_button(docs_bt, c.code)
 
 
 func _get_sidebar_tabs() -> TabContainer:
