@@ -430,6 +430,11 @@ static func _bind_code(_save_data: HenSaveData, _source: Dictionary) -> Dictiona
 		if native.is_empty():
 			return {error = 'unknown native source "' + str(_source.native) + '"'}
 
+		var refused: String = _native_class_error(_save_data, str(_source.native))
+
+		if not refused.is_empty():
+			return {error = refused}
+
 		return {code = native}
 
 	if _source.has('prop'):
@@ -775,6 +780,27 @@ static func _macro_output(_macro: HenSaveMacro, _key: String) -> HenSaveParam:
 
 # a parameterized source is written as "Action strength:ui_right" in the json and
 # stored as its "<key>:<argument>" bind code
+# the ui only offers a source the owner can answer, and the cli has to refuse the
+# same ones or it writes a property the class does not have
+static func _native_class_error(_save_data: HenSaveData, _name: String) -> String:
+	var separator: int = _name.find(':')
+	var head: String = _name.substr(0, separator) if separator > 0 else _name
+	var owner: StringName = _save_data.identity.type if _save_data.identity else &''
+
+	for source: Dictionary in HenUtils.NATIVE_SOURCES:
+		if str(source.name) != head and str(source.get('key', '')) != head:
+			continue
+
+		var needs: StringName = source.get('needs_class', &'')
+
+		if needs.is_empty() or HenUtils.class_serves(owner, [needs]):
+			return ''
+
+		return 'native source "' + str(source.name) + '" needs a ' + str(needs) + ', and this script extends ' + str(owner)
+
+	return ''
+
+
 static func _native_code(_name: String) -> String:
 	var separator: int = _name.find(':')
 	var head: String = _name.substr(0, separator) if separator > 0 else _name

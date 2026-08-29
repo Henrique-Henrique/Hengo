@@ -35,6 +35,7 @@ const CATEGORIES: Dictionary = {
 	tween = {name = 'Tween', icon = 'sparkles', color = '#fb7185', order = 135},
 	render = {name = 'Render', icon = 'palette', color = '#f368e0', order = 140},
 	control = {name = 'Control', icon = 'sliders-horizontal', color = '#60a5fa', order = 145},
+	tilemap = {name = 'Tile Map', icon = 'grid-3x3', color = '#7c9a6b', order = 148},
 	scene = {name = 'Scene', icon = 'layers', color = '#64748b', order = 150},
 	save = {name = 'Save', icon = 'save', color = '#a3a3a3', order = 155},
 	time = {name = 'Time', icon = 'timer', color = '#94a3b8', order = 160},

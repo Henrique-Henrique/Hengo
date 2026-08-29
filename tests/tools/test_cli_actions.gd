@@ -228,3 +228,14 @@ func test_an_action_that_takes_a_node_serves_any_class() -> void:
 
 	assert_str(_build_one('move_and_slide', 'physics')).is_empty()
 	assert_str(HenTest.get_all_code()).contains('must be bound to a variable or property')
+
+
+# the ui only offers a native source the owner can answer, and the cli used to
+# emit any of them, writing a property the class does not have
+func test_a_native_source_the_owner_cannot_answer_is_refused() -> void:
+	save_data.identity.type = 'Node2D'
+
+	assert_str(_build_one('print_value', 'update', {value = {native = 'Velocity'}})) \
+		.contains('needs a RigidBody3D')
+
+	assert_str(_build_one('print_value', 'update', {value = {native = 'Delta'}})).is_empty()
