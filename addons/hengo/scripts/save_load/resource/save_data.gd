@@ -132,6 +132,29 @@ func find_macro(_id: StringName) -> HenSaveStateMacro:
 	return null
 
 
+# a free state name based on _base, appending 2, 3, ... when taken. two states of
+# one machine sharing a name would write the same class twice
+func unique_state_name(_base: String) -> String:
+	var taken: Dictionary = {}
+
+	for state: HenSaveState in states:
+		taken[state.name.to_snake_case()] = true
+
+	for sub_list: Variant in sub_states.values():
+		for state: HenSaveState in sub_list:
+			taken[state.name.to_snake_case()] = true
+
+	if not taken.has(_base.to_snake_case()):
+		return _base
+
+	var index: int = 2
+
+	while taken.has((_base + ' ' + str(index)).to_snake_case()):
+		index += 1
+
+	return _base + ' ' + str(index)
+
+
 func new_counter_id() -> StringName:
 	counter += 1
 	return StringName(str(counter))

@@ -311,7 +311,7 @@ func call_code() -> String:
 	for param: HenSaveParam in func_res.inputs:
 		args.append('{{' + str(param.id) + '}}')
 
-	return '_ref.' + func_res.method_name() + '(' + ', '.join(args) + ')'
+	return '_ref.' + HenGeneratorFunction.method_name(save_data, func_res) + '(' + ', '.join(args) + ')'
 
 
 func _has_output(_id: String) -> bool:

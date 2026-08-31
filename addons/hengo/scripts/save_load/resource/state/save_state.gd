@@ -94,7 +94,9 @@ static func create_macro_use(_macro: HenSaveStateMacro, _save_data: HenSaveData)
 	var use: HenSaveState = HenSaveState.create(true, _save_data)
 
 	use.macro_id = _macro.id
-	use.name = _macro.name
+	# two uses of one macro would be born with the same name, and a machine cannot
+	# hold two states called the same
+	use.name = _save_data.unique_state_name(_macro.name)
 
 	for param: HenSaveParam in _macro.inputs:
 		use.macro_inputs.append(HenSaveParam.create(param.get_data()))

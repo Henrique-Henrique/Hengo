@@ -232,3 +232,139 @@ func test_the_palette_of_a_place_offers_actions() -> void:
 	assert_int(HenActionPool.for_phase(editor.effective_phase(StringName(str(hook.id)))).size()).is_greater(0)
 	# and a step dropped there keeps the port, not the phase
 	assert_str(String(editor.effective_phase(&'enter'))).is_equal('enter')
+
+
+# --- editing inside a definition ---------------------------------------------
+
+
+func _register_phases() -> HenSaveMacro:
+	var instance: HenScriptMacroBase = (load('res://tests/fixtures/action_phases.gd') as GDScript).new()
+	var macro_res: HenSaveMacro = HenSaveMacro.new()
+
+	macro_res.id = instance.get_id()
+	macro_res.name = 'phases'
+	macro_res.is_script_macro = true
+	macro_res.script_path = 'res://tests/fixtures/action_phases.gd'
+
+	for input: Dictionary in instance.get_inputs():
+		macro_res.inputs.append(HenSaveParam.create(input))
+
+	for flow: Dictionary in instance.get_flow_inputs():
+		macro_res.flow_inputs.append(HenSaveFlowParam.create(flow))
+
+	(Engine.get_singleton(&'Global') as HenGlobal).action_macros.append(macro_res)
+
+	return macro_res
+
+
+# a step added on a place of a macro is kept on that place, not on a phase
+func test_a_step_added_on_a_place_stays_there() -> void:
+	var hook: HenSaveFlowParam = macro.get_new_flow_input()
+	var use: HenSaveState = HenStateOps.request_add_macro_use(save_data, state, macro)
+	var editor := HenStateViewerCardEditor.new()
+
+	hook.name = 'on aim'
+	editor.target(save_data, use.id)
+	editor._do_insert(_register_phases(), save_data, use.id, null, StringName(str(hook.id)), -1)
+
+	var steps: Array = HenGeneratorAction.hook_steps(save_data, use, StringName(str(hook.id)))
+
+	assert_int(steps.size()).is_equal(1)
+	assert_str(String((steps[0] as HenSaveAction).phase)).is_equal(String(hook.id))
+
+
+# the body of a function is an action list like any other, so a step lands in it
+func test_a_step_added_inside_a_function_lands_in_its_body() -> void:
+	var editor := HenStateViewerCardEditor.new()
+	var scope: HenSaveState = func_res.scope_state()
+
+	editor.target(save_data, scope.id)
+	editor._do_insert(_register_phases(), save_data, scope.id, null, &'update', -1)
+
+	assert_int(save_data.get_state_actions(scope.id).size()).is_equal(1)
+
+
+# --- the definition going away while it is open ------------------------------
+
+
+func test_deleting_the_open_function_falls_back_to_the_script() -> void:
+	var viewer: HenFlowViewer = _viewer()
+	var side_bar: HenSideBar = (load('res://addons/hengo/scenes/side_bar.tscn') as PackedScene).instantiate()
+
+	add_child(side_bar)
+	HenRoute.enter(HenRoute.KIND_FUNCTION, func_res.id)
+
+	assert_array(_drawn(viewer)).is_equal(['helper'])
+
+	side_bar._request_delete_resource(func_res)
+	viewer.rebuild()
+
+	assert_bool(HenRoute.is_base()).is_true()
+	assert_array(_drawn(viewer)).contains(['Idle'])
+
+	side_bar.free()
+
+
+func test_deleting_the_open_macro_falls_back_to_the_script() -> void:
+	var viewer: HenFlowViewer = _viewer()
+	var side_bar: HenSideBar = (load('res://addons/hengo/scenes/side_bar.tscn') as PackedScene).instantiate()
+
+	add_child(side_bar)
+	HenRoute.enter(HenRoute.KIND_MACRO, macro.id)
+
+	assert_array(_drawn(viewer)).is_equal(['Flash'])
+
+	side_bar._request_delete_resource(macro)
+	viewer.rebuild()
+
+	assert_bool(HenRoute.is_base()).is_true()
+	assert_array(_drawn(viewer)).contains(['Idle'])
+
+	side_bar.free()
+
+
+# --- copy, paste and undo inside a definition --------------------------------
+
+
+# the clipboard and the undo stack are keyed by the list a step belongs to, and a
+# function body is one of those lists like any state
+func test_copy_and_paste_inside_a_function() -> void:
+	var editor := HenStateViewerCardEditor.new()
+	var scope: HenSaveState = func_res.scope_state()
+
+	editor.target(save_data, scope.id)
+	editor._do_insert(_register_phases(), save_data, scope.id, null, &'update', -1)
+
+	var original: HenSaveAction = save_data.get_state_actions(scope.id)[0]
+
+	HenActionClipboard.copy([original])
+	editor.paste_around(HenActionClipboard.take(), original)
+
+	assert_int(save_data.get_state_actions(scope.id).size()).is_equal(2)
+
+	var pasted: HenSaveAction = save_data.get_state_actions(scope.id)[1]
+
+	assert_str(String(pasted.macro_id)).is_equal(String(original.macro_id))
+	assert_str(String(pasted.id)).is_not_equal(String(original.id))
+
+
+# undo of an edit made inside a definition restores that definition, and not the
+# state that happened to be on screen before
+func test_undo_restores_the_body_of_the_open_definition() -> void:
+	var editor := HenStateViewerCardEditor.new()
+	var scope: HenSaveState = func_res.scope_state()
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	editor.record_hook = func(_states: Array, _label: String, _mutation: Callable) -> bool:
+		return global.flow_history.record(save_data, _states, _label, _mutation)
+
+	editor.target(save_data, scope.id)
+	editor._insert_new(_register_phases(), scope.id, null, &'update', -1)
+
+	assert_int(save_data.get_state_actions(scope.id).size()).is_equal(1)
+
+	assert_bool(global.flow_history.undo(save_data)).is_true()
+	assert_int(save_data.get_state_actions(scope.id).size()).is_equal(0)
+
+	assert_bool(global.flow_history.redo(save_data)).is_true()
+	assert_int(save_data.get_state_actions(scope.id).size()).is_equal(1)

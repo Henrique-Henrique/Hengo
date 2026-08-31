@@ -28,6 +28,7 @@ func get_code(_save_data: HenSaveData, _build_preview: bool = false) -> String:
 	# would leave the next one writing self for _ref
 	HenGeneratorAction.in_function = false
 	HenGeneratorAction.macro_uses.clear()
+	HenGeneratorAction.clear_hook_scopes()
 
 	code += _get_start(_save_data)
 	code += HenGeneratorVariable.get_variables_code(_save_data)

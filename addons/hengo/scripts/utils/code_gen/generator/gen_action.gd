@@ -22,6 +22,25 @@ static func current_macro_use() -> HenSaveState:
 	return macro_uses.back() if not macro_uses.is_empty() else null
 
 
+# true when this use runs a macro already being written, which would unfold the
+# same machine forever
+static func macro_use_loops(_use: HenSaveState) -> bool:
+	for entry: HenSaveState in macro_uses:
+		if entry != _use and str(entry.macro_id) == str(_use.macro_id):
+			return true
+
+	return false
+
+
+# the scopes whose hooks are being gathered, so a function that reaches itself is
+# asked once and not once per level
+static var _hook_scopes: Dictionary = {}
+
+
+static func clear_hook_scopes() -> void:
+	_hook_scopes.clear()
+
+
 # a function body is written at script scope, where the node is `self`: `_ref` is
 # the field a state class holds and does not exist there
 static var in_function: bool = false
@@ -673,6 +692,10 @@ static func for_each_scope(_save_data: HenSaveData, _visit: Callable) -> void:
 
 static func _visit_scope(_save_data: HenSaveData, _state: HenSaveState, _visit: Callable) -> void:
 	if _state.is_macro_use():
+		# a macro that uses itself is written once: the inner use is a dead end
+		if macro_use_loops(_state):
+			return
+
 		push_macro_use(_state)
 
 		for inner: HenSaveState in _state.get_sub_states(_save_data):
@@ -690,6 +713,13 @@ static func _visit_scope(_save_data: HenSaveData, _state: HenSaveState, _visit: 
 # the hook lines of one scope, used both for a state and for the body of a
 # function, whose own hooks become methods of the script
 static func get_scope_hook_tokens(_save_data: HenSaveData, _scope: HenSaveState, _method: StringName) -> Array:
+	var key: String = str(_scope.id) + ':' + str(_method)
+
+	if _hook_scopes.has(key):
+		return []
+
+	_hook_scopes[key] = true
+
 	var was_in_function: bool = in_function
 
 	in_function = _scope.is_function_scope
@@ -697,6 +727,7 @@ static func get_scope_hook_tokens(_save_data: HenSaveData, _scope: HenSaveState,
 	var tokens: Array = _get_hook_tokens(_save_data, _scope, _method)
 
 	in_function = was_in_function
+	_hook_scopes.erase(key)
 
 	return tokens
 
@@ -735,7 +766,7 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 			asked[str(called.id)] = true
 
 			if not get_scope_hook_tokens(_save_data, called.scope_state(), _method).is_empty():
-				tokens.append('_ref.' + HenGeneratorFunction.hook_method(called, _method) + '()')
+				tokens.append('_ref.' + HenGeneratorFunction.hook_method(_save_data, called, _method) + '()')
 
 			continue
 

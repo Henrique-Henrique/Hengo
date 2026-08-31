@@ -96,6 +96,12 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 	for state: HenSaveState in _state_arr:
 		var is_use: bool = state.is_macro_use()
 
+		# a macro that uses itself would unfold forever, so the inner use stops here
+		if is_use and HenGeneratorAction.macro_use_loops(state):
+			code += _looping_use_code(state, _level, idx)
+			idx += 1
+			continue
+
 		# a use writes the machine of its macro, so the drawer is entered around it:
 		# its steps and the names they declare belong to this use alone
 		if is_use:
@@ -109,6 +115,19 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 		idx += 1
 
 	return code
+
+
+# a use of a macro that is already being written: an empty state, since unfolding
+# it again would never end
+static func _looping_use_code(_use: HenSaveState, _level: int, _idx: int) -> String:
+	return '{new_line}{indent}class {name} extends HengoState:
+{indent}	pass'.format({
+		name = _use.name.to_pascal_case(),
+		new_line = '
+
+' if _idx > 0 else '',
+		indent = '	'.repeat(_level)
+	})
 
 
 # one state as a class: its lifecycle methods, what its actions declare and the

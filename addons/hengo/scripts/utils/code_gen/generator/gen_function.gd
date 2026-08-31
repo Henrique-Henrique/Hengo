@@ -13,8 +13,28 @@ const HOOK_SUFFIX: Dictionary = {
 }
 
 
-static func hook_method(_func: HenSaveFunc, _method: StringName) -> String:
-	return _func.method_name() + str(HOOK_SUFFIX.get(str(_method), '_hook'))
+static func hook_method(_save_data: HenSaveData, _func: HenSaveFunc, _method: StringName) -> String:
+	return method_name(_save_data, _func) + str(HOOK_SUFFIX.get(str(_method), '_hook'))
+
+
+# two names can land on the same method ("take damage" and "Take Damage"), and one
+# would overwrite the other: the later one is numbered, by the order they are kept
+static func method_name(_save_data: HenSaveData, _func: HenSaveFunc) -> String:
+	var base: String = _func.method_name()
+
+	if not _save_data:
+		return base
+
+	var taken: int = 0
+
+	for other: HenSaveFunc in _save_data.functions:
+		if other == _func:
+			break
+
+		if other.method_name() == base:
+			taken += 1
+
+	return base if taken == 0 else base + '_' + str(taken + 1)
 
 
 # every function of the script as a method, plus the variables a branching one
@@ -49,7 +69,7 @@ static func _hook_code(_save_data: HenSaveData, _func: HenSaveFunc, _method: Str
 		body.append('\t' + str(token))
 
 	return 'func {name}() -> void:\n{body}'.format({
-		name = hook_method(_func, _method),
+		name = hook_method(_save_data, _func, _method),
 		body = '\n'.join(body)
 	})
 
@@ -102,7 +122,7 @@ static func _method_code(_save_data: HenSaveData, _func: HenSaveFunc) -> String:
 		body.append('\tpass')
 
 	return 'func {name}({params}) -> {type}:\n{body}'.format({
-		name = _func.method_name(),
+		name = method_name(_save_data, _func),
 		params = _params_code(_func),
 		type = _return_type(_func),
 		body = '\n'.join(body)
