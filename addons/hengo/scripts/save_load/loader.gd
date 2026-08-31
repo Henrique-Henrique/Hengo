@@ -162,6 +162,7 @@ func _apply_active(_save_data: HenSaveData, _headless: bool) -> void:
 
 	HenScriptMacroLoader.load_script_macros()
 	HenScriptMacroLoader.load_native_actions()
+	HenRoute.sync_to_script(String(_save_data.identity.id) if _save_data.identity else '')
 
 	if not _headless:
 		show_class_name()
@@ -191,6 +192,7 @@ func load(_id: StringName, _headless: bool = false, _override_data: HenSaveData 
 		# load script macros
 		HenScriptMacroLoader.load_script_macros()
 		HenScriptMacroLoader.load_native_actions()
+		HenRoute.sync_to_script(String(save_data.identity.id) if save_data.identity else '')
 
 		_migrate_open_scripts()
 

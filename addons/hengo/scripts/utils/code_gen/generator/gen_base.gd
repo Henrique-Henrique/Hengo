@@ -30,7 +30,7 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	_STATE_CONTROLLER.static_physics_process(delta)
 {_physics_process}
-{custom_virtuals}{states}"""
+{custom_virtuals}{functions}{states}"""
 
 
 static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferences) -> String:
@@ -48,6 +48,12 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 	# an action may reach script scope too: declarations first, then the virtual
 	# overrides it contributes (mouse look needs _input, which a state cannot have)
 	var action_scope: Array = HenGeneratorAction.get_script_scope_lines(_save_data)
+
+	# a function has no state class to declare in, so what its steps keep and what
+	# it hands back both live here
+	action_scope.append_array(HenGeneratorFunction.get_output_var_lines(_save_data))
+	action_scope.append_array(HenGeneratorFunction.get_base_lines(_save_data))
+	action_scope.append_array(HenGeneratorState.get_macro_input_lines(_save_data))
 
 	if not action_scope.is_empty():
 		code += '\n'.join(action_scope) + '\n\n'
@@ -96,6 +102,7 @@ static func get_base_script_code(_save_data: HenSaveData, _refs: HenTypeReferenc
 		_process = '\n'.join(process_code),
 		_physics_process = '\n'.join(physics_process_code),
 		custom_virtuals = (custom_virtual_code + '\n') if not custom_virtual_code.is_empty() else '',
+		functions = HenGeneratorFunction.get_functions_code(_save_data),
 		reenterable = HenGeneratorState.get_reenterable_code(_save_data),
 		states_dict = HenGeneratorState.get_states_start_code(_save_data),
 		states = HenGeneratorState.get_states_code(_save_data)

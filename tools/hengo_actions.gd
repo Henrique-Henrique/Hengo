@@ -10,10 +10,18 @@ class_name HenHengoActions extends RefCounted
 # pointing at another script finds its states whatever order the json lists them
 
 # collection and debug ride along when the json holds a single script
-const SCRIPT_KEYS: PackedStringArray = ['name', 'extends', 'vars', 'states', 'collection', 'debug']
+const SCRIPT_KEYS: PackedStringArray = ['name', 'extends', 'vars', 'states', 'functions', 'macros', 'collection', 'debug']
 const VAR_KEYS: PackedStringArray = ['name', 'type', 'value', 'export']
-const STATE_KEYS: PackedStringArray = ['name', 'start', 'can_reenter', 'description', 'actions', 'sub_states']
+const STATE_KEYS: PackedStringArray = ['name', 'start', 'can_reenter', 'description', 'actions', 'sub_states', 'uses']
 const ACTION_KEYS: PackedStringArray = ['id', 'phase', 'inputs', 'branches', 'body', 'ref']
+const FUNCTION_KEYS: PackedStringArray = ['name', 'description', 'inputs', 'outputs', 'ways_out', 'actions']
+const MACRO_KEYS: PackedStringArray = ['name', 'description', 'inputs', 'hooks', 'ways_out', 'states']
+const USE_KEYS: PackedStringArray = ['macro', 'name', 'start', 'inputs', 'ways_out', 'steps']
+const PARAM_KEYS: PackedStringArray = ['name', 'type', 'value', 'doc']
+
+# the definition being built, so a step inside it can name the inputs and the ways
+# out of whatever holds it
+static var _scope_def: HenSaveResType = null
 
 # ref given in the json -> the action built for it, so a wire can point at a step
 # declared earlier. cleared per script, since a wire never crosses one
@@ -31,12 +39,200 @@ static func declare(_save_data: HenSaveData, _spec: Dictionary) -> String:
 		if not err.is_empty():
 			return err
 
+	# the definitions come first: a state may use a macro and an action may call a
+	# function, whatever order the json lists them in
+	for f: Dictionary in _spec.get('functions', []):
+		var func_err: String = _declare_function(_save_data, f)
+		if not func_err.is_empty():
+			return func_err
+
+	for m: Dictionary in _spec.get('macros', []):
+		var macro_err: String = _declare_macro(_save_data, m)
+		if not macro_err.is_empty():
+			return macro_err
+
 	for st: Dictionary in _spec.get('states', []):
 		var err: String = _declare_state(_save_data, st)
 		if not err.is_empty():
 			return err
 
 	return ''
+
+
+# a definition is named in the json, and its params carry readable ids so a step
+# can name them: prefixing with the owner keeps two definitions apart
+static func param_id(_owner: String, _name: String) -> StringName:
+	return StringName(_owner.to_snake_case() + '_' + _name.to_snake_case())
+
+
+static func _declare_function(_save_data: HenSaveData, _spec: Dictionary) -> String:
+	var name: String = str(_spec.get('name', ''))
+	var unknown: String = _unknown_keys(_spec, FUNCTION_KEYS, 'function "' + name + '"')
+
+	if not unknown.is_empty():
+		return unknown
+
+	if name.is_empty():
+		return 'function without a name'
+
+	if find_function(_save_data, name):
+		return 'duplicated function "' + name + '"'
+
+	var func_res: HenSaveFunc = _save_data.add_function()
+
+	func_res.name = name
+	func_res.description = str(_spec.get('description', ''))
+
+	for param_spec: Dictionary in _spec.get('inputs', []):
+		var param: Variant = _make_param(name, param_spec)
+
+		if param is String:
+			return 'function "' + name + '": ' + str(param)
+
+		func_res.inputs.append(param)
+
+	for param_spec: Dictionary in _spec.get('outputs', []):
+		var param: Variant = _make_param(name, param_spec)
+
+		if param is String:
+			return 'function "' + name + '": ' + str(param)
+
+		func_res.outputs.append(param)
+
+	for way: Dictionary in _spec.get('ways_out', []):
+		func_res.flow_outputs.append(_make_way_out(name, way))
+
+	return ''
+
+
+static func _declare_macro(_save_data: HenSaveData, _spec: Dictionary) -> String:
+	var name: String = str(_spec.get('name', ''))
+	var unknown: String = _unknown_keys(_spec, MACRO_KEYS, 'macro "' + name + '"')
+
+	if not unknown.is_empty():
+		return unknown
+
+	if name.is_empty():
+		return 'macro without a name'
+
+	if find_macro_def(_save_data, name):
+		return 'duplicated macro "' + name + '"'
+
+	var macro: HenSaveStateMacro = HenSaveStateMacro.create(_save_data)
+
+	macro.name = name
+	macro.description = str(_spec.get('description', ''))
+	_save_data.macros.append(macro)
+
+	for param_spec: Dictionary in _spec.get('inputs', []):
+		var param: Variant = _make_param(name, param_spec)
+
+		if param is String:
+			return 'macro "' + name + '": ' + str(param)
+
+		macro.inputs.append(param)
+
+	for hook: Dictionary in _spec.get('hooks', []):
+		macro.flow_inputs.append(_make_way_out(name, hook))
+
+	for way: Dictionary in _spec.get('ways_out', []):
+		macro.flow_outputs.append(_make_way_out(name, way))
+
+	var states: Array = _spec.get('states', [])
+
+	if states.is_empty():
+		return 'macro "' + name + '" has no state'
+
+	for state_spec: Dictionary in states:
+		var err: String = _declare_macro_state(_save_data, macro, state_spec)
+
+		if not err.is_empty():
+			return err
+
+	if not macro.get_start_state(_save_data):
+		(macro.get_states(_save_data)[0] as HenSaveState).start = true
+
+	return ''
+
+
+static func _declare_macro_state(_save_data: HenSaveData, _macro: HenSaveStateMacro, _spec: Dictionary) -> String:
+	var name: String = str(_spec.get('name', ''))
+	var unknown: String = _unknown_keys(_spec, STATE_KEYS, 'state "' + name + '"')
+
+	if not unknown.is_empty():
+		return unknown
+
+	if name.is_empty():
+		return 'state of macro "' + _macro.name + '" without a name'
+
+	if find_state(_save_data, name):
+		return 'duplicated state "' + name + '"'
+
+	var state: HenSaveState = _macro.add_state(_save_data)
+
+	state.name = name
+	state.description = str(_spec.get('description', ''))
+	state.can_reenter = bool(_spec.get('can_reenter', false))
+
+	if bool(_spec.get('start', false)):
+		state.start = true
+
+	for sub: Dictionary in _spec.get('sub_states', []):
+		var err: String = _declare_sub_state(_save_data, state, sub)
+
+		if not err.is_empty():
+			return err
+
+	return _declare_uses(_save_data, state, _spec)
+
+
+static func _make_param(_owner: String, _spec: Dictionary) -> Variant:
+	var name: String = str(_spec.get('name', ''))
+	var unknown: String = _unknown_keys(_spec, PARAM_KEYS, 'param "' + name + '"')
+
+	if not unknown.is_empty():
+		return unknown
+
+	if name.is_empty():
+		return 'param without a name'
+
+	var param: HenSaveParam = HenSaveParam.create({
+		id = param_id(_owner, name),
+		name = name,
+		type = StringName(str(_spec.get('type', 'Variant'))),
+		doc = str(_spec.get('doc', ''))
+	})
+
+	if _spec.has('value'):
+		param.default_value = _coerce(_spec.value, param.type)
+
+	return param
+
+
+static func _make_way_out(_owner: String, _spec: Dictionary) -> HenSaveFlowParam:
+	var name: String = str(_spec.get('name', ''))
+
+	return HenSaveFlowParam.create({
+		id = param_id(_owner, name),
+		name = name,
+		doc = str(_spec.get('doc', ''))
+	})
+
+
+static func find_function(_save_data: HenSaveData, _name: String) -> HenSaveFunc:
+	for f: HenSaveFunc in _save_data.functions:
+		if f.name == _name:
+			return f
+
+	return null
+
+
+static func find_macro_def(_save_data: HenSaveData, _name: String) -> HenSaveStateMacro:
+	for macro: HenSaveStateMacro in _save_data.macros:
+		if macro.name == _name:
+			return macro
+
+	return null
 
 
 static func _declare_var(_save_data: HenSaveData, _spec: Dictionary) -> String:
@@ -89,6 +285,46 @@ static func _declare_state(_save_data: HenSaveData, _spec: Dictionary) -> String
 		if not err.is_empty():
 			return err
 
+	return _declare_uses(_save_data, state, _spec)
+
+
+# a use is structure, so it is created here: a branch of any state can name it
+# before the build fills in its values
+static func _declare_uses(_save_data: HenSaveData, _state: HenSaveState, _spec: Dictionary) -> String:
+	var index: int = 0
+
+	for use_spec: Dictionary in _spec.get('uses', []):
+		var unknown: String = _unknown_keys(use_spec, USE_KEYS, 'use #' + str(index) + ' of "' + _state.name + '"')
+
+		if not unknown.is_empty():
+			return unknown
+
+		var macro: HenSaveStateMacro = find_macro_def(_save_data, str(use_spec.get('macro', '')))
+
+		if not macro:
+			return 'unknown macro "' + str(use_spec.get('macro', '')) + '"'
+
+		var name: String = str(use_spec.get('name', macro.name))
+
+		if find_state(_save_data, name):
+			return 'duplicated state "' + name + '"'
+
+		var use: HenSaveState = HenSaveState.create_macro_use(macro, _save_data)
+
+		use.name = name
+
+		if not _save_data.sub_states.has(_state.id):
+			_save_data.sub_states[_state.id] = []
+
+		var siblings: Array = _save_data.sub_states[_state.id]
+
+		siblings.append(use)
+
+		if bool(use_spec.get('start', false)) or siblings.size() == 1:
+			use.start = true
+
+		index += 1
+
 	return ''
 
 
@@ -122,12 +358,25 @@ static func _declare_sub_state(_save_data: HenSaveData, _parent: HenSaveState, _
 		if not err.is_empty():
 			return err
 
-	return ''
+	return _declare_uses(_save_data, state, _spec)
 
 
 # fills the action list of every state; declare() must have run for all scripts
 static func build_actions(_save_data: HenSaveData, _spec: Dictionary, _all_scripts: Dictionary = {}) -> String:
 	_refs.clear()
+	_scope_def = null
+
+	for f: Dictionary in _spec.get('functions', []):
+		var func_err: String = _build_function(_save_data, f, _all_scripts)
+
+		if not func_err.is_empty():
+			return func_err
+
+	for m: Dictionary in _spec.get('macros', []):
+		var macro_err: String = _build_macro(_save_data, m, _all_scripts)
+
+		if not macro_err.is_empty():
+			return macro_err
 
 	for st: Dictionary in _spec.get('states', []):
 		var err: String = _build_state_tree(_save_data, st, _all_scripts)
@@ -136,6 +385,155 @@ static func build_actions(_save_data: HenSaveData, _spec: Dictionary, _all_scrip
 			return err
 
 	return ''
+
+
+# the body of a function is an action list like a state's, held under its own id
+static func _build_function(_save_data: HenSaveData, _spec: Dictionary, _all_scripts: Dictionary) -> String:
+	var func_res: HenSaveFunc = find_function(_save_data, str(_spec.get('name', '')))
+
+	if not func_res:
+		return 'function "' + str(_spec.get('name', '')) + '" was not declared'
+
+	_scope_def = func_res
+
+	var scope: HenSaveState = func_res.scope_state()
+	var index: int = 0
+
+	for action_spec: Dictionary in _spec.get('actions', []):
+		var built: Variant = _make_action(_save_data, scope, action_spec, _all_scripts)
+
+		if built is String:
+			_scope_def = null
+			return 'function "' + func_res.name + '" action #' + str(index) + ': ' + str(built)
+
+		_save_data.add_state_action(scope.id, built)
+		index += 1
+
+	_scope_def = null
+
+	return ''
+
+
+static func _build_macro(_save_data: HenSaveData, _spec: Dictionary, _all_scripts: Dictionary) -> String:
+	var macro: HenSaveStateMacro = find_macro_def(_save_data, str(_spec.get('name', '')))
+
+	if not macro:
+		return 'macro "' + str(_spec.get('name', '')) + '" was not declared'
+
+	_scope_def = macro
+
+	for state_spec: Dictionary in _spec.get('states', []):
+		var err: String = _build_state_tree(_save_data, state_spec, _all_scripts)
+
+		if not err.is_empty():
+			_scope_def = null
+			return 'macro "' + macro.name + '": ' + err
+
+	_scope_def = null
+
+	return ''
+
+
+# a use runs the machine of a macro inside the state that holds it, with values
+# and ways out of its own
+static func _build_use(_save_data: HenSaveData, _parent: HenSaveState, _spec: Dictionary, _index: int, _all_scripts: Dictionary = {}) -> String:
+	var macro: HenSaveStateMacro = find_macro_def(_save_data, str(_spec.get('macro', '')))
+
+	if not macro:
+		return 'unknown macro "' + str(_spec.get('macro', '')) + '"'
+
+	var use: HenSaveState = find_state(_save_data, str(_spec.get('name', macro.name)))
+
+	if not use or not use.is_macro_use():
+		return 'use "' + str(_spec.get('name', macro.name)) + '" was not declared'
+
+	for raw_key: Variant in _spec.get('inputs', {}):
+		var input_name: String = str(raw_key)
+		var declared: HenSaveParam = _definition_param(macro, input_name)
+
+		if not declared:
+			return 'macro "' + macro.name + '" has no input "' + input_name + '"'
+
+		var value: Variant = (_spec.inputs as Dictionary)[raw_key]
+
+		if value is Dictionary:
+			var bind: Dictionary = _bind_code(_save_data, value as Dictionary)
+
+			if bind.has('error'):
+				return 'use of "' + macro.name + '", input "' + input_name + '": ' + str(bind.error)
+
+			use.macro_bindings[str(declared.id)] = bind.code
+			continue
+
+		for param: HenSaveParam in use.macro_inputs:
+			if str(param.id) == str(declared.id):
+				param.default_value = _coerce(value, param.type)
+
+	for raw_key: Variant in _spec.get('steps', {}):
+		var slot: String = str(raw_key)
+		var flow: HenSaveFlowParam = _definition_way_out_or_hook(macro, slot)
+		var phase: StringName = StringName(str(flow.id)) if flow else StringName(slot)
+
+		if not flow and not HenSaveAction.PHASE_ORDER.has(phase):
+			return 'macro "' + macro.name + '" has no place "' + slot + '"'
+
+		var index: int = 0
+
+		for action_spec: Dictionary in (_spec.steps as Dictionary)[raw_key]:
+			var built: Variant = _make_action(_save_data, use, action_spec, _all_scripts, false)
+
+			if built is String:
+				return 'use "' + use.name + '", ' + slot + ' #' + str(index) + ': ' + str(built)
+
+			(built as HenSaveAction).phase = phase
+			_save_data.add_state_action(use.id, built)
+			index += 1
+
+	for raw_key: Variant in _spec.get('ways_out', {}):
+		var way_name: String = str(raw_key)
+		var flow: HenSaveFlowParam = _definition_way_out(macro, way_name)
+
+		if not flow:
+			return 'macro "' + macro.name + '" has no way out "' + way_name + '"'
+
+		var target: HenSaveState = find_state(_save_data, str((_spec.ways_out as Dictionary)[raw_key]))
+
+		if not target:
+			return 'unknown state "' + str((_spec.ways_out as Dictionary)[raw_key]) + '" for way out "' + way_name + '"'
+
+		use.flow_targets[str(flow.id)] = {state_id = target.id, label = way_name}
+
+	return ''
+
+
+static func _definition_param(_definition: HenSaveResType, _name: String) -> HenSaveParam:
+	var params: Array[HenSaveParam] = []
+
+	if _definition is HenSaveFunc:
+		params = (_definition as HenSaveFunc).inputs
+	elif _definition is HenSaveStateMacro:
+		params = (_definition as HenSaveStateMacro).inputs
+
+	for param: HenSaveParam in params:
+		if param.name == _name or str(param.id) == _name:
+			return param
+
+	return null
+
+
+static func _definition_way_out(_definition: HenSaveResType, _name: String) -> HenSaveFlowParam:
+	var flows: Array[HenSaveFlowParam] = []
+
+	if _definition is HenSaveFunc:
+		flows = (_definition as HenSaveFunc).flow_outputs
+	elif _definition is HenSaveStateMacro:
+		flows = (_definition as HenSaveStateMacro).flow_outputs
+
+	for flow: HenSaveFlowParam in flows:
+		if flow.name == _name or str(flow.id) == _name:
+			return flow
+
+	return null
 
 
 static func _build_state_tree(_save_data: HenSaveData, _spec: Dictionary, _all_scripts: Dictionary) -> String:
@@ -169,6 +567,16 @@ static func _build_state_actions(_save_data: HenSaveData, _spec: Dictionary, _al
 
 		index += 1
 
+	var use_index: int = 0
+
+	for use_spec: Dictionary in _spec.get('uses', []):
+		var use_err: String = _build_use(_save_data, state, use_spec, use_index, _all_scripts)
+
+		if not use_err.is_empty():
+			return 'state "' + state.name + '": ' + use_err
+
+		use_index += 1
+
 	return ''
 
 
@@ -193,7 +601,7 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 		return unknown
 
 	var id: StringName = StringName(str(_spec.get('id', '')))
-	var macro: HenSaveMacro = find_macro(id)
+	var macro: HenSaveMacro = _resolve_macro(_save_data, id)
 
 	if not macro:
 		return 'unknown action id "' + str(id) + '"' + _id_hint(str(id))
@@ -282,11 +690,13 @@ static func _apply_inputs(_save_data: HenSaveData, _state: HenSaveState, _action
 	var literals: Dictionary = {}
 
 	for raw_key: Variant in _inputs:
-		var key: String = str(raw_key)
-		var declared: HenSaveParam = _macro_input(_macro, key)
+		var declared: HenSaveParam = _macro_input(_macro, str(raw_key))
 
 		if not declared:
-			return 'input "' + key + '" is not declared (valid: ' + _input_ids(_macro) + ')'
+			return 'input "' + str(raw_key) + '" is not declared (valid: ' + _input_ids(_macro) + ')'
+
+		# the json may name a slot, and everything downstream stores it by id
+		var key: String = str(declared.id)
 
 		var value: Variant = _inputs[raw_key]
 
@@ -424,6 +834,14 @@ static func _bind_code(_save_data: HenSaveData, _source: Dictionary) -> Dictiona
 	if _source.has('path'):
 		return {code = HenUtils.BIND_PATH_PREFIX + str(_source.path)}
 
+	if _source.has('arg'):
+		var param: HenSaveParam = _definition_param(_scope_def, str(_source.arg))
+
+		if not param:
+			return {error = 'no input "' + str(_source.arg) + '" in the definition being built'}
+
+		return {code = HenUtils.bind_code_for_arg(param)}
+
 	if _source.has('native'):
 		var native: String = _native_code(str(_source.native))
 
@@ -475,10 +893,12 @@ static func _build_expression(_save_data: HenSaveData, _source: Dictionary) -> V
 # "actions" holds the steps a branch runs before its transition
 static func _apply_branches(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _macro: HenSaveMacro, _branches: Dictionary, _all_scripts: Dictionary) -> String:
 	for raw_key: Variant in _branches:
-		var key: String = str(raw_key)
+		var declared: HenSaveFlowParam = _macro_flow_output(_macro, str(raw_key))
 
-		if not _macro_flow_output(_macro, key):
-			return 'branch "' + key + '" is not a flow output (valid: ' + _flow_output_ids(_macro) + ')'
+		if not declared:
+			return 'branch "' + str(raw_key) + '" is not a flow output (valid: ' + _flow_output_ids(_macro) + ')'
+
+		var key: String = str(declared.id)
 
 		var spec: Variant = _branches[raw_key]
 
@@ -542,6 +962,14 @@ static func _build_branch(_save_data: HenSaveData, _target: Variant, _all_script
 
 	var spec: Dictionary = _target as Dictionary
 
+	if spec.has('way_out'):
+		var flow: HenSaveFlowParam = _definition_way_out(_scope_def, str(spec.way_out))
+
+		if not flow:
+			return 'no way out "' + str(spec.way_out) + '" in the definition being built'
+
+		return {exit_id = str(flow.id), label = str(spec.get('label', spec.way_out))}
+
 	if not spec.has('script'):
 		var same: HenSaveState = find_state(_save_data, str(spec.get('state', '')))
 
@@ -588,6 +1016,37 @@ static func _build_cross_branch(_save_data: HenSaveData, _spec: Dictionary, _all
 	_save_data.add_dep(other.identity.id)
 
 	return branch
+
+
+# "fn:<name>" calls a function of this script and "finish:<name>" ends one; every
+# other id names an action of the pool
+static func _resolve_macro(_save_data: HenSaveData, _id: StringName) -> HenSaveMacro:
+	var text: String = str(_id)
+
+	for prefix: String in ['fn:', 'finish:']:
+		if not text.begins_with(prefix):
+			continue
+
+		var func_res: HenSaveFunc = find_function(_save_data, text.substr(prefix.length()))
+
+		return HenFunctionMacro.macro_of(func_res, prefix == 'finish:') if func_res else null
+
+	if text.begins_with('run:'):
+		var macro: HenSaveStateMacro = _scope_def as HenSaveStateMacro
+		var flow: HenSaveFlowParam = _definition_way_out_or_hook(macro, text.substr(4)) if macro else null
+
+		return HenMacroHookMacro.macro_of(macro, flow) if flow else null
+
+	return find_macro(_id)
+
+
+# a hook is named like a way out, and only a macro has them
+static func _definition_way_out_or_hook(_macro: HenSaveStateMacro, _name: String) -> HenSaveFlowParam:
+	for flow: HenSaveFlowParam in _macro.flow_inputs:
+		if flow.name == _name or str(flow.id) == _name:
+			return flow
+
+	return null
 
 
 # the effective type follows type_from, so a value on a Variant slot is cast to
@@ -754,9 +1213,15 @@ static func find_state(_save_data: HenSaveData, _name: String) -> HenSaveState:
 	return null
 
 
+# a definition of the script carries ids nobody writes by hand, so its slots also
+# answer to the name they were declared with
 static func _macro_input(_macro: HenSaveMacro, _key: String) -> HenSaveParam:
 	for param: HenSaveParam in _macro.inputs:
 		if str(param.id) == _key:
+			return param
+
+	for param: HenSaveParam in _macro.inputs:
+		if param.name == _key:
 			return param
 
 	return null
@@ -764,7 +1229,7 @@ static func _macro_input(_macro: HenSaveMacro, _key: String) -> HenSaveParam:
 
 static func _macro_flow_output(_macro: HenSaveMacro, _key: String) -> HenSaveFlowParam:
 	for flow: HenSaveFlowParam in _macro.flow_outputs:
-		if str(flow.id) == _key:
+		if str(flow.id) == _key or flow.name == _key:
 			return flow
 
 	return null

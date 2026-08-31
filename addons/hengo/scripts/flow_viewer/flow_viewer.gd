@@ -23,13 +23,14 @@ const DOUBLE_CLICK_MS: int = 400
 # update action fires every frame. a shorter fade would strobe instead of glow
 const RUN_TIME_MS: int = 200
 # the header buttons of a state frame, the only part of the band that reacts
-const FRAME_BUTTONS: Array[StringName] = [&'state_start', &'state_add_sub', &'state_move', &'state_delete', &'state_menu']
+const FRAME_BUTTONS: Array[StringName] = [&'state_start', &'state_add_sub', &'state_move', &'state_delete', &'state_menu', &'state_enter']
 const STATE_POPUP_SIZE: Vector2 = Vector2(360, 400)
 # a button hint is glanced at, not read like a doc, so it waits far less
 const BUTTON_DWELL: float = 0.3
 const FRAME_BUTTON_HINTS: Dictionary = {
 	state_start = 'Make this the state the machine starts on',
 	state_add_sub = 'New sub-state inside this one',
+	state_enter = 'Open the macro this state runs',
 	state_move = 'Move this state into another state',
 	state_delete = 'Delete this state',
 	state_menu = 'State settings'
@@ -70,6 +71,8 @@ var _selected_actions: Array[String] = []
 var _selection_anchor: String = ''
 # an action the graph is asked to centre on before it holds the card
 var _pending_focus: String = ''
+# same for a state picked while another scope was open
+var _pending_state: String = ''
 # the card the press landed on, and the drop it is currently pointing at
 var _press_card: HenFlowNodeCard = null
 var _dragging: bool = false
@@ -100,9 +103,9 @@ var _running_state: String = ''
 # swapped in _ready for the one on Global, so the sidebar and the state ops record
 # into the same stack. the local one covers the paths that return before that
 var _history: HenFlowHistory = HenFlowHistory.new()
-var _history_script: String = ''
-# the script the cam is currently framing, so its view can be kept on the way out
-var _cam_script: String = ''
+var _history_scope: String = ''
+# the scope the cam is currently framing, so its view can be kept on the way out
+var _cam_scope: String = ''
 
 
 func _ready() -> void:
@@ -116,7 +119,7 @@ func _ready() -> void:
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 
 	if signal_bus:
-		for signal_name: StringName in [&'request_list_update', &'request_structural_update', &'scripts_generation_finished']:
+		for signal_name: StringName in [&'request_list_update', &'request_structural_update', &'scripts_generation_finished', &'route_changed']:
 			if not signal_bus.get(signal_name).is_connected(_on_changed):
 				signal_bus.get(signal_name).connect(_on_changed)
 
@@ -225,22 +228,22 @@ func _cam() -> HenCam:
 # one cam frames one script at a time, so the outgoing view is kept until its tab
 # comes back
 func _store_cam_view(_global: HenGlobal) -> void:
-	if not _global or _cam_script.is_empty():
+	if not _global or _cam_scope.is_empty():
 		return
 
 	var cam: HenCam = _cam()
 
 	if cam:
-		_global.CAM_VIEWS[_cam_script] = cam.capture_view()
+		_global.CAM_VIEWS[_cam_scope] = cam.capture_view()
 
 
-func _restore_cam_view(_global: HenGlobal, _script_id: String) -> void:
+func _restore_cam_view(_global: HenGlobal, _scope_key: String) -> void:
 	var cam: HenCam = _cam()
 
 	if not _global or not cam:
 		return
 
-	cam.apply_view(_global.CAM_VIEWS.get(_script_id, {}))
+	cam.apply_view(_global.CAM_VIEWS.get(_scope_key, {}))
 
 
 func _process(_delta: float) -> void:
@@ -479,32 +482,50 @@ func rebuild() -> void:
 
 	if not global or not global.SAVE_DATA:
 		_store_cam_view(global)
-		_cam_script = ''
+		_cam_scope = ''
 		_clear()
 		return
 
 	var save_data: HenSaveData = global.SAVE_DATA
-	var script_id: String = String(save_data.identity.id) if save_data.identity else ''
 
-	# an entry restores a list into the script it was taken from, so it means
-	# nothing once another script is on screen
-	if script_id != _history_script:
-		_history_script = script_id
+	HenRoute.validate(save_data)
+
+	var script_id: String = String(save_data.identity.id) if save_data.identity else ''
+	var scope_key: String = HenRoute.key(script_id)
+
+	# an entry restores a list into the scope it was taken from, so it means
+	# nothing once another one is on screen
+	if scope_key != _history_scope:
+		_history_scope = scope_key
 		_history.clear()
 
-	if script_id != _cam_script:
+	if scope_key != _cam_scope:
 		_store_cam_view(global)
-		_cam_script = script_id
-		_restore_cam_view(global, script_id)
+		_cam_scope = scope_key
+		_restore_cam_view(global, scope_key)
+
+		# a definition edited in another scope may have grown an input, and the steps
+		# that use it cloned the shape it had when they were created
+		HenSaveAction.sync_macro_inputs(save_data)
 
 	_clear()
-	_build_states(save_data)
-	_build_outer(save_data)
+
+	var scope: HenSaveResType = HenRoute.current_scope(save_data)
+
+	_build_states(save_data, scope)
+	_build_outer(save_data, scope)
 
 	# the cards come back blank, and the sweep that marks the broken ones is the
 	# root's: a manual refresh has nothing else to schedule it
 	if global.HENGO_ROOT:
 		global.HENGO_ROOT.schedule_check_errors()
+
+	if not _pending_state.is_empty():
+		var wanted_state: String = _pending_state
+
+		_pending_state = ''
+
+		focus_state(HenGeneratorAction.find_state(save_data, StringName(wanted_state)))
 
 	if not _pending_focus.is_empty():
 		var wanted: String = _pending_focus
@@ -533,9 +554,11 @@ func _clear() -> void:
 
 
 # pass one: every state's own graph, measured and laid out in its own space
-func _build_states(_save_data: HenSaveData) -> void:
-	for state: HenSaveState in _all_states(_save_data):
-		var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphBuilder.build(_save_data, state)
+func _build_states(_save_data: HenSaveData, _scope: HenSaveResType = null) -> void:
+	var is_function: bool = _scope is HenSaveFunc
+
+	for state: HenSaveState in _scope_states(_save_data, _scope):
+		var graph: HenFlowGraphTypes.FlowGraph = _graph_of(_save_data, state, is_function)
 		var cards: Array[HenFlowNodeCard] = []
 
 		for node: HenFlowGraphTypes.FlowNode in graph.nodes:
@@ -559,27 +582,64 @@ func _build_states(_save_data: HenSaveData) -> void:
 		}
 
 
+func _graph_of(_save_data: HenSaveData, _state: HenSaveState, _is_function: bool) -> HenFlowGraphTypes.FlowGraph:
+	if _state.is_macro_use():
+		return HenFlowGraphBuilder.build_macro_use(_save_data, _state)
+
+	if _is_function:
+		return HenFlowGraphBuilder.build_function(_save_data, _state)
+
+	return HenFlowGraphBuilder.build(_save_data, _state)
+
+
+# the states the open scope draws: the whole machine of the script, or the single
+# body of the function being edited
+func _scope_states(_save_data: HenSaveData, _scope: HenSaveResType) -> Array[HenSaveState]:
+	if _scope is HenSaveFunc:
+		return [(_scope as HenSaveFunc).scope_state()] as Array[HenSaveState]
+
+	if _scope is HenSaveStateMacro:
+		var states: Array[HenSaveState] = []
+
+		for state: HenSaveState in (_scope as HenSaveStateMacro).get_states(_save_data):
+			_collect_tree(_save_data, state, states)
+
+		return states
+
+	return _all_states(_save_data)
+
+
 # a sub state is a state with its own actions, and it lives in its own dictionary
 # instead of carrying the flag: skipping it left its parent framing nothing at all
 func _all_states(_save_data: HenSaveData) -> Array[HenSaveState]:
 	var out: Array[HenSaveState] = []
 
 	for state: HenSaveState in _save_data.states:
-		out.append(state)
-
-	for key: Variant in _save_data.sub_states:
-		for state: HenSaveState in _save_data.sub_states[key]:
-			if not out.has(state):
-				out.append(state)
+		_collect_tree(_save_data, state, out)
 
 	return out
 
 
+# the states of a macro are drawn inside the macro, never in the scope that uses
+# it: a use is a closed box here
+func _collect_tree(_save_data: HenSaveData, _state: HenSaveState, _out: Array[HenSaveState]) -> void:
+	if _out.has(_state):
+		return
+
+	_out.append(_state)
+
+	if _state.is_macro_use():
+		return
+
+	for sub: HenSaveState in _state.get_sub_states(_save_data):
+		_collect_tree(_save_data, sub, _out)
+
+
 # pass two: the frames on the state grid, which is the state viewer's own engine
-func _build_outer(_save_data: HenSaveData) -> void:
+func _build_outer(_save_data: HenSaveData, _scope: HenSaveResType = null) -> void:
 	var dict: Dictionary = {
 		id = 'collection',
-		states = {_save_data.identity.name: HenStateGraphSource.script_dict(_save_data)}
+		states = {_save_data.identity.name: HenStateGraphSource.scope_dict(_save_data, _scope)}
 	}
 
 	graph_root = parser.parse_machine(dict)
@@ -627,8 +687,18 @@ func _spawn_frame(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var state: HenSaveState = entry.state
 	var frame: HenFlowStateFrame = HenFlowStateFrame.new()
 
+	var macro: HenSaveStateMacro = state.get_macro(_save_data()) if state.is_macro_use() else null
+	var meta: String = ('runs the macro ' + macro.name) if macro else state.description
+
 	nodes_container.add_child(frame)
-	frame.setup(self , state.name, state.description, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base, state.can_reenter)
+	frame.setup(self , state.name, meta, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base, state.can_reenter)
+
+	if state.is_function_scope:
+		frame.hide_chrome()
+
+	if state.is_macro_use():
+		frame.mark_macro_use()
+
 	frame.set_content_size(entry.size)
 
 	_frames[_node] = frame
@@ -1602,6 +1672,11 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	if card.node.kind == &'wire_ref' and card.node.wire_source:
 		return focus_action(str(card.node.wire_source.id))
 
+	# a step that stands for a definition takes the canvas into it
+	if hit.kind == &'enter_scope' and not card.node.enter_scope.is_empty():
+		HenRoute.enter(StringName(str(card.node.enter_scope.kind)), StringName(str(card.node.enter_scope.id)), true)
+		return true
+
 	# before the action guard below: an add tail has no action of its own
 	if hit.kind == &'add_tail':
 		_editing_card = card
@@ -1612,9 +1687,15 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 	# a phase cell of the entry is where its chain is started, the same way a branch
 	# cell is where a branch is set
 	if hit.kind == &'exec_out' and card.node.kind == &'state_entry':
+		var pin_id: String = str((hit.pin as HenFlowGraphTypes.FlowPin).id)
+
+		# a way out of a macro leads to a state, so its cell picks one
+		if pin_id.begins_with(HenFlowGraphTypes.WAY_OUT_PIN):
+			return _open_way_out_picker(card, pin_id.substr(HenFlowGraphTypes.WAY_OUT_PIN.length()))
+
 		_editing_card = card
 		_editor_for(hit.node)
-		_editor.open_add(StringName(str((hit.pin as HenFlowGraphTypes.FlowPin).id)), null, -1, rect)
+		_editor.open_add(StringName(pin_id), null, -1, rect)
 		return true
 
 	if (hit.kind == &'add_above' or hit.kind == &'add_below') and card.node.action:
@@ -1695,12 +1776,37 @@ func _dispatch_context_click() -> bool:
 	return true
 
 
+# the ways out of a macro are wired per use, so the cell asks which state this one
+# hands control to
+func _open_way_out_picker(_card: HenFlowNodeCard, _exit_id: String) -> bool:
+	var use: HenSaveState = _state_of_entry(_card)
+
+	if not use or not use.is_macro_use():
+		return false
+
+	HenStateOps.open_way_out_menu(use, _exit_id)
+
+	return true
+
+
+# the state whose graph holds this entry card, which a card with no action of its
+# own cannot be found by
+func _state_of_entry(_card: HenFlowNodeCard) -> HenSaveState:
+	for entry: Variant in _states.values():
+		if (entry.graph as HenFlowGraphTypes.FlowGraph).entry == _card.node:
+			return entry.state
+
+	return null
+
+
 # the state chrome mirrors the sidebar: the same menu, the same confirm and the
 # same undo entry, reached from the graph instead of from the list
 func _dispatch_state_button(_kind: StringName, _state: HenSaveState, _rect: Rect2) -> bool:
 	var side_bar: HenSideBar = (Engine.get_singleton(&'Global') as HenGlobal).SIDE_BAR
 
 	match _kind:
+		&'state_enter':
+			HenRoute.enter(HenRoute.KIND_MACRO, _state.macro_id, true)
 		&'state_start':
 			HenStateOps.request_set_start(HenStateOps.owner_of(_state), _state)
 		&'state_add_sub':
@@ -1930,6 +2036,25 @@ func _focus_state_by_name(_name: String) -> bool:
 	return false
 
 
+# swaps the open scope for the one holding this state, when it is not the one on
+# screen. false when it already is
+func _open_scope_of(_state: HenSaveState) -> bool:
+	var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+	var save_data: HenSaveData = global.SAVE_DATA if global else null
+
+	if not save_data:
+		return false
+
+	var wanted: Array = HenRoute.stack_for(save_data, StringName(str(_state.id)))
+
+	if wanted == HenRoute.stack():
+		return false
+
+	HenRoute.set_stack(wanted)
+
+	return true
+
+
 # centers on one step and selects it, which is how the error list lands on a card.
 # switching scripts rebuilds the graph, so a request that arrives first waits
 func focus_action(_action_id: String, _keep: bool = true) -> bool:
@@ -1955,6 +2080,17 @@ func focus_state(_state: HenSaveState) -> bool:
 
 	var cam: HenCam = _cam()
 	var entry: Variant = _states.get(String(_state.id))
+
+	# the state lives in another scope: open it and centre once it is drawn. the
+	# request is written first because opening redraws right here, and a request
+	# left over would drag the next scope back to this state
+	if not entry:
+		_pending_state = String(_state.id)
+
+		if _open_scope_of(_state):
+			return true
+
+		_pending_state = ''
 
 	if not cam or not entry or not entry.has('frame'):
 		return false

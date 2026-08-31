@@ -24,6 +24,20 @@ const BASE_NAME: String = 'base'
 			signal_bus.request_structural_update.emit()
 @export var can_reenter: bool = false
 @export_multiline var description: String = ''
+# set when this state is a use of a macro: its behaviour comes from the definition
+# and it holds no actions or sub states of its own
+@export var macro_id: StringName
+# values bound to the macro inputs, cloned from the definition on creation
+@export var macro_inputs: Array[HenSaveParam]
+# macro input id -> bind code, for a use that reads a variable instead of a literal
+@export var macro_bindings: Dictionary
+# macro flow output id -> { state_id: StringName, label: String }, the state of
+# this scope a named exit hands control to
+@export var flow_targets: Dictionary
+
+# set on the in-memory state that stands for a function body, never persisted: a
+# function holds actions like a state does, but changes no state
+var is_function_scope: bool = false
 
 
 # a state is its name and its action list now: the route and the scaffolding
@@ -43,6 +57,49 @@ static func create(_is_sub_state: bool = false, _owner: HenSaveData = null) -> H
 
 func get_new_name() -> String:
 	return 'state_' + str(id)
+
+
+func is_macro_use() -> bool:
+	return not str(macro_id).is_empty()
+
+
+# the definition behind a macro use, null for a plain state
+func get_macro(_save_data: HenSaveData) -> HenSaveStateMacro:
+	return _save_data.find_macro(macro_id) if _save_data and is_macro_use() else null
+
+
+# a use clones the macro inputs when it is created, so one that predates a new
+# input never draws its slot
+func sync_macro_inputs(_save_data: HenSaveData) -> void:
+	var macro: HenSaveStateMacro = get_macro(_save_data)
+
+	if not macro:
+		return
+
+	var held: Dictionary = {}
+
+	for param: HenSaveParam in macro_inputs:
+		held[str(param.id)] = true
+
+	for index: int in macro.inputs.size():
+		var declared: HenSaveParam = macro.inputs[index]
+
+		if held.has(str(declared.id)):
+			continue
+
+		macro_inputs.insert(mini(index, macro_inputs.size()), HenSaveParam.create(declared.get_data()))
+
+
+static func create_macro_use(_macro: HenSaveStateMacro, _save_data: HenSaveData) -> HenSaveState:
+	var use: HenSaveState = HenSaveState.create(true, _save_data)
+
+	use.macro_id = _macro.id
+	use.name = _macro.name
+
+	for param: HenSaveParam in _macro.inputs:
+		use.macro_inputs.append(HenSaveParam.create(param.get_data()))
+
+	return use
 
 
 func add_sub_state(_save_data: HenSaveData) -> HenSaveState:
@@ -67,11 +124,15 @@ func add_sub_state(_save_data: HenSaveData) -> HenSaveState:
 	return s
 
 
+# a use of a macro runs the states of the definition, which is what makes it
+# behave like a state someone filled in by hand
 func get_sub_states(_save_data: HenSaveData) -> Array:
-	if not _save_data.sub_states.has(id):
+	var key: StringName = macro_id if is_macro_use() else id
+
+	if not _save_data.sub_states.has(key):
 		return []
 
-	return _save_data.sub_states.get(id)
+	return _save_data.sub_states.get(key)
 
 
 func _get_resource_info() -> Dictionary:
@@ -92,7 +153,7 @@ func _get_resource_info() -> Dictionary:
 
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
-	if _property.name in [&'is_sub_state', &'is_base']:
+	if _property.name in [&'is_sub_state', &'is_base', &'macro_id', &'macro_inputs', &'macro_bindings', &'flow_targets']:
 		_property.usage = PROPERTY_USAGE_STORAGE
 
 

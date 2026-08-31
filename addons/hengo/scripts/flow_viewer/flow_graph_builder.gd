@@ -38,6 +38,145 @@ static func build(_save_data: HenSaveData, _state: HenSaveState) -> HenFlowGraph
 	return graph
 
 
+# a use of a macro reads as what it hands the definition and what it fills in: the
+# values, the places the macro left for it, its own phases and the ways out
+static func build_macro_use(_save_data: HenSaveData, _use: HenSaveState) -> HenFlowGraphTypes.FlowGraph:
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
+
+	graph.state_id = StringName(str(_use.id))
+
+	var macro: HenSaveStateMacro = _use.get_macro(_save_data)
+	var entry: HenFlowGraphTypes.FlowNode = _entry_node(_use)
+
+	graph.entry = entry
+	graph.add_node(entry)
+
+	if not macro:
+		return graph
+
+	for param: HenSaveParam in _use.macro_inputs:
+		var pin: HenFlowGraphTypes.FlowPin = HenFlowGraphTypes.FlowPin.new(param.id, &'data_in', param.name)
+
+		pin.part = _use_input_part(_save_data, _use, param)
+		entry.add_pin(pin)
+
+	# the places the macro left come first: they are what this use is here to fill
+	for flow: HenSaveFlowParam in macro.flow_inputs:
+		_use_chain(graph, _save_data, _use, entry, StringName(str(flow.id)), flow.name)
+
+	for phase: StringName in HenSaveAction.PHASE_ORDER:
+		_use_chain(graph, _save_data, _use, entry, phase, HenActionVisuals.phase_label(phase))
+
+	for flow: HenSaveFlowParam in macro.flow_outputs:
+		_use_way_out(graph, _save_data, _use, entry, flow)
+
+	return graph
+
+
+# one port of a use plus whatever it holds, the way a phase of a state works
+static func _use_chain(
+	_graph: HenFlowGraphTypes.FlowGraph,
+	_save_data: HenSaveData,
+	_use: HenSaveState,
+	_entry: HenFlowGraphTypes.FlowNode,
+	_id: StringName,
+	_label: String
+) -> void:
+	var bucket: Array = HenGeneratorAction.hook_steps(_save_data, _use, _id)
+
+	_entry.add_pin(HenFlowGraphTypes.FlowPin.new(_id, &'exec_out', _label))
+
+	if bucket.is_empty():
+		return
+
+	_chain(_graph, _save_data, bucket, _entry, _id, _id, 0)
+	_add_tail(_graph, bucket, _id)
+
+
+# a way out is a port too: it carries the transition this use wired it to
+static func _use_way_out(
+	_graph: HenFlowGraphTypes.FlowGraph,
+	_save_data: HenSaveData,
+	_use: HenSaveState,
+	_entry: HenFlowGraphTypes.FlowNode,
+	_flow: HenSaveFlowParam
+) -> void:
+	var pin_id: StringName = StringName(HenFlowGraphTypes.WAY_OUT_PIN + str(_flow.id))
+
+	_entry.add_pin(HenFlowGraphTypes.FlowPin.new(pin_id, &'exec_out', _flow.name))
+
+	var target_id: String = str((_use.flow_targets.get(str(_flow.id), {}) as Dictionary).get('state_id', ''))
+	var target: HenSaveState = HenGeneratorAction.find_state(_save_data, StringName(target_id))
+
+	if not target:
+		return
+
+	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
+
+	node.id = StringName('w' + str(_use.id) + ':' + str(_flow.id))
+	node.kind = &'transition'
+	node.title = target.name
+	node.icon = 'arrow-right-to-line'
+	node.accent = HenActionVisuals.PHASE_COLORS.get('update', HenActionVisuals.FALLBACK_COLOR)
+	node.phase = pin_id
+
+	node.add_pin(HenFlowGraphTypes.FlowPin.new(HenFlowGraphTypes.ENTER_PIN, &'exec_in'))
+
+	_graph.add_node(node)
+	_graph.connect_pins(&'exec', _entry, pin_id, node, HenFlowGraphTypes.ENTER_PIN)
+
+
+# the value a use hands one input, drawn as the chip an action slot draws
+static func _use_input_part(_save_data: HenSaveData, _use: HenSaveState, _param: HenSaveParam) -> Dictionary:
+	var bind: String = str(_use.macro_bindings.get(str(_param.id), ''))
+	var part: Dictionary = {}
+
+	if not bind.is_empty():
+		part = {kind = &'variable', value = HenUtils.get_bind_label(_save_data, bind)}
+	elif _param.default_value is Color:
+		part = {kind = &'literal', value = HenActionsPanel.format_value(_param.default_value), swatch = _param.default_value}
+	else:
+		part = {kind = &'literal', value = HenActionsPanel.format_value(_param.default_value)}
+
+	part.label = _param.name
+	part.options = _param.options
+	part.picker = _param.picker
+	part.editor = &'value'
+	part.slot = {
+		param = _param,
+		type = str(_param.type),
+		bind_store = _use.macro_bindings,
+		bind_key = str(_param.id),
+		macro_params = {}
+	}
+
+	return part
+
+
+# a function body is one run from top to bottom: it has no lifecycle phases, so
+# the entry carries a single port and every step hangs from it
+static func build_function(_save_data: HenSaveData, _scope: HenSaveState) -> HenFlowGraphTypes.FlowGraph:
+	var graph: HenFlowGraphTypes.FlowGraph = HenFlowGraphTypes.FlowGraph.new()
+
+	if not _save_data or not _scope:
+		return graph
+
+	graph.state_id = StringName(str(_scope.id))
+
+	var actions: Array = _save_data.get_state_actions(graph.state_id)
+	var entry: HenFlowGraphTypes.FlowNode = _entry_node(_scope)
+
+	graph.entry = entry
+	graph.add_node(entry)
+	entry.add_pin(HenFlowGraphTypes.FlowPin.new(&'update', &'exec_out', 'Run'))
+
+	if not actions.is_empty():
+		_chain(graph, _save_data, actions, entry, &'update', &'update', 0)
+		_add_tail(graph, actions, &'update')
+
+	return graph
+
+
 # the end of a phase chain is where a new step lands, and the graph is the only
 # place that knows where that is
 static func _add_tail(_graph: HenFlowGraphTypes.FlowGraph, _bucket: Array, _phase: StringName) -> void:
@@ -171,6 +310,10 @@ static func _action_node(
 	var macro: HenSaveMacro = HenActionsPanel.find_macro(_action.macro_id)
 	var node: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
 
+	# a definition of the script can be renamed and retyped with its actions on
+	# screen, so the slots follow it here instead of waiting for a reload
+	HenSaveAction.sync_action_inputs(_action, macro)
+
 	node.id = StringName('a' + str(_action.id))
 	node.kind = _kind
 	node.action = _action
@@ -179,6 +322,7 @@ static func _action_node(
 	node.accent = HenActionVisuals.accent_of(macro).to_html(false)
 	node.phase = _phase
 	node.depth = _depth
+	node.enter_scope = _scope_of(_action)
 
 	_graph.add_node(node)
 
@@ -209,6 +353,14 @@ static func _action_node(
 		node.body.assign(chain)
 
 	return node
+
+
+# the definition a step stands for, so the header can offer a way into it
+static func _scope_of(_action: HenSaveAction) -> Dictionary:
+	if HenFunctionMacro.is_function_macro(_action.macro_id) and not HenFunctionMacro.is_return_macro(_action.macro_id):
+		return {kind = HenRoute.KIND_FUNCTION, id = HenFunctionMacro.function_id_of(_action.macro_id)}
+
+	return {}
 
 
 # one data pin per declared input; an input fed by another action gets a wire and
@@ -385,17 +537,20 @@ static func _add_branch_pins(
 			chain = _chain(_graph, _save_data, steps, _node, flow.id, _node.phase, _depth)
 			_branch_tail(_graph, _action, flow.id, _node, chain)
 
+		var exit_name: String = _macro_exit_name(_save_data, _action, str(flow.id))
 		var target: HenSaveState = HenGeneratorAction.branch_target(_save_data, _action, str(flow.id))
 
-		if not target:
+		# inside a macro the branch leaves through a named way out, and where that
+		# lands is answered by each use of it, never here
+		if not target and exit_name.is_empty():
 			continue
 
 		var transition: HenFlowGraphTypes.FlowNode = HenFlowGraphTypes.FlowNode.new()
 
 		transition.id = StringName('t' + str(_action.id) + ':' + str(flow.id))
 		transition.kind = &'transition'
-		transition.title = target.name
-		transition.icon = 'arrow-right-to-line'
+		transition.title = exit_name if target == null else target.name
+		transition.icon = 'door-open' if target == null else 'arrow-right-to-line'
 		transition.accent = HenActionVisuals.PHASE_COLORS.get('update', HenActionVisuals.FALLBACK_COLOR)
 		transition.phase = _node.phase
 
@@ -409,6 +564,25 @@ static func _add_branch_pins(
 			_graph.connect_pins(&'exec', _node, flow.id, transition, HenFlowGraphTypes.ENTER_PIN)
 		else:
 			_graph.connect_pins(&'exec', chain.back(), HenFlowGraphTypes.THEN_PIN, transition, HenFlowGraphTypes.ENTER_PIN)
+
+
+# what a branch that leaves the macro is called, empty when it goes to a state
+static func _macro_exit_name(_save_data: HenSaveData, _action: HenSaveAction, _key: String) -> String:
+	if not HenGeneratorAction.branch_is_macro_exit(_action, _key):
+		return ''
+
+	var exit_id: String = str((_action.branches[_key] as Dictionary).get('exit_id', ''))
+	var macro: HenSaveStateMacro = HenRoute.definition_of(_save_data, HenActionsPanel.state_id_of(_save_data, _action)) as HenSaveStateMacro
+	var flow: HenSaveFlowParam = macro.find_flow_input(StringName(exit_id)) if macro else null
+
+	if flow:
+		return flow.name
+
+	for way: HenSaveFlowParam in (macro.flow_outputs if macro else [] as Array[HenSaveFlowParam]):
+		if str(way.id) == exit_id:
+			return way.name
+
+	return 'way out'
 
 
 # the node that carries an action in the sequence: its store when it has one,

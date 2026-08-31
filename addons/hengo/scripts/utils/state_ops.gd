@@ -6,6 +6,7 @@ class_name HenStateOps extends RefCounted
 
 
 const MOVE_ICON: String = 'res://addons/hengo/assets/new_icons/move.svg'
+const MACRO_ICON: String = 'res://addons/hengo/assets/new_icons/box.svg'
 const MENU_SIZE: Vector2 = Vector2(200, 230)
 
 
@@ -17,6 +18,125 @@ static func move_action(_state: HenSaveState) -> Dictionary:
 		callable = open_move_menu.bind(_state),
 		icon = MOVE_ICON
 	}
+
+
+# the header entry that drops a macro inside this state
+static func use_macro_action(_state: HenSaveState) -> Dictionary:
+	return {
+		name = 'Use macro',
+		tooltip = 'Run a macro inside this state',
+		callable = open_macro_menu.bind(_state),
+		icon = MACRO_ICON
+	}
+
+
+static func open_macro_menu(_state: HenSaveState) -> void:
+	var save_data: HenSaveData = owner_of(_state)
+
+	if not save_data:
+		return
+
+	if save_data.macros.is_empty():
+		_notify('There is no macro to use yet.', HenToast.MessageType.INFO)
+		return
+
+	var options: Array = []
+
+	for macro: HenSaveStateMacro in save_data.macros:
+		options.append({name = macro.name, kind = 'macro', macro_id = macro.id})
+
+	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		pos = _mouse_position(),
+		min_size = MENU_SIZE
+	})
+
+	menu.mount(options, _on_macro_picked.bind(save_data, _state), 'item_type')
+
+
+static func _on_macro_picked(_item: Dictionary, _save_data: HenSaveData, _state: HenSaveState) -> void:
+	var macro: HenSaveStateMacro = _save_data.find_macro(StringName(str(_item.get('macro_id', ''))))
+
+	if not macro:
+		return
+
+	request_add_macro_use.bind(_save_data, _state, macro).call_deferred()
+
+
+# a use is a sub-state of the host that runs the machine of the definition
+static func request_add_macro_use(_save_data: HenSaveData, _parent: HenSaveState, _macro: HenSaveStateMacro) -> HenSaveState:
+	if not _save_data or not _parent or not _macro:
+		return null
+
+	var use: HenSaveState = HenSaveState.create_macro_use(_macro, _save_data)
+
+	_record(_save_data, 'Use ' + _macro.name, func() -> bool:
+		if not _save_data.sub_states.has(_parent.id):
+			_save_data.sub_states[_parent.id] = []
+
+		var list: Array = _save_data.sub_states[_parent.id]
+
+		if not list.has(use):
+			list.append(use)
+
+		if list.size() == 1:
+			use.start = true
+
+		return true
+	)
+
+	return use
+
+
+# where one way out of a macro leads, asked per use: the states of the scope that
+# holds it, never the ones inside the macro
+static func open_way_out_menu(_use: HenSaveState, _exit_id: String) -> void:
+	var save_data: HenSaveData = owner_of(_use)
+
+	if not save_data:
+		return
+
+	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		pos = _mouse_position(),
+		min_size = MENU_SIZE
+	})
+
+	menu.mount(way_out_options(save_data, _use), _on_way_out_picked.bind(save_data, _use, _exit_id), 'item_type')
+
+
+static func way_out_options(_save_data: HenSaveData, _use: HenSaveState) -> Array:
+	var options: Array = [ {name = 'Nowhere', kind = 'none'} ]
+
+	for state: HenSaveState in _save_data.states:
+		options.append({name = state.name, kind = 'state', state_id = state.id})
+
+	for holder: HenSaveState in HenGeneratorAction.ancestor_chain(_save_data, _use):
+		if holder == _use:
+			continue
+
+		for sub: HenSaveState in holder.get_sub_states(_save_data):
+			if sub == _use:
+				continue
+
+			options.append({name = holder.name + ' / ' + sub.name, kind = 'state', state_id = sub.id})
+
+	return options
+
+
+static func _on_way_out_picked(_item: Dictionary, _save_data: HenSaveData, _use: HenSaveState, _exit_id: String) -> void:
+	_record(_save_data, 'Wire way out', func() -> bool:
+		if str(_item.get('kind', '')) == 'none':
+			_use.flow_targets.erase(_exit_id)
+		else:
+			_use.flow_targets[_exit_id] = {state_id = _item.state_id, label = ''}
+
+		return true
+	)
 
 
 static func open_move_menu(_state: HenSaveState) -> void:
@@ -69,7 +189,8 @@ static func move_options(_save_data: HenSaveData, _state: HenSaveState) -> Array
 		options.append({name = 'Script (top level)', kind = 'root'})
 
 	for state: HenSaveState in all_states(_save_data):
-		if state == current or blocked.has(state):
+		# a use runs the machine of its definition, so nothing else lands inside it
+		if state == current or blocked.has(state) or state.is_macro_use():
 			continue
 
 		options.append({name = path_label(_save_data, state), kind = 'state', state_id = state.id})
@@ -168,6 +289,52 @@ static func request_add_var(_save_data: HenSaveData, _save: bool = true) -> HenS
 	return variable
 
 
+# a function is created with one input-less shape and edited from the inspector,
+# the way a variable is
+static func request_add_function(_save_data: HenSaveData) -> HenSaveFunc:
+	if not _save_data:
+		return null
+
+	var func_res: HenSaveFunc = HenSaveFunc.create(_save_data)
+
+	_record(_save_data, 'New function', func() -> bool:
+		if not _save_data.functions.has(func_res):
+			_save_data.functions.append(func_res)
+
+		return true
+	)
+
+	return func_res
+
+
+# a macro is created with one state inside it, so entering it has somewhere to run
+static func request_add_macro(_save_data: HenSaveData) -> HenSaveStateMacro:
+	if not _save_data:
+		return null
+
+	var macro: HenSaveStateMacro = HenSaveStateMacro.create(_save_data)
+	var first: HenSaveState = HenSaveState.create(true, _save_data)
+
+	first.start = true
+
+	_record(_save_data, 'New macro', func() -> bool:
+		if not _save_data.macros.has(macro):
+			_save_data.macros.append(macro)
+
+		if not _save_data.sub_states.has(macro.id):
+			_save_data.sub_states[macro.id] = []
+
+		var states: Array = _save_data.sub_states[macro.id]
+
+		if not states.has(first):
+			states.append(first)
+
+		return true
+	)
+
+	return macro
+
+
 # the setter demotes the sibling that held the flag, so the undo goes through the
 # same snapshot the move uses instead of writing the property back
 static func request_set_start(_save_data: HenSaveData, _state: HenSaveState, _save: bool = true) -> void:
@@ -209,7 +376,9 @@ static func tree_snapshot(_save_data: HenSaveData) -> Dictionary:
 		states = _save_data.states.duplicate(),
 		sub_states = subs,
 		flags = flags,
-		variables = _save_data.variables.duplicate()
+		variables = _save_data.variables.duplicate(),
+		functions = _save_data.functions.duplicate(),
+		macros = _save_data.macros.duplicate()
 	}
 
 
@@ -220,6 +389,12 @@ static func tree_snapshot(_save_data: HenSaveData) -> Dictionary:
 static func apply_tree(_save_data: HenSaveData, _snap: Dictionary, _save: bool = true) -> void:
 	if _snap.has('variables'):
 		_save_data.variables.assign(_snap.variables)
+
+	if _snap.has('functions'):
+		_save_data.functions.assign(_snap.functions)
+
+	if _snap.has('macros'):
+		_save_data.macros.assign(_snap.macros)
 
 	_save_data.states.assign(_snap.states)
 	_save_data.sub_states.clear()
@@ -276,6 +451,12 @@ static func tree_digest(_snap: Dictionary) -> String:
 
 	for variable: HenSaveVar in _snap.get('variables', []):
 		parts.append(['var', str(variable.id)])
+
+	for func_res: HenSaveFunc in _snap.get('functions', []):
+		parts.append(['fn', str(func_res.id)])
+
+	for macro: HenSaveStateMacro in _snap.get('macros', []):
+		parts.append(['macro', str(macro.id)])
 
 	return var_to_str(parts)
 
@@ -409,6 +590,10 @@ static func parent_of(_save_data: HenSaveData, _state: HenSaveState) -> HenSaveS
 
 static func descendants(_save_data: HenSaveData, _state: HenSaveState) -> Array:
 	var out: Array = []
+
+	# what a use runs belongs to the macro, and is reached through it
+	if _state.is_macro_use():
+		return out
 
 	for sub: HenSaveState in _state.get_sub_states(_save_data):
 		out.append(sub)

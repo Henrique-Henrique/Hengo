@@ -128,6 +128,20 @@ func open_producer(_slot: Dictionary, _rect: Rect2) -> void:
 
 # adding was only reachable through the sidebar tab that the cards replaced, so
 # the search opens here with no action to replace and an index to land on
+# the lifecycle phase a port stands for: itself, or the phase the macro runs that
+# place at when the port is one of its own
+func effective_phase(_phase: StringName) -> StringName:
+	if HenSaveAction.PHASE_ORDER.has(_phase) or not _save_data:
+		return _phase
+
+	var state: HenSaveState = HenGeneratorAction.find_state(_save_data, _state_id)
+
+	if not state or not state.is_macro_use():
+		return _phase
+
+	return HenGeneratorAction.hook_phase(_save_data, state, _phase)
+
+
 func open_add(
 	_phase: StringName,
 	_parent: HenSaveAction,
@@ -152,7 +166,9 @@ func open_add(
 	# branching ones included
 	var search: HenCodeSearch = HenCodeSearch.load(Vector2.ZERO, {
 		type = &'',
-		phase = phase,
+		# a place a macro leaves for its uses is not a lifecycle phase: what can go
+		# there is what fits the phase the macro runs it at
+		phase = effective_phase(phase),
 		on_pick = func(_macro: HenSaveMacro, _output: StringName) -> void:
 			_insert_new(_macro, state_id, parent, phase, at, replacing, branch_key)
 	})
@@ -204,8 +220,9 @@ func _do_insert(
 ) -> void:
 	var action: HenSaveAction = HenSaveAction.create(_macro)
 
-	# the macro decides: a phase it has no body for would emit nothing at all
-	action.phase = _phase if HenSaveAction.supported_phases(_macro).has(_phase) else HenSaveAction.default_phase(_macro)
+	# the macro decides: a phase it has no body for would emit nothing at all. a
+	# step going onto a place of a macro is judged by the phase that place runs at
+	action.phase = _phase if HenSaveAction.supported_phases(_macro).has(effective_phase(_phase)) else HenSaveAction.default_phase(_macro)
 
 	if _parent:
 		var list: Array = _target_list(_parent, _branch_key)
@@ -264,7 +281,7 @@ func paste_actions(
 		var index: int = _at
 
 		for action: HenSaveAction in _actions:
-			if HenActionsPanel.can_use_phase(action, _phase):
+			if HenActionsPanel.can_use_phase(action, _phase, _save_data, HenGeneratorAction.find_state(_save_data, _state_id)):
 				action.phase = _phase
 
 			if _parent:
@@ -411,8 +428,9 @@ func _open_option_picker(_part: Dictionary, _rect: Rect2) -> void:
 	var menu: HenDropDownMenu = DROPDOWN_SCENE.instantiate()
 	var options: Array = []
 
+	# an option whose value is an id nobody typed is listed by the name it was given
 	for option: String in _part.get('options', []):
-		options.append({name = option})
+		options.append({name = param.option_label(option), value = option})
 
 	is_editing = true
 
@@ -424,7 +442,7 @@ func _open_option_picker(_part: Dictionary, _rect: Rect2) -> void:
 	})
 
 	menu.mount(options, func(item: Dictionary) -> void:
-		param.default_value = str(item.name)
+		param.default_value = str(item.get('value', item.name))
 	, 'item_type')
 
 

@@ -7,6 +7,10 @@ const FIX_PHASES: String = 'res://tests/fixtures/action_phases.gd'
 const FIX_TYPED: String = 'res://tests/fixtures/action_typed.gd'
 const FIX_PROCESS: String = 'res://tests/fixtures/action_process.gd'
 const FIX_TRANSITION: String = 'res://addons/hengo/actions/flow/transition.gd'
+# keeps a guard between frames, which is what a scope has to declare somewhere
+const FIX_ONCE: String = 'res://addons/hengo/actions/flow/do_once.gd'
+# acts on a node slot that falls back to the node the script sits on
+const FIX_NODE_SLOT: String = 'res://addons/hengo/actions/render/change_color.gd'
 
 # single-output, multi-output and branching, one per inline case
 const FIX_MATH: String = 'res://addons/hengo/actions/math/math_operator.gd'
@@ -126,6 +130,7 @@ func _option_names(_inspector: HenInspector, _action: HenSaveAction, _key: Strin
 
 	var options: Array = _inspector._build_bind_options({
 		param = param,
+		action = _action,
 		bind_store = _action.input_bindings,
 		bind_key = _key,
 		macro_params = macro_params,

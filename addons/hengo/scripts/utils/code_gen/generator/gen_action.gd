@@ -5,6 +5,54 @@ class_name HenGeneratorAction extends RefCounted
 # run playmaker-style; decoupled from cnode/virtualcnode codegen.
 
 
+# the uses of a macro being generated, innermost last. a macro is written once per
+# use, so this is what tells the steps inside it which one they belong to
+static var macro_uses: Array[HenSaveState] = []
+
+
+static func push_macro_use(_use: HenSaveState) -> void:
+	macro_uses.append(_use)
+
+
+static func pop_macro_use() -> void:
+	macro_uses.resize(maxi(0, macro_uses.size() - 1))
+
+
+static func current_macro_use() -> HenSaveState:
+	return macro_uses.back() if not macro_uses.is_empty() else null
+
+
+# a function body is written at script scope, where the node is `self`: `_ref` is
+# the field a state class holds and does not exist there
+static var in_function: bool = false
+
+
+# names an action emits are keyed by its id, which two uses of one macro share:
+# the use is what makes them different
+static func _process_body(_body: String, _action_id: StringName) -> String:
+	var use: HenSaveState = current_macro_use()
+	var suffix: String = ''
+
+	for entry: HenSaveState in macro_uses:
+		suffix += '_' + str(entry.id)
+
+	var body: String = HenActionCode.process_script_macro_body(_body, in_function, str(_action_id) + suffix)
+
+	return body.replace('{{MACRO_ID}}', str(use.id) if use else '')
+
+
+# a function is a flat list run where it is called, so nothing is filtered by
+# phase: every step of its body runs, in the order it is written
+static func get_function_tokens(_save_data: HenSaveData, _scope: HenSaveState) -> Array:
+	in_function = true
+
+	var tokens: Array = _emit_actions(_save_data, _scope, _save_data.get_state_actions(_scope.id), &'', 0, false)
+
+	in_function = false
+
+	return tokens
+
+
 # tokens for the actions assigned to one lifecycle phase of a state
 static func get_state_action_tokens(_save_data: HenSaveData, _state: HenSaveState, _phase: StringName) -> Array:
 	return _emit_actions(_save_data, _state, _save_data.get_state_actions(_state.id), _phase, 0, true)
@@ -12,7 +60,9 @@ static func get_state_action_tokens(_save_data: HenSaveData, _state: HenSaveStat
 
 # lines for a list of actions run at one phase. the top level is the state's list,
 # filtered by phase; a loop passes its body_actions with _filter off (they run
-# when the loop runs) and depth+1 so break/continue know they are inside a loop
+# when the loop runs) and depth+1 so break/continue know they are inside a loop.
+# an empty phase runs every step at the one it was stored with, which is what a
+# function body does: it has no lifecycle of its own
 static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _actions: Array, _phase: StringName, _loop_depth: int, _filter_phase: bool) -> Array:
 	var tokens: Array = []
 	var global: HenGlobal = Engine.get_singleton(&'Global')
@@ -26,41 +76,52 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 		if action.disabled:
 			continue
 
-		var macro: HenSaveMacro = _resolve_macro(action.macro_id)
+		var macro: HenSaveMacro = _resolve_macro(action.macro_id, _save_data)
 
-		if not macro or not FileAccess.file_exists(macro.script_path):
+		if _macro_is_missing(macro):
 			tokens.append(_unresolved_token(action, 'macro not found'))
 			continue
 
-		var instance: HenScriptMacroBase = _load_instance(macro)
+		var instance: HenScriptMacroBase = _load_instance(macro, _save_data)
 
 		if not instance:
 			tokens.append(_unresolved_token(action, 'could not instance macro'))
 			continue
 
-		_prime_instance(_save_data, instance, action, _phase if not _phase.is_empty() else StringName(str(action.phase)), _loop_depth)
+		var phase: StringName = _phase if not _phase.is_empty() else StringName(str(action.phase))
 
-		var reason: String = skip_reason(_save_data, _state, action, instance, _phase, _loop_depth)
+		_prime_instance(_save_data, instance, action, phase, _loop_depth)
+
+		var reason: String = skip_reason(_save_data, _state, action, instance, phase, _loop_depth)
 
 		if not reason.is_empty():
 			tokens.append(_unresolved_token(action, reason))
 			continue
 
 		# a nested action emits at the LOOP's phase, never its own stored phase
-		var body: String = _get_phase_body(instance, _phase)
+		var body: String = _get_phase_body(instance, phase)
 		var branches: Array = instance.get_flow_outputs()
 
 		# outputs before inputs: the output rhs still holds {{input}} placeholders the
 		# next sweep resolves. then branch transitions, then {{VCNODE_ID}} / _ref
 		body = _substitute_outputs(_save_data, body, action, instance)
+
+		# an action that still does something when nobody stores its value says so,
+		# instead of vanishing the way a pure producer does
+		if body.strip_edges().is_empty():
+			body = instance.get_unstored_body()
+
 		body = _substitute_inputs(_save_data, body, action, instance)
-		body = _substitute_branches(_save_data, body, action, branches, _state, _phase, _loop_depth)
-		body = HenActionCode.process_script_macro_body(body, false, action.id)
+		body = _substitute_branches(_save_data, body, action, branches, _state, phase, _loop_depth)
+		body = _process_body(body, action.id)
 
 		# the nested body goes in LAST, after this action's own {{VCNODE_ID}} pass:
 		# its lines are already resolved and must not be run through it again
 		if instance.get_has_body():
-			body = _substitute_loop_body(_save_data, _state, body, action, _phase, _loop_depth)
+			body = _substitute_loop_body(_save_data, _state, body, action, phase, _loop_depth)
+
+		if instance is HenMacroHookMacro:
+			body = _substitute_macro_hook(_save_data, body, instance as HenMacroHookMacro, phase, _loop_depth)
 
 		var emitted: String = body.strip_edges(false, true)
 
@@ -106,6 +167,117 @@ static func _substitute_loop_body(_save_data: HenSaveData, _state: HenSaveState,
 	return HenActionCode._inject_placeholder(_body, 'loop_body', '\n'.join(nested))
 
 
+# what the use of a macro put on this place. the use is the state being written,
+# so its list is read the way any other state's is
+static func _substitute_macro_hook(_save_data: HenSaveData, _body: String, _instance: HenMacroHookMacro, _phase: StringName, _loop_depth: int) -> String:
+	var use: HenSaveState = current_macro_use()
+	var steps: Array = []
+
+	if use:
+		steps = _emit_actions(
+			_save_data,
+			use,
+			hook_steps(_save_data, use, StringName(str(_instance.hook.id))),
+			_phase,
+			_loop_depth,
+			false
+		)
+
+	if steps.is_empty():
+		steps = ['pass']
+
+	return HenActionCode._inject_placeholder(_body, 'macro_hook', '
+'.join(steps))
+
+
+# true when the step rides a named place of a macro instead of a lifecycle phase
+static func _is_hook_step(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction) -> bool:
+	if not _state.is_macro_use():
+		return false
+
+	return not HenSaveAction.PHASE_ORDER.has(StringName(str(_action.phase)))
+
+
+# the phase a place of a macro runs at, which is the phase of the step that runs
+# it. what a use puts there is collected at that phase, not at the name of the
+# place, or the collectors would call it a step with no body
+static func hook_phase(_save_data: HenSaveData, _use: HenSaveState, _hook: StringName) -> StringName:
+	var macro: HenSaveStateMacro = _use.get_macro(_save_data)
+
+	if not macro:
+		return &'update'
+
+	var wanted: StringName = HenMacroHookMacro.hook_id(macro, macro.find_flow_input(_hook)) if macro.find_flow_input(_hook) else &''
+
+	for state: HenSaveState in _macro_states(_save_data, macro):
+		var found: StringName = _phase_of_macro_in(_save_data.get_state_actions(state.id), wanted)
+
+		if not found.is_empty():
+			return found
+
+	return &'update'
+
+
+static func _macro_states(_save_data: HenSaveData, _macro: HenSaveStateMacro) -> Array:
+	var out: Array = []
+
+	for state: HenSaveState in _macro.get_states(_save_data):
+		out.append(state)
+		out.append_array(_descendants(_save_data, state))
+
+	return out
+
+
+static func _descendants(_save_data: HenSaveData, _state: HenSaveState) -> Array:
+	var out: Array = []
+
+	if _state.is_macro_use():
+		return out
+
+	for sub: HenSaveState in _state.get_sub_states(_save_data):
+		out.append(sub)
+		out.append_array(_descendants(_save_data, sub))
+
+	return out
+
+
+static func _phase_of_macro_in(_actions: Array, _macro_id: StringName) -> StringName:
+	for action: HenSaveAction in _actions:
+		if StringName(str(action.macro_id)) == _macro_id:
+			return StringName(str(action.phase))
+
+		for list: Array in nested_lists(action):
+			var found: StringName = _phase_of_macro_in(list, _macro_id)
+
+			if not found.is_empty():
+				return found
+
+	return &''
+
+
+# the phase a step of this state is collected at: a step a use put on a place of
+# its macro runs where that place runs
+static func collect_phase(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction) -> StringName:
+	var phase: StringName = StringName(str(_action.phase))
+
+	if not _state.is_macro_use() or HenSaveAction.PHASE_ORDER.has(phase):
+		return phase
+
+	return hook_phase(_save_data, _state, phase)
+
+
+# the steps a use put on one named place of its macro. they ride the action list
+# of the use, keyed by the place instead of by a lifecycle phase
+static func hook_steps(_save_data: HenSaveData, _use: HenSaveState, _hook: StringName) -> Array:
+	var steps: Array = []
+
+	for action: HenSaveAction in _save_data.get_state_actions(_use.id):
+		if StringName(str(action.phase)) == _hook:
+			steps.append(action)
+
+	return steps
+
+
 # why an action cannot be emitted, empty when it is fine. every emission path
 # asks this, so a skipped action never leaves half of itself behind — the phase
 # body is dropped but its script base, its connect and its disconnect are not.
@@ -116,6 +288,11 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 	if not invalid.is_empty():
 		return invalid
+
+	var wrong_scope: String = _scope_error(_save_data, _state, _action, _instance)
+
+	if not wrong_scope.is_empty():
+		return wrong_scope
 
 	# break/continue are only valid inside a loop body
 	if _instance.get_needs_loop() and _loop_depth == 0:
@@ -195,6 +372,32 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 	return ''
 
 
+# a function body and a state body take different actions: a finish belongs to the
+# function that declares it, and nothing inside a function changes state
+static func _scope_error(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _instance: HenScriptMacroBase) -> String:
+	var inside_function: bool = _state != null and _state.is_function_scope
+
+	if _instance.get_needs_function() and not inside_function:
+		return str(_instance.get_display_name()).to_lower() + ' can only be used inside a function'
+
+	if _instance is HenFunctionMacro:
+		var function_macro: HenFunctionMacro = _instance as HenFunctionMacro
+
+		if function_macro.is_return and (not _state or str(_state.id) != str(function_macro.func_res.id)):
+			return 'this finish belongs to another function'
+
+	# a function has no machine of its own to change; driving ANOTHER node's machine
+	# is a call like any other and stays allowed
+	if inside_function:
+		for out: Dictionary in _instance.get_flow_outputs():
+			var key: String = str(out.get('id', ''))
+
+			if branch_target(_save_data, _action, key) and branch_script_id(_save_data, _action, key).is_empty():
+				return 'a function cannot change the state of its own script'
+
+	return ''
+
+
 static func _first_unreachable_branch(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _branches: Array) -> String:
 	for out: Dictionary in _branches:
 		var key: String = str(out.get('id', ''))
@@ -224,12 +427,12 @@ static func action_error(
 	if not _save_data or not _state or not _action or _action.disabled:
 		return ''
 
-	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
+	var macro: HenSaveMacro = _resolve_macro(_action.macro_id, _save_data)
 
-	if not macro or not FileAccess.file_exists(macro.script_path):
+	if _macro_is_missing(macro):
 		return 'macro not found'
 
-	var instance: HenScriptMacroBase = _load_instance(macro)
+	var instance: HenScriptMacroBase = _load_instance(macro, _save_data)
 
 	if not instance:
 		return 'could not instance macro'
@@ -252,6 +455,11 @@ static func collect_errors(_save_data: HenSaveData) -> Array[Dictionary]:
 	for state: HenSaveState in _all_states(_save_data):
 		_collect_errors(_save_data, state, _save_data.get_state_actions(state.id), &'', 0, errors)
 
+	for func_res: HenSaveFunc in _save_data.functions:
+		var scope: HenSaveState = func_res.scope_state()
+
+		_collect_errors(_save_data, scope, _save_data.get_state_actions(scope.id), &'', 0, errors)
+
 	return errors
 
 
@@ -269,7 +477,7 @@ static func _collect_errors(
 		if action.disabled:
 			continue
 
-		var phase: StringName = _phase if not _phase.is_empty() else StringName(str(action.phase))
+		var phase: StringName = _phase if not _phase.is_empty() else collect_phase(_save_data, _state, action)
 		var reason: String = action_error(_save_data, _state, action, phase, _depth)
 
 		if not reason.is_empty():
@@ -289,7 +497,7 @@ static func _error_entry(
 	_action: HenSaveAction,
 	_reason: String
 ) -> Dictionary:
-	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
+	var macro: HenSaveMacro = _resolve_macro(_action.macro_id, _save_data)
 	var label: String = str(_action.label).strip_edges()
 	var title: String = label if not label.is_empty() else (macro.name if macro else str(_action.name))
 
@@ -326,13 +534,29 @@ static func _collect_emitted(
 	_out: Array
 ) -> void:
 	for action: HenSaveAction in _actions:
-		var phase: StringName = _phase if not _phase.is_empty() else StringName(str(action.phase))
+		# what a use puts on a place of its macro is collected where that place runs,
+		# which is a state of the macro and not the use itself
+		if _phase.is_empty() and _is_hook_step(_save_data, _state, action):
+			continue
+
+		var phase: StringName = _phase if not _phase.is_empty() else collect_phase(_save_data, _state, action)
 		var instance: HenScriptMacroBase = _instance_for(_save_data, action, phase, _depth)
 
 		if not instance or not skip_reason(_save_data, _state, action, instance, phase, _depth).is_empty():
 			continue
 
 		_out.append({action = action, instance = instance})
+
+		# the step that runs a place declares for whatever the use put there
+		if instance is HenMacroHookMacro and current_macro_use():
+			_collect_emitted(
+				_save_data,
+				current_macro_use(),
+				hook_steps(_save_data, current_macro_use(), StringName(str((instance as HenMacroHookMacro).hook.id))),
+				phase,
+				_depth,
+				_out
+			)
 
 		_collect_emitted(_save_data, _state, action.body_actions, phase, _depth + 1, _out)
 
@@ -346,6 +570,8 @@ static func _collect_emitted(
 static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) -> Array:
 	var lines: Array = []
 
+	in_function = _state.is_function_scope
+
 	for entry: Dictionary in emitted_actions(_save_data, _state):
 		var action: HenSaveAction = entry.action
 		var instance: HenScriptMacroBase = entry.instance
@@ -354,7 +580,7 @@ static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) 
 		if base.is_empty():
 			continue
 
-		base = HenActionCode.process_script_macro_body(base, false, action.id)
+		base = _process_body(base, action.id)
 
 		# a blank line between blocks, or two actions run together on screen
 		if not lines.is_empty():
@@ -372,7 +598,9 @@ static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) 
 static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 	var lines: Array = []
 
-	for state: HenSaveState in _all_states(_save_data):
+	for_each_scope(_save_data, func(state: HenSaveState) -> void:
+		in_function = state.is_function_scope
+
 		for entry: Dictionary in emitted_actions(_save_data, state):
 			var action: HenSaveAction = entry.action
 			var scope: String = (entry.instance as HenScriptMacroBase).get_script_scope()
@@ -380,10 +608,11 @@ static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 			if scope.is_empty():
 				continue
 
-			scope = HenActionCode.process_script_macro_body(scope, false, action.id)
+			scope = _process_body(scope, action.id)
 
 			for line: String in scope.strip_edges().split('\n'):
 				lines.append(line)
+	)
 
 	return lines
 
@@ -392,7 +621,7 @@ static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 # bodies are split line by line: a single multi-line token would only get the
 # first line indented
 static func merge_script_overrides(_save_data: HenSaveData, _override_data: Dictionary) -> void:
-	for state: HenSaveState in _all_states(_save_data):
+	for_each_scope(_save_data, func(state: HenSaveState) -> void:
 		for entry: Dictionary in emitted_actions(_save_data, state):
 			var action: HenSaveAction = entry.action
 
@@ -413,10 +642,11 @@ static func merge_script_overrides(_save_data: HenSaveData, _override_data: Dict
 						tokens = []
 					}
 
-				var code: String = HenActionCode.process_script_macro_body(body as String, false, action.id)
+				var code: String = _process_body(body as String, action.id)
 
 				for line: String in code.strip_edges(false, true).split('\n'):
 					(_override_data[func_name].tokens as Array).append(line)
+	)
 
 
 # every state of the script, sub-states included
@@ -428,6 +658,47 @@ static func _all_states(_save_data: HenSaveData) -> Array:
 		states.append_array(sub_list)
 
 	return states
+
+
+# every action list the script actually emits, walked the way the codegen writes
+# it: entering a macro use, so a step inside one declares under the use it belongs
+# to instead of once for the definition
+static func for_each_scope(_save_data: HenSaveData, _visit: Callable) -> void:
+	for state: HenSaveState in _save_data.states:
+		_visit_scope(_save_data, state, _visit)
+
+	for func_res: HenSaveFunc in _save_data.functions:
+		_visit.call(func_res.scope_state())
+
+
+static func _visit_scope(_save_data: HenSaveData, _state: HenSaveState, _visit: Callable) -> void:
+	if _state.is_macro_use():
+		push_macro_use(_state)
+
+		for inner: HenSaveState in _state.get_sub_states(_save_data):
+			_visit_scope(_save_data, inner, _visit)
+
+		pop_macro_use()
+		return
+
+	_visit.call(_state)
+
+	for sub: HenSaveState in _state.get_sub_states(_save_data):
+		_visit_scope(_save_data, sub, _visit)
+
+
+# the hook lines of one scope, used both for a state and for the body of a
+# function, whose own hooks become methods of the script
+static func get_scope_hook_tokens(_save_data: HenSaveData, _scope: HenSaveState, _method: StringName) -> Array:
+	var was_in_function: bool = in_function
+
+	in_function = _scope.is_function_scope
+
+	var tokens: Array = _get_hook_tokens(_save_data, _scope, _method)
+
+	in_function = was_in_function
+
+	return tokens
 
 
 # reset tokens run at the top of enter() whatever phase the action is on: zeroing
@@ -447,10 +718,26 @@ static func get_state_teardown_tokens(_save_data: HenSaveData, _state: HenSaveSt
 # through _substitute_inputs, so a hook body may hold {{input}} placeholders
 static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _method: StringName) -> Array:
 	var tokens: Array = []
+	var asked: Dictionary = {}
 
 	for entry: Dictionary in emitted_actions(_save_data, _state):
 		var action: HenSaveAction = entry.action
 		var instance: HenScriptMacroBase = entry.instance
+
+		# what a function keeps lives at script scope, out of reach from here, so the
+		# caller asks the function to do it instead of naming what it holds
+		if instance is HenFunctionMacro and not (instance as HenFunctionMacro).is_return:
+			var called: HenSaveFunc = (instance as HenFunctionMacro).func_res
+
+			if asked.has(str(called.id)):
+				continue
+
+			asked[str(called.id)] = true
+
+			if not get_scope_hook_tokens(_save_data, called.scope_state(), _method).is_empty():
+				tokens.append('_ref.' + HenGeneratorFunction.hook_method(called, _method) + '()')
+
+			continue
 
 		if not instance.has_method(_method):
 			continue
@@ -461,7 +748,7 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 			continue
 
 		var code: String = _substitute_inputs(_save_data, body as String, action, instance)
-		code = HenActionCode.process_script_macro_body(code, false, action.id)
+		code = _process_body(code, action.id)
 
 		for line: String in code.strip_edges(false, true).split('\n'):
 			tokens.append(line)
@@ -471,12 +758,12 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 
 # macro instance behind an action, or null when it can't be resolved
 static func _instance_for(_save_data: HenSaveData, _action: HenSaveAction, _phase: StringName = &'', _loop_depth: int = 0) -> HenScriptMacroBase:
-	var macro: HenSaveMacro = _resolve_macro(_action.macro_id)
+	var macro: HenSaveMacro = _resolve_macro(_action.macro_id, _save_data)
 
-	if not macro or not FileAccess.file_exists(macro.script_path):
+	if _macro_is_missing(macro):
 		return null
 
-	var instance: HenScriptMacroBase = _load_instance(macro)
+	var instance: HenScriptMacroBase = _load_instance(macro, _save_data)
 
 	if instance:
 		_prime_instance(_save_data, instance, _action, _phase, _loop_depth)
@@ -611,7 +898,7 @@ static func _declares_hook(_instance: HenScriptMacroBase) -> bool:
 # body has no statement left. detected statically on the substituted body, since
 # "side-effect-free" can't be read off the source
 static func _produces_nothing(_save_data: HenSaveData, _action: HenSaveAction, _instance: HenScriptMacroBase, _phase: StringName) -> bool:
-	if _instance.get_outputs().is_empty():
+	if _instance.get_outputs().is_empty() or not _instance.get_unstored_body().is_empty():
 		return false
 
 	var body: String = _substitute_outputs(_save_data, _get_phase_body(_instance, _phase), _action, _instance)
@@ -643,7 +930,11 @@ static func _substitute_outputs(_save_data: HenSaveData, _body: String, _action:
 # a value already parked in a local is read as many times as needed for free, one
 # that is recomputed at every read has to be parked once two steps read it
 static func wire_temp_name(_save_data: HenSaveData, _action: HenSaveAction, _instance: HenScriptMacroBase, _output: String) -> String:
-	if wire_reader_count(_save_data, StringName(str(_action.id)), _output) < 2:
+	# a value that costs a call with a body behind it is parked from the first
+	# reader: recomputing it would run that body twice
+	var readers: int = 2 if _instance.get_unstored_body().is_empty() else 1
+
+	if wire_reader_count(_save_data, StringName(str(_action.id)), _output) < readers:
 		return ''
 
 	if _output_rhs(_instance, _output).replace('{{VCNODE_ID}}', 'x').strip_edges().is_valid_identifier():
@@ -654,14 +945,9 @@ static func wire_temp_name(_save_data: HenSaveData, _action: HenSaveAction, _ins
 
 # the right side of an output assignment, from the macro's get_output_<id>()
 static func _output_rhs(_instance: HenScriptMacroBase, _id: String) -> String:
-	var method: String = 'get_output_' + _id
+	var rhs: String = _instance.get_output_rhs(_id)
 
-	if _instance.has_method(method):
-		var rhs: Variant = _instance.call(method)
-		if rhs is String:
-			return rhs as String
-
-	return 'null'
+	return rhs if not rhs.is_empty() else 'null'
 
 
 # removes every line holding {{token}}, used for an output nobody stores.
@@ -813,8 +1099,18 @@ static func _branch_call(_save_data: HenSaveData, _action: HenSaveAction, _key: 
 # state that holds _state as a sub-state, null when it is top level
 static func _parent_of(_save_data: HenSaveData, _state: HenSaveState) -> HenSaveState:
 	for parent_id: Variant in _save_data.sub_states:
-		if (_save_data.sub_states[parent_id] as Array).has(_state):
-			return find_state(_save_data, StringName(str(parent_id)))
+		if not (_save_data.sub_states[parent_id] as Array).has(_state):
+			continue
+
+		var parent: HenSaveState = find_state(_save_data, StringName(str(parent_id)))
+
+		if parent:
+			return parent
+
+		# the drawer belongs to a macro, so the parent is the use running it
+		for index: int in range(macro_uses.size() - 1, -1, -1):
+			if str(macro_uses[index].macro_id) == str(parent_id):
+				return macro_uses[index]
 
 	return null
 
@@ -859,12 +1155,37 @@ static func branch_target(_save_data: HenSaveData, _action: HenSaveAction, _key:
 	if not branch is Dictionary:
 		return null
 
+	var exit_id: String = str((branch as Dictionary).get('exit_id', ''))
+
+	if not exit_id.is_empty():
+		return macro_exit_target(_save_data, exit_id)
+
 	var script_id: StringName = branch_script_id(_save_data, _action, _key)
 
 	if script_id.is_empty():
 		return find_state(_save_data, (branch as Dictionary).get('state_id', &''))
 
 	return find_state_in_script(script_id, (branch as Dictionary).get('state_id', &''))
+
+
+# where a named way out of a macro leads: the use being generated says it, since
+# each one wires its exits to a state of its own scope
+static func macro_exit_target(_save_data: HenSaveData, _exit_id: String) -> HenSaveState:
+	for index: int in range(macro_uses.size() - 1, -1, -1):
+		var use: HenSaveState = macro_uses[index]
+		var target: Variant = use.flow_targets.get(_exit_id)
+
+		if target is Dictionary:
+			return find_state(_save_data, StringName(str((target as Dictionary).get('state_id', ''))))
+
+	return null
+
+
+# true when the branch leaves the macro through one of its named ways out
+static func branch_is_macro_exit(_action: HenSaveAction, _key: String) -> bool:
+	var branch: Variant = _action.branches.get(_key)
+
+	return branch is Dictionary and not str((branch as Dictionary).get('exit_id', '')).is_empty()
 
 
 # the branch's target script, empty when it points at this script
@@ -987,6 +1308,10 @@ static func _branches_are_optional(_branches: Array) -> bool:
 # a branch is wired when it transitions or runs steps, and only the transition
 # is refused on exit
 static func _branch_is_wired(_save_data: HenSaveData, _action: HenSaveAction, _branches: Array) -> bool:
+	for out: Dictionary in _branches:
+		if branch_is_macro_exit(_action, str(out.get('id', ''))):
+			return true
+
 	return _has_transition(_save_data, _action, _branches) or _runs_branch_steps(_action, _branches)
 
 
@@ -1040,7 +1365,7 @@ static func _first_broken_wire(_save_data: HenSaveData, _action: HenSaveAction) 
 		var instance: HenScriptMacroBase = _instance_for(_save_data, producer)
 		var output: String = str((_action.input_wires[key] as Dictionary).get('output', ''))
 
-		if not instance or not instance.has_method('get_output_' + output):
+		if not instance or not instance.has_output_rhs(output):
 			return 'input "' + str(key) + '" reads an output that step does not have'
 
 	return ''
@@ -1150,7 +1475,13 @@ static func _first_unbound_cross_branch(_save_data: HenSaveData, _action: HenSav
 	return ''
 
 
-static func _resolve_macro(_macro_id: StringName) -> HenSaveMacro:
+static func _resolve_macro(_macro_id: StringName, _save_data: HenSaveData = null) -> HenSaveMacro:
+	if HenFunctionMacro.is_function_macro(_macro_id):
+		return HenFunctionMacro.macro_for(_save_data, _macro_id)
+
+	if HenMacroHookMacro.is_hook_macro(_macro_id):
+		return HenMacroHookMacro.macro_for(_save_data, _macro_id)
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
 	for macro: HenSaveMacro in global.action_macros:
@@ -1164,7 +1495,21 @@ static func _resolve_macro(_macro_id: StringName) -> HenSaveMacro:
 	return null
 
 
-static func _load_instance(_macro: HenSaveMacro) -> HenScriptMacroBase:
+# a function has no script on disk: it is emitted from the save data it lives in
+static func _macro_is_missing(_macro: HenSaveMacro) -> bool:
+	if not _macro:
+		return true
+
+	return _macro.function_id.is_empty() and not FileAccess.file_exists(_macro.script_path)
+
+
+static func _load_instance(_macro: HenSaveMacro, _save_data: HenSaveData = null) -> HenScriptMacroBase:
+	if HenMacroHookMacro.is_hook_macro(_macro.id):
+		return HenMacroHookMacro.instance_for(_save_data, _macro.id)
+
+	if not _macro.function_id.is_empty():
+		return HenFunctionMacro.instance_for(_save_data, _macro.id)
+
 	# CACHE_MODE_REUSE keeps the registered class identity — CACHE_MODE_IGNORE
 	# yields a fresh script whose `as HenScriptMacroBase` cast fails under editor hot-reload
 	var script: GDScript = ResourceLoader.load(_macro.script_path, "", ResourceLoader.CACHE_MODE_REUSE)
@@ -1266,7 +1611,7 @@ static func _emit_wire(_save_data: HenSaveData, _wire: Variant) -> String:
 	if temp.is_empty():
 		rhs = _substitute_inputs(_save_data, _output_rhs(instance, output), producer, instance)
 
-	rhs = HenActionCode.process_script_macro_body(rhs, false, producer.id)
+	rhs = _process_body(rhs, producer.id)
 
 	return rhs.strip_edges()
 
@@ -1453,7 +1798,7 @@ static func _emit_inline_action(_save_data: HenSaveData, _ref: Variant) -> Strin
 
 	var rhs: String = _output_rhs(instance, output_id)
 	rhs = _substitute_inputs(_save_data, rhs, child, instance)
-	rhs = HenActionCode.process_script_macro_body(rhs, false, child.id)
+	rhs = _process_body(rhs, child.id)
 
 	# _inject_placeholder trails a newline per input, which would break the expression
 	return rhs.strip_edges()

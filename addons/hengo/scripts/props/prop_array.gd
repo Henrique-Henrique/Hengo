@@ -207,13 +207,23 @@ func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, typ
 	
 	item.set(p_name, final_val)
 
+	# renaming an entry has to reach whoever draws it, and the announcement waits
+	# for the popup to close, the way an edit on the resource itself does
+	if inspector:
+		inspector.mark_dirty()
+
 	if p_name == 'type' and item is HenSaveParam:
 		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 		_refresh_list()
 
 
+# adding or removing an entry changes the shape of everything built from it, so
+# it is announced right away instead of waiting
 func _active_refresh(new_arr: Array) -> void:
 	array_val = new_arr
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
 	if is_inside_tree():
 		_refresh_list()
 

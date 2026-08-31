@@ -182,6 +182,12 @@ func announce_on_close(_popup: HenPopupContainer) -> void:
 	_popup.closed.connect(announce_changes, CONNECT_ONE_SHOT)
 
 
+# an edit nothing else announced: the sidebar and the graph still show what the
+# resource was before it
+func mark_dirty() -> void:
+	_dirty = true
+
+
 func announce_changes() -> void:
 	if not _dirty:
 		return
@@ -286,6 +292,11 @@ func _update_props() -> void:
 		_render_action_params()
 		return
 
+	# a use of a macro is values and ways out, never the state fields
+	if resource is HenSaveState and (resource as HenSaveState).is_macro_use():
+		_render_macro_use(resource as HenSaveState)
+		return
+
 	var prop_index: int = 0
 	for prop in resource.get_property_list():
 		if _is_tool_button_property(prop):
@@ -333,6 +344,104 @@ func _create_prop_editor(prop: Dictionary, prop_index: int) -> void:
 	vbox.add_child(panel)
 
 
+# a use hands the macro its values and says where each way out leads
+func _render_macro_use(use: HenSaveState) -> void:
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var macro: HenSaveStateMacro = use.get_macro(save_data)
+
+	_slot_idx = 0
+
+	if not macro:
+		var missing := Label.new()
+		missing.text = 'The macro this state runs is gone.'
+		missing.add_theme_color_override('font_color', HenActionVisuals.ERROR_COLOR)
+		vbox.add_child(missing)
+		return
+
+	use.sync_macro_inputs(save_data)
+
+	for param: HenSaveParam in use.macro_inputs:
+		_create_value_slot({
+			param = param,
+			bind_store = use.macro_bindings,
+			bind_key = str(param.id),
+			macro_params = {},
+			indent = 0
+		})
+
+	for flow: HenSaveFlowParam in macro.flow_outputs:
+		_create_macro_exit_row(use, flow)
+
+
+func _create_macro_exit_row(use: HenSaveState, flow: HenSaveFlowParam) -> void:
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var target_id: String = str((use.flow_targets.get(str(flow.id), {}) as Dictionary).get('state_id', ''))
+	var target: HenSaveState = HenGeneratorAction.find_state(save_data, StringName(target_id))
+
+	var container: VBoxContainer = PROP_CONTAINER.instantiate()
+	var label: Label = container.get_node('Name')
+
+	label.text = flow.name + '  (way out)'
+	ThemeUtils.apply_font_size(label, 14)
+
+	var target_bt := Button.new()
+
+	target_bt.text = ('-> ' + target.name) if target else 'Nowhere'
+	target_bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	target_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	target_bt.pressed.connect(_open_macro_exit_picker.bind(use, str(flow.id), target_bt))
+
+	container.add_child(target_bt)
+
+	var panel := PanelContainer.new()
+
+	panel.add_child(container)
+	vbox.add_child(panel)
+
+
+func _open_macro_exit_picker(use: HenSaveState, exit_id: String, anchor: Control) -> void:
+	var menu: HenDropDownMenu = load('res://addons/hengo/scenes/drop_down_menu.tscn').instantiate()
+
+	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
+		layout = HenGeneralPopup.Layout.ANCHORED,
+		pos = anchor.global_position,
+		min_size = Vector2(220, 280)
+	})
+
+	menu.mount(_build_use_target_options(use), _on_macro_exit_selected.bind(use, exit_id), 'item_type')
+
+
+# the states a use can hand control to: the ones of the scope holding it
+func _build_use_target_options(use: HenSaveState) -> Array:
+	var save_data: HenSaveData = (Engine.get_singleton(&'Global') as HenGlobal).SAVE_DATA
+	var options: Array = [ {name = 'Nowhere', kind = 'none'} ]
+
+	for state: HenSaveState in save_data.states:
+		options.append({name = state.name, kind = 'state', state_id = state.id})
+
+	for holder: HenSaveState in HenGeneratorAction.ancestor_chain(save_data, use):
+		if holder == use:
+			continue
+
+		for sub: HenSaveState in holder.get_sub_states(save_data):
+			if sub == use:
+				continue
+
+			options.append({name = holder.name + ' / ' + sub.name, kind = 'state', state_id = sub.id})
+
+	return options
+
+
+func _on_macro_exit_selected(item: Dictionary, use: HenSaveState, exit_id: String) -> void:
+	if str(item.get('kind', '')) == 'none':
+		use.flow_targets.erase(exit_id)
+	else:
+		use.flow_targets[exit_id] = {state_id = item.state_id, label = ''}
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+	_update_props()
+
+
 # value-only editor for each of an action's inputs (reuses the prop widgets)
 func _render_action_params() -> void:
 	var action: HenSaveAction = resource as HenSaveAction
@@ -350,6 +459,8 @@ func _render_action_params() -> void:
 	var macro: HenSaveMacro = _find_macro(action.macro_id)
 	var outputs: Array[HenSaveParam] = macro.outputs if macro else [] as Array[HenSaveParam]
 
+	HenSaveAction.sync_action_inputs(action, macro)
+
 	if action.inputs.is_empty() and outputs.is_empty():
 		var label := Label.new()
 		label.text = 'This action has no parameters.'
@@ -361,6 +472,7 @@ func _render_action_params() -> void:
 		# a top-level slot: bindings on the action, expressions allowed
 		_create_value_slot({
 			param = param,
+			action = action,
 			bind_store = action.input_bindings,
 			bind_key = str(param.id),
 			expr_store = action.input_expressions,
@@ -447,7 +559,7 @@ func _create_value_slot(slot: Dictionary) -> void:
 	# value display: option picker | expression button | bound chip | literal editor
 	if not options.is_empty():
 		var option_bt := Button.new()
-		option_bt.text = str(param.default_value) if param.default_value != null else options[0]
+		option_bt.text = param.option_label(param.default_value) if param.default_value != null else param.option_label(options[0])
 		option_bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		option_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		option_bt.pressed.connect(_open_option_picker.bind(param, options, option_bt))
@@ -739,7 +851,7 @@ func _open_option_picker(param: HenSaveParam, options: Array[String], anchor: Bu
 	var list: Array = []
 
 	for option: String in options:
-		list.append({name = option})
+		list.append({name = param.option_label(option), value = option})
 
 	# show first (enters the tree → _ready resolves the refs), then mount
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(menu, {
@@ -749,7 +861,7 @@ func _open_option_picker(param: HenSaveParam, options: Array[String], anchor: Bu
 	})
 
 	menu.mount(list, func(item: Dictionary) -> void:
-		param.default_value = str(item.name)
+		param.default_value = str(item.get('value', item.name))
 		anchor.text = str(item.name)
 	, 'item_type')
 
@@ -797,6 +909,12 @@ func _build_bind_options(slot: Dictionary) -> Array:
 		else:
 			options.append({name = str(source.name), kind = 'bind', code = str(source.code)})
 
+	# inside a function or a macro its own inputs come first: they are what the
+	# definition was handed to work with
+	for scope_input: HenSaveParam in _scope_inputs(save_data, slot.get('action') as HenSaveAction):
+		if ptype == 'Variant' or HenUtils.is_type_relation_valid(ptype, scope_input.type):
+			options.append({name = scope_input.name, kind = 'bind', code = HenUtils.bind_code_for_arg(scope_input)})
+
 	for v: HenSaveVar in save_data.variables:
 		if HenUtils.is_type_relation_valid(ptype, v.type):
 			options.append({name = v.name, kind = 'bind', code = HenUtils.bind_code_for_var(v)})
@@ -809,6 +927,30 @@ func _build_bind_options(slot: Dictionary) -> Array:
 			options.append({name = prop.name, kind = 'bind', code = prop.name})
 
 	return options
+
+
+# the inputs of the definition the step belongs to, empty for a step of a state
+func _scope_inputs(_save_data: HenSaveData, _action: HenSaveAction) -> Array[HenSaveParam]:
+	var scope: HenSaveResType = _definition_of(_save_data, _action)
+
+	if scope is HenSaveFunc:
+		return (scope as HenSaveFunc).inputs
+
+	if scope is HenSaveStateMacro:
+		return (scope as HenSaveStateMacro).inputs
+
+	return []
+
+
+# the definition holding a step; the open scope answers for the paths that have no
+# action at hand yet
+func _definition_of(_save_data: HenSaveData, _action: HenSaveAction) -> HenSaveResType:
+	if not _action:
+		return HenRoute.current_scope(_save_data)
+
+	var scope_id: StringName = HenActionsPanel.state_id_of(_save_data, _action)
+
+	return HenRoute.definition_of(_save_data, scope_id) if not scope_id.is_empty() else HenRoute.current_scope(_save_data)
 
 
 func _on_bind_selected(item: Dictionary, slot: Dictionary) -> void:
@@ -1172,6 +1314,11 @@ func _create_branch_row(action: HenSaveAction, key: String, title: String) -> vo
 
 	var target_bt := Button.new()
 	target_bt.text = ('-> ' + _branch_target_name(target, script_id)) if target else 'Nowhere'
+
+	# a way out is only resolved where the macro is used, so the row names the exit
+	if HenGeneratorAction.branch_is_macro_exit(action, key):
+		target_bt.text = 'leaves through ' + _macro_exit_name(save_data, str(branch.get('exit_id', '')))
+
 	target_bt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	target_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	target_bt.pressed.connect(_open_branch_picker.bind(key, target_bt))
@@ -1371,21 +1518,35 @@ func _build_branch_options() -> Array:
 	# the states offered have to come from the script the action lives in
 	var save_data: HenSaveData = HenActionsPanel.owner_of(resource as HenSaveAction)
 	var options: Array = [ {name = 'Nowhere', kind = 'none'} ]
+	# inside a macro the reachable states are its own, plus the ways out each use
+	# of it wires to a state of the scope that holds it
+	var definition: HenSaveResType = _definition_of(save_data, resource as HenSaveAction)
+	var macro: HenSaveStateMacro = definition as HenSaveStateMacro
+	# a function has no machine of its own to change, so the only thing it may
+	# drive is another node's: offering a state of this script would only earn the
+	# step a red card
+	var in_function: bool = definition is HenSaveFunc
 
-	for state: HenSaveState in save_data.states:
+	for state: HenSaveState in ([] if in_function else (macro.get_states(save_data) if macro else save_data.states)):
 		options.append({name = state.name, kind = 'state', state_id = state.id})
 
 	var owner_state: HenSaveState = _owner_state(save_data)
 
 	# every state on the running chain can have its sub-states switched: the owner's
 	# own children, its siblings, and so on up to the top
-	if owner_state:
+	if owner_state and not in_function:
 		for holder: HenSaveState in HenGeneratorAction.ancestor_chain(save_data, owner_state):
 			for sub: HenSaveState in holder.get_sub_states(save_data):
 				if sub == owner_state:
 					continue
 
 				options.append({name = holder.name + ' / ' + sub.name, kind = 'state', state_id = sub.id})
+
+	if macro:
+		for flow: HenSaveFlowParam in macro.flow_outputs:
+			options.append({name = flow.name + '  (way out)', kind = 'macro_exit', exit_id = str(flow.id)})
+
+		return options
 
 	for script: Dictionary in _other_scripts(save_data):
 		for state: HenSaveState in script.states:
@@ -1455,6 +1616,18 @@ func _script_states(ast: HenMapDependencies.ProjectAST) -> Array:
 	return states
 
 
+# what a way out of the open macro is called, by its id
+func _macro_exit_name(save_data: HenSaveData, exit_id: String) -> String:
+	var macro: HenSaveStateMacro = _definition_of(save_data, resource as HenSaveAction) as HenSaveStateMacro
+
+	if macro:
+		for flow: HenSaveFlowParam in macro.flow_outputs:
+			if str(flow.id) == exit_id:
+				return flow.name
+
+	return exit_id
+
+
 func _script_name_for_id(script_id: StringName) -> String:
 	var map_dep: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 
@@ -1483,6 +1656,9 @@ func _on_branch_selected(item: Dictionary, key: String) -> void:
 
 	if str(item.get('kind', '')) == 'none':
 		action.branches.erase(key)
+	elif str(item.get('kind', '')) == 'macro_exit':
+		# a way out is resolved by whoever uses the macro, so it names no state here
+		action.branches[key] = {exit_id = str(item.exit_id), label = str((action.branches.get(key, {}) as Dictionary).get('label', ''))}
 	else:
 		var branch: Dictionary = action.branches.get(key, {})
 		var script_id: StringName = StringName(str(item.get('script_id', '')))

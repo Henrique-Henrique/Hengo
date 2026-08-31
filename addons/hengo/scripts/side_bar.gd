@@ -50,6 +50,13 @@ class DeleteResourceCommand:
 			if meta is HenSaveResTypeWithRoute:
 				removed_route_ids.append(meta.id)
 
+			# a macro keeps its states in the sub_states drawer, like a state does
+			if meta is HenSaveStateMacro and save_data.sub_states.has(meta.id):
+				removed_sub_states[meta.id] = (save_data.sub_states[meta.id] as Array).duplicate()
+
+				for state: HenSaveState in save_data.sub_states[meta.id]:
+					side_bar._collect_state_delete_cache(state, removed_items, removed_route_ids, removed_sub_states)
+
 		for route_id: StringName in removed_route_ids:
 			if save_data.state_actions.has(route_id):
 				removed_state_actions[route_id] = save_data.state_actions[route_id]
@@ -135,7 +142,7 @@ func _ready() -> void:
 	ICONS = {
 		AddType.STATE: HenUtils.ICON_STATE,
 		AddType.VAR: HenUtils.ICON_VARIABLE,
-		AddType.MACRO: HenUtils.ICON_FUNCTION,
+		AddType.MACRO: HenUtils.ICON_BOX,
 		AddType.FUNC: HenUtils.ICON_FUNCTION,
 		AddType.SIGNAL_CALLBACK: HenUtils.ICON_SIGNAL,
 		AddType.LOCAL_VAR: HenUtils.ICON_VARIABLE,
@@ -177,6 +184,8 @@ func update() -> void:
 
 	var categories: Array[Dictionary] = [
 		{name = 'States', type = AddType.STATE},
+		{name = 'Macros', type = AddType.MACRO},
+		{name = 'Functions', type = AddType.FUNC},
 		{name = 'Variables', type = AddType.VAR}
 	]
 
@@ -218,6 +227,26 @@ func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
 				item.set_start_badge(state_data.start)
 				_add_category_row(category, item)
 				_add_sub_states_card(category.items_container, state_data, _type, BG_COLOR[_type], 1)
+		AddType.MACRO:
+			for macro_data: HenSaveStateMacro in global.SAVE_DATA.macros:
+				_add_category_row(category, _create_row(
+					macro_data.name,
+					macro_data,
+					ICONS[_type],
+					BG_COLOR[_type],
+					false,
+					8
+				))
+		AddType.FUNC:
+			for func_data: HenSaveFunc in global.SAVE_DATA.functions:
+				_add_category_row(category, _create_row(
+					func_data.name,
+					func_data,
+					ICONS[_type],
+					BG_COLOR[_type],
+					false,
+					8
+				))
 		AddType.VAR:
 			for var_data: HenSaveVar in global.SAVE_DATA.variables:
 				var row: HenSideBarRow = _create_row(
@@ -234,6 +263,11 @@ func _add_category(_name: String, _type: AddType, show_divider: bool) -> void:
 
 func _add_sub_states_card(parent_container: Node, state: HenSaveState, type: AddType, tint: Color, depth: int) -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	# what a use runs is listed under the macro, never under the state using it
+	if state.is_macro_use():
+		return
+
 	var sub_states: Array = state.get_sub_states(global.SAVE_DATA)
 	if sub_states.is_empty():
 		return
@@ -249,9 +283,9 @@ func _add_sub_states_card(parent_container: Node, state: HenSaveState, type: Add
 		var item: HenSideBarRow = _create_row(
 			sub_state.name,
 			sub_state,
-			ICONS[type],
+			HenUtils.ICON_BOX if sub_state.is_macro_use() else ICONS[type],
 			BG_COLOR[type],
-			true,
+			not sub_state.is_macro_use(),
 			6,
 			'New Substate'
 		)
@@ -310,6 +344,20 @@ func _on_add_requested(meta: int) -> void:
 		AddType.VAR:
 			HenStateOps.request_add_var(global.SAVE_DATA)
 			return
+		AddType.FUNC:
+			var func_res: HenSaveFunc = HenStateOps.request_add_function(global.SAVE_DATA)
+
+			if func_res:
+				HenRoute.enter(HenRoute.KIND_FUNCTION, func_res.id)
+
+			return
+		AddType.MACRO:
+			var macro: HenSaveStateMacro = HenStateOps.request_add_macro(global.SAVE_DATA)
+
+			if macro:
+				HenRoute.enter(HenRoute.KIND_MACRO, macro.id)
+
+			return
 
 	update()
 
@@ -359,11 +407,17 @@ func get_inspect_actions(meta: Variant) -> Array[Dictionary]:
 	var actions: Array[Dictionary] = []
 
 	if meta is HenSaveState:
+		var state: HenSaveState = meta as HenSaveState
+
+		# a use of a macro takes no machine of its own, so it hosts nothing
+		if not state.is_macro_use():
+			actions.append(HenStateOps.use_macro_action(state))
+
 		# the base state stays put and stays alive, so it gets no entry at all
-		if (meta as HenSaveState).is_base:
+		if state.is_base:
 			return actions
 
-		actions.append(HenStateOps.move_action(meta as HenSaveState))
+		actions.append(HenStateOps.move_action(state))
 
 	actions.append(
 		{
@@ -504,6 +558,10 @@ func _get_target_array_for_meta(meta: HenSaveResType) -> Array:
 		return save_data.variables
 	if meta is HenSaveState:
 		return save_data.states
+	if meta is HenSaveFunc:
+		return save_data.functions
+	if meta is HenSaveStateMacro:
+		return save_data.macros
 
 	return []
 
@@ -562,6 +620,14 @@ func _create_row(_name: String, _meta: Variant, _icon: Texture2D = null, _icon_c
 func _on_row_pressed(meta: Variant, mouse_button_index: int) -> void:
 	match mouse_button_index:
 		MOUSE_BUTTON_LEFT:
+			if meta is HenSaveFunc:
+				HenRoute.enter(HenRoute.KIND_FUNCTION, (meta as HenSaveFunc).id)
+				return
+
+			if meta is HenSaveStateMacro:
+				HenRoute.enter(HenRoute.KIND_MACRO, (meta as HenSaveStateMacro).id)
+				return
+
 			_focus_state_in_graph(meta)
 		MOUSE_BUTTON_RIGHT:
 			HenInspector.edit_resource(meta, get_inspect_title(meta), get_inspect_actions(meta), get_inspect_popup_opts())
@@ -595,6 +661,7 @@ func _after_resource_removed(removed_route_ids: Array[StringName]) -> void:
 # the sidebar is not the only view of a state: the flow graph draws the same data
 # and only rebuilds on the signal
 func _announce_change() -> void:
+	HenActionPool.invalidate()
 	update()
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')

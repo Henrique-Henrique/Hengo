@@ -13,6 +13,9 @@ var default_value: Variant = null
 @export var type_from: StringName = &''
 # optional: fixed set of code fragments this input can hold, shown as a dropdown
 @export var options: Array[String] = []
+# optional: what each option is called on screen, when the value emitted is not
+# what should be read (an id the user never typed)
+@export var option_labels: Array[String] = []
 # the value is emitted verbatim instead of being quoted as a literal
 @export var raw: bool = false
 # the input is an assignment target: it must be bound, and only to something
@@ -51,6 +54,9 @@ static func create(data: Dictionary = {}) -> HenSaveParam:
 		if data.has('options'):
 			for option: Variant in data.options:
 				p.options.append(str(option))
+		if data.has('option_labels'):
+			for label: Variant in data.option_labels:
+				p.option_labels.append(str(label))
 		if data.has('doc'): p.doc = str(data.doc)
 		if data.has('picker'): p.picker = StringName(str(data.picker))
 		if data.has('default_value'): p.default_value = data.default_value
@@ -64,6 +70,7 @@ func get_data() -> Dictionary:
 		id = id,
 		type_from = type_from,
 		options = options,
+		option_labels = option_labels,
 		raw = raw,
 		lvalue = lvalue,
 		bind_only = bind_only,
@@ -76,7 +83,7 @@ func get_data() -> Dictionary:
 
 func _validate_property(_property: Dictionary) -> void:
 	super (_property)
-	if _property.name in [&'type_from', &'options', &'raw', &'lvalue', &'bind_only', &'optional', &'doc', &'picker']:
+	if _property.name in [&'type_from', &'options', &'option_labels', &'raw', &'lvalue', &'bind_only', &'optional', &'doc', &'picker']:
 		_property.usage = PROPERTY_USAGE_STORAGE
 
 
@@ -96,4 +103,9 @@ func _get_property_list() -> Array[Dictionary]:
 
 func get_new_name() -> String:
 	return 'param_' + str(id)
+# what an option is called on screen; the value itself when it has no label
+func option_label(_value: Variant) -> String:
+	var index: int = options.find(str(_value))
+
+	return option_labels[index] if index >= 0 and index < option_labels.size() else str(_value)
 

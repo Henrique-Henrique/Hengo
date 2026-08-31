@@ -8,6 +8,12 @@ class_name HenSaveData extends Resource
 @export var sub_states: Dictionary
 # linear action lists keyed by state id (str(state.id) -> Array[HenSaveAction])
 @export var state_actions: Dictionary
+# reusable action lists, offered in the palette like any other action. the body of
+# each one is a state_actions entry under its own id
+@export var functions: Array[HenSaveFunc]
+# reusable state machines, added to a state as a collapsed box. the states of each
+# one are a sub_states entry under its own id
+@export var macros: Array[HenSaveStateMacro]
 
 var _node_cache: Dictionary = {}
 
@@ -91,6 +97,39 @@ func add_state(_save: bool = true) -> HenSaveState:
 		s.start = true
 
 	return s
+
+
+func add_function() -> HenSaveFunc:
+	var f: HenSaveFunc = HenSaveFunc.create(self )
+
+	functions.append(f)
+
+	return f
+
+
+func add_macro() -> HenSaveStateMacro:
+	var macro: HenSaveStateMacro = HenSaveStateMacro.create(self )
+
+	macros.append(macro)
+	macro.add_state(self )
+
+	return macro
+
+
+func find_function(_id: StringName) -> HenSaveFunc:
+	for f: HenSaveFunc in functions:
+		if str(f.id) == str(_id):
+			return f
+
+	return null
+
+
+func find_macro(_id: StringName) -> HenSaveStateMacro:
+	for macro: HenSaveStateMacro in macros:
+		if str(macro.id) == str(_id):
+			return macro
+
+	return null
 
 
 func new_counter_id() -> StringName:

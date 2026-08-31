@@ -69,14 +69,20 @@ static func dragged_action(_data: Variant) -> HenSaveAction:
 	return (_data as Dictionary).get('action') as HenSaveAction
 
 
-# a phase is only a valid target when the macro has a body for it
-static func can_use_phase(_action: HenSaveAction, _phase: StringName) -> bool:
+# a phase is only a valid target when the macro has a body for it. a place a macro
+# leaves for its uses is judged by the phase it runs at
+static func can_use_phase(_action: HenSaveAction, _phase: StringName, _save_data: HenSaveData = null, _state: HenSaveState = null) -> bool:
 	var macro: HenSaveMacro = find_macro(_action.macro_id)
 
 	if not macro:
 		return str(_action.phase) == str(_phase)
 
-	return HenSaveAction.supported_phases(macro).has(_phase)
+	var phase: StringName = _phase
+
+	if not HenSaveAction.PHASE_ORDER.has(phase) and _save_data and _state and _state.is_macro_use():
+		phase = HenGeneratorAction.hook_phase(_save_data, _state, phase)
+
+	return HenSaveAction.supported_phases(macro).has(phase)
 
 
 # macro id -> macro, plus the pool sizes it was built from
@@ -125,6 +131,12 @@ static func find_macro(_macro_id: StringName) -> HenSaveMacro:
 
 	if not global:
 		return null
+
+	if HenFunctionMacro.is_function_macro(_macro_id):
+		return HenFunctionMacro.macro_for(global.SAVE_DATA, _macro_id)
+
+	if HenMacroHookMacro.is_hook_macro(_macro_id):
+		return HenMacroHookMacro.macro_for(global.SAVE_DATA, _macro_id)
 
 	var sizes: Vector2i = Vector2i(global.action_macros.size(), global.script_macros.size())
 
@@ -178,6 +190,11 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 
 		part.label = param.name if show_names else ''
 		part.options = declared.options if not declared.options.is_empty() else param.options
+		part.option_labels = declared.option_labels if not declared.option_labels.is_empty() else param.option_labels
+
+		# an option whose value is an id nobody typed reads as the name it was given
+		if part.kind == &'literal' and not part.option_labels.is_empty():
+			part.value = declared.option_label(param.default_value)
 		part.picker = declared.picker if not declared.picker.is_empty() else param.picker
 		part.slot = input_slot(_action, param, declared, params)
 		part.editor = _editor_kind(part, needs_bind)

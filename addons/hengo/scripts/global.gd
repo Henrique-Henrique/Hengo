@@ -18,6 +18,13 @@ var ACTIVE_COLLECTION: HenSaveCollection
 var CURRENT_INSPECTOR: HenInspector
 # script id -> { origin: Vector2, zoom: float } of the flow canvas
 var CAM_VIEWS: Dictionary = {}
+# the definition stack the canvas is editing, empty while it draws the script.
+# entries are { kind: StringName, id: StringName }, read through HenRoute
+var ROUTE: Array[Dictionary] = []
+# script id -> the route stack it had when its tab was left
+var ROUTE_VIEWS: Dictionary = {}
+# script the current stack belongs to, so leaving a tab knows where to park it
+var ROUTE_OWNER: String = ''
 var CODE_SEARCH: HenCodeSearch
 
 # CONFIG

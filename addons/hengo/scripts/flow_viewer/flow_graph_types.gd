@@ -8,6 +8,9 @@ extends RefCounted
 # the synthetic port every action carries: codegen runs the next action after this
 # one no matter which declared branch was taken, so the sequence is its own port
 const THEN_PIN: StringName = &'then'
+# a port of a use that stands for a way out of its macro, told apart from the
+# places the use fills with steps
+const WAY_OUT_PIN: String = 'way:'
 const ENTER_PIN: StringName = &'in'
 const BODY_PIN: StringName = &'body'
 
@@ -53,6 +56,9 @@ class FlowNode extends RefCounted:
 	var wire_input: StringName = &''
 	# on a wire_ref, the step the value comes from, which clicking it goes to
 	var wire_source: HenSaveAction
+	# { kind, id } of the definition this step stands for, empty when it is a plain
+	# action: it is what the enter button on the header opens
+	var enter_scope: Dictionary = {}
 	# the phase chain this node belongs to
 	var phase: StringName = &''
 	# why the codegen would drop this action, empty when it is fine

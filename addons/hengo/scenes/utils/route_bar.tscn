@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/utils/route_bar.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/corner-down-left.svg" id="2_back"]
+
+[node name="RouteBar" type="HBoxContainer"]
+visible = false
+theme_override_constants/separation = 2
+script = ExtResource("1_script")
+
+[node name="RouteBaseBt" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Back to the script"
+icon = ExtResource("2_back")
+flat = true
+
+[node name="RouteCrumbs" type="HBoxContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2

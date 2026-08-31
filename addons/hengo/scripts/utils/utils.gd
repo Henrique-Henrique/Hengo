@@ -4,6 +4,9 @@ class_name HenUtils extends Node
 # an action binding stores 'var:<id>' for a hengo variable and the bare name for a
 # native property, so renaming a variable can't silently break the generated code
 const BIND_VAR_PREFIX: String = 'var:'
+# bind to an input of the function or macro the action runs inside, which reaches
+# the caller's value instead of anything the script holds
+const BIND_ARG_PREFIX: String = 'arg:'
 # bind to a node reached by path instead of a variable, so a sibling node can be
 # used without declaring anything
 const BIND_PATH_PREFIX: String = 'path:'
@@ -321,6 +324,8 @@ static func get_bound_source_type(_save_data: HenSaveData, _bind_code: String) -
 	match str(bind.kind):
 		'var':
 			return (bind.value as HenSaveVar).type
+		'arg':
+			return str((bind.value as HenSaveParam).type)
 		'native':
 			return str((bind.value as Dictionary).type)
 		'property':
@@ -342,6 +347,11 @@ static func bind_expression(_save_data: HenSaveData, _bind_code: String) -> Stri
 	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
 	var is_global: bool = str(bind.kind) == 'native' and bool((bind.value as Dictionary).get('global', false))
 
+	# a function input is a parameter of the method being written, a macro input is
+	# a script variable of the use running it: neither reads off the owner here
+	if str(bind.kind) == 'arg':
+		return resolved
+
 	return resolved if is_global else '_ref.' + resolved
 
 
@@ -355,6 +365,10 @@ static func classify_bind_code(_save_data: HenSaveData, _bind_code: String) -> D
 	if _bind_code.begins_with(BIND_VAR_PREFIX):
 		var variable: HenSaveVar = get_bind_var(_save_data, _bind_code)
 		return {kind = 'var', value = variable, arg = ''} if variable else {kind = 'none', value = null, arg = ''}
+
+	if _bind_code.begins_with(BIND_ARG_PREFIX):
+		var param: HenSaveParam = get_bind_arg(_save_data, _bind_code)
+		return {kind = 'arg', value = param, arg = ''} if param else {kind = 'none', value = null, arg = ''}
 
 	var separator: int = _bind_code.find(':')
 
@@ -392,6 +406,44 @@ static func get_native_source(_save_data: HenSaveData, _bind_code: String) -> Di
 
 static func bind_code_for_var(_var: HenSaveVar) -> String:
 	return BIND_VAR_PREFIX + str(_var.id)
+
+
+static func bind_code_for_arg(_param: HenSaveParam) -> String:
+	return BIND_ARG_PREFIX + str(_param.id)
+
+
+# a function input is a parameter of the method being written; a macro input is a
+# script variable named after the use running it, which the emit path fills in
+static func arg_code(_save_data: HenSaveData, _param: HenSaveParam) -> String:
+	if not _param or not _save_data:
+		return ''
+
+	for func_res: HenSaveFunc in _save_data.functions:
+		if func_res.inputs.has(_param):
+			return _param.name.to_snake_case()
+
+	return '_ref.' + HenSaveStateMacro.INPUT_VAR_PREFIX + '{{MACRO_ID}}_' + _param.name.to_snake_case()
+
+
+# input of a function or of a macro a bind code points at. ids are unique inside a
+# script, so the definition holding it does not have to be named
+static func get_bind_arg(_save_data: HenSaveData, _bind_code: String) -> HenSaveParam:
+	if not _save_data or not _bind_code.begins_with(BIND_ARG_PREFIX):
+		return null
+
+	var param_id: String = _bind_code.substr(BIND_ARG_PREFIX.length())
+
+	for func_res: HenSaveFunc in _save_data.functions:
+		for param: HenSaveParam in func_res.inputs:
+			if str(param.id) == param_id:
+				return param
+
+	for macro: HenSaveStateMacro in _save_data.macros:
+		for param: HenSaveParam in macro.inputs:
+			if str(param.id) == param_id:
+				return param
+
+	return null
 
 
 static func script_path_of(_identity: HenSaveDataIdentity) -> String:
@@ -432,6 +484,8 @@ static func resolve_bind_code(_save_data: HenSaveData, _bind_code: String) -> St
 	match str(bind.kind):
 		'var':
 			return (bind.value as HenSaveVar).name.to_snake_case()
+		'arg':
+			return arg_code(_save_data, bind.value as HenSaveParam)
 		'native':
 			return native_source_code(bind.value as Dictionary, str(bind.arg))
 		'property':
@@ -452,6 +506,9 @@ static func native_source_code(_source: Dictionary, _arg: String) -> String:
 # label for a bind code in the ui, so a raw id never reaches the screen
 static func get_bind_label(_save_data: HenSaveData, _bind_code: String) -> String:
 	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+
+	if str(bind.kind) == 'arg':
+		return (bind.value as HenSaveParam).name
 
 	if str(bind.kind) == 'native':
 		var source: Dictionary = bind.value

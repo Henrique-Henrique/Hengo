@@ -18,7 +18,9 @@ signal request_structural_update
 # a state was picked outside the graph, which is asked to centre the view on it
 signal request_focus_state(_state: HenSaveState)
 
-# emitted whenever the active route changes
+# emitted whenever the open scope changes (the script itself, a function, a macro)
+signal route_changed
+
 
 # set to true during batch compilation to suppress thread-unsafe UI signals
 var is_batch_loading: bool = false

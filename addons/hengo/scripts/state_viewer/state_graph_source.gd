@@ -27,6 +27,57 @@ static func collection_dict(_open_scripts: Array) -> Dictionary:
 	return root
 
 
+# the machine the open scope draws: the states of the script, or the single body
+# of the definition being edited
+static func scope_dict(_save_data: HenSaveData, _scope: HenSaveResType) -> Dictionary:
+	if _scope is HenSaveFunc:
+		return function_dict(_save_data, _scope as HenSaveFunc)
+
+	if _scope is HenSaveStateMacro:
+		return macro_dict(_save_data, _scope as HenSaveStateMacro)
+
+	return script_dict(_save_data)
+
+
+# the machine a macro holds, drawn the way the script's own is
+static func macro_dict(_save_data: HenSaveData, _macro: HenSaveStateMacro) -> Dictionary:
+	var root: Dictionary = {
+		id = _macro.name,
+		states = {},
+		script_type = String(_save_data.identity.type) if _save_data.identity else ''
+	}
+
+	var states: Array = _macro.get_states(_save_data)
+
+	if states.is_empty():
+		return root
+
+	root.initial = states[0].name
+
+	for state: HenSaveState in states:
+		if state.start:
+			root.initial = state.name
+
+		root.states[state.name] = state_dict(state, _save_data)
+
+	return root
+
+
+# a function body draws as one frame: it has no machine of its own
+static func function_dict(_save_data: HenSaveData, _func: HenSaveFunc) -> Dictionary:
+	var scope: HenSaveState = _func.scope_state()
+
+	return {
+		id = _func.name,
+		states = {_func.name: {
+			state_id = String(scope.id),
+			script_id = String(_save_data.identity.id) if _save_data.identity else ''
+		}},
+		initial = _func.name,
+		script_type = String(_save_data.identity.type) if _save_data.identity else ''
+	}
+
+
 static func script_dict(_save_data: HenSaveData) -> Dictionary:
 	var root: Dictionary = {
 		id = _save_data.identity.name if _save_data.identity else 'root',
@@ -64,6 +115,10 @@ static func state_dict(_state: HenSaveState, _save_data: HenSaveData) -> Diction
 
 	if not _state.description.is_empty():
 		out.description = _state.description
+
+	# a use of a macro draws as a closed box: what it runs is edited in the macro
+	if _state.is_macro_use():
+		return out
 
 	_add_sub_states(_state, _save_data, out)
 

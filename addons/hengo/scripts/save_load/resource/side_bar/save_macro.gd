@@ -7,6 +7,8 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 @export var flow_outputs: Array[HenSaveFlowParam]
 @export var script_path: String
 @export var is_script_macro: bool = false
+# set when this macro stands for a function of a script instead of a file on disk
+@export var function_id: StringName
 # presentation, mirroring the native_items vocabulary: icon name + category color
 @export var icon: String
 @export var color: String

@@ -46,6 +46,7 @@ const ICON_MOVE: Texture2D = preload('res://addons/hengo/assets/new_icons/move.s
 const ICON_ADD_SUB: Texture2D = preload('res://addons/hengo/assets/new_icons/circle-plus.svg')
 const ICON_TRASH: Texture2D = preload('res://addons/hengo/assets/new_icons/trash-2.svg')
 const ICON_START: Texture2D = preload('res://addons/hengo/assets/new_icons/flag.svg')
+const ICON_ENTER: Texture2D = preload('res://addons/hengo/assets/new_icons/chevrons-right.svg')
 
 const CORNER: int = 8
 const HEADER_CORNER: int = 6
@@ -72,9 +73,24 @@ var _running: bool = false
 var _is_start: bool = false
 var _is_base: bool = false
 var _can_reenter: bool = false
+# the state chrome, dropped on a frame that stands for something else
+var _chrome: bool = true
+# a use of a macro: it keeps the state chrome but opens the definition instead of
+# growing a machine of its own
+var _is_macro_use: bool = false
 var _errors: int = 0
 var _hover_kind: StringName = &''
 var _hits: Array[Dictionary] = []
+
+
+# a frame that is not a state of the machine wears no state chrome: a function
+# body has nothing to start, nest, move or delete
+func hide_chrome() -> void:
+	_chrome = false
+
+
+func mark_macro_use() -> void:
+	_is_macro_use = true
 
 
 func setup(_host_control: Control, _name: String, _description: String, _nodes: int, _accent_color: Color, _start: bool = false, _base: bool = false, _reenter: bool = false) -> void:
@@ -250,6 +266,9 @@ func _emit_error_badge(_at: Vector2) -> void:
 # right aligned: start, new sub-state, move, delete, then the menu the sidebar
 # popup opens from
 func _emit_buttons(_size: Vector2, _centre: float) -> void:
+	if not _chrome:
+		return
+
 	var y: float = _centre - BT_SIZE * 0.5
 	var x: float = _size.x - HEADER_PAD_H - BT_SIZE
 
@@ -263,7 +282,12 @@ func _emit_buttons(_size: Vector2, _centre: float) -> void:
 	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_MOVE, BT_COLOR, &'state_move', not _is_base)
 	x -= BT_SIZE + BT_GAP
 
-	_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_ADD_SUB, BT_COLOR, &'state_add_sub')
+	# a use runs the machine of its definition, so it opens it instead of nesting
+	if _is_macro_use:
+		_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_ENTER, BT_COLOR, &'state_enter')
+	else:
+		_emit_button(Rect2(Vector2(x, y), Vector2(BT_SIZE, BT_SIZE)), ICON_ADD_SUB, BT_COLOR, &'state_add_sub')
+
 	x -= BT_SIZE + BT_GAP
 
 	# a state that already runs first has nothing to set, so the button only shows

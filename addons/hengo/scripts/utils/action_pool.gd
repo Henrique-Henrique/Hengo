@@ -21,7 +21,30 @@ static func all() -> Array[HenSaveMacro]:
 		if macro.serves_class(script_class):
 			pool.append(macro)
 
+	pool.append_array(function_macros(global.SAVE_DATA))
+
 	return pool
+
+
+# the functions of the script, offered like any other action. inside the body of
+# one, the finish that ends it takes its place: a function is not a step of itself
+static func function_macros(_save_data: HenSaveData) -> Array[HenSaveMacro]:
+	var out: Array[HenSaveMacro] = []
+
+	if not _save_data:
+		return out
+
+	var open_scope: HenSaveResType = HenRoute.current_scope(_save_data)
+
+	for func_res: HenSaveFunc in _save_data.functions:
+		out.append(HenFunctionMacro.macro_of(func_res, func_res == open_scope))
+
+	# inside a macro, the places it leaves for its uses are steps of its own
+	if open_scope is HenSaveStateMacro:
+		for flow: HenSaveFlowParam in (open_scope as HenSaveStateMacro).flow_inputs:
+			out.append(HenMacroHookMacro.macro_of(open_scope as HenSaveStateMacro, flow))
+
+	return out
 
 
 # actions with a body for this phase: offering one that has none would let the

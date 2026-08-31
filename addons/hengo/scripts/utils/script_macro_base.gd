@@ -101,6 +101,36 @@ func get_inputs() -> Array[Dictionary]:
 	return []
 
 
+# right side of an output assignment, from get_output_<id>(). a macro whose
+# outputs are only known at runtime (a function of the script) overrides this
+func get_output_rhs(_id: String) -> String:
+	var method: String = 'get_output_' + _id
+
+	if has_method(method):
+		var rhs: Variant = call(method)
+
+		if rhs is String:
+			return rhs as String
+
+	return ''
+
+
+func has_output_rhs(_id: String) -> bool:
+	return has_method('get_output_' + _id)
+
+
+# true when the action only makes sense inside a function body (finish). emitting
+# it in a state is refused with a loud marker
+func get_needs_function() -> bool:
+	return false
+
+
+# body to emit when the action declares outputs and nobody stores any of them.
+# empty means the action is a pure producer and is dropped instead
+func get_unstored_body() -> String:
+	return ''
+
+
 # returns an array of dictionary with { name: string, type: string, id: stringname }
 # for each output define a func get_output_<id>() -> String returning its rhs.
 # as an action, place {{out:<id>}} on its own line in the flow body where the

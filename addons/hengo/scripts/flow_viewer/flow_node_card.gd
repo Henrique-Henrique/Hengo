@@ -71,7 +71,9 @@ const FLOW_PAD_H: float = 12.0
 const FLOW_PAD_V: float = 7.0
 const SEPARATOR_WIDTH: float = 2.0
 const CHIP_CORNER: int = 4
-const HOVER_ROUNDED: Array[StringName] = [&'chip', &'menu', &'add_above', &'add_below', &'unwire', &'wire_out']
+const HOVER_ROUNDED: Array[StringName] = [&'chip', &'menu', &'add_above', &'add_below', &'unwire', &'wire_out', &'enter_scope']
+# a step that stands for a definition opens it from the header
+const ENTER_ICON: String = 'chevrons-right'
 const CHIP_PAD_H: float = 6.0
 # the badge hangs outside the card, so the stub is what ties it back to the dot
 const BADGE_STUB: float = 10.0
@@ -676,6 +678,17 @@ func _emit_header(_size: Vector2) -> void:
 
 			_hit(above, &'add_above', {})
 			_hit(below, &'add_below', {})
+
+			if not node.enter_scope.is_empty():
+				var enter: Rect2 = Rect2(above.position - Vector2(button.x + HEADER_BT_GAP, 0.0), button)
+
+				_painter.add_texture(
+					HenActionVisuals.icon_texture(ENTER_ICON),
+					Rect2(enter.position + (enter.size - Vector2(ICON_GLYPH, ICON_GLYPH)) * 0.5, Vector2(ICON_GLYPH, ICON_GLYPH)),
+					_label_color()
+				)
+
+				_hit(enter, &'enter_scope', {})
 
 	_hit(Rect2(Vector2.ZERO, Vector2(_size.x, _header_h)), &'header', {})
 

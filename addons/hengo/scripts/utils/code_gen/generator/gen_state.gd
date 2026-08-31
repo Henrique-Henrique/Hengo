@@ -45,14 +45,78 @@ static func get_reenterable_code(_save_data: HenSaveData) -> String:
 	return '\n\t_STATE_CONTROLLER.set_reenterable([{names}])'.format({names = ', '.join(names)})
 
 
+# the values a use hands its macro, kept at script scope: a nested state class
+# cannot read the class holding it
+static func get_macro_input_lines(_save_data: HenSaveData) -> Array:
+	var lines: Array = []
+
+	for use: HenSaveState in _macro_uses(_save_data):
+		var macro: HenSaveStateMacro = use.get_macro(_save_data)
+
+		if not macro:
+			continue
+
+		for param: HenSaveParam in use.macro_inputs:
+			lines.append('var ' + HenSaveStateMacro.INPUT_VAR_PREFIX + str(use.id) + '_' + param.name.to_snake_case() + ' = ' + _macro_input_code(_save_data, use, param))
+
+	return lines
+
+
+static func _macro_input_code(_save_data: HenSaveData, _use: HenSaveState, _param: HenSaveParam) -> String:
+	var bind: String = HenUtils.bind_expression(_save_data, str(_use.macro_bindings.get(str(_param.id), '')))
+
+	if not bind.is_empty():
+		return bind
+
+	return HenActionCode.get_default_value_code(_save_data, str(_param.type), false, '', null, _param.default_value)
+
+
+static func _macro_uses(_save_data: HenSaveData) -> Array:
+	var uses: Array = []
+
+	for state: HenSaveState in _save_data.states:
+		if state.is_macro_use():
+			uses.append(state)
+
+	for sub_list: Variant in _save_data.sub_states.values():
+		for state: HenSaveState in sub_list:
+			if state.is_macro_use():
+				uses.append(state)
+
+	return uses
+
+
 static func get_states_code(_save_data: HenSaveData) -> String:
 	return get_states_code_with_arr(_save_data, _save_data.states)
 
 static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array, _level: int = 0) -> String:
 	var code: String = ''
 	var idx: int = 0
-	# generate classes implementation
+
 	for state: HenSaveState in _state_arr:
+		var is_use: bool = state.is_macro_use()
+
+		# a use writes the machine of its macro, so the drawer is entered around it:
+		# its steps and the names they declare belong to this use alone
+		if is_use:
+			HenGeneratorAction.push_macro_use(state)
+
+		code += _state_code(_save_data, state, _level, idx)
+
+		if is_use:
+			HenGeneratorAction.pop_macro_use()
+
+		idx += 1
+
+	return code
+
+
+# one state as a class: its lifecycle methods, what its actions declare and the
+# machine it holds, which for a use of a macro comes from the drawer
+static func _state_code(_save_data: HenSaveData, state: HenSaveState, _level: int, idx: int) -> String:
+	var code: String = ''
+
+	if true:
 		# the phases a state has come from its action list alone: the scaffolding
 		# vcnode that used to stand for each one carried no logic of its own
 		var virtual_tokens: Dictionary = {}
@@ -145,10 +209,7 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 					(virtual_tokens['enter'].tokens as Array).append(change_sub_command)
 		else:
 			if virtual_tokens.is_empty():
-				base += '\t'.repeat(_level + 1) + 'pass'
-				code += base
-				idx += 1
-				continue
+				return base + '\t'.repeat(_level + 1) + 'pass'
 
 		var idx_1: int = 0
 
@@ -189,6 +250,5 @@ static func get_states_code_with_arr(_save_data: HenSaveData, _state_arr: Array,
 			idx_1 += 1
 
 		code += base
-		idx += 1
-	
+
 	return code

@@ -36,6 +36,7 @@
 [ext_resource type="Texture2D" uid="uid://cuxdwx2mic0yt" path="res://addons/hengo/assets/new_icons/focus.svg" id="55_focus"]
 [ext_resource type="Script" path="res://addons/hengo/scripts/utils/tabs.gd" id="tabs_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/saving_pill.tscn" id="savpill_inst"]
+[ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/route_bar.tscn" id="routebar_inst"]
 [ext_resource type="PackedScene" path="res://addons/hengo/scenes/debug_nodes_panel.tscn" id="dbgpanel_inst"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/bug.svg" id="57_bug"]
 [ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/command.svg" id="54_shortcuts"]
@@ -537,6 +538,10 @@ stretch_mode = 5
 unique_name_in_owner = true
 layout_mode = 2
 text = "No script loaded"
+
+[node name="RouteBar" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000130 instance=ExtResource("routebar_inst")]
+unique_name_in_owner = true
+layout_mode = 2
 
 [node name="VSeparatorStatus" type="VSeparator" parent="Content/UIBase/MainLayout/StatusBar/StatusHBox" unique_id=2000000013]
 layout_mode = 2

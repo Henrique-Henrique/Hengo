@@ -145,23 +145,75 @@ static func _sync_list(_actions: Array) -> void:
 			if child:
 				_sync_list([child])
 
-		var macro: HenSaveMacro = HenActionsPanel.find_macro(action.macro_id)
+		sync_action_inputs(action, HenActionsPanel.find_macro(action.macro_id))
 
-		if not macro:
+
+# a macro script is fixed, so an action of it only ever misses a slot that was
+# added later. a definition of the script can be renamed and retyped while its
+# actions exist, and there the clone has to follow the declaration
+static func sync_action_inputs(_action: HenSaveAction, _macro: HenSaveMacro) -> void:
+	if not _macro:
+		return
+
+	if not HenFunctionMacro.is_function_macro(_action.macro_id):
+		_insert_missing_inputs(_action, _macro)
+		return
+
+	var kept: Dictionary = {}
+
+	for param: HenSaveParam in _action.inputs:
+		kept[str(param.id)] = param
+
+	var synced: Array[HenSaveParam] = []
+
+	for declared: HenSaveParam in _macro.inputs:
+		var held: HenSaveParam = kept.get(str(declared.id))
+
+		synced.append(_sync_param(held, declared) if held else HenSaveParam.create(declared.get_data()))
+		kept.erase(str(declared.id))
+
+	_action.inputs = synced
+
+	# a slot the definition dropped takes whatever was feeding it with it
+	for id: Variant in kept:
+		for store: Dictionary in [_action.input_bindings, _action.input_expressions, _action.input_actions, _action.input_wires]:
+			store.erase(str(id))
+
+
+# name and shape come from the declaration; the value stays unless the type moved
+static func _sync_param(_param: HenSaveParam, _declared: HenSaveParam) -> HenSaveParam:
+	if _param.type != _declared.type:
+		# the type setter clears the value, which is what a retyped slot needs
+		_param.type = _declared.type
+		_param.default_value = _declared.default_value
+
+	_param.name = _declared.name
+	_param.options = _declared.options.duplicate()
+	_param.option_labels = _declared.option_labels.duplicate()
+	_param.raw = _declared.raw
+	_param.lvalue = _declared.lvalue
+	_param.bind_only = _declared.bind_only
+	_param.optional = _declared.optional
+	_param.doc = _declared.doc
+	_param.picker = _declared.picker
+	_param.type_from = _declared.type_from
+
+	return _param
+
+
+static func _insert_missing_inputs(_action: HenSaveAction, _macro: HenSaveMacro) -> void:
+	var held: Dictionary = {}
+
+	for param: HenSaveParam in _action.inputs:
+		held[str(param.id)] = true
+
+	for index: int in _macro.inputs.size():
+		var declared: HenSaveParam = _macro.inputs[index]
+
+		if held.has(str(declared.id)):
 			continue
 
-		var held: Dictionary = {}
-
-		for param: HenSaveParam in action.inputs:
-			held[str(param.id)] = true
-
-		for index: int in macro.inputs.size():
-			var declared: HenSaveParam = macro.inputs[index]
-
-			if held.has(str(declared.id)):
-				continue
-
-			action.inputs.insert(mini(index, action.inputs.size()), HenSaveParam.create(declared.get_data()))
+		_action.inputs.insert(mini(index, _action.inputs.size()), HenSaveParam.create(declared.get_data()))
 
 
 func get_new_name() -> String:
