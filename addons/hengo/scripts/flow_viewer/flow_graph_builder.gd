@@ -317,7 +317,7 @@ static func _action_node(
 	node.id = StringName('a' + str(_action.id))
 	node.kind = _kind
 	node.action = _action
-	node.title = macro.name if macro else _action.name
+	node.title = HenActionsPanel.display_name(_action)
 	node.icon = macro.icon if macro else ''
 	node.accent = HenActionVisuals.accent_of(macro).to_html(false)
 	node.phase = _phase

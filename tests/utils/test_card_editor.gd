@@ -56,6 +56,14 @@ func _add(_macro: HenSaveMacro, _phase: StringName) -> HenSaveAction:
 	return action
 
 
+func _node_for(_graph: HenFlowGraphTypes.FlowGraph, _action: HenSaveAction) -> HenFlowGraphTypes.FlowNode:
+	for node: HenFlowGraphTypes.FlowNode in _graph.nodes:
+		if node.action == _action:
+			return node
+
+	return null
+
+
 func test_the_index_counts_inside_the_phase_and_not_the_list() -> void:
 	var macro: HenSaveMacro = _register(FIX_PHASES)
 
@@ -239,3 +247,21 @@ func test_pasting_next_to_a_branch_step_stays_in_that_branch() -> void:
 
 	assert_int(chain.size()).is_equal(2)
 	assert_object(chain[1]).is_same(copy)
+
+
+func test_a_renamed_action_reaches_the_flow_node() -> void:
+	var macro: HenSaveMacro = _register(FIX_PHASES)
+	var action: HenSaveAction = _add(macro, &'update')
+
+	action.label = 'Hit Counter'
+
+	var node: HenFlowGraphTypes.FlowNode = _node_for(HenFlowGraphBuilder.build(save_data, state), action)
+
+	assert_object(node).is_not_null()
+	assert_str(node.title).is_equal('Hit Counter')
+
+	action.label = ''
+
+	node = _node_for(HenFlowGraphBuilder.build(save_data, state), action)
+
+	assert_str(node.title).is_equal(macro.name)
