@@ -46,6 +46,12 @@ static func clear_hook_scopes() -> void:
 static var in_function: bool = false
 
 
+# for a line written by hand instead of by a macro body, which never reaches the
+# `_ref` -> `self` pass of _process_body
+static func owner_ref() -> String:
+	return 'self' if in_function else '_ref'
+
+
 # names an action emits are keyed by its id, which two uses of one macro share:
 # the use is what makes them different
 static func _process_body(_body: String, _action_id: StringName) -> String:
@@ -163,7 +169,7 @@ static func _emit_actions(_save_data: HenSaveData, _state: HenSaveState, _action
 static func _action_trace(_save_data: HenSaveData, _action: HenSaveAction) -> String:
 	var script_id: String = str(_save_data.identity.id)
 
-	return 'if _ref.get_instance_id() == HengoDebugger.state_targets.get("' + script_id \
+	return 'if ' + owner_ref() + '.get_instance_id() == HengoDebugger.state_targets.get("' + script_id \
 		+ '", -1): HengoDebugger.trace_action(&"' + str(_action.id) + '", "' + script_id + '")'
 
 
@@ -588,6 +594,7 @@ static func _collect_emitted(
 # counter across frames; {{VCNODE_ID}} makes the names unique per action
 static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) -> Array:
 	var lines: Array = []
+	var was_in_function: bool = in_function
 
 	in_function = _state.is_function_scope
 
@@ -608,6 +615,8 @@ static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) 
 		for line: String in base.strip_edges().split('\n'):
 			lines.append(line)
 
+	in_function = was_in_function
+
 	return lines
 
 
@@ -616,6 +625,7 @@ static func get_state_base_lines(_save_data: HenSaveData, _state: HenSaveState) 
 # the node, not on the state
 static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 	var lines: Array = []
+	var was_in_function: bool = in_function
 
 	for_each_scope(_save_data, func(state: HenSaveState) -> void:
 		in_function = state.is_function_scope
@@ -632,6 +642,8 @@ static func get_script_scope_lines(_save_data: HenSaveData) -> Array:
 			for line: String in scope.strip_edges().split('\n'):
 				lines.append(line)
 	)
+
+	in_function = was_in_function
 
 	return lines
 
@@ -766,7 +778,7 @@ static func _get_hook_tokens(_save_data: HenSaveData, _state: HenSaveState, _met
 			asked[str(called.id)] = true
 
 			if not get_scope_hook_tokens(_save_data, called.scope_state(), _method).is_empty():
-				tokens.append('_ref.' + HenGeneratorFunction.hook_method(_save_data, called, _method) + '()')
+				tokens.append(owner_ref() + '.' + HenGeneratorFunction.hook_method(_save_data, called, _method) + '()')
 
 			continue
 

@@ -76,6 +76,27 @@ func test_debug_trace_indents_inside_loop_body() -> void:
 	assert_int(script.reload()).is_equal(OK)
 
 
+# a function body is written at script scope, where `_ref` is not declared
+func test_debug_trace_inside_a_function_names_self() -> void:
+	var func_res: HenSaveFunc = save_data.add_function()
+
+	func_res.name = 'do stuff'
+
+	var action: HenSaveAction = HenSaveAction.create(_register(FIX_PRINT))
+
+	save_data.add_state_action(func_res.scope_state().id, action)
+
+	var code: String = _code_with_debug()
+
+	assert_str(code).contains(
+		'func fn_do_stuff() -> void:\n\t' + _trace_line(action).replace('_ref.', 'self.'))
+	assert_str(code).not_contains('func fn_do_stuff() -> void:\n\tif _ref.')
+
+	var script := GDScript.new()
+	script.source_code = code
+	assert_int(script.reload()).is_equal(OK)
+
+
 # the release-shaped path (get_all_code) carries no instrumentation
 func test_debug_off_emits_no_trace() -> void:
 	_add_action(_register(FIX_PHASES), &'update')

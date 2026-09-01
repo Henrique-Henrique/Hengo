@@ -289,6 +289,24 @@ func test_a_macro_calling_a_stateful_function_asks_it_to_reset() -> void:
 	assert_int(code.count('var did_' + str(once.id))).is_equal(1)
 
 
+# the same ask from one function to another is written at script scope, where the
+# node is self and `_ref` is not declared
+func test_a_function_asking_another_to_reset_names_self() -> void:
+	var inner: HenSaveFunc = _add_function('try once')
+
+	_function_step(inner, _register(FIX_ONCE)).branch_actions['first'] = [HenSaveAction.create(_register(FIX_PHASES))]
+
+	var outer: HenSaveFunc = _add_function('caller')
+
+	save_data.add_state_action(outer.scope_state().id, HenSaveAction.create(HenFunctionMacro.macro_of(inner)))
+	_call_action(outer)
+
+	var code: String = HenTest.get_all_code()
+
+	assert_str(code).contains('func fn_caller_reset() -> void:\n\tself.fn_try_once_reset()')
+	assert_str(code).not_contains('\t_ref.fn_try_once_reset()\n')
+
+
 # --- a call is a step, not a value -------------------------------------------
 
 

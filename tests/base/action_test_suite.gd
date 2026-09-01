@@ -11,6 +11,8 @@ const FIX_TRANSITION: String = 'res://addons/hengo/actions/flow/transition.gd'
 const FIX_ONCE: String = 'res://addons/hengo/actions/flow/do_once.gd'
 # acts on a node slot that falls back to the node the script sits on
 const FIX_NODE_SLOT: String = 'res://addons/hengo/actions/render/change_color.gd'
+# emits a body that stands on its own, so the generated script can be reloaded
+const FIX_PRINT: String = 'res://addons/hengo/actions/debug/print_value.gd'
 
 # single-output, multi-output and branching, one per inline case
 const FIX_MATH: String = 'res://addons/hengo/actions/math/math_operator.gd'
