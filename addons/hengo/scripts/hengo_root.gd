@@ -291,7 +291,7 @@ func _update_ui_state(all_errors: Array) -> void:
 func _on_actions_bt_pressed() -> void:
 	check_errors(false)
 
-	var popup: HenCompileAllReportPopup = preload('res://addons/hengo/scenes/utils/compile_all_report_popup.tscn').instantiate()
+	var popup: HenCompileAllReportPopup = (load('res://addons/hengo/scenes/utils/compile_all_report_popup.tscn') as PackedScene).instantiate()
 
 	popup.report = HenCompileAllReportPopup.live_report()
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(popup)

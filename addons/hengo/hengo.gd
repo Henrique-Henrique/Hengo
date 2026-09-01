@@ -1,9 +1,10 @@
 @tool
 class_name HenHengo extends EditorPlugin
 
-const HENGO_ROOT = preload('res://addons/hengo/scenes/hengo_root.tscn')
 const PLUGIN_NAME = 'Hengo'
-const BASE_THEME = preload('res://addons/hengo/references/theme/hengo.tres')
+const HENGO_ROOT_PATH = 'res://addons/hengo/scenes/hengo_root.tscn'
+const BASE_THEME_PATH = 'res://addons/hengo/references/theme/hengo.tres'
+const DEBUG_PLUGIN_PATH = 'res://addons/hengo/scripts/debug/debug_plugin.gd'
 
 const DOCK_BOTTOM = 0
 const DOCK_LEFT = 1
@@ -19,7 +20,7 @@ var debug_plugin: EditorDebuggerPlugin
 
 
 func _enter_tree():
-	debug_plugin = preload('res://addons/hengo/scripts/debug/debug_plugin.gd').new()
+	debug_plugin = (load(DEBUG_PLUGIN_PATH) as GDScript).new()
 	add_debugger_plugin(debug_plugin)
 
 	# creating hengo folder
@@ -41,10 +42,10 @@ func _enter_tree():
 	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SCRIPTS_PATH):
 		DirAccess.make_dir_absolute(HenEnums.HENGO_SCRIPTS_PATH)
 
-	main_scene = HENGO_ROOT.instantiate()
+	main_scene = (load(HENGO_ROOT_PATH) as PackedScene).instantiate()
 
 	var ui_base: Control = main_scene.get_node('%UIBase')
-	ui_base.theme = BASE_THEME
+	ui_base.theme = load(BASE_THEME_PATH) as Theme
 
 	# shrinks chrome fonts for the user's 1080p factor before the tree enters (runs
 	# before child _ready, so code overrides scaled via ThemeUtils.fs don't double)
