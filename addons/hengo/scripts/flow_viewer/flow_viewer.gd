@@ -109,7 +109,7 @@ var _cam_scope: String = ''
 
 
 func _ready() -> void:
-	if HenUtils.disable_scene_with_owner(self ):
+	if HenUtils.disable_scene_with_owner(self):
 		return
 
 	# EditorInterface only exists in the editor, and this scene also runs headless
@@ -565,7 +565,7 @@ func _build_states(_save_data: HenSaveData, _scope: HenSaveResType = null) -> vo
 			var card: HenFlowNodeCard = HenFlowNodeCard.new()
 
 			nodes_container.add_child(card)
-			card.setup(self , node)
+			card.setup(self, node)
 			card.compute_size()
 			cards.append(card)
 
@@ -691,7 +691,7 @@ func _spawn_frame(_node: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	var meta: String = ('runs the macro ' + macro.name) if macro else state.description
 
 	nodes_container.add_child(frame)
-	frame.setup(self , state.name, meta, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base, state.can_reenter)
+	frame.setup(self, state.name, meta, (entry.graph as HenFlowGraphTypes.FlowGraph).nodes.size(), _accent_for(state), state.start, state.is_base, state.can_reenter)
 
 	if state.is_function_scope:
 		frame.hide_chrome()
@@ -1723,6 +1723,18 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 
 		return true
 
+	
+	if hit.kind == &'chip':
+		_editing_card = card
+		_editor_for(hit.node)
+
+		if not _editor.chip_pressed(hit.part, rect):
+			var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
+
+			_history.commit(global.SAVE_DATA if global else null, 'Edit Action')
+
+		return true
+
 	var action: HenSaveAction = card.node.action
 
 	if not action:
@@ -1733,23 +1745,12 @@ func _dispatch_hit(hit: Dictionary, _ctrl: bool = false, _shift: bool = false) -
 		_open_card_menu(hit, card, card.node.action)
 		return true
 
+	# an inline producer is stored on the action holding the slot, so a use of a
+	# macro has nowhere to park one
 	if hit.kind == &'pin':
 		_editing_card = card
 		_editor_for(hit.node)
 		_editor.open_producer((hit.part as Dictionary).get('slot', {}), rect)
-		return true
-
-	if hit.kind == &'chip':
-		_editing_card = card
-		_editor_for(hit.node)
-
-		# an edit with no popup (a bool toggle) never reaches _on_popup_closed, and
-		# the snapshot taken above would sit open until some later edit commits it
-		if not _editor.chip_pressed(hit.part, rect):
-			var global: HenGlobal = Engine.get_singleton(&'Global') if Engine.has_singleton(&'Global') else null
-
-			_history.commit(global.SAVE_DATA if global else null, 'Edit Action')
-
 		return true
 
 	_click_select(card, _ctrl, _shift)

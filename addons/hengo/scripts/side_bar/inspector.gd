@@ -218,11 +218,13 @@ func edit_one_slot(_action: HenSaveAction, _slot: Dictionary, _title: String) ->
 	inspector_title = _title
 	inspector_actions = []
 
-	_migrate_name_bindings(_action)
+	# a value a macro use hands its definition has no action holding it
+	if _action:
+		_migrate_name_bindings(_action)
 
 	var slot: Dictionary = _slot.duplicate()
 
-	slot.macro_params = _get_macro_params(_action.macro_id)
+	slot.macro_params = _get_macro_params(_action.macro_id) if _action else {}
 	slot.indent = 0
 
 	_single_branch = {}
@@ -279,14 +281,13 @@ func _update_props() -> void:
 	for child in vbox.get_children():
 		child.queue_free()
 
-	if not resource:
-		return
-
-	# picking a source redraws through here, and the popup opened on one row: without
-	# this it would come back as the whole action, phase selector and branches included
+	# a value a macro use hands its definition has no action behind the row
 	if not _single_slot.is_empty():
 		_slot_idx = 0
 		_create_value_slot(_single_slot)
+		return
+
+	if not resource:
 		return
 
 	if not _single_branch.is_empty():

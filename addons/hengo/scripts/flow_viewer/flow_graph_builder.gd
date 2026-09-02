@@ -141,7 +141,6 @@ static func _use_input_part(_save_data: HenSaveData, _use: HenSaveState, _param:
 	part.label = _param.name
 	part.options = _param.options
 	part.picker = _param.picker
-	part.editor = &'value'
 	part.slot = {
 		param = _param,
 		type = str(_param.type),
@@ -149,6 +148,7 @@ static func _use_input_part(_save_data: HenSaveData, _use: HenSaveState, _param:
 		bind_key = str(_param.id),
 		macro_params = {}
 	}
+	part.editor = HenActionsPanel.editor_kind(part, _param.lvalue or _param.bind_only)
 
 	return part
 

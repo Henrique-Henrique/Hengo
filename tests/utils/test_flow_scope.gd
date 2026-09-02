@@ -368,3 +368,83 @@ func test_undo_restores_the_body_of_the_open_definition() -> void:
 
 	assert_bool(global.flow_history.redo(save_data)).is_true()
 	assert_int(save_data.get_state_actions(scope.id).size()).is_equal(1)
+
+
+# --- the values a use hands its macro -----------------------------------------
+
+# the chips live on the entry card of the use, which carries no action of its own
+func test_a_value_chip_of_a_use_answers_the_click() -> void:
+	var param: HenSaveParam = macro.get_new_input()
+	param.name = 'Loud'
+	param.type = &'bool'
+	param.default_value = false
+
+	HenStateOps.request_add_macro_use(save_data, state, macro)
+
+	var viewer: HenFlowViewer = _viewer()
+	var hit: Dictionary = _chip_hit(viewer)
+
+	assert_dict(hit).is_not_empty()
+	assert_bool(viewer._dispatch_hit(hit)).is_true()
+	assert_bool(bool(_use_param(viewer).default_value)).is_true()
+
+
+# the row is what the chip of a non-bool value opens, and it has no action to
+# render itself from
+func test_the_row_of_a_use_value_renders_without_an_action() -> void:
+	var param: HenSaveParam = macro.get_new_input()
+	param.name = 'Speed'
+	param.type = &'float'
+
+	var use: HenSaveState = HenStateOps.request_add_macro_use(save_data, state, macro)
+	var inspector: HenInspector = auto_free(
+		(load('res://addons/hengo/scenes/custom_inspector.tscn') as PackedScene).instantiate()
+	)
+
+	add_child(inspector)
+	inspector.edit_one_slot(null, {
+		param = use.macro_inputs[0],
+		type = 'float',
+		bind_store = use.macro_bindings,
+		bind_key = str(use.macro_inputs[0].id)
+	}, 'Speed')
+
+	assert_int(inspector.vbox.get_child_count()).is_greater(0)
+	assert_object(_first_of_class(inspector.vbox, 'SpinBox')).is_not_null()
+
+
+func _first_of_class(_node: Node, _class: String) -> Node:
+	for child: Node in _node.get_children():
+		if child.get_class() == _class:
+			return child
+
+		var found: Node = _first_of_class(child, _class)
+
+		if found:
+			return found
+
+	return null
+
+
+# the use holds its own copy of the value, not the one the definition declares
+func _use_param(_viewer: HenFlowViewer) -> HenSaveParam:
+	for entry: Variant in _viewer._states.values():
+		if (entry.state as HenSaveState).is_macro_use():
+			return (entry.state as HenSaveState).macro_inputs[0]
+
+	return null
+
+
+# a card rect is frame local and the hover cache already holds it in world space
+func _chip_hit(_viewer: HenFlowViewer) -> Dictionary:
+	for item: Dictionary in _viewer._hover_items:
+		if item.kind != &'card':
+			continue
+
+		var card: HenFlowNodeCard = item.card
+
+		for hit: Dictionary in card.get_hits():
+			if hit.kind == &'chip':
+				return _viewer.hit_at((item.rect as Rect2).position + (hit.rect as Rect2).get_center())
+
+	return {}

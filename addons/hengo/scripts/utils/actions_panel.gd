@@ -197,7 +197,7 @@ static func value_parts(_action: HenSaveAction, _owner: HenSaveData = null) -> A
 			part.value = declared.option_label(param.default_value)
 		part.picker = declared.picker if not declared.picker.is_empty() else param.picker
 		part.slot = input_slot(_action, param, declared, params)
-		part.editor = _editor_kind(part, needs_bind)
+		part.editor = editor_kind(part, needs_bind)
 
 		parts.append(part)
 
@@ -311,7 +311,7 @@ static func _reid_action(_action: HenSaveAction) -> void:
 			_reid_action(nested)
 
 
-static func _editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:
+static func editor_kind(_part: Dictionary, _needs_bind: bool) -> StringName:
 	if _part.kind != &'literal' or _needs_bind or not (_part.options as Array).is_empty():
 		return &''
 

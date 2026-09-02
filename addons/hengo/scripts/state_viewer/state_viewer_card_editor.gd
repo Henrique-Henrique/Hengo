@@ -74,10 +74,8 @@ func chip_pressed(_part: Dictionary, _rect: Rect2) -> bool:
 		return false
 
 	var slot: Dictionary = _part.get('slot', {})
-	var owner: Variant = slot.get('action')
 
-	if owner is HenSaveAction:
-		open_slot(owner as HenSaveAction, slot, _rect)
+	open_slot(slot.get('action') as HenSaveAction, slot, _rect)
 
 	return true
 
@@ -89,6 +87,9 @@ func open_slot(_action: HenSaveAction, _slot: Dictionary, _rect: Rect2) -> void:
 		return
 
 	var param: HenSaveParam = _slot.get('param')
+
+	if not param and not _action:
+		return
 
 	is_editing = true
 
