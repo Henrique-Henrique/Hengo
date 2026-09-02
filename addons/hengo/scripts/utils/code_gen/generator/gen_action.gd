@@ -980,10 +980,23 @@ static func wire_temp_name(_save_data: HenSaveData, _action: HenSaveAction, _ins
 	if wire_reader_count(_save_data, StringName(str(_action.id)), _output) < readers:
 		return ''
 
-	if _output_rhs(_instance, _output).replace('{{VCNODE_ID}}', 'x').strip_edges().is_valid_identifier():
+	if _is_cheap_rhs(_output_rhs(_instance, _output)):
 		return ''
 
 	return 'wire_{{VCNODE_ID}}_' + _output
+
+
+# a name or a plain property path costs nothing to read again, and a body that
+# never injects its outputs (a call that branches parks them itself) has no line
+# for the local to be declared on
+static func _is_cheap_rhs(_rhs: String) -> bool:
+	var text: String = _rhs.replace('{{VCNODE_ID}}', 'x').strip_edges()
+
+	for part: String in text.split('.'):
+		if not part.is_valid_identifier():
+			return false
+
+	return true
 
 
 # the right side of an output assignment, from the macro's get_output_<id>()

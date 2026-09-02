@@ -65,8 +65,9 @@ static func get_macro_input_lines(_save_data: HenSaveData) -> Array:
 static func _macro_input_code(_save_data: HenSaveData, _use: HenSaveState, _param: HenSaveParam) -> String:
 	var bind: String = HenUtils.bind_expression(_save_data, str(_use.macro_bindings.get(str(_param.id), '')))
 
+	# the line lands at script scope, where the node is self and _ref is nothing
 	if not bind.is_empty():
-		return bind
+		return HenActionCode.process_script_macro_body(bind, true)
 
 	return HenActionCode.get_default_value_code(_save_data, str(_param.type), false, '', null, _param.default_value)
 

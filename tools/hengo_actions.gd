@@ -13,10 +13,10 @@ class_name HenHengoActions extends RefCounted
 const SCRIPT_KEYS: PackedStringArray = ['name', 'extends', 'vars', 'states', 'functions', 'macros', 'collection', 'debug']
 const VAR_KEYS: PackedStringArray = ['name', 'type', 'value', 'export']
 const STATE_KEYS: PackedStringArray = ['name', 'start', 'can_reenter', 'description', 'actions', 'sub_states', 'uses']
-const ACTION_KEYS: PackedStringArray = ['id', 'phase', 'inputs', 'branches', 'body', 'ref']
+const ACTION_KEYS: PackedStringArray = ['id', 'phase', 'inputs', 'branches', 'body', 'ref', 'label', 'disabled']
 const FUNCTION_KEYS: PackedStringArray = ['name', 'description', 'inputs', 'outputs', 'ways_out', 'actions']
 const MACRO_KEYS: PackedStringArray = ['name', 'description', 'inputs', 'hooks', 'ways_out', 'states']
-const USE_KEYS: PackedStringArray = ['macro', 'name', 'start', 'inputs', 'ways_out', 'steps']
+const USE_KEYS: PackedStringArray = ['macro', 'name', 'start', 'can_reenter', 'inputs', 'ways_out', 'steps']
 const PARAM_KEYS: PackedStringArray = ['name', 'type', 'value', 'doc']
 
 # the definition being built, so a step inside it can name the inputs and the ways
@@ -320,6 +320,8 @@ static func _declare_uses(_save_data: HenSaveData, _state: HenSaveState, _spec: 
 
 		siblings.append(use)
 
+		use.can_reenter = bool(use_spec.get('can_reenter', false))
+
 		if bool(use_spec.get('start', false)) or siblings.size() == 1:
 			use.start = true
 
@@ -613,6 +615,9 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 
 	var action: HenSaveAction = HenSaveAction.create(macro)
 
+	action.label = str(_spec.get('label', ''))
+	action.disabled = bool(_spec.get('disabled', false))
+
 	# a nested action inherits the loop's phase, so it keeps the macro default
 	if not _nested:
 		var phase_err: String = _apply_phase(action, macro, _spec)
@@ -720,7 +725,7 @@ static func _apply_inputs(_save_data: HenSaveData, _state: HenSaveState, _action
 
 static func _apply_input_source(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _key: String, _source: Dictionary, _declared: HenSaveParam, _all_scripts: Dictionary) -> String:
 	if _source.has('wire'):
-		return _apply_wire(_action, _key, _source.wire, _declared)
+		return _apply_wire(_save_data, _action, _key, _source.wire, _declared)
 
 	if _source.has('action'):
 		return _apply_inline_action(_save_data, _state, _action, _key, _source, _declared, _all_scripts)
@@ -745,7 +750,7 @@ static func _apply_input_source(_save_data: HenSaveData, _state: HenSaveState, _
 
 
 # source shape: { wire: { from: 'ref', output: 'x' } }
-static func _apply_wire(_action: HenSaveAction, _key: String, _wire: Variant, _declared: HenSaveParam) -> String:
+static func _apply_wire(_save_data: HenSaveData, _action: HenSaveAction, _key: String, _wire: Variant, _declared: HenSaveParam) -> String:
 	if _declared.lvalue:
 		return 'input "' + _key + '": a wire cannot be the left side of an assignment'
 
@@ -759,7 +764,8 @@ static func _apply_wire(_action: HenSaveAction, _key: String, _wire: Variant, _d
 		return 'input "' + _key + '": unknown ref "' + from + '", a wire only reaches a step declared before it'
 
 	var producer: HenSaveAction = _refs[from]
-	var macro: HenSaveMacro = find_macro(producer.macro_id)
+	# a call to a function of the script is not in the action pool, it is synthesized from the definition
+	var macro: HenSaveMacro = HenFunctionMacro.macro_for(_save_data, producer.macro_id) if HenFunctionMacro.is_function_macro(producer.macro_id) else find_macro(producer.macro_id)
 	var output: String = str(spec.get('output', ''))
 
 	if not _macro_output(macro, output):
@@ -784,7 +790,9 @@ static func _apply_inline_action(_save_data: HenSaveData, _state: HenSaveState, 
 		return 'input "' + _key + '" inline action: ' + str(built)
 
 	var child: HenSaveAction = built as HenSaveAction
-	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(find_macro(child.macro_id))
+	# a call to a function of the script is synthesized, it is not in the action pool
+	var child_macro: HenSaveMacro = HenFunctionMacro.macro_for(_save_data, child.macro_id) if HenFunctionMacro.is_function_macro(child.macro_id) else find_macro(child.macro_id)
+	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(child_macro, _save_data) if child_macro else null
 
 	if not instance or not HenGeneratorAction.is_inlinable(instance):
 		return 'input "' + _key + '": action "' + str(child.macro_id) + '" is not an inlinable value producer'
