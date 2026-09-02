@@ -185,20 +185,6 @@ func toggle_fullscreen() -> void:
 	_fullscreen = not _fullscreen
 
 
-func hide_plugin() -> void:
-	if _fullscreen:
-		toggle_fullscreen()
-		return
-
-	if _dock_location == DOCK_BOTTOM:
-		hide_bottom_panel()
-
-
-func show_plugin() -> void:
-	if _dock_location == DOCK_BOTTOM:
-		make_bottom_panel_item_visible(main_scene)
-
-
 func register_singletons() -> void:
 	if not main_scene:
 		return

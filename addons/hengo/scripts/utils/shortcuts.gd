@@ -7,22 +7,14 @@ extends RefCounted
 # both or in neither
 
 const FLOW: StringName = &'flow'
-const GLOBAL: StringName = &'global'
 
 const GROUP_NAMES: Dictionary = {
-	global = 'Everywhere',
 	flow = 'Flow view'
 }
 
 # method is the name called on the flow viewer; the other groups are handled
 # where they live and are listed here for the reader
 const LIST: Array[Dictionary] = [
-	{
-		group = GLOBAL,
-		combo = ['Shift', 'Space'],
-		title = 'Show or hide Hengo',
-		description = 'Brings the panel up when it is closed, and puts it away when it is open.'
-	},
 	{
 		group = FLOW,
 		combo = ['W'],

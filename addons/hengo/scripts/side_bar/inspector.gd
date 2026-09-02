@@ -24,6 +24,12 @@ const DROPDOWN_HINT_TYPES: Array[String] = [
 const WARNING_COLOR: Color = Color('#f0a24a')
 # first row of the node menu: falls back to the plain text field
 const TYPED_PATH_ENTRY: String = 'Type a path...'
+# property name -> what the popup calls it, when capitalizing the field is not
+# enough to tell it apart from the value params next to it
+const PROP_LABELS: Dictionary = {
+	flow_inputs = 'Entries',
+	flow_outputs = 'Branches'
+}
 const PROPS: Dictionary = {
 	TYPE_BOOL: preload('res://addons/hengo/scenes/props/boolean.tscn'),
 	TYPE_INT: preload('res://addons/hengo/scenes/props/int.tscn'),
@@ -309,6 +315,10 @@ func _update_props() -> void:
 			prop_index += 1
 
 
+static func prop_label(_name: String) -> String:
+	return str(PROP_LABELS.get(_name, _name.capitalize()))
+
+
 func _create_prop_editor(prop: Dictionary, prop_index: int) -> void:
 	var prop_scene: PackedScene = get_prop_scene(resource, prop)
 	if not prop_scene:
@@ -320,7 +330,7 @@ func _create_prop_editor(prop: Dictionary, prop_index: int) -> void:
 
 	var container: VBoxContainer = PROP_CONTAINER.instantiate()
 	var label: Label = container.get_node('Name')
-	label.text = prop.name.capitalize()
+	label.text = prop_label(prop.name)
 	ThemeUtils.apply_font_size(label, 14)
 
 	vbox.add_theme_constant_override('separation', 10)
@@ -381,7 +391,7 @@ func _create_macro_exit_row(use: HenSaveState, flow: HenSaveFlowParam) -> void:
 	var container: VBoxContainer = PROP_CONTAINER.instantiate()
 	var label: Label = container.get_node('Name')
 
-	label.text = flow.name + '  (way out)'
+	label.text = flow.name + '  (branch)'
 	ThemeUtils.apply_font_size(label, 14)
 
 	var target_bt := Button.new()
@@ -1270,7 +1280,7 @@ func _create_phase_selector(action: HenSaveAction) -> void:
 
 	for phase: StringName in HenSaveAction.PHASE_ORDER:
 		var bt := Button.new()
-		bt.text = str(phase).capitalize()
+		bt.text = HenActionVisuals.phase_label(phase)
 		bt.toggle_mode = true
 		bt.button_pressed = str(action.phase) == str(phase)
 		bt.disabled = not supported.has(phase)
@@ -1544,7 +1554,7 @@ func _build_branch_options() -> Array:
 
 	if macro:
 		for flow: HenSaveFlowParam in macro.flow_outputs:
-			options.append({name = flow.name + '  (way out)', kind = 'macro_exit', exit_id = str(flow.id)})
+			options.append({name = flow.name + '  (branch)', kind = 'macro_exit', exit_id = str(flow.id)})
 
 		return options
 

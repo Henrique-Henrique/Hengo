@@ -2,19 +2,11 @@
 class_name HenSettings extends Resource
 
 const DEVELOPMENT_MODE_PATH = 'hengo/settings/development_mode'
-const AUTO_LAYOUT_PATH = 'hengo/settings/auto_layout'
-const AUTO_MOVE_PATH = 'hengo/settings/auto_move'
-const AUTO_ZOOM_PATH = 'hengo/settings/auto_zoom'
-const AUTO_MOVE_ON_ADD_PATH = 'hengo/settings/auto_move_on_add'
-const AUTO_MOVE_ON_REMOVE_PATH = 'hengo/settings/auto_move_on_remove'
-const AUTO_MOVE_ON_CONNECTION_PATH = 'hengo/settings/auto_move_on_connection'
-const AUTO_ZOOM_LEVEL_PATH = 'hengo/settings/auto_zoom_level_v2'
 const MIN_ZOOM_PATH = 'hengo/settings/min_zoom'
 const MAX_ZOOM_PATH = 'hengo/settings/max_zoom'
 const ZOOM_INCREMENT_PATH = 'hengo/settings/zoom_increment'
 const ZOOM_RATE_PATH = 'hengo/settings/zoom_rate'
 const DEBUG_COMPILATION_PATH = 'hengo/settings/debug_compilation'
-const POOL_SIZE_PATH = 'hengo/settings/pool_size'
 const DOCK_LOCATION_PATH = 'hengo/settings/dock_location'
 const FONT_SCALE_PATH = 'hengo/settings/font_scale'
 const STATE_ROWS_ZOOM_PATH = 'hengo/settings/state_rows_zoom'
@@ -36,12 +28,6 @@ const FLOW_WRAP_PATH = 'hengo/settings/flow_wrap'
 		_set_value(DEVELOPMENT_MODE_PATH, value)
 	get:
 		return _get_value(DEVELOPMENT_MODE_PATH, false)
-
-@export var auto_layout: bool:
-	set(value):
-		_set_value(AUTO_LAYOUT_PATH, value)
-	get:
-		return _get_value(AUTO_LAYOUT_PATH, true)
 
 @export_group('Interface')
 
@@ -72,53 +58,7 @@ const FLOW_WRAP_PATH = 'hengo/settings/flow_wrap'
 	get:
 		return _get_value(DOCK_LOCATION_PATH, 0)
 
-@export_group('Pool')
-
-@export_range(50, 5000, 10) var pool_size: int:
-	set(value):
-		_set_value(POOL_SIZE_PATH, value)
-	get:
-		return _get_value(POOL_SIZE_PATH, 500)
-
-@export_group('Move')
-
-@export var auto_move: bool:
-	set(value):
-		_set_value(AUTO_MOVE_PATH, value)
-	get:
-		return _get_value(AUTO_MOVE_PATH, true)
-
-@export var auto_move_on_add: bool:
-	set(value):
-		_set_value(AUTO_MOVE_ON_ADD_PATH, value)
-	get:
-		return _get_value(AUTO_MOVE_ON_ADD_PATH, true)
-
-@export var auto_move_on_remove: bool:
-	set(value):
-		_set_value(AUTO_MOVE_ON_REMOVE_PATH, value)
-	get:
-		return _get_value(AUTO_MOVE_ON_REMOVE_PATH, false)
-
-@export var auto_move_on_connection: bool:
-	set(value):
-		_set_value(AUTO_MOVE_ON_CONNECTION_PATH, value)
-	get:
-		return _get_value(AUTO_MOVE_ON_CONNECTION_PATH, true)
-
 @export_group('Zoom')
-
-@export var auto_zoom: bool:
-	set(value):
-		_set_value(AUTO_ZOOM_PATH, value)
-	get:
-		return _get_value(AUTO_ZOOM_PATH, true)
-
-@export_range(1, 2, 0.1) var auto_zoom_level: float:
-	set(value):
-		_set_value(AUTO_ZOOM_LEVEL_PATH, value)
-	get:
-		return _get_value(AUTO_ZOOM_LEVEL_PATH, 1.7)
 
 @export_range(0.1, 10, 0.1) var min_zoom: float:
 	set(value):
@@ -183,19 +123,11 @@ func _get_value(path: String, default: Variant) -> Variant:
 func _property_can_revert(property: StringName) -> bool:
 	return property in [
 		&'development_mode',
-		&'auto_layout',
-		&'auto_move',
-		&'auto_zoom',
-		&'auto_move_on_add',
-		&'auto_move_on_remove',
-		&'auto_move_on_connection',
-		&'auto_zoom_level',
 		&'min_zoom',
 		&'max_zoom',
 		&'zoom_increment',
 		&'zoom_rate',
 		&'debug_compilation',
-		&'pool_size',
 		&'dock_location',
 		&'font_scale',
 		&'state_rows_zoom',
@@ -207,20 +139,6 @@ func _property_get_revert(property: StringName) -> Variant:
 	match property:
 		&'development_mode':
 			return false
-		&'auto_layout':
-			return true
-		&'auto_move':
-			return true
-		&'auto_zoom':
-			return true
-		&'auto_move_on_add':
-			return true
-		&'auto_move_on_remove':
-			return false
-		&'auto_move_on_connection':
-			return true
-		&'auto_zoom_level':
-			return 1.7
 		&'min_zoom':
 			return 1.0
 		&'max_zoom':
@@ -231,8 +149,6 @@ func _property_get_revert(property: StringName) -> Variant:
 			return 12.0
 		&'debug_compilation':
 			return true
-		&'pool_size':
-			return 500
 		&'dock_location':
 			return 0
 		&'font_scale':

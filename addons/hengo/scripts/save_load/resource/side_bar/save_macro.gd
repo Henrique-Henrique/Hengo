@@ -23,6 +23,9 @@ class_name HenSaveMacro extends HenSaveResTypeWithRoute
 @export var target_classes: Array[StringName]
 # the action owns a nested action list run per iteration (a loop)
 @export var has_body: bool
+# the action is a pure value producer, so a slot may take it inline. read from
+# the loader recipe: computing it needs the definition script in memory
+@export var is_inlinable: bool
 
 
 static func create() -> HenSaveMacro:

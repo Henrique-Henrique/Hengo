@@ -20,9 +20,9 @@ func setup(res: Resource, p_name: String, val: Array, hint_string: String, p_dep
 	depth = p_depth
 	
 	if p_path.is_empty():
-		current_path = prop_name.capitalize()
+		current_path = HenInspector.prop_label(prop_name)
 	else:
-		current_path = p_path + ' > ' + prop_name.capitalize()
+		current_path = p_path + ' > ' + HenInspector.prop_label(prop_name)
 	
 	
 	if ':' in hint_string:
@@ -66,7 +66,7 @@ func _setup_header() -> void:
 	
 	var btn: Button = Button.new()
 	btn.name = 'AddBtn'
-	btn.text = 'Add ' + prop_name.capitalize()
+	btn.text = 'Add ' + HenInspector.prop_label(prop_name)
 	btn.icon = get_theme_icon('Add', 'EditorIcons')
 	btn.pressed.connect(_on_add_pressed)
 	hbox.add_child(btn)
@@ -139,7 +139,7 @@ func _create_sub_property_editor(parent_container: Control, item: Resource, prop
 
 	var container: VBoxContainer = PROP_CONTAINER.instantiate()
 	var label: Label = container.get_node('Name')
-	label.text = prop.name.capitalize()
+	label.text = HenInspector.prop_label(prop.name)
 	
 	ThemeUtils.apply_font_size(label, 14)
 	add_theme_constant_override('separation', 10)

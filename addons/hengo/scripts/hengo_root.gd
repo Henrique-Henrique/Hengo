@@ -154,7 +154,6 @@ func _apply_semantic_colors() -> void:
 	var c: Dictionary = HenUtils.UI_COLORS
 
 	HenUtils.tint_button(get_node('%Config') as Button, c.settings, false)
-	HenUtils.tint_button(get_node('%CloseBt') as Button, c.destructive, false)
 	HenUtils.tint_button(get_node('%RefreshGraphBt') as Button, c.state, false)
 	HenUtils.tint_button(get_node('%FlowWrapBt') as Button, c.state, false)
 
@@ -166,11 +165,6 @@ func _on_config_pressed() -> void:
 
 func _on_open_terminal() -> void:
 	(Engine.get_singleton(&'GeneralPopup') as HenGeneralPopup).show_content(HenTerminal.new())
-
-
-func _on_close() -> void:
-	var global: HenGlobal = Engine.get_singleton(&'Global')
-	global.HENGO_EDITOR_PLUGIN.hide_plugin()
 
 
 # the scripts the Actions button speaks about: the whole open collection, plus
@@ -430,7 +424,6 @@ func _ready() -> void:
 				name = x
 			}
 	)
-	(get_node('%CloseBt') as Button).pressed.connect(_on_close)
 	(get_node('%TerminalBt') as Button).pressed.connect(_on_open_terminal)
 	(get_node('%Config') as Button).pressed.connect(_on_config_pressed)
 	(get_node('%ActionsBt') as Button).pressed.connect(_on_actions_bt_pressed)
@@ -491,24 +484,12 @@ func _input(event: InputEvent) -> void:
 		return
 
 	if not global.HENGO_ROOT.visible:
-		if event is InputEventKey:
-			var e: InputEventKey = event
-			if e.pressed and e.shift_pressed:
-				if e.keycode == KEY_SPACE:
-					get_tree().root.set_input_as_handled()
-					global.HENGO_EDITOR_PLUGIN.show_plugin()
 		return
 
 	if event is InputEventKey:
 		var e: InputEventKey = event
 
 		if e.pressed:
-			if e.shift_pressed:
-				if e.keycode == KEY_SPACE:
-					get_tree().root.set_input_as_handled()
-					global.HENGO_EDITOR_PLUGIN.hide_plugin()
-					return
-
 			if not has_input_focus():
 				return
 

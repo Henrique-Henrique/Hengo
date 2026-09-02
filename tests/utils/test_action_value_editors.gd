@@ -28,6 +28,7 @@ func _action(_path: String) -> HenSaveAction:
 	macro.name = _path.get_file().get_basename()
 	macro.is_script_macro = true
 	macro.script_path = _path
+	macro.is_inlinable = HenGeneratorAction.is_inlinable(instance)
 
 	for input: Dictionary in instance.get_inputs():
 		macro.inputs.append(HenSaveParam.create(input))

@@ -582,7 +582,7 @@ static func _macro_exit_name(_save_data: HenSaveData, _action: HenSaveAction, _k
 		if str(way.id) == exit_id:
 			return way.name
 
-	return 'way out'
+	return 'branch'
 
 
 # the node that carries an action in the sequence: its store when it has one,

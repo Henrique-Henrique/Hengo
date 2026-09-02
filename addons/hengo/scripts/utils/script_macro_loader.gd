@@ -4,13 +4,13 @@ class_name HenScriptMacroLoader extends RefCounted
 const MACRO_PATH: String = 'res://hengo/macros'
 const NATIVE_ACTION_PATH: String = 'res://addons/hengo/actions'
 
-# path -> { mtime: int, id: StringName, inputs: Array, outputs: Array, flow_inputs: Array, flow_outputs: Array }
+# path -> { mtime: int, id: StringName, inputs: Array, outputs: Array, flow_inputs: Array, flow_outputs: Array, inlinable: bool }
 static var _cache: Dictionary = {}
 # the recipes survive an editor restart here: cold, reading them back costs a file
 # read against loading and instantiating every action script
 const DISK_CACHE: String = 'user://hengo_macro_cache.txt'
 # bump to throw every recipe away when the shape above changes
-const DISK_CACHE_VERSION: int = 1
+const DISK_CACHE_VERSION: int = 2
 static var _disk_loaded: bool = false
 static var _disk_dirty: bool = false
 
@@ -152,6 +152,7 @@ static func _load_macro_script(path: String, global: HenGlobal, target: Array[He
 			target_classes = instance.get_target_classes(),
 			default_phase = instance.get_default_phase(),
 			has_body = instance.get_has_body(),
+			inlinable = HenGeneratorAction.is_inlinable(instance),
 		}
 		_cache[path] = recipe
 		_disk_dirty = true
@@ -167,6 +168,7 @@ static func _load_macro_script(path: String, global: HenGlobal, target: Array[He
 	macro.category = category
 	macro.default_phase = StringName(str(recipe.get('default_phase', '')))
 	macro.has_body = bool(recipe.get('has_body', false))
+	macro.is_inlinable = bool(recipe.get('inlinable', false))
 	# category supplies the presentation defaults; the macro's own declaration wins
 	var category_data: Dictionary = HenActionCategories.get_data(category)
 	macro.icon = str(recipe.get('icon', '')) if not str(recipe.get('icon', '')).is_empty() else str(category_data.icon)

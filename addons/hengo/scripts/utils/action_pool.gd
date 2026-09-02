@@ -103,33 +103,36 @@ static func _script_class() -> StringName:
 	return global.SAVE_DATA.identity.type
 
 
-# the outputs of this action the input can actually take: with more than one the
-# picker has to ask which, or a Vector2 XY always feeds X
+# loading the script behind each of 350 actions costs 1.5s the first time
 static func outputs_for(_macro: HenSaveMacro, _type: String) -> Array:
-	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(_macro)
 	var out: Array = []
 
-	if not instance:
-		return out
-
-	for output: Dictionary in instance.get_outputs():
-		if type_accepts(_type, str(output.get('type', 'Variant'))):
+	for output: HenSaveParam in _macro.outputs:
+		if type_accepts(_type, str(output.type)):
 			out.append({
-				id = str(output.get('id', '')),
-				name = str(output.get('name', output.get('id', ''))),
-				type = str(output.get('type', 'Variant'))
+				id = str(output.id),
+				name = output.name,
+				type = str(output.type)
 			})
 
 	return out
 
 
 static func _is_producer(_macro: HenSaveMacro, _type: String) -> bool:
-	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(_macro)
-
-	if not instance or not HenGeneratorAction.is_inlinable(instance):
+	if outputs_for(_macro, _type).is_empty():
 		return false
 
-	return not outputs_for(_macro, _type).is_empty()
+	return _is_inlinable(_macro)
+
+
+# a function or a hook is built in memory, so asking its instance costs nothing
+static func _is_inlinable(_macro: HenSaveMacro) -> bool:
+	if _macro.is_script_macro:
+		return _macro.is_inlinable
+
+	var instance: HenScriptMacroBase = HenGeneratorAction._load_instance(_macro)
+
+	return instance != null and HenGeneratorAction.is_inlinable(instance)
 
 
 static func type_accepts(_input_type: String, _output_type: String) -> bool:
