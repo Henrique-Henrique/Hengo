@@ -6,7 +6,7 @@ class_name HenCam extends Node2D
 
 var target_zoom: float = 1.
 
-var MIN_ZOOM: float = 1
+var MIN_ZOOM: float = 0.2
 var MAX_ZOOM: float = 2
 var ZOOM_INCREMENT: float = .15
 var ZOOM_RATE: float = 12.
@@ -64,7 +64,7 @@ func _on_ui_size_changed() -> void:
 
 
 func update_settings() -> void:
-	MIN_ZOOM = ProjectSettings.get_setting(HenSettings.MIN_ZOOM_PATH, 1.0)
+	MIN_ZOOM = ProjectSettings.get_setting(HenSettings.MIN_ZOOM_PATH, 0.2)
 	MAX_ZOOM = ProjectSettings.get_setting(HenSettings.MAX_ZOOM_PATH, 2.0)
 	ZOOM_INCREMENT = ProjectSettings.get_setting(HenSettings.ZOOM_INCREMENT_PATH, 0.15)
 	ZOOM_RATE = ProjectSettings.get_setting(HenSettings.ZOOM_RATE_PATH, 12.0)

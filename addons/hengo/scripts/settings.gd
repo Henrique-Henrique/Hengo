@@ -64,7 +64,7 @@ const FLOW_WRAP_PATH = 'hengo/settings/flow_wrap'
 	set(value):
 		_set_value(MIN_ZOOM_PATH, value)
 	get:
-		return _get_value(MIN_ZOOM_PATH, 1.0)
+		return _get_value(MIN_ZOOM_PATH, 0.2)
 
 @export_range(0.1, 10, 0.1) var max_zoom: float:
 	set(value):
@@ -140,7 +140,7 @@ func _property_get_revert(property: StringName) -> Variant:
 		&'development_mode':
 			return false
 		&'min_zoom':
-			return 1.0
+			return 0.2
 		&'max_zoom':
 			return 2.0
 		&'zoom_increment':
