@@ -362,6 +362,8 @@ func _render_macro_use(use: HenSaveState) -> void:
 
 	_slot_idx = 0
 
+	_create_name_editor()
+
 	if not macro:
 		var missing := Label.new()
 		missing.text = 'The macro this state runs is gone.'
@@ -382,6 +384,13 @@ func _render_macro_use(use: HenSaveState) -> void:
 
 	for flow: HenSaveFlowParam in macro.flow_outputs:
 		_create_macro_exit_row(use, flow)
+
+
+func _create_name_editor() -> void:
+	for prop: Dictionary in resource.get_property_list():
+		if prop.name == &'name':
+			_create_prop_editor(prop, 0)
+			return
 
 
 func _create_macro_exit_row(use: HenSaveState, flow: HenSaveFlowParam) -> void:
