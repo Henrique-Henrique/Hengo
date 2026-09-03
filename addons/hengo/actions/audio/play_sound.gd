@@ -11,7 +11,7 @@ func get_id() -> StringName:
 
 
 func get_description() -> String:
-	return 'Plays a sound from an audio player.'
+	return 'Plays a sound from an audio player. One player carries one sound at a time, so playing again cuts the first one short, and raising Max Polyphony on the player is what lets three coins picked up in a row all ring out together.'
 
 
 func get_display_name() -> String:
