@@ -34,9 +34,12 @@ plain, readable code that runs with zero overhead.
 
 ## Installation
 
-1. Download or clone this repository.
-2. Copy the `addons/hengo/` folder into your project's `res://addons/` directory.
+1. Download from the [**Releases page**](https://github.com/Henrique-Henrique/Hengo/releases).
+2. Extract it at the root of your Godot project, the addon lands in `res://addons/hengo/`.
 3. Open **Project → Project Settings → Plugins** and enable **Hengo**.
+
+Cloning this repository works too: copy its `addons/hengo/` folder into your project's
+`res://addons/` directory. The releases are the tested snapshots, `main` is the development branch.
 
 A **Hengo** tab appears in the editor's **bottom panel**. Click it to open the tool. To move it, use
 the gear in the top bar and change **Dock Location**.
