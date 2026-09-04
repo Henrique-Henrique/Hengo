@@ -5,8 +5,9 @@ addons/gdUnit4
 addons/hengo/api/native_api.json
 temp/
 reports/
-!.github/
 .*/
 .*
+!.github/
 /hengo/
 /data/
+dist/
