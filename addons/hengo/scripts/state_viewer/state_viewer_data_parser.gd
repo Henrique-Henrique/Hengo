@@ -27,29 +27,33 @@ func parse_machine(dict: Dictionary, id_prefix: String = '') -> HenStateViewerGr
 
 # iterates through the built tree to connect all edges (pass 2)
 func resolve_edges(root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
-	_resolve_node_edges(root, root)
+	_resolve_node_edges(root, root, root)
 
 
-# internal recursive edge resolver
-func _resolve_node_edges(node: HenStateViewerGraphTypes.DirectedGraphNode, root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
-	_extract_edges(node, node.data, root)
-	
+# internal recursive edge resolver. bare targets resolve in local_root (so equally
+# named states across scripts never cross-link); qualified targets ("script.state")
+# resolve in global_root (cross-script edges)
+func _resolve_node_edges(node: HenStateViewerGraphTypes.DirectedGraphNode, local_root: HenStateViewerGraphTypes.DirectedGraphNode, global_root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
+	_extract_edges(node, node.data, local_root, global_root)
+
 	for child in node.children:
-		_resolve_node_edges(child, root)
+		_resolve_node_edges(child, local_root, global_root)
 
 
 # reads 'on' transitions and creates directed graph edges
-func _extract_edges(source: HenStateViewerGraphTypes.DirectedGraphNode, dict: Dictionary, root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
+func _extract_edges(source: HenStateViewerGraphTypes.DirectedGraphNode, dict: Dictionary, local_root: HenStateViewerGraphTypes.DirectedGraphNode, global_root: HenStateViewerGraphTypes.DirectedGraphNode) -> void:
 	if not dict.has('on'):
 		return
 
 	var transitions: Dictionary = dict.on
+	var transitions_meta: Dictionary = dict.get('on_meta', {})
 	var transition_index: int = 0
 
 	# iterates transition keys to find target nodes
 	for event_name in transitions.keys():
 		var target_key: String = transitions[event_name]
-		var target_node: HenStateViewerGraphTypes.DirectedGraphNode = _find_node_by_id(root, target_key)
+		var search_root: HenStateViewerGraphTypes.DirectedGraphNode = global_root if '.' in target_key else local_root
+		var target_node: HenStateViewerGraphTypes.DirectedGraphNode = _find_node_by_id(search_root, target_key)
 
 		if target_node != null:
 			var edge: HenStateViewerGraphTypes.DirectedGraphEdge = HenStateViewerGraphTypes.DirectedGraphEdge.new({
@@ -57,7 +61,8 @@ func _extract_edges(source: HenStateViewerGraphTypes.DirectedGraphNode, dict: Di
 				source = source,
 				target = target_node,
 				transition = {event = event_name},
-				label_text = event_name
+				label_text = event_name,
+				meta = transitions_meta.get(event_name, {})
 			})
 			source.edges.append(edge)
 

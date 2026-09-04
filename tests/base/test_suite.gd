@@ -15,6 +15,10 @@ func before_test() -> void:
 
 
 func after_test() -> void:
+	# a test that repopulates a list leaves the old rows on the free queue, and
+	# they only leave the ObjectDB on the next frame
+	await get_tree().process_frame
+
 	for singleton_name: StringName in HenEnums.SINGLETON_LIST:
 		if Engine.has_singleton(singleton_name):
 			Engine.unregister_singleton(singleton_name)
@@ -24,7 +28,6 @@ func after_test() -> void:
 
 func set_global_config() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var router: HenRouter = Engine.get_singleton(&'Router')
 
 	var _save_data: HenSaveData = HenSaveData.new()
 	var _class: StringName = 'Node'
@@ -34,17 +37,8 @@ func set_global_config() -> void:
 	_save_data.identity = identity
 	_save_data.counter = 1
 
-	var base_route: HenRouteData = HenRouteData.create(
-		'Base',
-		HenRouter.ROUTE_TYPE.BASE,
-		_save_data.identity.id,
-	)
-
-	_save_data.add_route(_save_data.identity.id, base_route)
-
 	global.SAVE_DATA = _save_data
 	global.IS_HEADLESS = true
-	router.current_route = global.SAVE_DATA.get_base_route()
 
 	var map_deps: HenMapDependencies = Engine.get_singleton(&'MapDependencies')
 	map_deps.ast_list.set(_save_data.identity.id, HenUtils.get_current_ast_list())

@@ -3,206 +3,19 @@ class_name HenSaveData extends Resource
 
 @export var counter: int
 @export var identity: HenSaveDataIdentity
-@export var routes: Dictionary
-@export var macros: Array[HenSaveMacro]
 @export var variables: Array[HenSaveVar]
-@export var functions: Array[HenSaveFunc]
-@export var signals: Array[HenSaveSignal]
 @export var states: Array[HenSaveState]
-@export var signals_callback: Array[HenSaveSignalCallback]
-@export var connections: Dictionary
-@export var flow_connections: Dictionary
 @export var sub_states: Dictionary
+# linear action lists keyed by state id (str(state.id) -> Array[HenSaveAction])
+@export var state_actions: Dictionary
+# reusable action lists, offered in the palette like any other action. the body of
+# each one is a state_actions entry under its own id
+@export var functions: Array[HenSaveFunc]
+# reusable state machines, added to a state as a collapsed box. the states of each
+# one are a sub_states entry under its own id
+@export var macros: Array[HenSaveStateMacro]
 
 var _node_cache: Dictionary = {}
-
-
-func get_cnode_by_id(_id: StringName) -> HenVirtualCNode:
-	if _node_cache.has(_id):
-		return _node_cache.get(_id)
-	
-	for route_id: StringName in routes:
-		for vc: HenVirtualCNode in (routes.get(route_id) as HenRouteData).virtual_cnode_list:
-			if vc.id == _id:
-				_node_cache[vc.id] = vc
-				return vc
-	
-	return null
-
-
-func create_route(_id: StringName, _name: String, _type: HenRouter.ROUTE_TYPE) -> HenRouteData:
-	var route: HenRouteData = HenRouteData.create(
-		_name,
-		_type,
-		_id
-	)
-
-	add_route(_id, route)
-	return route
-
-
-func get_base_route() -> HenRouteData:
-	return routes.get(identity.id)
-
-
-func add_route(_id: StringName, _route: HenRouteData) -> HenRouteData:
-	if not routes.has(_id):
-		routes.set(_id, _route)
-	return _route
-
-
-func get_route(_id: StringName) -> HenRouteData:
-	return routes.get(_id)
-
-
-func get_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: StringName = _vc.id
-	if not connections.has(node_id):
-		return []
-	
-	var vc_dict: Dictionary = connections[node_id]
-	return vc_dict.values()
-
-
-func get_connections_by_id(_vc_id: StringName) -> Array:
-	if not connections.has(_vc_id):
-		return []
-	
-	var vc_dict: Dictionary = connections[_vc_id] as Dictionary
-	return vc_dict.values()
-
-
-func add_connection(_connection: HenVCConnectionData) -> void:
-	var nodes: Array = [_connection.get_from(self), _connection.get_to(self)]
-	
-	for _vc: HenVirtualCNode in nodes:
-		var node_id: StringName = _vc.id
-		
-		if not connections.has(node_id):
-			connections[node_id] = {}
-		
-		var vc_dict: Dictionary = connections[node_id]
-		vc_dict[_connection.id] = _connection
-
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).connection_added.emit(_connection)
-
-
-func remove_connection(_connection: HenVCConnectionData) -> void:
-	var nodes: Array = [_connection.get_from(self), _connection.get_to(self)]
-	
-	for _vc: HenVirtualCNode in nodes:
-		var node_id: StringName = _vc.id
-		
-		if connections.has(node_id):
-			var vc_dict: Dictionary = connections[node_id]
-
-			if _connection.line_ref:
-				_connection.line_ref.visible = false
-				_connection.line_ref = null
-
-			vc_dict.erase(_connection.id)
-			
-			if vc_dict.is_empty():
-				connections.erase(node_id)
-	
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).connection_removed.emit(_connection)
-
-
-func get_flow_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: StringName = _vc.id
-	if not flow_connections.has(node_id):
-		return []
-	
-	var vc_dict: Dictionary = flow_connections[node_id]
-	return vc_dict.values()
-
-
-func get_outgoing_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: StringName = _vc.id
-	if not connections.has(node_id):
-		return []
-	
-	var vc_dict: Dictionary = connections[node_id]
-	var outgoing: Array = []
-
-	for connection: HenVCConnectionData in vc_dict.values():
-		if connection.get_from(self) == _vc:
-			outgoing.append(connection)
-
-	return outgoing
-
-
-func get_to_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: StringName = _vc.id
-	if not connections.has(node_id):
-		return []
-	
-	var vc_dict: Dictionary = connections[node_id]
-	var outgoing: Array = []
-
-	for connection: HenVCConnectionData in vc_dict.values():
-		if connection.get_to(self) == _vc:
-			outgoing.append(connection)
-
-	return outgoing
-
-
-func get_outgoing_flow_connection_from_vc(_vc: HenVirtualCNode) -> Array:
-	var node_id: StringName = _vc.id
-	if not flow_connections.has(node_id):
-		return []
-	
-	var vc_dict: Dictionary = flow_connections[node_id]
-	var outgoing: Array = []
-
-	for connection: HenVCFlowConnectionData in vc_dict.values():
-		if connection.get_from(self) == _vc:
-			outgoing.append(connection)
-
-	return outgoing
-
-
-func get_flow_connections_by_id(_vc_id: StringName) -> Array:
-	if not flow_connections.has(_vc_id):
-		return []
-	
-	var vc_dict: Dictionary = flow_connections[_vc_id] as Dictionary
-	return vc_dict.values()
-
-
-func add_flow_connection(_connection: HenVCFlowConnectionData) -> void:
-	var nodes: Array = [_connection.get_from(self), _connection.get_to(self)]
-	
-	for _vc: HenVirtualCNode in nodes:
-		var node_id: StringName = _vc.id
-		
-		if not flow_connections.has(node_id):
-			flow_connections[node_id] = {}
-		
-		var vc_dict: Dictionary = flow_connections[node_id]
-		vc_dict[_connection.id] = _connection
-	
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).flow_connection_added.emit(_connection)
-
-
-func remove_flow_connection(_connection: HenVCFlowConnectionData) -> void:
-	var nodes: Array = [_connection.get_from(self), _connection.get_to(self)]
-	
-	for _vc: HenVirtualCNode in nodes:
-		var node_id: StringName = _vc.id
-		
-		if flow_connections.has(node_id):
-			var vc_dict: Dictionary = flow_connections[node_id]
-			
-			if _connection.line_ref:
-				_connection.line_ref.visible = false
-				_connection.line_ref = null
-			
-			vc_dict.erase(_connection.id)
-			if vc_dict.is_empty():
-				flow_connections.erase(node_id)
-	
-	(Engine.get_singleton(&'SignalBus') as HenSignalBus).flow_connection_removed.emit(_connection)
 
 
 func add_dep(_id: StringName) -> void:
@@ -238,13 +51,31 @@ func add_var(_save: bool = true) -> HenSaveVar:
 
 	if not v:
 		return null
-	
+
 	if _save:
 		if not HenUtils.save_side_bar_item(v, identity.id, HenSideBar.SideBarItem.VARIABLES):
 			return null
 
 	variables.append(v)
 	return v
+
+
+# a free variable name based on _base, appending 2, 3, ... when taken. compared on
+# the emitted identifier (snake_case), since that is what would collide in codegen
+func unique_var_name(_base: String) -> String:
+	var taken: Dictionary = {}
+
+	for v: HenSaveVar in variables:
+		taken[v.name.to_snake_case()] = true
+
+	if not taken.has(_base.to_snake_case()):
+		return _base
+
+	var i: int = 2
+	while taken.has((_base + str(i)).to_snake_case()):
+		i += 1
+
+	return _base + str(i)
 
 
 func add_state(_save: bool = true) -> HenSaveState:
@@ -258,56 +89,207 @@ func add_state(_save: bool = true) -> HenSaveState:
 			return
 	
 	states.append(s)
+
+	# the flags are set after the append, because the start setter sweeps the
+	# siblings by looking for the list holding this state and would find none before
+	if states.size() == 1:
+		s.is_base = true
+		s.start = true
+
 	return s
 
 
-func add_func(_save: bool = true) -> HenSaveFunc:
-	var f: HenSaveFunc = HenSaveFunc.create()
+func add_function() -> HenSaveFunc:
+	var f: HenSaveFunc = HenSaveFunc.create(self )
 
-	if not f:
-		return null
-	
-	if _save:
-		if not HenUtils.save_side_bar_item(f, identity.id, HenSideBar.SideBarItem.FUNCTIONS):
-			return null
-	
 	functions.append(f)
+
 	return f
 
 
-func add_signal(_save: bool = true) -> HenSaveSignal:
-	var s: HenSaveSignal = HenSaveSignal.create()
+func add_macro() -> HenSaveStateMacro:
+	var macro: HenSaveStateMacro = HenSaveStateMacro.create(self )
 
-	if not s:
-		return null
-	
-	if _save:
-		if not HenUtils.save_side_bar_item(s, identity.id, HenSideBar.SideBarItem.SIGNALS):
-			return null
-	
-	signals.append(s)
-	return s
+	macros.append(macro)
+	macro.add_state(self )
+
+	return macro
 
 
-func add_signals_callback(_save: bool = true) -> HenSaveSignalCallback:
-	var sc: HenSaveSignalCallback = HenSaveSignalCallback.create()
+func find_function(_id: StringName) -> HenSaveFunc:
+	for f: HenSaveFunc in functions:
+		if str(f.id) == str(_id):
+			return f
 
-	if not sc:
-		return null
-	
-	if _save:
-		if not HenUtils.save_side_bar_item(sc, identity.id, HenSideBar.SideBarItem.SIGNALS_CALLBACK):
-			return null
-
-	signals_callback.append(sc)
-	return sc
+	return null
 
 
-func add_macro() -> HenSaveMacro:
-	var m: HenSaveMacro = HenSaveMacro.create()
+func find_macro(_id: StringName) -> HenSaveStateMacro:
+	for macro: HenSaveStateMacro in macros:
+		if str(macro.id) == str(_id):
+			return macro
 
-	if not m:
-		return null
+	return null
 
-	macros.append(m)
-	return m
+
+# a free state name based on _base, appending 2, 3, ... when taken. two states of
+# one machine sharing a name would write the same class twice
+func unique_state_name(_base: String) -> String:
+	var taken: Dictionary = {}
+
+	for state: HenSaveState in states:
+		taken[state.name.to_snake_case()] = true
+
+	for sub_list: Variant in sub_states.values():
+		for state: HenSaveState in sub_list:
+			taken[state.name.to_snake_case()] = true
+
+	if not taken.has(_base.to_snake_case()):
+		return _base
+
+	var index: int = 2
+
+	while taken.has((_base + ' ' + str(index)).to_snake_case()):
+		index += 1
+
+	return _base + ' ' + str(index)
+
+
+func new_counter_id() -> StringName:
+	counter += 1
+	return StringName(str(counter))
+
+
+func get_base_state() -> HenSaveState:
+	for state: HenSaveState in states:
+		if state.is_base:
+			return state
+
+	return null
+
+
+# every script keeps one top level state that cannot be deleted, so the machine
+# always has somewhere to start
+func ensure_base_state() -> HenSaveState:
+	var base: HenSaveState = get_base_state()
+
+	if base:
+		return base
+
+	for state: HenSaveState in states:
+		if state.start:
+			base = state
+			break
+
+	if not base and not states.is_empty():
+		base = states[0]
+
+	if not base:
+		base = HenSaveState.create(false, self)
+		base.name = HenSaveState.BASE_NAME
+		states.append(base)
+		base.start = true
+
+	base.is_base = true
+	return base
+
+
+
+
+
+
+
+
+
+
+func add_state_action(_state_id: StringName, _action: HenSaveAction) -> void:
+	if not state_actions.has(_state_id):
+		state_actions[_state_id] = []
+
+	(state_actions[_state_id] as Array).append(_action)
+
+
+func get_state_actions(_state_id: StringName) -> Array:
+	if not state_actions.has(_state_id):
+		return []
+
+	return state_actions[_state_id]
+
+
+func remove_state_action(_state_id: StringName, _action: HenSaveAction) -> void:
+	if not state_actions.has(_state_id):
+		return
+
+	(state_actions[_state_id] as Array).erase(_action)
+
+	if (state_actions[_state_id] as Array).is_empty():
+		state_actions.erase(_state_id)
+
+
+# an action can sit at the top of the list, inside a loop body or bound to an
+# input of another action, and only the first one has an entry in state_actions
+func remove_action_anywhere(_state_id: StringName, _action: HenSaveAction) -> bool:
+	if not state_actions.has(_state_id) or not _action:
+		return false
+
+	var list: Array = state_actions[_state_id]
+
+	if not _remove_action_from(list, _action):
+		return false
+
+	if list.is_empty():
+		state_actions.erase(_state_id)
+
+	return true
+
+
+func _remove_action_from(_list: Array, _target: HenSaveAction) -> bool:
+	for i: int in range(_list.size()):
+		if _list[i] == _target:
+			_list.remove_at(i)
+			return true
+
+		if _remove_action_inside(_list[i], _target):
+			return true
+
+	return false
+
+
+func _remove_action_inside(_action: HenSaveAction, _target: HenSaveAction) -> bool:
+	for key: Variant in _action.input_actions.keys():
+		var nested: HenSaveAction = (_action.input_actions[key] as Dictionary).get('action')
+
+		if nested == _target:
+			_action.input_actions.erase(key)
+			return true
+
+		if nested and _remove_action_inside(nested, _target):
+			return true
+
+	for list: Array in HenGeneratorAction.nested_lists(_action):
+		if _remove_action_from(list, _target):
+			return true
+
+	return false
+
+
+# inserts at a flat index; a negative or out of range index appends
+func insert_state_action(_state_id: StringName, _action: HenSaveAction, _index: int) -> void:
+	if not state_actions.has(_state_id):
+		state_actions[_state_id] = []
+
+	var list: Array = state_actions[_state_id]
+
+	if _index < 0 or _index > list.size():
+		list.append(_action)
+	else:
+		list.insert(_index, _action)
+
+
+# replaces the whole list, keeping the empty-means-absent invariant
+func set_state_actions(_state_id: StringName, _actions: Array) -> void:
+	if _actions.is_empty():
+		state_actions.erase(_state_id)
+		return
+
+	state_actions[_state_id] = _actions.duplicate()

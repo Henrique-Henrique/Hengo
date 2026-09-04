@@ -65,13 +65,13 @@ func _compile_task() -> void:
 		elapsed_ms = 0
 	}
 
-	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_SAVE_PATH):
+	if not DirAccess.dir_exists_absolute(HenEnums.HENGO_COLLECTION_PATH):
 		report.items.append({
 			script_id = '-',
 			script_name = '-',
 			status = 'failed',
-			message = 'Save folder not found: ' + str(HenEnums.HENGO_SAVE_PATH),
-			errors = ['Missing save directory']
+			message = 'Collections folder not found: ' + str(HenEnums.HENGO_COLLECTION_PATH),
+			errors = ['Missing collections directory']
 		})
 		report.total = 1
 		report.failed_count = 1
@@ -82,7 +82,9 @@ func _compile_task() -> void:
 			signal_bus.is_batch_loading = false
 		return
 
-	var save_dirs: PackedStringArray = DirAccess.get_directories_at(HenEnums.HENGO_SAVE_PATH)
+	var save_dirs: PackedStringArray = PackedStringArray()
+	for script_id: StringName in HenUtils.get_all_script_ids():
+		save_dirs.append(str(script_id))
 	save_dirs.sort()
 	report.total = save_dirs.size()
 
@@ -99,8 +101,9 @@ func _compile_task() -> void:
 
 	for idx: int in range(save_dirs.size()):
 		var save_id: String = save_dirs[idx]
-		var save_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_dirs[idx]).path_join('save' + HenEnums.SAVE_EXTENSION)
-		var identity_path: String = HenEnums.HENGO_SAVE_PATH.path_join(save_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
+		var script_dir: String = HenUtils.get_script_dir(StringName(save_id))
+		var save_path: String = script_dir.path_join(HenEnums.SAVE_FILE)
+		var identity_path: String = script_dir.path_join(HenEnums.IDENTITY_FILE)
 		var exists: bool = FileAccess.file_exists(save_path)
 
 		save_paths.append(save_path)
@@ -159,9 +162,6 @@ func _compile_task() -> void:
 						var temp_ast: HenMapDependencies.ProjectAST = HenMapDependencies.ProjectAST.new()
 						temp_ast.identity = temp_save.identity
 						temp_ast.variables = temp_save.variables
-						temp_ast.functions = temp_save.functions
-						temp_ast.signals = temp_save.signals
-						temp_ast.macros = temp_save.macros
 						preloaded_saves[current_id] = temp_ast
 					
 			if not preloaded_saves.has(current_id):
@@ -248,23 +248,22 @@ func _compile_task() -> void:
 		if save_data.identity:
 			item.script_name = save_data.identity.name
 
-		# collect all routes once and reuse for both validation and deps
-		var routes: Array = _collect_routes(save_data)
+		HenSaver.recalculate_dependencies(save_data)
 
-		# validate using check_errors (no UI side-effects)
-		var graph_errors: Array[String] = _validate_routes(save_data, routes)
-		if not graph_errors.is_empty():
+		# an action the codegen drops would reach the file as a comment and nothing else
+		var broken: Array[Dictionary] = HenGeneratorAction.collect_errors(save_data)
+
+		if not broken.is_empty():
 			item.status = 'failed'
-			item.message = 'Graph validation failed.'
-			item.errors = graph_errors
+			item.message = 'Broken action(s): ' + str(broken.size()) + '.'
+			# the whole entry, so the report row can take the canvas to the action
+			item.errors = broken
+
 			report.items.append(item)
 			report.failed_count += 1
 			aborted = true
 			abort_index = idx
 			break
-
-		# recalculate deps using the same routes
-		_recalculate_deps_from_routes(save_data, routes)
 
 		code_gen.reset()
 		var code: String = code_gen.get_code(save_data)
@@ -341,17 +340,13 @@ func _on_finished() -> void:
 	_is_compiling = false
 	batch_finished.emit()
 
+	# nothing pops up: the toast tells how it went and the Actions button holds the
+	# report until it is asked for
+	HenCompileAllReportPopup.last_report = _report
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if global and global.HENGO_ROOT:
-		var ui_base: Control = global.HENGO_ROOT.get_node_or_null('%UIBase')
-		if ui_base:
-			# remove any existing result panels before showing the new one
-			for child in ui_base.get_children():
-				if child is HenCompileResultPanel:
-					child.queue_free()
-			var panel := HenCompileResultPanel.new()
-			panel.report = _report
-			ui_base.add_child(panel)
+		global.HENGO_ROOT.schedule_check_errors()
 
 	if Engine.is_editor_hint():
 		EditorInterface.get_resource_filesystem().scan()
@@ -364,46 +359,12 @@ func _on_finished() -> void:
 			toast.notify.call_deferred('Batch compilation failed. See report for details.', HenToast.MessageType.ERROR)
 
 
-# collects all routes from save data in a single pass
-func _collect_routes(save_data: HenSaveData) -> Array:
-	var routes: Array = [save_data.get_base_route()]
-
+func _has_start_state(save_data: HenSaveData) -> bool:
 	for state: HenSaveState in save_data.states:
-		routes.append(state.get_route(save_data))
-	for func_data: HenSaveFunc in save_data.functions:
-		routes.append(func_data.get_route(save_data))
-	for macro: HenSaveMacro in save_data.macros:
-		routes.append(macro.get_route(save_data))
-	for callback_data: HenSaveSignalCallback in save_data.signals_callback:
-		routes.append(callback_data.get_route(save_data))
+		if state.start:
+			return true
 
-	return routes
-
-
-# validates all cnodes in the given routes using check_errors (no UI updates)
-func _validate_routes(save_data: HenSaveData, routes: Array) -> Array[String]:
-	var errors: Array[String] = []
-
-	for route in routes:
-		if not route:
-			continue
-		for vc: HenVirtualCNode in route.virtual_cnode_list:
-			var node_errors: Array = vc.check_errors(save_data)
-			for err in node_errors:
-				errors.append(str(err.get('description', 'Unknown graph error')))
-
-	return errors
-
-
-# recalculates deps from pre-collected routes
-func _recalculate_deps_from_routes(save_data: HenSaveData, routes: Array) -> void:
-	save_data.identity.deps.clear()
-	save_data.identity.detailed_deps.clear()
-
-	for route in routes:
-		if not route:
-			continue
-		HenSaver._process_cnodes_for_deps(save_data, route.virtual_cnode_list)
+	return false
 
 
 func _is_script_up_to_date(save_path: String, script_path: String) -> bool:

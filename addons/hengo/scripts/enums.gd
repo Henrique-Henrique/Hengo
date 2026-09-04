@@ -3,8 +3,12 @@ class_name HenEnums extends Node
 
 const HENGO_PATH: StringName = 'res://hengo/'
 const HENGO_SAVE_PATH: StringName = 'res://hengo/saves/'
+const HENGO_COLLECTION_PATH: StringName = 'res://hengo/collections/'
 const HENGO_SCRIPTS_PATH: StringName = 'res://hengo/scripts/'
 const SAVE_EXTENSION: String = '.res'
+const COLLECTION_FILE: String = 'collection.res'
+const IDENTITY_FILE: String = 'identity.res'
+const SAVE_FILE: String = 'save.res'
 
 
 const SCRIPT_REF_PATH: StringName = 'res://hengo/save/hengo_cross_references.json'
@@ -41,7 +45,6 @@ const SINGLETON_LIST: Array[StringName] = [
 	&'ThreadHelper',
 	&'MapDependencies',
 	&'Loader',
-	&'Router',
 	&'CodeGeneration',
 	&'Enums',
 	&'Global',

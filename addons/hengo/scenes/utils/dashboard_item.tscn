@@ -8,9 +8,9 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_item_normal"]
 content_margin_left = 6.0
-content_margin_top = 4.0
+content_margin_top = 3.0
 content_margin_right = 6.0
-content_margin_bottom = 4.0
+content_margin_bottom = 3.0
 bg_color = Color(1, 1, 1, 0)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
@@ -19,9 +19,9 @@ corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_item_hover"]
 content_margin_left = 6.0
-content_margin_top = 4.0
+content_margin_top = 3.0
 content_margin_right = 6.0
-content_margin_bottom = 4.0
+content_margin_bottom = 3.0
 bg_color = Color(1, 1, 1, 0.06)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
@@ -33,6 +33,7 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 32.0
 grow_horizontal = 2
+custom_minimum_size = Vector2(0, 32)
 mouse_default_cursor_shape = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_item_normal")
 script = ExtResource("1_dashboard_item")
@@ -42,7 +43,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="Icon" type="TextureRect" parent="HBoxContainer"]
-custom_minimum_size = Vector2(18, 18)
+custom_minimum_size = Vector2(16, 16)
 layout_mode = 2
 expand_mode = 1
 stretch_mode = 5
@@ -66,18 +67,22 @@ text = ""
 
 [node name="Rename" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 24)
+visible = false
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
-tooltip_text = "Rename Script"
+tooltip_text = "Rename Collection"
 mouse_default_cursor_shape = 2
+theme_override_constants/icon_max_width = 14
 icon = ExtResource("3_rename")
 flat = true
 
 [node name="Delete" type="Button" parent="HBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(24, 24)
+visible = false
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
-tooltip_text = "Delete Script"
+tooltip_text = "Delete Collection"
 mouse_default_cursor_shape = 2
+theme_override_constants/icon_max_width = 14
 icon = ExtResource("6_delete")
 flat = true

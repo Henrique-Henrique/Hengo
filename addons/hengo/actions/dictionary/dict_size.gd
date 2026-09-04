@@ -1,0 +1,73 @@
+@tool
+class_name HenActionDictSize extends HenScriptMacroBase
+
+
+# writes the number of key/value pairs in Dictionary into Store.
+
+
+func get_id() -> StringName:
+	return &'dict_size'
+
+
+func get_description() -> String:
+	return 'Counts how many key and value pairs a dictionary holds and stores the number.'
+
+
+func get_display_name() -> String:
+	return 'Dictionary Size'
+
+
+func get_icon() -> String:
+	return 'list-ordered'
+
+
+func get_inputs() -> Array[Dictionary]:
+	return [
+		{
+			name = 'Dictionary',
+			type = 'Dictionary',
+			id = &'dict',
+			doc = 'The dictionary to measure.',
+			bind_only = true,
+			default_value = null
+		}
+	]
+
+
+func get_outputs() -> Array[Dictionary]:
+	return [
+		{name = 'Size', type = 'int', id = &'result', doc = 'Where to store the number of pairs.'}
+	]
+
+
+func get_output_result() -> String:
+	return '{{dict}}.size()'
+
+
+func get_flow_inputs() -> Array[Dictionary]:
+	return [
+		{name = 'Enter', id = &'enter'},
+		{name = 'Update', id = &'update'},
+		{name = 'Physics', id = &'physics'},
+		{name = 'Exit', id = &'exit'}
+	]
+
+
+func get_flow_enter() -> String:
+	return _body()
+
+
+func get_flow_update() -> String:
+	return _body()
+
+
+func get_flow_physics() -> String:
+	return _body()
+
+
+func get_flow_exit() -> String:
+	return _body()
+
+
+func _body() -> String:
+	return '{{out:result}}'

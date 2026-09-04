@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "artifact = zip only, no release. draft = release held back, tag created when it is published. publish = live release and tag"
+        type: choice
+        default: artifact
+        options:
+          - artifact
+          - draft
+          - publish
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+
+    steps:
+      - name: Only main
+        env:
+          REF: ${{ github.ref_name }}
+        run: |
+          if [ "$REF" != main ]; then
+            echo "release runs only from main, got $REF" >&2
+            exit 1
+          fi
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Tests
+        uses: MikeSchulze/gdunit4-action@v1
+        with:
+          godot-version: "4.7"
+          version: "v6.2.1"
+          paths: "res://tests"
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build the addon zip
+        id: build
+        run: |
+          version=$(sed -n 's/^version="\(.*\)"$/\1/p' addons/hengo/plugin.cfg)
+          if [ "$version" = dev ]; then
+            echo 'plugin.cfg still says version="dev", bump it before releasing' >&2
+            exit 1
+          fi
+          bash tools/make_release.sh
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: hengo-${{ steps.build.outputs.version }}
+          path: dist/hengo-${{ steps.build.outputs.version }}.zip
+          if-no-files-found: error
+
+      - name: Create the release
+        if: inputs.mode != 'artifact'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ inputs.mode }}
+          VERSION: ${{ steps.build.outputs.version }}
+          TARGET: ${{ github.sha }}
+        run: |
+          draft=''
+          if [ "$MODE" = draft ]; then
+            draft='--draft'
+          fi
+          gh release create "$VERSION" "dist/hengo-$VERSION.zip" \
+            --target "$TARGET" \
+            --title "Hengo $VERSION" \
+            --notes "" $draft

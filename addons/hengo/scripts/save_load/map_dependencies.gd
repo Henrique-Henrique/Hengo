@@ -7,63 +7,27 @@ class ProjectAST:
 	var identity: HenSaveDataIdentity
 	var macros: Array[HenSaveMacro]
 	var variables: Array[HenSaveVar]
-	var functions: Array[HenSaveFunc]
-	var signals: Array[HenSaveSignal]
-	var signals_callback: Array[HenSaveSignalCallback]
 	var states: Array[HenSaveState]
 
 
-# iterates over project directories to build the dependency map
+# iterates over every script of every collection to build the dependency map
 func start_map() -> void:
 	var start: int = Time.get_ticks_usec()
 	ast_list.clear()
-	var root_dir: DirAccess = DirAccess.open(HenEnums.HENGO_SAVE_PATH)
-	
-	if not root_dir:
-		push_error('Failed to access save path.')
-		return
 
-	for id_dir: String in root_dir.get_directories():
+	for id_dir: StringName in HenUtils.get_all_script_ids():
 		_map_project_data(id_dir)
 
 	var end: int = Time.get_ticks_usec()
 
 	print('Project mapped in ', (end - start) / 1000., 'ms')
-	get_real_ast_size()
-
-
-# this is a test, I don't know if its works properly
-func get_real_ast_size() -> void:
-	var total_bytes: int = 0
-	
-	# loop through all projects in the dictionary
-	for id: StringName in ast_list:
-		var project: ProjectAST = ast_list[id]
-		
-		var all_lists: Array = [
-			project.variables,
-			project.functions,
-			project.signals,
-			project.signals_callback,
-			project.macros
-		]
-		
-		for list: Array in all_lists:
-			for res: Resource in list:
-				if res:
-					# duplicate to detach from disk and force data serialization
-					var temp_res: Resource = res.duplicate(true)
-					temp_res.resource_path = ''
-					total_bytes += var_to_bytes(temp_res).size()
-
-	print('Real Data Payload: ', snappedf(total_bytes / 1024.0, 0.01), ' KB')
 
 
 # iterates through all sidebar types to load resources into ast
 func _map_project_data(_id: StringName) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 
-	var identity_path = HenEnums.HENGO_SAVE_PATH.path_join(_id).path_join('identity' + HenEnums.SAVE_EXTENSION)
+	var identity_path = HenUtils.get_script_dir(_id).path_join(HenEnums.IDENTITY_FILE)
 	if FileAccess.file_exists(identity_path):
 		var res_identity: HenSaveDataIdentity = load(identity_path)
 
@@ -90,14 +54,6 @@ func _map_project_data(_id: StringName) -> void:
 				match type:
 					HenSideBar.SideBarItem.VARIABLES:
 						ast.variables.append(res)
-					HenSideBar.SideBarItem.FUNCTIONS:
-						ast.functions.append(res)
-					HenSideBar.SideBarItem.SIGNALS:
-						ast.signals.append(res)
-					HenSideBar.SideBarItem.SIGNALS_CALLBACK:
-						ast.signals_callback.append(res)
-					HenSideBar.SideBarItem.MACROS:
-						ast.macros.append(res)
 
 	ast_list.set(_id, ast)
 
@@ -180,24 +136,6 @@ func _has_dependency_changed(_deps: Array, _updated_ast: ProjectAST) -> bool:
 						if HenUtils.get_dependency_hash(v) == dep.hash:
 							changed = false
 						break
-			HenEnums.DependencyType.FUNC:
-				for f: HenSaveFunc in _updated_ast.functions:
-					if f.id == dep.id:
-						if HenUtils.get_dependency_hash(f) == dep.hash:
-							changed = false
-						break
-			HenEnums.DependencyType.SIGNAL:
-				for s: HenSaveSignal in _updated_ast.signals:
-					if s.id == dep.id:
-						if HenUtils.get_dependency_hash(s) == dep.hash:
-							changed = false
-						break
-			HenEnums.DependencyType.MACRO:
-				for m: HenSaveMacro in _updated_ast.macros:
-					if m.id == dep.id:
-						if HenUtils.get_dependency_hash(m) == dep.hash:
-							changed = false
-						break
 		
 		if changed:
 			return true
@@ -213,10 +151,6 @@ func update_project_data(_id: StringName) -> void:
 func update_project_data_from_save(_id: StringName, _save_data: HenSaveData) -> void:
 	var ast: ProjectAST = ProjectAST.new()
 	ast.identity = _save_data.identity
-	ast.macros = _save_data.macros
 	ast.variables = _save_data.variables
-	ast.functions = _save_data.functions
-	ast.signals = _save_data.signals
-	ast.signals_callback = _save_data.signals_callback
 	ast.states = _save_data.states
 	ast_list.set(_id, ast)

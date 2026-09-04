@@ -20,9 +20,9 @@ func setup(res: Resource, p_name: String, val: Array, hint_string: String, p_dep
 	depth = p_depth
 	
 	if p_path.is_empty():
-		current_path = prop_name.capitalize()
+		current_path = HenInspector.prop_label(prop_name)
 	else:
-		current_path = p_path + ' > ' + prop_name.capitalize()
+		current_path = p_path + ' > ' + HenInspector.prop_label(prop_name)
 	
 	
 	if ':' in hint_string:
@@ -32,9 +32,7 @@ func setup(res: Resource, p_name: String, val: Array, hint_string: String, p_dep
 
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		var editor_scale: float = EditorInterface.get_editor_scale()
-		add_theme_constant_override('separation', int(10 * editor_scale))
+	add_theme_constant_override('separation', 10)
 
 	call_deferred('_setup_header')
 	_refresh_list()
@@ -68,7 +66,7 @@ func _setup_header() -> void:
 	
 	var btn: Button = Button.new()
 	btn.name = 'AddBtn'
-	btn.text = 'Add ' + prop_name.capitalize()
+	btn.text = 'Add ' + HenInspector.prop_label(prop_name)
 	btn.icon = get_theme_icon('Add', 'EditorIcons')
 	btn.pressed.connect(_on_add_pressed)
 	hbox.add_child(btn)
@@ -141,12 +139,10 @@ func _create_sub_property_editor(parent_container: Control, item: Resource, prop
 
 	var container: VBoxContainer = PROP_CONTAINER.instantiate()
 	var label: Label = container.get_node('Name')
-	label.text = prop.name.capitalize()
+	label.text = HenInspector.prop_label(prop.name)
 	
-	if Engine.is_editor_hint():
-		var editor_scale: float = EditorInterface.get_editor_scale()
-		label.add_theme_font_size_override('font_size', int(14 * editor_scale))
-		add_theme_constant_override('separation', int(10 * editor_scale))
+	ThemeUtils.apply_font_size(label, 14)
+	add_theme_constant_override('separation', 10)
 	
 	var editor: Control = prop_scene.instantiate()
 	if not editor:
@@ -186,36 +182,21 @@ func _on_add_pressed() -> void:
 		var script: Script = load('res://addons/hengo/scripts/save_load/resource/save_param.gd')
 		new_item = script.create()
 	
-	var history: UndoRedo = global.history
-	history.create_action('Add ' + array_type_string)
-	
+	# the flow history snapshots the whole action at the popup boundary, so the
+	# undo half of a method pair here would only fill a second stack
 	var new_arr: Array = array_val.duplicate()
 	new_arr.append(new_item)
-	
-	history.add_do_property(resource, prop_name, new_arr)
-	history.add_undo_property(resource, prop_name, array_val)
-	
-	history.add_do_method(_active_refresh.bind(new_arr))
-	history.add_undo_method(_active_refresh.bind(array_val))
-	
-	history.commit_action()
+
+	resource.set(prop_name, new_arr)
+	_active_refresh(new_arr)
 
 
 func _on_remove_pressed(index: int) -> void:
-	var global: HenGlobal = Engine.get_singleton('Global')
-	var history: UndoRedo = global.history
-	
 	var new_arr: Array = array_val.duplicate()
 	new_arr.remove_at(index)
-	
-	history.create_action('Remove Array Item')
-	history.add_do_property(resource, prop_name, new_arr)
-	history.add_undo_property(resource, prop_name, array_val)
-	
-	history.add_do_method(_active_refresh.bind(new_arr))
-	history.add_undo_method(_active_refresh.bind(array_val))
-	
-	history.commit_action()
+
+	resource.set(prop_name, new_arr)
+	_active_refresh(new_arr)
 
 
 func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, type: int) -> void:
@@ -224,27 +205,25 @@ func _on_item_prop_changed(item: Resource, p_name: String, new_val: Variant, typ
 	if inspector:
 		final_val = inspector.normalize_value(item, p_name, new_val, type)
 	
-	var global: HenGlobal = Engine.get_singleton('Global')
-	var history: UndoRedo = global.history
-	
-	history.create_action('Set ' + p_name)
-	history.add_do_property(item, p_name, final_val)
-	history.add_undo_property(item, p_name, item.get(p_name))
-	
+	item.set(p_name, final_val)
+
+	# renaming an entry has to reach whoever draws it, and the announcement waits
+	# for the popup to close, the way an edit on the resource itself does
+	if inspector:
+		inspector.mark_dirty()
+
 	if p_name == 'type' and item is HenSaveParam:
-		history.add_do_method((Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit)
-		history.add_undo_method((Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit)
-		history.add_do_method(_refresh_list)
-		history.add_undo_method(_refresh_list)
-	
-	history.commit_action()
-	
-	if p_name == 'type' and item is HenSaveParam:
+		(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
 		_refresh_list()
 
 
+# adding or removing an entry changes the shape of everything built from it, so
+# it is announced right away instead of waiting
 func _active_refresh(new_arr: Array) -> void:
 	array_val = new_arr
+
+	(Engine.get_singleton(&'SignalBus') as HenSignalBus).request_structural_update.emit()
+
 	if is_inside_tree():
 		_refresh_list()
 

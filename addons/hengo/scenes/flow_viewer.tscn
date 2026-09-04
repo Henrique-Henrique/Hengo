@@ -1,0 +1,70 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/flow_viewer/flow_viewer.gd" id="1_flow"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/state_viewer/state_viewer_edges_overlay.gd" id="2_edges"]
+[ext_resource type="Script" path="res://addons/hengo/scripts/cam.gd" id="3_cam"]
+[ext_resource type="Shader" path="res://addons/hengo/assets/shaders/grid.gdshader" id="4_grid"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/images/grid.png" id="5_gridtex"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_flow"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flow"]
+shader = ExtResource("4_grid")
+shader_parameter/screen_size = Vector2(1539, 1975)
+shader_parameter/offset = Vector2(0, 0)
+shader_parameter/zoom_factor = 1.0
+shader_parameter/alpha = 0.05
+shader_parameter/text = ExtResource("5_gridtex")
+shader_parameter/text_size = 400.0
+
+[node name="FlowViewer" type="Control"]
+clip_contents = true
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_flow")
+
+[node name="Panel" type="Panel" parent="."]
+process_mode = 4
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_flow")
+
+[node name="Grid" type="TextureRect" parent="Panel"]
+process_mode = 4
+texture_filter = 1
+texture_repeat = 2
+material = SubResource("ShaderMaterial_flow")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("5_gridtex")
+
+[node name="Cam" type="Node2D" parent="." node_paths=PackedStringArray("grid")]
+unique_name_in_owner = true
+script = ExtResource("3_cam")
+grid = NodePath("../Panel/Grid")
+is_global_cam = false
+
+[node name="RefPoint" type="Marker2D" parent="Cam"]
+visible = false
+
+[node name="FlowNodes" type="Node2D" parent="Cam"]
+unique_name_in_owner = true
+
+[node name="FlowEdges" type="Node2D" parent="Cam"]
+unique_name_in_owner = true
+script = ExtResource("2_edges")

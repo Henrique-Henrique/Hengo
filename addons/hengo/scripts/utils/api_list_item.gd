@@ -10,8 +10,8 @@ extends MarginContainer
 var data: Dictionary
 
 func _ready() -> void:
-	name_label.add_theme_font_size_override('font_size', 15 * EditorInterface.get_editor_scale())
-	type_label.add_theme_font_size_override('font_size', 12 * EditorInterface.get_editor_scale())
+	ThemeUtils.apply_font_size(name_label, 15)
+	ThemeUtils.apply_font_size(type_label, 12)
 	bt.gui_input.connect(_on_bt_gui_input)
 
 
@@ -35,7 +35,8 @@ func _on_press() -> void:
 
 	var prop_arr: Array = data.get('recursive_props', [])
 	if prop_arr.is_empty():
-		prop_arr = global.CODE_SEARCH.get_native_props_as_data(data)
+		_select()
+		return
 
 	var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 
@@ -47,7 +48,6 @@ func _on_press() -> void:
 
 func _select() -> void:
 	if not data.is_empty():
-		print(JSON.stringify(data))
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
 		signal_bus.request_code_search_select.emit(data)
 

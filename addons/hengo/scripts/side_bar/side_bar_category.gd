@@ -4,14 +4,15 @@ const FONT_BOLD = preload('res://addons/hengo/assets/fonts/bold.ttf')
 
 signal add_pressed(add_type: int)
 
+static var _title_font: FontVariation
+
 var add_type: int = -1
 
-var header_panel: PanelContainer
 var icon_rect: TextureRect
 var title_label: Label
 var add_button: Button
 var items_container: VBoxContainer
-var divider: ColorRect
+var divider: HSeparator
 
 
 func _ready() -> void:
@@ -22,15 +23,15 @@ func _ready() -> void:
 	)
 
 
-func setup(title: String, type: int, icon: Texture2D, icon_color: Color, show_divider: bool = true, add_label: String = 'New') -> void:
+func setup(title: String, type: int, icon: Texture2D, icon_color: Color, show_divider: bool = true, add_label: String = 'New', show_add: bool = true) -> void:
 	_bind_refs()
-	var editor_scale: float = EditorInterface.get_editor_scale() if Engine.is_editor_hint() else 1.0
 
 	add_type = type
-	title_label.text = title
-	title_label.modulate = Color('#e3ebf2')
-	title_label.add_theme_font_override('font', FONT_BOLD)
-	title_label.add_theme_font_size_override('font_size', int(max(13, roundi(13 * editor_scale))))
+	add_button.visible = show_add
+	title_label.text = title.to_upper()
+	title_label.modulate = Color(1, 1, 1, 0.92)
+	title_label.add_theme_font_override('font', _get_title_font())
+	ThemeUtils.apply_font_size(title_label, 11)
 
 	# show icon tinted with solid category color
 	var solid_color: Color = Color(icon_color.r, icon_color.g, icon_color.b, 1.0)
@@ -38,24 +39,12 @@ func setup(title: String, type: int, icon: Texture2D, icon_color: Color, show_di
 	icon_rect.modulate = solid_color
 	icon_rect.visible = icon != null
 
-	# tinted header background with rounded corners matching design system
-	var header_style := StyleBoxFlat.new()
-	header_style.bg_color = Color(icon_color.r, icon_color.g, icon_color.b, 0.14)
-	header_style.border_color = Color(icon_color.r, icon_color.g, icon_color.b, 0.35)
-	header_style.set_border_width_all(int(max(1, roundi(1 * editor_scale))))
-	var radius: int = int(max(10, roundi(10 * editor_scale)))
-	header_style.corner_radius_top_left = radius
-	header_style.corner_radius_top_right = radius
-	header_style.corner_radius_bottom_left = radius
-	header_style.corner_radius_bottom_right = radius
-	header_panel.add_theme_stylebox_override('panel', header_style)
-
-	add_button.text = add_label
-	add_button.add_theme_font_size_override('font_size', int(max(10, roundi(10 * editor_scale))))
-	add_button.add_theme_constant_override('icon_max_width', int(max(14, roundi(14 * editor_scale))))
-	add_button.add_theme_constant_override('h_separation', int(max(4, roundi(4 * editor_scale))))
+	add_button.tooltip_text = add_label
+	add_button.add_theme_constant_override('icon_max_width', 13)
+	add_button.add_theme_color_override('icon_normal_color', Color(1, 1, 1, 0.3))
+	add_button.add_theme_color_override('icon_hover_color', Color(1, 1, 1, 0.9))
+	add_button.add_theme_color_override('icon_pressed_color', Color(1, 1, 1, 1))
 	divider.visible = show_divider
-	divider.color = Color('#2c3138', 0.4)
 
 	var add_style := StyleBoxEmpty.new()
 	add_button.add_theme_stylebox_override('normal', add_style)
@@ -69,11 +58,19 @@ func add_row(row: Control) -> void:
 	items_container.add_child(row)
 
 
+static func _get_title_font() -> FontVariation:
+	if not _title_font:
+		_title_font = FontVariation.new()
+		_title_font.base_font = FONT_BOLD
+		_title_font.spacing_glyph = 1
+
+	return _title_font
+
+
 func _bind_refs() -> void:
 	if icon_rect:
 		return
 
-	header_panel = get_node('%HeaderPanel')
 	icon_rect = get_node('%Icon')
 	title_label = get_node('%Title')
 	add_button = get_node('%AddButton')

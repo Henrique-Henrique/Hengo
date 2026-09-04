@@ -11,6 +11,7 @@ const NAME_COLOR_HOVER = Color(1, 1, 1, 1)
 
 @onready var icon: TextureRect = $HBoxContainer/Icon
 @onready var name_label: Label = %Name
+@onready var time_label: Label = %Time
 @onready var rename_bt: Button = %Rename
 @onready var delete_bt: Button = %Delete
 
@@ -18,14 +19,19 @@ var meta: Dictionary
 
 
 func _ready() -> void:
-	rename_bt.pressed.connect(func(): rename_request.emit(meta, rename_bt))
+	rename_bt.pressed.connect(func(): rename_request.emit(meta, self ))
 	delete_bt.pressed.connect(func(): delete_request.emit(meta))
 
 	mouse_entered.connect(_on_hover)
 	mouse_exited.connect(_on_exit)
 
+	for bt: Button in [rename_bt, delete_bt]:
+		bt.mouse_entered.connect(_on_hover)
+		bt.mouse_exited.connect(_on_exit)
+
 	gui_input.connect(_on_gui_input)
-	name_label.add_theme_color_override('font_color', NAME_COLOR_NORMAL)
+	_apply_hover(false)
+	ThemeUtils.apply_font_scale(self )
 
 	HenUtils.tint_button(rename_bt, HenUtils.UI_COLORS.rename, false)
 	HenUtils.tint_button(delete_bt, HenUtils.UI_COLORS.destructive, false)
@@ -38,8 +44,14 @@ func setup(_meta: Dictionary) -> void:
 	if meta.has('type'):
 		icon.texture = HenUtils.get_icon_texture(meta.type)
 		icon.modulate = HenUtils.get_type_parent_color(meta.type, 1., Color.WHITE).lightened(.3)
+	else:
+		# collection entry: generic icon
+		icon.texture = HenUtils.ICON_LAYERS
+		icon.modulate = Color(0.62, 0.7, 1.0)
 
-	if meta.has('time'):
+	if meta.has('script_count'):
+		%Time.text = '%d scripts' % meta.script_count
+	elif meta.has('time'):
 		%Time.text = _format_time(meta.time)
 
 
@@ -68,8 +80,20 @@ func _on_gui_input(event: InputEvent) -> void:
 
 
 func _on_hover() -> void:
-	name_label.add_theme_color_override('font_color', NAME_COLOR_HOVER)
+	_apply_hover(true)
 
 
+# showing the buttons makes the row exit before the pointer actually left it
 func _on_exit() -> void:
-	name_label.add_theme_color_override('font_color', NAME_COLOR_NORMAL)
+	_recheck_hover.call_deferred()
+
+
+func _recheck_hover() -> void:
+	_apply_hover(get_global_rect().has_point(get_global_mouse_position()))
+
+
+func _apply_hover(hovered: bool) -> void:
+	name_label.add_theme_color_override('font_color', NAME_COLOR_HOVER if hovered else NAME_COLOR_NORMAL)
+	time_label.visible = not hovered
+	rename_bt.visible = hovered
+	delete_bt.visible = hovered
