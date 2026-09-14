@@ -204,6 +204,52 @@ func test_broken_references_are_reported() -> void:
 		.contains('unknown state "Nowhere"')
 
 
+func test_a_finish_names_the_way_out_by_id_or_by_name() -> void:
+	var err: String = _build({
+		name = 'solo',
+		functions = [ {
+			name = 'Check',
+			ways_out = [ {name = 'near'}, {name = 'far'}],
+			actions = [
+				{id = 'finish:Check', inputs = {branch = 'near'}},
+				{id = 'finish:Check', inputs = {branch = 'check_far'}}
+			]
+		}]
+	})
+
+	assert_str(err).is_empty()
+
+	var steps: Array = save_data.get_state_actions(HenHengoActions.find_function(save_data, 'Check').scope_state().id)
+	var picked: Array = steps.map(func(step: HenSaveAction) -> String:
+		return str(step.inputs.filter(func(p: HenSaveParam) -> bool: return str(p.id) == 'branch')[0].default_value)
+	)
+
+	assert_array(picked).is_equal(['check_near', 'check_far'])
+
+
+func test_an_unknown_source_shape_lists_every_form() -> void:
+	assert_str(_build_one('print_value', 'enter', {value = {variable = 'x'}})) \
+		.contains('expected one of wire, action, expr, bind, path, arg, native, prop')
+
+
+func test_a_wire_names_the_output_by_id_or_by_name() -> void:
+	for output: String in ['result', 'Result']:
+		var err: String = _build({
+			name = 'solo',
+			states = [ {
+				name = 'Wire' + output,
+				start = true,
+				actions = [
+					{id = 'math_operator', phase = 'update', ref = 'sum' + output, inputs = {a = 3, op = '*', b = 2}},
+					{id = 'print_value', phase = 'update', inputs = {value = {wire = {from = 'sum' + output, output = output}}}}
+				]
+			}]
+		})
+
+		assert_str(err).is_empty()
+		assert_str(HenTest.get_all_code()).not_contains(UNRESOLVED)
+
+
 # a dropped feature (funcs, signals, lifecycle flows) must not pass in silence
 func test_unknown_schema_key_is_reported() -> void:
 	assert_str(_build({name = 'solo', funcs = []})) \

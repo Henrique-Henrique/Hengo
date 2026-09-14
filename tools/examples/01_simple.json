@@ -1,0 +1,26 @@
+{
+	"collection": "Example Simple",
+	"scripts": [
+		{
+			"name": "example_spinner",
+			"extends": "Node2D",
+			"vars": [
+				{ "name": "spin_speed", "type": "float", "value": 180.0, "export": true },
+				{ "name": "drift", "type": "Vector2", "value": [60.0, 0.0] }
+			],
+			"states": [
+				{
+					"name": "Spinning",
+					"start": true,
+					"description": "Spins in place and drifts to the right forever.",
+					"actions": [
+						{ "id": "print_value", "phase": "enter", "inputs": { "value": "spinner ready" } },
+						{ "id": "change_color", "phase": "enter", "inputs": { "color": [1.0, 0.8, 0.2, 1.0] } },
+						{ "id": "rotate_sprite", "phase": "update", "inputs": { "speed": { "bind": "spin_speed" } } },
+						{ "id": "move_sprite", "phase": "update", "inputs": { "velocity": { "bind": "drift" }, "speed": 1.0 } }
+					]
+				}
+			]
+		}
+	]
+}

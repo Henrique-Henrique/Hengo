@@ -1,0 +1,81 @@
+{
+	"collection": "Example Cross Script",
+	"scripts": [
+		{
+			"name": "example_switch",
+			"extends": "Area2D",
+			"states": [
+				{
+					"name": "Waiting",
+					"start": true,
+					"description": "Waits for a body to step on the switch, then opens the sibling Door node.",
+					"actions": [
+						{ "id": "change_color", "phase": "enter", "inputs": { "color": [1.0, 0.3, 0.3, 1.0] } },
+						{
+							"id": "on_body_entered",
+							"phase": "update",
+							"inputs": { "emitter": { "path": "." } },
+							"branches": {
+								"received": {
+									"actions": [
+										{
+											"id": "transition",
+											"branches": { "to": { "script": "example_door", "state": "Opening", "path": "../Door", "label": "open the door" } }
+										},
+										{ "id": "transition", "branches": { "to": "Pressed" } }
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Pressed",
+					"description": "Stays green until the door closes and sends the switch back to Waiting.",
+					"actions": [
+						{ "id": "change_color", "phase": "enter", "inputs": { "color": [0.3, 1.0, 0.4, 1.0] } }
+					]
+				}
+			]
+		},
+		{
+			"name": "example_door",
+			"extends": "Node2D",
+			"vars": [
+				{ "name": "open_time", "type": "float", "value": 2.0, "export": true }
+			],
+			"states": [
+				{
+					"name": "Closed",
+					"start": true,
+					"actions": [
+						{ "id": "tween_fade", "phase": "enter", "inputs": { "to": 1.0, "duration": 0.3 } }
+					]
+				},
+				{
+					"name": "Opening",
+					"description": "Fades out, stays open for open_time seconds and resets the switch that opened it.",
+					"actions": [
+						{ "id": "tween_fade", "phase": "enter", "inputs": { "to": 0.2, "duration": 0.3 } },
+						{
+							"id": "wait",
+							"phase": "update",
+							"inputs": { "seconds": { "bind": "open_time" } },
+							"branches": {
+								"finished": {
+									"actions": [
+										{
+											"id": "transition",
+											"branches": { "to": { "script": "example_switch", "state": "Waiting", "path": "../Switch", "check_instance": true } }
+										},
+										{ "id": "transition", "branches": { "to": "Closed" } }
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

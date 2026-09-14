@@ -1,0 +1,161 @@
+{
+	"collection": "Example Function Macro",
+	"scripts": [
+		{
+			"name": "example_turret",
+			"extends": "Node2D",
+			"vars": [
+				{ "name": "shots", "type": "int", "value": 0 },
+				{ "name": "charge_time", "type": "float", "value": 1.2, "export": true },
+				{ "name": "reach", "type": "float", "value": 400.0, "export": true }
+			],
+			"functions": [
+				{
+					"name": "Face Mouse",
+					"description": "Points the turret straight at the mouse cursor.",
+					"actions": [
+						{ "id": "look_at_2d", "inputs": { "target": { "native": "Mouse Position" } } }
+					]
+				},
+				{
+					"name": "Mouse In Range",
+					"description": "Measures how far the mouse is and answers whether it is close enough to shoot.",
+					"inputs": [
+						{ "name": "max distance", "type": "float", "value": 300.0, "doc": "How close the mouse has to be, in pixels." }
+					],
+					"outputs": [
+						{ "name": "distance", "type": "float", "doc": "How far the mouse is right now." }
+					],
+					"ways_out": [
+						{ "name": "near", "doc": "The mouse is inside the range." },
+						{ "name": "far", "doc": "The mouse is outside the range." }
+					],
+					"actions": [
+						{
+							"id": "vector2_combine",
+							"ref": "dist",
+							"inputs": { "func_name": "distance_to", "a": { "native": "Mouse Position" }, "b": { "prop": "global_position" } }
+						},
+						{
+							"id": "compare",
+							"inputs": { "a": { "wire": { "from": "dist", "output": "result" } }, "op": "<", "b": { "arg": "max distance" } },
+							"branches": {
+								"true": {
+									"actions": [
+										{ "id": "finish:Mouse In Range", "inputs": { "distance": { "wire": { "from": "dist", "output": "result" } }, "branch": "mouse_in_range_near" } }
+									]
+								},
+								"false": {
+									"actions": [
+										{ "id": "finish:Mouse In Range", "inputs": { "distance": { "wire": { "from": "dist", "output": "result" } }, "branch": "mouse_in_range_far" } }
+									]
+								}
+							}
+						}
+					]
+				}
+			],
+			"macros": [
+				{
+					"name": "Charge",
+					"description": "Fills up for a number of seconds, running the while charging steps every frame, then leaves by charged.",
+					"inputs": [
+						{ "name": "seconds", "type": "float", "value": 1.0, "doc": "How long the charge takes." }
+					],
+					"hooks": [
+						{ "name": "while charging", "doc": "Runs every frame until the charge is full." }
+					],
+					"ways_out": [
+						{ "name": "charged", "doc": "Taken when the charge is full." }
+					],
+					"states": [
+						{
+							"name": "Filling",
+							"start": true,
+							"actions": [
+								{ "id": "run:while charging", "phase": "update" },
+								{
+									"id": "wait",
+									"phase": "update",
+									"inputs": { "seconds": { "arg": "seconds" } },
+									"branches": { "finished": { "way_out": "charged" } }
+								}
+							]
+						}
+					]
+				}
+			],
+			"states": [
+				{
+					"name": "Armed",
+					"start": true,
+					"description": "Faces the mouse while a shot charges up.",
+					"uses": [
+						{
+							"macro": "Charge",
+							"name": "Charging Shot",
+							"inputs": { "seconds": { "bind": "charge_time" } },
+							"steps": {
+								"enter": [
+									{ "id": "change_color", "inputs": { "color": [1.0, 0.6, 0.2, 1.0] } }
+								],
+								"while charging": [
+									{ "id": "fn:Face Mouse" }
+								]
+							},
+							"ways_out": { "charged": "Fire" }
+						}
+					]
+				},
+				{
+					"name": "Fire",
+					"description": "Shoots when the mouse is in range, otherwise goes back to charging.",
+					"actions": [
+						{ "id": "change_color", "phase": "enter", "inputs": { "color": [1.0, 1.0, 1.0, 1.0] } },
+						{
+							"id": "fn:Mouse In Range",
+							"phase": "enter",
+							"ref": "check",
+							"inputs": { "max distance": { "bind": "reach" } },
+							"branches": {
+								"near": {
+									"actions": [
+										{ "id": "change_value", "inputs": { "target": { "bind": "shots" }, "op": "+", "amount": 1, "min": 0, "max": 9999 } },
+										{
+											"id": "set_text_format",
+											"inputs": {
+												"target": { "path": "../Hud" },
+												"template": "shot {0} at {1} px",
+												"v0": { "bind": "shots" },
+												"v1": { "wire": { "from": "check", "output": "mouse_in_range_distance" } }
+											}
+										},
+										{ "id": "transition", "branches": { "to": "Recoil" } }
+									]
+								},
+								"far": {
+									"actions": [
+										{ "id": "set_text_format", "inputs": { "target": { "path": "../Hud" }, "template": "out of range" } },
+										{ "id": "transition", "branches": { "to": "Armed" } }
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Recoil",
+					"actions": [
+						{ "id": "tween_scale", "phase": "enter", "inputs": { "to": [0.8, 0.8], "duration": 0.08 }, "branches": { "finished": "Settle" } }
+					]
+				},
+				{
+					"name": "Settle",
+					"actions": [
+						{ "id": "tween_scale", "phase": "enter", "inputs": { "to": [1.0, 1.0], "duration": 0.15 }, "branches": { "finished": "Armed" } }
+					]
+				}
+			]
+		}
+	]
+}

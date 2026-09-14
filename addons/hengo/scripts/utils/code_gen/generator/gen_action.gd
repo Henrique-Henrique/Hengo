@@ -44,6 +44,7 @@ static func clear_hook_scopes() -> void:
 # a function body is written at script scope, where the node is `self`: `_ref` is
 # the field a state class holds and does not exist there
 static var in_function: bool = false
+static var _delta_word: RegEx = RegEx.create_from_string('\\bdelta\\b')
 
 
 # for a line written by hand instead of by a macro body, which never reaches the
@@ -314,7 +315,7 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 	if not invalid.is_empty():
 		return invalid
 
-	var wrong_scope: String = _scope_error(_save_data, _state, _action, _instance)
+	var wrong_scope: String = _scope_error(_save_data, _state, _action, _instance, _phase if not _phase.is_empty() else _action.phase)
 
 	if not wrong_scope.is_empty():
 		return wrong_scope
@@ -409,11 +410,15 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 # a function body and a state body take different actions: a finish belongs to the
 # function that declares it, and nothing inside a function changes state
-static func _scope_error(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _instance: HenScriptMacroBase) -> String:
+static func _scope_error(_save_data: HenSaveData, _state: HenSaveState, _action: HenSaveAction, _instance: HenScriptMacroBase, _phase: StringName) -> String:
 	var inside_function: bool = _state != null and _state.is_function_scope
 
 	if _instance.get_needs_function() and not inside_function:
 		return str(_instance.get_display_name()).to_lower() + ' can only be used inside a function'
+
+	# a function method takes no delta parameter, so the body would not parse
+	if inside_function and _delta_word.search(_get_phase_body(_instance, _phase)):
+		return 'uses delta, which a function does not have: run it from a state instead'
 
 	if _instance is HenFunctionMacro:
 		var function_macro: HenFunctionMacro = _instance as HenFunctionMacro
