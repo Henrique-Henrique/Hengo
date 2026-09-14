@@ -51,7 +51,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build the addon zip
+      - name: Build the addon zips
         id: build
         run: |
           version=$(sed -n 's/^version="\(.*\)"$/\1/p' addons/hengo/plugin.cfg)
@@ -62,11 +62,13 @@ jobs:
           bash tools/make_release.sh
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Upload the zip
+      - name: Upload the zips
         uses: actions/upload-artifact@v4
         with:
           name: hengo-${{ steps.build.outputs.version }}
-          path: dist/hengo-${{ steps.build.outputs.version }}.zip
+          path: |
+            dist/hengo-${{ steps.build.outputs.version }}.zip
+            dist/hengo-${{ steps.build.outputs.version }}-with-tools.zip
           if-no-files-found: error
 
       - name: Create the release
@@ -81,7 +83,7 @@ jobs:
           if [ "$MODE" = draft ]; then
             draft='--draft'
           fi
-          gh release create "$VERSION" "dist/hengo-$VERSION.zip" \
+          gh release create "$VERSION" "dist/hengo-$VERSION.zip" "dist/hengo-$VERSION-with-tools.zip" \
             --target "$TARGET" \
             --title "Hengo $VERSION" \
             --notes "" $draft

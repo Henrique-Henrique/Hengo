@@ -625,7 +625,8 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 		if not phase_err.is_empty():
 			return phase_err
 
-	var input_err: String = _apply_inputs(_save_data, _state, action, macro, _spec.get('inputs', {}), _all_scripts)
+	var inputs: Dictionary = _finish_branch_by_name(_save_data, str(id), _spec.get('inputs', {}))
+	var input_err: String = _apply_inputs(_save_data, _state, action, macro, inputs, _all_scripts)
 
 	if not input_err.is_empty():
 		return input_err
@@ -649,6 +650,23 @@ static func _make_action(_save_data: HenSaveData, _state: HenSaveState, _spec: D
 		return body_err
 
 	return action
+
+
+# the branch slot of a finish is raw with the way out ids as options
+static func _finish_branch_by_name(_save_data: HenSaveData, _id: String, _inputs: Dictionary) -> Dictionary:
+	if not _id.begins_with('finish:') or not _inputs.get('branch') is String:
+		return _inputs
+
+	var func_res: HenSaveFunc = find_function(_save_data, _id.substr('finish:'.length()))
+	var flow: HenSaveFlowParam = _definition_way_out(func_res, str(_inputs.branch)) if func_res else null
+
+	if not flow:
+		return _inputs
+
+	var mapped: Dictionary = _inputs.duplicate()
+	mapped.branch = str(flow.id)
+
+	return mapped
 
 
 # nested actions of a loop; only a macro that declares a body accepts them
@@ -742,7 +760,8 @@ static func _apply_input_source(_save_data: HenSaveData, _state: HenSaveState, _
 	var bind: Dictionary = _bind_code(_save_data, _source)
 
 	if bind.has('error'):
-		return 'input "' + _key + '": ' + str(bind.error)
+		var known: bool = ['bind', 'path', 'arg', 'native', 'prop'].any(func(k: String) -> bool: return _source.has(k))
+		return 'input "' + _key + '": ' + (str(bind.error) if known else 'expected one of wire, action, expr, bind, path, arg, native, prop')
 
 	_action.input_bindings[_key] = bind.code
 
@@ -767,11 +786,12 @@ static func _apply_wire(_save_data: HenSaveData, _action: HenSaveAction, _key: S
 	# a call to a function of the script is not in the action pool, it is synthesized from the definition
 	var macro: HenSaveMacro = HenFunctionMacro.macro_for(_save_data, producer.macro_id) if HenFunctionMacro.is_function_macro(producer.macro_id) else find_macro(producer.macro_id)
 	var output: String = str(spec.get('output', ''))
+	var declared_output: HenSaveParam = _macro_output(macro, output)
 
-	if not _macro_output(macro, output):
+	if not declared_output:
 		return 'input "' + _key + '": output "' + output + '" is not declared on "' + from + '" (valid: ' + _output_ids(macro) + ')'
 
-	_action.input_wires[_key] = {action_id = StringName(str(producer.id)), output = StringName(output)}
+	_action.input_wires[_key] = {action_id = StringName(str(producer.id)), output = declared_output.id}
 
 	return ''
 
@@ -866,7 +886,7 @@ static func _bind_code(_save_data: HenSaveData, _source: Dictionary) -> Dictiona
 	if _source.has('prop'):
 		return {code = str(_source.prop)}
 
-	return {error = 'expected one of bind, path, native, prop, expr'}
+	return {error = 'expected one of bind, path, arg, native, prop'}
 
 
 # free-text expression: each word is bound to a source or holds a raw code fragment
@@ -1246,6 +1266,10 @@ static func _macro_flow_output(_macro: HenSaveMacro, _key: String) -> HenSaveFlo
 static func _macro_output(_macro: HenSaveMacro, _key: String) -> HenSaveParam:
 	for param: HenSaveParam in _macro.outputs:
 		if str(param.id) == _key:
+			return param
+
+	for param: HenSaveParam in _macro.outputs:
+		if param.name == _key:
 			return param
 
 	return null

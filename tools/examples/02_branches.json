@@ -1,0 +1,114 @@
+{
+	"collection": "Example Branches",
+	"scripts": [
+		{
+			"name": "example_dasher",
+			"extends": "CharacterBody2D",
+			"vars": [
+				{ "name": "speed", "type": "float", "value": 200.0, "export": true },
+				{ "name": "dash_speed", "type": "float", "value": 700.0, "export": true },
+				{ "name": "dash_time", "type": "float", "value": 0.2 },
+				{ "name": "recover_time", "type": "float", "value": 0.5 }
+			],
+			"states": [
+				{
+					"name": "Free",
+					"start": true,
+					"description": "Walks with the arrow keys and dashes on ui_accept.",
+					"actions": [
+						{
+							"id": "input_action",
+							"phase": "update",
+							"inputs": { "action": "ui_accept", "mode": "is_action_just_pressed" },
+							"branches": { "true": "Dash" }
+						}
+					],
+					"sub_states": [
+						{
+							"name": "Idle",
+							"start": true,
+							"actions": [
+								{ "id": "set_velocity", "phase": "physics", "inputs": { "velocity": [0.0, 0.0] } },
+								{ "id": "move_and_slide", "phase": "physics" },
+								{ "id": "get_move_vector", "phase": "update", "ref": "idle_dir" },
+								{
+									"id": "vector2_info",
+									"phase": "update",
+									"ref": "idle_len",
+									"inputs": { "func_name": "length", "vector": { "wire": { "from": "idle_dir", "output": "result" } } }
+								},
+								{
+									"id": "compare",
+									"phase": "update",
+									"inputs": { "a": { "wire": { "from": "idle_len", "output": "result" } }, "op": ">", "b": 0.1 },
+									"branches": { "true": "Walk" }
+								}
+							]
+						},
+						{
+							"name": "Walk",
+							"actions": [
+								{
+									"id": "set_velocity",
+									"phase": "physics",
+									"inputs": {
+										"velocity": {
+											"action": {
+												"id": "vector2_scale",
+												"inputs": { "vector": { "action": { "id": "get_move_vector" }, "output": "result" }, "factor": { "bind": "speed" } }
+											},
+											"output": "result"
+										}
+									}
+								},
+								{ "id": "move_and_slide", "phase": "physics" },
+								{ "id": "get_move_vector", "phase": "update", "ref": "walk_dir" },
+								{
+									"id": "vector2_info",
+									"phase": "update",
+									"ref": "walk_len",
+									"inputs": { "func_name": "length", "vector": { "wire": { "from": "walk_dir", "output": "result" } } }
+								},
+								{
+									"id": "compare",
+									"phase": "update",
+									"inputs": { "a": { "wire": { "from": "walk_len", "output": "result" } }, "op": "<=", "b": 0.1 },
+									"branches": { "true": "Idle" }
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Dash",
+					"description": "A short burst to the right, then a forced recovery.",
+					"actions": [
+						{ "id": "change_color", "phase": "enter", "inputs": { "color": [0.4, 0.8, 1.0, 1.0] } },
+						{
+							"id": "set_velocity",
+							"phase": "enter",
+							"inputs": {
+								"velocity": {
+									"action": { "id": "make_vector2", "inputs": { "x": { "bind": "dash_speed" }, "y": 0.0 } },
+									"output": "result"
+								}
+							}
+						},
+						{ "id": "move_and_slide", "phase": "physics", "branches": { "hit": "Recover" } },
+						{ "id": "wait", "phase": "update", "inputs": { "seconds": { "bind": "dash_time" } }, "branches": { "finished": "Recover" } }
+					]
+				},
+				{
+					"name": "Recover",
+					"description": "Stands still and cannot dash until the timer ends.",
+					"actions": [
+						{ "id": "change_color", "phase": "enter", "inputs": { "color": [1.0, 1.0, 1.0, 1.0] } },
+						{ "id": "set_velocity", "phase": "enter", "inputs": { "velocity": [0.0, 0.0] } },
+						{ "id": "print_value", "phase": "enter", "inputs": { "value": "recovering" } },
+						{ "id": "wait", "phase": "update", "inputs": { "seconds": { "bind": "recover_time" } }, "branches": { "finished": "Free" } }
+					]
+				}
+			]
+		}
+	]
+}

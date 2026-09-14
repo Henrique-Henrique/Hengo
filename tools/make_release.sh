@@ -10,12 +10,13 @@ if [ -z "$version" ]; then
 fi
 
 out_dir=${1:-dist}
-out="$out_dir/hengo-$version.zip"
+slim="$out_dir/hengo-$version.zip"
+full="$out_dir/hengo-$version-with-tools.zip"
 
 # git stash create skips untracked files, so a new action would leave the zip silently
-untracked=$(git ls-files --others --exclude-standard addons/hengo)
+untracked=$(git ls-files --others --exclude-standard addons/hengo tools)
 if [ -n "$untracked" ]; then
-	echo 'untracked files under addons/hengo, commit or remove them first:' >&2
+	echo 'untracked files under addons/hengo or tools, commit or remove them first:' >&2
 	echo "$untracked" >&2
 	exit 1
 fi
@@ -24,14 +25,28 @@ fi
 tree=$(git stash create)
 
 mkdir -p "$out_dir"
-rm -f "$out"
-git archive --format=zip --output="$out" "${tree:-HEAD}"
+rm -f "$slim" "$full"
+git archive --format=zip --output="$slim" "${tree:-HEAD}" addons
+git archive --format=zip --output="$full" "${tree:-HEAD}" addons tools
 
-roots=$(unzip -Z1 "$out" | cut -d/ -f1 | sort -u)
-if [ "$roots" != 'addons' ]; then
-	echo "unexpected roots in the zip: $roots" >&2
+check_roots() {
+	local roots
+	roots=$(unzip -Z1 "$1" | cut -d/ -f1 | sort -u | tr '\n' ' ')
+	if [ "$roots" != "$2 " ]; then
+		echo "unexpected roots in $1: $roots" >&2
+		exit 1
+	fi
+}
+
+check_roots "$slim" 'addons'
+check_roots "$full" 'addons tools'
+
+if unzip -Z1 "$full" | grep -qx 'tools/make_release.sh'; then
+	echo "$full ships tools/make_release.sh, check .gitattributes" >&2
 	exit 1
 fi
 
-echo "$out"
-echo "files: $(unzip -Z1 "$out" | grep -vc '/$')"
+for zip in "$slim" "$full"; do
+	echo "$zip"
+	echo "files: $(unzip -Z1 "$zip" | grep -vc '/$')"
+done

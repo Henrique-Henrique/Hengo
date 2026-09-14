@@ -1,20 +1,50 @@
 extends SceneTree
 
-# this cli is just for tests purposes; it is not a supported entry point for hengo usage
-
-# headless entry point to generate a hengo script from a high-level json. the json
-# describes variables, states and the actions each state runs — an action is
-# referenced by its macro id, never redeclared.
-# usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name]
-#        godot --headless -s tools/hengo_cli.gd -- --list-actions [--class=Node2D]
-#        godot --headless -s tools/hengo_cli.gd -- --export-actions [out.json] [--with-code]
-#        godot --headless -s tools/hengo_cli.gd -- --preview <action_id>
-
 
 const HENGO_ROOT_SCENE: String = 'res://addons/hengo/scenes/hengo_root.tscn'
-const USAGE: String = 'usage: godot --headless -s tools/hengo_cli.gd -- <script.json> [collection_name] | --list-actions [--class=Node2D] | --export-actions [out.json] [--with-code] | --preview <action_id>'
-# the catalog is not committed here, it is built straight into the docs site checkout
-const FRONT_ACTIONS_PATH: String = '../HengoFront/src/data/actions.json'
+const DEFAULT_ACTIONS_PATH: String = 'res://tools/actions.json'
+const COMMANDS: Array[String] = ['--list-actions', '--preview', '--export-actions', '--lint-exprs']
+const MULTI_SCRIPT_KEYS: PackedStringArray = ['scripts', 'collection', 'debug']
+const HELP: String = '''hengo_cli: builds hengo scripts from a json and inspects the action catalog
+
+usage:
+  godot --headless --path <project> -s tools/hengo_cli.gd -- <command>
+
+  on windows use the console binary (godot_console.exe or Godot_*_console.exe), the other one prints nothing
+
+commands:
+  <script.json> [collection_name]
+      generates the scripts of the json. rebuilds the collection with that name (default "AI")
+      and overwrites hengo/scripts/<script>.gd
+      example: -- my_game.json Demo
+
+  --list-actions [--class=Node2D]
+      prints every action that serves the class, as json (default class: Node)
+      example: -- --list-actions --class=CharacterBody2D
+
+  --preview <action_id>
+      prints the inputs, outputs, branches and the code one action emits
+      example: -- --preview set_position
+
+  --export-actions [out.json] [--with-code]
+      writes the full action catalog as json (default out: tools/actions.json)
+      example: -- --export-actions --with-code
+
+  --lint-exprs
+      lists the expressions in the saved scripts that an action already covers
+      example: -- --lint-exprs
+
+  --help, -h
+      prints this help
+      example: -- --help
+
+exit codes:
+  0  ok
+  1  error in the json, nothing was written
+  2  an action cannot be emitted (nothing was written), or the written code does not parse or round-trip
+  3  lint found expressions an action covers
+
+docs: tools/README.md'''
 # codegen marks an action it could not emit with this prefix
 const UNRESOLVED_MARKER: String = '# hengo: action '
 
@@ -23,7 +53,19 @@ func _initialize() -> void:
 	var user_args: PackedStringArray = OS.get_cmdline_user_args()
 
 	if user_args.is_empty():
-		_fail(USAGE)
+		print(HELP)
+		quit(1)
+		return
+
+	if user_args[0] == '--help' or user_args[0] == '-h':
+		print(HELP)
+		quit(0)
+		return
+
+	if user_args[0].begins_with('--') and not COMMANDS.has(user_args[0]):
+		print('unknown command "', user_args[0], '"\n')
+		print(HELP)
+		quit(1)
 		return
 
 	var root_scene: Node = await _bootstrap()
@@ -50,9 +92,8 @@ func _initialize() -> void:
 
 	if user_args[0] == '--export-actions':
 		var given_path: String = _positional(user_args)
-		var explicit_path: bool = not given_path.is_empty()
-		var out_path: String = given_path if explicit_path else _default_actions_path()
-		var export_err: String = _export_actions(out_path, explicit_path, user_args.has('--with-code'))
+		var out_path: String = given_path if not given_path.is_empty() else ProjectSettings.globalize_path(DEFAULT_ACTIONS_PATH)
+		var export_err: String = _export_actions(out_path, user_args.has('--with-code'))
 		root_scene.free()
 
 		if export_err.is_empty():
@@ -79,7 +120,7 @@ func _initialize() -> void:
 	root_scene.free()
 
 	if not result.ok:
-		_fail(result.get('error', 'unknown error'))
+		_fail(result.get('error', 'unknown error'), result.get('exit_code', 1))
 		return
 
 	_report(result)
@@ -164,14 +205,10 @@ func _input_data(_param: HenSaveParam) -> Dictionary:
 	}
 
 
-func _default_actions_path() -> String:
-	return ProjectSettings.globalize_path('res://').path_join(FRONT_ACTIONS_PATH).simplify_path()
-
-
 # prints everything about one action, the emitted code included
 func _preview(_id: String) -> String:
 	if _id.is_empty():
-		return USAGE
+		return 'missing action id, e.g. --preview set_position'
 
 	for macro: HenSaveMacro in HenHengoActions.pool():
 		if str(macro.id) == _id:
@@ -190,8 +227,8 @@ func _positional(_args: PackedStringArray) -> String:
 	return ''
 
 
-# writes the full actions catalog (categories + actions) as json for the docs site
-func _export_actions(_out_path: String, _create_dirs: bool, _with_code: bool) -> String:
+# writes the full actions catalog (categories + actions) as json
+func _export_actions(_out_path: String, _with_code: bool) -> String:
 	var actions: Array = []
 	var present: Dictionary = {}
 
@@ -231,12 +268,7 @@ func _export_actions(_out_path: String, _create_dirs: bool, _with_code: bool) ->
 
 	var doc: Dictionary = {version = Engine.get_version_info().string, categories = categories, actions = actions}
 
-	var out_dir: String = _out_path.get_base_dir()
-
-	if _create_dirs:
-		DirAccess.make_dir_recursive_absolute(out_dir)
-	elif not DirAccess.dir_exists_absolute(out_dir):
-		return 'docs site not found at ' + out_dir + ', pass an output path'
+	DirAccess.make_dir_recursive_absolute(_out_path.get_base_dir())
 
 	var file: FileAccess = FileAccess.open(_out_path, FileAccess.WRITE)
 
@@ -425,21 +457,21 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 	var specs: Array = _json.get('scripts', [])
 	if specs.is_empty():
 		specs = [_json]
+	else:
+		var unknown: String = HenHengoActions._unknown_keys(_json, MULTI_SCRIPT_KEYS, 'top level')
+		if not unknown.is_empty():
+			return {ok = false, error = unknown}
 	var col_name: String = _json.get('collection', _collection_name)
 
-	# idempotent regen: drop any prior collection with the same name so repeated runs
-	# don't pile up duplicates
-	_purge_collections_named(col_name)
-
-	var collection: HenSaveCollection = HenCollectionManager.create_collection(col_name)
-	global.ACTIVE_COLLECTION = collection
 	global.OPEN_SCRIPTS = []
 
 	# pass 1: create resources so every script exists before any graph is built
 	var built: Array = []
 	var all_scripts: Dictionary = {}
 	for spec: Dictionary in specs:
-		var b: Dictionary = _create_script_resource(collection, spec)
+		var b: Variant = _create_script_resource(spec)
+		if b is String:
+			return {ok = false, error = b}
 		global.OPEN_SCRIPTS.append(b.save_data)
 		built.append(b)
 		all_scripts[String(b.identity.name).to_snake_case()] = b.save_data
@@ -465,6 +497,22 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 		global.SAVE_DATA = b.save_data
 		map_deps.ast_list.set(b.identity.id, HenUtils.get_current_ast_list())
 
+	var action_errors: Array = []
+	for b: Dictionary in built:
+		global.SAVE_DATA = b.save_data
+		for entry: Dictionary in HenGeneratorAction.collect_errors(b.save_data):
+			action_errors.append(b.identity.name + ': ' + str(entry.description))
+
+	if not action_errors.is_empty():
+		return {ok = false, error = 'actions that cannot be emitted, nothing was written:\n  ' + '\n  '.join(action_errors), exit_code = 2}
+
+	# idempotent regen: drop any prior collection with the same name so repeated runs
+	# don't pile up duplicates
+	_purge_collections_named(col_name)
+
+	var collection: HenSaveCollection = HenCollectionManager.create_collection(col_name)
+	global.ACTIVE_COLLECTION = collection
+
 	# pass 3: persist + compile each script. debug instrumentation is left on when
 	# the json requests it (needed for the hengo state debugger)
 	var debug: bool = _json.get('debug', false)
@@ -475,6 +523,7 @@ func _generate(_json: Dictionary, _collection_name: String) -> Dictionary:
 
 	var scripts: Array = []
 	for b: Dictionary in built:
+		b.id_path = HenEnums.HENGO_COLLECTION_PATH.path_join(collection.id).path_join(str(b.id))
 		if not DirAccess.dir_exists_absolute(b.id_path):
 			DirAccess.make_dir_recursive_absolute(b.id_path)
 		b.identity.take_over_path(b.id_path.path_join(HenEnums.IDENTITY_FILE))
@@ -541,16 +590,15 @@ func _report(_result: Dictionary) -> void:
 		printerr('[hengo_cli] one or more scripts failed round-trip')
 
 
-# builds identity + empty save_data for one script spec; the folder is written
-# later in pass 3 so a failed pass 2 leaves no orphaned folders behind
-func _create_script_resource(_collection: HenSaveCollection, _spec: Dictionary) -> Dictionary:
+# builds identity + empty save_data for one script spec, or an error String. the
+# folder is written in pass 3 so a failed build leaves the previous collection intact
+func _create_script_resource(_spec: Dictionary) -> Variant:
 	var script_name: String = String(_spec.get('name', 'generated')).to_snake_case()
-	var extends_class: StringName = _spec.get('extends', 'Node')
+	var extends_class: StringName = StringName(str(_spec.get('extends', 'Node')))
 	if not ClassDB.class_exists(extends_class):
-		extends_class = 'Node'
+		return 'script "' + script_name + '": unknown class "' + str(extends_class) + '" in extends'
 
 	var id: int = ResourceUID.create_id()
-	var id_path: String = HenEnums.HENGO_COLLECTION_PATH.path_join(_collection.id).path_join(str(id))
 
 	var identity: HenSaveDataIdentity = HenSaveDataIdentity.create(str(id), extends_class, script_name)
 	identity.script_path = HenEnums.HENGO_SCRIPTS_PATH + script_name + '.gd'
@@ -559,13 +607,13 @@ func _create_script_resource(_collection: HenSaveCollection, _spec: Dictionary) 
 	save_data.identity = identity
 	save_data.counter = 1
 
-	return {id = id, id_path = id_path, identity = identity, save_data = save_data, spec = _spec}
+	return {id = id, id_path = '', identity = identity, save_data = save_data, spec = _spec}
 
 
 # reloads the .res from disk bypassing the resource cache (a genuinely fresh
 # deserialization, not the in-memory instance) and re-runs codegen, comparing to
 # the in-memory output. globals are pointed at the reloaded graph so both codegen
-# passes use the same context — the only variable is in-memory vs serialized graph.
+# passes use the same context. the only variable is in-memory vs serialized graph.
 func _verify_roundtrip(_save_path: String, _expected_code: String) -> Dictionary:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	var reloaded: HenSaveData = ResourceLoader.load(_save_path, '', ResourceLoader.CACHE_MODE_IGNORE_DEEP)
@@ -606,9 +654,17 @@ func _tally_actions(_save_data: HenSaveData) -> String:
 			if phases.has(str(phase)):
 				counts.append('%s:%d' % [phase, phases[str(phase)]])
 
-		parts.append((state.name if state else str(state_id)) + ': ' + ' '.join(counts))
+		parts.append((state.name if state else _function_name(_save_data, str(state_id))) + ': ' + ' '.join(counts))
 
 	return ' · '.join(parts) if not parts.is_empty() else '(none)'
+
+
+func _function_name(_save_data: HenSaveData, _scope_id: String) -> String:
+	for func_res: HenSaveFunc in _save_data.functions:
+		if str(func_res.scope_state().id) == _scope_id:
+			return 'function ' + func_res.name
+
+	return _scope_id
 
 
 # feeds the emitted source to the gdscript parser, so a broken macro body is
@@ -618,7 +674,7 @@ func _parse_error(_code: String, _path: String) -> String:
 	script.source_code = _code
 	script.take_over_path(_path)
 
-	return '' if script.reload() == OK else 'does not parse'
+	return '' if script.reload() == OK else 'does not parse, the SCRIPT ERROR lines above give the line in ' + _path
 
 
 # codegen leaves a comment where an action could not be emitted; those are errors here
@@ -663,7 +719,7 @@ func _arg_value(_args: PackedStringArray, _flag: String, _fallback: String) -> S
 	return _fallback
 
 
-func _fail(_msg: String) -> void:
-	push_error('[hengo_cli] ' + _msg)
+func _fail(_msg: String, _exit_code: int = 1) -> void:
 	printerr('[hengo_cli] ', _msg)
-	quit(1)
+	printerr('run with --help, docs in tools/README.md')
+	quit(_exit_code)

@@ -202,6 +202,17 @@ func test_a_finish_outside_a_function_is_refused() -> void:
 	assert_str(str(errors[0].reason)).contains('can only be used inside a function')
 
 
+func test_an_action_that_reads_delta_is_refused_inside_a_function() -> void:
+	var func_res: HenSaveFunc = _add_function('spin')
+
+	_function_step(func_res, _register(FIX_PROCESS)).phase = &'update'
+
+	var errors: Array[Dictionary] = HenGeneratorAction.collect_errors(save_data)
+
+	assert_int(errors.size()).is_equal(1)
+	assert_str(str(errors[0].reason)).contains('uses delta')
+
+
 func test_a_transition_inside_a_function_is_refused() -> void:
 	var func_res: HenSaveFunc = _add_function('go')
 	var target: HenSaveState = save_data.add_state(false)
