@@ -336,6 +336,38 @@ static func get_bound_source_type(_save_data: HenSaveData, _bind_code: String) -
 	return ''
 
 
+static func bind_class_error(_save_data: HenSaveData, _bind_code: String) -> String:
+	var owner: StringName = _save_data.identity.type if _save_data and _save_data.identity else &''
+
+	if _bind_code.is_empty() or not ClassDB.class_exists(owner):
+		return ''
+
+	var bind: Dictionary = classify_bind_code(_save_data, _bind_code)
+
+	match str(bind.kind):
+		'native':
+			var source: Dictionary = bind.value
+			var needs: StringName = StringName(str(source.get('needs_class', '')))
+
+			if not needs.is_empty() and ClassDB.class_exists(needs) and not ClassDB.is_parent_class(owner, needs):
+				return 'reads ' + str(source.name) + ', which needs a script extending ' + str(needs)
+		'property':
+			var property: String = str(bind.value).get_slice('.', 0)
+
+			if not class_has_property(owner, property):
+				return 'reads the property "' + property + '", which ' + str(owner) + ' does not have'
+
+	return ''
+
+
+static func class_has_property(_class: StringName, _property: String) -> bool:
+	for prop: Dictionary in ClassDB.class_get_property_list(_class):
+		if str(prop.name) == _property:
+			return true
+
+	return false
+
+
 # full expression a bind code emits: an engine-global source stands alone, every
 # other bind reads off the owner. empty when the bind no longer resolves
 static func bind_expression(_save_data: HenSaveData, _bind_code: String) -> String:

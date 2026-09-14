@@ -11,7 +11,7 @@ const FIX_BRANCH: String = 'res://addons/hengo/actions/flow/if_condition.gd'
 
 func _if_action(_phase: StringName) -> HenSaveAction:
 	var action: HenSaveAction = _add_action(_register(FIX_BRANCH), _phase)
-	action.input_bindings['condition'] = 'is_dead'
+	action.input_bindings['condition'] = 'visible'
 	return action
 
 
@@ -24,7 +24,7 @@ func test_branch_to_sibling_state() -> void:
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('if _ref.is_dead:\n\t\t\t_ref._STATE_CONTROLLER.change_state("dead")\n\t\t\treturn\n\t\telse:\n\t\t\tpass')
+	assert_str(code).contains('if _ref.visible:\n\t\t\t_ref._STATE_CONTROLLER.change_state("dead")\n\t\t\treturn\n\t\telse:\n\t\t\tpass')
 
 
 # a child of the owning state goes through the parent, not the controller
@@ -84,7 +84,7 @@ func test_branch_with_only_steps_is_not_skipped() -> void:
 	var code: String = HenTest.get_all_code()
 
 	assert_str(code).not_contains('no branch target set')
-	assert_str(code).contains('if _ref.is_dead:\n\t\t\ttest_update("hi")\n\t\telse:\n\t\t\tpass')
+	assert_str(code).contains('if _ref.visible:\n\t\t\ttest_update("hi")\n\t\telse:\n\t\t\tpass')
 
 
 # the row preview shows where each configured branch goes
@@ -234,7 +234,7 @@ func test_if_branch_goes_to_another_script_state() -> void:
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('if _ref.is_dead:\n\t\t\t_ref.target_player._STATE_CONTROLLER.change_state("dead")')
+	assert_str(code).contains('if _ref.visible:\n\t\t\t_ref.target_player._STATE_CONTROLLER.change_state("dead")')
 
 
 # it transitions on its own, so it may never run on exit
