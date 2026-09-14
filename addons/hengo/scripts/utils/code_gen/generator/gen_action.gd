@@ -319,6 +319,11 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 	if not wrong_scope.is_empty():
 		return wrong_scope
 
+	var wrong_class: String = _class_error(_save_data, _instance)
+
+	if not wrong_class.is_empty():
+		return wrong_class
+
 	# break/continue are only valid inside a loop body
 	if _instance.get_needs_loop() and _loop_depth == 0:
 		return str(_instance.get_display_name()).to_lower() + ' can only be used inside a loop'
@@ -342,6 +347,11 @@ static func skip_reason(_save_data: HenSaveData, _state: HenSaveState, _action: 
 
 	if not broken.is_empty():
 		return broken + ' binds a variable that no longer exists'
+
+	var off_class: String = _first_off_class_binding(_save_data, _action)
+
+	if not off_class.is_empty():
+		return off_class
 
 	var broken_inline: String = _first_broken_inline(_save_data, _action)
 
@@ -1409,6 +1419,44 @@ static func _first_broken_binding(_save_data: HenSaveData, _action: HenSaveActio
 	return ''
 
 
+static func _first_off_class_binding(_save_data: HenSaveData, _action: HenSaveAction) -> String:
+	for key: Variant in _action.input_bindings:
+		var reason: String = HenUtils.bind_class_error(_save_data, str(_action.input_bindings[key]))
+
+		if not reason.is_empty():
+			return 'input "' + str(key) + '" ' + reason
+
+	for key: Variant in _action.input_expressions:
+		var expr: HenSaveActionExpression = _action.input_expressions[key]
+
+		for word: Variant in expr.word_bindings:
+			var reason: String = HenUtils.bind_class_error(_save_data, str(expr.word_bindings[word]))
+
+			if not reason.is_empty():
+				return 'expression word "' + str(word) + '" ' + reason
+
+	return ''
+
+
+# an action saved before a base type change is held to the rule the pool offers by
+static func _class_error(_save_data: HenSaveData, _instance: HenScriptMacroBase) -> String:
+	var script_class: StringName = _save_data.identity.type if _save_data.identity else &''
+	var targets: Array[StringName] = _instance.get_target_classes()
+
+	if script_class.is_empty() or HenUtils.class_serves(script_class, targets):
+		return ''
+
+	var inputs: Array = _instance.get_inputs()
+
+	if not inputs.is_empty():
+		var first: Dictionary = inputs[0]
+
+		if HenUtils.is_node_ref_slot(StringName(str(first.get('type', ''))), bool(first.get('bind_only', false)), bool(first.get('optional', false))):
+			return ''
+
+	return 'only works on ' + ', '.join(PackedStringArray(targets)) + ', and this script extends ' + str(script_class)
+
+
 # a fault deep in the subtree takes the top action down, instead of emitting half of it
 # a wire to a step that no longer exists would emit a silent null
 static func _first_broken_wire(_save_data: HenSaveData, _action: HenSaveAction) -> String:
@@ -1446,6 +1494,16 @@ static func _first_broken_inline(_save_data: HenSaveData, _action: HenSaveAction
 
 		if not broken.is_empty():
 			return broken + ' binds a variable that no longer exists'
+
+		var off_class: String = _first_off_class_binding(_save_data, child)
+
+		if not off_class.is_empty():
+			return off_class
+
+		var wrong_class: String = _class_error(_save_data, instance)
+
+		if not wrong_class.is_empty():
+			return 'input "' + str(key) + '" inline action ' + wrong_class
 
 		var deeper: String = _first_broken_inline(_save_data, child)
 

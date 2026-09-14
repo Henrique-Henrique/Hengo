@@ -146,15 +146,15 @@ func test_action_expression_substitutes_words() -> void:
 	assert_str(code).contains('test_update((_ref.spin + 2))')
 
 
-# word 'a' resolves to a value containing word 'b' — a sequential pass would
-# rewrite the b inside _ref.b, so substitution has to be single-pass
+# word 'a' resolves to a value containing word 'scale' — a sequential pass would
+# rewrite the scale inside _ref.scale, so substitution has to be single-pass
 func test_action_expression_substitution_is_single_pass() -> void:
 	var action: HenSaveAction = _add_action(_register(FIX_PHASES), &'update')
-	action.input_expressions['value'] = _expression('a + b', ['a', 'b'], {a = 'b'}, {b = '9'})
+	action.input_expressions['value'] = _expression('a + scale', ['a', 'scale'], {a = 'scale'}, {scale = '9'})
 
 	var code: String = HenTest.get_all_code()
 
-	assert_str(code).contains('test_update((_ref.b + 9))')
+	assert_str(code).contains('test_update((_ref.scale + 9))')
 
 
 # Value declares type_from = target, so binding Target to a float var makes the

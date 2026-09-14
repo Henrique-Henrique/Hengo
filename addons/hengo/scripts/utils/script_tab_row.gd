@@ -2,8 +2,10 @@
 class_name HenScriptTabRow extends PanelContainer
 
 signal pressed(save_data: HenSaveData)
+signal menu_request(save_data: HenSaveData, source: Control)
 
 const ROW_HEIGHT: int = 32
+const ICON_MENU = preload('res://addons/hengo/assets/new_icons/ellipsis-vertical.svg')
 
 var save_data: HenSaveData
 
@@ -13,6 +15,7 @@ var _is_collapsed: bool = false
 var _hbox: HBoxContainer
 var _icon: TextureRect
 var _name_label: Label
+var _menu_bt: Button
 
 var _normal_sb: StyleBoxFlat
 var _active_sb: StyleBoxFlat
@@ -29,6 +32,7 @@ func _ready() -> void:
 	gui_input.connect(_on_gui_input)
 	mouse_entered.connect(_on_hover.bind(true))
 	mouse_exited.connect(_on_hover.bind(false))
+	_apply_actions_visible(false)
 
 
 func setup(_save_data: HenSaveData) -> void:
@@ -53,6 +57,12 @@ func setup(_save_data: HenSaveData) -> void:
 
 
 func _on_hover(hovered: bool) -> void:
+	# showing the buttons makes the row exit before the pointer actually left it
+	if hovered:
+		_apply_actions_visible(true)
+	else:
+		_recheck_hover.call_deferred()
+
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 	if not global or not global.TOOLTIP:
 		return
@@ -63,10 +73,26 @@ func _on_hover(hovered: bool) -> void:
 		global.TOOLTIP.close()
 
 
+func _recheck_hover() -> void:
+	if is_inside_tree():
+		_apply_actions_visible(get_global_rect().has_point(get_global_mouse_position()))
+
+
+func _apply_actions_visible(_visible: bool) -> void:
+	if _menu_bt:
+		_menu_bt.visible = _visible and not _is_collapsed
+
+
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if not event is InputEventMouseButton or not event.pressed:
+		return
+
+	match (event as InputEventMouseButton).button_index:
+		MOUSE_BUTTON_LEFT:
 			pressed.emit(save_data)
+		MOUSE_BUTTON_RIGHT:
+			accept_event()
+			menu_request.emit(save_data, self)
 
 
 func set_active(_active: bool) -> void:
@@ -76,6 +102,7 @@ func set_active(_active: bool) -> void:
 
 func set_collapsed(_collapsed: bool) -> void:
 	_is_collapsed = _collapsed
+	_apply_actions_visible(false)
 	if _name_label:
 		_name_label.visible = not _collapsed
 	if _hbox:
@@ -122,6 +149,23 @@ func _build_children() -> void:
 	_name_label.clip_text = true
 	_name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hbox.add_child(_name_label)
+
+	var bt_size: int = ThemeUtils.fs(20)
+
+	_menu_bt = Button.new()
+	_menu_bt.icon = ICON_MENU
+	_menu_bt.flat = true
+	_menu_bt.tooltip_text = 'Script options'
+	_menu_bt.custom_minimum_size = Vector2(bt_size, bt_size)
+	_menu_bt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_menu_bt.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	_menu_bt.focus_mode = Control.FOCUS_NONE
+	_menu_bt.add_theme_constant_override('icon_max_width', ThemeUtils.fs(14))
+	_menu_bt.mouse_entered.connect(_on_hover.bind(true))
+	_menu_bt.mouse_exited.connect(_on_hover.bind(false))
+	_menu_bt.pressed.connect(func() -> void: menu_request.emit(save_data, self))
+	HenUtils.tint_button(_menu_bt, HenUtils.UI_COLORS.settings, false)
+	_hbox.add_child(_menu_bt)
 
 
 func _apply_visual_state() -> void:

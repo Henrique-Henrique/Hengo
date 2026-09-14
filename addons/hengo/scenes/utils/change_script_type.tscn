@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/utils/change_script_type.gd" id="1_change_type"]
+[ext_resource type="PackedScene" uid="uid://cgo5l4r43cdyy" path="res://addons/hengo/scenes/props/dropdown.tscn" id="2_dropdown"]
+[ext_resource type="Texture2D" uid="uid://c0ys1mawvwv14" path="res://addons/hengo/assets/new_icons/replace.svg" id="3_replace"]
+
+[node name="ChangeScriptType" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+script = ExtResource("1_change_type")
+
+[node name="Current" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.6)
+text = "Script extends Node"
+
+[node name="ExtendBt" parent="." instance=ExtResource("2_dropdown")]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pick the new base type"
+type = "all_godot_classes"
+
+[node name="Report" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="ApplyBt" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Change"
+icon = ExtResource("3_replace")
