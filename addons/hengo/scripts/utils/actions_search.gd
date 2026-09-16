@@ -79,10 +79,7 @@ func _populate(_query: String) -> void:
 		_populate_grouped()
 		return
 
-	for macro: HenSaveMacro in _get_pool():
-		if not macro.name.to_lower().contains(query):
-			continue
-
+	for macro: HenSaveMacro in HenSearch.rank(_get_pool(), query, func(_macro: HenSaveMacro) -> String: return _macro.name):
 		results.add_child(_build_row(macro, true))
 
 

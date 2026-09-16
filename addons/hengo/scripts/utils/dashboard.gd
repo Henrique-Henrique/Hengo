@@ -121,9 +121,7 @@ func search(_search_text: String) -> void:
 	
 	var result: Array[Dictionary] = []
 
-	for script: Dictionary in script_list:
-		var score: int = HenSearch.score_only(_search_text.to_lower(), (script.base_name as String).to_lower())
-		if score > 0: result.append(script)
+	result.assign(HenSearch.rank(script_list, _search_text, func(_script: Dictionary) -> String: return _script.base_name))
 
 	update(result)
 

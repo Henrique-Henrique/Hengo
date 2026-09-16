@@ -1,6 +1,51 @@
 @tool
 class_name HenSearch extends RefCounted
 
+# every list the plugin filters by typing scores and orders through here
+
+# a hit on a secondary field counts, but never as much as one on the name
+const SECONDARY_WEIGHT: int = 4
+
+
+# the items that match _query, best first. _text_of gives the name of an item, the
+# optional _opts carry { secondary_of: Callable, tie_of: Callable, limit: int }
+static func rank(_items: Array, _query: String, _text_of: Callable, _opts: Dictionary = {}) -> Array:
+	var query: String = _query.strip_edges().to_lower()
+	var out: Array = []
+
+	if query.is_empty():
+		return out
+
+	var secondary_of: Callable = _opts.get('secondary_of', Callable())
+	var tie_of: Callable = _opts.get('tie_of', Callable())
+	var limit: int = int(_opts.get('limit', 0))
+	var scored: Array = []
+
+	for item: Variant in _items:
+		var score: int = score_only(query, str(_text_of.call(item)).to_lower())
+
+		if score <= 0 and secondary_of.is_valid():
+			score = score_only(query, str(secondary_of.call(item)).to_lower()) / SECONDARY_WEIGHT
+
+		if score > 0:
+			scored.append([score, int(tie_of.call(item)) if tie_of.is_valid() else 0, item])
+
+	scored.sort_custom(func(_a: Array, _b: Array) -> bool:
+		if _a[0] != _b[0]:
+			return _a[0] > _b[0]
+
+		return _a[1] < _b[1]
+	)
+
+	if limit > 0:
+		scored = scored.slice(0, limit)
+
+	for entry: Array in scored:
+		out.append(entry[2])
+
+	return out
+
+
 # optimized scoring function for fuzzy search
 static func score_only(query_lower: String, text_lower: String) -> int:
 	var q_len = query_lower.length()

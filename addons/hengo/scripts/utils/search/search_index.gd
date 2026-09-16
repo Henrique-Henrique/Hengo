@@ -336,10 +336,9 @@ static func read_script(_script_id: StringName, _collection: HenSaveCollection, 
 
 
 static func search(_records: Array[Dictionary], _query: String, _limit: int = MAX_RESULTS) -> Array[Dictionary]:
-	var query: String = _query.strip_edges().to_lower()
 	var out: Array[Dictionary] = []
 
-	if query.is_empty():
+	if _query.strip_edges().is_empty():
 		for record: Dictionary in _records:
 			if record.kind == KIND_SCRIPT or record.kind == KIND_COLLECTION:
 				out.append(record)
@@ -349,25 +348,10 @@ static func search(_records: Array[Dictionary], _query: String, _limit: int = MA
 
 		return out
 
-	var scored: Array = []
-
-	for record: Dictionary in _records:
-		var score: int = HenSearch.score_only(query, str(record.title).to_lower())
-
-		if score <= 0 and not str(record.detail).is_empty():
-			score = HenSearch.score_only(query, str(record.detail).to_lower()) / 4
-
-		if score > 0:
-			scored.append([score, KIND_ORDER.find(record.kind), record])
-
-	scored.sort_custom(func(_a: Array, _b: Array) -> bool:
-		if _a[0] != _b[0]:
-			return _a[0] > _b[0]
-
-		return _a[1] < _b[1]
-	)
-
-	for entry: Array in scored.slice(0, _limit):
-		out.append(entry[2])
+	out.assign(HenSearch.rank(_records, _query, func(_record: Dictionary) -> String: return _record.title, {
+		secondary_of = func(_record: Dictionary) -> String: return _record.detail,
+		tie_of = func(_record: Dictionary) -> int: return KIND_ORDER.find(_record.kind),
+		limit = _limit
+	}))
 
 	return out
