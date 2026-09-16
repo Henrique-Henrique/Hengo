@@ -67,8 +67,48 @@ var SCRIPTS_STATES: Dictionary = {}
 # counter
 var node_counter: int = 0
 
+# threads reading saves off disk, whose _init must not renumber the active script
+var _quiet_threads: Dictionary = {}
+var _quiet_lock: Mutex = Mutex.new()
+
+
+static func set_thread_quiet(_quiet: bool) -> void:
+	if not Engine.has_singleton(&'Global'):
+		return
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global._quiet_lock:
+		global._quiet_lock = Mutex.new()
+
+	global._quiet_lock.lock()
+
+	if _quiet:
+		global._quiet_threads[OS.get_thread_caller_id()] = true
+	else:
+		global._quiet_threads.erase(OS.get_thread_caller_id())
+
+	global._quiet_lock.unlock()
+
+
+static func is_thread_quiet() -> bool:
+	if not Engine.has_singleton(&'Global'):
+		return false
+
+	var global: HenGlobal = Engine.get_singleton(&'Global')
+
+	if not global._quiet_lock:
+		return false
+
+	global._quiet_lock.lock()
+	var quiet: bool = global._quiet_threads.has(OS.get_thread_caller_id())
+	global._quiet_lock.unlock()
+
+	return quiet
+
+
 func get_new_node_counter() -> StringName:
-	if not SAVE_DATA:
+	if not SAVE_DATA or is_thread_quiet():
 		return ""
 
 	SAVE_DATA.counter += 1

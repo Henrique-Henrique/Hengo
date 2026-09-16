@@ -4,6 +4,7 @@ class_name HenVirtualList extends Control
 @export var item_scene: PackedScene
 @export var scroll_container: ScrollContainer
 @export var content: Control
+@export var item_padding: float = Y_PADDING
 
 const Y_PADDING: float = 20.0
 const HEIGHT_EPSILON: float = 0.5
@@ -53,6 +54,24 @@ func set_data(data: Array) -> void:
 
 	scroll_container.scroll_vertical = 0
 	_request_update()
+
+
+func get_active_items() -> Dictionary:
+	return _active_items
+
+
+func ensure_visible(_index: int) -> void:
+	if _index < 0 or _index >= _layout.size():
+		return
+
+	var info: Dictionary = _layout[_index]
+	var top: float = scroll_container.scroll_vertical
+	var view_h: float = scroll_container.size.y
+
+	if info.y_pos < top:
+		scroll_container.scroll_vertical = int(info.y_pos)
+	elif info.y_pos + info.height > top + view_h:
+		scroll_container.scroll_vertical = int(ceil(info.y_pos + info.height - view_h))
 
 
 func update(force_recalc: bool = false) -> void:
@@ -224,7 +243,7 @@ func _measure_pass() -> void:
 		var min_h: float = n.get_combined_minimum_size().y
 		if min_h <= 0.0:
 			continue
-		var real_h: float = min_h + Y_PADDING
+		var real_h: float = min_h + item_padding
 		var current: float = _measured.get(idx, -1.0)
 		if abs(current - real_h) > HEIGHT_EPSILON:
 			_measured[idx] = real_h

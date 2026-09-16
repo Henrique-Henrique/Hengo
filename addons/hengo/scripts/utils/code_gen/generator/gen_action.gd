@@ -44,7 +44,15 @@ static func clear_hook_scopes() -> void:
 # a function body is written at script scope, where the node is `self`: `_ref` is
 # the field a state class holds and does not exist there
 static var in_function: bool = false
-static var _delta_word: RegEx = RegEx.create_from_string('\\bdelta\\b')
+# a static initializer does not run again when the editor reloads a tool script
+static var _delta_word: RegEx
+
+
+static func _delta_regex() -> RegEx:
+	if not _delta_word:
+		_delta_word = RegEx.create_from_string('\\bdelta\\b')
+
+	return _delta_word
 
 
 # for a line written by hand instead of by a macro body, which never reaches the
@@ -417,7 +425,7 @@ static func _scope_error(_save_data: HenSaveData, _state: HenSaveState, _action:
 		return str(_instance.get_display_name()).to_lower() + ' can only be used inside a function'
 
 	# a function method takes no delta parameter, so the body would not parse
-	if inside_function and _delta_word.search(_get_phase_body(_instance, _phase)):
+	if inside_function and _delta_regex().search(_get_phase_body(_instance, _phase)):
 		return 'uses delta, which a function does not have: run it from a state instead'
 
 	if _instance is HenFunctionMacro:

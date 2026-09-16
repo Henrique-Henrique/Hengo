@@ -13,7 +13,7 @@ const BASE_NAME: String = 'base'
 		start = value
 
 		var signal_bus: HenSignalBus = Engine.get_singleton(&'SignalBus')
-		var batch_loading: bool = signal_bus != null and signal_bus.is_batch_loading
+		var batch_loading: bool = (signal_bus != null and signal_bus.is_batch_loading) or HenGlobal.is_thread_quiet()
 
 		# during load the persisted flags are authoritative; mutating siblings here
 		# corrupts them (property load order can misfire this setter)

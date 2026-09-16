@@ -1,0 +1,92 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/utils/search/project_search_row.gd" id="1_row"]
+
+[node name="ProjectSearchRow" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 46)
+size_flags_horizontal = 3
+mouse_filter = 1
+mouse_default_cursor_shape = 2
+script = ExtResource("1_row")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 0
+
+[node name="Body" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="IconBox" type="PanelContainer" parent="Margin/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="Margin/Body/IconBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Text" type="VBoxContainer" parent="Margin/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="Margin/Body/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Title"
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="Context" type="Label" parent="Margin/Body/Text"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Context"
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="Detail" type="Label" parent="Margin/Body"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+text = "Detail"
+horizontal_alignment = 2
+
+[node name="PhaseSlot" type="HBoxContainer" parent="Margin/Body"]
+custom_minimum_size = Vector2(84, 0)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+alignment = 2
+
+[node name="PhaseChip" type="PanelContainer" parent="Margin/Body/PhaseSlot"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Phase" type="Label" parent="Margin/Body/PhaseSlot/PhaseChip"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Phase"
+
+[node name="Kind" type="Label" parent="Margin/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+size_flags_vertical = 4
+text = "KIND"

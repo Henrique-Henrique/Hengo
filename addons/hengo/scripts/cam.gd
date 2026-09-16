@@ -279,7 +279,7 @@ func _physics_process(_delta: float) -> void:
 		(grid.material as ShaderMaterial).set_shader_parameter('offset', transform.origin)
 
 
-		if is_equal_approx(transform.origin.x, pos.x):
+		if transform.origin.is_equal_approx(pos):
 			set_physics_process(false)
 			ignore_process = false
 
