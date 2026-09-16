@@ -1,10 +1,17 @@
 @tool
 class_name TestHenProjectSearch extends HenTestSuite
 
+# hengo/ is gitignored, so a run on a fresh checkout has no collection on disk: the
+# tests that read the project write their own and take it out again
+const FIXTURE_COLLECTION: StringName = &'search_disk_fixture'
+const FIXTURE_SCRIPT: StringName = &'search_disk_script'
+const FIXTURE_FUNCTION: String = 'disk_only_function'
+
 
 func after_test() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
 
+	_remove_disk_collection()
 	HenRoute.go_base()
 	global.ROUTE_OWNER = ''
 	global.ROUTE_VIEWS.clear()
@@ -38,6 +45,50 @@ func _find(_records: Array[Dictionary], _kind: StringName, _title: String) -> Di
 			return record
 
 	return {}
+
+
+func _write_disk_collection() -> HenSaveCollection:
+	var collection: HenSaveCollection = HenSaveCollection.create(FIXTURE_COLLECTION, 'Disk Fixture')
+	var collection_dir: String = HenEnums.HENGO_COLLECTION_PATH.path_join(str(FIXTURE_COLLECTION))
+	var script_dir: String = collection_dir.path_join(str(FIXTURE_SCRIPT))
+	var data: HenSaveData = HenSaveData.new()
+
+	data.identity = HenSaveDataIdentity.create(FIXTURE_SCRIPT, 'Node', 'disk_script')
+	data.counter = 1
+	(data.add_function() as HenSaveFunc).name = FIXTURE_FUNCTION
+	collection.add_script(FIXTURE_SCRIPT)
+
+	DirAccess.make_dir_recursive_absolute(script_dir)
+	ResourceSaver.save(collection, collection_dir.path_join(HenEnums.COLLECTION_FILE))
+	ResourceSaver.save(data.identity, script_dir.path_join(HenEnums.IDENTITY_FILE))
+	ResourceSaver.save(data, script_dir.path_join(HenEnums.SAVE_FILE))
+
+	HenUtils.rebuild_script_index()
+	HenSearchIndex._disk_cache.clear()
+
+	return collection
+
+
+func _remove_disk_collection() -> void:
+	var collection_dir: String = HenEnums.HENGO_COLLECTION_PATH.path_join(str(FIXTURE_COLLECTION))
+
+	if not DirAccess.dir_exists_absolute(collection_dir):
+		return
+
+	_remove_tree(collection_dir)
+	HenUtils.rebuild_script_index()
+	HenSearchIndex._disk_cache.clear()
+
+
+# move_to_trash needs a desktop, and the ci runner has none
+func _remove_tree(_path: String) -> void:
+	for dir_name: String in DirAccess.get_directories_at(_path):
+		_remove_tree(_path.path_join(dir_name))
+
+	for file_name: String in DirAccess.get_files_at(_path):
+		DirAccess.remove_absolute(_path.path_join(file_name))
+
+	DirAccess.remove_absolute(_path)
 
 
 func _second_script(_name: String) -> HenSaveData:
@@ -237,6 +288,8 @@ func test_the_view_lists_matches_and_moves_with_the_arrows() -> void:
 
 
 func test_without_a_collection_only_the_project_tab_is_offered() -> void:
+	_write_disk_collection()
+
 	var view: HenProjectSearch = _view()
 
 	assert_bool(view._tabs.is_tab_disabled(HenProjectSearch.TAB_COLLECTION)).is_true()
@@ -254,29 +307,24 @@ func test_without_a_collection_only_the_project_tab_is_offered() -> void:
 	await _drain_jobs()
 
 	assert_bool(view._project_ready).is_true()
-	assert_bool(view._project_records.is_empty()).is_false()
+	assert_array(view._project_records.map(func(_record: Dictionary) -> String: return _record.title)) 		.contains(['Disk Fixture', 'disk_script', FIXTURE_FUNCTION])
 
 
 func test_the_collection_tab_also_finds_other_collections_by_name() -> void:
 	var global: HenGlobal = Engine.get_singleton(&'Global')
-	var collections: Array[Dictionary] = HenSearchIndex.collection_records()
-
-	if collections.is_empty():
-		return
-
-	var other: Dictionary = collections[0]
 	var collection: HenSaveCollection = HenSaveCollection.create(&'search_tab', 'Tab')
 
+	_write_disk_collection()
 	collection.add_script(save_data.identity.id)
 	global.ACTIVE_COLLECTION = collection
 	global.OPEN_SCRIPTS.assign([save_data])
 
 	var view: HenProjectSearch = _view()
 
-	view._search.text = str(other.title)
+	view._search.text = 'Disk Fixture'
 	view._refresh()
 	await _drain_jobs()
 
-	var kinds: Array = view._results.map(func(_record: Dictionary) -> StringName: return _record.kind)
+	var titles: Array = view._results.map(func(_record: Dictionary) -> String: return _record.title)
 
-	assert_array(kinds).contains([HenSearchIndex.KIND_COLLECTION])
+	assert_array(titles).contains(['Disk Fixture'])
