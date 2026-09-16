@@ -89,9 +89,8 @@ func _search_actions(_text: String) -> void:
 
 	var leaves: Array = []
 
-	for macro: HenSaveMacro in _action_pool():
-		if HenSearch.score_only(query, macro.name.to_lower()) > 0:
-			leaves.append(_action_leaf(macro))
+	for macro: HenSaveMacro in HenSearch.rank(_action_pool(), query, func(_macro: HenSaveMacro) -> String: return _macro.name):
+		leaves.append(_action_leaf(macro))
 
 	set_data.call_deferred(1, leaves)
 

@@ -7,14 +7,22 @@ extends RefCounted
 # both or in neither
 
 const FLOW: StringName = &'flow'
+const GLOBAL: StringName = &'global'
 
 const GROUP_NAMES: Dictionary = {
+	global = 'Anywhere',
 	flow = 'Flow view'
 }
 
-# method is the name called on the flow viewer; the other groups are handled
-# where they live and are listed here for the reader
+# method is called on the node that owns the group
 const LIST: Array[Dictionary] = [
+	{
+		group = GLOBAL,
+		combo = ['Ctrl', 'K'],
+		title = 'Search',
+		description = 'Finds a state, action, function or variable in the open collection or in the whole project, and jumps to it.',
+		method = 'open_search'
+	},
 	{
 		group = FLOW,
 		combo = ['W'],

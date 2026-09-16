@@ -1,0 +1,276 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://addons/hengo/scripts/utils/search/project_search.gd" id="1_search"]
+[ext_resource type="PackedScene" uid="uid://6urv5rx15yye" path="res://addons/hengo/scenes/utils/virtual_list.tscn" id="2_list"]
+[ext_resource type="PackedScene" path="res://addons/hengo/scenes/utils/project_search_row.tscn" id="3_row"]
+[ext_resource type="Texture2D" uid="uid://dibqfnkm4yg4k" path="res://addons/hengo/assets/icons/menu/loading.svg" id="4_spin"]
+[ext_resource type="Texture2D" path="res://addons/hengo/assets/new_icons/search.svg" id="5_icon"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_input"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_field"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_track"]
+content_margin_left = 3.0
+content_margin_top = 3.0
+content_margin_right = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(1, 1, 1, 0.03)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_selected"]
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.09)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_hovered"]
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.04)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_idle"]
+content_margin_left = 12.0
+content_margin_top = 4.0
+content_margin_right = 12.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_key"]
+content_margin_left = 5.0
+content_margin_top = 1.0
+content_margin_right = 5.0
+content_margin_bottom = 1.0
+bg_color = Color(1, 1, 1, 0.07)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="ProjectSearch" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+script = ExtResource("1_search")
+
+[node name="Top" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="TopBox" type="VBoxContainer" parent="Top"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Field" type="PanelContainer" parent="Top/TopBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_field")
+
+[node name="Row" type="HBoxContainer" parent="Top/TopBox/Field"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SearchIcon" type="TextureRect" parent="Top/TopBox/Field/Row"]
+modulate = Color(1, 1, 1, 0.5)
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("5_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Search" type="LineEdit" parent="Top/TopBox/Field/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("StyleBoxEmpty_input")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_input")
+placeholder_text = "Search"
+caret_blink = true
+
+[node name="Spinner" type="TextureRect" parent="Top/TopBox/Field/Row"]
+unique_name_in_owner = true
+visible = false
+modulate = Color(1, 1, 1, 0.6)
+custom_minimum_size = Vector2(14, 14)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_spin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Toolbar" type="HBoxContainer" parent="Top/TopBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Track" type="PanelContainer" parent="Top/TopBox/Toolbar"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_track")
+
+[node name="Tabs" type="TabBar" parent="Top/TopBox/Toolbar/Track"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hovered_color = Color(0.85, 0.87, 0.9, 1)
+theme_override_colors/font_unselected_color = Color(0.58, 0.6, 0.65, 1)
+theme_override_colors/font_disabled_color = Color(0.35, 0.36, 0.4, 1)
+theme_override_constants/h_separation = 0
+theme_override_styles/tab_focus = SubResource("StyleBoxEmpty_input")
+theme_override_styles/tab_selected = SubResource("StyleBoxFlat_tab_selected")
+theme_override_styles/tab_hovered = SubResource("StyleBoxFlat_tab_hovered")
+theme_override_styles/tab_unselected = SubResource("StyleBoxFlat_tab_idle")
+theme_override_styles/tab_disabled = SubResource("StyleBoxFlat_tab_idle")
+current_tab = 0
+clip_tabs = false
+tab_count = 2
+tab_0/title = "Collection"
+tab_1/title = "Project"
+
+[node name="Spacer" type="Control" parent="Top/TopBox/Toolbar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="Top/TopBox/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.49, 0.53, 0.59, 1)
+
+[node name="TopLine" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.06)
+
+[node name="Body" type="MarginContainer" parent="."]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 6
+
+[node name="BodyBox" type="VBoxContainer" parent="Body"]
+layout_mode = 2
+
+[node name="List" parent="Body/BodyBox" instance=ExtResource("2_list")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+item_scene = ExtResource("3_row")
+item_padding = 2.0
+
+[node name="Empty" type="Label" parent="Body/BodyBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.49, 0.53, 0.59, 1)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BottomLine" type="ColorRect" parent="."]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0.06)
+
+[node name="FooterMargin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 2
+
+[node name="Footer" type="HBoxContainer" parent="FooterMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Move" type="HBoxContainer" parent="FooterMargin/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Key" type="Label" parent="FooterMargin/Footer/Move"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.8, 0.84, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "↑ ↓"
+
+[node name="Text" type="Label" parent="FooterMargin/Footer/Move"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.49, 0.53, 0.59, 1)
+text = "navigate"
+
+[node name="Open" type="HBoxContainer" parent="FooterMargin/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Key" type="Label" parent="FooterMargin/Footer/Open"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.8, 0.84, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "Enter"
+
+[node name="Text" type="Label" parent="FooterMargin/Footer/Open"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.49, 0.53, 0.59, 1)
+text = "open"
+
+[node name="Switch" type="HBoxContainer" parent="FooterMargin/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Key" type="Label" parent="FooterMargin/Footer/Switch"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.8, 0.84, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "Tab"
+
+[node name="Text" type="Label" parent="FooterMargin/Footer/Switch"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.49, 0.53, 0.59, 1)
+text = "switch scope"
+
+[node name="Close" type="HBoxContainer" parent="FooterMargin/Footer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Key" type="Label" parent="FooterMargin/Footer/Close"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.8, 0.84, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_key")
+text = "Esc"
+
+[node name="Text" type="Label" parent="FooterMargin/Footer/Close"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.49, 0.53, 0.59, 1)
+text = "close"

@@ -78,6 +78,27 @@ func refresh_script_state() -> void:
 		global.HENGO_DEBUGGER_PLUGIN.on_active_script_changed(String(global.SAVE_DATA.identity.id))
 
 
+func open_search() -> void:
+	HenProjectSearch.open()
+
+
+# the editor takes ctrl combos before _input reaches a dock, as in the flow viewer
+func _shortcut_input(event: InputEvent) -> void:
+	if not event is InputEventKey or not (event as InputEventKey).pressed or (event as InputEventKey).echo:
+		return
+
+	var general_popup: HenGeneralPopup = Engine.get_singleton(&'GeneralPopup') if Engine.has_singleton(&'GeneralPopup') else null
+
+	if not has_input_focus() or (general_popup and general_popup.has_open_popups()):
+		return
+
+	for entry: Dictionary in HenShortcuts.of_group(HenShortcuts.GLOBAL):
+		if HenShortcuts.matches(entry, event as InputEventKey):
+			call(entry.method)
+			get_viewport().set_input_as_handled()
+			return
+
+
 func show_shortcuts() -> void:
 	var panel: HenShortcutsPanel = (load('res://addons/hengo/scenes/shortcuts_panel.tscn') as PackedScene).instantiate()
 
@@ -507,11 +528,6 @@ func _input(event: InputEvent) -> void:
 					print(
 						code_generation.get_code(global.SAVE_DATA)
 					)
-			if e.ctrl_pressed:
-				# ctrl+z/ctrl+y belong to the flow view, through HenShortcuts
-				if e.keycode == KEY_F:
-					get_tree().root.set_input_as_handled()
-					print('FORMATTED')
 
 func _validate_script_errors(_save_data: HenSaveData) -> Array:
 	return HenGeneratorAction.collect_errors(_save_data)
